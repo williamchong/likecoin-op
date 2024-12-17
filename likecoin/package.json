@@ -4,7 +4,11 @@
     "build": "hardhat compile",
     "dev": "hardhat node",
     "debug:local": "hardhat console --network localhost",
-    "deploy:local": "GIT_HASH=$( git rev-parse HEAD ) hardhat run --network localhost scripts/deploy-local.ts",
+    "deploy:local": "hardhat run --network localhost scripts/deploy.ts",
+    "upgrade:local": "hardhat run --network localhost scripts/upgrade.ts",
+    "debug:optimism-sepolia": "hardhat console --network optimism-sepolia",
+    "deploy:optimism-sepolia": "DEBUG=@openzeppelin:* hardhat run --network optimism-sepolia scripts/deploy.ts",
+    "upgrade:optimism-sepolia": "DEBUG=@openzeppelin:* hardhat run --network optimism-sepolia scripts/upgrade.ts",
     "format": "prettier . --write",
     "lint": "solhint contracts/**/*.sol; eslint './**/*.{js,mjs,ts}'",
     "test": "hardhat test"
