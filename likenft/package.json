@@ -1,0 +1,28 @@
+{
+  "name": "hardhat-project",
+  "scripts": {
+    "build": "hardhat compile",
+    "dev": "hardhat node",
+    "format": "prettier . --write",
+    "lint": "solhint contracts/**/*.sol; eslint './**/*.{js,mjs,ts}'",
+    "test": "hardhat test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.16.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "@nomicfoundation/hardhat-toolbox-viem": "^3.0.0",
+    "@openzeppelin/contracts": "^5.1.0",
+    "@openzeppelin/contracts-upgradeable": "^5.1.0",
+    "@openzeppelin/hardhat-upgrades": "^3.7.0",
+    "dotenv": "^16.4.7",
+    "eslint": "^9.16.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "ethers": "^6.13.4",
+    "hardhat": "^2.22.17",
+    "prettier": "^3.4.2",
+    "prettier-plugin-solidity": "^1.4.1",
+    "solhint": "^5.0.3",
+    "solhint-plugin-prettier": "^0.1.0"
+  }
+}
