@@ -48,18 +48,18 @@ contract LikeNFT is
         __Pausable_init();
     }
 
-    function pause() public onlyOwner {
+    function pause() public {
         _pause();
     }
 
-    function unpause() public onlyOwner {
+    function unpause() public {
         _unpause();
     }
 
     function newClass(
         MsgNewClass memory msgNewClass,
         string memory id
-    ) public onlyOwner whenNotPaused {
+    ) public whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
         if (
             address($.creatorClassIdClassMapping[msgNewClass.creator][id]) !=
@@ -74,7 +74,7 @@ contract LikeNFT is
 
     function updateClass(
         MsgUpdateClass memory msgUpdateClass
-    ) public onlyOwner whenNotPaused {
+    ) public whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
         Class class = $.creatorClassIdClassMapping[msgUpdateClass.creator][
             msgUpdateClass.class_id
@@ -85,9 +85,7 @@ contract LikeNFT is
         class.update(msgUpdateClass.input);
     }
 
-    function mintNFT(
-        MsgMintNFT memory msgMintNFT
-    ) public onlyOwner whenNotPaused {
+    function mintNFT(MsgMintNFT memory msgMintNFT) public whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
         Class class = $.creatorClassIdClassMapping[msgMintNFT.creator][
             msgMintNFT.class_id
@@ -100,9 +98,8 @@ contract LikeNFT is
 
     function _authorizeUpgrade(
         address _newImplementation
-    )
-        internal
-        override
-        onlyOwner // solhint-disable-next-line no-empty-blocks
-    {}
+    ) internal override // solhint-disable-next-line no-empty-blocks
+    {
+
+    }
 }
