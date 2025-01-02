@@ -97,9 +97,6 @@ contract LikeNFT is
     }
 
     function _authorizeUpgrade(
-        address _newImplementation
-    ) internal override // solhint-disable-next-line no-empty-blocks
-    {
-
-    }
+        address _newImplementation // solhint-disable-next-line no-empty-blocks
+    ) internal override {}
 }
