@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+
+	"github.com/likecoin/likecoin-migration-backend/pkg/handler"
 )
 
 func main() {
@@ -22,6 +24,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	http.Handle("/healthz", &handler.HealthzHandler{})
 
 	server := &http.Server{
 		Addr:              envCfg.ListenAddr,
