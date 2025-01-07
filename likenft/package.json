@@ -12,6 +12,7 @@
     "debug:optimism-sepolia": "hardhat console --network optimism-sepolia",
     "deploy:optimism-sepolia": "DEBUG=@openzeppelin:* hardhat run --network optimism-sepolia scripts/deploy.ts",
     "upgrade:optimism-sepolia": "DEBUG=@openzeppelin:* hardhat run --network optimism-sepolia scripts/upgrade.ts",
+    "check-format": "prettier -l .",
     "format": "prettier . --write",
     "lint": "solhint contracts/**/*.sol; eslint './**/*.{js,mjs,ts}'",
     "test": "hardhat test"
