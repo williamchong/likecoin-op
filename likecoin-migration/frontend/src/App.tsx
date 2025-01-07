@@ -1,11 +1,14 @@
 import "./App.css";
 
+import { ConfigProvider } from "./providers/Config";
 import Routes from "./routes";
 
 function App() {
   return (
     <>
-      <Routes />
+      <ConfigProvider>
+        <Routes />
+      </ConfigProvider>
     </>
   );
 }
