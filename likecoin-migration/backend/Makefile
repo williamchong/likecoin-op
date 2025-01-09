@@ -1,3 +1,8 @@
+GIT_SHORT_HASH ?= $(shell git rev-parse --short=8 HEAD)
+TAG ?= $(GIT_SHORT_HASH)
+DEPLOY_DEV_DOCKER_IMAGE_NAME ?= chankiyu22/likecoin-migration-backend
+DOCKER_BUILD_ARGS ?=
+
 .PHONY: vendor
 vendor:
 	curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v1.55.2
@@ -27,3 +32,11 @@ check-tidy:
 	$(MAKE) fmt
 	go mod tidy
 	git status . --porcelain | grep '.*'; test $$? -eq 1
+
+.PHONY: docker-image
+docker-image:
+	docker buildx build --platform linux/amd64 . \
+		--build-arg 'BUILD_TAG=$(TAG)' \
+		-t '$(DEPLOY_DEV_DOCKER_IMAGE_NAME):latest' \
+		-t '$(DEPLOY_DEV_DOCKER_IMAGE_NAME):$(TAG)' \
+		$(DOCKER_BUILD_ARGS)
