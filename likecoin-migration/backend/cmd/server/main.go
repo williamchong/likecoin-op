@@ -9,6 +9,7 @@ import (
 
 	"github.com/joho/godotenv"
 
+	"github.com/likecoin/likecoin-migration-backend/pkg/cosmos/api"
 	"github.com/likecoin/likecoin-migration-backend/pkg/handler"
 )
 
@@ -25,7 +26,21 @@ func main() {
 		panic(err)
 	}
 
+	cosmosAPI := &api.CosmosAPI{
+		HTTPClient: &http.Client{
+			Timeout: 5 * time.Second,
+		},
+		NodeURL: envCfg.CosmosNodeUrl,
+	}
+
 	http.Handle("/healthz", &handler.HealthzHandler{})
+	http.Handle("/init_likecoin_migration_from_cosmos",
+		&handler.InitLikeCoinMigrationFromCosmosHandler{
+			CosmosAPI:              cosmosAPI,
+			EthWalletPrivateKey:    envCfg.EthWalletPrivateKey,
+			EthNetworkPublicRPCURL: envCfg.EthNetworkPublicRPCURL,
+			EthTokenAddress:        envCfg.EthTokenAddress,
+		})
 
 	server := &http.Server{
 		Addr:              envCfg.ListenAddr,
