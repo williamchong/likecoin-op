@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: likecoin-migration-backend
+  name: {{ .Values.likecoin.migration.backend.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app.kubernetes.io/component: likecoin-migration-backend
+  ports:
+  - protocol: TCP
+    port: {{ .Values.likecoin.migration.backend.service.port }}
+    targetPort: {{ .Values.likecoin.migration.backend.container.port }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: {{ .Values.likecoin.migration.backend.name }}
+  name: {{ .Values.likecoin.migration.backend.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: {{ .Values.likecoin.migration.backend.name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: {{ .Values.likecoin.migration.backend.name }}
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: {{ .Values.likecoin.migration.backend.name }}
+        image: {{ .Values.likecoin.migration.backend.container.imageRepository }}:{{ .Values.appVersion }}
+        imagePullPolicy: {{ .Values.likecoin.migration.backend.container.imagePullPolicy}}
+        envFrom:
+          - secretRef:
+              name: {{ .Values.likecoin.migration.backend.name }}
+        ports:
+        - containerPort: {{ .Values.likecoin.migration.backend.container.port }}
+        resources:
+          {{- toYaml .Values.likecoin.migration.backend.resources | nindent 12 }}

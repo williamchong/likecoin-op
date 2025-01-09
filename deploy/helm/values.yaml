@@ -1,0 +1,39 @@
+likecoin:
+  migration:
+    backend:
+      name: likecoin-migration-backend
+
+      container:
+        imageRepository: chankiyu22/likecoin-migration-backend
+        imagePullPolicy: IfNotPresent
+        port: 8091
+        restartPolicy: Always
+
+      service:
+        port: 80
+
+      resources:
+        {}
+
+
+nginx:
+  name: nginx
+
+  container:
+    image: nginx
+    imagePullPolicy: IfNotPresent
+    port: 8000
+    restartPolicy: Always
+
+  service:
+    port: 80
+
+ingress:
+  name: likecoin-op
+
+  className: "nginx"
+
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/use-regex: "true"
