@@ -5,7 +5,11 @@ import (
 )
 
 type EnvConfig struct {
-	ListenAddr string `envconfig:"LISTEN_ADDR" default:"0.0.0.0:8091"`
+	ListenAddr             string `envconfig:"LISTEN_ADDR" default:"0.0.0.0:8091"`
+	CosmosNodeUrl          string `envconfig:"COSMOS_NODE_URL"`
+	EthWalletPrivateKey    string `envconfig:"ETH_WALLET_PRIVATE_KEY"`
+	EthNetworkPublicRPCURL string `envconfig:"ETH_NETWORK_PUBLIC_RPC_URL"`
+	EthTokenAddress        string `envconfig:"ETH_TOKEN_ADDRESS"`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {
