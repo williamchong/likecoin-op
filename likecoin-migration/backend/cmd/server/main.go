@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -12,6 +13,13 @@ import (
 	"github.com/likecoin/likecoin-migration-backend/pkg/cosmos/api"
 	"github.com/likecoin/likecoin-migration-backend/pkg/handler"
 )
+
+func prefixedRoute(prefix string, route string) string {
+	if prefix == "" {
+		return route
+	}
+	return fmt.Sprintf("%s%s", prefix, route)
+}
 
 func main() {
 	logger := slog.New(slog.Default().Handler())
@@ -33,8 +41,9 @@ func main() {
 		NodeURL: envCfg.CosmosNodeUrl,
 	}
 
-	http.Handle("/healthz", &handler.HealthzHandler{})
-	http.Handle("/init_likecoin_migration_from_cosmos",
+	http.Handle(prefixedRoute(envCfg.RoutePrefix, "/healthz"),
+		&handler.HealthzHandler{})
+	http.Handle(prefixedRoute(envCfg.RoutePrefix, "/init_likecoin_migration_from_cosmos"),
 		&handler.InitLikeCoinMigrationFromCosmosHandler{
 			CosmosAPI:              cosmosAPI,
 			EthWalletPrivateKey:    envCfg.EthWalletPrivateKey,

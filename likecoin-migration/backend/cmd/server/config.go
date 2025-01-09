@@ -6,6 +6,7 @@ import (
 
 type EnvConfig struct {
 	ListenAddr             string `envconfig:"LISTEN_ADDR" default:"0.0.0.0:8091"`
+	RoutePrefix            string `envconfig:"ROUTE_PREFIX" default:""`
 	CosmosNodeUrl          string `envconfig:"COSMOS_NODE_URL"`
 	EthWalletPrivateKey    string `envconfig:"ETH_WALLET_PRIVATE_KEY"`
 	EthNetworkPublicRPCURL string `envconfig:"ETH_NETWORK_PUBLIC_RPC_URL"`
