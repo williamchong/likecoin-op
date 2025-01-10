@@ -3,6 +3,12 @@ TAG ?= $(GIT_SHORT_HASH)
 DEPLOY_DEV_DOCKER_IMAGE_NAME ?= chankiyu22/likecoin-migration-backend
 DOCKER_BUILD_ARGS ?=
 
+.PHONY: secret
+secret:
+	@curl -s https://raw.githubusercontent.com/oursky/devsecops-secret/v1.0/generate-secret.sh \
+		| bash -s -- \
+		.env.example .env
+
 .PHONY: vendor
 vendor:
 	curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v1.55.2
