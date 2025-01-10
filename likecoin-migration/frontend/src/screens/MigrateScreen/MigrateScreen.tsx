@@ -1,10 +1,12 @@
 import { Coin, SigningStargateClient } from "@cosmjs/stargate";
 import { Keplr } from "@keplr-wallet/types";
+import { useMutation } from "@tanstack/react-query";
 import { Eip1193Provider } from "ethers";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router";
 import Web3 from "web3";
 
+import useInitLikeCoinMigrationFromCosmos from "../../apis/useInitLikeCoinMigrationFromCosmos";
 import { useConfig } from "../../hooks/useConfig";
 
 interface Memo {
@@ -65,6 +67,20 @@ export default function MigrateScreen() {
   const [ethereumAddress, setEthereumAddress] = useState<string | null>(null);
   const [cosmosAddress, setCosmosAddress] = useState<string | null>(null);
 
+  const [isLoading, setIsLoading] = useState(false);
+
+  const initLikeCoinMigrationFromCosmos = useInitLikeCoinMigrationFromCosmos();
+
+  const mutation = useMutation({
+    mutationFn: initLikeCoinMigrationFromCosmos,
+    onSuccess: (_, { cosmos_tx_hash }) => {
+      navigate(`/migrate/${cosmos_tx_hash}`);
+    },
+    onError(error) {
+      alert(error.message);
+    },
+  });
+
   const retrieveEthereumAccount = useCallback(() => {
     if (window.ethereum == null) {
       return;
@@ -119,6 +135,7 @@ export default function MigrateScreen() {
     }
 
     const offlineSigner = keplr.getOfflineSigner(config.cosmosChainId);
+    setIsLoading(true);
     SigningStargateClient.connectWithSigner(
       "https://node.testnet.like.co/rpc/",
       offlineSigner,
@@ -165,7 +182,9 @@ export default function MigrateScreen() {
           ),
         );
 
-        navigate(`/migrate/${cosmosTx.transactionHash}`);
+        mutation.mutate({
+          cosmos_tx_hash: cosmosTx.transactionHash,
+        });
       })
       .catch(console.error);
   }, [
@@ -176,7 +195,7 @@ export default function MigrateScreen() {
     config.cosmosFeeGas,
     cosmosAddress,
     ethereumAddress,
-    navigate,
+    mutation,
   ]);
 
   return (
@@ -206,6 +225,11 @@ export default function MigrateScreen() {
           Migrate
         </button>
       </main>
+      {isLoading ? (
+        <div className="fixed top-0 left-0 w-full h-full bg-white/90 flex items-center justify-center">
+          Loading
+        </div>
+      ) : null}
     </div>
   );
 }

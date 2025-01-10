@@ -6,6 +6,8 @@ export const ConfigSchema = z.object({
   cosmosDepositAddress: z.string(),
   cosmosFeeAmount: z.number(),
   cosmosFeeGas: z.number(),
+
+  apiBaseUri: z.string(),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
