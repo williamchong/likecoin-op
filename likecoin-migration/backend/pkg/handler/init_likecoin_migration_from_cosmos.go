@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/likecoin/likecoin-migration-backend/pkg/cosmos/api"
 	"github.com/likecoin/likecoin-migration-backend/pkg/logic"
 )
@@ -18,6 +20,8 @@ type ResponseBody struct {
 }
 
 type InitLikeCoinMigrationFromCosmosHandler struct {
+	Db                     *sql.DB
+	EthClient              *ethclient.Client
 	CosmosAPI              *api.CosmosAPI
 	EthWalletPrivateKey    string
 	EthNetworkPublicRPCURL string
@@ -38,6 +42,8 @@ func (p *InitLikeCoinMigrationFromCosmosHandler) ServeHTTP(w http.ResponseWriter
 	// TODO: lock CosmosTxHash for this operation to prevent multiple trigger
 
 	tx, err := logic.MigrateLikeCoinFromCosmos(
+		p.Db,
+		p.EthClient,
 		p.CosmosAPI,
 		p.EthNetworkPublicRPCURL,
 		p.EthWalletPrivateKey,

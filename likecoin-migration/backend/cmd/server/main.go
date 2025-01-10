@@ -8,7 +8,12 @@ import (
 	"os"
 	"time"
 
+	"database/sql"
+
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/joho/godotenv"
+
+	_ "github.com/lib/pq"
 
 	"github.com/likecoin/likecoin-migration-backend/pkg/cosmos/api"
 	"github.com/likecoin/likecoin-migration-backend/pkg/handler"
@@ -34,6 +39,17 @@ func main() {
 		panic(err)
 	}
 
+	db, err := sql.Open("postgres", envCfg.DbConnectionStr)
+	if err != nil {
+		panic(err)
+	}
+
+	client, err := ethclient.Dial(envCfg.EthNetworkPublicRPCURL)
+
+	if err != nil {
+		panic(err)
+	}
+
 	cosmosAPI := &api.CosmosAPI{
 		HTTPClient: &http.Client{
 			Timeout: 5 * time.Second,
@@ -45,6 +61,8 @@ func main() {
 		&handler.HealthzHandler{})
 	http.Handle(prefixedRoute(envCfg.RoutePrefix, "/init_likecoin_migration_from_cosmos"),
 		&handler.InitLikeCoinMigrationFromCosmosHandler{
+			Db:                     db,
+			EthClient:              client,
 			CosmosAPI:              cosmosAPI,
 			EthWalletPrivateKey:    envCfg.EthWalletPrivateKey,
 			EthNetworkPublicRPCURL: envCfg.EthNetworkPublicRPCURL,

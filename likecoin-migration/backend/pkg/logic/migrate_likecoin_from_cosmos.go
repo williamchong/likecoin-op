@@ -1,13 +1,19 @@
 package logic
 
 import (
+	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/likecoin/likecoin-migration-backend/pkg/cosmos/api"
+	appdb "github.com/likecoin/likecoin-migration-backend/pkg/db"
 	"github.com/likecoin/likecoin-migration-backend/pkg/ethereum"
+	"github.com/likecoin/likecoin-migration-backend/pkg/model"
 )
 
 type Memo struct {
@@ -24,6 +30,8 @@ This sign make sure the address is correct.`, amount, denom)
 }
 
 func MigrateLikeCoinFromCosmos(
+	db *sql.DB,
+	ethClient *ethclient.Client,
 	cosmosAPI *api.CosmosAPI,
 	ethNetworkPublicRPCURL string,
 	ethWalletPrivateKey string,
@@ -35,32 +43,59 @@ func MigrateLikeCoinFromCosmos(
 		return nil, err
 	}
 
-	// TODO: Compare the cosmos wallet address which receives token
-	// should be the one desire
+	migrationRecord, err := appdb.GetMigrationRecordByCosmosTxHash(db, cosmosTxHash)
 
-	memoString := txResponse.Tx.Body.Memo
-	var memo Memo
-	err = json.Unmarshal([]byte(memoString), &memo)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			memoString := txResponse.Tx.Body.Memo
+			var memo Memo
+			err = json.Unmarshal([]byte(memoString), &memo)
+			if err != nil {
+				return nil, err
+			}
+			message := getMessage(memo.Amount, memo.Denom)
+
+			recoveredAddr, err := ethereum.RecoverAddress(memo.Signature, []byte(message))
+			if err != nil {
+				return nil, err
+			}
+
+			migrationRecord = &model.MigrationRecord{
+				CosmosTxHash: cosmosTxHash,
+				EthAddress:   recoveredAddr.Hex(),
+			}
+
+			// TODO: Use worker
+			tx, err := ethereum.TransferToken(
+				ethNetworkPublicRPCURL,
+				ethWalletPrivateKey,
+				*recoveredAddr,
+				common.HexToAddress(ethTokenAddress),
+				memo.Amount)
+			if err != nil {
+				return nil, err
+			}
+
+			migrationRecord.EthTxHash = tx.Hash().Hex()
+
+			err = appdb.InsertMigrationRecord(db, migrationRecord)
+
+			if err != nil {
+				return nil, err
+			}
+
+			return tx, nil
+		}
+
+		return nil, err
+	}
+
+	transaction, _, err := ethClient.TransactionByHash(
+		context.Background(),
+		common.HexToHash(migrationRecord.EthTxHash),
+	)
 	if err != nil {
 		return nil, err
 	}
-	message := getMessage(memo.Amount, memo.Denom)
-
-	recoveredAddr, err := ethereum.RecoverAddress(memo.Signature, []byte(message))
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: Use worker
-	tx, err := ethereum.TransferToken(
-		ethNetworkPublicRPCURL,
-		ethWalletPrivateKey,
-		*recoveredAddr,
-		common.HexToAddress(ethTokenAddress),
-		memo.Amount)
-	if err != nil {
-		return nil, err
-	}
-
-	return tx, nil
+	return transaction, nil
 }
