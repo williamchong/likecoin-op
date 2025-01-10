@@ -11,6 +11,7 @@ type EnvConfig struct {
 	EthWalletPrivateKey    string `envconfig:"ETH_WALLET_PRIVATE_KEY"`
 	EthNetworkPublicRPCURL string `envconfig:"ETH_NETWORK_PUBLIC_RPC_URL"`
 	EthTokenAddress        string `envconfig:"ETH_TOKEN_ADDRESS"`
+	DbConnectionStr        string `envconfig:"DB_CONNECTION_STR"`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {
