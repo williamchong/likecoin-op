@@ -68,6 +68,12 @@ func main() {
 			EthNetworkPublicRPCURL: envCfg.EthNetworkPublicRPCURL,
 			EthTokenAddress:        envCfg.EthTokenAddress,
 		})
+	http.Handle(prefixedRoute(envCfg.RoutePrefix, "/migration_record/"),
+		&handler.GetLikeCoinMigrationRecordHandler{
+			Db:        db,
+			EthClient: client,
+		},
+	)
 
 	server := &http.Server{
 		Addr:              envCfg.ListenAddr,
