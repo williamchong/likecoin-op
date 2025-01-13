@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres
+    volumes:
+      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+      - db_data:/var/lib/postgresql/data
+    restart: always
+    env_file: .env
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: pg_isready -d $${POSTGRES_DB} -U $${DB_USER} -p 5432 -h localhost
+      interval: 1s
+      timeout: 1s
+      retries: 30
+
+volumes:
+  db_data:
+    driver: local

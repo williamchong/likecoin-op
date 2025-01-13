@@ -1,3 +1,5 @@
 /.blackbox/pubring.gpg~
 /.blackbox/pubring.kbx~
 /.blackbox/secring.gpg
+/deploy/helm/dev/values.secret.yaml
+/likecoin-migration/backend/.env.dev
