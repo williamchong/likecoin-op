@@ -12,6 +12,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 
 	_ "github.com/lib/pq"
 
@@ -39,6 +40,11 @@ func main() {
 		panic(err)
 	}
 
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+	})
+
 	db, err := sql.Open("postgres", envCfg.DbConnectionStr)
 	if err != nil {
 		panic(err)
@@ -58,21 +64,21 @@ func main() {
 	}
 
 	http.Handle(prefixedRoute(envCfg.RoutePrefix, "/healthz"),
-		&handler.HealthzHandler{})
+		c.Handler(&handler.HealthzHandler{}))
 	http.Handle(prefixedRoute(envCfg.RoutePrefix, "/init_likecoin_migration_from_cosmos"),
-		&handler.InitLikeCoinMigrationFromCosmosHandler{
+		c.Handler(&handler.InitLikeCoinMigrationFromCosmosHandler{
 			Db:                     db,
 			EthClient:              client,
 			CosmosAPI:              cosmosAPI,
 			EthWalletPrivateKey:    envCfg.EthWalletPrivateKey,
 			EthNetworkPublicRPCURL: envCfg.EthNetworkPublicRPCURL,
 			EthTokenAddress:        envCfg.EthTokenAddress,
-		})
+		}))
 	http.Handle(prefixedRoute(envCfg.RoutePrefix, "/migration_record/"),
-		&handler.GetLikeCoinMigrationRecordHandler{
+		c.Handler(&handler.GetLikeCoinMigrationRecordHandler{
 			Db:        db,
 			EthClient: client,
-		},
+		}),
 	)
 
 	server := &http.Server{
