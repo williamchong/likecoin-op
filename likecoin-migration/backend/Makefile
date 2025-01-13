@@ -3,6 +3,10 @@ TAG ?= $(GIT_SHORT_HASH)
 DEPLOY_DEV_DOCKER_IMAGE_NAME ?= chankiyu22/likecoin-migration-backend
 DOCKER_BUILD_ARGS ?=
 
+ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+
+args = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}` 
+
 .PHONY: secret
 secret:
 	@curl -s https://raw.githubusercontent.com/oursky/devsecops-secret/v1.0/generate-secret.sh \
@@ -38,6 +42,28 @@ check-tidy:
 	$(MAKE) fmt
 	go mod tidy
 	git status . --porcelain | grep '.*'; test $$? -eq 1
+
+.PHONY: create-migration
+create-migration:
+	docker run \
+		--rm \
+		-v $(ROOT_DIR):$(ROOT_DIR) \
+		-w $(ROOT_DIR) \
+		-i \
+		chankiyu22/sql-migrate \
+		sql-migrate new $(args)
+
+.PHONY: run-migration
+run-migration:
+	docker run \
+		--rm \
+		-v $(ROOT_DIR):$(ROOT_DIR) \
+		-w $(ROOT_DIR) \
+		--net=host \
+		--env-file .env \
+		-i \
+		chankiyu22/sql-migrate \
+		sql-migrate up
 
 .PHONY: docker-image
 docker-image:
