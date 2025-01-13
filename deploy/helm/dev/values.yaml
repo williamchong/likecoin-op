@@ -1,5 +1,9 @@
 likecoin:
   migration:
+    frontend:
+      configFilePath: "dev/likecoin/migration/frontend/config.json"
+      nginxConfigFilePath: "dev/likecoin/migration/frontend/nginx/nginx.conf"
+
     backend:
       env:
         COSMOS_NODE_URL: https://like.rickmak.com/faucet

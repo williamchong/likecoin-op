@@ -7,6 +7,20 @@ likecoin:
         imageRepository: chankiyu22/likecoin-migration-backend
         imagePullPolicy: IfNotPresent
         port: 8091
+
+      service:
+        port: 80
+
+      resources:
+        {}
+
+    frontend:
+      name: likecoin-migration-frontend
+
+      container:
+        imageRepository: chankiyu22/likecoin-migration-frontend
+        imagePullPolicy: IfNotPresent
+        port: 80
         restartPolicy: Always
 
       service:
