@@ -5,6 +5,7 @@ RUN go mod download
 COPY . .
 RUN apk add --no-cache make
 RUN make build
+RUN go install github.com/rubenv/sql-migrate/...@v1.7.1
 
 FROM ubuntu:noble
 WORKDIR /app
@@ -13,6 +14,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tzdata \
     && rm -rf /var/lib/apt/lists/*
 RUN update-ca-certificates
+
+# App
 COPY --from=stage1 /src/likecoin-migration-backend /usr/local/bin/
+
+# Migration
+COPY --from=stage1 /go/bin/sql-migrate /usr/local/bin/
+COPY --from=stage1 /src/migrations /app/migrations
+COPY --from=stage1 /src/dbconfig.yml /app/dbconfig.yml
+
 EXPOSE 8091
 CMD ["likecoin-migration-backend"]
