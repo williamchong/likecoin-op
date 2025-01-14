@@ -4,7 +4,9 @@ import hardhat, { ethers, upgrades } from "hardhat";
 async function main() {
   // We get the contract to deploy
   const LikeNFT = await ethers.getContractFactory("LikeNFT");
-  console.log("Deploying LikeNFT...");
+  console.log("Deploying LikeNFT... Network:", hardhat.network.name);
+  console.log("Owner:", process.env.INITIAL_OWNER_ADDRESS);
+  console.log("Expecting Proxy Address:", process.env.ERC721_PROXY_ADDRESS);
 
   const likeNFT = await upgrades.deployProxy(
     LikeNFT,
@@ -25,6 +27,10 @@ async function main() {
     await upgrades.erc1967.getImplementationAddress(proxyAddress);
   console.log("LikeNFT implementation is deployed to:", implementationAddress);
 
+  if (hardhat.network.name === "localhost") {
+    console.log("Skipping verification on localhost");
+    return;
+  }
   await hardhat.run("verify:verify", {
     address: implementationAddress,
   });

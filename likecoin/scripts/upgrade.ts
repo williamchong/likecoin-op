@@ -8,7 +8,7 @@ async function main() {
   console.log("Upgrading EkilCoin...");
 
   const newImplementationAddress = await upgrades.prepareUpgrade(
-    process.env.PROXY_ADDRESS!,
+    process.env.ERC20_PROXY_ADDRESS!,
     EkilCoin,
     {
       timeout: 0,
