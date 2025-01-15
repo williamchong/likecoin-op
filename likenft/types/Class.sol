@@ -7,7 +7,6 @@ import {ClassParent} from "./ClassParent.sol";
 
 /**
  * Class {
- *   string id          = 1;
  *   string name        = 2;
  *   string symbol      = 3;
  *   string description = 4;
@@ -17,7 +16,6 @@ import {ClassParent} from "./ClassParent.sol";
  * }
  */
 struct ClassStorage {
-    string id;
     string name;
     string symbol;
     string description;
