@@ -16,5 +16,4 @@ import {ClassParent} from "./ClassParent.sol";
 struct NFTData {
     string metadata;
     ClassParent class_parent;
-    bool to_be_revealed;
 }

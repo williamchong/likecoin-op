@@ -77,7 +77,6 @@ contract Class is ERC721, Ownable {
         _safeMint(to, tokenId);
         nftDataMap[tokenId].class_parent = $.data.parent;
         nftDataMap[tokenId].metadata = metadata;
-        nftDataMap[tokenId].to_be_revealed = false;
         tokenId++;
     }
 

@@ -58,10 +58,6 @@ describe("LikeNFT", () => {
               config: {
                 burnable: true,
                 max_supply: 10,
-                blind_box_config: {
-                  mint_periods: [],
-                  reveal_time: 0,
-                },
               },
             },
           },
@@ -115,10 +111,6 @@ describe("LikeNFT", () => {
               config: {
                 burnable: true,
                 max_supply: 10,
-                blind_box_config: {
-                  mint_periods: [],
-                  reveal_time: 0,
-                },
               },
             },
           },
@@ -188,10 +180,6 @@ describe("LikeNFT class operations", () => {
             config: {
               burnable: true,
               max_supply: 10,
-              blind_box_config: {
-                mint_periods: [],
-                reveal_time: 0,
-              },
             },
           },
         },
@@ -231,10 +219,6 @@ describe("LikeNFT class operations", () => {
             config: {
               burnable: true,
               max_supply: 10,
-              blind_box_config: {
-                mint_periods: [],
-                reveal_time: 0,
-              },
             },
           },
         })

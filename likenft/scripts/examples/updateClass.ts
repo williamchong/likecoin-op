@@ -32,10 +32,6 @@ async function updateClass() {
       config: {
         burnable: true,
         max_supply: 10,
-        blind_box_config: {
-          mint_periods: [],
-          reveal_time: 0,
-        },
       },
     },
   });

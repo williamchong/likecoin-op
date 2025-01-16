@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import {BlindBoxState} from "./BlindBoxState.sol";
 import {ClassConfig} from "./ClassConfig.sol";
 import {ClassParent} from "./ClassParent.sol";
 
@@ -41,5 +40,4 @@ struct ClassDataStorage {
     string metadata;
     ClassParent parent;
     ClassConfig config;
-    BlindBoxState blind_box_state;
 }
