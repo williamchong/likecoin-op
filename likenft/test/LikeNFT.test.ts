@@ -56,7 +56,6 @@ describe("LikeNFT", () => {
                 collaborators: [],
               }),
               config: {
-                burnable: true,
                 max_supply: 10,
               },
             },
@@ -109,7 +108,6 @@ describe("LikeNFT", () => {
                 collaborators: [],
               }),
               config: {
-                burnable: true,
                 max_supply: 10,
               },
             },
@@ -178,7 +176,6 @@ describe("LikeNFT class operations", () => {
               collaborators: [],
             }),
             config: {
-              burnable: true,
               max_supply: 10,
             },
           },
@@ -217,7 +214,6 @@ describe("LikeNFT class operations", () => {
               collaborators: [],
             }),
             config: {
-              burnable: true,
               max_supply: 10,
             },
           },

@@ -35,7 +35,6 @@ async function newClass() {
           collaborators: [],
         }),
         config: {
-          burnable: true,
           max_supply: 10,
         },
       },

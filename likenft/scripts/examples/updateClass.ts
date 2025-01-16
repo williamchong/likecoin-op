@@ -30,7 +30,6 @@ async function updateClass() {
         collaborators: [],
       }),
       config: {
-        burnable: true,
         max_supply: 10,
       },
     },

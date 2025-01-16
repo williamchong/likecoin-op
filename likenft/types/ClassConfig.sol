@@ -9,6 +9,5 @@ pragma solidity ^0.8.9;
  * }
  */
 struct ClassConfig {
-    bool burnable;
     uint64 max_supply;
 }
