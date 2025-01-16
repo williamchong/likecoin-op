@@ -7,7 +7,8 @@ async function getTokenURI() {
     signer,
   });
 
-  const class_ = Class.attach("0x7b43F8aB14A983FF3D8831081F62370a14967f7B");
+  // Extract and update the class id from newClass's NewClass event
+  const class_ = Class.attach("0x14CE6632272552E676b53FE6202edA8F1Be4992c");
 
   console.log(await class_.tokenURI(0n));
 }

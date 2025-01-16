@@ -28,140 +28,9 @@ describe("LikeNFT", () => {
     });
     const likeNFTOwnerSigner = LikeNFTOwnerSigner.attach(this.contractAddress);
 
-    const classOperation = async (id: string) => {
+    const classOperation = async () => {
       await likeNFTOwnerSigner
-        .newClass(
-          {
-            creator: this.ownerSigner,
-            parent: {
-              type_: 1,
-              iscn_id_prefix:
-                "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-            },
-            input: {
-              name: "My Book",
-              symbol: "KOOB",
-              description: "Description",
-              uri: "",
-              uri_hash: "",
-              metadata: JSON.stringify({
-                name: "My Book 202412201604",
-                symbol: "KOOB202412201604",
-                description: "My description 202412201604",
-                image:
-                  "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-                banner_image: "",
-                featured_image: "",
-                external_link: "https://www.example.com",
-                collaborators: [],
-              }),
-              config: {
-                burnable: true,
-                max_supply: 10,
-                blind_box_config: {
-                  mint_periods: [],
-                  reveal_time: 0,
-                },
-              },
-            },
-          },
-          id,
-        )
-        .then((tx) => tx.wait());
-    };
-
-    await expect(classOperation("202412191729")).to.be.not.rejected;
-    await expect(likeNFTOwnerSigner.pause()).to.be.not.rejected;
-    await expect(classOperation("202412191730")).to.be.rejectedWith(
-      "VM Exception while processing transaction: reverted with custom error 'EnforcedPause()'",
-    );
-    await expect(likeNFTOwnerSigner.unpause()).to.be.not.rejected;
-    await expect(classOperation("202412191730")).to.be.not.rejected;
-  });
-
-  it("should be able to create new class", async function () {
-    const LikeNFTOwnerSigner = await ethers.getContractFactory("LikeNFT", {
-      signer: this.ownerSigner,
-    });
-    const likeNFTOwnerSigner = LikeNFTOwnerSigner.attach(this.contractAddress);
-
-    const newClass = async (id: string) => {
-      await likeNFTOwnerSigner
-        .newClass(
-          {
-            creator: this.ownerSigner,
-            parent: {
-              type_: 1,
-              iscn_id_prefix:
-                "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-            },
-            input: {
-              name: "My Book",
-              symbol: "KOOB",
-              description: "Description",
-              uri: "",
-              uri_hash: "",
-              metadata: JSON.stringify({
-                name: "My Book 202412201604",
-                symbol: "KOOB202412201604",
-                description: "My description 202412201604",
-                image:
-                  "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-                banner_image: "",
-                featured_image: "",
-                external_link: "https://www.example.com",
-                collaborators: [],
-              }),
-              config: {
-                burnable: true,
-                max_supply: 10,
-                blind_box_config: {
-                  mint_periods: [],
-                  reveal_time: 0,
-                },
-              },
-            },
-          },
-          id,
-        )
-        .then((tx) => tx.wait());
-    };
-
-    await expect(newClass("202412191729")).to.be.not.rejected;
-    await expect(newClass("202412191729")).to.be.rejectedWith(
-      "VM Exception while processing transaction: reverted with custom error 'ErrNftClassAlreadyExists()'",
-    );
-    await expect(newClass("202412191730")).to.be.not.rejected;
-  });
-});
-
-describe("LikeNFT class operations", () => {
-  before(async function () {
-    this.LikeNFT = await ethers.getContractFactory("LikeNFT");
-    const [ownerSigner, signer1] = await ethers.getSigners();
-
-    this.ownerSigner = ownerSigner;
-    this.signer1 = signer1;
-  });
-
-  beforeEach(async function () {
-    const likeNFT = await upgrades.deployProxy(
-      this.LikeNFT,
-      [this.ownerSigner.address],
-      {
-        initializer: "initialize",
-      },
-    );
-    const deployment = await likeNFT.waitForDeployment();
-    this.contractAddress = await deployment.getAddress();
-
-    const LikeNFTOwnerSigner = await ethers.getContractFactory("LikeNFT", {
-      signer: this.ownerSigner,
-    });
-    const likeNFTOwnerSigner = LikeNFTOwnerSigner.attach(this.contractAddress);
-    likeNFTOwnerSigner
-      .newClass(
-        {
+        .newClass({
           creator: this.ownerSigner,
           parent: {
             type_: 1,
@@ -194,10 +63,155 @@ describe("LikeNFT class operations", () => {
               },
             },
           },
+        })
+        .then((tx) => tx.wait());
+    };
+
+    await expect(classOperation()).to.be.not.rejected;
+    await expect(likeNFTOwnerSigner.pause()).to.be.not.rejected;
+    await expect(classOperation()).to.be.rejectedWith(
+      "VM Exception while processing transaction: reverted with custom error 'EnforcedPause()'",
+    );
+    await expect(likeNFTOwnerSigner.unpause()).to.be.not.rejected;
+    await expect(classOperation()).to.be.not.rejected;
+  });
+
+  it("should be able to create new class", async function () {
+    const LikeNFTOwnerSigner = await ethers.getContractFactory("LikeNFT", {
+      signer: this.ownerSigner,
+    });
+    const likeNFTOwnerSigner = LikeNFTOwnerSigner.attach(this.contractAddress);
+
+    const newClassEvent = new Promise<{ id: string }>((resolve, reject) => {
+      likeNFTOwnerSigner.on("NewClass", (id, params, event) => {
+        event.removeListener();
+        resolve({ id });
+      });
+
+      setTimeout(() => {
+        reject(new Error("timeout"));
+      }, 60000);
+    });
+
+    const tx = await likeNFTOwnerSigner.newClass({
+      creator: this.ownerSigner,
+      parent: {
+        type_: 1,
+        iscn_id_prefix:
+          "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+      },
+      input: {
+        name: "My Book",
+        symbol: "KOOB",
+        description: "Description",
+        uri: "",
+        uri_hash: "",
+        metadata: JSON.stringify({
+          name: "My Book 202412201604",
+          symbol: "KOOB202412201604",
+          description: "My description 202412201604",
+          image:
+            "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
+          banner_image: "",
+          featured_image: "",
+          external_link: "https://www.example.com",
+          collaborators: [],
+        }),
+        config: {
+          burnable: true,
+          max_supply: 10,
+          blind_box_config: {
+            mint_periods: [],
+            reveal_time: 0,
+          },
         },
-        "202412191729",
-      )
+      },
+    });
+
+    const event = await newClassEvent;
+
+    await expect(tx.wait()).to.be.not.rejected;
+    // An arbitrary address of class returned by newClass operation
+    // Will be different depending on the bytecode of class contract
+    expect(event.id).to.equal("0x9bd03768a7DCc129555dE410FF8E85528A4F88b5");
+  });
+});
+
+describe("LikeNFT class operations", () => {
+  before(async function () {
+    this.LikeNFT = await ethers.getContractFactory("LikeNFT");
+    const [ownerSigner, signer1] = await ethers.getSigners();
+
+    this.ownerSigner = ownerSigner;
+    this.signer1 = signer1;
+  });
+
+  beforeEach(async function () {
+    const likeNFT = await upgrades.deployProxy(
+      this.LikeNFT,
+      [this.ownerSigner.address],
+      {
+        initializer: "initialize",
+      },
+    );
+    const deployment = await likeNFT.waitForDeployment();
+    this.contractAddress = await deployment.getAddress();
+
+    const LikeNFTOwnerSigner = await ethers.getContractFactory("LikeNFT", {
+      signer: this.ownerSigner,
+    });
+    const likeNFTOwnerSigner = LikeNFTOwnerSigner.attach(this.contractAddress);
+
+    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
+      likeNFTOwnerSigner.on("NewClass", (id, params, event) => {
+        event.removeListener();
+        resolve({ id });
+      });
+
+      setTimeout(() => {
+        reject(new Error("timeout"));
+      }, 60000);
+    });
+
+    likeNFTOwnerSigner
+      .newClass({
+        creator: this.ownerSigner,
+        parent: {
+          type_: 1,
+          iscn_id_prefix:
+            "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+        },
+        input: {
+          name: "My Book",
+          symbol: "KOOB",
+          description: "Description",
+          uri: "",
+          uri_hash: "",
+          metadata: JSON.stringify({
+            name: "My Book 202412201604",
+            symbol: "KOOB202412201604",
+            description: "My description 202412201604",
+            image:
+              "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
+            banner_image: "",
+            featured_image: "",
+            external_link: "https://www.example.com",
+            collaborators: [],
+          }),
+          config: {
+            burnable: true,
+            max_supply: 10,
+            blind_box_config: {
+              mint_periods: [],
+              reveal_time: 0,
+            },
+          },
+        },
+      })
       .then((tx) => tx.wait());
+
+    const newClassEvent = await NewClassEvent;
+    this.classId = newClassEvent.id;
   });
 
   it("should be able to update class", async function () {
@@ -210,7 +224,7 @@ describe("LikeNFT class operations", () => {
       await likeNFTOwnerSigner
         .updateClass({
           creator: this.ownerSigner,
-          class_id: "202412191729",
+          class_id: this.classId,
           input: {
             name: "My Book",
             symbol: "KOOB",
@@ -245,7 +259,7 @@ describe("LikeNFT class operations", () => {
       await likeNFTOwnerSigner
         .mintNFT({
           creator: this.ownerSigner,
-          class_id: "202412191729",
+          class_id: this.classId,
           input: {
             uri: "",
             uri_hash: "",
@@ -287,7 +301,7 @@ describe("LikeNFT class operations", () => {
       await likeNFTOwnerSigner
         .mintNFT({
           creator: this.ownerSigner,
-          class_id: "202412191729",
+          class_id: this.classId,
           input: {
             uri: "",
             uri_hash: "",

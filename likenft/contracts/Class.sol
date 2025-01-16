@@ -34,14 +34,12 @@ contract Class is ERC721, Ownable {
     event ContractURIUpdated();
 
     constructor(
-        MsgNewClass memory msgNewClass,
-        string memory id
+        MsgNewClass memory msgNewClass
     )
         ERC721(msgNewClass.input.name, msgNewClass.input.symbol)
         Ownable(msg.sender)
     {
         ClassStorage storage $ = _getClassStorage();
-        $.id = id;
         $.name = msgNewClass.input.name;
         $.symbol = msgNewClass.input.symbol;
         $.description = msgNewClass.input.description;

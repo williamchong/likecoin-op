@@ -13,7 +13,6 @@ import {MsgUpdateClass} from "../types/msgs/MsgUpdateClass.sol";
 import {Class} from "./Class.sol";
 
 error ErrNftClassNotFound();
-error ErrNftClassAlreadyExists();
 
 contract LikeNFT is
     Initializable,
@@ -23,7 +22,7 @@ contract LikeNFT is
 {
     struct LikeNFTStorage {
         address minter;
-        mapping(address creator => mapping(string class_id => Class)) creatorClassIdClassMapping;
+        mapping(address creator => mapping(address class_id => Class)) creatorClassIdClassMapping;
         Class[] classes;
     }
     // keccak256(abi.encode(uint256(keccak256("likenft.storage")) - 1)) & ~bytes32(uint256(0xff))
@@ -42,6 +41,8 @@ contract LikeNFT is
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
+    event NewClass(address classId, MsgNewClass params);
+
     function initialize(address initialOwner) public initializer {
         __UUPSUpgradeable_init();
         __Ownable_init(initialOwner);
@@ -56,20 +57,13 @@ contract LikeNFT is
         _unpause();
     }
 
-    function newClass(
-        MsgNewClass memory msgNewClass,
-        string memory id
-    ) public whenNotPaused {
+    function newClass(MsgNewClass memory msgNewClass) public whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
-        if (
-            address($.creatorClassIdClassMapping[msgNewClass.creator][id]) !=
-            address(0)
-        ) {
-            revert ErrNftClassAlreadyExists();
-        }
-        Class class = new Class(msgNewClass, id);
+        Class class = new Class(msgNewClass);
+        address id = address(class);
         $.classes.push(class);
         $.creatorClassIdClassMapping[msgNewClass.creator][id] = class;
+        emit NewClass(id, msgNewClass);
     }
 
     function updateClass(

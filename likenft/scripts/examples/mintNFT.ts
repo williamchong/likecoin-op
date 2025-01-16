@@ -11,7 +11,7 @@ async function mintNFT() {
 
   const tx = await likeNFT.mintNFT({
     creator: signer.address,
-    class_id: "202412191729",
+    class_id: "0x14CE6632272552E676b53FE6202edA8F1Be4992c",
     input: {
       uri: "",
       uri_hash: "",

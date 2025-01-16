@@ -13,7 +13,7 @@ import {NFTInput} from "../NFTInput.sol";
  */
 struct MsgMintNFT {
     address creator;
-    string class_id;
+    address class_id;
     // string id;
     NFTInput input;
 }
