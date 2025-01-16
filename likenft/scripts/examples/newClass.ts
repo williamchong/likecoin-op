@@ -15,7 +15,6 @@ async function newClass() {
     console.log("newClassEventPayload", id, parameters);
   };
   await likeNFT.on("NewClass", handleNewClass);
-
   const tx = await likeNFT.newClass({
     creator: signer.address,
     parent: {
@@ -41,12 +40,7 @@ async function newClass() {
         collaborators: [],
       }),
       config: {
-        burnable: true,
         max_supply: 10,
-        blind_box_config: {
-          mint_periods: [],
-          reveal_time: 0,
-        },
       },
     },
   });
