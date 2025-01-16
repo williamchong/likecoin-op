@@ -7,9 +7,6 @@ import {ClassParent} from "./ClassParent.sol";
 struct ClassStorage {
     string name;
     string symbol;
-    string description;
-    string uri;
-    string uri_hash;
     ClassDataStorage data;
 }
 

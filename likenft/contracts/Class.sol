@@ -42,9 +42,6 @@ contract Class is ERC721, Ownable {
         ClassStorage storage $ = _getClassStorage();
         $.name = msgNewClass.input.name;
         $.symbol = msgNewClass.input.symbol;
-        $.description = msgNewClass.input.description;
-        $.uri = msgNewClass.input.uri;
-        $.uri_hash = msgNewClass.input.uri_hash;
         $.data.metadata = msgNewClass.input.metadata;
         $.data.parent.type_ = msgNewClass.parent.type_;
         $.data.parent.iscn_id_prefix = msgNewClass.parent.iscn_id_prefix;
@@ -58,9 +55,6 @@ contract Class is ERC721, Ownable {
         ClassStorage storage $ = _getClassStorage();
         $.name = classInput.name;
         $.symbol = classInput.symbol;
-        $.description = classInput.description;
-        $.uri = classInput.uri;
-        $.uri_hash = classInput.uri_hash;
         $.data.metadata = classInput.metadata;
         emit ContractURIUpdated();
     }
@@ -76,6 +70,16 @@ contract Class is ERC721, Ownable {
         nftDataMap[tokenId].class_parent = $.data.parent;
         nftDataMap[tokenId].metadata = metadata;
         tokenId++;
+    }
+
+    function name() public view override returns (string memory) {
+        ClassStorage storage $ = _getClassStorage();
+        return $.name;
+    }
+
+    function symbol() public view override returns (string memory) {
+        ClassStorage storage $ = _getClassStorage();
+        return $.symbol;
     }
 
     function contractURI() public view returns (string memory) {

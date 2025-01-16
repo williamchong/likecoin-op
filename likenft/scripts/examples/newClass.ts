@@ -25,9 +25,6 @@ async function newClass() {
     input: {
       name: "My Book",
       symbol: "KOOB",
-      description: "Description",
-      uri: "",
-      uri_hash: "",
       metadata: JSON.stringify({
         name: "My Book 202412201604",
         symbol: "KOOB202412201604",

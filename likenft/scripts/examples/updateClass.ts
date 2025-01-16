@@ -15,9 +15,6 @@ async function updateClass() {
     input: {
       name: "My Book",
       symbol: "KOOB",
-      description: "Description",
-      uri: "",
-      uri_hash: "",
       metadata: JSON.stringify({
         name: "My Book 202412201605 Updated",
         symbol: "KOOB202412201605 Updated",
