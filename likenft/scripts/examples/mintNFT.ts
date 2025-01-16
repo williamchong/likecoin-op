@@ -13,8 +13,6 @@ async function mintNFT() {
     creator: signer.address,
     class_id: "0x14CE6632272552E676b53FE6202edA8F1Be4992c",
     input: {
-      uri: "",
-      uri_hash: "",
       metadata: JSON.stringify({
         image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
         image_data: "",

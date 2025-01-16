@@ -217,8 +217,6 @@ describe("LikeNFT class operations", () => {
           creator: this.ownerSigner,
           class_id: this.classId,
           input: {
-            uri: "",
-            uri_hash: "",
             metadata: JSON.stringify({
               image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
               image_data: "",
@@ -259,8 +257,6 @@ describe("LikeNFT class operations", () => {
           creator: this.ownerSigner,
           class_id: this.classId,
           input: {
-            uri: "",
-            uri_hash: "",
             metadata: JSON.stringify({
               image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
               image_data: "",
