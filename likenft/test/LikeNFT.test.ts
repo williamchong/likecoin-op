@@ -40,13 +40,10 @@ describe("LikeNFT", () => {
           input: {
             name: "My Book",
             symbol: "KOOB",
-            description: "Description",
-            uri: "",
-            uri_hash: "",
             metadata: JSON.stringify({
-              name: "My Book 202412201604",
-              symbol: "KOOB202412201604",
-              description: "My description 202412201604",
+              name: "Collection Name",
+              symbol: "Collection SYMB",
+              description: "Collection Description",
               image:
                 "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
               banner_image: "",
@@ -88,13 +85,10 @@ describe("LikeNFT", () => {
           input: {
             name: "My Book",
             symbol: "KOOB",
-            description: "Description",
-            uri: "",
-            uri_hash: "",
             metadata: JSON.stringify({
-              name: "My Book 202412201604",
-              symbol: "KOOB202412201604",
-              description: "My description 202412201604",
+              name: "Collection Name",
+              symbol: "Collection SYMB",
+              description: "Collection Description",
               image:
                 "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
               banner_image: "",
@@ -162,13 +156,10 @@ describe("LikeNFT class operations", () => {
         input: {
           name: "My Book",
           symbol: "KOOB",
-          description: "Description",
-          uri: "",
-          uri_hash: "",
           metadata: JSON.stringify({
-            name: "My Book 202412201604",
-            symbol: "KOOB202412201604",
-            description: "My description 202412201604",
+            name: "Collection Name",
+            symbol: "Collection SYMB",
+            description: "Collection Description",
             image:
               "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
             banner_image: "",
@@ -201,13 +192,10 @@ describe("LikeNFT class operations", () => {
           input: {
             name: "My Book",
             symbol: "KOOB",
-            description: "Description",
-            uri: "",
-            uri_hash: "",
             metadata: JSON.stringify({
-              name: "My Book 202412201605 Updated",
-              symbol: "KOOB202412201605 Updated",
-              description: "My description 202412201604 Updated",
+              name: "Collection Name",
+              symbol: "Collection SYMB",
+              description: "Collection Description",
               image:
                 "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
               banner_image: "",
@@ -229,8 +217,6 @@ describe("LikeNFT class operations", () => {
           creator: this.ownerSigner,
           class_id: this.classId,
           input: {
-            uri: "",
-            uri_hash: "",
             metadata: JSON.stringify({
               image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
               image_data: "",
@@ -255,9 +241,7 @@ describe("LikeNFT class operations", () => {
 
     await expect(updateClass()).to.be.not.rejected;
     await expect(mintNFT()).to.be.not.rejected;
-    await expect(updateClass()).to.be.rejectedWith(
-      "VM Exception while processing transaction: reverted with custom error 'ErrCannotUpdateClassWithMintedTokens()'",
-    );
+    await expect(updateClass()).to.be.not.rejected;
   });
 
   it("should be able to mint class", async function () {
@@ -271,8 +255,6 @@ describe("LikeNFT class operations", () => {
           creator: this.ownerSigner,
           class_id: this.classId,
           input: {
-            uri: "",
-            uri_hash: "",
             metadata: JSON.stringify({
               image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
               image_data: "",
