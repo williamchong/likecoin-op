@@ -60,7 +60,7 @@ const config: HardhatUserConfig = {
     ...(process.env.DEPLOY_WALLET_PRIVATE_KEY_OP_SEPOLIA != null
       ? {
           sepolia: {
-            url: "https://ethereum-sepolia-rpc.publicnode.com",
+            url: "https://sepolia.drpc.org",
             chainId: 11155111,
             accounts: [`0x${process.env.DEPLOY_WALLET_PRIVATE_KEY_OP_SEPOLIA}`],
           },
