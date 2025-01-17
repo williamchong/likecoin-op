@@ -7,6 +7,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
 import {MsgMintNFT} from "../types/msgs/MsgMintNFT.sol";
+import {MsgMintNFTs} from "../types/msgs/MsgMintNFTs.sol";
 import {MsgNewClass} from "../types/msgs/MsgNewClass.sol";
 import {MsgUpdateClass} from "../types/msgs/MsgUpdateClass.sol";
 
@@ -79,7 +80,7 @@ contract LikeNFT is
         class.update(msgUpdateClass.input);
     }
 
-    function mintNFT(MsgMintNFT memory msgMintNFT) public whenNotPaused {
+    function mintNFT(MsgMintNFT calldata msgMintNFT) external whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
         Class class = $.creatorClassIdClassMapping[msgMintNFT.creator][
             msgMintNFT.class_id
@@ -87,7 +88,24 @@ contract LikeNFT is
         if (address(class) == address(0)) {
             revert ErrNftClassNotFound();
         }
-        class.mint(msgMintNFT.creator, msgMintNFT.input.metadata);
+        string[] memory metadata_list = new string[](1);
+        metadata_list[0] = msgMintNFT.input.metadata;
+        class.mint(msgMintNFT.creator, metadata_list);
+    }
+
+    function mintNFTs(MsgMintNFTs calldata msgMintNFTs) external whenNotPaused {
+        LikeNFTStorage storage $ = _getLikeNFTStorage();
+        Class class = $.creatorClassIdClassMapping[msgMintNFTs.creator][
+            msgMintNFTs.class_id
+        ];
+        if (address(class) == address(0)) {
+            revert ErrNftClassNotFound();
+        }
+        string[] memory metadata_list = new string[](msgMintNFTs.inputs.length);
+        for (uint i = 0; i < msgMintNFTs.inputs.length; i++) {
+            metadata_list[i] = msgMintNFTs.inputs[i].metadata;
+        }
+        class.mint(msgMintNFTs.creator, metadata_list);
     }
 
     function _authorizeUpgrade(
