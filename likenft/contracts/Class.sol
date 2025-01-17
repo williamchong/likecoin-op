@@ -49,9 +49,6 @@ contract Class is ERC721, Ownable {
     }
 
     function update(ClassInput memory classInput) public onlyOwner {
-        if (tokenId > 0) {
-            revert ErrCannotUpdateClassWithMintedTokens();
-        }
         ClassStorage storage $ = _getClassStorage();
         $.name = classInput.name;
         $.symbol = classInput.symbol;

@@ -241,9 +241,7 @@ describe("LikeNFT class operations", () => {
 
     await expect(updateClass()).to.be.not.rejected;
     await expect(mintNFT()).to.be.not.rejected;
-    await expect(updateClass()).to.be.rejectedWith(
-      "VM Exception while processing transaction: reverted with custom error 'ErrCannotUpdateClassWithMintedTokens()'",
-    );
+    await expect(updateClass()).to.be.not.rejected;
   });
 
   it("should be able to mint class", async function () {
