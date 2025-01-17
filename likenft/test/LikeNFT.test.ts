@@ -278,4 +278,60 @@ describe("LikeNFT class operations", () => {
     };
     await expect(mintNFT()).to.be.not.rejected;
   });
+
+  it("should be able to multiple mint", async function () {
+    const LikeNFTOwnerSigner = await ethers.getContractFactory("LikeNFT", {
+      signer: this.ownerSigner,
+    });
+    const likeNFTOwnerSigner = LikeNFTOwnerSigner.attach(this.contractAddress);
+    const mintNFT = async () => {
+      await likeNFTOwnerSigner
+        .mintNFTs({
+          creator: this.ownerSigner,
+          class_id: this.classId,
+          inputs: [
+            {
+              metadata: JSON.stringify({
+                image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+                image_data: "",
+                external_url: "https://www.google.com",
+                description: "202412191729 #0001 Description",
+                name: "202412191729 #0001",
+                attributes: [
+                  {
+                    trait_type: "ISCN ID",
+                    value:
+                      "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+                  },
+                ],
+                background_color: "",
+                animation_url: "",
+                youtube_url: "",
+              }),
+            },
+            {
+              metadata: JSON.stringify({
+                image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+                image_data: "",
+                external_url: "https://www.google.com",
+                description: "202412191729 #0001 Description",
+                name: "202412191729 #0001",
+                attributes: [
+                  {
+                    trait_type: "ISCN ID",
+                    value:
+                      "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+                  },
+                ],
+                background_color: "",
+                animation_url: "",
+                youtube_url: "",
+              }),
+            },
+          ],
+        })
+        .then((tx) => tx.wait());
+    };
+    await expect(mintNFT()).to.be.not.rejected;
+  });
 });

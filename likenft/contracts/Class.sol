@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {ERC721A} from "erc721a/contracts/ERC721A.sol";
 
 import {ClassStorage} from "../types/Class.sol";
 import {ClassInput} from "../types/ClassInput.sol";
@@ -12,7 +12,7 @@ import {NFTData} from "../types/NFTData.sol";
 error ErrNftNoSupply();
 error ErrCannotUpdateClassWithMintedTokens();
 
-contract Class is ERC721, Ownable {
+contract Class is ERC721A, Ownable {
     // keccak256(abi.encode(uint256(keccak256("likenft.storage.class")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant CLASS_DATA_STORAGE =
         0x99391ccf5d97dbb7711a73831d943712d1774ca037a259af20891dc6f0d9f200;
@@ -36,7 +36,7 @@ contract Class is ERC721, Ownable {
     constructor(
         MsgNewClass memory msgNewClass
     )
-        ERC721(msgNewClass.input.name, msgNewClass.input.symbol)
+        ERC721A(msgNewClass.input.name, msgNewClass.input.symbol)
         Ownable(msg.sender)
     {
         ClassStorage storage $ = _getClassStorage();
@@ -56,17 +56,27 @@ contract Class is ERC721, Ownable {
         emit ContractURIUpdated();
     }
 
-    function mint(address to, string memory metadata) public onlyOwner {
+    function mint(
+        address to,
+        string[] calldata metadata_list
+    ) external onlyOwner {
         ClassStorage storage $ = _getClassStorage();
+
+        uint256 nextTokenId = _nextTokenId();
         uint64 maxSupply = $.data.config.max_supply;
-        if (maxSupply != 0 && tokenId >= maxSupply) {
+        uint quantity = metadata_list.length;
+
+        if (maxSupply != 0 && totalSupply() + quantity > maxSupply) {
             revert ErrNftNoSupply();
         }
 
-        _safeMint(to, tokenId);
-        nftDataMap[tokenId].class_parent = $.data.parent;
-        nftDataMap[tokenId].metadata = metadata;
-        tokenId++;
+        _safeMint(to, quantity);
+
+        for (uint i = 0; i < quantity; i++) {
+            uint256 _tokenId = nextTokenId + i;
+            nftDataMap[_tokenId].class_parent = $.data.parent;
+            nftDataMap[_tokenId].metadata = metadata_list[i];
+        }
     }
 
     function name() public view override returns (string memory) {
