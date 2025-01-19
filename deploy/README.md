@@ -4,7 +4,7 @@ We rely on operation to maintains the initial contract address of the evm smart 
 
 Operator keys are stored in the `env.operator` file. [Blackbox](https://github.com/StackExchange/blackbox) encrypts the keys.
 
-To decrypt the keys, run `blackbox_decrypt_all_keys`, then `make operator-key-link`.
+To decrypt the keys, run `blackbox_decrypt_all_files`, then `make operator-key-link` at the root of the repo.
 
 ## Expected procedure
 
@@ -15,7 +15,7 @@ Once the initial deployment is done, we should updated the expected proxy addres
 0. Checkout a specific commit
 1. Someone sends ETH to the operator's wallet
 2. Use operator's wallet to run the deployment on `likecoin` and `likenft` (!! Order matters)
-   - 2.1. `likecon` should run first, with itslef as the owner and minter
+   - 2.1. `likecoin` should run first, with itself as the owner and minter
    - 2.2. `likenft` come second, itself as the owner
 3. Upgrade the implementation to latest implementation
 4. Update the owner and minter accordingly

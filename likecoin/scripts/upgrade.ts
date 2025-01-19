@@ -39,7 +39,7 @@ async function main() {
   }
 
   // TODO: Prepare an upgrade proposal to safe
-  const ekilCoin = EkilCoin.attach(process.env.PROXY_ADDRESS!);
+  const ekilCoin = EkilCoin.attach(process.env.ERC20_PROXY_ADDRESS!);
   await ekilCoin.upgradeToAndCall(newImplementationAddress, "0x");
 
   console.log("EkilCoin upgraded implementation to:", newImplementationAddress);

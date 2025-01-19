@@ -39,7 +39,7 @@ async function main() {
   }
 
   // TODO: Prepare an upgrade proposal to safe
-  const likeNFT = LikeNFT.attach(process.env.PROXY_ADDRESS!);
+  const likeNFT = LikeNFT.attach(process.env.ERC721_PROXY_ADDRESS!);
   await likeNFT.upgradeToAndCall(newImplementationAddress, "0x");
 
   console.log("LikeNFT upgraded implementation to:", newImplementationAddress);
