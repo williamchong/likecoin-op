@@ -33,6 +33,13 @@ contract Class is ERC721A, Ownable {
 
     event ContractURIUpdated();
 
+    event TransferWithMemo(
+        address indexed from,
+        address indexed to,
+        uint256 indexed tokenId,
+        string memo
+    );
+
     constructor(
         MsgNewClass memory msgNewClass
     )
@@ -105,5 +112,16 @@ contract Class is ERC721A, Ownable {
                 "data:application/json;utf8,",
                 nftDataMap[_tokenId].metadata
             );
+    }
+
+    function transferWithMemo(
+        address from,
+        address to,
+        uint256 _tokenId,
+        string calldata memo
+    ) external payable {
+        transferFrom(from, to, _tokenId);
+
+        emit TransferWithMemo(from, to, _tokenId, memo);
     }
 }
