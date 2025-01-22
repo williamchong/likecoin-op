@@ -18,11 +18,6 @@ async function newClass() {
 
   const tx = await likeNFT.newClass({
     creator: signer.address,
-    parent: {
-      type_: 1,
-      iscn_id_prefix:
-        "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c",
-    },
     input: {
       name: "《所謂「我不投資」，就是 all in 在法定貨幣》",
       symbol: "BOOK",

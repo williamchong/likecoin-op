@@ -50,8 +50,6 @@ contract Class is ERC721A, Ownable {
         $.name = msgNewClass.input.name;
         $.symbol = msgNewClass.input.symbol;
         $.data.metadata = msgNewClass.input.metadata;
-        $.data.parent.type_ = msgNewClass.parent.type_;
-        $.data.parent.iscn_id_prefix = msgNewClass.parent.iscn_id_prefix;
         $.data.config = msgNewClass.input.config;
     }
 
@@ -81,7 +79,6 @@ contract Class is ERC721A, Ownable {
 
         for (uint i = 0; i < quantity; i++) {
             uint256 _tokenId = nextTokenId + i;
-            nftDataMap[_tokenId].class_parent = $.data.parent;
             nftDataMap[_tokenId].metadata = metadata_list[i];
         }
     }
