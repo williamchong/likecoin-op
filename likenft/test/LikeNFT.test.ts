@@ -33,11 +33,6 @@ describe("LikeNFT", () => {
       await likeNFTOwnerSigner
         .newClass({
           creator: this.ownerSigner,
-          parent: {
-            type_: 1,
-            iscn_id_prefix:
-              "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-          },
           input: {
             name: "My Book",
             symbol: "KOOB",
@@ -78,11 +73,6 @@ describe("LikeNFT", () => {
       await likeNFTOwnerSigner
         .newClass({
           creator: this.ownerSigner,
-          parent: {
-            type_: 1,
-            iscn_id_prefix:
-              "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-          },
           input: {
             name: "My Book",
             symbol: "KOOB",
@@ -149,11 +139,6 @@ describe("LikeNFT class operations", () => {
     likeNFTOwnerSigner
       .newClass({
         creator: this.ownerSigner,
-        parent: {
-          type_: 1,
-          iscn_id_prefix:
-            "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-        },
         input: {
           name: "My Book",
           symbol: "KOOB",
@@ -376,11 +361,6 @@ describe("LikeNFT token operations", () => {
     likeNFTOwnerSigner
       .newClass({
         creator: this.ownerSigner,
-        parent: {
-          type_: 1,
-          iscn_id_prefix:
-            "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-        },
         input: {
           name: "My Book",
           symbol: "KOOB",
