@@ -1,4 +1,5 @@
-# Simple Makefile for a Go project
+-include .env
+export
 
 # Build the application
 all: build test
@@ -21,11 +22,37 @@ tailwind-install:
 	
 	@chmod +x tailwindcss
 
-build: tailwind-install templ-install
+generate:
+	@echo "Generating..."
+	go generate ./ent
+
+.PHONY: migration
+migration:
+	atlas migrate diff "${MIGRATION_NAME}" \
+		--dir file://ent/migrate/migrations \
+		--to ent://ent/schema/ \
+		--dev-url "docker://postgres/15/test?search_path=public"
+
+.PHONY: migrate-up
+migrate-up:
+	@echo "Migrating up..."
+	atlas migrate apply \
+		--dir "file://ent/migrate/migrations" \
+		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@localhost:5432/${DB_DATABASE}?sslmode=disable"
+
+.PHONY: migrate-down
+migrate-down:
+	@echo "Migrating down..."
+	atlas migrate down \
+		--dir "file://ent/migrate/migrations" \
+		--dev-url "docker://postgres/15/test?search_path=public" \
+		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@localhost:5432/${DB_DATABASE}?sslmode=disable"
+
+build: tailwind-install templ-install generate
 	@echo "Building..."
-	@templ generate
-	@./tailwindcss -i cmd/web/styles/input.css -o cmd/web/assets/css/output.css
-	@go build -o main cmd/api/main.go
+	templ generate
+	./tailwindcss -i cmd/web/styles/input.css -o cmd/web/assets/css/output.css
+	go build -o main cmd/api/main.go
 
 # Run the application
 run:
