@@ -37,16 +37,16 @@ const (
 	// EdgeClass holds the string denoting the class edge name in mutations.
 	EdgeClass = "class"
 	// Table holds the table name of the nft in the database.
-	Table = "nf_ts"
+	Table = "nfts"
 	// OwnerTable is the table that holds the owner relation/edge.
-	OwnerTable = "nf_ts"
+	OwnerTable = "nfts"
 	// OwnerInverseTable is the table name for the Account entity.
 	// It exists in this package in order to avoid circular dependency with the "account" package.
 	OwnerInverseTable = "accounts"
 	// OwnerColumn is the table column denoting the owner relation/edge.
 	OwnerColumn = "account_nfts"
 	// ClassTable is the table that holds the class relation/edge.
-	ClassTable = "nf_ts"
+	ClassTable = "nfts"
 	// ClassInverseTable is the table name for the NFTClass entity.
 	// It exists in this package in order to avoid circular dependency with the "nftclass" package.
 	ClassInverseTable = "nft_classes"
@@ -69,7 +69,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "nf_ts"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "nfts"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"account_nfts",

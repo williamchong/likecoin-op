@@ -31,22 +31,22 @@ migration:
 	atlas migrate diff "${MIGRATION_NAME}" \
 		--dir file://ent/migrate/migrations \
 		--to ent://ent/schema/ \
-		--dev-url "docker://postgres/15/test?search_path=public"
+		--dev-url "docker://postgres/15/test?search_path=${DB_SCHEMA}"
 
 .PHONY: migrate-up
 migrate-up:
 	@echo "Migrating up..."
 	atlas migrate apply \
 		--dir "file://ent/migrate/migrations" \
-		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@localhost:5432/${DB_DATABASE}?sslmode=disable"
+		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@localhost:5432/${DB_DATABASE}?sslmode=disable&search_path=${DB_SCHEMA}"
 
 .PHONY: migrate-down
 migrate-down:
 	@echo "Migrating down..."
 	atlas migrate down \
 		--dir "file://ent/migrate/migrations" \
-		--dev-url "docker://postgres/15/test?search_path=public" \
-		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@localhost:5432/${DB_DATABASE}?sslmode=disable"
+		--dev-url "docker://postgres/15/test?search_path=${DB_SCHEMA}" \
+		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@localhost:5432/${DB_DATABASE}?sslmode=disable&search_path=${DB_SCHEMA}"
 
 build: tailwind-install templ-install generate
 	@echo "Building..."

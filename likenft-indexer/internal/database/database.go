@@ -9,23 +9,26 @@ import (
 	"strconv"
 	"time"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"likenft-indexer/ent"
+
+	entsql "entgo.io/ent/dialect/sql"
+
 	_ "github.com/joho/godotenv/autoload"
+	_ "github.com/lib/pq"
 )
 
 // Service represents a service that interacts with a database.
 type Service interface {
 	// Health returns a map of health status information.
 	// The keys and values in the map are service-specific.
+	Client() *ent.Client
 	Health() map[string]string
-
-	// Close terminates the database connection.
-	// It returns an error if the connection cannot be closed.
 	Close() error
 }
 
 type service struct {
-	db *sql.DB
+	client *ent.Client
+	db     *sql.DB
 }
 
 var (
@@ -43,15 +46,29 @@ func New() Service {
 	if dbInstance != nil {
 		return dbInstance
 	}
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
-	db, err := sql.Open("pgx", connStr)
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s",
+		username, password, host, port, database, schema)
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed opening connection to postgres: %v", err)
 	}
+
+	// Wrap the sql.DB with a dialect driver
+	drv := entsql.OpenDB("postgres", db)
+	client := ent.NewClient(ent.Driver(drv))
+	if err != nil {
+		log.Fatalf("failed construct ent ORM: %v", err)
+	}
+
 	dbInstance = &service{
-		db: db,
+		client: client,
+		db:     db,
 	}
 	return dbInstance
+}
+
+func (s *service) Client() *ent.Client {
+	return s.client
 }
 
 // Health checks the health of the database connection by pinging the database.
@@ -62,7 +79,7 @@ func (s *service) Health() map[string]string {
 
 	stats := make(map[string]string)
 
-	// Ping the database
+	// Ping the databaseo
 	err := s.db.PingContext(ctx)
 	if err != nil {
 		stats["status"] = "down"

@@ -3,6 +3,7 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
@@ -42,8 +43,8 @@ var (
 		Columns:    EvmEventsColumns,
 		PrimaryKey: []*schema.Column{EvmEventsColumns[0]},
 	}
-	// NfTsColumns holds the columns for the "nf_ts" table.
-	NfTsColumns = []*schema.Column{
+	// NftsColumns holds the columns for the "nfts" table.
+	NftsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "token_id", Type: field.TypeUint64, Unique: true},
 		{Name: "token_url", Type: field.TypeString, Nullable: true},
@@ -58,21 +59,21 @@ var (
 		{Name: "account_nfts", Type: field.TypeInt, Nullable: true},
 		{Name: "nft_class_nfts", Type: field.TypeInt, Nullable: true},
 	}
-	// NfTsTable holds the schema information for the "nf_ts" table.
-	NfTsTable = &schema.Table{
-		Name:       "nf_ts",
-		Columns:    NfTsColumns,
-		PrimaryKey: []*schema.Column{NfTsColumns[0]},
+	// NftsTable holds the schema information for the "nfts" table.
+	NftsTable = &schema.Table{
+		Name:       "nfts",
+		Columns:    NftsColumns,
+		PrimaryKey: []*schema.Column{NftsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "nf_ts_accounts_nfts",
-				Columns:    []*schema.Column{NfTsColumns[11]},
+				Symbol:     "nfts_accounts_nfts",
+				Columns:    []*schema.Column{NftsColumns[11]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "nf_ts_nft_classes_nfts",
-				Columns:    []*schema.Column{NfTsColumns[12]},
+				Symbol:     "nfts_nft_classes_nfts",
+				Columns:    []*schema.Column{NftsColumns[12]},
 				RefColumns: []*schema.Column{NftClassesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -114,13 +115,16 @@ var (
 	Tables = []*schema.Table{
 		AccountsTable,
 		EvmEventsTable,
-		NfTsTable,
+		NftsTable,
 		NftClassesTable,
 	}
 )
 
 func init() {
-	NfTsTable.ForeignKeys[0].RefTable = AccountsTable
-	NfTsTable.ForeignKeys[1].RefTable = NftClassesTable
+	NftsTable.ForeignKeys[0].RefTable = AccountsTable
+	NftsTable.ForeignKeys[1].RefTable = NftClassesTable
+	NftsTable.Annotation = &entsql.Annotation{
+		Table: "nfts",
+	}
 	NftClassesTable.ForeignKeys[0].RefTable = AccountsTable
 }

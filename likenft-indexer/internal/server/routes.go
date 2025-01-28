@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"likenft-indexer/cmd/web"
+	"likenft-indexer/internal/api"
+
 	"github.com/a-h/templ"
 	"github.com/coder/websocket"
-	"likenft-indexer/cmd/web"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -18,6 +20,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	// Register routes
 	mux.HandleFunc("/", s.HelloWorldHandler)
+	// All of /api/*
+	api.SetupRoutes(mux, s.db.Client())
 
 	mux.HandleFunc("/health", s.healthHandler)
 

@@ -32,10 +32,10 @@ const (
 	// NftClassesColumn is the table column denoting the nft_classes relation/edge.
 	NftClassesColumn = "account_nft_classes"
 	// NftsTable is the table that holds the nfts relation/edge.
-	NftsTable = "nf_ts"
+	NftsTable = "nfts"
 	// NftsInverseTable is the table name for the NFT entity.
 	// It exists in this package in order to avoid circular dependency with the "nft" package.
-	NftsInverseTable = "nf_ts"
+	NftsInverseTable = "nfts"
 	// NftsColumn is the table column denoting the nfts relation/edge.
 	NftsColumn = "account_nfts"
 )

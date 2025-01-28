@@ -2,6 +2,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -10,6 +12,12 @@ import (
 // NFT holds the schema definition for the NFT entity.
 type NFT struct {
 	ent.Schema
+}
+
+func (NFT) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "nfts"},
+	}
 }
 
 // Fields of the NFT.

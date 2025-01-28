@@ -45,10 +45,10 @@ const (
 	// Table holds the table name of the nftclass in the database.
 	Table = "nft_classes"
 	// NftsTable is the table that holds the nfts relation/edge.
-	NftsTable = "nf_ts"
+	NftsTable = "nfts"
 	// NftsInverseTable is the table name for the NFT entity.
 	// It exists in this package in order to avoid circular dependency with the "nft" package.
-	NftsInverseTable = "nf_ts"
+	NftsInverseTable = "nfts"
 	// NftsColumn is the table column denoting the nfts relation/edge.
 	NftsColumn = "nft_class_nfts"
 	// OwnerTable is the table that holds the owner relation/edge.
