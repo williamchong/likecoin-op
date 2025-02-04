@@ -10,7 +10,7 @@ remove-operator-key-link:
 
 .PHONY: local-node
 local-node:
-	(sleep 1 && make -C deploy/operation init-local-state) &
+	(sleep 1 && make -C operation init-local-state) &
 	(sleep 2 && make -C likecoin deploy-local) &
 	(sleep 3 && make -C likenft deploy-local) &
-	make -C deploy/operation local-node
+	make -C operation local-node
