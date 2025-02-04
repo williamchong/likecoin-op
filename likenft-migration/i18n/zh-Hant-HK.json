@@ -1,5 +1,11 @@
 {
   "index": {
     "get-started": ""
+  },
+  "migrate": {
+    "connect-cosmos-wallet": "",
+    "connect-evm-wallet": "",
+    "cosmos-wallet-address": "",
+    "evm-wallet-address": ""
   }
 }

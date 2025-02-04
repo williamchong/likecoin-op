@@ -1,5 +1,11 @@
 {
   "index": {
     "get-started": "Get Started"
+  },
+  "migrate": {
+    "connect-cosmos-wallet": "Connect cosmos wallet",
+    "connect-evm-wallet": "Connect evm wallet",
+    "cosmos-wallet-address": "Cosmos wallet address: {cosmosWalletAddress}",
+    "evm-wallet-address": "EVM wallet address: {evmWalletAddress}"
   }
 }
