@@ -29,7 +29,20 @@ spec:
                 name: {{ .Values.likecoin.migration.frontend.name }}
                 port:
                   number: {{ .Values.likecoin.migration.frontend.service.port }}
+    - host: {{ .Values.likenft.migration.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.likenft.migration.frontend.name }}
+                port:
+                  number: {{ .Values.likenft.migration.frontend.service.port }}
   tls:
     - hosts:
         - {{ .Values.likecoin.migration.ingress.tls.host }}
       secretName: {{ .Values.likecoin.migration.ingress.tls.secretName }}
+    - hosts:
+        - {{ .Values.likenft.migration.ingress.tls.host }}
+      secretName: {{ .Values.likenft.migration.ingress.tls.secretName }}

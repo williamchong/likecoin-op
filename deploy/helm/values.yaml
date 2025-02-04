@@ -29,6 +29,22 @@ likecoin:
       resources:
         {}
 
+likenft:
+  migration:
+    frontend:
+      name: likenft-migration
+
+      container:
+        imageRepository: chankiyu22/likenft-migration
+        imagePullPolicy: IfNotPresent
+        port: 80
+        restartPolicy: Always
+
+      service:
+        port: 80
+
+      resources:
+        {}
 
 nginx:
   name: nginx
