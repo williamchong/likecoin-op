@@ -19,3 +19,7 @@ ci:
 	npm run check-format
 	npm run lint
 	npm run test
+
+.PHONY: deploy-local
+deploy-local:
+	npm run deploy:local
