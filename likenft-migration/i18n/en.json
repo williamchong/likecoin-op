@@ -7,6 +7,7 @@
     "connect-evm-wallet": "Connect evm wallet",
     "cosmos-wallet-address": "Cosmos wallet address: {cosmosWalletAddress}",
     "evm-wallet-address": "EVM wallet address: {evmWalletAddress}",
-    "liker-id": "Liker ID: {likerID}"
+    "liker-id": "Liker ID: {likerID}",
+    "migrate": "Migrate"
   }
 }

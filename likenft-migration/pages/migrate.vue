@@ -12,6 +12,12 @@
         {{ $t('migrate.connect-evm-wallet') }}
       </primary-button>
       <p>{{ $t('migrate.evm-wallet-address', { evmWalletAddress }) }}</p>
+      <primary-button
+        v-if="cosmosWalletAddress != null && evmWalletAddress != null"
+        @click="handleMigrateClick"
+      >
+        {{ $t('migrate.migrate') }}
+      </primary-button>
     </main>
     <div
       v-if="isLoading"
@@ -31,7 +37,11 @@ import {
 import { Eip1193Provider } from 'ethers';
 import Vue from 'vue';
 import Web3 from 'web3';
+import { z } from 'zod';
+
+import { getSignMessage } from '~/apis/getSignMessage';
 import { getUser } from '~/apis/getUser';
+import { migrateEVMAddress } from '~/apis/migrateEVMAddress';
 import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network';
 import { Config } from '~/models/config';
 
@@ -45,6 +55,21 @@ async function getEthereumAccount(
     return accounts[0];
   }
   return null;
+}
+
+async function signEthereumMessage(
+  message: string,
+  ethereum: Eip1193Provider,
+  ethereumAddress: string
+) {
+  const web3 = new Web3(ethereum);
+  const sign = await web3.eth.personal.sign(
+    message,
+    ethereumAddress,
+    'Password!'
+  );
+
+  return sign;
 }
 
 interface Data {
@@ -72,20 +97,20 @@ export default Vue.extend({
     },
   },
 
-  mounted() {
-    if (this.config != null) {
-      this.connector = new LikeCoinWalletConnector(
-        LIKECOIN_WALLET_CONNECTOR_CONFIG(this.config.isTestnet)
-      );
-    }
-  },
-
   watch: {
     config(newConfig: Config) {
       this.connector = new LikeCoinWalletConnector(
         LIKECOIN_WALLET_CONNECTOR_CONFIG(newConfig.isTestnet)
       );
     },
+  },
+
+  mounted() {
+    if (this.config != null) {
+      this.connector = new LikeCoinWalletConnector(
+        LIKECOIN_WALLET_CONNECTOR_CONFIG(this.config.isTestnet)
+      );
+    }
   },
 
   methods: {
@@ -133,6 +158,45 @@ export default Vue.extend({
       } finally {
         this.isLoading = false;
       }
+    },
+
+    async handleMigrateClick() {
+      const S = z.object({
+        cosmosWalletAddress: z.string(),
+        evmWalletAddress: z.string(),
+      });
+      const s = S.safeParse({
+        cosmosWalletAddress: this.cosmosWalletAddress,
+        evmWalletAddress: this.evmWalletAddress,
+      });
+      if (s.data == null) {
+        return;
+      }
+      if (window.ethereum == null) {
+        alert('Please install metamask extension');
+        return;
+      }
+      const u = await getUser(s.data.cosmosWalletAddress);
+      if (u.evm_address == null) {
+        const signMessage = await getSignMessage(
+          this.likerID,
+          s.data.cosmosWalletAddress
+        );
+        const signedMessage = await signEthereumMessage(
+          signMessage,
+          window.ethereum,
+          s.data.evmWalletAddress
+        );
+        await migrateEVMAddress(
+          s.data.cosmosWalletAddress,
+          s.data.evmWalletAddress,
+          this.likerID,
+          signedMessage,
+          'some-nonce'
+        );
+      }
+
+      this.$router.push(`/migration-preview/${s.data.cosmosWalletAddress}`);
     },
   },
 });
