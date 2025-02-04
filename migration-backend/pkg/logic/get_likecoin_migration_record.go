@@ -6,8 +6,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	appdb "github.com/likecoin/likecoin-migration-backend/pkg/db"
-	"github.com/likecoin/likecoin-migration-backend/pkg/model"
+	appdb "github.com/likecoin/like-migration-backend/pkg/db"
+	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
 type MigrationRecordStatus string

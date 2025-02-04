@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/likecoin/likecoin-migration-backend/pkg/model/cosmos"
+	"github.com/likecoin/like-migration-backend/pkg/model/cosmos"
 )
 
 func (a *CosmosAPI) QueryTransaction(txHash string) (*cosmos.TxResponse, error) {

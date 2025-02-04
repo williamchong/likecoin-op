@@ -1,4 +1,4 @@
-module github.com/likecoin/likecoin-migration-backend
+module github.com/likecoin/like-migration-backend
 
 go 1.22.10
 

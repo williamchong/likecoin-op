@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/likecoin/likecoin-migration-backend/pkg/cosmos/api"
-	"github.com/likecoin/likecoin-migration-backend/pkg/logic"
+	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
+	"github.com/likecoin/like-migration-backend/pkg/logic"
 )
 
 type RequestBody struct {

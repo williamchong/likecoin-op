@@ -10,10 +10,10 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/likecoin/likecoin-migration-backend/pkg/cosmos/api"
-	appdb "github.com/likecoin/likecoin-migration-backend/pkg/db"
-	"github.com/likecoin/likecoin-migration-backend/pkg/ethereum"
-	"github.com/likecoin/likecoin-migration-backend/pkg/model"
+	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
+	appdb "github.com/likecoin/like-migration-backend/pkg/db"
+	"github.com/likecoin/like-migration-backend/pkg/ethereum"
+	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
 type Memo struct {
