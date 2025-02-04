@@ -7,6 +7,7 @@
         {{ $t('migrate.connect-cosmos-wallet') }}
       </primary-button>
       <p>{{ $t('migrate.cosmos-wallet-address', { cosmosWalletAddress }) }}</p>
+      <p>{{ $t('migrate.liker-id', { likerID }) }}</p>
       <primary-button @click="handleConnectEVMWalletClick">
         {{ $t('migrate.connect-evm-wallet') }}
       </primary-button>
@@ -30,6 +31,7 @@ import {
 import { Eip1193Provider } from 'ethers';
 import Vue from 'vue';
 import Web3 from 'web3';
+import { getUser } from '~/apis/getUser';
 import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network';
 import { Config } from '~/models/config';
 
@@ -93,12 +95,23 @@ export default Vue.extend({
       this.handleConnection(connection);
     },
 
-    handleConnection(connection: LikeCoinWalletConnectorSession | undefined) {
+    async handleConnection(
+      connection: LikeCoinWalletConnectorSession | undefined
+    ) {
       if (!connection) return;
       const {
         accounts: [account],
       } = connection;
       this.cosmosWalletAddress = account.address;
+
+      this.isLoading = true;
+      try {
+        const user = await getUser(this.cosmosWalletAddress);
+        this.likerID = user.liker_id;
+      } finally {
+        this.isLoading = false;
+      }
+
       this.connector?.once('account_change', this.handleAccountChange);
     },
 
