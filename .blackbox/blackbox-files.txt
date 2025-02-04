@@ -1,2 +1,3 @@
+deploy/env.operator
 deploy/helm/dev/values.secret.yaml
 likecoin-migration/backend/.env.dev
