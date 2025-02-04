@@ -1,19 +1,5 @@
 likecoin:
   migration:
-    backend:
-      name: likecoin-migration-backend
-
-      container:
-        imageRepository: chankiyu22/likecoin-migration-backend
-        imagePullPolicy: IfNotPresent
-        port: 8091
-
-      service:
-        port: 80
-
-      resources:
-        {}
-
     frontend:
       name: likecoin-migration-frontend
 
@@ -26,8 +12,7 @@ likecoin:
       service:
         port: 80
 
-      resources:
-        {}
+      resources: {}
 
 likenft:
   migration:
@@ -45,6 +30,19 @@ likenft:
 
       resources:
         {}
+
+migrationBackend:
+  name: migration-backend
+
+  container:
+    imageRepository: chankiyu22/like-migration-backend
+    imagePullPolicy: IfNotPresent
+    port: 8091
+
+  service:
+    port: 80
+
+  resources: {}
 
 nginx:
   name: nginx
