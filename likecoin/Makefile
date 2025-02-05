@@ -16,6 +16,7 @@ test:
 
 .PHONY: ci
 ci:
+	cp .env.local .env
 	npm run check-format
 	npm run lint
 	npm run test
