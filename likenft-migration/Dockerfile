@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM node:21.7.3-slim as builder
+FROM --platform=$BUILDPLATFORM node:23.7-slim as builder
 
 WORKDIR /usr/src/app
 COPY . ./
