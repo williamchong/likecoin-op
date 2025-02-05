@@ -1,0 +1,18 @@
+{
+  "scripts": {
+    "local": "hardhat node",
+    "script:local": "hardhat run --network localhost",
+    "script:optimism-sepolia": "hardhat run --network optimism-sepolia",
+    "script:sepolia": "hardhat run --network sepolia"
+  },
+  "dependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "@nomicfoundation/hardhat-toolbox-viem": "^3.0.0",
+    "dotenv": "^16.4.7",
+    "hardhat": "^2.22.18"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}
