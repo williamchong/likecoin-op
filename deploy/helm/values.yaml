@@ -1,18 +1,16 @@
-likecoin:
-  migration:
-    frontend:
-      name: likecoin-migration-frontend
+likecoinMigration:
+  name: likecoin-migration
 
-      container:
-        imageRepository: chankiyu22/likecoin-migration-frontend
-        imagePullPolicy: IfNotPresent
-        port: 80
-        restartPolicy: Always
+  container:
+    imageRepository: chankiyu22/likecoin-migration
+    imagePullPolicy: IfNotPresent
+    port: 80
+    restartPolicy: Always
 
-      service:
-        port: 80
+  service:
+    port: 80
 
-      resources: {}
+  resources: {}
 
 likenft:
   migration:
@@ -28,8 +26,7 @@ likenft:
       service:
         port: 80
 
-      resources:
-        {}
+      resources: {}
 
 migrationBackend:
   name: migration-backend
