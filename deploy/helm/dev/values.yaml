@@ -8,17 +8,15 @@ likecoinMigration:
       secretName: likecoin-migration.pandawork.com
       host: likecoin-migration.pandawork.com
 
-likenft:
-  migration:
-    frontend:
-      configFilePath: "dev/likenft/migration/frontend/config.json"
-      nginxConfigFilePath: "dev/likenft/migration/frontend/nginx/nginx.conf"
+likenftMigration:
+  configFilePath: "dev/likenft/migration/frontend/config.json"
+  nginxConfigFilePath: "dev/likenft/migration/frontend/nginx/nginx.conf"
 
-    ingress:
+  ingress:
+    host: likenft-migration.pandawork.com
+    tls:
+      secretName: likenft-migration.pandawork.com
       host: likenft-migration.pandawork.com
-      tls:
-        secretName: likenft-migration.pandawork.com
-        host: likenft-migration.pandawork.com
 
 migrationBackend:
   env:
