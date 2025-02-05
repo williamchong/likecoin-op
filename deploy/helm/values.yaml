@@ -1,50 +1,43 @@
-likecoin:
-  migration:
-    backend:
-      name: likecoin-migration-backend
+likecoinMigration:
+  name: likecoin-migration
 
-      container:
-        imageRepository: chankiyu22/likecoin-migration-backend
-        imagePullPolicy: IfNotPresent
-        port: 8091
+  container:
+    imageRepository: chankiyu22/likecoin-migration
+    imagePullPolicy: IfNotPresent
+    port: 80
+    restartPolicy: Always
 
-      service:
-        port: 80
+  service:
+    port: 80
 
-      resources:
-        {}
+  resources: {}
 
-    frontend:
-      name: likecoin-migration-frontend
+likenftMigration:
+  name: likenft-migration
 
-      container:
-        imageRepository: chankiyu22/likecoin-migration-frontend
-        imagePullPolicy: IfNotPresent
-        port: 80
-        restartPolicy: Always
+  container:
+    imageRepository: chankiyu22/likenft-migration
+    imagePullPolicy: IfNotPresent
+    port: 80
+    restartPolicy: Always
 
-      service:
-        port: 80
+  service:
+    port: 80
 
-      resources:
-        {}
+  resources: {}
 
-likenft:
-  migration:
-    frontend:
-      name: likenft-migration
+migrationBackend:
+  name: migration-backend
 
-      container:
-        imageRepository: chankiyu22/likenft-migration
-        imagePullPolicy: IfNotPresent
-        port: 80
-        restartPolicy: Always
+  container:
+    imageRepository: chankiyu22/like-migration-backend
+    imagePullPolicy: IfNotPresent
+    port: 8091
 
-      service:
-        port: 80
+  service:
+    port: 80
 
-      resources:
-        {}
+  resources: {}
 
 nginx:
   name: nginx

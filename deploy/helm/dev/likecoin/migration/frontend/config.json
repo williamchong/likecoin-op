@@ -4,5 +4,5 @@
   "cosmosDepositAddress": "like155s3xuruk2vnynda9gq6x9e7uzvut74654mc4d",
   "cosmosFeeAmount": 100000000,
   "cosmosFeeGas": 100000,
-  "apiBaseUri": "https://likecoin-migration.pandawork.com/api"
+  "apiBaseUri": "https://like-migration-api.pandawork.com"
 }

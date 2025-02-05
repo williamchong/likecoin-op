@@ -1,7 +1,7 @@
 package db
 
 import (
-	"github.com/likecoin/likecoin-migration-backend/pkg/model"
+	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
 func GetMigrationRecordByCosmosTxHash(

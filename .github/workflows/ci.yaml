@@ -39,7 +39,7 @@ jobs:
 
       - run: make -C likenft ci
 
-  likecoin-migrate-frontend:
+  likecoin-migration:
     runs-on: [ubuntu-latest]
 
     steps:
@@ -49,11 +49,11 @@ jobs:
         with:
           node-version: 20
 
-      - run: make -C likecoin-migration/frontend setup
+      - run: make -C likecoin-migration setup
 
-      - run: make -C likecoin-migration/frontend ci
+      - run: make -C likecoin-migration ci
 
-  likenft-migrate-frontend:
+  likenft-migrate:
     runs-on: [ubuntu-latest]
 
     steps:

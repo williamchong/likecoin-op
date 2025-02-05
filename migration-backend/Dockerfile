@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN update-ca-certificates
 
 # App
-COPY --from=stage1 /src/likecoin-migration-backend /usr/local/bin/
+COPY --from=stage1 /src/like-migration-backend /usr/local/bin/
 
 # Migration
 COPY --from=stage1 /go/bin/sql-migrate /usr/local/bin/
@@ -24,4 +24,4 @@ COPY --from=stage1 /src/migrations /app/migrations
 COPY --from=stage1 /src/dbconfig.yml /app/dbconfig.yml
 
 EXPOSE 8091
-CMD ["likecoin-migration-backend"]
+CMD ["like-migration-backend"]

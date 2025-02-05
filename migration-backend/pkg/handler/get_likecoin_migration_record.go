@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/likecoin/likecoin-migration-backend/pkg/logic"
+	"github.com/likecoin/like-migration-backend/pkg/logic"
 )
 
 type apiMigrationRecord struct {

@@ -1,30 +1,32 @@
-likecoin:
-  migration:
-    frontend:
-      configFilePath: "dev/likecoin/migration/frontend/config.json"
-      nginxConfigFilePath: "dev/likecoin/migration/frontend/nginx/nginx.conf"
+likecoinMigration:
+  configFilePath: "dev/likecoin/migration/frontend/config.json"
+  nginxConfigFilePath: "dev/likecoin/migration/frontend/nginx/nginx.conf"
 
-    backend:
-      env:
-        COSMOS_NODE_URL: https://like.rickmak.com/faucet
-        ROUTE_PREFIX: /api
-        ETH_NETWORK_PUBLIC_RPC_URL: https://sepolia.optimism.io
-        ETH_TOKEN_ADDRESS: "0x081DDCB0d10f85740c1C0aE8dF4E1c6F8e320cfD"
-
-    ingress:
+  ingress:
+    host: likecoin-migration.pandawork.com
+    tls:
+      secretName: likecoin-migration.pandawork.com
       host: likecoin-migration.pandawork.com
-      tls:
-        secretName: likecoin-migration.pandawork.com
-        host: likecoin-migration.pandawork.com
 
-likenft:
-  migration:
-    frontend:
-      configFilePath: "dev/likenft/migration/frontend/config.json"
-      nginxConfigFilePath: "dev/likenft/migration/frontend/nginx/nginx.conf"
+likenftMigration:
+  configFilePath: "dev/likenft/migration/frontend/config.json"
+  nginxConfigFilePath: "dev/likenft/migration/frontend/nginx/nginx.conf"
 
-    ingress:
+  ingress:
+    host: likenft-migration.pandawork.com
+    tls:
+      secretName: likenft-migration.pandawork.com
       host: likenft-migration.pandawork.com
-      tls:
-        secretName: likenft-migration.pandawork.com
-        host: likenft-migration.pandawork.com
+
+migrationBackend:
+  env:
+    COSMOS_NODE_URL: https://like.rickmak.com/faucet
+    ROUTE_PREFIX: ""
+    ETH_NETWORK_PUBLIC_RPC_URL: https://sepolia.optimism.io
+    ETH_TOKEN_ADDRESS: "0x081DDCB0d10f85740c1C0aE8dF4E1c6F8e320cfD"
+
+  ingress:
+    host: like-migration-api.pandawork.com
+    tls:
+      secretName: like-migration-api.pandawork.com
+      host: like-migration-api.pandawork.com

@@ -16,8 +16,8 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/likecoin/likecoin-migration-backend/pkg/cosmos/api"
-	"github.com/likecoin/likecoin-migration-backend/pkg/handler"
+	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
+	"github.com/likecoin/like-migration-backend/pkg/handler"
 )
 
 func prefixedRoute(prefix string, route string) string {

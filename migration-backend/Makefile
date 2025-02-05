@@ -1,6 +1,6 @@
 GIT_SHORT_HASH ?= $(shell git rev-parse --short=8 HEAD)
 TAG ?= $(GIT_SHORT_HASH)
-DEPLOY_DEV_DOCKER_IMAGE_NAME ?= chankiyu22/likecoin-migration-backend
+DEPLOY_DEV_DOCKER_IMAGE_NAME ?= chankiyu22/like-migration-backend
 DOCKER_BUILD_ARGS ?=
 
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
@@ -26,11 +26,11 @@ start:
 
 .PHONY: build
 build:
-	go build -o likecoin-migration-backend ./cmd/server
+	go build -o like-migration-backend ./cmd/server
 
 .PHONY: fmt
 fmt:
-	find ./cmd -name '*.go' -not -name 'wire_gen.go' -not -name '*_mock_test.go' | sort | xargs goimports -w -format-only -local github.com/likecoin/likecoin-migration-backend
+	find ./cmd -name '*.go' -not -name 'wire_gen.go' -not -name '*_mock_test.go' | sort | xargs goimports -w -format-only -local github.com/likecoin/like-migration-backend
 
 .PHONY: lint
 lint:
