@@ -2,11 +2,6 @@
 
 This repo contains the code for the migration program, from cosmos like to evm likecoin.
 
-## Folder overview
-
-- `backend`: the code for the backend
-- `frontend`: the code for the frontend
-
 ## Program flow
 
 ```mermaid
@@ -28,3 +23,17 @@ Note:
 
 - The migration program will paid for the gas fee of the evm transaction.
 - The destinated address of migrated LIKE will be redelegate across the validator for protecting the security of the chain.
+
+## Pre-requisite
+
+Node 20
+
+## Dev
+
+```bash
+$ make setup
+```
+
+```bash
+$ make dev
+```

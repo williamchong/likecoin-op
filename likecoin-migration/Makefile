@@ -1,6 +1,6 @@
 GIT_SHORT_HASH ?= $(shell git rev-parse --short=8 HEAD)
 TAG ?= $(GIT_SHORT_HASH)
-DEPLOY_DEV_DOCKER_IMAGE_NAME ?= chankiyu22/likecoin-migration-frontend
+DEPLOY_DEV_DOCKER_IMAGE_NAME ?= chankiyu22/likecoin-migration
 DOCKER_BUILD_ARGS ?=
 
 .PHONY: setup
