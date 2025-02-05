@@ -18,6 +18,7 @@ import (
 
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
+	"github.com/likecoin/like-migration-backend/pkg/handler/likenft"
 )
 
 func main() {
@@ -72,6 +73,10 @@ func main() {
 		Db:        db,
 		EthClient: client,
 	})
+	likeNFTRouter := likenft.LikeNFTRouter{
+		Db: db,
+	}
+	mainMux.Handle("/likenft/", http.StripPrefix("/likenft", likeNFTRouter.Router()))
 
 	routePrefixMux.Handle(fmt.Sprintf("%s/", envCfg.RoutePrefix), http.StripPrefix(envCfg.RoutePrefix, mainMux))
 
