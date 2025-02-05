@@ -17,6 +17,33 @@ $ npm run start
 $ npm run generate
 ```
 
+## Program flow
+
+```mermaid
+sequenceDiagram 
+    Browser->>Browser: Get user's cosmos address and/or LikerID
+    Browser->>Like.co: Get user's full LikerID info, by LikerID or cosmos address
+    Browser->>Browser: Get user's evm address
+    Browser->>Backend: Send the migration info, LikerID and evm address to backend
+    Backend->>Browser: Request user using cosmos wallet to signin
+    Browser->>Backend: Send the signed cosmos message to backend
+    Backend->>Backend: Verify the cosmos message
+    Backend->>Like.co: Pass on the signed cosmos message for LikerID migration
+    Backend->>Browser: Return the token for trigger LikeNFT drop on OP
+    Backend->>Browser: (Optional) Request user using EVM wallet do a personal sign, for verifying wallet ownership
+    Browser->>Cosmos: Querying the user's LikeNFTClass and LikeNFT
+    Browser->>Backend: Send the NFT migration info
+    Backend->>Cosmos: Verify the NFT migration info is valid.<br> (NFT ownership, not migrated before)
+    Backend->>EVM: Mint the NFT on OP
+    Backend->>Browser: Return the EVM TX hashes
+    Browser->>Browser: Show the migration result
+```
+
+## Note
+- How backend mint the NFT on OP is not a single TX, because it can be involve minting NFTClass. Details please refer to the [migration-backend](./migration-backend/README.md).
+
+## Frameworks
+
 For detailed explanation on how things work, check out the [documentation](https://nuxtjs.org).
 
 ## Special Directories
