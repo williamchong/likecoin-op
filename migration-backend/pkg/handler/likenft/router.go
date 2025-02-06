@@ -15,6 +15,7 @@ func (h *LikeNFTRouter) Router() *http.ServeMux {
 	router.Handle("POST /signing_message", &CreateSigningMessageHandler{
 		Db: h.Db,
 	})
+	router.Handle("POST /likerid/migration", &LikerIDMigrationHandler{})
 
 	return router
 }
