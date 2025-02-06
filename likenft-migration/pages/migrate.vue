@@ -43,7 +43,6 @@ import { getSignMessage } from '~/apis/getSignMessage';
 import { getUser } from '~/apis/getUser';
 import { migrateEVMAddress } from '~/apis/migrateEVMAddress';
 import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network';
-import { Config } from '~/models/config';
 
 async function getEthereumAccount(
   ethereum: Eip1193Provider
@@ -77,7 +76,6 @@ interface Data {
   likerID: string | null;
   evmWalletAddress: string | null;
   isLoading: boolean;
-  connector: LikeCoinWalletConnector | null;
 }
 
 export default Vue.extend({
@@ -87,30 +85,15 @@ export default Vue.extend({
       likerID: null,
       evmWalletAddress: null,
       isLoading: false,
-      connector: null,
     };
   },
 
   computed: {
-    config() {
-      return this.$store.state.config.config;
-    },
-  },
-
-  watch: {
-    config(newConfig: Config) {
-      this.connector = new LikeCoinWalletConnector(
-        LIKECOIN_WALLET_CONNECTOR_CONFIG(newConfig.isTestnet)
+    connector() {
+      return new LikeCoinWalletConnector(
+        LIKECOIN_WALLET_CONNECTOR_CONFIG(this.$appConfig.isTestnet)
       );
     },
-  },
-
-  mounted() {
-    if (this.config != null) {
-      this.connector = new LikeCoinWalletConnector(
-        LIKECOIN_WALLET_CONNECTOR_CONFIG(this.config.isTestnet)
-      );
-    }
   },
 
   methods: {
