@@ -94,6 +94,9 @@ export default Vue.extend({
         LIKECOIN_WALLET_CONNECTOR_CONFIG(this.$appConfig.isTestnet)
       );
     },
+    getSignMessage() {
+      return getSignMessage(this.$apiClient);
+    },
   },
 
   methods: {
@@ -161,12 +164,13 @@ export default Vue.extend({
       }
       const u = await getUser(s.data.cosmosWalletAddress);
       if (u.evm_address == null) {
-        const signMessage = await getSignMessage(
-          this.likerID,
-          s.data.cosmosWalletAddress
-        );
+        const signMessage = await this.getSignMessage({
+          cosmos_address: s.data.cosmosWalletAddress,
+          eth_address: s.data.evmWalletAddress,
+          liker_id: this.likerID,
+        });
         const signedMessage = await signEthereumMessage(
-          signMessage,
+          signMessage.message,
           window.ethereum,
           s.data.evmWalletAddress
         );
