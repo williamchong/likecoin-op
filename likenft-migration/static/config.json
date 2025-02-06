@@ -1,3 +1,4 @@
 {
-  "isTestnet": true
+  "isTestnet": true,
+  "apiBaseURL": "http://localhost:8091"
 }
