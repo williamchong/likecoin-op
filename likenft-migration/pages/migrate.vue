@@ -41,7 +41,7 @@ import { z } from 'zod';
 
 import { getSignMessage } from '~/apis/getSignMessage';
 import { getUser } from '~/apis/getUser';
-import { migrateEVMAddress } from '~/apis/migrateEVMAddress';
+import { makeMigrateLikerIDAPI } from '~/apis/migrateLikerID';
 import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network';
 
 async function getEthereumAccount(
@@ -96,6 +96,9 @@ export default Vue.extend({
     },
     getSignMessage() {
       return getSignMessage(this.$apiClient);
+    },
+    migrateLikerID() {
+      return makeMigrateLikerIDAPI(this.$apiClient);
     },
   },
 
@@ -169,18 +172,40 @@ export default Vue.extend({
           eth_address: s.data.evmWalletAddress,
           liker_id: this.likerID,
         });
+        const connection = await this.connector.initIfNecessary();
+        if (connection == null) {
+          alert('cannot get wallet connector connection');
+          return;
+        }
+        const {
+          accounts: [account],
+          offlineSigner,
+        } = connection;
+
+        if (!offlineSigner.signArbitrary) {
+          alert('signArbitrary not supported');
+          return;
+        }
+        const result = await offlineSigner.signArbitrary(
+          this.connector.options.chainId,
+          account.address,
+          signMessage.message
+        );
+        const cosmosSignature = result.signature;
         const signedMessage = await signEthereumMessage(
           signMessage.message,
           window.ethereum,
           s.data.evmWalletAddress
         );
-        await migrateEVMAddress(
-          s.data.cosmosWalletAddress,
-          s.data.evmWalletAddress,
-          this.likerID,
-          signedMessage,
-          'some-nonce'
-        );
+
+        await this.migrateLikerID({
+          cosmos_pub_key: result.pub_key.value,
+          cosmos_signature: cosmosSignature,
+          eth_address: s.data.evmWalletAddress,
+          eth_signature: signedMessage,
+          like_id: this.likerID,
+          signing_message: signMessage.message,
+        });
       }
 
       this.$router.push(`/migration-preview/${s.data.cosmosWalletAddress}`);
