@@ -26,11 +26,11 @@ sequenceDiagram
     Browser->>Browser: Get user's evm address
     Browser->>Backend: Send the migration info, LikerID and evm address to backend
     Backend->>Browser: Request user using cosmos wallet to signin
-    Browser->>Backend: Send the signed cosmos message to backend
-    Backend->>Backend: Verify the cosmos message
-    Backend->>Like.co: Pass on the signed cosmos message for LikerID migration
-    Backend->>Browser: Return the token for trigger LikeNFT drop on OP
     Backend->>Browser: (Optional) Request user using EVM wallet do a personal sign, for verifying wallet ownership
+    Browser->>Backend: Send the signed cosmos message and EVM personal sign to backend
+    Backend->>Backend: Verify the cosmos message and EVM personal signt
+    Backend->>Like.co: Pass on the signed cosmos message and EVM personal sign for LikerID migration
+    Backend->>Browser: Return the token for trigger LikeNFT drop on OP
     Browser->>Cosmos: Querying the user's LikeNFTClass and LikeNFT
     Browser->>Backend: Send the NFT migration info
     Backend->>Cosmos: Verify the NFT migration info is valid.<br> (NFT ownership, not migrated before)
