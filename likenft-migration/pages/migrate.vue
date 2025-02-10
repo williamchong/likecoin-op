@@ -41,9 +41,8 @@ import { z } from 'zod';
 
 import { getSignMessage } from '~/apis/getSignMessage';
 import { getUser } from '~/apis/getUser';
-import { migrateEVMAddress } from '~/apis/migrateEVMAddress';
+import { makeMigrateLikerIDAPI } from '~/apis/migrateLikerID';
 import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network';
-import { Config } from '~/models/config';
 
 async function getEthereumAccount(
   ethereum: Eip1193Provider
@@ -77,7 +76,6 @@ interface Data {
   likerID: string | null;
   evmWalletAddress: string | null;
   isLoading: boolean;
-  connector: LikeCoinWalletConnector | null;
 }
 
 export default Vue.extend({
@@ -87,30 +85,21 @@ export default Vue.extend({
       likerID: null,
       evmWalletAddress: null,
       isLoading: false,
-      connector: null,
     };
   },
 
   computed: {
-    config() {
-      return this.$store.state.config.config;
-    },
-  },
-
-  watch: {
-    config(newConfig: Config) {
-      this.connector = new LikeCoinWalletConnector(
-        LIKECOIN_WALLET_CONNECTOR_CONFIG(newConfig.isTestnet)
+    connector() {
+      return new LikeCoinWalletConnector(
+        LIKECOIN_WALLET_CONNECTOR_CONFIG(this.$appConfig.isTestnet)
       );
     },
-  },
-
-  mounted() {
-    if (this.config != null) {
-      this.connector = new LikeCoinWalletConnector(
-        LIKECOIN_WALLET_CONNECTOR_CONFIG(this.config.isTestnet)
-      );
-    }
+    getSignMessage() {
+      return getSignMessage(this.$apiClient);
+    },
+    migrateLikerID() {
+      return makeMigrateLikerIDAPI(this.$apiClient);
+    },
   },
 
   methods: {
@@ -178,22 +167,45 @@ export default Vue.extend({
       }
       const u = await getUser(s.data.cosmosWalletAddress);
       if (u.evm_address == null) {
-        const signMessage = await getSignMessage(
-          this.likerID,
-          s.data.cosmosWalletAddress
+        const signMessage = await this.getSignMessage({
+          cosmos_address: s.data.cosmosWalletAddress,
+          eth_address: s.data.evmWalletAddress,
+          liker_id: this.likerID,
+        });
+        const connection = await this.connector.initIfNecessary();
+        if (connection == null) {
+          alert('cannot get wallet connector connection');
+          return;
+        }
+        const {
+          accounts: [account],
+          offlineSigner,
+        } = connection;
+
+        if (!offlineSigner.signArbitrary) {
+          alert('signArbitrary not supported');
+          return;
+        }
+        const result = await offlineSigner.signArbitrary(
+          this.connector.options.chainId,
+          account.address,
+          signMessage.message
         );
+        const cosmosSignature = result.signature;
         const signedMessage = await signEthereumMessage(
-          signMessage,
+          signMessage.message,
           window.ethereum,
           s.data.evmWalletAddress
         );
-        await migrateEVMAddress(
-          s.data.cosmosWalletAddress,
-          s.data.evmWalletAddress,
-          this.likerID,
-          signedMessage,
-          'some-nonce'
-        );
+
+        await this.migrateLikerID({
+          cosmos_pub_key: result.pub_key.value,
+          cosmos_signature: cosmosSignature,
+          eth_address: s.data.evmWalletAddress,
+          eth_signature: signedMessage,
+          like_id: this.likerID,
+          signing_message: signMessage.message,
+        });
       }
 
       this.$router.push(`/migration-preview/${s.data.cosmosWalletAddress}`);
