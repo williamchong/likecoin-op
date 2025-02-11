@@ -1,6 +1,6 @@
 # Likecoin Migration
 
-This repo contains the code for the migration program, from cosmos like to evm likecoin.
+This repo contains the code for the migration UI, from cosmos like to evm likecoin.
 
 ## Program flow
 
@@ -21,8 +21,7 @@ sequenceDiagram
 
 Note:
 
-- The migration program will paid for the gas fee of the evm transaction.
-- The destinated address of migrated LIKE will be redelegate across the validator for protecting the security of the chain.
+- Backend, please refer to the [migration-backend](../migration-backend/README.md).
 
 ## Pre-requisite
 
