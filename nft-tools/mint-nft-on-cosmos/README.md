@@ -1,5 +1,7 @@
 <div align="center">
 
+> This project is copied from [https://github.com/likecoin/iscn-nft-tools/tree/6b90e2d8e3abaf7090dad49ffb84d4180e94971e/mint-nft](https://github.com/likecoin/iscn-nft-tools/tree/6b90e2d8e3abaf7090dad49ffb84d4180e94971e/mint-nft)
+
 ![project logo](https://8565014-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-LL4mdaVjNgL6A1--PV0-1972196547%2Fuploads%2Fgit-blob-67a9bfa664bab32a8f64e5239545677cc8c98a26%2FLCF001-key%20visual%20v4.1-1.jpg?alt=media)
 
 # mint NFT
