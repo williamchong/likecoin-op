@@ -157,6 +157,13 @@ async function createRoyaltyConfig(classId, iscnId, signingClient, account) {
   }
 }
 
+function chunk(array, size) {
+  const chunks = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+  return chunks;
+}
 async function mintNFTsFromJSON(classId, nftCount, signingClient, account) {
   console.log(
     'Minting NFTs - Reading default data from ./data/nfts_default.json...',
@@ -174,38 +181,49 @@ async function mintNFTsFromJSON(classId, nftCount, signingClient, account) {
     throw new Error('NFT data length and nft count not match');
   const defaultURI = defaultData.uri;
   const defaultMetadata = defaultData.metadata;
-  const nfts = [...Array(nftCount).keys()].map((i) => {
-    const {
-      nftId,
-      uri: dataUri,
-      image: dataImage,
-      metadata: dataMetadataString,
-      ...otherData
-    } = listData[i];
-    const dataMetadata = JSON.parse(dataMetadataString || '{}');
-    const data = { ...defaultMetadata, ...dataMetadata };
-    if (dataImage) data.image = dataImage;
-    Object.entries(otherData).forEach(([key, value]) => {
-      if (value) {
-        try {
-          data[key] = JSON.parse(value);
-        } catch (err) {
-          data[key] = value;
+  const chunks = chunk([...Array(nftCount).keys()], 10);
+  const nfts = [];
+  for (const _chunk of chunks) {
+    const nftsChunk = _chunk.map((i) => {
+      const {
+        nftId,
+        uri: dataUri,
+        image: dataImage,
+        metadata: dataMetadataString,
+        ...otherData
+      } = listData[i];
+      const dataMetadata = JSON.parse(dataMetadataString || '{}');
+      const data = { ...defaultMetadata, ...dataMetadata };
+      if (dataImage) data.image = dataImage;
+      Object.entries(otherData).forEach(([key, value]) => {
+        if (value) {
+          try {
+            data[key] = JSON.parse(value);
+          } catch (err) {
+            data[key] = value;
+          }
         }
-      }
+      });
+      const id = nftId || `nft-${uuidv4()}`;
+      let uri = dataUri || defaultURI || '';
+      const isUriHttp = uri && uri.startsWith('https://');
+      if (isUriHttp)
+        uri = addParamToUrl(uri, { class_id: classId, nft_id: id });
+      return {
+        id,
+        uri,
+        metadata: data,
+      };
     });
-    const id = nftId || `nft-${uuidv4()}`;
-    let uri = dataUri || defaultURI || '';
-    const isUriHttp = uri && uri.startsWith('https://');
-    if (isUriHttp) uri = addParamToUrl(uri, { class_id: classId, nft_id: id });
-    return {
-      id,
-      uri,
-      metadata: data,
-    };
-  });
-  const res = await signingClient.mintNFTs(account.address, classId, nfts);
-  console.log(`Minting NFTs - Completed ${res.transactionHash}`);
+    console.log(`Minting NFTs - ${_chunk}`);
+    const res = await signingClient.mintNFTs(
+      account.address,
+      classId,
+      nftsChunk,
+    );
+    console.log(`Minting NFTs - Completed ${res.transactionHash}`);
+    nfts.push(...nftsChunk);
+  }
   const csvData = stringify(nfts, { header: true });
   writeFileSync(path.join(__dirname, './data/nfts_output.csv'), csvData);
 }
