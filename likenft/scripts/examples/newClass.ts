@@ -8,7 +8,7 @@ async function newClass() {
     signer,
   });
 
-  const likeNFT = LikeNFT.attach(process.env.PROXY_ADDRESS!);
+  const likeNFT = LikeNFT.attach(process.env.ERC721_PROXY_ADDRESS!);
 
   const handleNewClass: Listener = (id, parameters, event) => {
     event.removeListener();

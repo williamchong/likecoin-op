@@ -7,7 +7,7 @@ async function mintNFT() {
     signer,
   });
 
-  const likeNFT = LikeNFT.attach(process.env.PROXY_ADDRESS!);
+  const likeNFT = LikeNFT.attach(process.env.ERC721_PROXY_ADDRESS!);
 
   const tx = await likeNFT.mintNFT({
     creator: signer.address,
