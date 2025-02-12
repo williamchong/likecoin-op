@@ -8,12 +8,19 @@
       </primary-button>
       <p>{{ $t('migrate.cosmos-wallet-address', { cosmosWalletAddress }) }}</p>
       <p>{{ $t('migrate.liker-id', { likerID }) }}</p>
-      <primary-button @click="handleConnectEVMWalletClick">
+      <primary-button
+        v-if="!isEthAddressMigrated"
+        @click="handleConnectEVMWalletClick"
+      >
         {{ $t('migrate.connect-evm-wallet') }}
       </primary-button>
       <p>{{ $t('migrate.evm-wallet-address', { evmWalletAddress }) }}</p>
       <primary-button
-        v-if="cosmosWalletAddress != null && evmWalletAddress != null"
+        v-if="
+          !isEthAddressMigrated &&
+          cosmosWalletAddress != null &&
+          evmWalletAddress != null
+        "
         @click="handleMigrateClick"
       >
         {{ $t('migrate.migrate') }}
@@ -40,7 +47,7 @@ import Web3 from 'web3';
 import { z } from 'zod';
 
 import { getSignMessage } from '~/apis/getSignMessage';
-import { getUser } from '~/apis/getUser';
+import { makeGetUserProfileAPI } from '~/apis/getUserProfile';
 import { makeMigrateLikerIDAPI } from '~/apis/migrateLikerID';
 import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network';
 
@@ -75,6 +82,7 @@ interface Data {
   cosmosWalletAddress: string | null;
   likerID: string | null;
   evmWalletAddress: string | null;
+  isEthAddressMigrated: boolean;
   isLoading: boolean;
 }
 
@@ -84,6 +92,7 @@ export default Vue.extend({
       cosmosWalletAddress: null,
       likerID: null,
       evmWalletAddress: null,
+      isEthAddressMigrated: false,
       isLoading: false,
     };
   },
@@ -118,12 +127,18 @@ export default Vue.extend({
       } = connection;
       this.cosmosWalletAddress = account.address;
 
-      this.isLoading = true;
-      try {
-        const user = await getUser(this.cosmosWalletAddress);
-        this.likerID = user.liker_id;
-      } finally {
-        this.isLoading = false;
+      if (this.cosmosWalletAddress != null) {
+        this.isLoading = true;
+        try {
+          const userProfile = await makeGetUserProfileAPI(
+            this.cosmosWalletAddress
+          )(this.$apiClient)();
+          this.likerID = userProfile.user_profile.liker_id;
+          this.evmWalletAddress = userProfile.user_profile.eth_wallet_address;
+          this.isEthAddressMigrated = this.evmWalletAddress != null;
+        } finally {
+          this.isLoading = false;
+        }
       }
 
       this.connector?.once('account_change', this.handleAccountChange);
@@ -165,8 +180,7 @@ export default Vue.extend({
         alert('Please install metamask extension');
         return;
       }
-      const u = await getUser(s.data.cosmosWalletAddress);
-      if (u.evm_address == null) {
+      if (!this.isEthAddressMigrated) {
         const signMessage = await this.getSignMessage({
           cosmos_address: s.data.cosmosWalletAddress,
           eth_address: s.data.evmWalletAddress,
