@@ -44,7 +44,7 @@ contract Class is ERC721A, Ownable {
         MsgNewClass memory msgNewClass
     )
         ERC721A(msgNewClass.input.name, msgNewClass.input.symbol)
-        Ownable(msg.sender)
+        Ownable(msgNewClass.creator)
     {
         ClassStorage storage $ = _getClassStorage();
         $.name = msgNewClass.input.name;
