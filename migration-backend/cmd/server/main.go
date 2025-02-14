@@ -61,7 +61,7 @@ func main() {
 		},
 		NodeURL: envCfg.CosmosNodeUrl,
 	}
-	likerlandAPI := &likecoin_api.LikecoinAPI{
+	likecoinAPI := &likecoin_api.LikecoinAPI{
 		LikecoinAPIUrlBase: envCfg.LikecoinAPIUrlBase,
 		HTTPClient: &http.Client{
 			Timeout: 5 * time.Second,
@@ -88,7 +88,7 @@ func main() {
 
 	userRouter := user.UserRouter{
 		Db:          db,
-		LikecoinAPI: likerlandAPI,
+		LikecoinAPI: likecoinAPI,
 	}
 	mainMux.Handle("/user/", http.StripPrefix("/user", userRouter.Router()))
 
