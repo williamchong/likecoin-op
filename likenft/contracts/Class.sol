@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC721A} from "erc721a/contracts/ERC721A.sol";
 
@@ -9,10 +10,11 @@ import {ClassInput} from "../types/ClassInput.sol";
 import {MsgNewClass} from "../types/msgs/MsgNewClass.sol";
 import {NFTData} from "../types/NFTData.sol";
 
+error ErrUnauthorized();
 error ErrNftNoSupply();
 error ErrCannotUpdateClassWithMintedTokens();
 
-contract Class is ERC721A, Ownable {
+contract Class is ERC721A, Ownable, AccessControl {
     // keccak256(abi.encode(uint256(keccak256("likenft.storage.class")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant CLASS_DATA_STORAGE =
         0x99391ccf5d97dbb7711a73831d943712d1774ca037a259af20891dc6f0d9f200;
@@ -26,6 +28,7 @@ contract Class is ERC721A, Ownable {
     mapping(uint256 => NFTData) private nftDataMap;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
 
     uint256 public tokenId;
 
@@ -40,6 +43,20 @@ contract Class is ERC721A, Ownable {
         string memo
     );
 
+    modifier onlyOwnerOrMinter() {
+        if (owner() != msg.sender && !hasRole(MINTER_ROLE, msg.sender)) {
+            revert ErrUnauthorized();
+        }
+        _;
+    }
+
+    modifier onlyOwnerOrUpdater() {
+        if (owner() != msg.sender && !hasRole(UPDATER_ROLE, msg.sender)) {
+            revert ErrUnauthorized();
+        }
+        _;
+    }
+
     constructor(
         MsgNewClass memory msgNewClass
     )
@@ -51,9 +68,19 @@ contract Class is ERC721A, Ownable {
         $.symbol = msgNewClass.input.symbol;
         $.data.metadata = msgNewClass.input.metadata;
         $.data.config = msgNewClass.input.config;
+
+        // The contract creator. Assume a likenft meta contract
+        _grantRole(MINTER_ROLE, msg.sender);
+        _grantRole(UPDATER_ROLE, msg.sender);
     }
 
-    function update(ClassInput memory classInput) public onlyOwner {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC721A, AccessControl) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    function update(ClassInput memory classInput) public onlyOwnerOrUpdater {
         ClassStorage storage $ = _getClassStorage();
         $.name = classInput.name;
         $.symbol = classInput.symbol;
@@ -64,7 +91,7 @@ contract Class is ERC721A, Ownable {
     function mint(
         address to,
         string[] calldata metadata_list
-    ) external onlyOwner {
+    ) external onlyOwnerOrMinter {
         ClassStorage storage $ = _getClassStorage();
 
         uint256 nextTokenId = _nextTokenId();
