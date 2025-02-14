@@ -23,8 +23,10 @@ contract LikeNFT is
 {
     struct LikeNFTStorage {
         address minter;
-        mapping(address creator => mapping(address class_id => Class)) creatorClassIdClassMapping;
+        // A storage slot pointing to a depreciated storage when upgrade
+        mapping(address creator => mapping(address class_id => Class)) deprecated_creatorClassIdClassMapping;
         Class[] classes;
+        mapping(address class_id => Class) classIdClassMapping;
     }
     // keccak256(abi.encode(uint256(keccak256("likenft.storage")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant DATA_STORAGE =
@@ -63,7 +65,7 @@ contract LikeNFT is
         Class class = new Class(msgNewClass);
         address id = address(class);
         $.classes.push(class);
-        $.creatorClassIdClassMapping[msgNewClass.creator][id] = class;
+        $.classIdClassMapping[id] = class;
         emit NewClass(id, msgNewClass);
     }
 
@@ -71,9 +73,7 @@ contract LikeNFT is
         MsgUpdateClass memory msgUpdateClass
     ) public whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
-        Class class = $.creatorClassIdClassMapping[msgUpdateClass.creator][
-            msgUpdateClass.class_id
-        ];
+        Class class = $.classIdClassMapping[msgUpdateClass.class_id];
         if (address(class) == address(0)) {
             revert ErrNftClassNotFound();
         }
@@ -82,9 +82,7 @@ contract LikeNFT is
 
     function mintNFT(MsgMintNFT calldata msgMintNFT) external whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
-        Class class = $.creatorClassIdClassMapping[msgMintNFT.creator][
-            msgMintNFT.class_id
-        ];
+        Class class = $.classIdClassMapping[msgMintNFT.class_id];
         if (address(class) == address(0)) {
             revert ErrNftClassNotFound();
         }
@@ -95,9 +93,7 @@ contract LikeNFT is
 
     function mintNFTs(MsgMintNFTs calldata msgMintNFTs) external whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
-        Class class = $.creatorClassIdClassMapping[msgMintNFTs.creator][
-            msgMintNFTs.class_id
-        ];
+        Class class = $.classIdClassMapping[msgMintNFTs.class_id];
         if (address(class) == address(0)) {
             revert ErrNftClassNotFound();
         }
