@@ -34,7 +34,7 @@ async function newClass() {
         collaborators: [],
       }),
       config: {
-        max_supply: 10,
+        max_supply: 0,
       },
     },
   });
