@@ -13,7 +13,7 @@ import (
 )
 
 type GetMigrationPreviewResponseBody struct {
-	NFTSnapshot      *api_model.LikeNFTAssetSnapshot `json:"nft_snapshot,omitempty"`
+	Preview          *api_model.LikeNFTAssetSnapshot `json:"preview,omitempty"`
 	ErrorDescription string                          `json:"error_description,omitempty"`
 }
 
@@ -40,7 +40,7 @@ func (h *GetMigrationPreviewHandler) ServeHTTP(w http.ResponseWriter, r *http.Re
 	}
 
 	handler.SendJSON(w, http.StatusOK, &GetMigrationPreviewResponseBody{
-		NFTSnapshot: snapshot,
+		Preview: snapshot,
 	})
 }
 
