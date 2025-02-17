@@ -20,10 +20,11 @@ likenftMigration:
 
 migrationBackend:
   env:
-    COSMOS_NODE_URL: https://like.rickmak.com/faucet
+    COSMOS_NODE_URL: https://node.testnet.like.co
     ROUTE_PREFIX: ""
     ETH_NETWORK_PUBLIC_RPC_URL: https://sepolia.optimism.io
     ETH_TOKEN_ADDRESS: "0x081DDCB0d10f85740c1C0aE8dF4E1c6F8e320cfD"
+    LIKECOIN_API_URL_BASE: https://api.rinkeby.like.co
 
   ingress:
     host: like-migration-api.pandawork.com

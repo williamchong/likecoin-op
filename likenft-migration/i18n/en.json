@@ -3,11 +3,16 @@
     "get-started": "Get Started"
   },
   "migrate": {
+    "classes": "Books",
     "connect-cosmos-wallet": "Connect cosmos wallet",
     "connect-evm-wallet": "Connect evm wallet",
     "cosmos-wallet-address": "Cosmos wallet address: {cosmosWalletAddress}",
     "evm-wallet-address": "EVM wallet address: {evmWalletAddress}",
     "liker-id": "Liker ID: {likerID}",
-    "migrate": "Migrate"
+    "migrate-assets": "Migrate Assets",
+    "migrate-likerid": "Migrate LikerID",
+    "nfts": "NFTs",
+    "preview": "Migration Preview",
+    "reload-preview": "Reload Preview"
   }
 }
