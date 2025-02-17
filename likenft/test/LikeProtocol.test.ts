@@ -20,6 +20,7 @@ describe("LikeNFT", () => {
       },
     );
     const deployment = await likeNFT.waitForDeployment();
+    this.deployment = deployment;
     this.contractAddress = await deployment.getAddress();
   });
 
@@ -63,6 +64,7 @@ describe("LikeNFT", () => {
     await expect(likeNFTOwnerSigner.unpause()).to.be.not.rejected;
     await expect(classOperation()).to.be.not.rejected;
   });
+
   it("should be able to create new class", async function () {
     const LikeNFTOwnerSigner = await ethers.getContractFactory("LikeNFT", {
       signer: this.ownerSigner,
@@ -96,6 +98,31 @@ describe("LikeNFT", () => {
     };
 
     await expect(newClass()).to.be.not.rejected;
+    await expect(newClass()).to.be.not.rejected;
+  });
+
+  it("should be allow everyone to create new class", async function () {
+    const likeNFTSigner = this.deployment.attach(this.signer1.address);
+
+    const newClass = async () => {
+      await likeNFTSigner
+        .newClass({
+        creator: this.signer1,
+        input: {
+            name: "My Book",
+            symbol: "KOOB",
+            metadata: JSON.stringify({
+            name: "Random by somone",
+            symbol: "No data",
+            }),
+            config: {
+            max_supply: 10,
+            },
+        },
+        })
+        .then((tx) => tx.wait());
+    };
+
     await expect(newClass()).to.be.not.rejected;
   });
 });
