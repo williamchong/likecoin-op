@@ -21,10 +21,62 @@
           cosmosWalletAddress != null &&
           evmWalletAddress != null
         "
-        @click="handleMigrateClick"
+        @click="handleMigrateLikerIDClick"
       >
-        {{ $t('migrate.migrate') }}
+        {{ $t('migrate.migrate-likerid') }}
       </primary-button>
+      <div v-if="migrationPreview" class="w-full">
+        <h2 class="text-[32px] font-bold">{{ $t('migrate.preview') }}</h2>
+        <div
+          v-if="
+            migrationPreview.status === 'init' ||
+            migrationPreview.status === 'in_progress'
+          "
+        >
+          Loading...
+        </div>
+        <div class="max-h-40 overflow-auto">
+          <div v-if="migrationPreview.classes.length > 0">
+            <h3 class="text-[20px]">{{ $t('migrate.classes') }}</h3>
+            <ol class="list-decimal pl-10">
+              <li
+                v-for="c in migrationPreview.classes"
+                :key="c.cosmos_class_id"
+              >
+                <a :href="getLikerlandUrlForClass(c)">{{ c.name }}</a>
+              </li>
+            </ol>
+          </div>
+          <div v-if="migrationPreview.nfts.length > 0">
+            <h3 class="text-[20px]">{{ $t('migrate.nfts') }}</h3>
+            <ol class="list-decimal pl-10">
+              <li
+                v-for="n in migrationPreview.nfts"
+                :key="n.cosmos_class_id + '/' + n.cosmos_nft_id"
+              >
+                <a :href="getLikerlandUrlForNFT(n)"
+                  >{{ n.name }}({{ n.cosmos_nft_id }})</a
+                >
+              </li>
+            </ol>
+          </div>
+        </div>
+        <primary-button
+          v-if="
+            migrationPreview.status === 'completed' ||
+            migrationPreview.status === 'failed'
+          "
+          class="mt-8"
+          @click="handleReloadMigrationPreview"
+          >{{ $t('migrate.reload-preview') }}</primary-button
+        >
+        <primary-button
+          v-if="migrationPreview.status === 'completed'"
+          class="mt-8"
+          @click="handleMigrateAssetsClick"
+          >{{ $t('migrate.migrate-assets') }}</primary-button
+        >
+      </div>
     </main>
     <div
       v-if="isLoading"
@@ -41,14 +93,22 @@ import {
   LikeCoinWalletConnectorMethodType,
   LikeCoinWalletConnectorSession,
 } from '@likecoin/wallet-connector';
+import { isAxiosError } from 'axios';
 import { Eip1193Provider } from 'ethers';
 import Vue from 'vue';
 import Web3 from 'web3';
 import { z } from 'zod';
 
+import { makeCreateMigrationPreviewAPI } from '~/apis/createMigrationPreview';
+import { makeGetMigrationPreviewAPI } from '~/apis/getMigrationPreview';
 import { getSignMessage } from '~/apis/getSignMessage';
 import { makeGetUserProfileAPI } from '~/apis/getUserProfile';
 import { makeMigrateLikerIDAPI } from '~/apis/migrateLikerID';
+import {
+  LikeNFTAssetSnapshot,
+  LikeNFTAssetSnapshotClass,
+  LikeNFTAssetSnapshotNFT,
+} from '~/apis/models/likenftAssetSnapshot';
 import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network';
 
 async function getEthereumAccount(
@@ -83,7 +143,9 @@ interface Data {
   likerID: string | null;
   evmWalletAddress: string | null;
   isEthAddressMigrated: boolean;
+  migrationPreview: LikeNFTAssetSnapshot | null;
   isLoading: boolean;
+  migrationPreviewFetchTimeout: ReturnType<typeof setTimeout> | null;
 }
 
 export default Vue.extend({
@@ -93,6 +155,8 @@ export default Vue.extend({
       likerID: null,
       evmWalletAddress: null,
       isEthAddressMigrated: false,
+      migrationPreview: null,
+      migrationPreviewFetchTimeout: null,
       isLoading: false,
     };
   },
@@ -111,6 +175,33 @@ export default Vue.extend({
     },
   },
 
+  watch: {
+    migrationPreview(migrationPreview: LikeNFTAssetSnapshot | null) {
+      if (this.migrationPreviewFetchTimeout != null) {
+        clearTimeout(this.migrationPreviewFetchTimeout);
+        this.migrationPreviewFetchTimeout = null;
+      }
+      if (migrationPreview == null) {
+        return;
+      }
+      if (
+        migrationPreview.status === 'init' ||
+        migrationPreview.status === 'in_progress'
+      ) {
+        this.migrationPreviewFetchTimeout = setTimeout(async () => {
+          if (this.cosmosWalletAddress == null) {
+            return;
+          }
+          const migrationPreview = await this.fetchMigrationPreview(
+            this.cosmosWalletAddress
+          );
+          this.migrationPreviewFetchTimeout = null;
+          this.migrationPreview = migrationPreview;
+        }, 1000);
+      }
+    },
+  },
+
   methods: {
     async handleConnectCosmosWalletClick() {
       const connection =
@@ -122,6 +213,9 @@ export default Vue.extend({
       connection: LikeCoinWalletConnectorSession | undefined
     ) {
       if (!connection) return;
+
+      this.migrationPreview = null;
+
       const {
         accounts: [account],
       } = connection;
@@ -136,6 +230,18 @@ export default Vue.extend({
           this.likerID = userProfile.user_profile.liker_id;
           this.evmWalletAddress = userProfile.user_profile.eth_wallet_address;
           this.isEthAddressMigrated = this.evmWalletAddress != null;
+          if (this.isEthAddressMigrated) {
+            // TODO: check if migration exists
+            let migrationPreview = await this.fetchMigrationPreview(
+              this.cosmosWalletAddress
+            );
+            if (migrationPreview == null) {
+              migrationPreview = await this.createMigrationPreview(
+                this.cosmosWalletAddress
+              );
+            }
+            this.migrationPreview = migrationPreview;
+          }
         } finally {
           this.isLoading = false;
         }
@@ -157,6 +263,17 @@ export default Vue.extend({
       }
       try {
         this.evmWalletAddress = await getEthereumAccount(window.ethereum);
+        if (this.cosmosWalletAddress != null) {
+          let migrationPreview = await this.fetchMigrationPreview(
+            this.cosmosWalletAddress
+          );
+          if (migrationPreview == null) {
+            migrationPreview = await this.createMigrationPreview(
+              this.cosmosWalletAddress
+            );
+          }
+          this.migrationPreview = migrationPreview;
+        }
       } catch (e) {
         console.error(e);
       } finally {
@@ -164,7 +281,7 @@ export default Vue.extend({
       }
     },
 
-    async handleMigrateClick() {
+    async handleMigrateLikerIDClick() {
       const S = z.object({
         cosmosWalletAddress: z.string(),
         evmWalletAddress: z.string(),
@@ -221,8 +338,61 @@ export default Vue.extend({
           signing_message: signMessage.message,
         });
       }
+    },
 
-      this.$router.push(`/migration-preview/${s.data.cosmosWalletAddress}`);
+    async fetchMigrationPreview(cosmosWalletAddress: string) {
+      try {
+        const migrationResponse = await makeGetMigrationPreviewAPI(
+          cosmosWalletAddress
+        )(this.$apiClient)();
+        return migrationResponse.preview;
+      } catch (e) {
+        if (isAxiosError(e)) {
+          if (e.status === 404) {
+            return null;
+          }
+        }
+        throw e;
+      }
+    },
+
+    async createMigrationPreview(cosmosWalletAddress: string) {
+      const migrationResponse = await makeCreateMigrationPreviewAPI(
+        this.$apiClient
+      )({ cosmos_address: cosmosWalletAddress });
+      return migrationResponse.preview;
+    },
+
+    async handleReloadMigrationPreview() {
+      if (this.cosmosWalletAddress == null) {
+        return;
+      }
+      const migrationPreview = await this.createMigrationPreview(
+        this.cosmosWalletAddress
+      );
+      this.migrationPreview = migrationPreview;
+    },
+
+    handleMigrateAssetsClick() {
+      if (this.migrationPreview == null) {
+        return;
+      }
+      if (this.cosmosWalletAddress == null || this.evmWalletAddress == null) {
+        alert('Please connect cosmos wallet and evm wallet');
+        return;
+      }
+      // TODO
+      alert(
+        `TODO: call migrationAssetAPI(${this.migrationPreview.id}, ${this.cosmosWalletAddress}, ${this.evmWalletAddress})`
+      );
+    },
+
+    getLikerlandUrlForClass(c: LikeNFTAssetSnapshotClass): string {
+      return `${this.$appConfig.likerlandUrlBase}/nft/class/${c.cosmos_class_id}`;
+    },
+
+    getLikerlandUrlForNFT(n: LikeNFTAssetSnapshotNFT): string {
+      return `${this.$appConfig.likerlandUrlBase}/nft/class/${n.cosmos_class_id}/${n.cosmos_nft_id}`;
     },
   },
 });
