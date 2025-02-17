@@ -52,11 +52,11 @@ contract LikeProtocol is
         __Pausable_init();
     }
 
-    function pause() public {
+    function pause() public onlyOwner {
         _pause();
     }
 
-    function unpause() public {
+    function unpause() public onlyOwner {
         _unpause();
     }
 

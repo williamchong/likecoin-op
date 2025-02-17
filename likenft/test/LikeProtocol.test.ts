@@ -1,16 +1,20 @@
 import { expect } from "chai";
-import { EventLog } from "ethers";
+import { BaseContract, EventLog } from "ethers";
 import { ethers, upgrades } from "hardhat";
 
 describe("LikeProtocol", () => {
   before(async function () {
     this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-    const [ownerSigner, signer1] = await ethers.getSigners();
+    const [ownerSigner, randomSigner] = await ethers.getSigners();
 
     this.ownerSigner = ownerSigner;
-    this.signer1 = signer1;
+    this.randomSigner = randomSigner;
   });
 
+
+  let deployment: BaseContract;
+  let contractAddress: string;
+  let contract: any;
   beforeEach(async function () {
     const likeProtocol = await upgrades.deployProxy(
       this.LikeProtocol,
@@ -19,16 +23,49 @@ describe("LikeProtocol", () => {
         initializer: "initialize",
       },
     );
-    const deployment = await likeProtocol.waitForDeployment();
-    this.deployment = deployment;
-    this.contractAddress = await deployment.getAddress();
+    deployment = await likeProtocol.waitForDeployment();
+    contractAddress = await deployment.getAddress();
+    contract = await ethers.getContractAt("LikeProtocol", contractAddress);
   });
 
-  it("should be able to pause", async function () {
-    const LikeProtocolSigner = await ethers.getContractFactory("LikeProtocol", {
-      signer: this.ownerSigner,
-    });
-    const likeProtocolSigner = LikeProtocolSigner.attach(this.contractAddress);
+  it("should set the right owner", async function () {
+    expect(await contract.owner()).to.equal(this.ownerSigner.address);
+  });
+
+  it("should allow ownership transfer", async function () {
+    await contract.transferOwnership(this.randomSigner.address);
+    expect(await contract.owner()).to.equal(this.randomSigner.address);
+  });
+
+  it("should not allow random ownership transfer", async function () {
+    const likeProtocolSigner = contract.connect(this.randomSigner);
+    try {
+      await likeProtocolSigner.transferOwnership(this.randomSigner.address);
+    } catch (error) {
+      expect(error).to.be.instanceOf(Error);
+    }
+    expect(await contract.owner()).to.equal(this.ownerSigner.address);
+  });
+
+  it("should not paused by random address", async function () {
+    const likeProtocolSigner = contract.connect(this.randomSigner);
+    await expect(likeProtocolSigner.pause()).to.be.rejected;
+  });
+
+  it("should be paused by owner address", async function () {
+    const likeProtocolSigner = contract.connect(this.ownerSigner);
+    await expect(likeProtocolSigner.pause()).to.be.not.rejected;
+  });
+
+  it("should not unpaused by random address", async function () {
+    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
+    await expect(likeProtocolOwnerSigner.pause()).to.be.not.rejected;
+    const likeProtocolRandomSigner = contract.connect(this.randomSigner);
+    await expect(likeProtocolRandomSigner.unpause()).to.be.rejected;
+  });
+
+  it("should not operatable when paused", async function () {
+    const likeProtocolSigner = contract.connect(this.ownerSigner);
 
     const classOperation = async () => {
       await likeProtocolSigner
@@ -66,10 +103,7 @@ describe("LikeProtocol", () => {
   });
 
   it("should be able to create new class", async function () {
-    const LikeProtocolOwnerSigner = await ethers.getContractFactory("LikeProtocol", {
-      signer: this.ownerSigner,
-    });
-    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(this.contractAddress);
+    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
 
     const newClass = async () => {
       await likeProtocolOwnerSigner
@@ -97,17 +131,33 @@ describe("LikeProtocol", () => {
         .then((tx) => tx.wait());
     };
 
+    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
+      likeProtocolOwnerSigner.on("NewClass", (id, params, event) => {
+        event.removeListener();
+        resolve({ id });
+      });
+
+      setTimeout(() => {
+        reject(new Error("timeout"));
+      }, 20000);
+    });
+
     await expect(newClass()).to.be.not.rejected;
-    await expect(newClass()).to.be.not.rejected;
+    const newClassEvent = await NewClassEvent;
+    const classId = newClassEvent.id;
+
+    const _newNFTClass = await ethers.getContractAt("Class", classId);
+    expect(await _newNFTClass.name()).to.equal("My Book");
+    expect(await _newNFTClass.symbol()).to.equal("KOOB");
   });
 
   it("should be allow everyone to create new class", async function () {
-    const likeNFTSigner = this.deployment.attach(this.signer1.address);
+    const likeNFTSigner = contract.connect(this.randomSigner);
 
     const newClass = async () => {
       await likeNFTSigner
         .newClass({
-        creator: this.signer1,
+        creator: this.randomSigner,
         input: {
             name: "My Book",
             symbol: "KOOB",
