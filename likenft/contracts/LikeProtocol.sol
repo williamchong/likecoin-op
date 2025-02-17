@@ -15,7 +15,7 @@ import {Class} from "./Class.sol";
 
 error ErrNftClassNotFound();
 
-contract LikeNFT is
+contract LikeProtocol is
     Initializable,
     UUPSUpgradeable,
     OwnableUpgradeable,

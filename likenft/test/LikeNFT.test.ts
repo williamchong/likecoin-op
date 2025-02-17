@@ -5,7 +5,7 @@ import { ethers, upgrades } from "hardhat";
 
 describe("LikeNFT token operations", () => {
   before(async function () {
-    this.LikeNFT = await ethers.getContractFactory("LikeNFT");
+    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
     const [ownerSigner, signer1] = await ethers.getSigners();
 
     this.ownerSigner = ownerSigner;
@@ -13,23 +13,23 @@ describe("LikeNFT token operations", () => {
   });
 
   beforeEach(async function () {
-    const likeNFT = await upgrades.deployProxy(
-      this.LikeNFT,
+    const likeProtocol = await upgrades.deployProxy(
+      this.LikeProtocol,
       [this.ownerSigner.address],
       {
         initializer: "initialize",
       },
     );
-    const deployment = await likeNFT.waitForDeployment();
+    const deployment = await likeProtocol.waitForDeployment();
     this.contractAddress = await deployment.getAddress();
 
-    const LikeNFTOwnerSigner = await ethers.getContractFactory("LikeNFT", {
+    const LikeProtocolOwnerSigner = await ethers.getContractFactory("LikeProtocol", {
       signer: this.ownerSigner,
     });
-    const likeNFTOwnerSigner = LikeNFTOwnerSigner.attach(this.contractAddress);
+    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(this.contractAddress);
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeNFTOwnerSigner.on("NewClass", (id, params, event) => {
+      likeProtocolOwnerSigner.on("NewClass", (id, params, event) => {
         event.removeListener();
         resolve({ id });
       });
@@ -39,7 +39,7 @@ describe("LikeNFT token operations", () => {
       }, 60000);
     });
 
-    likeNFTOwnerSigner
+    likeProtocolOwnerSigner
       .newClass({
         creator: this.ownerSigner,
         input: {
@@ -66,7 +66,7 @@ describe("LikeNFT token operations", () => {
     const newClassEvent = await NewClassEvent;
     this.classId = newClassEvent.id;
 
-    await likeNFTOwnerSigner
+    await likeProtocolOwnerSigner
       .mintNFT({
         creator: this.ownerSigner,
         class_id: this.classId,

@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { EventLog } from "ethers";
 import { ethers, upgrades } from "hardhat";
 
-describe("LikeNFT", () => {
+describe("LikeProtocol", () => {
   before(async function () {
-    this.LikeNFT = await ethers.getContractFactory("LikeNFT");
+    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
     const [ownerSigner, signer1] = await ethers.getSigners();
 
     this.ownerSigner = ownerSigner;
@@ -12,26 +12,26 @@ describe("LikeNFT", () => {
   });
 
   beforeEach(async function () {
-    const likeNFT = await upgrades.deployProxy(
-      this.LikeNFT,
+    const likeProtocol = await upgrades.deployProxy(
+      this.LikeProtocol,
       [this.ownerSigner.address],
       {
         initializer: "initialize",
       },
     );
-    const deployment = await likeNFT.waitForDeployment();
+    const deployment = await likeProtocol.waitForDeployment();
     this.deployment = deployment;
     this.contractAddress = await deployment.getAddress();
   });
 
   it("should be able to pause", async function () {
-    const LikeNFTOwnerSigner = await ethers.getContractFactory("LikeNFT", {
+    const LikeProtocolSigner = await ethers.getContractFactory("LikeProtocol", {
       signer: this.ownerSigner,
     });
-    const likeNFTOwnerSigner = LikeNFTOwnerSigner.attach(this.contractAddress);
+    const likeProtocolSigner = LikeProtocolSigner.attach(this.contractAddress);
 
     const classOperation = async () => {
-      await likeNFTOwnerSigner
+      await likeProtocolSigner
         .newClass({
           creator: this.ownerSigner,
           input: {
@@ -57,22 +57,22 @@ describe("LikeNFT", () => {
     };
 
     await expect(classOperation()).to.be.not.rejected;
-    await expect(likeNFTOwnerSigner.pause()).to.be.not.rejected;
+    await expect(likeProtocolSigner.pause()).to.be.not.rejected;
     await expect(classOperation()).to.be.rejectedWith(
       "VM Exception while processing transaction: reverted with custom error 'EnforcedPause()'",
     );
-    await expect(likeNFTOwnerSigner.unpause()).to.be.not.rejected;
+    await expect(likeProtocolSigner.unpause()).to.be.not.rejected;
     await expect(classOperation()).to.be.not.rejected;
   });
 
   it("should be able to create new class", async function () {
-    const LikeNFTOwnerSigner = await ethers.getContractFactory("LikeNFT", {
+    const LikeProtocolOwnerSigner = await ethers.getContractFactory("LikeProtocol", {
       signer: this.ownerSigner,
     });
-    const likeNFTOwnerSigner = LikeNFTOwnerSigner.attach(this.contractAddress);
+    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(this.contractAddress);
 
     const newClass = async () => {
-      await likeNFTOwnerSigner
+      await likeProtocolOwnerSigner
         .newClass({
           creator: this.ownerSigner,
           input: {

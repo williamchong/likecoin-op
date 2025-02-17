@@ -4,7 +4,7 @@ import { ethers, upgrades } from "hardhat";
 
 describe("LikeNFT class operations", () => {
   before(async function () {
-    this.LikeNFT = await ethers.getContractFactory("LikeNFT");
+    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
     const [ownerSigner, signer1] = await ethers.getSigners();
 
     this.ownerSigner = ownerSigner;
@@ -12,23 +12,23 @@ describe("LikeNFT class operations", () => {
   });
 
   beforeEach(async function () {
-    const likeNFT = await upgrades.deployProxy(
-      this.LikeNFT,
+    const likeProtocol = await upgrades.deployProxy(
+      this.LikeProtocol,
       [this.ownerSigner.address],
       {
         initializer: "initialize",
       },
     );
-    const deployment = await likeNFT.waitForDeployment();
+    const deployment = await likeProtocol.waitForDeployment();
     this.contractAddress = await deployment.getAddress();
 
-    const LikeNFTOwnerSigner = await ethers.getContractFactory("LikeNFT", {
+    const LikeProtocolOwnerSigner = await ethers.getContractFactory("LikeProtocol", {
       signer: this.ownerSigner,
     });
-    const likeNFTOwnerSigner = LikeNFTOwnerSigner.attach(this.contractAddress);
+    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(this.contractAddress);
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeNFTOwnerSigner.on("NewClass", (id, params, event) => {
+      likeProtocolOwnerSigner.on("NewClass", (id, params, event) => {
         event.removeListener();
         resolve({ id });
       });
@@ -38,7 +38,7 @@ describe("LikeNFT class operations", () => {
       }, 60000);
     });
 
-    likeNFTOwnerSigner
+    likeProtocolOwnerSigner
       .newClass({
         creator: this.ownerSigner,
         input: {
@@ -67,13 +67,13 @@ describe("LikeNFT class operations", () => {
   });
 
   it("should be able to update class", async function () {
-    const LikeNFTOwnerSigner = await ethers.getContractFactory("LikeNFT", {
+    const LikeProtocolOwnerSigner = await ethers.getContractFactory("LikeProtocol", {
       signer: this.ownerSigner,
     });
-    const likeNFTOwnerSigner = LikeNFTOwnerSigner.attach(this.contractAddress);
+    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(this.contractAddress);
 
     const updateClass = async () => {
-      await likeNFTOwnerSigner
+      await likeProtocolOwnerSigner
         .updateClass({
           creator: this.ownerSigner,
           class_id: this.classId,
@@ -100,7 +100,7 @@ describe("LikeNFT class operations", () => {
     };
 
     const mintNFT = async () => {
-      await likeNFTOwnerSigner
+      await likeProtocolOwnerSigner
         .mintNFT({
           creator: this.ownerSigner,
           class_id: this.classId,
@@ -133,12 +133,12 @@ describe("LikeNFT class operations", () => {
   });
 
   it("should be able to mint class", async function () {
-    const LikeNFTOwnerSigner = await ethers.getContractFactory("LikeNFT", {
+    const LikeProtocolOwnerSigner = await ethers.getContractFactory("LikeProtocol", {
       signer: this.ownerSigner,
     });
-    const likeNFTOwnerSigner = LikeNFTOwnerSigner.attach(this.contractAddress);
+    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(this.contractAddress);
     const mintNFT = async () => {
-      await likeNFTOwnerSigner
+      await likeProtocolOwnerSigner
         .mintNFT({
           creator: this.ownerSigner,
           class_id: this.classId,
@@ -168,12 +168,12 @@ describe("LikeNFT class operations", () => {
   });
 
   it("should be able to multiple mint", async function () {
-    const LikeNFTOwnerSigner = await ethers.getContractFactory("LikeNFT", {
+    const LikeProtocolOwnerSigner = await ethers.getContractFactory("LikeProtocol", {
       signer: this.ownerSigner,
     });
-    const likeNFTOwnerSigner = LikeNFTOwnerSigner.attach(this.contractAddress);
+    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(this.contractAddress);
     const mintNFT = async () => {
-      await likeNFTOwnerSigner
+      await likeProtocolOwnerSigner
         .mintNFTs({
           creator: this.ownerSigner,
           class_id: this.classId,
@@ -226,17 +226,17 @@ describe("LikeNFT class operations", () => {
 
 describe("LikeNFT mint by likenft and creator", () => {
   before(async function () {
-    this.LikeNFT = await ethers.getContractFactory("LikeNFT");
-    const [likeNFTOwnerSigner, classCreatorSigner] = await ethers.getSigners();
+    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
+    const [likeProtocolOwnerSigner, classCreatorSigner] = await ethers.getSigners();
 
-    this.likeNFTOwnerSigner = likeNFTOwnerSigner;
+    this.likeProtocolOwnerSigner = likeProtocolOwnerSigner;
     this.classCreatorSigner = classCreatorSigner;
   });
 
   beforeEach(async function () {
     const likeNFT = await upgrades.deployProxy(
-      this.LikeNFT,
-      [this.likeNFTOwnerSigner.address],
+      this.LikeProtocol,
+      [this.likeProtocolOwnerSigner.address],
       {
         initializer: "initialize",
       },
@@ -244,17 +244,16 @@ describe("LikeNFT mint by likenft and creator", () => {
     const deployment = await likeNFT.waitForDeployment();
     this.contractAddress = await deployment.getAddress();
 
-    const LikeNFTContractWithOwnerSigner = await ethers.getContractFactory(
-      "LikeNFT",
+    const LikeProtocolOwnerSigner = await ethers.getContractFactory(
+      "LikeProtocol",
       {
-        signer: this.likeNFTOwnerSigner,
+        signer: this.likeProtocolOwnerSigner,
       },
     );
-    const likeNFTContractWithOwnerSigner =
-      LikeNFTContractWithOwnerSigner.attach(this.contractAddress);
+    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(this.contractAddress);
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeNFTContractWithOwnerSigner.on("NewClass", (id, params, event) => {
+      likeProtocolOwnerSigner.on("NewClass", (id, params, event) => {
         event.removeListener();
         resolve({ id });
       });
@@ -264,7 +263,7 @@ describe("LikeNFT mint by likenft and creator", () => {
       }, 60000);
     });
 
-    likeNFTContractWithOwnerSigner
+    likeProtocolOwnerSigner
       .newClass({
         creator: this.classCreatorSigner.address,
         input: {
@@ -293,17 +292,16 @@ describe("LikeNFT mint by likenft and creator", () => {
   });
 
   it("should be able to mint by likenft", async function () {
-    const LikeNFTContractWithOwnerSigner = await ethers.getContractFactory(
-      "LikeNFT",
+    const LikeProtocolOwnerSigner = await ethers.getContractFactory(
+      "LikeProtocol",
       {
-        signer: this.likeNFTOwnerSigner,
+        signer: this.likeProtocolOwnerSigner,
       },
     );
-    const likeNFTContractWithOwnerSigner =
-      LikeNFTContractWithOwnerSigner.attach(this.contractAddress);
+    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(this.contractAddress);
 
     const mintNFT = async () => {
-      await likeNFTContractWithOwnerSigner
+      await likeProtocolOwnerSigner
         .mintNFT({
           creator: this.classCreatorSigner.address,
           class_id: this.classId,
@@ -390,19 +388,19 @@ describe("LikeNFT mint by likenft and creator", () => {
 
 describe("LikeNFT mint by likenft and creator after transfer", () => {
   before(async function () {
-    this.LikeNFT = await ethers.getContractFactory("LikeNFT");
-    const [likeNFTOwnerSigner, classCreatorSigner, nextClassOwnerSigner] =
+    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
+    const [likeProtocolOwnerSigner, classCreatorSigner, nextClassOwnerSigner] =
       await ethers.getSigners();
 
-    this.likeNFTOwnerSigner = likeNFTOwnerSigner;
+    this.likeProtocolOwnerSigner = likeProtocolOwnerSigner;
     this.classCreatorSigner = classCreatorSigner;
     this.nextClassOwnerSigner = nextClassOwnerSigner;
   });
 
   beforeEach(async function () {
     const likeNFT = await upgrades.deployProxy(
-      this.LikeNFT,
-      [this.likeNFTOwnerSigner.address],
+      this.LikeProtocol,
+      [this.likeProtocolOwnerSigner.address],
       {
         initializer: "initialize",
       },
@@ -410,17 +408,16 @@ describe("LikeNFT mint by likenft and creator after transfer", () => {
     const deployment = await likeNFT.waitForDeployment();
     this.contractAddress = await deployment.getAddress();
 
-    const LikeNFTContractWithOwnerSigner = await ethers.getContractFactory(
-      "LikeNFT",
+    const LikeProtocolOwnerSigner = await ethers.getContractFactory(
+      "LikeProtocol",
       {
-        signer: this.likeNFTOwnerSigner,
+        signer: this.likeProtocolOwnerSigner,
       },
     );
-    const likeNFTContractWithOwnerSigner =
-      LikeNFTContractWithOwnerSigner.attach(this.contractAddress);
+    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(this.contractAddress);
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeNFTContractWithOwnerSigner.on("NewClass", (id, params, event) => {
+      likeProtocolOwnerSigner.on("NewClass", (id, params, event) => {
         event.removeListener();
         resolve({ id });
       });
@@ -430,7 +427,7 @@ describe("LikeNFT mint by likenft and creator after transfer", () => {
       }, 60000);
     });
 
-    likeNFTContractWithOwnerSigner
+    likeProtocolOwnerSigner
       .newClass({
         creator: this.classCreatorSigner.address,
         input: {
@@ -476,17 +473,16 @@ describe("LikeNFT mint by likenft and creator after transfer", () => {
   });
 
   it("should be able to mint by likenft", async function () {
-    const LikeNFTContractWithOwnerSigner = await ethers.getContractFactory(
-      "LikeNFT",
+    const LikeProtocolOwnerSigner = await ethers.getContractFactory(
+      "LikeProtocol",
       {
-        signer: this.likeNFTOwnerSigner,
+        signer: this.likeProtocolOwnerSigner,
       },
     );
-    const likeNFTContractWithOwnerSigner =
-      LikeNFTContractWithOwnerSigner.attach(this.contractAddress);
+    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(this.contractAddress);
 
     const mintNFT = async () => {
-      await likeNFTContractWithOwnerSigner
+      await likeProtocolOwnerSigner
         .mintNFT({
           creator: this.classCreatorSigner.address,
           class_id: this.classId,
