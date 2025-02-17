@@ -337,6 +337,8 @@ export default Vue.extend({
           like_id: this.likerID,
           signing_message: signMessage.message,
         });
+
+        this.isEthAddressMigrated = true;
       }
     },
 
