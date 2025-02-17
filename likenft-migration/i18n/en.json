@@ -13,6 +13,7 @@
     "migrate-likerid": "Migrate LikerID",
     "nfts": "NFTs",
     "preview": "Migration Preview",
-    "reload-preview": "Reload Preview"
+    "reload-preview": "Reload Preview",
+    "result": "Migration Result"
   }
 }
