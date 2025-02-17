@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
+	"github.com/likecoin/like-migration-backend/pkg/handler/likenft/migration"
 	"github.com/likecoin/like-migration-backend/pkg/handler/likenft/migration_preview"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 )
@@ -36,6 +37,15 @@ func (h *LikeNFTRouter) Router() *http.ServeMux {
 	router.Handle("/migration-preview", migrationPreviewRouter.Router())
 	// This is for paths with trailing/intermediate /, e.g. GET / PUT
 	router.Handle("/migration-preview/", migrationPreviewRouter.Router())
+
+	migrationRouter := &migration.MigrationRouter{
+		Db: h.Db,
+	}
+
+	// This is for paths without trailing /. e.g. GET / POST
+	router.Handle("/migration", migrationRouter.Router())
+	// This is for paths with trailing/intermediate /, e.g. GET / PUT
+	router.Handle("/migration/", migrationRouter.Router())
 
 	return router
 }
