@@ -1,3 +1,5 @@
 {
-  "isTestnet": true
+  "isTestnet": true,
+  "apiBaseURL": "https://like-migration-api.pandawork.com",
+  "likerlandUrlBase": "https://rinkeby.liker.land"
 }
