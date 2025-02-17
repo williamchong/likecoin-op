@@ -3,7 +3,7 @@ import { EventLog } from "ethers";
 import { ethers, upgrades } from "hardhat";
 
 
-describe("LikeNFT token operations", () => {
+describe("LikeNFT", () => {
   before(async function () {
     this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
     const [ownerSigner, signer1] = await ethers.getSigners();
