@@ -180,6 +180,7 @@ interface Data {
   isLoading: boolean;
   migrationPreviewFetchTimeout: ReturnType<typeof setTimeout> | null;
   migration: LikeNFTAssetMigration | null;
+  migrationFetchTimeout: ReturnType<typeof setTimeout> | null;
 }
 
 export default Vue.extend({
@@ -193,6 +194,7 @@ export default Vue.extend({
       migrationPreviewFetchTimeout: null,
       isLoading: false,
       migration: null,
+      migrationFetchTimeout: null,
     };
   },
 
@@ -233,6 +235,25 @@ export default Vue.extend({
           this.migrationPreviewFetchTimeout = null;
           this.migrationPreview = migrationPreview;
         }, 1000);
+      }
+    },
+    migration(migration: LikeNFTAssetMigration | null) {
+      if (this.migrationPreviewFetchTimeout != null) {
+        clearTimeout(this.migrationPreviewFetchTimeout);
+        this.migrationPreviewFetchTimeout = null;
+      }
+      if (migration == null) {
+        return;
+      }
+      if (migration.status === 'init' || migration.status === 'in_progress') {
+        this.migrationFetchTimeout = setTimeout(async () => {
+          if (this.cosmosWalletAddress == null) {
+            return;
+          }
+          const migration = await this.fetchMigration(this.cosmosWalletAddress);
+          this.migrationFetchTimeout = null;
+          this.migration = migration;
+        }, 5000);
       }
     },
   },
