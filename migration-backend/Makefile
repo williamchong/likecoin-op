@@ -36,6 +36,10 @@ start-scheduler:
 build:
 	go build -o like-migration-backend ./cmd/server
 
+.PHONY: build-worker-cli
+build-worker-cli:
+	go build -o like-migration-backend-worker-cli ./cmd/worker
+
 .PHONY: fmt
 fmt:
 	find ./cmd -name '*.go' -not -name 'wire_gen.go' -not -name '*_mock_test.go' | sort | xargs goimports -w -format-only -local github.com/likecoin/like-migration-backend

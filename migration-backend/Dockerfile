@@ -5,6 +5,7 @@ RUN go mod download
 COPY . .
 RUN apk add --no-cache make
 RUN make build
+RUN make build-worker-cli
 RUN go install github.com/rubenv/sql-migrate/...@v1.7.1
 
 FROM ubuntu:noble
@@ -17,6 +18,7 @@ RUN update-ca-certificates
 
 # App
 COPY --from=stage1 /src/like-migration-backend /usr/local/bin/
+COPY --from=stage1 /src/like-migration-backend-worker-cli /usr/local/bin/
 
 # Migration
 COPY --from=stage1 /go/bin/sql-migrate /usr/local/bin/
