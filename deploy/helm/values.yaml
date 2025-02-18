@@ -39,6 +39,16 @@ migrationBackend:
 
   resources: {}
 
+  worker:
+    name: migration-backend-worker
+
+    resources: {}
+
+  scheduler:
+    name: migration-backend-scheduler
+
+    resources: {}
+
 redis:
   name: redis
   container:
