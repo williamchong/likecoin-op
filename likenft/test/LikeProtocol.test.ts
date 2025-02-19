@@ -11,7 +11,6 @@ describe("LikeProtocol", () => {
     this.randomSigner = randomSigner;
   });
 
-
   let deployment: BaseContract;
   let contractAddress: string;
   let contract: any;
@@ -157,18 +156,18 @@ describe("LikeProtocol", () => {
     const newClass = async () => {
       await likeNFTSigner
         .newClass({
-        creator: this.randomSigner,
-        input: {
+          creator: this.randomSigner,
+          input: {
             name: "My Book",
             symbol: "KOOB",
             metadata: JSON.stringify({
-            name: "Random by somone",
-            symbol: "No data",
+              name: "Random by somone",
+              symbol: "No data",
             }),
             config: {
-            max_supply: 10,
+              max_supply: 10,
             },
-        },
+          },
         })
         .then((tx) => tx.wait());
     };

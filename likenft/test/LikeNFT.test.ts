@@ -2,7 +2,6 @@ import { expect } from "chai";
 import { EventLog } from "ethers";
 import { ethers, upgrades } from "hardhat";
 
-
 describe("LikeNFT", () => {
   before(async function () {
     this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
@@ -23,10 +22,15 @@ describe("LikeNFT", () => {
     const deployment = await likeProtocol.waitForDeployment();
     this.contractAddress = await deployment.getAddress();
 
-    const LikeProtocolOwnerSigner = await ethers.getContractFactory("LikeProtocol", {
-      signer: this.ownerSigner,
-    });
-    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(this.contractAddress);
+    const LikeProtocolOwnerSigner = await ethers.getContractFactory(
+      "LikeProtocol",
+      {
+        signer: this.ownerSigner,
+      },
+    );
+    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(
+      this.contractAddress,
+    );
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
       likeProtocolOwnerSigner.on("NewClass", (id, params, event) => {
