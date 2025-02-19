@@ -1,17 +1,19 @@
 import { ethers } from "hardhat";
 
 async function updateClass() {
+  const classId = "0x84ce8AaB5aceCaE283083761498440539a5DD8dE";
   const signer = await ethers.provider.getSigner();
 
-  const LikeNFT = await ethers.getContractFactory("LikeNFT", {
-    signer,
-  });
+  const LikeProtocol = await ethers.getContractAt(
+    "LikeProtocol",
+    process.env.ERC721_PROXY_ADDRESS!,
+  );
 
-  const likeNFT = LikeNFT.attach(process.env.ERC721_PROXY_ADDRESS!);
+  const likeProtocol = LikeProtocol.connect(signer);
 
-  const tx = await likeNFT.updateClass({
+  const tx = await likeProtocol.updateClass({
     creator: signer.address,
-    class_id: "0x14CE6632272552E676b53FE6202edA8F1Be4992c",
+    class_id: classId,
     input: {
       name: "《所謂「我不投資」，就是 all in 在法定貨幣》",
       symbol: "BOOK",

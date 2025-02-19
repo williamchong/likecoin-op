@@ -23,8 +23,6 @@ contract LikeProtocol is
 {
     struct LikeNFTStorage {
         address minter;
-        // A storage slot pointing to a depreciated storage when upgrade
-        mapping(address creator => mapping(address class_id => LikeNFTClass)) deprecated_creatorClassIdClassMapping;
         LikeNFTClass[] classes;
         mapping(address class_id => LikeNFTClass) classIdClassMapping;
     }

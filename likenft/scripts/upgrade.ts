@@ -4,12 +4,12 @@ import hardhat, { ethers, upgrades } from "hardhat";
 
 async function main() {
   // We get the contract to deploy
-  const LikeNFT = await ethers.getContractFactory("LikeNFT");
-  console.log("Upgrading LikeNFT...");
+  const LikeProtocol = await ethers.getContractFactory("LikeProtocol");
+  console.log("Upgrading LikeProtocol...");
 
   const newImplementationAddress = await upgrades.prepareUpgrade(
     process.env.ERC721_PROXY_ADDRESS!,
-    LikeNFT,
+    LikeProtocol,
     {
       timeout: 0,
       verifySourceCode: true,
@@ -18,7 +18,7 @@ async function main() {
   );
 
   console.log(
-    "LikeNFT new implementation is deployed to:",
+    "LikeProtocol new implementation is deployed to:",
     newImplementationAddress,
   );
 
@@ -30,20 +30,22 @@ async function main() {
     if (e instanceof ContractAlreadyVerifiedError) {
       // There may be the same implementation contract verified due to code revert
       console.log(
-        "LikeNFT new implementation is already verified:",
+        "LikeProtocol new implementation is already verified:",
         newImplementationAddress,
       );
     } else {
-      throw e;
+      if (network.name !== "localhost") {
+        throw e;
+      }
     }
   }
 
   // TODO: Prepare an upgrade proposal to safe
-  const likeNFT = LikeNFT.attach(process.env.ERC721_PROXY_ADDRESS!);
-  await likeNFT.upgradeToAndCall(newImplementationAddress, "0x");
+  const likeProtocol = LikeProtocol.attach(process.env.ERC721_PROXY_ADDRESS!);
+  await likeProtocol.upgradeToAndCall(newImplementationAddress, "0x");
 
-  console.log("LikeNFT upgraded implementation to:", newImplementationAddress);
-  console.log("LikeNFT proxy address is:", await likeNFT.getAddress());
+  console.log("LikeProtocol upgraded implementation to:", newImplementationAddress);
+  console.log("LikeProtocol proxy address is:", await likeProtocol.getAddress());
 }
 
 main()

@@ -3,13 +3,13 @@ import hardhat, { ethers, upgrades } from "hardhat";
 
 async function main() {
   // We get the contract to deploy
-  const LikeNFT = await ethers.getContractFactory("LikeNFT");
-  console.log("Deploying LikeNFT... Network:", hardhat.network.name);
+  const LikeProtocol = await ethers.getContractFactory("LikeProtocol");
+  console.log("Deploying LikeProtocol... Network:", hardhat.network.name);
   console.log("Owner:", process.env.INITIAL_OWNER_ADDRESS);
   console.log("Expecting Proxy Address:", process.env.ERC721_PROXY_ADDRESS);
 
-  const likeNFT = await upgrades.deployProxy(
-    LikeNFT,
+  const likeProtocol = await upgrades.deployProxy(
+    LikeProtocol,
     [process.env.INITIAL_OWNER_ADDRESS!],
     {
       initializer: "initialize",
@@ -18,14 +18,14 @@ async function main() {
     },
   );
 
-  await likeNFT.waitForDeployment();
+  await likeProtocol.waitForDeployment();
 
-  const proxyAddress = await likeNFT.getAddress();
-  console.log("LikeNFT proxy is deployed to:", proxyAddress);
+  const proxyAddress = await likeProtocol.getAddress();
+  console.log("LikeProtocol proxy is deployed to:", proxyAddress);
 
   const implementationAddress =
     await upgrades.erc1967.getImplementationAddress(proxyAddress);
-  console.log("LikeNFT implementation is deployed to:", implementationAddress);
+  console.log("LikeProtocol implementation is deployed to:", implementationAddress);
 
   if (hardhat.network.name === "localhost") {
     console.log("Skipping verification on localhost");

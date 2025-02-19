@@ -1,16 +1,16 @@
 import { ethers } from "hardhat";
 
 async function mintNFTInClass() {
+  const classId = "0x84ce8AaB5aceCaE283083761498440539a5DD8dE";
   const signer = await ethers.provider.getSigner();
 
-  const Class_ = await ethers.getContractFactory("Class", {
-    signer,
-  });
+  const LikeNFTClass = await ethers.getContractAt(
+    "LikeNFTClass",
+    classId,
+  );
+  const likeNFTClass = LikeNFTClass.connect(signer);
 
-  // Extract and update the class id from newClass's NewClass event
-  const class_ = Class_.attach("0x14CE6632272552E676b53FE6202edA8F1Be4992c");
-
-  const tx = await class_.mint(signer.address, [
+  const tx = await likeNFTClass.mint(signer.address, [
     JSON.stringify({
       image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
       image_data: "",

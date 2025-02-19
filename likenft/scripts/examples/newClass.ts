@@ -4,19 +4,20 @@ import { ethers } from "hardhat";
 async function newClass() {
   const signer = await ethers.provider.getSigner();
 
-  const LikeNFT = await ethers.getContractFactory("LikeNFT", {
-    signer,
-  });
+  const LikeProtocol = await ethers.getContractAt(
+    "LikeProtocol",
+    process.env.ERC721_PROXY_ADDRESS!,
+  );
 
-  const likeNFT = LikeNFT.attach(process.env.ERC721_PROXY_ADDRESS!);
+  const likeProtocol = LikeProtocol.connect(signer);
 
   const handleNewClass: Listener = (id, parameters, event) => {
     event.removeListener();
     console.log("newClassEventPayload", id, parameters);
   };
-  await likeNFT.on("NewClass", handleNewClass);
+  await likeProtocol.on("NewClass", handleNewClass);
 
-  const tx = await likeNFT.newClass({
+  const tx = await likeProtocol.newClass({
     creator: signer.address,
     input: {
       name: "《所謂「我不投資」，就是 all in 在法定貨幣》",

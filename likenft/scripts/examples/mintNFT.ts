@@ -1,17 +1,19 @@
 import { ethers } from "hardhat";
 
 async function mintNFT() {
+  const classId = "0x73228898f17e2057D898475953c1018704155e25";
   const signer = await ethers.provider.getSigner();
 
-  const LikeNFT = await ethers.getContractFactory("LikeNFT", {
-    signer,
-  });
+  const LikeProtocol = await ethers.getContractAt(
+    "LikeProtocol",
+    process.env.ERC721_PROXY_ADDRESS!,
+  );
 
-  const likeNFT = LikeNFT.attach(process.env.ERC721_PROXY_ADDRESS!);
+  const likeProtocol = LikeProtocol.connect(signer);
 
-  const tx = await likeNFT.mintNFT({
+  const tx = await likeProtocol.mintNFT({
     creator: signer.address,
-    class_id: "0x9c746861f90e8908975035c6593c27e6cef644d4",
+    class_id: classId,
     input: {
       metadata: JSON.stringify({
         image:
