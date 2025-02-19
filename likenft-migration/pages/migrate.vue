@@ -25,7 +25,7 @@
       >
         {{ $t('migrate.migrate-likerid') }}
       </primary-button>
-      <div v-if="migrationPreview" class="w-full">
+      <div v-if="migration == null && migrationPreview != null" class="w-full">
         <h2 class="text-[32px] font-bold">{{ $t('migrate.preview') }}</h2>
         <div
           v-if="
@@ -77,6 +77,32 @@
           >{{ $t('migrate.migrate-assets') }}</primary-button
         >
       </div>
+      <div v-else-if="migration != null">
+        <h2 class="text-[32px] font-bold">{{ $t('migrate.result') }}</h2>
+        <div class="max-h-40 overflow-auto">
+          <div v-if="migration.classes.length > 0">
+            <h3 class="text-[20px]">{{ $t('migrate.classes') }}</h3>
+            <ol class="list-decimal pl-10">
+              <li v-for="c in migration.classes" :key="c.cosmos_class_id">
+                <a :href="getLikerlandUrlForClass(c)">{{ c.name }}</a>
+              </li>
+            </ol>
+          </div>
+          <div v-if="migration.nfts.length > 0">
+            <h3 class="text-[20px]">{{ $t('migrate.nfts') }}</h3>
+            <ol class="list-decimal pl-10">
+              <li
+                v-for="n in migration.nfts"
+                :key="n.cosmos_class_id + '/' + n.cosmos_nft_id"
+              >
+                <a :href="getLikerlandUrlForNFT(n)"
+                  >{{ n.name }}({{ n.cosmos_nft_id }})</a
+                >
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
     </main>
     <div
       v-if="isLoading"
@@ -99,11 +125,18 @@ import Vue from 'vue';
 import Web3 from 'web3';
 import { z } from 'zod';
 
+import { makeCreateMigrationAPI } from '~/apis/createMigration';
 import { makeCreateMigrationPreviewAPI } from '~/apis/createMigrationPreview';
+import { makeGetMigrationAPI } from '~/apis/getMigration';
 import { makeGetMigrationPreviewAPI } from '~/apis/getMigrationPreview';
 import { getSignMessage } from '~/apis/getSignMessage';
 import { makeGetUserProfileAPI } from '~/apis/getUserProfile';
 import { makeMigrateLikerIDAPI } from '~/apis/migrateLikerID';
+import {
+  LikeNFTAssetMigration,
+  LikeNFTAssetMigrationClass,
+  LikeNFTAssetMigrationNFT,
+} from '~/apis/models/likenftAssetMigration';
 import {
   LikeNFTAssetSnapshot,
   LikeNFTAssetSnapshotClass,
@@ -146,6 +179,8 @@ interface Data {
   migrationPreview: LikeNFTAssetSnapshot | null;
   isLoading: boolean;
   migrationPreviewFetchTimeout: ReturnType<typeof setTimeout> | null;
+  migration: LikeNFTAssetMigration | null;
+  migrationFetchTimeout: ReturnType<typeof setTimeout> | null;
 }
 
 export default Vue.extend({
@@ -158,6 +193,8 @@ export default Vue.extend({
       migrationPreview: null,
       migrationPreviewFetchTimeout: null,
       isLoading: false,
+      migration: null,
+      migrationFetchTimeout: null,
     };
   },
 
@@ -200,6 +237,25 @@ export default Vue.extend({
         }, 1000);
       }
     },
+    migration(migration: LikeNFTAssetMigration | null) {
+      if (this.migrationPreviewFetchTimeout != null) {
+        clearTimeout(this.migrationPreviewFetchTimeout);
+        this.migrationPreviewFetchTimeout = null;
+      }
+      if (migration == null) {
+        return;
+      }
+      if (migration.status === 'init' || migration.status === 'in_progress') {
+        this.migrationFetchTimeout = setTimeout(async () => {
+          if (this.cosmosWalletAddress == null) {
+            return;
+          }
+          const migration = await this.fetchMigration(this.cosmosWalletAddress);
+          this.migrationFetchTimeout = null;
+          this.migration = migration;
+        }, 5000);
+      }
+    },
   },
 
   methods: {
@@ -215,6 +271,7 @@ export default Vue.extend({
       if (!connection) return;
 
       this.migrationPreview = null;
+      this.migration = null;
 
       const {
         accounts: [account],
@@ -231,16 +288,22 @@ export default Vue.extend({
           this.evmWalletAddress = userProfile.user_profile.eth_wallet_address;
           this.isEthAddressMigrated = this.evmWalletAddress != null;
           if (this.isEthAddressMigrated) {
-            // TODO: check if migration exists
-            let migrationPreview = await this.fetchMigrationPreview(
+            const migration = await this.fetchMigration(
               this.cosmosWalletAddress
             );
-            if (migrationPreview == null) {
-              migrationPreview = await this.createMigrationPreview(
+            if (migration != null) {
+              this.migration = migration;
+            } else {
+              let migrationPreview = await this.fetchMigrationPreview(
                 this.cosmosWalletAddress
               );
+              if (migrationPreview == null) {
+                migrationPreview = await this.createMigrationPreview(
+                  this.cosmosWalletAddress
+                );
+              }
+              this.migrationPreview = migrationPreview;
             }
-            this.migrationPreview = migrationPreview;
           }
         } finally {
           this.isLoading = false;
@@ -365,6 +428,35 @@ export default Vue.extend({
       return migrationResponse.preview;
     },
 
+    async fetchMigration(cosmosWalletAddress: string) {
+      try {
+        const migration = await makeGetMigrationAPI(cosmosWalletAddress)(
+          this.$apiClient
+        )();
+        return migration.migration;
+      } catch (e) {
+        if (isAxiosError(e)) {
+          if (e.status === 404) {
+            return null;
+          }
+        }
+        throw e;
+      }
+    },
+
+    async createMigration(
+      snapshotId: number,
+      cosmosWalletAddress: string,
+      ethAddress: string
+    ) {
+      const migrationResponse = await makeCreateMigrationAPI(this.$apiClient)({
+        asset_snapshot_id: snapshotId,
+        cosmos_address: cosmosWalletAddress,
+        eth_address: ethAddress,
+      });
+      return migrationResponse.migration;
+    },
+
     async handleReloadMigrationPreview() {
       if (this.cosmosWalletAddress == null) {
         return;
@@ -375,7 +467,7 @@ export default Vue.extend({
       this.migrationPreview = migrationPreview;
     },
 
-    handleMigrateAssetsClick() {
+    async handleMigrateAssetsClick() {
       if (this.migrationPreview == null) {
         return;
       }
@@ -383,17 +475,23 @@ export default Vue.extend({
         alert('Please connect cosmos wallet and evm wallet');
         return;
       }
-      // TODO
-      alert(
-        `TODO: call migrationAssetAPI(${this.migrationPreview.id}, ${this.cosmosWalletAddress}, ${this.evmWalletAddress})`
+      const migration = await this.createMigration(
+        this.migrationPreview.id,
+        this.cosmosWalletAddress,
+        this.evmWalletAddress
       );
+      this.migration = migration;
     },
 
-    getLikerlandUrlForClass(c: LikeNFTAssetSnapshotClass): string {
+    getLikerlandUrlForClass(
+      c: LikeNFTAssetSnapshotClass | LikeNFTAssetMigrationClass
+    ): string {
       return `${this.$appConfig.likerlandUrlBase}/nft/class/${c.cosmos_class_id}`;
     },
 
-    getLikerlandUrlForNFT(n: LikeNFTAssetSnapshotNFT): string {
+    getLikerlandUrlForNFT(
+      n: LikeNFTAssetSnapshotNFT | LikeNFTAssetMigrationNFT
+    ): string {
       return `${this.$appConfig.likerlandUrlBase}/nft/class/${n.cosmos_class_id}/${n.cosmos_nft_id}`;
     },
   },
