@@ -24,9 +24,21 @@ vendor:
 start:
 	go run ./cmd/server
 
+.PHONY: start-worker
+start-worker:
+	go run ./cmd/worker worker
+
+.PHONY: start-scheduler
+start-scheduler:
+	go run ./cmd/worker scheduler
+
 .PHONY: build
 build:
 	go build -o like-migration-backend ./cmd/server
+
+.PHONY: build-worker-cli
+build-worker-cli:
+	go build -o like-migration-backend-worker-cli ./cmd/worker
 
 .PHONY: fmt
 fmt:

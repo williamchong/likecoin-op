@@ -39,6 +39,28 @@ migrationBackend:
 
   resources: {}
 
+  worker:
+    name: migration-backend-worker
+
+    resources: {}
+
+  scheduler:
+    name: migration-backend-scheduler
+
+    resources: {}
+
+redis:
+  name: redis
+  container:
+    imageRepository: redis
+    imageVersion: 7
+    port: 6379
+
+  service:
+    port: 6379
+
+  resources: {}
+
 nginx:
   name: nginx
 
