@@ -145,7 +145,7 @@ describe("LikeProtocol", () => {
     const newClassEvent = await NewClassEvent;
     const classId = newClassEvent.id;
 
-    const _newNFTClass = await ethers.getContractAt("Class", classId);
+    const _newNFTClass = await ethers.getContractAt("LikeNFTClass", classId);
     expect(await _newNFTClass.name()).to.equal("My Book");
     expect(await _newNFTClass.symbol()).to.equal("KOOB");
   });

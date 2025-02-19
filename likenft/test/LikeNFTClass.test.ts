@@ -75,7 +75,7 @@ describe("LikeNFTClass", () => {
 
     const newClassEvent = await NewClassEvent;
     nftClassId = newClassEvent.id;
-    nftClassContract = await ethers.getContractAt("Class", nftClassId);
+    nftClassContract = await ethers.getContractAt("LikeNFTClass", nftClassId);
     expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
   });
 
@@ -462,7 +462,7 @@ describe("LikeNFTClass permission control", () => {
 
   it("should allow creator to mint NFT", async function () {
     const ClassContractWithCreatorSigner = await ethers.getContractFactory(
-      "Class",
+      "LikeNFTClass",
       {
         signer: this.classCreatorSigner,
       },
@@ -586,7 +586,7 @@ describe("LikeNFTClass ownership transfer", () => {
     this.classId = newClassEvent.id;
 
     const ClassContractWithCreatorSigner = await ethers.getContractFactory(
-      "Class",
+      "LikeNFTClass",
       {
         signer: this.classCreatorSigner,
       },
@@ -647,7 +647,7 @@ describe("LikeNFTClass ownership transfer", () => {
 
   it("should not allow creator to mint NFT", async function () {
     const ClassContractWithCreatorSigner = await ethers.getContractFactory(
-      "Class",
+      "LikeNFTClass",
       {
         signer: this.classCreatorSigner,
       },
@@ -703,7 +703,7 @@ describe("LikeNFTClass ownership transfer", () => {
 
   it("should allow next owner to mint NFT", async function () {
     const ClassContractWithNextOwnerSigner = await ethers.getContractFactory(
-      "Class",
+      "LikeNFTClass",
       {
         signer: this.nextClassOwnerSigner,
       },

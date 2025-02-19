@@ -14,7 +14,7 @@ error ErrUnauthorized();
 error ErrNftNoSupply();
 error ErrCannotUpdateClassWithMintedTokens();
 
-contract Class is ERC721A, Ownable, AccessControl {
+contract LikeNFTClass is ERC721A, Ownable, AccessControl {
     // keccak256(abi.encode(uint256(keccak256("likenft.storage.class")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant CLASS_DATA_STORAGE =
         0x99391ccf5d97dbb7711a73831d943712d1774ca037a259af20891dc6f0d9f200;

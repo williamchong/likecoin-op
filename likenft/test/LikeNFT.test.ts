@@ -98,7 +98,7 @@ describe("LikeNFT", () => {
   });
 
   it("should be able to send", async function () {
-    const ClassOwnerSigner = await ethers.getContractFactory("Class", {
+    const ClassOwnerSigner = await ethers.getContractFactory("LikeNFTClass", {
       signer: this.ownerSigner,
     });
     const classOwnerSigner = ClassOwnerSigner.attach(this.classId);
@@ -119,7 +119,7 @@ describe("LikeNFT", () => {
     const logs1 = await classOwnerSigner.queryFilter(filters);
     expect((logs1[0] as EventLog).args[3]).to.equal("memo1");
 
-    const ClassSigner1 = await ethers.getContractFactory("Class", {
+    const ClassSigner1 = await ethers.getContractFactory("LikeNFTClass", {
       signer: this.signer1,
     });
     const classSigner1 = ClassSigner1.attach(this.classId);
