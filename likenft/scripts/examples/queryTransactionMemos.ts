@@ -17,10 +17,7 @@ async function _queryTransactionMemos() {
 
   const signer = await ethers.provider.getSigner();
 
-  const LikeNFTClass = await ethers.getContractAt(
-    "LikeNFTClass",
-    classId,
-  );
+  const LikeNFTClass = await ethers.getContractAt("LikeNFTClass", classId);
   const likeNFTClass = LikeNFTClass.connect(signer);
   console.log(await queryTransactionMemos(likeNFTClass, tokenId));
 }
@@ -48,8 +45,6 @@ export async function queryTransactionMemos(
 
   return transactionMemos;
 }
-
-
 
 _queryTransactionMemos().catch((error) => {
   console.error(error);

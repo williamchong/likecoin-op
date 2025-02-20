@@ -8,10 +8,7 @@ async function transferWithMemo() {
 
   const signer = await ethers.provider.getSigner();
 
-  const LikeNFTClass = await ethers.getContractAt(
-    "LikeNFTClass",
-    classId,
-  );
+  const LikeNFTClass = await ethers.getContractAt("LikeNFTClass", classId);
   const likeNFTClass = LikeNFTClass.connect(signer);
 
   const tx = await likeNFTClass.transferWithMemo(

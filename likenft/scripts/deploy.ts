@@ -25,7 +25,10 @@ async function main() {
 
   const implementationAddress =
     await upgrades.erc1967.getImplementationAddress(proxyAddress);
-  console.log("LikeProtocol implementation is deployed to:", implementationAddress);
+  console.log(
+    "LikeProtocol implementation is deployed to:",
+    implementationAddress,
+  );
 
   if (hardhat.network.name === "localhost") {
     console.log("Skipping verification on localhost");

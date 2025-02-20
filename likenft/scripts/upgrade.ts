@@ -44,8 +44,14 @@ async function main() {
   const likeProtocol = LikeProtocol.attach(process.env.ERC721_PROXY_ADDRESS!);
   await likeProtocol.upgradeToAndCall(newImplementationAddress, "0x");
 
-  console.log("LikeProtocol upgraded implementation to:", newImplementationAddress);
-  console.log("LikeProtocol proxy address is:", await likeProtocol.getAddress());
+  console.log(
+    "LikeProtocol upgraded implementation to:",
+    newImplementationAddress,
+  );
+  console.log(
+    "LikeProtocol proxy address is:",
+    await likeProtocol.getAddress(),
+  );
 }
 
 main()

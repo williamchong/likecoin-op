@@ -5,10 +5,7 @@ async function transferClassOwnership() {
   const newOwner = "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199";
   const signer = await ethers.provider.getSigner();
 
-  const LikeNFTClass = await ethers.getContractAt(
-    "LikeNFTClass",
-    classId,
-  );
+  const LikeNFTClass = await ethers.getContractAt("LikeNFTClass", classId);
   const likeNFTClass = LikeNFTClass.connect(signer);
 
   const tx = await likeNFTClass.transferOwnership(newOwner);

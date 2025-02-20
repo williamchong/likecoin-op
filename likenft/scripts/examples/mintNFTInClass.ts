@@ -4,10 +4,7 @@ async function mintNFTInClass() {
   const classId = "0x84ce8AaB5aceCaE283083761498440539a5DD8dE";
   const signer = await ethers.provider.getSigner();
 
-  const LikeNFTClass = await ethers.getContractAt(
-    "LikeNFTClass",
-    classId,
-  );
+  const LikeNFTClass = await ethers.getContractAt("LikeNFTClass", classId);
   const likeNFTClass = LikeNFTClass.connect(signer);
 
   const tx = await likeNFTClass.mint(signer.address, [
