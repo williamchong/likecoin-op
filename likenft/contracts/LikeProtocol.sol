@@ -99,5 +99,5 @@ contract LikeProtocol is
 
     function _authorizeUpgrade(
         address _newImplementation // solhint-disable-next-line no-empty-blocks
-    ) internal override {}
+    ) internal override onlyOwner {}
 }

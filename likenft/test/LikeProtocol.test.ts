@@ -5,6 +5,7 @@ import { ethers, upgrades } from "hardhat";
 describe("LikeProtocol", () => {
   before(async function () {
     this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
+    this.LikeProtocolMock = await ethers.getContractFactory("LikeProtocolMock");
     const [ownerSigner, randomSigner] = await ethers.getSigners();
 
     this.ownerSigner = ownerSigner;
@@ -25,6 +26,28 @@ describe("LikeProtocol", () => {
     deployment = await likeProtocol.waitForDeployment();
     contractAddress = await deployment.getAddress();
     contract = await ethers.getContractAt("LikeProtocol", contractAddress);
+  });
+
+  it("should be upgradable", async function () {
+    const likeProtocolMockOwnerSigner = this.LikeProtocolMock.connect(
+      this.ownerSigner,
+    );
+    const newLikeProtocol = await upgrades.upgradeProxy(
+      contractAddress,
+      likeProtocolMockOwnerSigner,
+    );
+    expect(await newLikeProtocol.owner()).to.equal(this.ownerSigner.address);
+    expect(await newLikeProtocol.version()).to.equal(2n);
+  });
+
+  it("should not be upgradable by random address", async function () {
+    const likeProtocolMockRandomSigner = this.LikeProtocolMock.connect(
+      this.randomSigner,
+    );
+    await expect(
+      upgrades.upgradeProxy(contractAddress, likeProtocolMockRandomSigner),
+    ).to.be.rejected;
+    expect(await contract.owner()).to.equal(this.ownerSigner.address);
   });
 
   it("should set the right owner", async function () {
@@ -62,8 +85,6 @@ describe("LikeProtocol", () => {
     const likeProtocolRandomSigner = contract.connect(this.randomSigner);
     await expect(likeProtocolRandomSigner.unpause()).to.be.rejected;
   });
-
-
 
   it("should be able to create new class", async function () {
     const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
@@ -284,9 +305,7 @@ describe("LikeProtocol", () => {
         },
       }),
     ).to.be.rejected;
-    await expect(await _newNFTClass.owner()).to.equal(
-      this.ownerSigner.address,
-    );
+    await expect(await _newNFTClass.owner()).to.equal(this.ownerSigner.address);
     await expect(await _newNFTClass.symbol()).to.equal("KOOB");
   });
 });
