@@ -22,8 +22,6 @@ contract LikeProtocol is
     PausableUpgradeable
 {
     struct LikeNFTStorage {
-        address minter;
-        LikeNFTClass[] classes;
         mapping(address class_id => LikeNFTClass) classIdClassMapping;
     }
     // keccak256(abi.encode(uint256(keccak256("likenft.storage")) - 1)) & ~bytes32(uint256(0xff))
@@ -60,7 +58,6 @@ contract LikeProtocol is
         LikeNFTStorage storage $ = _getLikeNFTStorage();
         LikeNFTClass class = new LikeNFTClass(msgNewClass);
         address id = address(class);
-        $.classes.push(class);
         $.classIdClassMapping[id] = class;
         emit NewClass(id, msgNewClass);
     }
@@ -84,7 +81,7 @@ contract LikeProtocol is
         }
         string[] memory metadata_list = new string[](1);
         metadata_list[0] = msgMintNFT.input.metadata;
-        class.mint(msgMintNFT.creator, metadata_list);
+        class.mint(msgMintNFT.to, metadata_list);
     }
 
     function mintNFTs(MsgMintNFTs calldata msgMintNFTs) external whenNotPaused {
@@ -97,7 +94,7 @@ contract LikeProtocol is
         for (uint i = 0; i < msgMintNFTs.inputs.length; i++) {
             metadata_list[i] = msgMintNFTs.inputs[i].metadata;
         }
-        class.mint(msgMintNFTs.creator, metadata_list);
+        class.mint(msgMintNFTs.to, metadata_list);
     }
 
     function _authorizeUpgrade(

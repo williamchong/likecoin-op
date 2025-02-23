@@ -203,7 +203,7 @@ describe("LikeNFTClass", () => {
     const mintNFT = async () => {
       await likeProtocolClassOwnerSigner
         .mintNFT({
-          creator: this.classOwner.address,
+          to: this.classOwner.address,
           class_id: nftClassId,
           input: {
             metadata: JSON.stringify({
@@ -281,7 +281,7 @@ describe("LikeNFTClass", () => {
     const mintNFT = async () => {
       await likeProtocolClassOwnerSigner
         .mintNFT({
-          creator: this.classOwner,
+          to: this.classOwner,
           class_id: nftClassId,
           input: {
             metadata: JSON.stringify({
@@ -313,7 +313,7 @@ describe("LikeNFTClass", () => {
     const mintNFT = async () => {
       await likeClassOwnerSigner
         .mintNFTs({
-          creator: this.classOwner,
+          to: this.classOwner,
           class_id: nftClassId,
           inputs: [
             {
@@ -449,7 +449,7 @@ describe("LikeNFTClass permission control", () => {
     const mintNFT = async () => {
       await likeProtocolOwnerSigner
         .mintNFT({
-          creator: this.classCreatorSigner.address,
+          to: this.classCreatorSigner.address,
           class_id: this.classId,
           input: {
             metadata: JSON.stringify({

@@ -74,8 +74,8 @@ describe("LikeNFT", () => {
 
     await likeProtocolOwnerSigner
       .mintNFT({
-        creator: this.ownerSigner,
         class_id: this.classId,
+        to: this.ownerSigner,
         input: {
           metadata: JSON.stringify({
             image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
