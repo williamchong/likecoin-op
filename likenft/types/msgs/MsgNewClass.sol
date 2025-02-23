@@ -5,5 +5,7 @@ import {ClassInput} from "../ClassInput.sol";
 
 struct MsgNewClass {
     address creator;
+    address[] updaters;
+    address[] minters;
     ClassInput input;
 }

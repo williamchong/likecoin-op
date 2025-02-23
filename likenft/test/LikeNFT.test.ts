@@ -46,6 +46,8 @@ describe("LikeNFT", () => {
     likeProtocolOwnerSigner
       .newClass({
         creator: this.ownerSigner,
+        updaters: [this.ownerSigner],
+        minters: [this.ownerSigner],
         input: {
           name: "My Book",
           symbol: "KOOB",

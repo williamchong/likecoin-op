@@ -43,15 +43,17 @@ contract LikeNFTClass is ERC721A, Ownable, AccessControl {
         string memo
     );
 
-    modifier onlyOwnerOrMinter() {
-        if (owner() != msg.sender && !hasRole(MINTER_ROLE, msg.sender)) {
+    modifier onlyMinter() {
+        // FIXME: tx.origin is prone to phishing attacks
+        if (!hasRole(MINTER_ROLE, tx.origin)) {
             revert ErrUnauthorized();
         }
         _;
     }
 
-    modifier onlyOwnerOrUpdater() {
-        if (owner() != msg.sender && !hasRole(UPDATER_ROLE, msg.sender)) {
+    modifier onlyUpdater() {
+        // FIXME: tx.origin is prone to phishing attacks
+        if (!hasRole(UPDATER_ROLE, tx.origin)) {
             revert ErrUnauthorized();
         }
         _;
@@ -69,9 +71,12 @@ contract LikeNFTClass is ERC721A, Ownable, AccessControl {
         $.data.metadata = msgNewClass.input.metadata;
         $.data.config = msgNewClass.input.config;
 
-        // The contract creator. Assume a likenft meta contract
-        _grantRole(MINTER_ROLE, msg.sender);
-        _grantRole(UPDATER_ROLE, msg.sender);
+        for (uint i = 0; i < msgNewClass.minters.length; i++) {
+            _grantRole(MINTER_ROLE, msgNewClass.minters[i]);
+        }
+        for (uint i = 0; i < msgNewClass.updaters.length; i++) {
+            _grantRole(UPDATER_ROLE, msgNewClass.updaters[i]);
+        }
     }
 
     function supportsInterface(
@@ -80,7 +85,7 @@ contract LikeNFTClass is ERC721A, Ownable, AccessControl {
         return super.supportsInterface(interfaceId);
     }
 
-    function update(ClassInput memory classInput) public onlyOwnerOrUpdater {
+    function update(ClassInput memory classInput) public onlyUpdater {
         ClassStorage storage $ = _getClassStorage();
         $.name = classInput.name;
         $.symbol = classInput.symbol;
@@ -91,7 +96,7 @@ contract LikeNFTClass is ERC721A, Ownable, AccessControl {
     function mint(
         address to,
         string[] calldata metadata_list
-    ) external onlyOwnerOrMinter {
+    ) external onlyMinter {
         ClassStorage storage $ = _getClassStorage();
 
         uint256 nextTokenId = _nextTokenId();

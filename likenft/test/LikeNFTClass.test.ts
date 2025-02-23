@@ -52,7 +52,9 @@ describe("LikeNFTClass", () => {
     });
 
     await likeProtocolOwnerSigner.newClass({
-      creator: this.classOwner.address,
+      creator: this.classOwner,
+      updaters: [this.classOwner, this.likerLand],
+      minters: [this.classOwner, this.likerLand],
       input: {
         name: "My Book",
         symbol: "KOOB",
@@ -79,17 +81,33 @@ describe("LikeNFTClass", () => {
     expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
   });
 
-  it("should have the right minter", async function () {
-    // FIXME: This is not working
-    return;
+  it("should have the right roles assigned", async function () {
     const MINTER_ROLE = await nftClassContract.MINTER_ROLE();
+    const UPDATER_ROLE = await nftClassContract.UPDATER_ROLE();
+    expect(
+      await nftClassContract.hasRole(MINTER_ROLE, this.protocolOwner.address),
+    ).to.equal(false);
     expect(
       await nftClassContract.hasRole(MINTER_ROLE, this.classOwner.address),
     ).to.equal(true);
     expect(
-      await nftClassContract.hasRole(MINTER_ROLE, this.protocolOwner.address),
+      await nftClassContract.hasRole(MINTER_ROLE, this.likerLand.address),
     ).to.equal(true);
-    // expect(await nftClassContract.hasRole(MINTER_ROLE, contractAddress)).to.equal(true);
+    expect(
+      await nftClassContract.hasRole(MINTER_ROLE, this.randomSigner.address),
+    ).to.equal(false);
+    expect(
+      await nftClassContract.hasRole(UPDATER_ROLE, this.protocolOwner.address),
+    ).to.equal(false);
+    expect(
+      await nftClassContract.hasRole(UPDATER_ROLE, this.classOwner.address),
+    ).to.equal(true);
+    expect(
+      await nftClassContract.hasRole(UPDATER_ROLE, this.likerLand.address),
+    ).to.equal(true);
+    expect(
+      await nftClassContract.hasRole(UPDATER_ROLE, this.randomSigner.address),
+    ).to.equal(false);
   });
 
   it("should allow class owner to update class and mint NFT", async function () {
@@ -159,7 +177,6 @@ describe("LikeNFTClass", () => {
     const updateClass = async () => {
       await likeProtocolClassOwnerSigner
         .updateClass({
-          creator: this.classOwner.address,
           class_id: nftClassId,
           input: {
             name: "My Book",
@@ -234,14 +251,11 @@ describe("LikeNFTClass", () => {
   });
 
   it("should not allow random address update class via protocol contract", async function () {
-    // FIXME: This is not working
-    return;
     const likeProtocolRandomSigner = protocolContract.connect(
       this.randomSigner,
     );
 
-    await likeProtocolRandomSigner.updateClass({
-      creator: this.randomSigner,
+    await expect(likeProtocolRandomSigner.updateClass({
       class_id: nftClassId,
       input: {
         name: "Hi Jack",
@@ -250,8 +264,9 @@ describe("LikeNFTClass", () => {
         config: {
           max_supply: 0,
         },
-      },
-    });
+        },
+      }),
+    ).to.be.rejected;
 
     await expect(await nftClassContract.owner()).to.equal(
       this.classOwner.address,
@@ -344,39 +359,43 @@ describe("LikeNFTClass", () => {
         .then((tx) => tx.wait());
     };
     await expect(mintNFT()).to.be.not.rejected;
+    await expect(await nftClassContract.totalSupply()).to.equal(2n);
   });
 });
 
 describe("LikeNFTClass permission control", () => {
   before(async function () {
     this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-    const [likeProtocolOwnerSigner, classCreatorSigner, randomSigner] =
-      await ethers.getSigners();
+    const [protocolOwner, classOwner, likerLand, randomSigner] =
+    await ethers.getSigners();
 
-    this.likeProtocolOwnerSigner = likeProtocolOwnerSigner;
-    this.classCreatorSigner = classCreatorSigner;
+    this.protocolOwner = protocolOwner;
+    this.classOwner = classOwner;
+    this.likerLand = likerLand;
     this.randomSigner = randomSigner;
   });
 
+  let deployment: BaseContract;
+  let contractAddress: string;
+  let protocolContract: BaseContract;
+  let nftClassId: string;
+  let nftClassContract: BaseContract;
   beforeEach(async function () {
     const likeProtocol = await upgrades.deployProxy(
       this.LikeProtocol,
-      [this.likeProtocolOwnerSigner.address],
+      [this.protocolOwner.address],
       {
         initializer: "initialize",
       },
     );
-    const deployment = await likeProtocol.waitForDeployment();
-    this.contractAddress = await deployment.getAddress();
-
-    const LikeProtocolOwnerSigner = await ethers.getContractFactory(
+    deployment = await likeProtocol.waitForDeployment();
+    contractAddress = await deployment.getAddress();
+    protocolContract = await ethers.getContractAt(
       "LikeProtocol",
-      {
-        signer: this.likeProtocolOwnerSigner,
-      },
+      contractAddress,
     );
-    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(
-      this.contractAddress,
+    const likeProtocolOwnerSigner = protocolContract.connect(
+      this.protocolOwner,
     );
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
@@ -392,7 +411,9 @@ describe("LikeNFTClass permission control", () => {
 
     likeProtocolOwnerSigner
       .newClass({
-        creator: this.classCreatorSigner.address,
+        creator: this.classOwner,
+        updaters: [this.classOwner, this.likerLand],
+        minters: [this.classOwner, this.likerLand],
         input: {
           name: "My Book",
           symbol: "KOOB",
@@ -414,19 +435,15 @@ describe("LikeNFTClass permission control", () => {
       })
       .then((tx) => tx.wait());
 
-    const newClassEvent = await NewClassEvent;
-    this.classId = newClassEvent.id;
+      const newClassEvent = await NewClassEvent;
+      nftClassId = newClassEvent.id;
+      nftClassContract = await ethers.getContractAt("LikeNFTClass", nftClassId);
+      expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
   });
 
-  it("should allow protocol owner to mint NFT", async function () {
-    const LikeProtocolOwnerSigner = await ethers.getContractFactory(
-      "LikeProtocol",
-      {
-        signer: this.likeProtocolOwnerSigner,
-      },
-    );
-    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(
-      this.contractAddress,
+  it("should not allow protocol owner to mint NFT", async function () {
+    const likeProtocolOwnerSigner = protocolContract.connect(
+      this.protocolOwner,
     );
 
     const mintNFT = async () => {
@@ -457,22 +474,15 @@ describe("LikeNFTClass permission control", () => {
         .then((tx) => tx.wait());
     };
 
-    await expect(mintNFT()).to.be.not.rejected;
+    await expect(mintNFT()).to.be.rejected;
   });
 
-  it("should allow creator to mint NFT", async function () {
-    const ClassContractWithCreatorSigner = await ethers.getContractFactory(
-      "LikeNFTClass",
-      {
-        signer: this.classCreatorSigner,
-      },
-    );
-    const classContractWithCreatorSigner =
-      ClassContractWithCreatorSigner.attach(this.classId);
+  it("should allow class owner to mint NFT", async function () {
+    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
 
     const mintNFT = async () => {
-      await classContractWithCreatorSigner
-        .mint(this.classCreatorSigner.address, [
+      await likeClassOwnerSigner
+        .mint(this.likerLand.address, [
           JSON.stringify({
             image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
             image_data: "",
@@ -512,39 +522,45 @@ describe("LikeNFTClass permission control", () => {
     };
 
     await expect(mintNFT()).to.be.not.rejected;
+    await expect(await nftClassContract.totalSupply()).to.equal(2n);
+    await expect(await nftClassContract.balanceOf(this.likerLand.address)).to.equal(2n);
   });
 });
 
 describe("LikeNFTClass ownership transfer", () => {
   before(async function () {
     this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-    const [likeProtocolOwnerSigner, classCreatorSigner, nextClassOwnerSigner] =
-      await ethers.getSigners();
+    const [protocolOwner, classOwner, likerLand, randomSigner] =
+    await ethers.getSigners();
 
-    this.likeProtocolOwnerSigner = likeProtocolOwnerSigner;
-    this.classCreatorSigner = classCreatorSigner;
-    this.nextClassOwnerSigner = nextClassOwnerSigner;
+    this.protocolOwner = protocolOwner;
+    this.classOwner = classOwner;
+    this.likerLand = likerLand;
+    this.randomSigner = randomSigner;
   });
 
+  let deployment: BaseContract;
+  let contractAddress: string;
+  let protocolContract: BaseContract;
+  let nftClassId: string;
+  let nftClassContract: BaseContract;
   beforeEach(async function () {
-    const likeNFT = await upgrades.deployProxy(
+    const likeProtocol = await upgrades.deployProxy(
       this.LikeProtocol,
-      [this.likeProtocolOwnerSigner.address],
+      [this.protocolOwner.address],
       {
         initializer: "initialize",
       },
     );
-    const deployment = await likeNFT.waitForDeployment();
-    this.contractAddress = await deployment.getAddress();
-
-    const LikeProtocolOwnerSigner = await ethers.getContractFactory(
+    deployment = await likeProtocol.waitForDeployment();
+    contractAddress = await deployment.getAddress();
+    protocolContract = await ethers.getContractAt(
       "LikeProtocol",
-      {
-        signer: this.likeProtocolOwnerSigner,
-      },
+      contractAddress,
     );
-    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(
-      this.contractAddress,
+
+    const likeProtocolOwnerSigner = protocolContract.connect(
+      this.protocolOwner,
     );
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
@@ -560,7 +576,9 @@ describe("LikeNFTClass ownership transfer", () => {
 
     likeProtocolOwnerSigner
       .newClass({
-        creator: this.classCreatorSigner.address,
+        creator: this.classOwner,
+        updaters: [this.classOwner, this.likerLand],
+        minters: [this.classOwner, this.likerLand],
         input: {
           name: "My Book",
           symbol: "KOOB",
@@ -583,35 +601,37 @@ describe("LikeNFTClass ownership transfer", () => {
       .then((tx) => tx.wait());
 
     const newClassEvent = await NewClassEvent;
-    this.classId = newClassEvent.id;
+    nftClassId = newClassEvent.id;
+    nftClassContract = await ethers.getContractAt("LikeNFTClass", nftClassId);
+    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
+  });
 
-    const ClassContractWithCreatorSigner = await ethers.getContractFactory(
-      "LikeNFTClass",
-      {
-        signer: this.classCreatorSigner,
-      },
-    );
-    const classContractWithCreatorSigner =
-      ClassContractWithCreatorSigner.attach(this.classId);
+  it("should allow class owner to transfer ownership", async function () {
+    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
 
     const transferOwnership = async () => {
-      await classContractWithCreatorSigner
-        .transferOwnership(this.nextClassOwnerSigner)
+      await likeClassOwnerSigner
+        .transferOwnership(this.randomSigner.address)
         .then((tx) => tx.wait());
     };
 
-    expect(transferOwnership()).to.not.be.rejected;
+    await expect(transferOwnership()).to.not.be.rejected;
+    expect(await nftClassContract.owner()).to.equal(this.randomSigner.address);
   });
 
-  it("should allow protocol owner to mint NFT", async function () {
-    const LikeProtocolOwnerSigner = await ethers.getContractFactory(
-      "LikeProtocol",
-      {
-        signer: this.likeProtocolOwnerSigner,
-      },
-    );
-    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(
-      this.contractAddress,
+  it("should not allow random signer to transfer ownership", async function () {
+    const likeClassRandomSigner = nftClassContract.connect(this.randomSigner);
+    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
+
+    await expect(likeClassRandomSigner
+      .transferOwnership(this.randomSigner.address)).to.be.rejected;
+    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
+  });
+
+  it("should not allow protocol owner to mint NFT", async function () {
+    const likeProtocolOwnerSigner = protocolContract.connect(
+      this.protocolOwner,
     );
 
     const mintNFT = async () => {
@@ -642,22 +662,86 @@ describe("LikeNFTClass ownership transfer", () => {
         .then((tx) => tx.wait());
     };
 
+    await expect(mintNFT()).to.be.rejected;
+    await expect(await nftClassContract.totalSupply()).to.equal(0n);
+  });
+
+  it("should not modify minter permission when transfer ownership", async function () {
+    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
+
+    const transferOwnership = async () => {
+      await likeClassOwnerSigner
+        .transferOwnership(this.randomSigner.address)
+        .then((tx) => tx.wait());
+    };
+
+    await expect(transferOwnership()).to.not.be.rejected;
+    expect(await nftClassContract.owner()).to.equal(this.randomSigner.address);
+
+    const mintNFT = async () => {
+      await likeClassOwnerSigner
+        .mint(this.classOwner.address, [
+          JSON.stringify({
+            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+            image_data: "",
+            external_url: "https://www.google.com",
+            description: "202412191729 #0001 Description",
+            name: "202412191729 #0001",
+            attributes: [
+              {
+                trait_type: "ISCN ID",
+                value:
+                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+              },
+            ],
+            background_color: "",
+            animation_url: "",
+            youtube_url: "",
+          }),
+          JSON.stringify({
+            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+            image_data: "",
+            external_url: "https://www.google.com",
+            description: "202412191729 #0001 Description",
+            name: "202412191729 #0001",
+            attributes: [
+              {
+                trait_type: "ISCN ID",
+                value:
+                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+              },
+            ],
+            background_color: "",
+            animation_url: "",
+            youtube_url: "",
+          }),
+        ])
+        .then((tx) => tx.wait());
+    };
+
     await expect(mintNFT()).to.be.not.rejected;
+    await expect(await nftClassContract.totalSupply()).to.equal(2n);
+    await expect(await nftClassContract.balanceOf(this.classOwner.address)).to.equal(2n);
   });
 
-  it("should not allow creator to mint NFT", async function () {
-    const ClassContractWithCreatorSigner = await ethers.getContractFactory(
-      "LikeNFTClass",
-      {
-        signer: this.classCreatorSigner,
-      },
-    );
-    const classContractWithCreatorSigner =
-      ClassContractWithCreatorSigner.attach(this.classId);
+  it("should not allow next owner to mint NFT without minter permission", async function () {
+    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
 
+    const transferOwnership = async () => {
+      await likeClassOwnerSigner
+        .transferOwnership(this.randomSigner.address)
+        .then((tx) => tx.wait());
+    };
+
+    await expect(transferOwnership()).to.not.be.rejected;
+    expect(await nftClassContract.owner()).to.equal(this.randomSigner.address);
+
+    const likeClassRandomSigner = nftClassContract.connect(this.randomSigner);
     const mintNFT = async () => {
-      await classContractWithCreatorSigner
-        .mint(this.classCreatorSigner.address, [
+      await likeClassRandomSigner
+        .mint(this.randomSigner.address, [
           JSON.stringify({
             image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
             image_data: "",
@@ -696,62 +780,8 @@ describe("LikeNFTClass ownership transfer", () => {
         .then((tx) => tx.wait());
     };
 
-    await expect(mintNFT()).to.be.rejectedWith(
-      "VM Exception while processing transaction: reverted with custom error 'ErrUnauthorized()'",
-    );
-  });
-
-  it("should allow next owner to mint NFT", async function () {
-    const ClassContractWithNextOwnerSigner = await ethers.getContractFactory(
-      "LikeNFTClass",
-      {
-        signer: this.nextClassOwnerSigner,
-      },
-    );
-    const classContractWithNextOwnerSigner =
-      ClassContractWithNextOwnerSigner.attach(this.classId);
-
-    const mintNFT = async () => {
-      await classContractWithNextOwnerSigner
-        .mint(this.nextClassOwnerSigner.address, [
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "202412191729 #0001 Description",
-            name: "202412191729 #0001",
-            attributes: [
-              {
-                trait_type: "ISCN ID",
-                value:
-                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-              },
-            ],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "202412191729 #0001 Description",
-            name: "202412191729 #0001",
-            attributes: [
-              {
-                trait_type: "ISCN ID",
-                value:
-                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-              },
-            ],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-        ])
-        .then((tx) => tx.wait());
-    };
-
-    await expect(mintNFT()).to.not.be.rejected;
+    await expect(mintNFT()).to.be.rejected;
+    await expect(await nftClassContract.totalSupply()).to.equal(0n);
+    await expect(await nftClassContract.balanceOf(this.randomSigner.address)).to.equal(0n);
   });
 });

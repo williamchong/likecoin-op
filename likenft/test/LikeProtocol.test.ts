@@ -63,43 +63,7 @@ describe("LikeProtocol", () => {
     await expect(likeProtocolRandomSigner.unpause()).to.be.rejected;
   });
 
-  it("should not operatable when paused", async function () {
-    const likeProtocolSigner = contract.connect(this.ownerSigner);
 
-    const classOperation = async () => {
-      await likeProtocolSigner
-        .newClass({
-          creator: this.ownerSigner,
-          input: {
-            name: "My Book",
-            symbol: "KOOB",
-            metadata: JSON.stringify({
-              name: "Collection Name",
-              symbol: "Collection SYMB",
-              description: "Collection Description",
-              image:
-                "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-              banner_image: "",
-              featured_image: "",
-              external_link: "https://www.example.com",
-              collaborators: [],
-            }),
-            config: {
-              max_supply: 10,
-            },
-          },
-        })
-        .then((tx) => tx.wait());
-    };
-
-    await expect(classOperation()).to.be.not.rejected;
-    await expect(likeProtocolSigner.pause()).to.be.not.rejected;
-    await expect(classOperation()).to.be.rejectedWith(
-      "VM Exception while processing transaction: reverted with custom error 'EnforcedPause()'",
-    );
-    await expect(likeProtocolSigner.unpause()).to.be.not.rejected;
-    await expect(classOperation()).to.be.not.rejected;
-  });
 
   it("should be able to create new class", async function () {
     const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
@@ -108,6 +72,8 @@ describe("LikeProtocol", () => {
       await likeProtocolOwnerSigner
         .newClass({
           creator: this.ownerSigner,
+          updaters: [this.ownerSigner],
+          minters: [this.ownerSigner],
           input: {
             name: "My Book",
             symbol: "KOOB",
@@ -150,6 +116,46 @@ describe("LikeProtocol", () => {
     expect(await _newNFTClass.symbol()).to.equal("KOOB");
   });
 
+  it("should not allow to create new class when paused", async function () {
+    const likeProtocolSigner = contract.connect(this.ownerSigner);
+
+    const classOperation = async () => {
+      await likeProtocolSigner
+        .newClass({
+          creator: this.ownerSigner,
+          updaters: [this.ownerSigner],
+          minters: [this.ownerSigner],
+          input: {
+            name: "My Book",
+            symbol: "KOOB",
+            metadata: JSON.stringify({
+              name: "Collection Name",
+              symbol: "Collection SYMB",
+              description: "Collection Description",
+              image:
+                "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
+              banner_image: "",
+              featured_image: "",
+              external_link: "https://www.example.com",
+              collaborators: [],
+            }),
+            config: {
+              max_supply: 10,
+            },
+          },
+        })
+        .then((tx) => tx.wait());
+    };
+
+    await expect(classOperation()).to.be.not.rejected;
+    await expect(likeProtocolSigner.pause()).to.be.not.rejected;
+    await expect(classOperation()).to.be.rejectedWith(
+      "VM Exception while processing transaction: reverted with custom error 'EnforcedPause()'",
+    );
+    await expect(likeProtocolSigner.unpause()).to.be.not.rejected;
+    await expect(classOperation()).to.be.not.rejected;
+  });
+
   it("should be allow everyone to create new class", async function () {
     const likeNFTSigner = contract.connect(this.randomSigner);
 
@@ -157,6 +163,8 @@ describe("LikeProtocol", () => {
       await likeNFTSigner
         .newClass({
           creator: this.randomSigner,
+          updaters: [this.randomSigner],
+          minters: [this.randomSigner],
           input: {
             name: "My Book",
             symbol: "KOOB",
@@ -173,5 +181,112 @@ describe("LikeProtocol", () => {
     };
 
     await expect(newClass()).to.be.not.rejected;
+  });
+
+  it("should not allow everyone to create new class when paused", async function () {
+    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
+    const likeProtocolRandomSigner = contract.connect(this.randomSigner);
+
+    const classOperation = async () => {
+      await likeProtocolRandomSigner
+        .newClass({
+          creator: this.randomSigner,
+          updaters: [this.randomSigner],
+          minters: [this.randomSigner],
+          input: {
+            name: "My Book",
+            symbol: "KOOB",
+            metadata: JSON.stringify({
+              name: "Random by somone",
+              symbol: "No data",
+            }),
+            config: {
+              max_supply: 10,
+            },
+          },
+        })
+        .then((tx) => tx.wait());
+    };
+
+    await expect(classOperation()).to.be.not.rejected;
+    await expect(likeProtocolOwnerSigner.pause()).to.be.not.rejected;
+    await expect(classOperation()).to.be.rejectedWith(
+      "VM Exception while processing transaction: reverted with custom error 'EnforcedPause()'",
+    );
+    await expect(likeProtocolOwnerSigner.unpause()).to.be.not.rejected;
+    await expect(classOperation()).to.be.not.rejected;
+  });
+
+  it("should only allow LikeNFTClass owner to update the class", async function () {
+    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
+    const likeProtocolRandomSigner = contract.connect(this.randomSigner);
+
+    const newClass = async () => {
+      await likeProtocolOwnerSigner
+        .newClass({
+          creator: this.ownerSigner,
+          updaters: [this.ownerSigner],
+          minters: [this.ownerSigner],
+          input: {
+            name: "My Book",
+            symbol: "KOOB",
+            metadata: JSON.stringify({
+              name: "Collection Name",
+              symbol: "Collection SYMB",
+              description: "Collection Description",
+              image:
+                "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
+              banner_image: "",
+              featured_image: "",
+              external_link: "https://www.example.com",
+              collaborators: [],
+            }),
+            config: {
+              max_supply: 10,
+            },
+          },
+        })
+        .then((tx) => tx.wait());
+    };
+
+    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
+      likeProtocolOwnerSigner.on("NewClass", (id, params, event) => {
+        event.removeListener();
+        resolve({ id });
+      });
+
+      setTimeout(() => {
+        reject(new Error("timeout"));
+      }, 20000);
+    });
+
+    await expect(newClass()).to.be.not.rejected;
+    const newClassEvent = await NewClassEvent;
+    const classId = newClassEvent.id;
+
+    const _newNFTClass = await ethers.getContractAt("LikeNFTClass", classId);
+    await expect(await _newNFTClass.owner()).to.equal(this.ownerSigner.address);
+    await expect(await _newNFTClass.symbol()).to.equal("KOOB");
+
+    await expect(
+      likeProtocolRandomSigner.updateClass({
+        creator: this.randomSigner,
+        updaters: [this.randomSigner],
+        minters: [this.randomSigner],
+        class_id: classId,
+        input: {
+          name: "Hi Jack",
+          symbol: "HIJACK",
+          metadata: JSON.stringify({}),
+          config: {
+            max_supply: 0,
+          },
+        },
+      }),
+    ).to.be.rejected;
+    await expect(await _newNFTClass.owner()).to.equal(
+      this.ownerSigner.address,
+    );
+    await expect(await _newNFTClass.symbol()).to.equal("KOOB");
   });
 });
