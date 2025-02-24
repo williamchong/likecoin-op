@@ -46,6 +46,8 @@ describe("LikeNFT", () => {
     likeProtocolOwnerSigner
       .newClass({
         creator: this.ownerSigner,
+        updaters: [this.ownerSigner],
+        minters: [this.ownerSigner],
         input: {
           name: "My Book",
           symbol: "KOOB",
@@ -72,8 +74,8 @@ describe("LikeNFT", () => {
 
     await likeProtocolOwnerSigner
       .mintNFT({
-        creator: this.ownerSigner,
         class_id: this.classId,
+        to: this.ownerSigner,
         input: {
           metadata: JSON.stringify({
             image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
