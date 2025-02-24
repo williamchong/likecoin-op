@@ -18,6 +18,7 @@ var WorkerCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		envCfg := context.ConfigFromContext(cmd.Context())
 		client := context.AsynqClientFromContext(cmd.Context())
+		logger := context.LoggerFromContext(cmd.Context())
 
 		db, err := sql.Open("postgres", envCfg.DbConnectionStr)
 		if err != nil {
@@ -56,7 +57,8 @@ var WorkerCmd = &cobra.Command{
 
 		mux.Use(context.AsynqMiddlewareWithConfigContext(envCfg))
 		mux.Use(context.AsynqMiddlewareWithDBContext(db))
-		mux.Use(context.AsynqMiddlewareWithAsyncClientContext(client))
+		mux.Use(context.AsynqMiddlewareWithAsynqClientContext(client))
+		mux.Use(context.AsynqMiddlewareWithLoggerContext(logger))
 
 		if err := srv.Run(mux); err != nil {
 			log.Fatalf("could not run server: %v", err)

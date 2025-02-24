@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/go-redis/redis"
+	"github.com/hibiken/asynq"
 	"github.com/joho/godotenv"
 	"github.com/likecoin/like-migration-backend/cmd/worker/cmd"
 	"github.com/likecoin/like-migration-backend/cmd/worker/config"
@@ -23,5 +25,23 @@ func main() {
 		panic(err)
 	}
 
-	cmd.Execute(envCfg)
+	opt, err := redis.ParseURL(envCfg.RedisDsn)
+
+	if err != nil {
+		panic(err)
+	}
+
+	asynqClient := asynq.NewClient(asynq.RedisClientOpt{
+		Network:      opt.Network,
+		Addr:         opt.Addr,
+		Password:     opt.Password,
+		DB:           opt.DB,
+		DialTimeout:  opt.DialTimeout,
+		ReadTimeout:  opt.ReadTimeout,
+		WriteTimeout: opt.WriteTimeout,
+		PoolSize:     opt.PoolSize,
+		TLSConfig:    opt.TLSConfig,
+	})
+
+	cmd.Execute(envCfg, asynqClient, logger)
 }
