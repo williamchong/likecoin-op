@@ -14,3 +14,12 @@ local-node:
 	(sleep 2 && make -C likecoin deploy-local) &
 	(sleep 3 && make -C likenft deploy-local) &
 	make -C operation local-node
+
+.PHONY: abigen
+abigen:
+	make -C likenft build
+	mkdir -p abi
+	cp likenft/artifacts/contracts/LikeProtocol.sol/LikeProtocol.json abi/
+	cp likenft/artifacts/contracts/LikeNFTClass.sol/LikeNFTClass.json abi/
+	# make -C likenft-indexer abigen
+	# make -C migration-backend abigen
