@@ -5,31 +5,38 @@ import { ethers, upgrades } from "hardhat";
 describe("LikeNFT", () => {
   before(async function () {
     this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-    const [ownerSigner, signer1] = await ethers.getSigners();
+    const [protocolOwner, classOwner, likerLand, randomSigner, randomSigner2] =
+      await ethers.getSigners();
 
-    this.ownerSigner = ownerSigner;
-    this.signer1 = signer1;
+    this.protocolOwner = protocolOwner;
+    this.classOwner = classOwner;
+    this.likerLand = likerLand;
+    this.randomSigner = randomSigner;
+    this.randomSigner2 = randomSigner2;
   });
 
+  let deployment: BaseContract;
+  let contractAddress: string;
+  let protocolContract: BaseContract;
+  let nftClassId: string;
+  let nftClassContract: BaseContract;
   beforeEach(async function () {
     const likeProtocol = await upgrades.deployProxy(
       this.LikeProtocol,
-      [this.ownerSigner.address],
+      [this.protocolOwner.address],
       {
         initializer: "initialize",
       },
     );
-    const deployment = await likeProtocol.waitForDeployment();
-    this.contractAddress = await deployment.getAddress();
-
-    const LikeProtocolOwnerSigner = await ethers.getContractFactory(
+    deployment = await likeProtocol.waitForDeployment();
+    contractAddress = await deployment.getAddress();
+    protocolContract = await ethers.getContractAt(
       "LikeProtocol",
-      {
-        signer: this.ownerSigner,
-      },
+      contractAddress,
     );
-    const likeProtocolOwnerSigner = LikeProtocolOwnerSigner.attach(
-      this.contractAddress,
+
+    const likeProtocolOwnerSigner = protocolContract.connect(
+      this.protocolOwner,
     );
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
@@ -40,14 +47,14 @@ describe("LikeNFT", () => {
 
       setTimeout(() => {
         reject(new Error("timeout"));
-      }, 60000);
+      }, 20000);
     });
 
     likeProtocolOwnerSigner
       .newClass({
-        creator: this.ownerSigner,
-        updaters: [this.ownerSigner],
-        minters: [this.ownerSigner],
+        creator: this.classOwner,
+        updaters: [this.classOwner, this.likerLand],
+        minters: [this.classOwner, this.likerLand],
         input: {
           name: "My Book",
           symbol: "KOOB",
@@ -70,81 +77,88 @@ describe("LikeNFT", () => {
       .then((tx) => tx.wait());
 
     const newClassEvent = await NewClassEvent;
-    this.classId = newClassEvent.id;
+    nftClassId = newClassEvent.id;
+    nftClassContract = await ethers.getContractAt("LikeNFTClass", nftClassId);
 
-    await likeProtocolOwnerSigner
-      .mintNFT({
-        class_id: this.classId,
-        to: this.ownerSigner,
-        input: {
-          metadata: JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "#0001 Description",
-            name: "#0001",
-            attributes: [
-              {
-                trait_type: "ISCN ID",
-                value:
-                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-              },
-            ],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-        },
-      })
+    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    await likeNFTClassOwnerSigner
+      .mint(this.classOwner, [
+        JSON.stringify({
+          image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+          image_data: "",
+          external_url: "https://www.google.com",
+          description: "#0001 Description",
+          name: "#0001",
+          attributes: [
+            {
+              trait_type: "ISCN ID",
+              value:
+                "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+            },
+          ],
+          background_color: "",
+          animation_url: "",
+          youtube_url: "",
+        }),
+      ])
       .then((tx) => tx.wait());
   });
 
-  it("should be able to send", async function () {
-    const ClassOwnerSigner = await ethers.getContractFactory("LikeNFTClass", {
-      signer: this.ownerSigner,
-    });
-    const classOwnerSigner = ClassOwnerSigner.attach(this.classId);
+  it("owner should be able to send once", async function () {
+    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
     await expect(
-      classOwnerSigner
-        .transferWithMemo(this.ownerSigner, this.signer1, 0, "memo1")
+      likeNFTClassOwnerSigner
+        .transferWithMemo(this.classOwner, this.randomSigner, 0, "memo1")
         .then((tx) => tx.wait()),
     ).to.be.not.rejected;
     await expect(
-      classOwnerSigner
-        .transferWithMemo(this.ownerSigner, this.signer1, 0, "memo1")
+      likeNFTClassOwnerSigner
+        .transferWithMemo(this.classOwner, this.randomSigner2, 0, "memo1fails")
         .then((tx) => tx.wait()),
-    ).to.be.rejectedWith(
-      "VM Exception while processing transaction: reverted with custom error 'TransferFromIncorrectOwner()'",
-    );
+    ).to.be.rejectedWith(/ERC721InsufficientApproval/);
 
-    const filters = classOwnerSigner.filters.TransferWithMemo(null, null, 0);
-    const logs1 = await classOwnerSigner.queryFilter(filters);
+    const filters = likeNFTClassOwnerSigner.filters.TransferWithMemo(
+      null,
+      null,
+      0,
+    );
+    const logs1 = await likeNFTClassOwnerSigner.queryFilter(filters);
     expect((logs1[0] as EventLog).args[3]).to.equal("memo1");
+  });
 
-    const ClassSigner1 = await ethers.getContractFactory("LikeNFTClass", {
-      signer: this.signer1,
-    });
-    const classSigner1 = ClassSigner1.attach(this.classId);
+  it("should be able to send with memo", async function () {
+    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    const likeNFTClassRandomSigner = nftClassContract.connect(
+      this.randomSigner,
+    );
     await expect(
-      classSigner1
-        .transferWithMemo(this.signer1, this.ownerSigner, 0, "memo2")
+      likeNFTClassOwnerSigner
+        .transferWithMemo(this.classOwner, this.randomSigner, 0, "memo1")
         .then((tx) => tx.wait()),
     ).to.be.not.rejected;
     await expect(
-      classSigner1
-        .transferWithMemo(this.signer1, this.ownerSigner, 0, "memo2")
+      likeNFTClassRandomSigner
+        .transferWithMemo(this.randomSigner, this.classOwner, 0, "memo2")
         .then((tx) => tx.wait()),
-    ).to.be.rejectedWith(
-      "VM Exception while processing transaction: reverted with custom error 'TransferFromIncorrectOwner()'",
-    );
+    ).to.be.not.rejected;
+    await expect(
+      likeNFTClassRandomSigner
+        .transferWithMemo(this.randomSigner, this.classOwner, 0, "memo2fails")
+        .then((tx) => tx.wait()),
+    ).to.be.rejectedWith(/ERC721InsufficientApproval/);
 
-    const logs2 = await classOwnerSigner.queryFilter(filters);
-    expect((logs2[0] as EventLog).args[0]).to.equal(this.ownerSigner.address);
-    expect((logs2[0] as EventLog).args[1]).to.equal(this.signer1.address);
+    const filters2 = likeNFTClassOwnerSigner.filters.TransferWithMemo(
+      null,
+      null,
+      0,
+    );
+    const logs2 = await likeNFTClassOwnerSigner.queryFilter(filters2);
+    expect((logs2[0] as EventLog).args[0]).to.equal(this.classOwner.address);
+    expect((logs2[0] as EventLog).args[1]).to.equal(this.randomSigner.address);
     expect((logs2[0] as EventLog).args[2]).to.equal(0n);
     expect((logs2[0] as EventLog).args[3]).to.equal("memo1");
-    expect((logs2[1] as EventLog).args[0]).to.equal(this.signer1.address);
-    expect((logs2[1] as EventLog).args[1]).to.equal(this.ownerSigner.address);
+    expect((logs2[1] as EventLog).args[0]).to.equal(this.randomSigner.address);
+    expect((logs2[1] as EventLog).args[1]).to.equal(this.classOwner.address);
     expect((logs2[1] as EventLog).args[2]).to.equal(0n);
     expect((logs2[1] as EventLog).args[3]).to.equal("memo2");
   });
