@@ -54,6 +54,11 @@ contract LikeProtocol is
         _unpause();
     }
 
+    function isLikeNFTClass(address classId) public view returns (bool) {
+        LikeNFTStorage storage $ = _getLikeNFTStorage();
+        return address($.classIdClassMapping[classId]) != address(0);
+    }
+
     function newClass(MsgNewClass memory msgNewClass) public whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
         LikeNFTClass class = new LikeNFTClass(msgNewClass);
