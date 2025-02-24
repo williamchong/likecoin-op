@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/hibiken/asynq"
-	"github.com/likecoin/like-migration-backend/cmd/worker/config"
+	"github.com/likecoin/like-migration-backend/cmd/worker/context"
 	"github.com/likecoin/like-migration-backend/cmd/worker/task"
 	"github.com/spf13/cobra"
 )
@@ -14,7 +14,7 @@ var WorkerCmd = &cobra.Command{
 	Use:   "worker",
 	Short: "Start worker",
 	Run: func(cmd *cobra.Command, args []string) {
-		envCfg := cmd.Context().Value(config.ContextKey).(*config.EnvConfig)
+		envCfg := context.ConfigFromContext(cmd.Context())
 
 		opt, err := redis.ParseURL(envCfg.RedisDsn)
 		if err != nil {
@@ -45,6 +45,8 @@ var WorkerCmd = &cobra.Command{
 		mux := asynq.NewServeMux()
 		mux.HandleFunc(task.TypeHelloWorld, task.HandleHelloWorldTask)
 		// ...register other handlers...
+
+		mux.Use(context.AsynqMiddlewareWithConfigContext(envCfg))
 
 		if err := srv.Run(mux); err != nil {
 			log.Fatalf("could not run server: %v", err)
