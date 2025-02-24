@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"database/sql"
 	"log"
 
 	"github.com/go-redis/redis"
 	"github.com/hibiken/asynq"
+	_ "github.com/lib/pq"
 	"github.com/likecoin/like-migration-backend/cmd/worker/context"
 	"github.com/likecoin/like-migration-backend/cmd/worker/task"
 	"github.com/spf13/cobra"
@@ -15,6 +17,12 @@ var WorkerCmd = &cobra.Command{
 	Short: "Start worker",
 	Run: func(cmd *cobra.Command, args []string) {
 		envCfg := context.ConfigFromContext(cmd.Context())
+		client := context.AsynqClientFromContext(cmd.Context())
+
+		db, err := sql.Open("postgres", envCfg.DbConnectionStr)
+		if err != nil {
+			panic(err)
+		}
 
 		opt, err := redis.ParseURL(envCfg.RedisDsn)
 		if err != nil {
@@ -47,6 +55,8 @@ var WorkerCmd = &cobra.Command{
 		// ...register other handlers...
 
 		mux.Use(context.AsynqMiddlewareWithConfigContext(envCfg))
+		mux.Use(context.AsynqMiddlewareWithDBContext(db))
+		mux.Use(context.AsynqMiddlewareWithAsyncClientContext(client))
 
 		if err := srv.Run(mux); err != nil {
 			log.Fatalf("could not run server: %v", err)
