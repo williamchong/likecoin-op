@@ -19,6 +19,11 @@ type EnvConfig struct {
 	EthLikeNFTContractAddress string   `envconfig:"ETH_LIKENFT_CONTRACT_ADDRESS"`
 	DbConnectionStr           string   `envconfig:"DB_CONNECTION_STR"`
 	LikerlandUrlBase          string   `envconfig:"LIKERLAND_URL_BASE"`
+
+	InitialNewClassOwner      string `envconfig:"INITIAL_NEW_CLASS_OWNER"`
+	InitialNewClassMinter     string `envconfig:"INITIAL_NEW_CLASS_MINTER"`
+	InitialNewClassUpdater    string `envconfig:"INITIAL_NEW_CLASS_UPDATER"`
+	InitialBatchMintNFTsOwner string `envconfig:"INITIAL_BATCH_MINT_NFTS_OWNER"`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {
