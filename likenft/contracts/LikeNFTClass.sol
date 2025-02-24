@@ -105,19 +105,19 @@ contract LikeNFTClass is ERC721Enumerable, Ownable, AccessControl {
 
     function mint(
         address to,
-        string[] calldata metadata_list
+        string[] calldata metadataList
     ) external onlyMinter {
         ClassStorage storage $ = _getClassStorage();
 
         uint64 maxSupply = $.data.config.max_supply;
-        uint quantity = metadata_list.length;
+        uint quantity = metadataList.length;
 
         if (maxSupply != 0 && totalSupply() + quantity > maxSupply) {
             revert ErrNftNoSupply();
         }
 
         for (uint i = 0; i < quantity; i++) {
-            nftDataMap[_currentIndex].metadata = metadata_list[i];
+            nftDataMap[_currentIndex].metadata = metadataList[i];
             _safeMint(to, _currentIndex);
             _currentIndex++;
         }

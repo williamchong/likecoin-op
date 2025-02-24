@@ -22,7 +22,7 @@ contract LikeProtocol is
     PausableUpgradeable
 {
     struct LikeNFTStorage {
-        mapping(address class_id => LikeNFTClass) classIdClassMapping;
+        mapping(address classId => LikeNFTClass) classIdClassMapping;
     }
     // keccak256(abi.encode(uint256(keccak256("likenft.storage")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant DATA_STORAGE =
@@ -66,7 +66,7 @@ contract LikeProtocol is
         MsgUpdateClass memory msgUpdateClass
     ) public whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
-        LikeNFTClass class = $.classIdClassMapping[msgUpdateClass.class_id];
+        LikeNFTClass class = $.classIdClassMapping[msgUpdateClass.classId];
         if (address(class) == address(0)) {
             revert ErrNftClassNotFound();
         }
@@ -75,26 +75,26 @@ contract LikeProtocol is
 
     function mintNFT(MsgMintNFT calldata msgMintNFT) external whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
-        LikeNFTClass class = $.classIdClassMapping[msgMintNFT.class_id];
+        LikeNFTClass class = $.classIdClassMapping[msgMintNFT.classId];
         if (address(class) == address(0)) {
             revert ErrNftClassNotFound();
         }
-        string[] memory metadata_list = new string[](1);
-        metadata_list[0] = msgMintNFT.input.metadata;
-        class.mint(msgMintNFT.to, metadata_list);
+        string[] memory metadataList = new string[](1);
+        metadataList[0] = msgMintNFT.input.metadata;
+        class.mint(msgMintNFT.to, metadataList);
     }
 
     function mintNFTs(MsgMintNFTs calldata msgMintNFTs) external whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
-        LikeNFTClass class = $.classIdClassMapping[msgMintNFTs.class_id];
+        LikeNFTClass class = $.classIdClassMapping[msgMintNFTs.classId];
         if (address(class) == address(0)) {
             revert ErrNftClassNotFound();
         }
-        string[] memory metadata_list = new string[](msgMintNFTs.inputs.length);
+        string[] memory metadataList = new string[](msgMintNFTs.inputs.length);
         for (uint i = 0; i < msgMintNFTs.inputs.length; i++) {
-            metadata_list[i] = msgMintNFTs.inputs[i].metadata;
+            metadataList[i] = msgMintNFTs.inputs[i].metadata;
         }
-        class.mint(msgMintNFTs.to, metadata_list);
+        class.mint(msgMintNFTs.to, metadataList);
     }
 
     function _authorizeUpgrade(

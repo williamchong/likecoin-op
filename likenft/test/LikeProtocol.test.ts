@@ -294,7 +294,7 @@ describe("LikeProtocol", () => {
         creator: this.randomSigner,
         updaters: [this.randomSigner],
         minters: [this.randomSigner],
-        class_id: classId,
+        classId: classId,
         input: {
           name: "Hi Jack",
           symbol: "HIJACK",
