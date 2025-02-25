@@ -3,10 +3,15 @@ package migration
 import (
 	"database/sql"
 	"net/http"
+
+	"github.com/hibiken/asynq"
 )
 
 type MigrationRouter struct {
-	Db *sql.DB
+	Db                       *sql.DB
+	AsynqClient              *asynq.Client
+	InitialNewClassOwner     string
+	InitialBatchMintNFTOwner string
 }
 
 func (h *MigrationRouter) Router() *http.ServeMux {
@@ -16,7 +21,10 @@ func (h *MigrationRouter) Router() *http.ServeMux {
 		Db: h.Db,
 	})
 	router.Handle("POST /migration", &CreateMigrationHandler{
-		Db: h.Db,
+		Db:                       h.Db,
+		AsynqClient:              h.AsynqClient,
+		InitialNewClassOwner:     h.InitialNewClassOwner,
+		InitialBatchMintNFTOwner: h.InitialBatchMintNFTOwner,
 	})
 
 	return router
