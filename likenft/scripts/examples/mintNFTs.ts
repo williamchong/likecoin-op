@@ -13,7 +13,7 @@ async function mintNFT() {
 
   const tx = await likeProtocol.mintNFTs({
     creator: signer.address,
-    class_id: classId,
+    classId: classId,
     inputs: [
       {
         metadata: JSON.stringify({

@@ -177,7 +177,7 @@ describe("LikeNFTClass", () => {
     const updateClass = async () => {
       await likeProtocolClassOwnerSigner
         .updateClass({
-          class_id: nftClassId,
+          classId: nftClassId,
           input: {
             name: "My Book",
             symbol: "KOOB",
@@ -204,7 +204,7 @@ describe("LikeNFTClass", () => {
       await likeProtocolClassOwnerSigner
         .mintNFT({
           to: this.classOwner.address,
-          class_id: nftClassId,
+          classId: nftClassId,
           input: {
             metadata: JSON.stringify({
               image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
@@ -257,7 +257,7 @@ describe("LikeNFTClass", () => {
 
     await expect(
       likeProtocolRandomSigner.updateClass({
-        class_id: nftClassId,
+        classId: nftClassId,
         input: {
           name: "Hi Jack",
           symbol: "HIJACK",
@@ -283,7 +283,7 @@ describe("LikeNFTClass", () => {
       await likeProtocolClassOwnerSigner
         .mintNFT({
           to: this.classOwner,
-          class_id: nftClassId,
+          classId: nftClassId,
           input: {
             metadata: JSON.stringify({
               image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
@@ -315,7 +315,7 @@ describe("LikeNFTClass", () => {
       await likeClassOwnerSigner
         .mintNFTs({
           to: this.classOwner,
-          class_id: nftClassId,
+          classId: nftClassId,
           inputs: [
             {
               metadata: JSON.stringify({
@@ -451,7 +451,7 @@ describe("LikeNFTClass permission control", () => {
       await likeProtocolOwnerSigner
         .mintNFT({
           to: this.classCreatorSigner.address,
-          class_id: this.classId,
+          classId: this.classId,
           input: {
             metadata: JSON.stringify({
               image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
@@ -642,7 +642,7 @@ describe("LikeNFTClass ownership transfer", () => {
       await likeProtocolOwnerSigner
         .mintNFT({
           creator: this.classCreatorSigner.address,
-          class_id: this.classId,
+          classId: this.classId,
           input: {
             metadata: JSON.stringify({
               image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",

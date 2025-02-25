@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+import {ERC721, ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ERC721A} from "erc721a/contracts/ERC721A.sol";
 
 import {ClassStorage} from "../types/Class.sol";
 import {ClassInput} from "../types/ClassInput.sol";
@@ -12,9 +12,8 @@ import {NFTData} from "../types/NFTData.sol";
 
 error ErrUnauthorized();
 error ErrNftNoSupply();
-error ErrCannotUpdateClassWithMintedTokens();
 
-contract LikeNFTClass is ERC721A, Ownable, AccessControl {
+contract LikeNFTClass is ERC721Enumerable, Ownable, AccessControl {
     // keccak256(abi.encode(uint256(keccak256("likenft.storage.class")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant CLASS_DATA_STORAGE =
         0x99391ccf5d97dbb7711a73831d943712d1774ca037a259af20891dc6f0d9f200;
@@ -25,15 +24,17 @@ contract LikeNFTClass is ERC721A, Ownable, AccessControl {
         }
     }
 
-    mapping(uint256 => NFTData) private nftDataMap;
-
+    // Constants
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
+    // End Constants
 
-    uint256 public tokenId;
+    // Storage
+    uint256 private _currentIndex;
+    mapping(uint256 => NFTData) private nftDataMap;
+    // End Storage
 
-    address private _grantedMinter;
-
+    // Events
     event ContractURIUpdated();
 
     event TransferWithMemo(
@@ -42,6 +43,7 @@ contract LikeNFTClass is ERC721A, Ownable, AccessControl {
         uint256 indexed tokenId,
         string memo
     );
+    // End Events
 
     modifier onlyMinter() {
         // FIXME: tx.origin is prone to phishing attacks
@@ -62,7 +64,7 @@ contract LikeNFTClass is ERC721A, Ownable, AccessControl {
     constructor(
         MsgNewClass memory msgNewClass
     )
-        ERC721A(msgNewClass.input.name, msgNewClass.input.symbol)
+        ERC721(msgNewClass.input.name, msgNewClass.input.symbol)
         Ownable(msgNewClass.creator)
     {
         ClassStorage storage $ = _getClassStorage();
@@ -70,6 +72,8 @@ contract LikeNFTClass is ERC721A, Ownable, AccessControl {
         $.symbol = msgNewClass.input.symbol;
         $.data.metadata = msgNewClass.input.metadata;
         $.data.config = msgNewClass.input.config;
+
+        _currentIndex = 0;
 
         for (uint i = 0; i < msgNewClass.minters.length; i++) {
             _grantRole(MINTER_ROLE, msgNewClass.minters[i]);
@@ -81,7 +85,13 @@ contract LikeNFTClass is ERC721A, Ownable, AccessControl {
 
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC721A, AccessControl) returns (bool) {
+    )
+        public
+        view
+        virtual
+        override(ERC721Enumerable, AccessControl)
+        returns (bool)
+    {
         return super.supportsInterface(interfaceId);
     }
 
@@ -95,23 +105,21 @@ contract LikeNFTClass is ERC721A, Ownable, AccessControl {
 
     function mint(
         address to,
-        string[] calldata metadata_list
+        string[] calldata metadataList
     ) external onlyMinter {
         ClassStorage storage $ = _getClassStorage();
 
-        uint256 nextTokenId = _nextTokenId();
         uint64 maxSupply = $.data.config.max_supply;
-        uint quantity = metadata_list.length;
+        uint quantity = metadataList.length;
 
         if (maxSupply != 0 && totalSupply() + quantity > maxSupply) {
             revert ErrNftNoSupply();
         }
 
-        _safeMint(to, quantity);
-
         for (uint i = 0; i < quantity; i++) {
-            uint256 _tokenId = nextTokenId + i;
-            nftDataMap[_tokenId].metadata = metadata_list[i];
+            nftDataMap[_currentIndex].metadata = metadataList[i];
+            _safeMint(to, _currentIndex);
+            _currentIndex++;
         }
     }
 

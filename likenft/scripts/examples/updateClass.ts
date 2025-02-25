@@ -13,7 +13,7 @@ async function updateClass() {
 
   const tx = await likeProtocol.updateClass({
     creator: signer.address,
-    class_id: classId,
+    classId: classId,
     input: {
       name: "《所謂「我不投資」，就是 all in 在法定貨幣》",
       symbol: "BOOK",
