@@ -310,9 +310,7 @@ describe("LikeProtocol", () => {
   });
 
   it("should retain the LikeNFTClass paused state after upgrade", async function () {
-    const likeProtocolOwnerSigner = contract.connect(
-      this.ownerSigner,
-    );
+    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
 
     expect(await likeProtocolOwnerSigner.paused()).to.be.false;
     await likeProtocolOwnerSigner.pause();
@@ -328,7 +326,10 @@ describe("LikeProtocol", () => {
     expect(await newLikeProtocol.owner()).to.equal(this.ownerSigner.address);
     expect(await newLikeProtocol.version()).to.equal(2n);
 
-    const proxyContract = await ethers.getContractAt("LikeProtocolMock", contractAddress);
+    const proxyContract = await ethers.getContractAt(
+      "LikeProtocolMock",
+      contractAddress,
+    );
     expect(await proxyContract.version()).to.equal(2n);
 
     expect(await likeProtocolOwnerSigner.paused()).to.be.true;
@@ -336,11 +337,8 @@ describe("LikeProtocol", () => {
     expect(await likeProtocolOwnerSigner.paused()).to.be.false;
   });
 
-
   it("should retain the LikeNFTClass mapping after upgrade", async function () {
-    const likeProtocolOwnerSigner = contract.connect(
-      this.ownerSigner,
-    );
+    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
     const newClass = async () => {
       await likeProtocolOwnerSigner
         .newClass({
@@ -396,7 +394,10 @@ describe("LikeProtocol", () => {
     expect(await newLikeProtocol.version()).to.equal(2n);
     expect(await newLikeProtocol.isLikeNFTClass(classId)).to.be.true;
 
-    const proxyContract = await ethers.getContractAt("LikeProtocolMock", contractAddress);
+    const proxyContract = await ethers.getContractAt(
+      "LikeProtocolMock",
+      contractAddress,
+    );
     expect(await proxyContract.isLikeNFTClass(classId)).to.be.true;
   });
 });
