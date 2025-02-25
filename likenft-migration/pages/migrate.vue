@@ -35,7 +35,7 @@
         >
           Loading...
         </div>
-        <div class="max-h-40 overflow-auto">
+        <div class="max-h-80 overflow-auto">
           <div v-if="migrationPreview.classes.length > 0">
             <h3 class="text-[20px]">{{ $t('migrate.classes') }}</h3>
             <ol class="list-decimal pl-10">
@@ -78,13 +78,26 @@
         >
       </div>
       <div v-else-if="migration != null">
-        <h2 class="text-[32px] font-bold">{{ $t('migrate.result') }}</h2>
-        <div class="max-h-40 overflow-auto">
+        <div class="flex flex-row justify-between">
+          <h2 class="text-[32px] font-bold">
+            {{ $t('migrate.result') }}
+          </h2>
+          <p>{{ migration.status }}</p>
+        </div>
+        <div class="max-h-80 overflow-auto">
           <div v-if="migration.classes.length > 0">
             <h3 class="text-[20px]">{{ $t('migrate.classes') }}</h3>
             <ol class="list-decimal pl-10">
               <li v-for="c in migration.classes" :key="c.cosmos_class_id">
-                <a :href="getLikerlandUrlForClass(c)">{{ c.name }}</a>
+                <p>
+                  <a :href="getLikerlandUrlForClass(c)">{{ c.name }}</a>
+                </p>
+                <p>
+                  {{ c.status }}
+                  <span v-if="c.evm_tx_hash">| {{ c.evm_tx_hash }}</span>
+                  <span v-else>| -</span>
+                  <span v-if="c.failed_reason">| {{ c.failed_reason }}</span>
+                </p>
               </li>
             </ol>
           </div>
@@ -95,9 +108,17 @@
                 v-for="n in migration.nfts"
                 :key="n.cosmos_class_id + '/' + n.cosmos_nft_id"
               >
-                <a :href="getLikerlandUrlForNFT(n)"
-                  >{{ n.name }}({{ n.cosmos_nft_id }})</a
-                >
+                <p>
+                  <a :href="getLikerlandUrlForNFT(n)"
+                    >{{ n.name }}({{ n.cosmos_nft_id }})</a
+                  >
+                </p>
+                <p>
+                  {{ n.status }}
+                  <span v-if="n.evm_tx_hash">| {{ n.evm_tx_hash }}</span>
+                  <span v-else>| -</span>
+                  <span v-if="n.failed_reason">| {{ n.failed_reason }}</span>
+                </p>
               </li>
             </ol>
           </div>
