@@ -11,4 +11,7 @@ var EnqueueCmd = &cobra.Command{
 
 func init() {
 	EnqueueCmd.AddCommand(HelloWorldCmd)
+	EnqueueCmd.AddCommand(MigrateClassCmd)
+	EnqueueCmd.AddCommand(MigrateNFTCmd)
+	EnqueueCmd.AddCommand(EnqueueLikeNFTAssetMigrationCmd)
 }

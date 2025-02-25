@@ -67,9 +67,10 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 		likenftClient,
 		&evmLikeProtocolClient,
 		&evmLikeNFTClient,
-		"<initial owner>",
-		"<initial minter>",
-		"<initial updater>",
+		envCfg.InitialNewClassOwner,
+		envCfg.InitialNewClassMinter,
+		envCfg.InitialNewClassUpdater,
+		envCfg.InitialBatchMintNFTsOwner,
 		p.LikenftAssetMigrationNFTId,
 	)
 
