@@ -75,7 +75,7 @@ func UpdateLikeNFTAssetMigration(
 	migration *model.LikeNFTAssetMigration,
 ) error {
 	_, err := tx.Exec(
-		`UPDATE likenft_asset_snapshot SET
+		`UPDATE likenft_asset_migration SET
 	likenft_asset_snapshot_id = $1,
 	cosmos_address = $2,
 	eth_address = $3,
