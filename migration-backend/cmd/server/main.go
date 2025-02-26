@@ -11,6 +11,8 @@ import (
 	"database/sql"
 
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/go-redis/redis"
+	"github.com/hibiken/asynq"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 
@@ -49,6 +51,24 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	opt, err := redis.ParseURL(envCfg.RedisDsn)
+
+	if err != nil {
+		panic(err)
+	}
+
+	asynqClient := asynq.NewClient(asynq.RedisClientOpt{
+		Network:      opt.Network,
+		Addr:         opt.Addr,
+		Password:     opt.Password,
+		DB:           opt.DB,
+		DialTimeout:  opt.DialTimeout,
+		ReadTimeout:  opt.ReadTimeout,
+		WriteTimeout: opt.WriteTimeout,
+		PoolSize:     opt.PoolSize,
+		TLSConfig:    opt.TLSConfig,
+	})
 
 	client, err := ethclient.Dial(envCfg.EthNetworkPublicRPCURL)
 
@@ -90,8 +110,12 @@ func main() {
 	})
 	likeNFTRouter := likenft.LikeNFTRouter{
 		Db:                  db,
+		AsynqClient:         asynqClient,
 		CosmosAPI:           cosmosAPI,
 		LikeNFTCosmosClient: likenftCosmosClient,
+
+		InitialNewClassOwner:     envCfg.InitialNewClassOwner,
+		InitialBatchMintNFTOwner: envCfg.InitialBatchMintNFTsOwner,
 	}
 	mainMux.Handle("/likenft/", http.StripPrefix("/likenft", likeNFTRouter.Router()))
 

@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/hibiken/asynq"
-	"github.com/likecoin/like-migration-backend/cmd/worker/config"
+	"github.com/likecoin/like-migration-backend/cmd/worker/context"
 	"github.com/likecoin/like-migration-backend/cmd/worker/task"
 	"github.com/spf13/cobra"
 )
@@ -14,7 +14,7 @@ var SchedulerCmd = &cobra.Command{
 	Use:   "scheduler",
 	Short: "Start scheduelr",
 	Run: func(cmd *cobra.Command, args []string) {
-		envCfg := cmd.Context().Value(config.ContextKey).(*config.EnvConfig)
+		envCfg := context.ConfigFromContext(cmd.Context())
 
 		opt, err := redis.ParseURL(envCfg.RedisDsn)
 		if err != nil {

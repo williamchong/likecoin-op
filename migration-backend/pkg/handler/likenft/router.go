@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/hibiken/asynq"
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
 	"github.com/likecoin/like-migration-backend/pkg/handler/likenft/migration"
 	"github.com/likecoin/like-migration-backend/pkg/handler/likenft/migration_preview"
@@ -12,9 +13,13 @@ import (
 
 type LikeNFTRouter struct {
 	Db                  *sql.DB
+	AsynqClient         *asynq.Client
 	CosmosAPI           *api.CosmosAPI
 	LikeNFTCosmosClient *cosmos.LikeNFTCosmosClient
 	LikerlandUrlBase    string
+
+	InitialNewClassOwner     string
+	InitialBatchMintNFTOwner string
 }
 
 func (h *LikeNFTRouter) Router() *http.ServeMux {
@@ -39,7 +44,10 @@ func (h *LikeNFTRouter) Router() *http.ServeMux {
 	router.Handle("/migration-preview/", migrationPreviewRouter.Router())
 
 	migrationRouter := &migration.MigrationRouter{
-		Db: h.Db,
+		Db:                       h.Db,
+		AsynqClient:              h.AsynqClient,
+		InitialNewClassOwner:     h.InitialNewClassOwner,
+		InitialBatchMintNFTOwner: h.InitialBatchMintNFTOwner,
 	}
 
 	// This is for paths without trailing /. e.g. GET / POST

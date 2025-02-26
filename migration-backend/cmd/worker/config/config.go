@@ -1,14 +1,25 @@
 package config
 
-import "github.com/kelseyhightower/envconfig"
+import (
+	"math/big"
 
-type contextKey struct{}
-
-var ContextKey = &contextKey{}
+	"github.com/kelseyhightower/envconfig"
+)
 
 type EnvConfig struct {
-	RedisDsn    string `envconfig:"REDIS_DSN" default:"redis://127.0.0.1:6379"`
-	Concurrency int    `envconfig:"WORKER_CONCURRENCY" default:"1"`
+	DbConnectionStr           string   `envconfig:"DB_CONNECTION_STR"`
+	RedisDsn                  string   `envconfig:"REDIS_DSN" default:"redis://127.0.0.1:6379"`
+	Concurrency               int      `envconfig:"WORKER_CONCURRENCY" default:"1"`
+	CosmosNodeUrl             string   `envconfig:"COSMOS_NODE_URL"`
+	EthChainId                *big.Int `envconfig:"ETH_CHAIN_ID"`
+	EthNetworkPublicRPCURL    string   `envconfig:"ETH_NETWORK_PUBLIC_RPC_URL"`
+	EthWalletPrivateKey       string   `envconfig:"ETH_WALLET_PRIVATE_KEY"`
+	EthLikeNFTContractAddress string   `envconfig:"ETH_LIKENFT_CONTRACT_ADDRESS"`
+
+	InitialNewClassOwner      string `envconfig:"INITIAL_NEW_CLASS_OWNER"`
+	InitialNewClassMinter     string `envconfig:"INITIAL_NEW_CLASS_MINTER"`
+	InitialNewClassUpdater    string `envconfig:"INITIAL_NEW_CLASS_UPDATER"`
+	InitialBatchMintNFTsOwner string `envconfig:"INITIAL_BATCH_MINT_NFTS_OWNER"`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {

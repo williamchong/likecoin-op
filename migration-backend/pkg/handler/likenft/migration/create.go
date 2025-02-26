@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hibiken/asynq"
 	"github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	api_model "github.com/likecoin/like-migration-backend/pkg/handler/model"
 	"github.com/likecoin/like-migration-backend/pkg/model"
+	"github.com/likecoin/like-migration-backend/pkg/task"
 )
 
 type CreateMigrationRequestBody struct {
@@ -25,7 +27,10 @@ type CreateMigrationResponseBody struct {
 }
 
 type CreateMigrationHandler struct {
-	Db *sql.DB
+	Db                       *sql.DB
+	AsynqClient              *asynq.Client
+	InitialNewClassOwner     string
+	InitialBatchMintNFTOwner string
 }
 
 var ErrMigrationExists = fmt.Errorf("error migration exists")
@@ -56,8 +61,7 @@ func (h *CreateMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		Migration: migration,
 	})
 
-	// Trigger job
-	// TODO: use job queue
+	go h.enqueueMigrationTasks(migration.Id)
 }
 
 func (h *CreateMigrationHandler) handle(req CreateMigrationRequestBody) (*api_model.LikeNFTAssetMigration, error) {
@@ -91,13 +95,12 @@ func (h *CreateMigrationHandler) handle(req CreateMigrationRequestBody) (*api_mo
 			if err != nil {
 				return nil, err
 			}
-			defer tx.Commit()
 
 			migration, err := db.InsertLikeNFTAssetMigration(tx, &model.LikeNFTAssetMigration{
 				LikeNFTAssetSnapshotId: req.AssetSnapshotId,
 				CosmosAddress:          req.CosmosAddress,
 				EthAddress:             req.EthAddress,
-				Status:                 model.NFTMigrationStatusInit,
+				Status:                 model.NFTMigrationStatusInProgress,
 			})
 			if err != nil {
 				tx.Rollback()
@@ -142,6 +145,11 @@ func (h *CreateMigrationHandler) handle(req CreateMigrationRequestBody) (*api_mo
 				return nil, err
 			}
 
+			err = tx.Commit()
+			if err != nil {
+				return nil, err
+			}
+
 			return api_model.LikeNFTAssetMigrationFromModel(migration, migrationClasses, migrationNFTs), nil
 		} else {
 			return nil, err
@@ -149,4 +157,16 @@ func (h *CreateMigrationHandler) handle(req CreateMigrationRequestBody) (*api_mo
 	}
 
 	return nil, ErrMigrationExists
+}
+
+func (h *CreateMigrationHandler) enqueueMigrationTasks(migrationId uint64) error {
+	t, err := task.NewEnqueueLikeNFTAssetMigrationTask(migrationId)
+	if err != nil {
+		return err
+	}
+	_, err = h.AsynqClient.Enqueue(t, asynq.MaxRetry(0))
+	if err != nil {
+		return err
+	}
+	return nil
 }

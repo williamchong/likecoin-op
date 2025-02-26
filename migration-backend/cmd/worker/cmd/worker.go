@@ -1,12 +1,15 @@
 package cmd
 
 import (
+	"database/sql"
 	"log"
 
 	"github.com/go-redis/redis"
 	"github.com/hibiken/asynq"
-	"github.com/likecoin/like-migration-backend/cmd/worker/config"
+	_ "github.com/lib/pq"
+	"github.com/likecoin/like-migration-backend/cmd/worker/context"
 	"github.com/likecoin/like-migration-backend/cmd/worker/task"
+	apptask "github.com/likecoin/like-migration-backend/pkg/task"
 	"github.com/spf13/cobra"
 )
 
@@ -14,7 +17,14 @@ var WorkerCmd = &cobra.Command{
 	Use:   "worker",
 	Short: "Start worker",
 	Run: func(cmd *cobra.Command, args []string) {
-		envCfg := cmd.Context().Value(config.ContextKey).(*config.EnvConfig)
+		envCfg := context.ConfigFromContext(cmd.Context())
+		client := context.AsynqClientFromContext(cmd.Context())
+		logger := context.LoggerFromContext(cmd.Context())
+
+		db, err := sql.Open("postgres", envCfg.DbConnectionStr)
+		if err != nil {
+			panic(err)
+		}
 
 		opt, err := redis.ParseURL(envCfg.RedisDsn)
 		if err != nil {
@@ -44,7 +54,15 @@ var WorkerCmd = &cobra.Command{
 		// mux maps a type to a handler
 		mux := asynq.NewServeMux()
 		mux.HandleFunc(task.TypeHelloWorld, task.HandleHelloWorldTask)
+		mux.HandleFunc(apptask.TypeMigrateClass, task.HandleMigrateClassTask)
+		mux.HandleFunc(apptask.TypeMigrateNFT, task.HandleMigrateNFTTask)
+		mux.HandleFunc(apptask.TypeEnqueueLikeNFTAssetMigration, task.HandleEnqueueLikeNFTAssetMigration)
 		// ...register other handlers...
+
+		mux.Use(context.AsynqMiddlewareWithConfigContext(envCfg))
+		mux.Use(context.AsynqMiddlewareWithDBContext(db))
+		mux.Use(context.AsynqMiddlewareWithAsynqClientContext(client))
+		mux.Use(context.AsynqMiddlewareWithLoggerContext(logger))
 
 		if err := srv.Run(mux); err != nil {
 			log.Fatalf("could not run server: %v", err)

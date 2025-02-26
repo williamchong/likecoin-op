@@ -7,6 +7,48 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
+func QueryLikeNFTAssetMigrationClassById(
+	tx TxLike,
+	id uint64,
+) (*model.LikeNFTAssetMigrationClass, error) {
+	row := tx.QueryRow(
+		`SELECT
+	id,
+	likenft_asset_migration_id,
+	created_at,
+	cosmos_class_id,
+	name,
+	image,
+	status,
+	enqueue_time,
+	finish_time,
+	evm_tx_hash,
+	failed_reason
+FROM likenft_asset_migration_class WHERE id = $1`,
+		id,
+	)
+
+	class := &model.LikeNFTAssetMigrationClass{}
+	err := row.Scan(
+		&class.Id,
+		&class.LikeNFTAssetMigrationId,
+		&class.CreatedAt,
+		&class.CosmosClassId,
+		&class.Name,
+		&class.Image,
+		&class.Status,
+		&class.EnqueueTime,
+		&class.FinishTime,
+		&class.EvmTxHash,
+		&class.FailedReason,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return class, nil
+}
+
 func QueryLikeNFTAssetMigrationClassesByNFTMigrationId(
 	tx TxLike,
 	migrationId uint64,
