@@ -9,7 +9,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/core/types"
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
+	"github.com/likecoin/like-migration-backend/pkg/ethereum"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/like_protocol"
 	"github.com/likecoin/like-migration-backend/pkg/model"
@@ -37,9 +39,14 @@ func DoMintNFTAction(
 	initialBatchMintOwnerAddress := common.HexToAddress(a.InitialBatchMintOwner)
 
 	matches := nftIdRegex.FindStringSubmatch(a.CosmosNFTId)
-	var txHash *common.Hash
+
+	var (
+		tx  *types.Transaction
+		err error
+	)
+
 	if matches == nil {
-		_txHash, err := p.MintNFTs(&like_protocol.MsgMintNFTs{
+		tx, err = p.MintNFTs(&like_protocol.MsgMintNFTs{
 			ClassId: evmClassAddress,
 			To:      toOwner,
 			Inputs: []like_protocol.NFTData{
@@ -48,7 +55,6 @@ func DoMintNFTAction(
 				},
 			},
 		})
-		txHash = _txHash
 		if err != nil {
 			return nil, doMintNFTActionFailed(db, a, err)
 		}
@@ -56,7 +62,7 @@ func DoMintNFTAction(
 		nftIdStr := matches[numIndex]
 		nftId, err := strconv.ParseUint(nftIdStr, 10, 64)
 		if err != nil {
-			txHash, err = p.MintNFTs(&like_protocol.MsgMintNFTs{
+			tx, err = p.MintNFTs(&like_protocol.MsgMintNFTs{
 				ClassId: evmClassAddress,
 				To:      toOwner,
 				Inputs: []like_protocol.NFTData{
@@ -91,17 +97,23 @@ func DoMintNFTAction(
 					return nil, doMintNFTActionFailed(db, a, err)
 				}
 			}
-			txHash, err = p.TransferNFT(evmClassAddress, initialBatchMintOwnerAddress, toOwner, big.NewInt(int64(nftId)))
+			tx, err = p.TransferNFT(evmClassAddress, initialBatchMintOwnerAddress, toOwner, big.NewInt(int64(nftId)))
 			if err != nil {
 				return nil, doMintNFTActionFailed(db, a, err)
 			}
 		}
 	}
 
-	evmTxHash := hexutil.Encode(txHash.Bytes())
+	_, err = ethereum.AwaitTx(p.Client, tx)
+
+	if err != nil {
+		return nil, doMintNFTActionFailed(db, a, err)
+	}
+
+	evmTxHash := hexutil.Encode(tx.Hash().Bytes())
 	a.EvmTxHash = &evmTxHash
 	a.Status = model.LikeNFTMigrationActionMintNFTStatusCompleted
-	err := appdb.UpdateLikeNFTMigrationActionMintNFT(db, a)
+	err = appdb.UpdateLikeNFTMigrationActionMintNFT(db, a)
 	if err != nil {
 		return nil, doMintNFTActionFailed(db, a, err)
 	}

@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
+	"github.com/likecoin/like-migration-backend/pkg/ethereum"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/model"
@@ -37,13 +38,19 @@ func DoTransferClassAction(
 
 	newOwnerAddress := common.HexToAddress(a.EvmOwner)
 	ethClassAddress := common.HexToAddress(a.EvmClassId)
-	txHash, err := n.TransferClass(ethClassAddress, newOwnerAddress)
+	tx, err := n.TransferClass(ethClassAddress, newOwnerAddress)
 
 	if err != nil {
 		return nil, doTransferClassActionFailed(db, a, err)
 	}
 
-	evmTxHash := hexutil.Encode(txHash.Bytes())
+	_, err = ethereum.AwaitTx(n.Client, tx)
+
+	if err != nil {
+		return nil, doTransferClassActionFailed(db, a, err)
+	}
+
+	evmTxHash := hexutil.Encode(tx.Hash().Bytes())
 	a.EvmTxHash = &evmTxHash
 	a.Status = model.LikeNFTMigrationActionTransferClassStatusCompleted
 

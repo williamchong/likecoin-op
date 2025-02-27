@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
+	"github.com/likecoin/like-migration-backend/pkg/ethereum"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/like_protocol"
@@ -53,7 +54,7 @@ func DoNewClassAction(
 		}
 	}
 
-	newClassId, txHash, err := n.NewClass(like_protocol.MsgNewClass{
+	tx, err := n.NewClass(like_protocol.MsgNewClass{
 		Creator:  initialOwnerAddress,
 		Updaters: []common.Address{initialUpdaterAddress},
 		Minters:  []common.Address{initialMinterAddress},
@@ -71,9 +72,21 @@ func DoNewClassAction(
 		return nil, doNewClassActionFailed(db, a, err)
 	}
 
+	txReceipt, err := ethereum.AwaitTx(n.Client, tx)
+
+	if err != nil {
+		return nil, doNewClassActionFailed(db, a, err)
+	}
+
+	newClassId, err := n.GetClassIdFromNewClassTransaction(txReceipt)
+
+	if err != nil {
+		return nil, doNewClassActionFailed(db, a, err)
+	}
+
 	evmClassId := hexutil.Encode(newClassId.Bytes())
 	a.EvmClassId = &evmClassId
-	evmTxHash := hexutil.Encode(txHash.Bytes())
+	evmTxHash := hexutil.Encode(tx.Hash().Bytes())
 	a.EvmTxHash = &evmTxHash
 	a.Status = model.LikeNFTMigrationActionNewClassStatusCompleted
 	err = appdb.UpdateLikeNFTMigrationActionNewClass(db, a)
