@@ -18,7 +18,7 @@ var SchedulerCmd = &cobra.Command{
 
 		opt, err := redis.ParseURL(envCfg.RedisDsn)
 		if err != nil {
-			log.Fatalf("could not parse redis url: %v', err")
+			log.Fatalf("could not parse redis url: %v", err)
 		}
 		scheduler := asynq.NewScheduler(
 			asynq.RedisClientOpt{

@@ -28,7 +28,7 @@ var WorkerCmd = &cobra.Command{
 
 		opt, err := redis.ParseURL(envCfg.RedisDsn)
 		if err != nil {
-			log.Fatalf("could not parse redis url: %v', err")
+			log.Fatalf("could not parse redis url: %v", err)
 		}
 		srv := asynq.NewServer(
 			asynq.RedisClientOpt{
