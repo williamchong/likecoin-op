@@ -3,6 +3,7 @@ package likenft
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -17,7 +18,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var runLikeNFTMigrationPlanNewClassCmd = &cobra.Command{
+var migrateClassCmd = &cobra.Command{
 	Use:   "migrate-class likenft-asset-migration-class-id",
 	Short: "Mint NFT Class",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -67,7 +68,12 @@ var runLikeNFTMigrationPlanNewClassCmd = &cobra.Command{
 			panic(err)
 		}
 
+		logger := slog.New(slog.Default().Handler()).
+			WithGroup("migrateClassCmd").
+			With("id", id)
+
 		mc, err := likenft.MigrateClassFromAssetMigration(
+			logger,
 			db,
 			likenftClient,
 			&evmLikeNFTClient,
@@ -85,5 +91,5 @@ var runLikeNFTMigrationPlanNewClassCmd = &cobra.Command{
 }
 
 func init() {
-	LikeNFTCmd.AddCommand(runLikeNFTMigrationPlanNewClassCmd)
+	LikeNFTCmd.AddCommand(migrateClassCmd)
 }

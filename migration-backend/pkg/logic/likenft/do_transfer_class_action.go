@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -15,11 +16,17 @@ import (
 )
 
 func DoTransferClassAction(
+	logger *slog.Logger,
+
 	db *sql.DB,
 	c *cosmos.LikeNFTCosmosClient,
 	n *evm.LikeNFTClass,
 	a *model.LikeNFTMigrationActionTransferClass,
 ) (*model.LikeNFTMigrationActionTransferClass, error) {
+	mylogger := logger.
+		WithGroup("DoTransferClassAction").
+		With("transferClassActionId", a.Id)
+
 	if a.Status == model.LikeNFTMigrationActionTransferClassStatusCompleted {
 		return a, nil
 	}
@@ -44,7 +51,7 @@ func DoTransferClassAction(
 		return nil, doTransferClassActionFailed(db, a, err)
 	}
 
-	_, err = ethereum.AwaitTx(n.Client, tx)
+	_, err = ethereum.AwaitTx(mylogger, n.Client, tx)
 
 	if err != nil {
 		return nil, doTransferClassActionFailed(db, a, err)

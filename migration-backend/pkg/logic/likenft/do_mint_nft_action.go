@@ -3,6 +3,7 @@ package likenft
 import (
 	"database/sql"
 	"errors"
+	"log/slog"
 	"math/big"
 	"regexp"
 	"strconv"
@@ -21,11 +22,17 @@ var nftIdRegex = regexp.MustCompile("(?P<prefix>.+)-(?P<maybe_num>[0-9]+)")
 var numIndex = nftIdRegex.SubexpIndex("maybe_num")
 
 func DoMintNFTAction(
+	logger *slog.Logger,
+
 	db *sql.DB,
 	p *evm.LikeProtocol,
 	c *evm.LikeNFTClass,
 	a *model.LikeNFTMigrationActionMintNFT,
 ) (*model.LikeNFTMigrationActionMintNFT, error) {
+	mylogger := logger.
+		WithGroup("DoMintNFTAction").
+		With("mintNFTActionId", a.Id)
+
 	if a.Status == model.LikeNFTMigrationActionMintNFTStatusCompleted {
 		return a, nil
 	}
@@ -104,7 +111,7 @@ func DoMintNFTAction(
 		}
 	}
 
-	_, err = ethereum.AwaitTx(p.Client, tx)
+	_, err = ethereum.AwaitTx(mylogger, p.Client, tx)
 
 	if err != nil {
 		return nil, doMintNFTActionFailed(db, a, err)

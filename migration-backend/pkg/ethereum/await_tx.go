@@ -3,9 +3,10 @@ package ethereum
 import (
 	"context"
 	"errors"
-	"fmt"
+	"log/slog"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -13,9 +14,16 @@ import (
 var ErrTxFailed = errors.New("tx failed")
 
 func AwaitTx(
+	logger *slog.Logger,
+
 	c *ethclient.Client,
 	tx *types.Transaction,
 ) (*types.Receipt, error) {
+	txHash := hexutil.Encode(tx.Hash().Bytes())
+	mylogger := logger.
+		WithGroup("AwaitTx").
+		With("txHash", txHash)
+
 	txReciptChan := make(chan *types.Receipt)
 	errorChan := make(chan error)
 
@@ -23,7 +31,7 @@ func AwaitTx(
 		for {
 			txReceipt, err := c.TransactionReceipt(context.Background(), tx.Hash())
 			if err != nil {
-				fmt.Printf("fetch tx receipt failed: %v\n", err)
+				mylogger.Warn("fetch tx receipt failed", "error", err)
 				time.Sleep(1 * time.Second)
 				continue
 			}

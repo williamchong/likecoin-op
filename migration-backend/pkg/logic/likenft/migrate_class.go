@@ -3,6 +3,7 @@ package likenft
 import (
 	"database/sql"
 	"errors"
+	"log/slog"
 	"time"
 
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
@@ -12,6 +13,8 @@ import (
 )
 
 func MigrateClassFromAssetMigration(
+	logger *slog.Logger,
+
 	db *sql.DB,
 	c *cosmos.LikeNFTCosmosClient,
 	p *evm.LikeProtocol,
@@ -23,6 +26,10 @@ func MigrateClassFromAssetMigration(
 
 	assetMigrationClassId uint64,
 ) (*model.LikeNFTAssetMigrationClass, error) {
+	mylogger := logger.
+		WithGroup("MigrateClassFromAssetMigration").
+		With("assetMigrationClassId", assetMigrationClassId)
+
 	mc, err := appdb.QueryLikeNFTAssetMigrationClassById(db, assetMigrationClassId)
 	if err != nil {
 		return nil, err
@@ -42,6 +49,7 @@ func MigrateClassFromAssetMigration(
 	defer RecalculateMigrationStatus(db, m.Id)
 
 	lastAction, err := MigrateClass(
+		mylogger,
 		db,
 		c,
 		p,
@@ -71,6 +79,8 @@ func MigrateClassFromAssetMigration(
 }
 
 func MigrateClass(
+	logger *slog.Logger,
+
 	db *sql.DB,
 	c *cosmos.LikeNFTCosmosClient,
 	p *evm.LikeProtocol,
@@ -84,6 +94,15 @@ func MigrateClass(
 	cosmosOwner string,
 	evmOwner string,
 ) (*model.LikeNFTMigrationActionTransferClass, error) {
+	mylogger := logger.
+		WithGroup("MigrateClass").
+		With("cosmosClassId", cosmosClassId).
+		With("initialClassOwner", initialClassOwner).
+		With("initialClassMinter", initialClassMinter).
+		With("initialClassUpdater", initialClassUpdater).
+		With("cosmosOwner", cosmosOwner).
+		With("evmOwner", evmOwner)
+
 	newClassAction, err := GetOrCreateNewClassAction(
 		db,
 		cosmosClassId,
@@ -96,6 +115,7 @@ func MigrateClass(
 	}
 
 	newClassAction, err = DoNewClassAction(
+		mylogger,
 		db,
 		c,
 		p,
@@ -113,7 +133,13 @@ func MigrateClass(
 		return nil, err
 	}
 
-	transferClassAction, err = DoTransferClassAction(db, c, n, transferClassAction)
+	transferClassAction, err = DoTransferClassAction(
+		mylogger,
+		db,
+		c,
+		n,
+		transferClassAction,
+	)
 	if err != nil {
 		return nil, err
 	}

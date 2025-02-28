@@ -63,6 +63,7 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 
 	mylogger.Info("running migrate nft")
 	mn, err := likenft.MigrateNFTFromAssetMigration(
+		logger,
 		db,
 		likenftClient,
 		&evmLikeProtocolClient,

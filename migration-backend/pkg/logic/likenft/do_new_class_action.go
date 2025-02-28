@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -17,11 +18,17 @@ import (
 )
 
 func DoNewClassAction(
+	logger *slog.Logger,
+
 	db *sql.DB,
 	c *cosmos.LikeNFTCosmosClient,
 	n *evm.LikeProtocol,
 	a *model.LikeNFTMigrationActionNewClass,
 ) (*model.LikeNFTMigrationActionNewClass, error) {
+	mylogger := logger.
+		WithGroup("DoNewClassAction").
+		With("newClassActionId", a.Id)
+
 	if a.Status == model.LikeNFTMigrationActionNewClassStatusCompleted {
 		return a, nil
 	}
@@ -72,7 +79,7 @@ func DoNewClassAction(
 		return nil, doNewClassActionFailed(db, a, err)
 	}
 
-	txReceipt, err := ethereum.AwaitTx(n.Client, tx)
+	txReceipt, err := ethereum.AwaitTx(mylogger, n.Client, tx)
 
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)
