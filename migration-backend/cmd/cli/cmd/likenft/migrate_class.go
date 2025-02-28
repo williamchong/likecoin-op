@@ -10,11 +10,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/spf13/cobra"
+
 	"github.com/likecoin/like-migration-backend/cmd/cli/config"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likenft"
-	"github.com/spf13/cobra"
 )
 
 var runLikeNFTMigrationPlanNewClassCmd = &cobra.Command{
@@ -22,7 +23,7 @@ var runLikeNFTMigrationPlanNewClassCmd = &cobra.Command{
 	Short: "Mint NFT Class",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			cmd.Usage()
+			_ = cmd.Usage()
 			return
 		}
 

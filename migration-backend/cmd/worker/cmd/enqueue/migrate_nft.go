@@ -5,9 +5,10 @@ import (
 	"strconv"
 
 	"github.com/hibiken/asynq"
+	"github.com/spf13/cobra"
+
 	"github.com/likecoin/like-migration-backend/cmd/worker/context"
 	"github.com/likecoin/like-migration-backend/pkg/task"
-	"github.com/spf13/cobra"
 )
 
 var MigrateNFTCmd = &cobra.Command{
@@ -15,7 +16,7 @@ var MigrateNFTCmd = &cobra.Command{
 	Short: "Enqueue Migrate Class",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			cmd.Usage()
+			_ = cmd.Usage()
 			return
 		}
 

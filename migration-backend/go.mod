@@ -16,6 +16,7 @@ require (
 	github.com/rs/cors v1.11.1
 	github.com/smartystreets/goconvey v1.8.1
 	github.com/spf13/cobra v1.8.1
+	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.27.0
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -113,7 +114,6 @@ require (
 	github.com/smarty/assertions v1.15.0 // indirect
 	github.com/spf13/cast v1.7.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/supranational/blst v0.3.13 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
 	github.com/tendermint/go-amino v0.16.0 // indirect
