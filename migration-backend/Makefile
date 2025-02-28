@@ -59,6 +59,9 @@ check-tidy:
 	go mod tidy
 	git status . --porcelain | grep '.*'; test $$? -eq 1
 
+.PHONY: ci
+ci: check-tidy lint test
+
 .PHONY: create-migration
 create-migration:
 	docker run \
