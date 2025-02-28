@@ -8,6 +8,11 @@ import (
 
 type Class struct {
 	nft.Class
+	Data *ClassData `json:"data"`
+}
+
+type ClassListItem struct {
+	nft.Class
 	ClassData
 	CreatedAt      time.Time `json:"created_at"`
 	Owner          string    `json:"owner"`

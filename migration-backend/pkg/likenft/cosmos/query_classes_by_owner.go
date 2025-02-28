@@ -22,7 +22,7 @@ type QueryNFTClassesByOwnerPageRequest struct {
 }
 
 type QueryNFTClassesByOwnerResponse struct {
-	Classes    []model.Class                      `json:"classes,omitempty"`
+	Classes    []model.ClassListItem              `json:"classes,omitempty"`
 	Pagination QueryNFTClassesByOwnerPageResponse `json:"pagination,omitempty"`
 }
 
@@ -55,7 +55,7 @@ type QueryAllNFTClassesByOwnerRequest struct {
 }
 
 type QueryAllNFTClasssesByOwnerResponse struct {
-	Classes []model.Class `json:"classes,omitempty"`
+	Classes []model.ClassListItem `json:"classes,omitempty"`
 }
 
 func (c *LikeNFTCosmosClient) QueryAllNFTClassesByOwner(request QueryAllNFTClassesByOwnerRequest) (*QueryAllNFTClasssesByOwnerResponse, error) {
