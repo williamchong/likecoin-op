@@ -101,3 +101,46 @@ func TestContractLevelMetadataFromCosmosClassListItem(t *testing.T) {
 		}
 	})
 }
+
+func TestERC721MetadataFromCosmosNFT(t *testing.T) {
+	Convey("ERC721MetadataFromCosmosNFT", t, func() {
+		f, err := os.Open("testdata/erc721_metadata_from_cosmos_nft.tests.yaml")
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+
+		type TestCase struct {
+			Name           string `json:"name"`
+			CosmosNFT      string `json:"cosmosnft"`
+			ERC721Metadata string `json:"erc721metadata"`
+		}
+
+		decoder := goyaml.NewDecoder(f)
+
+		for {
+			var testCase TestCase
+			err := decoder.Decode(&testCase)
+			if errors.Is(err, io.EOF) {
+				break
+			} else if err != nil {
+				panic(err)
+			}
+
+			Convey(testCase.Name, func() {
+				var cosmosNFT cosmosmodel.NFT
+				err := json.Unmarshal([]byte(testCase.CosmosNFT), &cosmosNFT)
+				if err != nil {
+					panic(err)
+				}
+
+				contractLevelMetadata := evm.ERC721MetadataFromCosmosNFT(&cosmosNFT)
+				contractLevelMetadataStr, err := json.Marshal(contractLevelMetadata)
+				if err != nil {
+					panic(err)
+				}
+				require.JSONEq(t, testCase.ERC721Metadata, string(contractLevelMetadataStr))
+			})
+		}
+	})
+}
