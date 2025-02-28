@@ -24,6 +24,10 @@ vendor:
 start:
 	go run ./cmd/server
 
+.PHONY: test
+test:
+	go test ./...
+
 .PHONY: start-worker
 start-worker:
 	go run ./cmd/worker worker
