@@ -2,11 +2,13 @@ package likenft
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
 	"math/big"
 	"regexp"
+	"slices"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -14,6 +16,8 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/ethereum"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
+	cosmosmodel "github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/like_protocol"
 	"github.com/likecoin/like-migration-backend/pkg/model"
@@ -32,6 +36,7 @@ func DoMintNFTAction(
 	db *sql.DB,
 	p *evm.LikeProtocol,
 	c *evm.BookNFT,
+	m *cosmos.LikeNFTCosmosClient,
 	a *model.LikeNFTMigrationActionMintNFT,
 ) (*model.LikeNFTMigrationActionMintNFT, error) {
 	mylogger := logger.
@@ -50,20 +55,45 @@ func DoMintNFTAction(
 	toOwner := common.HexToAddress(a.EvmOwner)
 	initialBatchMintOwnerAddress := common.HexToAddress(a.InitialBatchMintOwner)
 
+	newClassAction, err := appdb.QueryLikeNFTMigrationActionNewClass(db, appdb.QueryLikeNFTMigrationActionNewClassFilter{
+		EvmClassId: &a.EvmClassId,
+	})
+	if err != nil {
+		return nil, doMintNFTActionFailed(db, a, err)
+	}
+
+	totalSupply, err := c.TotalSupply(evmClassAddress)
+	if err != nil {
+		return nil, doMintNFTActionFailed(db, a, err)
+	}
+
 	matches := nftIdRegex.FindStringSubmatch(a.CosmosNFTId)
 
 	var (
-		tx  *types.Transaction
-		err error
+		tx *types.Transaction
 	)
 
 	if matches == nil {
-		tx, err = p.MintNFTs(&like_protocol.MsgMintNFTs{
-			ClassId: evmClassAddress,
-			To:      toOwner,
+		cosmosNFT, err := m.QueryNFT(cosmos.QueryNFTRequest{
+			ClassId: newClassAction.CosmosClassId,
+			Id:      a.CosmosNFTId,
+		})
+		if err != nil {
+			return nil, doMintNFTActionFailed(db, a, err)
+		}
+		metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFT(cosmosNFT.NFT))
+		if err != nil {
+			return nil, doMintNFTActionFailed(db, a, err)
+		}
+
+		metadataString := string(metadataBytes)
+		tx, err = p.MintNFTs(&like_protocol.MsgMintNFTsFromTokenId{
+			ClassId:     evmClassAddress,
+			To:          toOwner,
+			FromTokenId: totalSupply,
 			Inputs: []like_protocol.NFTData{
 				{
-					Metadata: "{}", // TODO
+					Metadata: metadataString,
 				},
 			},
 		})
@@ -74,12 +104,26 @@ func DoMintNFTAction(
 		nftIdStr := matches[numIndex]
 		nftId, err := strconv.ParseUint(nftIdStr, 10, 64)
 		if err != nil {
-			tx, err = p.MintNFTs(&like_protocol.MsgMintNFTs{
-				ClassId: evmClassAddress,
-				To:      toOwner,
+			cosmosNFT, err := m.QueryNFT(cosmos.QueryNFTRequest{
+				ClassId: newClassAction.CosmosClassId,
+				Id:      a.CosmosNFTId,
+			})
+			if err != nil {
+				return nil, doMintNFTActionFailed(db, a, err)
+			}
+			metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFT(cosmosNFT.NFT))
+			if err != nil {
+				return nil, doMintNFTActionFailed(db, a, err)
+			}
+
+			metadataString := string(metadataBytes)
+			tx, err = p.MintNFTs(&like_protocol.MsgMintNFTsFromTokenId{
+				ClassId:     evmClassAddress,
+				To:          toOwner,
+				FromTokenId: totalSupply,
 				Inputs: []like_protocol.NFTData{
 					{
-						Metadata: "{}", // TODO
+						Metadata: metadataString,
 					},
 				},
 			})
@@ -88,22 +132,40 @@ func DoMintNFTAction(
 			}
 		} else {
 			// batch mint
-			totalSupply, err := c.TotalSupply(evmClassAddress)
-			if err != nil {
-				return nil, doMintNFTActionFailed(db, a, err)
-			}
 			desireBatchMintAmount := GetDesireBatchMintAmount(totalSupply, nftId)
 			if desireBatchMintAmount.Cmp(big.NewInt(0)) == 1 {
+				cosmosNFTs, err := m.QueryAllNFTsByClassId(cosmos.QueryAllNFTsByClassIdRequest{
+					ClassId: newClassAction.CosmosClassId,
+				})
+
+				if err != nil {
+					return nil, doMintNFTActionFailed(db, a, err)
+				}
+
 				inputs := make([]like_protocol.NFTData, 0)
 				for i := big.NewInt(0); i.Cmp(desireBatchMintAmount) == -1; i = i.Add(i, big.NewInt(1)) {
+					cosmosNFTIdx := slices.IndexFunc(cosmosNFTs.NFTs, func(n cosmosmodel.NFT) bool {
+						return MakeMatchNFTIdRegex(big.NewInt(0).Add(totalSupply, i).String()).MatchString(n.Id)
+					})
+					metadataStr := "{}"
+					if cosmosNFTIdx != -1 {
+						cosmosNFT := cosmosNFTs.NFTs[cosmosNFTIdx]
+						metadata := evm.ERC721MetadataFromCosmosNFT(&cosmosNFT)
+						metadataBytes, err := json.Marshal(metadata)
+						if err != nil {
+							return nil, doMintNFTActionFailed(db, a, err)
+						}
+						metadataStr = string(metadataBytes)
+					}
 					inputs = append(inputs, like_protocol.NFTData{
-						Metadata: "{}", // TODO
+						Metadata: metadataStr,
 					})
 				}
-				_, err = p.MintNFTs(&like_protocol.MsgMintNFTs{
-					ClassId: evmClassAddress,
-					To:      initialBatchMintOwnerAddress,
-					Inputs:  inputs,
+				_, err = p.MintNFTs(&like_protocol.MsgMintNFTsFromTokenId{
+					ClassId:     evmClassAddress,
+					To:          initialBatchMintOwnerAddress,
+					FromTokenId: totalSupply,
+					Inputs:      inputs,
 				})
 				if err != nil {
 					return nil, doMintNFTActionFailed(db, a, err)

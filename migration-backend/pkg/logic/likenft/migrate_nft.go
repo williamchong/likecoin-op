@@ -145,6 +145,7 @@ func MigrateNFT(
 		db,
 		p,
 		n,
+		c,
 		mintNFTAction,
 	)
 
