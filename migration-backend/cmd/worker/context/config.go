@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hibiken/asynq"
+
 	"github.com/likecoin/like-migration-backend/cmd/worker/config"
 )
 

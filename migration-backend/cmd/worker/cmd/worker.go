@@ -7,10 +7,11 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/hibiken/asynq"
 	_ "github.com/lib/pq"
+	"github.com/spf13/cobra"
+
 	"github.com/likecoin/like-migration-backend/cmd/worker/context"
 	"github.com/likecoin/like-migration-backend/cmd/worker/task"
 	apptask "github.com/likecoin/like-migration-backend/pkg/task"
-	"github.com/spf13/cobra"
 )
 
 var WorkerCmd = &cobra.Command{
@@ -28,7 +29,7 @@ var WorkerCmd = &cobra.Command{
 
 		opt, err := redis.ParseURL(envCfg.RedisDsn)
 		if err != nil {
-			log.Fatalf("could not parse redis url: %v', err")
+			log.Fatalf("could not parse redis url: %v", err)
 		}
 		srv := asynq.NewServer(
 			asynq.RedisClientOpt{

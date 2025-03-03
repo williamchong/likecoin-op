@@ -24,6 +24,10 @@ vendor:
 start:
 	go run ./cmd/server
 
+.PHONY: test
+test:
+	go test ./...
+
 .PHONY: start-worker
 start-worker:
 	go run ./cmd/worker worker
@@ -54,6 +58,9 @@ check-tidy:
 	$(MAKE) fmt
 	go mod tidy
 	git status . --porcelain | grep '.*'; test $$? -eq 1
+
+.PHONY: ci
+ci: check-tidy lint test
 
 .PHONY: create-migration
 create-migration:

@@ -54,3 +54,9 @@ $ make start
 ```sh
 $ make create-migration
 ```
+
+## Test
+
+```sh
+$ make test
+```

@@ -54,8 +54,8 @@ func DoNewClassAction(
 	initialUpdaterAddress := common.HexToAddress(a.InitialUpdater)
 
 	maxSupply := uint64(0)
-	if cosmosClass.Config.MaxSupply != "" {
-		maxSupply, err = strconv.ParseUint(cosmosClass.Config.MaxSupply, 10, 64)
+	if cosmosClass.Data.Config.MaxSupply != "" {
+		maxSupply, err = strconv.ParseUint(cosmosClass.Data.Config.MaxSupply, 10, 64)
 		if err != nil {
 			return nil, doNewClassActionFailed(db, a, err)
 		}

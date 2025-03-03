@@ -7,6 +7,7 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+
 	"github.com/likecoin/like-migration-backend/cmd/cli/cmd"
 	"github.com/likecoin/like-migration-backend/cmd/cli/config"
 )

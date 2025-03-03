@@ -8,6 +8,11 @@ import (
 
 type Class struct {
 	nft.Class
+	Data *ClassData `json:"data"`
+}
+
+type ClassListItem struct {
+	nft.Class
 	ClassData
 	CreatedAt      time.Time `json:"created_at"`
 	Owner          string    `json:"owner"`
@@ -35,7 +40,7 @@ type ClassMetadata struct {
 type ClassParent struct {
 	Type              ClassParentType `json:"type,omitempty"`
 	IscnIdPrefix      string          `json:"iscn_id_prefix,omitempty"`
-	IscnVersionAtMint uint64          `json:"iscn_version_at_mint,omitempty"`
+	IscnVersionAtMint string          `json:"iscn_version_at_mint,omitempty"`
 	Account           string          `json:"account,omitempty"`
 }
 
@@ -65,6 +70,6 @@ type MintPeriod struct {
 }
 
 type BlindBoxState struct {
-	ContentCount uint64 `json:"content_count,omitempty"`
+	ContentCount string `json:"content_count,omitempty"`
 	ToBeRevealed bool   `json:"to_be_revealed,omitempty"`
 }

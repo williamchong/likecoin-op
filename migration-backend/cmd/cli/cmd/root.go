@@ -4,9 +4,10 @@ import (
 	"context"
 	"os"
 
+	"github.com/spf13/cobra"
+
 	"github.com/likecoin/like-migration-backend/cmd/cli/cmd/likenft"
 	"github.com/likecoin/like-migration-backend/cmd/cli/config"
-	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{

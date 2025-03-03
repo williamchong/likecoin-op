@@ -5,9 +5,10 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/hibiken/asynq"
+	"github.com/spf13/cobra"
+
 	"github.com/likecoin/like-migration-backend/cmd/worker/context"
 	"github.com/likecoin/like-migration-backend/cmd/worker/task"
-	"github.com/spf13/cobra"
 )
 
 var SchedulerCmd = &cobra.Command{
@@ -18,7 +19,7 @@ var SchedulerCmd = &cobra.Command{
 
 		opt, err := redis.ParseURL(envCfg.RedisDsn)
 		if err != nil {
-			log.Fatalf("could not parse redis url: %v', err")
+			log.Fatalf("could not parse redis url: %v", err)
 		}
 		scheduler := asynq.NewScheduler(
 			asynq.RedisClientOpt{
@@ -38,7 +39,11 @@ var SchedulerCmd = &cobra.Command{
 		}
 
 		// ... Register tasks
-		scheduler.Register("* * * * *", task)
+		_, err = scheduler.Register("* * * * *", task)
+
+		if err != nil {
+			log.Fatalf("could not register task: %v", err)
+		}
 
 		if err := scheduler.Run(); err != nil {
 			log.Fatalf("could not run server: %v", err)

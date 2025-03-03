@@ -1,0 +1,89 @@
+name: class id = likenft1xmcmnq3j5v342ua2uply7xmvppwgy9z6s9kdlgw4e4rx0mxh9a3qcwy25r
+cosmosclass: |
+  {
+    "id": "likenft1xmcmnq3j5v342ua2uply7xmvppwgy9z6s9kdlgw4e4rx0mxh9a3qcwy25r",
+    "name": "Writing NFT - 回應高重建〈無大台出版實驗的初步構想〉",
+    "description": "討論 Kevin kelly 的成書、原生性正本概念在 NFT 可交換的特性下，如何實踐出版。",
+    "symbol": "WRITING",
+    "uri": "https://api.like.co/likernft/metadata?iscn_id=iscn%3A%2F%2Flikecoin-chain%2F0OefVvJvCmkBWkFM4Z8qyg37nED4ISfB4zYiX7-fh3w%2F1",
+    "uri_hash": "",
+    "config": {
+      "burnable": false,
+      "max_supply": "0",
+      "blind_box_config": null
+    },
+    "metadata": {
+      "image": "ar://V_qaF16YCH8B73APFt0txsZQjgT1w7ZUK5Hj7hrIvE8",
+      "message": "這篇文作為前期思想準備，後共構出高重建先生於2022年的去中心出版實驗。歡迎一同撿拾技術文明的彩霞，吹響屬於創作者的號角。",
+      "external_url": "https://matters.news/@mashbean/303521-回應高重建-無大台出版實驗的初步構想-bafyreifm77yqxz4saq772qmucgkl26l7pm37av5zhwtl4i7jmh7ctgsrtq",
+      "nft_meta_collection_id": "likerland_writing_nft",
+      "nft_meta_collection_name": "Writing NFT",
+      "nft_meta_collection_descrption": "Writing NFT by Liker Land"
+    },
+    "parent": {
+      "type": "ISCN",
+      "iscn_id_prefix": "iscn://likecoin-chain/0OefVvJvCmkBWkFM4Z8qyg37nED4ISfB4zYiX7-fh3w",
+      "account": ""
+    },
+    "created_at": "2022-11-23T05:35:34Z",
+    "latest_price": 1024003200000,
+    "price_updated_at": "2023-07-19T16:07:38Z",
+    "owner": "like1uve0ftw0fp25sd3m5ls956nu02k44afeegvfqe",
+    "nft_owned_count": 1,
+    "nft_last_owned_at": "2023-02-03T07:13:56Z",
+    "last_owned_nft_id": "writing-0c0817b9-4690-4bae-bd88-226a8d97e179"
+  }
+contractlevelmetadata: |
+  {
+    "description": "討論 Kevin kelly 的成書、原生性正本概念在 NFT 可交換的特性下，如何實踐出版。",
+    "name": "Writing NFT - 回應高重建〈無大台出版實驗的初步構想〉",
+    "symbol": "WRITING",
+    "external_link":"https://matters.news/@mashbean/303521-回應高重建-無大台出版實驗的初步構想-bafyreifm77yqxz4saq772qmucgkl26l7pm37av5zhwtl4i7jmh7ctgsrtq",
+    "image":"ar://V_qaF16YCH8B73APFt0txsZQjgT1w7ZUK5Hj7hrIvE8"
+  }
+
+---
+
+name: class id = likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83
+cosmosclass: |
+  {
+    "id": "likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83",
+    "name": "《所謂「我不投資」，就是 all in 在法定貨幣》",
+    "description": "購買本書會透過郵件收到 epub 和 pdf 檔，同時得到換領本書 NFT 的資格。書的 epub 和 pdf 歡迎轉發給朋友，讓更多人獲得相關知識。有別於粵語中「翻版」的原意，「翻版」不是「盜版」，並不違法。\n然而，翻版雖然不是盜版，卻也不是正版。唯有 NFT 的持有者，手上的 epub 和 pdf 才是正版。購買正版是一份美德，是能力所及的讀者該付出的一點承擔，代表著對作者的支持，對知識、報道和創作的尊重。\n翻版是傳播，正版是應援；傳播的同時，不要忘了鼓勵對方購買正版，讓正念 pay it forward。\n鼓勵正版，允許翻版，消滅盜版，是《所謂「我不投資」，就是 all in 在法定貨幣》分散式出版的核心理念。",
+    "symbol": "BOOK",
+    "uri": "https://api.ckxpress.com/book-nft/metadata?book_id=1&iscn_id=iscn%3A%2F%2Flikecoin-chain%2FFyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c%2F1",
+    "uri_hash": "",
+    "config": {
+      "burnable": false,
+      "max_supply": "0",
+      "blind_box_config": null
+    },
+    "metadata": {
+      "image": "ipfs://bafybeierwqwwtj7wynjaud2jwi5yjxfqnnthvxfky66suih5wlpjuofvey",
+      "message": "唯有 NFT 的持有者，手上的 epub 和 pdf 才是正版。購買正版是一份美德，是能力所及的讀者該付出的一點承擔，代表著對作者的支持，對知識、報道和創作的尊重。",
+      "external_url": "https://bit.ly/moneyverse-pdf",
+      "nft_meta_collection_id": "nft_book",
+      "nft_meta_collection_name": "NFT Book",
+      "nft_meta_collection_descrption": "NFT Book"
+    },
+    "parent": {
+      "type": "ISCN",
+      "iscn_id_prefix": "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c",
+      "account": ""
+    },
+    "created_at": "2022-12-05T05:01:15Z",
+    "latest_price": 60000000000000,
+    "price_updated_at": "2023-05-30T13:23:23Z",
+    "owner": "like13f4glvg80zvfrrs7utft5p68pct4mcq7t5atf6",
+    "nft_owned_count": 1,
+    "nft_last_owned_at": "2022-12-09T03:53:22Z",
+    "last_owned_nft_id": "moneyverse-1076"
+  }
+contractlevelmetadata: |
+  {
+    "description": "購買本書會透過郵件收到 epub 和 pdf 檔，同時得到換領本書 NFT 的資格。書的 epub 和 pdf 歡迎轉發給朋友，讓更多人獲得相關知識。有別於粵語中「翻版」的原意，「翻版」不是「盜版」，並不違法。\n然而，翻版雖然不是盜版，卻也不是正版。唯有 NFT 的持有者，手上的 epub 和 pdf 才是正版。購買正版是一份美德，是能力所及的讀者該付出的一點承擔，代表著對作者的支持，對知識、報道和創作的尊重。\n翻版是傳播，正版是應援；傳播的同時，不要忘了鼓勵對方購買正版，讓正念 pay it forward。\n鼓勵正版，允許翻版，消滅盜版，是《所謂「我不投資」，就是 all in 在法定貨幣》分散式出版的核心理念。",
+    "name": "《所謂「我不投資」，就是 all in 在法定貨幣》",
+    "symbol": "BOOK",
+    "external_link":"https://bit.ly/moneyverse-pdf",
+    "image":"ipfs://bafybeierwqwwtj7wynjaud2jwi5yjxfqnnthvxfky66suih5wlpjuofvey"
+  }

@@ -8,6 +8,7 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/hibiken/asynq"
 	"github.com/joho/godotenv"
+
 	"github.com/likecoin/like-migration-backend/cmd/worker/cmd"
 	"github.com/likecoin/like-migration-backend/cmd/worker/config"
 )

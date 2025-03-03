@@ -6,10 +6,11 @@ import (
 	"os"
 
 	"github.com/hibiken/asynq"
+	"github.com/spf13/cobra"
+
 	"github.com/likecoin/like-migration-backend/cmd/worker/cmd/enqueue"
 	"github.com/likecoin/like-migration-backend/cmd/worker/config"
 	appcontext "github.com/likecoin/like-migration-backend/cmd/worker/context"
-	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{

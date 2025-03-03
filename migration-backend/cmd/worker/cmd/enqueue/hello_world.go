@@ -5,9 +5,10 @@ import (
 	"time"
 
 	"github.com/hibiken/asynq"
+	"github.com/spf13/cobra"
+
 	"github.com/likecoin/like-migration-backend/cmd/worker/context"
 	"github.com/likecoin/like-migration-backend/cmd/worker/task"
-	"github.com/spf13/cobra"
 )
 
 var HelloWorldCmd = &cobra.Command{
@@ -15,7 +16,7 @@ var HelloWorldCmd = &cobra.Command{
 	Short: "Enqueue Hello World",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			cmd.Usage()
+			_ = cmd.Usage()
 			return
 		}
 

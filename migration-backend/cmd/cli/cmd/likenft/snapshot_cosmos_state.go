@@ -5,11 +5,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/spf13/cobra"
+
 	"github.com/likecoin/like-migration-backend/cmd/cli/config"
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likenft"
-	"github.com/spf13/cobra"
 )
 
 var initMigration = &cobra.Command{
@@ -17,7 +18,7 @@ var initMigration = &cobra.Command{
 	Short: "Initialize LikeNFT Migration",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			cmd.Usage()
+			_ = cmd.Usage()
 			return
 		}
 
