@@ -8,6 +8,7 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 
 import {MsgMintNFT} from "../types/msgs/MsgMintNFT.sol";
 import {MsgMintNFTs} from "../types/msgs/MsgMintNFTs.sol";
+import {MsgMintNFTsFromTokenId} from "../types/msgs/MsgMintNFTsFromTokenId.sol";
 import {MsgNewClass} from "../types/msgs/MsgNewClass.sol";
 import {MsgUpdateClass} from "../types/msgs/MsgUpdateClass.sol";
 
@@ -100,6 +101,29 @@ contract LikeProtocol is
             metadataList[i] = msgMintNFTs.inputs[i].metadata;
         }
         class.mint(msgMintNFTs.to, metadataList);
+    }
+
+    function safeMintNFTsWithTokenId(
+        MsgMintNFTsFromTokenId calldata msgMintNFTsFromTokenId
+    ) external whenNotPaused {
+        LikeNFTStorage storage $ = _getLikeNFTStorage();
+        LikeNFTClass class = $.classIdClassMapping[
+            msgMintNFTsFromTokenId.classId
+        ];
+        if (address(class) == address(0)) {
+            revert ErrNftClassNotFound();
+        }
+        string[] memory metadataList = new string[](
+            msgMintNFTsFromTokenId.inputs.length
+        );
+        for (uint i = 0; i < msgMintNFTsFromTokenId.inputs.length; i++) {
+            metadataList[i] = msgMintNFTsFromTokenId.inputs[i].metadata;
+        }
+        class.safeMintWithTokenId(
+            msgMintNFTsFromTokenId.fromTokenId,
+            msgMintNFTsFromTokenId.to,
+            metadataList
+        );
     }
 
     function _authorizeUpgrade(
