@@ -23,11 +23,11 @@ type NFTDataClassParent struct {
 }
 
 type NFTMetadata struct {
-	Name        string      `json:"name,omitempty"`
-	Description string      `json:"description,omitempty"`
-	Image       string      `json:"image,omitempty"`
-	ExternalUrl string      `json:"external_url,omitempty"`
-	FileName    string      `json:"fileName,omitempty"`
-	IpfsHash    string      `json:"ipfs_hash,omitempty"`
-	Attributes  interface{} `json:"attributes"`
+	Name        string                 `json:"name,omitempty"`
+	Description string                 `json:"description,omitempty"`
+	Image       string                 `json:"image,omitempty"`
+	ExternalUrl string                 `json:"external_url,omitempty"`
+	FileName    string                 `json:"fileName,omitempty"`
+	IpfsHash    string                 `json:"ipfs_hash,omitempty"`
+	Attributes  map[string]interface{} `json:"attributes"`
 }
