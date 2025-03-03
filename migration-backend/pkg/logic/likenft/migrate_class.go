@@ -18,7 +18,7 @@ func MigrateClassFromAssetMigration(
 	db *sql.DB,
 	c *cosmos.LikeNFTCosmosClient,
 	p *evm.LikeProtocol,
-	n *evm.LikeNFTClass,
+	n *evm.BookNFT,
 
 	initialClassOwner string,
 	initialClassMinter string,
@@ -84,7 +84,7 @@ func MigrateClass(
 	db *sql.DB,
 	c *cosmos.LikeNFTCosmosClient,
 	p *evm.LikeProtocol,
-	n *evm.LikeNFTClass,
+	n *evm.BookNFT,
 
 	cosmosClassId string,
 	initialClassOwner string,

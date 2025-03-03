@@ -57,7 +57,7 @@ var migrateNFTCmd = &cobra.Command{
 			envCfg.EthChainId,
 			contractAddress,
 		)
-		likeNFTClient := evm.NewLikeNFTClass(
+		likeNFTClient := evm.NewBookNFT(
 			ethClient,
 			privateKey,
 			envCfg.EthChainId,

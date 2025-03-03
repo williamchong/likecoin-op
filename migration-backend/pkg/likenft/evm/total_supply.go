@@ -6,11 +6,11 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/likenft_class"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/book_nft"
 )
 
-func (l *LikeNFTClass) TotalSupply(evmClassId common.Address) (*big.Int, error) {
-	instance, err := likenft_class.NewLikenftClass(evmClassId, l.Client)
+func (l *BookNFT) TotalSupply(evmClassId common.Address) (*big.Int, error) {
+	instance, err := book_nft.NewBookNft(evmClassId, l.Client)
 	if err != nil {
 		return nil, fmt.Errorf("err likenft_class.NewLikenftClass: %v", err)
 	}

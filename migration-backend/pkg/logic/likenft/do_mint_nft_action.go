@@ -26,7 +26,7 @@ func DoMintNFTAction(
 
 	db *sql.DB,
 	p *evm.LikeProtocol,
-	c *evm.LikeNFTClass,
+	c *evm.BookNFT,
 	a *model.LikeNFTMigrationActionMintNFT,
 ) (*model.LikeNFTMigrationActionMintNFT, error) {
 	mylogger := logger.

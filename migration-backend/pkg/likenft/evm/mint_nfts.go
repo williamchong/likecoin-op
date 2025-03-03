@@ -7,7 +7,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/like_protocol"
 )
 
-func (l *LikeProtocol) MintNFTs(msgMintNFTs *like_protocol.MsgMintNFTs) (*types.Transaction, error) {
+func (l *LikeProtocol) MintNFTs(msgMintNFTsFromTokenId *like_protocol.MsgMintNFTsFromTokenId) (*types.Transaction, error) {
 	opts, err := l.transactOpts()
 
 	if err != nil {
@@ -18,7 +18,7 @@ func (l *LikeProtocol) MintNFTs(msgMintNFTs *like_protocol.MsgMintNFTs) (*types.
 	if err != nil {
 		return nil, fmt.Errorf("err likenft.NewLikenft: %v", err)
 	}
-	tx, err := instance.MintNFTs(opts, *msgMintNFTs)
+	tx, err := instance.SafeMintNFTsWithTokenId(opts, *msgMintNFTsFromTokenId)
 	if err != nil {
 		return nil, fmt.Errorf("err instance.NewClass: %v", err)
 	}
