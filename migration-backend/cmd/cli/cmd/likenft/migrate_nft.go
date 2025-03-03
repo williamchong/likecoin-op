@@ -3,6 +3,7 @@ package likenft
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -67,7 +68,12 @@ var migrateNFTCmd = &cobra.Command{
 			panic(err)
 		}
 
+		logger := slog.New(slog.Default().Handler()).
+			WithGroup("migrateNFTCmd").
+			With("id", id)
+
 		mn, err := likenft.MigrateNFTFromAssetMigration(
+			logger,
 			db,
 			likenftClient,
 			&likeProtocolClient,

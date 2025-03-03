@@ -63,6 +63,7 @@ func HandleMigrateClassTask(ctx context.Context, t *asynq.Task) error {
 
 	mylogger.Info("running migrate class")
 	mc, err := likenft.MigrateClassFromAssetMigration(
+		logger,
 		db,
 		likenftClient,
 		&evmLikeProtocolClient,

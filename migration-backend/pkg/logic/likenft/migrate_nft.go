@@ -3,6 +3,7 @@ package likenft
 import (
 	"database/sql"
 	"errors"
+	"log/slog"
 	"time"
 
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
@@ -12,6 +13,8 @@ import (
 )
 
 func MigrateNFTFromAssetMigration(
+	logger *slog.Logger,
+
 	db *sql.DB,
 	c *cosmos.LikeNFTCosmosClient,
 	p *evm.LikeProtocol,
@@ -24,6 +27,10 @@ func MigrateNFTFromAssetMigration(
 
 	assetMigrationNFTId uint64,
 ) (*model.LikeNFTAssetMigrationNFT, error) {
+	mylogger := logger.
+		WithGroup("MigrateNFTFromAssetMigration").
+		With("assetMigrationNFTId", assetMigrationNFTId)
+
 	mn, err := appdb.QueryLikeNFTAssetMigrationNFTById(db, assetMigrationNFTId)
 	if err != nil {
 		return nil, err
@@ -42,6 +49,7 @@ func MigrateNFTFromAssetMigration(
 	defer RecalculateMigrationStatus(db, m.Id)
 
 	lastAction, err := MigrateNFT(
+		mylogger,
 		db,
 		c,
 		p,
@@ -73,6 +81,8 @@ func MigrateNFTFromAssetMigration(
 }
 
 func MigrateNFT(
+	logger *slog.Logger,
+
 	db *sql.DB,
 	c *cosmos.LikeNFTCosmosClient,
 	p *evm.LikeProtocol,
@@ -87,6 +97,16 @@ func MigrateNFT(
 	cosmosNFTId string,
 	evmOwner string,
 ) (*model.LikeNFTMigrationActionMintNFT, error) {
+	mylogger := logger.
+		WithGroup("MigrateNFT").
+		With("initialClassOwner", initialClassOwner).
+		With("initialClassMinter", initialClassMinter).
+		With("initialClassUpdater", initialClassUpdater).
+		With("initialBatchMintOwner", initialBatchMintOwner).
+		With("cosmosClassId", cosmosClassId).
+		With("cosmosNFTId", cosmosNFTId).
+		With("evmOwner", evmOwner)
+
 	newClassAction, err := GetOrCreateNewClassAction(
 		db,
 		cosmosClassId,
@@ -98,7 +118,13 @@ func MigrateNFT(
 		return nil, err
 	}
 
-	newClassAction, err = DoNewClassAction(db, c, p, newClassAction)
+	newClassAction, err = DoNewClassAction(
+		mylogger,
+		db,
+		c,
+		p,
+		newClassAction,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +140,13 @@ func MigrateNFT(
 	if err != nil {
 		return nil, err
 	}
-	mintNFTAction, err = DoMintNFTAction(db, p, n, mintNFTAction)
+	mintNFTAction, err = DoMintNFTAction(
+		mylogger,
+		db,
+		p,
+		n,
+		mintNFTAction,
+	)
 
 	if err != nil {
 		return nil, err
