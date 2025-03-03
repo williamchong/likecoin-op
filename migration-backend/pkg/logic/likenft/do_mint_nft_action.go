@@ -3,6 +3,7 @@ package likenft
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log/slog"
 	"math/big"
 	"regexp"
@@ -20,6 +21,10 @@ import (
 
 var nftIdRegex = regexp.MustCompile("(?P<prefix>.+)-(?P<maybe_num>[0-9]+)")
 var numIndex = nftIdRegex.SubexpIndex("maybe_num")
+
+func MakeMatchNFTIdRegex(id string) *regexp.Regexp {
+	return regexp.MustCompile(fmt.Sprintf("^(?P<prefix>[a-zA-Z0-9]+)-(?P<maybe_num>0*%s)$", id))
+}
 
 func DoMintNFTAction(
 	logger *slog.Logger,
