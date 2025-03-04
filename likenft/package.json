@@ -4,6 +4,7 @@
     "build": "hardhat compile",
     "dev": "hardhat node",
     "debug:local": "hardhat console --network localhost",
+    "script:local": "hardhat run --network localhost",
     "deploy:local": "hardhat run --network localhost scripts/deploy.ts",
     "upgrade:local": "hardhat run --network localhost scripts/upgrade.ts",
     "debug:sepolia": "hardhat console --network sepolia",

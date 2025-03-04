@@ -5,7 +5,7 @@ async function getTokenURI() {
   const classId = "0x84ce8AaB5aceCaE283083761498440539a5DD8dE";
   const signer = await ethers.provider.getSigner();
 
-  const LikeNFTClass = await ethers.getContractAt("LikeNFTClass", classId);
+  const LikeNFTClass = await ethers.getContractAt("BookNFT", classId);
   const likeNFTClass = LikeNFTClass.connect(signer);
 
   console.log(await likeNFTClass.getAddress());

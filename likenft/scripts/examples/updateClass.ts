@@ -16,7 +16,7 @@ async function updateClass() {
     classId: classId,
     input: {
       name: "《所謂「我不投資」，就是 all in 在法定貨幣》",
-      symbol: "BOOK",
+      symbol: "BOOK2",
       metadata: JSON.stringify({
         name: "《所謂「我不投資」，就是 all in 在法定貨幣》",
         symbol: "BOOK",

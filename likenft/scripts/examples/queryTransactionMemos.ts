@@ -12,12 +12,12 @@ export interface TransactionMemo {
 type AttachedContract = ReturnType<ContractFactory<any[], Contract>["attach"]>;
 
 async function _queryTransactionMemos() {
-  const classId = "0x73228898f17e2057D898475953c1018704155e25";
+  const classId = "0xAf0f5e9a70349947961691DB04f642c480200315";
   const tokenId = 0;
 
   const signer = await ethers.provider.getSigner();
 
-  const LikeNFTClass = await ethers.getContractAt("LikeNFTClass", classId);
+  const LikeNFTClass = await ethers.getContractAt("BookNFT", classId);
   const likeNFTClass = LikeNFTClass.connect(signer);
   console.log(await queryTransactionMemos(likeNFTClass, tokenId));
 }
