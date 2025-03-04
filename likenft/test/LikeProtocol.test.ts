@@ -36,6 +36,7 @@ describe("LikeProtocol", () => {
       contractAddress,
       likeProtocolMockOwnerSigner,
     );
+    expect(await newLikeProtocol.getAddress()).to.equal(contractAddress);
     expect(await newLikeProtocol.owner()).to.equal(this.ownerSigner.address);
     expect(await newLikeProtocol.version()).to.equal(2n);
   });
