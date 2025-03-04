@@ -12,6 +12,7 @@ import {NFTData} from "../types/NFTData.sol";
 
 error ErrUnauthorized();
 error ErrNftNoSupply();
+error ErrTokenIdMintFails(uint256 nextTokenId);
 
 contract LikeNFTClass is ERC721Enumerable, Ownable, AccessControl {
     // keccak256(abi.encode(uint256(keccak256("likenft.storage.class")) - 1)) & ~bytes32(uint256(0xff))
@@ -107,6 +108,33 @@ contract LikeNFTClass is ERC721Enumerable, Ownable, AccessControl {
         address to,
         string[] calldata metadataList
     ) external onlyMinter {
+        _mint(to, metadataList);
+    }
+
+    /**
+     * safeMintWithTokenId
+     *
+     * a fast fails function call to ensure the transaction sender
+     * is getting the desired tokenId(in stead of next Id) in the result.
+     *
+     * Expect caller to check and specify correct start token id
+     *
+     * @param fromTokenId - the start token id
+     * @param to - owner address to hold the new minted token
+     * @param metadataList - list of metadata to supply
+     */
+    function safeMintWithTokenId(
+        uint256 fromTokenId,
+        address to,
+        string[] calldata metadataList
+    ) external onlyMinter {
+        if (totalSupply() != fromTokenId) {
+            revert ErrTokenIdMintFails(totalSupply());
+        }
+        _mint(to, metadataList);
+    }
+
+    function _mint(address to, string[] memory metadataList) internal {
         ClassStorage storage $ = _getClassStorage();
 
         uint64 maxSupply = $.data.config.max_supply;
