@@ -1,0 +1,6 @@
+@font-face {
+  font-family: 'fa';
+  font-weight: 900;
+  src: url('fa-solid-900.ttf') format('truetype'),
+    url('fa-solid-900.woff2') format('woff2');
+}

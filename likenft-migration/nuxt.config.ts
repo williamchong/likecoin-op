@@ -35,7 +35,11 @@ export default {
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: ['./assets/css/style.css', '@likecoin/wallet-connector/dist/style.css'],
+  css: [
+    './assets/css/style.css',
+    '@likecoin/wallet-connector/dist/style.css',
+    './assets/fontawesome/fontawesome.css',
+  ],
 
   i18n,
 
