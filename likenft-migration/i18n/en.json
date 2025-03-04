@@ -1,6 +1,6 @@
 {
-  "index": {
-    "get-started": "Get Started"
+  "app": {
+    "title": "Liker ID and LikeNFT 轉換 Transfer"
   },
   "migrate": {
     "classes": "Books",
