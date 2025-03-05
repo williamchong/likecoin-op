@@ -1,3 +1,4 @@
+
 GIT_SHORT_HASH ?= $(shell git rev-parse --short=8 HEAD)
 TAG ?= $(GIT_SHORT_HASH)
 DEPLOY_DEV_DOCKER_IMAGE_NAME ?= chankiyu22/like-migration-backend
@@ -83,6 +84,20 @@ run-migration:
 		-i \
 		chankiyu22/sql-migrate \
 		sql-migrate up
+
+.PHONY: abigen
+abigen: SHELL=/bin/bash
+abigen:
+	mkdir -p pkg/likenft/evm/like_protocol
+	mkdir -p pkg/likenft/evm/book_nft
+	go run github.com/ethereum/go-ethereum/cmd/abigen@latest \
+		--abi=<(cat ../abi/LikeProtocol.json | jq '.["abi"]') \
+		--pkg=like_protocol \
+		--out=pkg/likenft/evm/like_protocol/like_protocol.go
+	go run github.com/ethereum/go-ethereum/cmd/abigen@latest \
+		--abi=<(cat ../abi/BookNFT.json | jq '.["abi"]') \
+		--pkg=book_nft \
+		--out=pkg/likenft/evm/book_nft/book_nft.go
 
 .PHONY: docker-image
 docker-image:

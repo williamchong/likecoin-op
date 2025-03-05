@@ -20,7 +20,7 @@ func DoTransferClassAction(
 
 	db *sql.DB,
 	c *cosmos.LikeNFTCosmosClient,
-	n *evm.LikeNFTClass,
+	n *evm.BookNFT,
 	a *model.LikeNFTMigrationActionTransferClass,
 ) (*model.LikeNFTMigrationActionTransferClass, error) {
 	mylogger := logger.

@@ -56,7 +56,7 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 		envCfg.EthChainId,
 		contractAddress,
 	)
-	evmLikeNFTClient := evm.NewLikeNFTClass(
+	evmLikeNFTClient := evm.NewBookNFT(
 		ethClient,
 		privateKey,
 		envCfg.EthChainId,

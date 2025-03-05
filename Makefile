@@ -20,9 +20,9 @@ abigen:
 	make -C likenft build
 	mkdir -p abi
 	cp likenft/artifacts/contracts/LikeProtocol.sol/LikeProtocol.json abi/
-	cp likenft/artifacts/contracts/LikeNFTClass.sol/LikeNFTClass.json abi/
+	cp likenft/artifacts/contracts/BookNFT.sol/BookNFT.json abi/
 	# make -C likenft-indexer abigen
-	# make -C migration-backend abigen
+	make -C migration-backend abigen
 
 .PHONY: docker-images
 docker-images:

@@ -2,6 +2,7 @@ package likenft
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -61,6 +62,10 @@ func DoNewClassAction(
 		}
 	}
 
+	metadataBytes, err := json.Marshal(evm.ContractLevelMetadataFromCosmosClass(cosmosClass))
+	if err != nil {
+		return nil, doNewClassActionFailed(db, a, err)
+	}
 	tx, err := n.NewClass(like_protocol.MsgNewClass{
 		Creator:  initialOwnerAddress,
 		Updaters: []common.Address{initialUpdaterAddress},
@@ -68,7 +73,7 @@ func DoNewClassAction(
 		Input: like_protocol.ClassInput{
 			Name:     cosmosClass.Name,
 			Symbol:   cosmosClass.Symbol,
-			Metadata: "{}", // TODO
+			Metadata: string(metadataBytes),
 			Config: like_protocol.ClassConfig{
 				MaxSupply: maxSupply,
 			},

@@ -1,0 +1,50 @@
+name: "1"
+id: "1"
+matches:
+  - nft-1
+  - nft-01
+  - nft-0001
+failes:
+  - nft-2
+  - nft-3
+  - nft-02
+  - nft-03
+  - nft-0002
+  - nft-0003
+  - nft-1001
+  - nft-1002
+  - nft-1003
+  - nft-1011
+  - nft-1012
+  - nft-1013
+
+---
+
+name: "11"
+id: "11"
+matches:
+  - nft-11
+  - nft-011
+  - nft-0011
+failes:
+  - nft-1
+  - nft-111
+  - nft-1111
+  - nft-0111
+
+---
+
+name: generic
+id: "[0-9]+"
+matches:
+  - nft-1
+  - nft-2
+  - nft-0011
+  - nft-1011
+failes:
+  - some-string
+  - some-string001
+  - some-001string
+  - string001
+  - 001string
+  - 89f41f8c-4441-431d-bf04-000000000007
