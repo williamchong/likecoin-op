@@ -29,7 +29,8 @@
       "eth-address": "ETH Address",
       "likecoin-wallet": "LikeCoin 錢包",
       "liker-id": "Liker ID",
-      "migration-wallet": "轉換對應錢包"
+      "migration-wallet": "轉換對應錢包",
+      "title": "連接錢包"
     }
   }
 }

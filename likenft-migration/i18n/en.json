@@ -29,7 +29,8 @@
       "eth-address": "ETH Address",
       "likecoin-wallet": "LikeCoin Wallet",
       "liker-id": "Liker ID",
-      "migration-wallet": "Migration Wallet"
+      "migration-wallet": "Migration Wallet",
+      "title": "Connect Wallet"
     }
   }
 }
