@@ -8,6 +8,9 @@ ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 args = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}` 
 
+-include .env
+export
+
 .PHONY: secret
 secret:
 	@curl -s https://raw.githubusercontent.com/oursky/devsecops-secret/v1.0/generate-secret.sh \
@@ -20,6 +23,7 @@ vendor:
 	go mod download
 	go install golang.org/x/vuln/cmd/govulncheck@latest
 	go install golang.org/x/tools/cmd/goimports@latest
+	go install github.com/rubenv/sql-migrate/...@latest
 
 .PHONY: start
 start:
@@ -65,25 +69,11 @@ ci: check-tidy lint test
 
 .PHONY: create-migration
 create-migration:
-	docker run \
-		--rm \
-		-v $(ROOT_DIR):$(ROOT_DIR) \
-		-w $(ROOT_DIR) \
-		-i \
-		chankiyu22/sql-migrate \
-		sql-migrate new $(args)
+	sql-migrate new $(args)
 
 .PHONY: run-migration
 run-migration:
-	docker run \
-		--rm \
-		-v $(ROOT_DIR):$(ROOT_DIR) \
-		-w $(ROOT_DIR) \
-		--net=host \
-		--env-file .env \
-		-i \
-		chankiyu22/sql-migrate \
-		sql-migrate up
+	sql-migrate up
 
 .PHONY: abigen
 abigen: SHELL=/bin/bash
