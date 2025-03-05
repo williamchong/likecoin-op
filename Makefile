@@ -23,3 +23,13 @@ abigen:
 	cp likenft/artifacts/contracts/LikeNFTClass.sol/LikeNFTClass.json abi/
 	# make -C likenft-indexer abigen
 	# make -C migration-backend abigen
+
+.PHONY: docker-images
+docker-images:
+	DOCKER_BUILD_ARGS=--push make -C migration-backend docker-image
+	DOCKER_BUILD_ARGS=--push make -C likenft-migration docker-image
+	DOCKER_BUILD_ARGS=--push make -C likecoin-migration docker-image
+
+.PHONY: deploy
+deploy:
+	make -C deploy deploy
