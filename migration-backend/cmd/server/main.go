@@ -76,24 +76,9 @@ func main() {
 		panic(err)
 	}
 
-	cosmosAPI := &api.CosmosAPI{
-		HTTPClient: &http.Client{
-			Timeout: 5 * time.Second,
-		},
-		NodeURL: envCfg.CosmosNodeUrl,
-	}
-	likenftCosmosClient := &cosmos.LikeNFTCosmosClient{
-		HTTPClient: &http.Client{
-			Timeout: 10 * time.Second,
-		},
-		NodeURL: envCfg.CosmosNodeUrl,
-	}
-	likecoinAPI := &likecoin_api.LikecoinAPI{
-		LikecoinAPIUrlBase: envCfg.LikecoinAPIUrlBase,
-		HTTPClient: &http.Client{
-			Timeout: 5 * time.Second,
-		},
-	}
+	cosmosAPI := api.NewCosmosAPI(envCfg.CosmosNodeUrl)
+	likenftCosmosClient := cosmos.NewLikeNFTCosmosClient(envCfg.CosmosNodeUrl)
+	likecoinAPI := likecoin_api.NewLikecoinAPI(envCfg.LikecoinAPIUrlBase)
 
 	mainMux.Handle("/healthz", &handler.HealthzHandler{})
 	mainMux.Handle("/init_likecoin_migration_from_cosmos", &handler.InitLikeCoinMigrationFromCosmosHandler{
