@@ -1,14 +1,14 @@
 import { ethers } from "hardhat";
 
 async function transferWithMemo() {
-  const classId = "0x84ce8AaB5aceCaE283083761498440539a5DD8dE";
+  const classId = "0xAf0f5e9a70349947961691DB04f642c480200315";
   const tokenId = 0;
   const from = "0xc71fe89e4c0e5458a793fc6548ef6b392417a7fb";
   const to = "0xc71fe89e4c0e5458a793fc6548ef6b392417a7fb";
 
   const signer = await ethers.provider.getSigner();
 
-  const LikeNFTClass = await ethers.getContractAt("LikeNFTClass", classId);
+  const LikeNFTClass = await ethers.getContractAt("BookNFT", classId);
   const likeNFTClass = LikeNFTClass.connect(signer);
 
   const tx = await likeNFTClass.transferWithMemo(

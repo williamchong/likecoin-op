@@ -12,7 +12,7 @@ import {MsgMintNFTsFromTokenId} from "../types/msgs/MsgMintNFTsFromTokenId.sol";
 import {MsgNewClass} from "../types/msgs/MsgNewClass.sol";
 import {MsgUpdateClass} from "../types/msgs/MsgUpdateClass.sol";
 
-import {LikeNFTClass} from "./LikeNFTClass.sol";
+import {BookNFT} from "./BookNFT.sol";
 
 error ErrNftClassNotFound();
 
@@ -23,7 +23,7 @@ contract LikeProtocol is
     PausableUpgradeable
 {
     struct LikeNFTStorage {
-        mapping(address classId => LikeNFTClass) classIdClassMapping;
+        mapping(address classId => BookNFT) classIdClassMapping;
     }
     // keccak256(abi.encode(uint256(keccak256("likenft.storage")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant DATA_STORAGE =
@@ -55,14 +55,14 @@ contract LikeProtocol is
         _unpause();
     }
 
-    function isLikeNFTClass(address classId) public view returns (bool) {
+    function isBookNFT(address classId) public view returns (bool) {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
         return address($.classIdClassMapping[classId]) != address(0);
     }
 
     function newClass(MsgNewClass memory msgNewClass) public whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
-        LikeNFTClass class = new LikeNFTClass(msgNewClass);
+        BookNFT class = new BookNFT(msgNewClass);
         address id = address(class);
         $.classIdClassMapping[id] = class;
         emit NewClass(id, msgNewClass);
@@ -72,7 +72,7 @@ contract LikeProtocol is
         MsgUpdateClass memory msgUpdateClass
     ) public whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
-        LikeNFTClass class = $.classIdClassMapping[msgUpdateClass.classId];
+        BookNFT class = $.classIdClassMapping[msgUpdateClass.classId];
         if (address(class) == address(0)) {
             revert ErrNftClassNotFound();
         }
@@ -81,7 +81,7 @@ contract LikeProtocol is
 
     function mintNFT(MsgMintNFT calldata msgMintNFT) external whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
-        LikeNFTClass class = $.classIdClassMapping[msgMintNFT.classId];
+        BookNFT class = $.classIdClassMapping[msgMintNFT.classId];
         if (address(class) == address(0)) {
             revert ErrNftClassNotFound();
         }
@@ -92,7 +92,7 @@ contract LikeProtocol is
 
     function mintNFTs(MsgMintNFTs calldata msgMintNFTs) external whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
-        LikeNFTClass class = $.classIdClassMapping[msgMintNFTs.classId];
+        BookNFT class = $.classIdClassMapping[msgMintNFTs.classId];
         if (address(class) == address(0)) {
             revert ErrNftClassNotFound();
         }
@@ -107,9 +107,7 @@ contract LikeProtocol is
         MsgMintNFTsFromTokenId calldata msgMintNFTsFromTokenId
     ) external whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
-        LikeNFTClass class = $.classIdClassMapping[
-            msgMintNFTsFromTokenId.classId
-        ];
+        BookNFT class = $.classIdClassMapping[msgMintNFTsFromTokenId.classId];
         if (address(class) == address(0)) {
             revert ErrNftClassNotFound();
         }

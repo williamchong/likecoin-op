@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { EventLog } from "ethers";
 import { ethers, upgrades } from "hardhat";
 
-describe("LikeNFT", () => {
+describe("BookNFTToken", () => {
   before(async function () {
     this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
     const [protocolOwner, classOwner, likerLand, randomSigner, randomSigner2] =
@@ -78,7 +78,7 @@ describe("LikeNFT", () => {
 
     const newClassEvent = await NewClassEvent;
     nftClassId = newClassEvent.id;
-    nftClassContract = await ethers.getContractAt("LikeNFTClass", nftClassId);
+    nftClassContract = await ethers.getContractAt("BookNFT", nftClassId);
 
     const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
     await likeNFTClassOwnerSigner

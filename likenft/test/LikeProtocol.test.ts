@@ -36,6 +36,7 @@ describe("LikeProtocol", () => {
       contractAddress,
       likeProtocolMockOwnerSigner,
     );
+    expect(await newLikeProtocol.getAddress()).to.equal(contractAddress);
     expect(await newLikeProtocol.owner()).to.equal(this.ownerSigner.address);
     expect(await newLikeProtocol.version()).to.equal(2n);
   });
@@ -132,7 +133,7 @@ describe("LikeProtocol", () => {
     const newClassEvent = await NewClassEvent;
     const classId = newClassEvent.id;
 
-    const _newNFTClass = await ethers.getContractAt("LikeNFTClass", classId);
+    const _newNFTClass = await ethers.getContractAt("BookNFT", classId);
     expect(await _newNFTClass.name()).to.equal("My Book");
     expect(await _newNFTClass.symbol()).to.equal("KOOB");
   });
@@ -238,7 +239,7 @@ describe("LikeProtocol", () => {
     await expect(classOperation()).to.be.not.rejected;
   });
 
-  it("should only allow LikeNFTClass owner to update the class", async function () {
+  it("should only allow BookNFT owner to update the class", async function () {
     const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
     const likeProtocolRandomSigner = contract.connect(this.randomSigner);
 
@@ -285,7 +286,7 @@ describe("LikeProtocol", () => {
     const newClassEvent = await NewClassEvent;
     const classId = newClassEvent.id;
 
-    const _newNFTClass = await ethers.getContractAt("LikeNFTClass", classId);
+    const _newNFTClass = await ethers.getContractAt("BookNFT", classId);
     await expect(await _newNFTClass.owner()).to.equal(this.ownerSigner.address);
     await expect(await _newNFTClass.symbol()).to.equal("KOOB");
 
@@ -309,7 +310,7 @@ describe("LikeProtocol", () => {
     await expect(await _newNFTClass.symbol()).to.equal("KOOB");
   });
 
-  it("should retain the LikeNFTClass paused state after upgrade", async function () {
+  it("should retain the BookNFT paused state after upgrade", async function () {
     const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
 
     expect(await likeProtocolOwnerSigner.paused()).to.be.false;
@@ -337,7 +338,7 @@ describe("LikeProtocol", () => {
     expect(await likeProtocolOwnerSigner.paused()).to.be.false;
   });
 
-  it("should retain the LikeNFTClass mapping after upgrade", async function () {
+  it("should retain the BookNFT mapping after upgrade", async function () {
     const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
     const newClass = async () => {
       await likeProtocolOwnerSigner
@@ -381,7 +382,7 @@ describe("LikeProtocol", () => {
     await expect(newClass()).to.be.not.rejected;
     const newClassEvent = await NewClassEvent;
     const classId = newClassEvent.id;
-    expect(await likeProtocolOwnerSigner.isLikeNFTClass(classId)).to.be.true;
+    expect(await likeProtocolOwnerSigner.isBookNFT(classId)).to.be.true;
 
     const likeProtocolMockOwnerSigner = this.LikeProtocolMock.connect(
       this.ownerSigner,
@@ -392,12 +393,12 @@ describe("LikeProtocol", () => {
     );
     expect(await newLikeProtocol.owner()).to.equal(this.ownerSigner.address);
     expect(await newLikeProtocol.version()).to.equal(2n);
-    expect(await newLikeProtocol.isLikeNFTClass(classId)).to.be.true;
+    expect(await newLikeProtocol.isBookNFT(classId)).to.be.true;
 
     const proxyContract = await ethers.getContractAt(
       "LikeProtocolMock",
       contractAddress,
     );
-    expect(await proxyContract.isLikeNFTClass(classId)).to.be.true;
+    expect(await proxyContract.isBookNFT(classId)).to.be.true;
   });
 });

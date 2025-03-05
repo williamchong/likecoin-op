@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { EventLog, BaseContract } from "ethers";
 import { ethers, upgrades } from "hardhat";
 
-describe("LikeNFTClass", () => {
+describe("BookNFTClass", () => {
   before(async function () {
     this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
     const [protocolOwner, classOwner, likerLand, randomSigner] =
@@ -77,7 +77,7 @@ describe("LikeNFTClass", () => {
 
     const newClassEvent = await NewClassEvent;
     nftClassId = newClassEvent.id;
-    nftClassContract = await ethers.getContractAt("LikeNFTClass", nftClassId);
+    nftClassContract = await ethers.getContractAt("BookNFT", nftClassId);
     expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
   });
 
@@ -530,7 +530,7 @@ describe("LikeNFTClass", () => {
   });
 });
 
-describe("LikeNFTClass permission control", () => {
+describe("BookNFT permission control", () => {
   before(async function () {
     this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
     const [protocolOwner, classOwner, likerLand, randomSigner] =
@@ -604,7 +604,7 @@ describe("LikeNFTClass permission control", () => {
 
     const newClassEvent = await NewClassEvent;
     nftClassId = newClassEvent.id;
-    nftClassContract = await ethers.getContractAt("LikeNFTClass", nftClassId);
+    nftClassContract = await ethers.getContractAt("BookNFT", nftClassId);
     expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
   });
 
@@ -696,7 +696,7 @@ describe("LikeNFTClass permission control", () => {
   });
 });
 
-describe("LikeNFTClass ownership transfer", () => {
+describe("BookNFT ownership transfer", () => {
   before(async function () {
     this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
     const [protocolOwner, classOwner, likerLand, randomSigner] =
@@ -771,7 +771,7 @@ describe("LikeNFTClass ownership transfer", () => {
 
     const newClassEvent = await NewClassEvent;
     nftClassId = newClassEvent.id;
-    nftClassContract = await ethers.getContractAt("LikeNFTClass", nftClassId);
+    nftClassContract = await ethers.getContractAt("BookNFT", nftClassId);
     expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
   });
 
