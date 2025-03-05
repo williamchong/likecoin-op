@@ -20,11 +20,13 @@
           <h2 :class="['text-base', 'font-semibold', 'text-likecoin-darkgrey']">
             {{ $t('section.introduction.title') }}
           </h2>
-          <div :class="['mt-2', 'mb-5']">
-            <SectionIntroduction
-              @confirmClicked="handleIntroductionSectionConfirmClick"
-            />
-          </div>
+          <template #current>
+            <div :class="['mt-2', 'mb-5']">
+              <SectionIntroduction
+                @confirmClicked="handleIntroductionSectionConfirmClick"
+              />
+            </div>
+          </template>
         </StepSection>
         <StepSection :step="2" :current-step="currentStep"></StepSection>
         <StepSection :step="3" :current-step="currentStep"></StepSection>
