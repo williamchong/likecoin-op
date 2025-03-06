@@ -49,6 +49,8 @@ export default {
     { src: '~/plugins/textEncoder' },
     '~/plugins/config.ts',
     '~/plugins/apiClient.ts',
+    '~/plugins/likeCoinWalletConnector.ts',
+    '~/plugins/likeCoinEVMWalletConnector.ts',
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
