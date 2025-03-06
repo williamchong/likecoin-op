@@ -4,9 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
-	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -34,12 +32,7 @@ var migrateClassCmd = &cobra.Command{
 			panic(err)
 		}
 
-		likenftClient := &cosmos.LikeNFTCosmosClient{
-			HTTPClient: &http.Client{
-				Timeout: 5 * time.Second,
-			},
-			NodeURL: envCfg.CosmosNodeUrl,
-		}
+		likenftClient := cosmos.NewLikeNFTCosmosClient(envCfg.CosmosNodeUrl)
 
 		ethClient, err := ethclient.Dial(envCfg.EthNetworkPublicRPCURL)
 		if err != nil {
