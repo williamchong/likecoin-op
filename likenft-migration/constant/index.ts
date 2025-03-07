@@ -45,3 +45,17 @@ export function AUTHCORE_API_HOST(isTestnet: boolean): string {
 export function EXTERNAL_HOST(isTestnet: boolean): string {
   return isTestnet ? 'https://rinkeby.liker.land' : 'https://liker.land';
 }
+
+export function EVM_CHAIN_ID(isTestnet: boolean): number {
+  return isTestnet ? 11155420 : 10;
+}
+
+export function EVM_RPC_URL(isTestnet: boolean): string {
+  return isTestnet
+    ? 'https://sepolia.optimism.io'
+    : 'https://mainnet.optimism.io';
+}
+
+export function EVM_MAGIC_LINK_API_KEY(isTestnet: boolean): string | undefined {
+  return isTestnet ? 'pk_live_5E14E3184484268D' : undefined;
+}
