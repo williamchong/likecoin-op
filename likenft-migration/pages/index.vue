@@ -14,7 +14,7 @@
         </h1>
       </HeroBanner>
     </div>
-    <div :class="['relative', 'z-10', 'max-w-[880px]', 'px-4', 'mx-auto']">
+    <div :class="['relative', 'max-w-[880px]', 'px-4', 'mx-auto']">
       <div :class="['bg-white', 'p-[30px]', 'rounded-md', 'shadow-md']">
         <StepSection :step="1" :current-step="currentStep.step">
           <h2 :class="['text-base', 'font-semibold', 'text-likecoin-darkgrey']">
