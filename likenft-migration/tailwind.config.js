@@ -1,8 +1,9 @@
+const defaultConfig = require('tailwindcss/defaultConfig');
 const defaultTheme = require('tailwindcss/defaultTheme');
 
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [],
+  content: [...defaultConfig.content, 'nuxtui/**/*.{vue,js,jsx,mjs,ts,tsx}'],
   theme: {
     extend: {
       colors: {
