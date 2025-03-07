@@ -38,6 +38,7 @@ export default {
   css: [
     './assets/css/style.css',
     '@likecoin/wallet-connector/dist/style.css',
+    '@likecoin/evm-wallet-connector/style.css',
     './assets/fontawesome/fontawesome.css',
   ],
 
