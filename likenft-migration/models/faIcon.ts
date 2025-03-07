@@ -4,6 +4,9 @@ const unicodeMapping = {
   'circle-3': '\uE0F0',
   'circle-4': '\uE0F1',
   'circle-check': '\uF058',
+  'circle-exclamation': '\uF06A',
+  'link-simple': '\uE1CD',
+  'triangle-exclamation': '\uF071',
 } as const;
 
 export default unicodeMapping;
