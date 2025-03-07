@@ -97,6 +97,7 @@ export default {
       '@likecoin/wallet-connector',
       'libsodium',
       'web3',
+      'date-fns',
     ],
   },
 };
