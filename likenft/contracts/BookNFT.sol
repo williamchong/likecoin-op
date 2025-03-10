@@ -184,6 +184,18 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         });
     }
 
+    /**
+     * getCurrentIndex
+     *
+     * getting the current index of the book nft, this is the index of the next token to be minted
+     *
+     * @return the current index
+     */
+    function getCurrentIndex() public view returns (uint256) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return $._currentIndex;
+    }   
+
     function name() public view override returns (string memory) {
         BookNFTStorage storage $ = _getClassStorage();
         return $.name;

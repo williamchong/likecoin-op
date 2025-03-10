@@ -108,6 +108,38 @@ describe("BookNFTClass", () => {
     ).to.equal(false);
   });
 
+  it("should return the right current index", async function () {
+    expect(await nftClassContract.getCurrentIndex()).to.equal(0n);
+
+    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    const mintNFT = async () => {
+      await likeClassOwnerSigner
+        .mint(this.classOwner.address, [
+          JSON.stringify({
+            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+            image_data: "",
+            external_url: "https://www.google.com",
+            description: "202412191729 #0001 Description",
+            name: "202412191729 #0001",
+            attributes: [
+              {
+                trait_type: "ISCN ID",
+                value:
+                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+              },
+            ],
+            background_color: "",
+            animation_url: "",
+            youtube_url: "",
+          }),
+        ])
+        .then((tx) => tx.wait());
+    };
+
+    await expect(mintNFT()).to.be.not.rejected;
+    expect(await nftClassContract.getCurrentIndex()).to.equal(1n);
+  });
+
   it("should allow class owner to update class and mint NFT", async function () {
     const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
     expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
