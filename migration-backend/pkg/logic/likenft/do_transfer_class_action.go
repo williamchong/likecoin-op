@@ -1,6 +1,7 @@
 package likenft
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -16,6 +17,7 @@ import (
 )
 
 func DoTransferClassAction(
+	ctx context.Context,
 	logger *slog.Logger,
 
 	db *sql.DB,
@@ -51,7 +53,7 @@ func DoTransferClassAction(
 		return nil, doTransferClassActionFailed(db, a, err)
 	}
 
-	_, err = ethereum.AwaitTx(mylogger, n.Client, tx)
+	_, err = ethereum.AwaitTx(ctx, mylogger, n.Client, tx)
 
 	if err != nil {
 		return nil, doTransferClassActionFailed(db, a, err)

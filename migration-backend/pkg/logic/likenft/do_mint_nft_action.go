@@ -1,6 +1,7 @@
 package likenft
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -31,6 +32,7 @@ func MakeMatchNFTIdRegex(id string) *regexp.Regexp {
 }
 
 func DoMintNFTAction(
+	ctx context.Context,
 	logger *slog.Logger,
 
 	db *sql.DB,
@@ -178,7 +180,7 @@ func DoMintNFTAction(
 		}
 	}
 
-	_, err = ethereum.AwaitTx(mylogger, p.Client, tx)
+	_, err = ethereum.AwaitTx(ctx, mylogger, p.Client, tx)
 
 	if err != nil {
 		return nil, doMintNFTActionFailed(db, a, err)

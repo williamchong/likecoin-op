@@ -20,6 +20,8 @@ import (
 )
 
 func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	envCfg := appcontext.ConfigFromContext(ctx)
 	db := appcontext.DBFromContext(ctx)
 	logger := appcontext.LoggerFromContext(ctx)
@@ -66,6 +68,7 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 
 	mylogger.Info("running migrate nft")
 	mn, err := likenft.MigrateNFTFromAssetMigration(
+		ctx,
 		logger,
 		db,
 		likenftClient,

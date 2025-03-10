@@ -14,6 +14,7 @@ import (
 var ErrTxFailed = errors.New("tx failed")
 
 func AwaitTx(
+	ctx context.Context,
 	logger *slog.Logger,
 
 	c *ethclient.Client,
@@ -29,7 +30,12 @@ func AwaitTx(
 
 	go func() {
 		for {
-			txReceipt, err := c.TransactionReceipt(context.Background(), tx.Hash())
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+			txReceipt, err := c.TransactionReceipt(ctx, tx.Hash())
 			if err != nil {
 				mylogger.Warn("fetch tx receipt failed", "error", err)
 				time.Sleep(1 * time.Second)
@@ -37,8 +43,10 @@ func AwaitTx(
 			}
 			if txReceipt.Status == 0 {
 				errorChan <- ErrTxFailed
+				return
 			} else {
 				txReciptChan <- txReceipt
+				return
 			}
 		}
 	}()

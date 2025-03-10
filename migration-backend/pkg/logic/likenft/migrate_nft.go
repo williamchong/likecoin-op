@@ -1,6 +1,7 @@
 package likenft
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"log/slog"
@@ -13,6 +14,7 @@ import (
 )
 
 func MigrateNFTFromAssetMigration(
+	ctx context.Context,
 	logger *slog.Logger,
 
 	db *sql.DB,
@@ -49,6 +51,7 @@ func MigrateNFTFromAssetMigration(
 	defer RecalculateMigrationStatus(db, m.Id)
 
 	lastAction, err := MigrateNFT(
+		ctx,
 		mylogger,
 		db,
 		c,
@@ -81,6 +84,7 @@ func MigrateNFTFromAssetMigration(
 }
 
 func MigrateNFT(
+	ctx context.Context,
 	logger *slog.Logger,
 
 	db *sql.DB,
@@ -119,6 +123,7 @@ func MigrateNFT(
 	}
 
 	newClassAction, err = DoNewClassAction(
+		ctx,
 		mylogger,
 		db,
 		c,
@@ -141,6 +146,7 @@ func MigrateNFT(
 		return nil, err
 	}
 	mintNFTAction, err = DoMintNFTAction(
+		ctx,
 		mylogger,
 		db,
 		p,

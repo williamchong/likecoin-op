@@ -1,6 +1,7 @@
 package likenft
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -19,6 +20,7 @@ import (
 )
 
 func DoNewClassAction(
+	ctx context.Context,
 	logger *slog.Logger,
 
 	db *sql.DB,
@@ -82,7 +84,7 @@ func DoNewClassAction(
 		return nil, doNewClassActionFailed(db, a, err)
 	}
 
-	txReceipt, err := ethereum.AwaitTx(mylogger, n.Client, tx)
+	txReceipt, err := ethereum.AwaitTx(ctx, mylogger, n.Client, tx)
 
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)

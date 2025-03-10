@@ -20,6 +20,9 @@ import (
 )
 
 func HandleMigrateClassTask(ctx context.Context, t *asynq.Task) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
 	envCfg := appcontext.ConfigFromContext(ctx)
 	db := appcontext.DBFromContext(ctx)
 	logger := appcontext.LoggerFromContext(ctx)
@@ -66,6 +69,7 @@ func HandleMigrateClassTask(ctx context.Context, t *asynq.Task) error {
 
 	mylogger.Info("running migrate class")
 	mc, err := likenft.MigrateClassFromAssetMigration(
+		ctx,
 		logger,
 		db,
 		likenftClient,

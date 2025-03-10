@@ -1,6 +1,7 @@
 package likenft
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log/slog"
@@ -26,6 +27,10 @@ var migrateClassCmd = &cobra.Command{
 			return
 		}
 
+		ctx := cmd.Context()
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
 		idStr := args[0]
 		id, err := strconv.ParseUint(idStr, 10, 64)
 		if err != nil {
@@ -36,7 +41,7 @@ var migrateClassCmd = &cobra.Command{
 			WithGroup("migrateClassCmd").
 			With("id", id)
 
-		envCfg := cmd.Context().Value(config.ContextKey).(*config.EnvConfig)
+		envCfg := ctx.Value(config.ContextKey).(*config.EnvConfig)
 		db, err := sql.Open("postgres", envCfg.DbConnectionStr)
 		if err != nil {
 			panic(err)
@@ -69,6 +74,7 @@ var migrateClassCmd = &cobra.Command{
 		)
 
 		mc, err := likenft.MigrateClassFromAssetMigration(
+			ctx,
 			logger,
 			db,
 			likenftClient,
