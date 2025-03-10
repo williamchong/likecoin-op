@@ -38,6 +38,7 @@ export default {
   css: [
     './assets/css/style.css',
     '@likecoin/wallet-connector/dist/style.css',
+    '@likecoin/evm-wallet-connector/style.css',
     './assets/fontawesome/fontawesome.css',
   ],
 
@@ -48,6 +49,8 @@ export default {
     { src: '~/plugins/textEncoder' },
     '~/plugins/config.ts',
     '~/plugins/apiClient.ts',
+    '~/plugins/likeCoinWalletConnector.ts',
+    '~/plugins/likeCoinEVMWalletConnector.ts',
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

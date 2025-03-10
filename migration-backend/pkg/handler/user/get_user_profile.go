@@ -54,6 +54,7 @@ func (h *GetUserProfileHandler) handle(cosmosWalletAddress string) (*api_model.U
 		}
 	} else {
 		userProfile.LikerID = &likecoinUserProfile.User
+		userProfile.Avatar = &likecoinUserProfile.Avatar
 	}
 
 	// TODO: the eth address should be retrieved from likerland

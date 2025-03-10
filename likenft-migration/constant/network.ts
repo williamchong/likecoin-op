@@ -1,3 +1,4 @@
+import type { LikeCoinEVMWalletConnectorOptions } from '@likecoin/evm-wallet-connector/dist/index';
 import {
   LikeCoinWalletConnectorConfig,
   LikeCoinWalletConnectorMethodType,
@@ -6,6 +7,9 @@ import {
 import {
   AUTHCORE_API_HOST,
   CIVIC_LIKER_V3_STAKING_ENDPOINT,
+  EVM_CHAIN_ID,
+  EVM_MAGIC_LINK_API_KEY,
+  EVM_RPC_URL,
   EXTERNAL_HOST,
   LIKECOIN_CHAIN_API,
   LIKECOIN_CHAIN_DENOM,
@@ -65,5 +69,15 @@ export function LIKECOIN_WALLET_CONNECTOR_CONFIG(
     authcoreRedirectUrl: `${EXTERNAL_HOST(
       isTestnet
     )}/auth/redirect?method=liker-id`,
+  };
+}
+
+export function EVM_WALLET_CONNECTOR_CONFIG(
+  isTestnet: boolean
+): LikeCoinEVMWalletConnectorOptions {
+  return {
+    magicLinkAPIKey: EVM_MAGIC_LINK_API_KEY(isTestnet),
+    rpcURL: EVM_RPC_URL(isTestnet),
+    chainId: EVM_CHAIN_ID(isTestnet),
   };
 }

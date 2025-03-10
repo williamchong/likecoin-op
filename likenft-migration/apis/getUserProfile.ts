@@ -5,6 +5,7 @@ import { makeAPI } from './makeAPI';
 export const UserProfileSchema = z.object({
   cosmos_wallet_address: z.string(),
   liker_id: z.string().nullable(),
+  avatar: z.string().nullable(),
   eth_wallet_address: z.string().nullable(),
 });
 

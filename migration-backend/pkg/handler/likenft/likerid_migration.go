@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/likecoin/like-migration-backend/pkg/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/ethereum"
@@ -73,7 +74,9 @@ func (p *LikerIDMigrationHandler) handle(data *MigrateLikerIDWithEthAddressReque
 		return err
 	}
 
-	if recoveredAddr.Hex() != data.EthAddress {
+	// The address from request data maybe in lower case
+	// while the recovered address maybe in uppercase
+	if !strings.EqualFold(recoveredAddr.Hex(), data.EthAddress) {
 		return fmt.Errorf("ethereum signature not verified")
 	}
 
