@@ -87,16 +87,16 @@ describe("LikeProtocol", () => {
     await expect(likeProtocolRandomSigner.unpause()).to.be.rejected;
   });
 
-  it("should be able to create new class", async function () {
+  it("should be able to create new BookNFT", async function () {
     const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
 
     const newClass = async () => {
       await likeProtocolOwnerSigner
-        .newClass({
+        .newBookNFT({
           creator: this.ownerSigner,
           updaters: [this.ownerSigner],
           minters: [this.ownerSigner],
-          input: {
+          config: {
             name: "My Book",
             symbol: "KOOB",
             metadata: JSON.stringify({
@@ -110,16 +110,14 @@ describe("LikeProtocol", () => {
               external_link: "https://www.example.com",
               collaborators: [],
             }),
-            config: {
-              max_supply: 10,
-            },
+            max_supply: 10,
           },
         })
         .then((tx) => tx.wait());
     };
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewClass", (id, params, event) => {
+      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
         event.removeListener();
         resolve({ id });
       });
@@ -138,16 +136,16 @@ describe("LikeProtocol", () => {
     expect(await _newNFTClass.symbol()).to.equal("KOOB");
   });
 
-  it("should not allow to create new class when paused", async function () {
+  it("should not allow to create new BookNFT when paused", async function () {
     const likeProtocolSigner = contract.connect(this.ownerSigner);
 
     const classOperation = async () => {
       await likeProtocolSigner
-        .newClass({
+        .newBookNFT({
           creator: this.ownerSigner,
           updaters: [this.ownerSigner],
           minters: [this.ownerSigner],
-          input: {
+          config: {
             name: "My Book",
             symbol: "KOOB",
             metadata: JSON.stringify({
@@ -161,9 +159,7 @@ describe("LikeProtocol", () => {
               external_link: "https://www.example.com",
               collaborators: [],
             }),
-            config: {
-              max_supply: 10,
-            },
+            max_supply: 10,
           },
         })
         .then((tx) => tx.wait());
@@ -178,25 +174,23 @@ describe("LikeProtocol", () => {
     await expect(classOperation()).to.be.not.rejected;
   });
 
-  it("should be allow everyone to create new class", async function () {
+  it("should be allow everyone to create new BookNFT", async function () {
     const likeNFTSigner = contract.connect(this.randomSigner);
 
     const newClass = async () => {
       await likeNFTSigner
-        .newClass({
+        .newBookNFT({
           creator: this.randomSigner,
           updaters: [this.randomSigner],
           minters: [this.randomSigner],
-          input: {
+          config: {
             name: "My Book",
             symbol: "KOOB",
             metadata: JSON.stringify({
               name: "Random by somone",
               symbol: "No data",
             }),
-            config: {
-              max_supply: 10,
-            },
+            max_supply: 10,
           },
         })
         .then((tx) => tx.wait());
@@ -205,26 +199,24 @@ describe("LikeProtocol", () => {
     await expect(newClass()).to.be.not.rejected;
   });
 
-  it("should not allow everyone to create new class when paused", async function () {
+  it("should not allow everyone to create new BookNFT when paused", async function () {
     const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
     const likeProtocolRandomSigner = contract.connect(this.randomSigner);
 
     const classOperation = async () => {
       await likeProtocolRandomSigner
-        .newClass({
+        .newBookNFT({
           creator: this.randomSigner,
           updaters: [this.randomSigner],
           minters: [this.randomSigner],
-          input: {
+          config: {
             name: "My Book",
             symbol: "KOOB",
             metadata: JSON.stringify({
               name: "Random by somone",
               symbol: "No data",
             }),
-            config: {
-              max_supply: 10,
-            },
+            max_supply: 10,
           },
         })
         .then((tx) => tx.wait());
@@ -239,17 +231,17 @@ describe("LikeProtocol", () => {
     await expect(classOperation()).to.be.not.rejected;
   });
 
-  it("should only allow BookNFT owner to update the class", async function () {
+  it("should only allow BookNFT owner to update the BookNFT", async function () {
     const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
     const likeProtocolRandomSigner = contract.connect(this.randomSigner);
 
     const newClass = async () => {
       await likeProtocolOwnerSigner
-        .newClass({
+        .newBookNFT({
           creator: this.ownerSigner,
           updaters: [this.ownerSigner],
           minters: [this.ownerSigner],
-          input: {
+          config: {
             name: "My Book",
             symbol: "KOOB",
             metadata: JSON.stringify({
@@ -263,16 +255,14 @@ describe("LikeProtocol", () => {
               external_link: "https://www.example.com",
               collaborators: [],
             }),
-            config: {
-              max_supply: 10,
-            },
+            max_supply: 10,
           },
         })
         .then((tx) => tx.wait());
     };
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewClass", (id, params, event) => {
+      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
         event.removeListener();
         resolve({ id });
       });
@@ -291,18 +281,13 @@ describe("LikeProtocol", () => {
     await expect(await _newNFTClass.symbol()).to.equal("KOOB");
 
     await expect(
-      likeProtocolRandomSigner.updateClass({
-        creator: this.randomSigner,
-        updaters: [this.randomSigner],
-        minters: [this.randomSigner],
+      likeProtocolRandomSigner.updateBookNFT({
         classId: classId,
-        input: {
+        config: {
           name: "Hi Jack",
           symbol: "HIJACK",
           metadata: JSON.stringify({}),
-          config: {
-            max_supply: 0,
-          },
+          max_supply: 0,
         },
       }),
     ).to.be.rejected;
@@ -342,11 +327,11 @@ describe("LikeProtocol", () => {
     const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
     const newClass = async () => {
       await likeProtocolOwnerSigner
-        .newClass({
+        .newBookNFT({
           creator: this.ownerSigner,
           updaters: [this.ownerSigner],
           minters: [this.ownerSigner],
-          input: {
+          config: {
             name: "My Book",
             symbol: "KOOB",
             metadata: JSON.stringify({
@@ -360,16 +345,14 @@ describe("LikeProtocol", () => {
               external_link: "https://www.example.com",
               collaborators: [],
             }),
-            config: {
-              max_supply: 10,
-            },
+            max_supply: 10,
           },
         })
         .then((tx) => tx.wait());
     };
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewClass", (id, params, event) => {
+      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
         event.removeListener();
         resolve({ id });
       });

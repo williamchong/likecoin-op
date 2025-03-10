@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import {ClassInput} from "../ClassInput.sol";
+import {BookConfig} from "../BookConfig.sol";
 
-struct MsgNewClass {
+struct MsgNewBookNFT {
     address creator;
     address[] updaters;
     address[] minters;
-    ClassInput input;
+    BookConfig config;
 }

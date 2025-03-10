@@ -5,8 +5,8 @@ import {ERC721, ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/ext
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import {ClassInput} from "../types/ClassInput.sol";
-import {MsgNewClass} from "../types/msgs/MsgNewClass.sol";
+import {BookConfig} from "../types/BookConfig.sol";
+import {MsgNewBookNFT} from "../types/msgs/MsgNewBookNFT.sol";
 import {NFTData} from "../types/NFTData.sol";
 
 error ErrUnauthorized();
@@ -66,24 +66,24 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
     }
 
     constructor(
-        MsgNewClass memory msgNewClass
+        MsgNewBookNFT memory msgNewBookNFT
     )
-        ERC721(msgNewClass.input.name, msgNewClass.input.symbol)
-        Ownable(msgNewClass.creator)
+        ERC721(msgNewBookNFT.config.name, msgNewBookNFT.config.symbol)
+        Ownable(msgNewBookNFT.creator)
     {
         BookNFTStorage storage $ = _getClassStorage();
-        $.name = msgNewClass.input.name;
-        $.symbol = msgNewClass.input.symbol;
-        $.metadata = msgNewClass.input.metadata;
-        $.max_supply = msgNewClass.input.config.max_supply;
+        $.name = msgNewBookNFT.config.name;
+        $.symbol = msgNewBookNFT.config.symbol;
+        $.metadata = msgNewBookNFT.config.metadata;
+        $.max_supply = msgNewBookNFT.config.max_supply;
 
         $._currentIndex = 0;
 
-        for (uint i = 0; i < msgNewClass.minters.length; i++) {
-            _grantRole(MINTER_ROLE, msgNewClass.minters[i]);
+        for (uint i = 0; i < msgNewBookNFT.minters.length; i++) {
+            _grantRole(MINTER_ROLE, msgNewBookNFT.minters[i]);
         }
-        for (uint i = 0; i < msgNewClass.updaters.length; i++) {
-            _grantRole(UPDATER_ROLE, msgNewClass.updaters[i]);
+        for (uint i = 0; i < msgNewBookNFT.updaters.length; i++) {
+            _grantRole(UPDATER_ROLE, msgNewBookNFT.updaters[i]);
         }
     }
 
@@ -99,11 +99,12 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         return super.supportsInterface(interfaceId);
     }
 
-    function update(ClassInput memory classInput) public onlyUpdater {
+    function update(BookConfig memory config) public onlyUpdater {
         BookNFTStorage storage $ = _getClassStorage();
-        $.name = classInput.name;
-        $.symbol = classInput.symbol;
-        $.metadata = classInput.metadata;
+        $.name = config.name;
+        $.symbol = config.symbol;
+        $.metadata = config.metadata;
+        $.max_supply = config.max_supply;
         emit ContractURIUpdated();
     }
 
@@ -153,6 +154,35 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
             $._currentIndex++;
         }
     }
+    function transferWithMemo(
+        address from,
+        address to,
+        uint256 _tokenId,
+        string calldata memo
+    ) external payable {
+        transferFrom(from, to, _tokenId);
+
+        emit TransferWithMemo(from, to, _tokenId, memo);
+    }
+
+    // Start Querying functions
+    /**
+     * getBookConfig
+     *
+     * getting the book config, owner can modify the book config field and use
+     * it in update function
+     *
+     * @return the book config
+     */ 
+    function getBookConfig() public view returns (BookConfig memory) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return BookConfig({
+            name: $.name,
+            symbol: $.symbol,
+            metadata: $.metadata,
+            max_supply: $.max_supply
+        });
+    }
 
     function name() public view override returns (string memory) {
         BookNFTStorage storage $ = _getClassStorage();
@@ -183,15 +213,5 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
                 $.tokenURIMap[_tokenId]
             );
     }
-
-    function transferWithMemo(
-        address from,
-        address to,
-        uint256 _tokenId,
-        string calldata memo
-    ) external payable {
-        transferFrom(from, to, _tokenId);
-
-        emit TransferWithMemo(from, to, _tokenId, memo);
-    }
+    // End Querying functions
 }
