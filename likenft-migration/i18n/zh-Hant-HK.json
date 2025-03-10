@@ -47,6 +47,9 @@
       "title": "簡介"
     },
     "migration-result": {
+      "failed-message": "There are {count} failed migrations, please retry or contact us for more assistant",
+      "in-progress": "(In Progress)",
+      "retry": "Retry",
       "table": {
         "data": {
           "status": {
@@ -74,7 +77,11 @@
           "tx-hash": "Transaction Hash",
           "type": "Type"
         }
-      }
+      },
+      "title": "Migration Results"
+    },
+    "start-migration": {
+      "title": "Start Migration"
     },
     "wallet-connect": {
       "connect-likecoin-wallet": "連接LikeCoin錢包",
