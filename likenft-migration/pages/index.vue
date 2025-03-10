@@ -64,7 +64,61 @@
             </div>
           </template>
         </StepSection>
-        <StepSection :step="3" :current-step="currentStep.step"></StepSection>
+        <StepSection :step="3" :current-step="currentStep.step">
+          <template #future>
+            <h2
+              :class="[
+                'text-base',
+                'font-semibold',
+                'leading-[30px]',
+                'text-likecoin-darkgrey',
+              ]"
+            >
+              {{ $t('migrate.preview') }}
+            </h2>
+          </template>
+          <template v-if="migrationPreview != null" #current>
+            <div :class="['flex', 'flex-row', 'gap-1']">
+              <h2
+                :class="[
+                  'text-base',
+                  'font-semibold',
+                  'leading-[30px]',
+                  'text-likecoin-darkgrey',
+                ]"
+              >
+                {{ $t('migrate.preview') }}
+              </h2>
+              <UTooltip
+                v-if="
+                  migrationPreview.block_time != null &&
+                  migrationPreview.block_height != null
+                "
+                :text="
+                  $t('section.asset-preview.tooltip', {
+                    date: _formatDate(migrationPreview.block_time),
+                    height: _formatNumber(migrationPreview.block_height),
+                  })
+                "
+                :ui="{
+                  base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
+                }"
+                ><FontAwesomeIcon
+                  icon="circle-exclamation"
+                  :class="[
+                    'text-sm',
+                    'leading-[30px]',
+                    'text-likecoin-votecolor-yes',
+                  ]"
+              /></UTooltip>
+            </div>
+            <SectionAssetPreview
+              v-if="migrationPreview != null"
+              :class="['max-w-full', 'mt-2']"
+              :snapshot="migrationPreview"
+            />
+          </template>
+        </StepSection>
         <StepSection :step="4" :current-step="currentStep.step"></StepSection>
       </div>
     </div>
@@ -72,37 +126,58 @@
 </template>
 
 <script lang="ts">
+import { isAxiosError } from 'axios';
+import { format as formatDate } from 'date-fns/format';
+import numeral from 'numeral';
 import Vue from 'vue';
 
+import { makeCreateMigrationPreviewAPI } from '~/apis/createMigrationPreview';
+import { makeGetMigrationPreviewAPI } from '~/apis/getMigrationPreview';
 import { getSignMessage } from '~/apis/getSignMessage';
 import { makeGetUserProfileAPI } from '~/apis/getUserProfile';
 import { makeMigrateLikerIDAPI } from '~/apis/migrateLikerID';
+import { LikeNFTAssetSnapshot } from '~/apis/models/likenftAssetSnapshot';
 import {
   initCosmosConnected,
   initEvmConnected,
+  initMigrationPreview,
   introductionConfirmed,
   likerIdEvmConnected,
   likerIdMigrated,
   likerIdResolved,
+  migrationPreviewFetched,
   StepState,
   StepStateStep2CosmosConnected,
   StepStateStep2LikerIdEvmConnected,
   StepStateStep2LikerIdMigrated,
   StepStateStep2LikerIdResolved,
+  StepStateStep3Init,
+  StepStateStep3MigrationPreview,
 } from '~/pageModels';
+
+import UTooltip from '../nuxtui/components/UTooltip.vue';
 
 interface Data {
   isTransitioning: boolean;
 
   currentStep: StepState;
+
+  migrationPreviewFetchTimeout: ReturnType<typeof setTimeout> | null;
 }
 
 export default Vue.extend({
+  components: {
+    UTooltip,
+  },
+
+  filters: {},
   data(): Data {
     return {
       isTransitioning: false,
 
       currentStep: { step: 1 },
+
+      migrationPreviewFetchTimeout: null,
     };
   },
   computed: {
@@ -141,6 +216,43 @@ export default Vue.extend({
       }
       return null;
     },
+
+    migrationPreview(): LikeNFTAssetSnapshot | null {
+      if ('migrationPreview' in this.currentStep) {
+        return this.currentStep.migrationPreview;
+      }
+      return null;
+    },
+  },
+
+  watch: {
+    migrationPreview(migrationPreview: LikeNFTAssetSnapshot | null) {
+      if (this.migrationPreviewFetchTimeout != null) {
+        clearTimeout(this.migrationPreviewFetchTimeout);
+        this.migrationPreviewFetchTimeout = null;
+      }
+      if (migrationPreview == null) {
+        return;
+      }
+      if (
+        this.currentStep.step !== 3 ||
+        this.currentStep.state !== 'MigrationPreview'
+      ) {
+        return;
+      }
+      if (
+        migrationPreview.status === 'init' ||
+        migrationPreview.status === 'in_progress'
+      ) {
+        const currentStep = this.currentStep;
+        this.migrationPreviewFetchTimeout = setTimeout(async () => {
+          this.currentStep = await this._asyncStateTransition(
+            currentStep,
+            (s) => this._getOrCreateMigrationPreview(s)
+          );
+        }, 1000);
+      }
+    },
   },
   methods: {
     handleIntroductionSectionConfirmClick() {
@@ -160,6 +272,17 @@ export default Vue.extend({
         this.currentStep,
         (s) => this._checkLikerID(s, cosmosAddress)
       );
+
+      if (this.currentStep.state === 'LikerIdMigrated') {
+        this.currentStep = initMigrationPreview(this.currentStep);
+      }
+
+      if (this.currentStep.step === 3) {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          (s) => this._getOrCreateMigrationPreview(s)
+        );
+      }
     },
 
     async handleLikeCoinEVMWalletConnected(ethAddress: string) {
@@ -179,6 +302,17 @@ export default Vue.extend({
             (s) => this._doMigrateLikerID(s, s.cosmosAddress, s.ethAddress)
           );
         }
+      }
+
+      if (this.currentStep.state === 'LikerIdMigrated') {
+        this.currentStep = initMigrationPreview(this.currentStep);
+      }
+
+      if (this.currentStep.step === 3) {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          (s) => this._getOrCreateMigrationPreview(s)
+        );
       }
     },
 
@@ -284,6 +418,54 @@ export default Vue.extend({
       }
 
       return currentStep;
+    },
+
+    async _getOrCreateMigrationPreview(
+      s: StepStateStep3Init | StepStateStep3MigrationPreview
+    ): Promise<StepStateStep3MigrationPreview> {
+      const migrationPreview = await this._fetchMigrationPreview(
+        s.cosmosAddress
+      );
+
+      if (migrationPreview == null) {
+        const newMigrationPreview = await this._createMigrationPreview(
+          s.cosmosAddress
+        );
+        return migrationPreviewFetched(s, newMigrationPreview);
+      } else {
+        return migrationPreviewFetched(s, migrationPreview);
+      }
+    },
+
+    async _fetchMigrationPreview(cosmosWalletAddress: string) {
+      try {
+        const migrationResponse = await makeGetMigrationPreviewAPI(
+          cosmosWalletAddress
+        )(this.$apiClient)();
+        return migrationResponse.preview;
+      } catch (e) {
+        if (isAxiosError(e)) {
+          if (e.status === 404) {
+            return null;
+          }
+        }
+        throw e;
+      }
+    },
+
+    async _createMigrationPreview(cosmosWalletAddress: string) {
+      const migrationResponse = await makeCreateMigrationPreviewAPI(
+        this.$apiClient
+      )({ cosmos_address: cosmosWalletAddress });
+      return migrationResponse.preview;
+    },
+
+    _formatDate(value: Date) {
+      return formatDate(value, 'dd MMM, yyyy HH:mm:ss');
+    },
+
+    _formatNumber(value: number | string) {
+      return numeral(value).format('0,0');
     },
   },
 });

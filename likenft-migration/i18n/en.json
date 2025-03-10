@@ -38,7 +38,8 @@
           "tx-hash": "Transaction Hash",
           "type": "Type"
         }
-      }
+      },
+      "tooltip": "This is a snapshot taken on {date} [{height}], if you found there is something missing or misalign with your current NFT wallet, please contact us for more assistant."
     },
     "introduction": {
       "confirm": "Confirm",
