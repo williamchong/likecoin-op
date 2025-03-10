@@ -61,12 +61,29 @@ contract LikeProtocol is
         return address($.classIdClassMapping[classId]) != address(0);
     }
 
-    function newBookNFT(MsgNewBookNFT memory msgNewBookNFT) public whenNotPaused {
+    function newBookNFT(
+        MsgNewBookNFT memory msgNewBookNFT
+    ) public whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
         BookNFT class = new BookNFT(msgNewBookNFT);
         address id = address(class);
         $.classIdClassMapping[id] = class;
         emit NewBookNFT(id, msgNewBookNFT.config);
+    }
+
+    /**
+     * newBookNFTs
+     *
+     * Proxy call to create multiple BookNFT at once
+     *
+     * @param msgNewBookNFTs the BookNFTs to create
+     */
+    function newBookNFTs(
+        MsgNewBookNFT[] calldata msgNewBookNFTs
+    ) public whenNotPaused {
+        for (uint i = 0; i < msgNewBookNFTs.length; i++) {
+            new BookNFT(msgNewBookNFTs[i]);
+        }
     }
 
     function updateBookNFT(
