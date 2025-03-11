@@ -19,6 +19,7 @@ export default {
           votecolor: {
             abstain: '#B7B7B7',
             yes: '#6DCDBC',
+            no: '#C72F2F',
           },
           white: '#ffffff',
         },
