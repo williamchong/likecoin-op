@@ -125,7 +125,7 @@ describe("BookNFTToken", () => {
       0,
     );
     const logs1 = await likeNFTClassOwnerSigner.queryFilter(filters);
-    expect((logs1[0] as EventLog).args[3]).to.equal("memo1");
+    expect((logs1[1] as EventLog).args[3]).to.equal("memo1");
   });
 
   it("should not able to send with random signer", async function () {
@@ -170,14 +170,14 @@ describe("BookNFTToken", () => {
       0,
     );
     const logs2 = await likeNFTClassOwnerSigner.queryFilter(filters2);
-    expect((logs2[0] as EventLog).args[0]).to.equal(this.classOwner.address);
-    expect((logs2[0] as EventLog).args[1]).to.equal(this.randomSigner.address);
-    expect((logs2[0] as EventLog).args[2]).to.equal(0n);
-    expect((logs2[0] as EventLog).args[3]).to.equal("memo1");
-    expect((logs2[1] as EventLog).args[0]).to.equal(this.randomSigner.address);
-    expect((logs2[1] as EventLog).args[1]).to.equal(this.classOwner.address);
+    expect((logs2[1] as EventLog).args[0]).to.equal(this.classOwner.address);
+    expect((logs2[1] as EventLog).args[1]).to.equal(this.randomSigner.address);
     expect((logs2[1] as EventLog).args[2]).to.equal(0n);
-    expect((logs2[1] as EventLog).args[3]).to.equal("memo2");
+    expect((logs2[1] as EventLog).args[3]).to.equal("memo1");
+    expect((logs2[2] as EventLog).args[0]).to.equal(this.randomSigner.address);
+    expect((logs2[2] as EventLog).args[1]).to.equal(this.classOwner.address);
+    expect((logs2[2] as EventLog).args[2]).to.equal(0n);
+    expect((logs2[2] as EventLog).args[3]).to.equal("memo2");
   });
 });
 
@@ -349,10 +349,10 @@ describe("BookNFTToken batch actions", () => {
       0,
     );
     const logs = await likeNFTClassOwnerSigner.queryFilter(filters);
-    expect((logs[0] as EventLog).args[0]).to.equal(this.classOwner.address);
-    expect((logs[0] as EventLog).args[1]).to.equal(this.randomSigner.address);
-    expect((logs[0] as EventLog).args[2]).to.equal(0n);
-    expect((logs[0] as EventLog).args[3]).to.equal("batch memo1");
+    expect((logs[1] as EventLog).args[0]).to.equal(this.classOwner.address);
+    expect((logs[1] as EventLog).args[1]).to.equal(this.randomSigner.address);
+    expect((logs[1] as EventLog).args[2]).to.equal(0n);
+    expect((logs[1] as EventLog).args[3]).to.equal("batch memo1");
 
     const filters2 = likeNFTClassOwnerSigner.filters.TransferWithMemo(
       null,
@@ -360,10 +360,10 @@ describe("BookNFTToken batch actions", () => {
       1,
     );
     const logs2 = await likeNFTClassOwnerSigner.queryFilter(filters2);
-    expect((logs2[0] as EventLog).args[0]).to.equal(this.classOwner.address);
-    expect((logs2[0] as EventLog).args[1]).to.equal(this.randomSigner2.address);
-    expect((logs2[0] as EventLog).args[2]).to.equal(1n);
-    expect((logs2[0] as EventLog).args[3]).to.equal("batch memo2");
+    expect((logs2[1] as EventLog).args[0]).to.equal(this.classOwner.address);
+    expect((logs2[1] as EventLog).args[1]).to.equal(this.randomSigner2.address);
+    expect((logs2[1] as EventLog).args[2]).to.equal(1n);
+    expect((logs2[1] as EventLog).args[3]).to.equal("batch memo2");
   });
 
   it("should not able to send token owned by other", async function () {

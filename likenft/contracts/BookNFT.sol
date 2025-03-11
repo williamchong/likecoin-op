@@ -154,6 +154,7 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         for (uint i = 0; i < quantity; i++) {
             $.tokenURIMap[$._currentIndex] = metadataList[i];
             _safeMint(to, $._currentIndex);
+            emit TransferWithMemo(tx.origin, to, $._currentIndex, "_mint");
             $._currentIndex++;
         }
     }
