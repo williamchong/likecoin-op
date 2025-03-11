@@ -26,6 +26,16 @@ var migrateNFTCmd = &cobra.Command{
 			return
 		}
 
+		idStr := args[0]
+		id, err := strconv.ParseUint(idStr, 10, 64)
+		if err != nil {
+			panic(err)
+		}
+
+		logger := slog.New(slog.Default().Handler()).
+			WithGroup("migrateNFTCmd").
+			With("id", id)
+
 		envCfg := cmd.Context().Value(config.ContextKey).(*config.EnvConfig)
 		db, err := sql.Open("postgres", envCfg.DbConnectionStr)
 		if err != nil {
@@ -44,26 +54,18 @@ var migrateNFTCmd = &cobra.Command{
 		contractAddress := common.HexToAddress(envCfg.EthLikeNFTContractAddress)
 
 		likeProtocolClient := evm.NewLikeProtocol(
+			logger,
 			ethClient,
 			privateKey,
 			envCfg.EthChainId,
 			contractAddress,
 		)
 		likeNFTClient := evm.NewBookNFT(
+			logger,
 			ethClient,
 			privateKey,
 			envCfg.EthChainId,
 		)
-
-		idStr := args[0]
-		id, err := strconv.ParseUint(idStr, 10, 64)
-		if err != nil {
-			panic(err)
-		}
-
-		logger := slog.New(slog.Default().Handler()).
-			WithGroup("migrateNFTCmd").
-			With("id", id)
 
 		mn, err := likenft.MigrateNFTFromAssetMigration(
 			logger,

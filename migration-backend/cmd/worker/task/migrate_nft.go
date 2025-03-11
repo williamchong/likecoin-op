@@ -51,12 +51,14 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 	contractAddress := common.HexToAddress(envCfg.EthLikeNFTContractAddress)
 
 	evmLikeProtocolClient := evm.NewLikeProtocol(
+		logger,
 		ethClient,
 		privateKey,
 		envCfg.EthChainId,
 		contractAddress,
 	)
 	evmLikeNFTClient := evm.NewBookNFT(
+		logger,
 		ethClient,
 		privateKey,
 		envCfg.EthChainId,
