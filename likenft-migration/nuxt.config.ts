@@ -51,6 +51,7 @@ export default {
     '~/plugins/apiClient.ts',
     '~/plugins/likeCoinWalletConnector.ts',
     '~/plugins/likeCoinEVMWalletConnector.ts',
+    '~/plugins/crisp.ts',
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
