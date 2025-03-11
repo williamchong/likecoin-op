@@ -40,7 +40,7 @@ describe("BookNFTToken", () => {
     );
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewClass", (id, params, event) => {
+      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
         event.removeListener();
         resolve({ id });
       });
@@ -51,11 +51,11 @@ describe("BookNFTToken", () => {
     });
 
     likeProtocolOwnerSigner
-      .newClass({
+      .newBookNFT({
         creator: this.classOwner,
         updaters: [this.classOwner, this.likerLand],
         minters: [this.classOwner, this.likerLand],
-        input: {
+        config: {
           name: "My Book",
           symbol: "KOOB",
           metadata: JSON.stringify({
@@ -69,9 +69,7 @@ describe("BookNFTToken", () => {
             external_link: "https://www.example.com",
             collaborators: [],
           }),
-          config: {
-            max_supply: 10,
-          },
+          max_supply: 10,
         },
       })
       .then((tx) => tx.wait());

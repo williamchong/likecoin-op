@@ -9,8 +9,9 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {MsgMintNFT} from "../types/msgs/MsgMintNFT.sol";
 import {MsgMintNFTs} from "../types/msgs/MsgMintNFTs.sol";
 import {MsgMintNFTsFromTokenId} from "../types/msgs/MsgMintNFTsFromTokenId.sol";
-import {MsgNewClass} from "../types/msgs/MsgNewClass.sol";
-import {MsgUpdateClass} from "../types/msgs/MsgUpdateClass.sol";
+import {MsgNewBookNFT} from "../types/msgs/MsgNewBookNFT.sol";
+import {MsgUpdateBookNFT} from "../types/msgs/MsgUpdateBookNFT.sol";
+import {BookConfig} from "../types/BookConfig.sol";
 
 import {BookNFT} from "./BookNFT.sol";
 
@@ -39,7 +40,7 @@ contract LikeProtocol is
         }
     }
 
-    event NewClass(address classId, MsgNewClass params);
+    event NewBookNFT(address bookNFT, BookConfig config);
 
     function initialize(address initialOwner) public initializer {
         __UUPSUpgradeable_init();
@@ -60,23 +61,40 @@ contract LikeProtocol is
         return address($.classIdClassMapping[classId]) != address(0);
     }
 
-    function newClass(MsgNewClass memory msgNewClass) public whenNotPaused {
-        LikeNFTStorage storage $ = _getLikeNFTStorage();
-        BookNFT class = new BookNFT(msgNewClass);
-        address id = address(class);
-        $.classIdClassMapping[id] = class;
-        emit NewClass(id, msgNewClass);
-    }
-
-    function updateClass(
-        MsgUpdateClass memory msgUpdateClass
+    function newBookNFT(
+        MsgNewBookNFT memory msgNewBookNFT
     ) public whenNotPaused {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
-        BookNFT class = $.classIdClassMapping[msgUpdateClass.classId];
+        BookNFT class = new BookNFT(msgNewBookNFT);
+        address id = address(class);
+        $.classIdClassMapping[id] = class;
+        emit NewBookNFT(id, msgNewBookNFT.config);
+    }
+
+    /**
+     * newBookNFTs
+     *
+     * Proxy call to create multiple BookNFT at once
+     *
+     * @param msgNewBookNFTs the BookNFTs to create
+     */
+    function newBookNFTs(
+        MsgNewBookNFT[] calldata msgNewBookNFTs
+    ) public whenNotPaused {
+        for (uint i = 0; i < msgNewBookNFTs.length; i++) {
+            new BookNFT(msgNewBookNFTs[i]);
+        }
+    }
+
+    function updateBookNFT(
+        MsgUpdateBookNFT memory msgUpdateBookNFT
+    ) public whenNotPaused {
+        LikeNFTStorage storage $ = _getLikeNFTStorage();
+        BookNFT class = $.classIdClassMapping[msgUpdateBookNFT.classId];
         if (address(class) == address(0)) {
             revert ErrNftClassNotFound();
         }
-        class.update(msgUpdateClass.input);
+        class.update(msgUpdateBookNFT.config);
     }
 
     function mintNFT(MsgMintNFT calldata msgMintNFT) external whenNotPaused {

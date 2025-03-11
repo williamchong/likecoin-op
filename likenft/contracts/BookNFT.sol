@@ -5,9 +5,8 @@ import {ERC721, ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/ext
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import {ClassStorage} from "../types/Class.sol";
-import {ClassInput} from "../types/ClassInput.sol";
-import {MsgNewClass} from "../types/msgs/MsgNewClass.sol";
+import {BookConfig} from "../types/BookConfig.sol";
+import {MsgNewBookNFT} from "../types/msgs/MsgNewBookNFT.sol";
 import {NFTData} from "../types/NFTData.sol";
 
 error ErrUnauthorized();
@@ -15,10 +14,22 @@ error ErrNftNoSupply();
 error ErrTokenIdMintFails(uint256 nextTokenId);
 
 contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
+    struct BookNFTStorage {
+        string name;
+        string symbol;
+        string metadata;
+        uint64 max_supply;
+        uint256 _currentIndex;
+        mapping(uint256 => string) tokenURIMap;
+    }
     // keccak256(abi.encode(uint256(keccak256("likenft.storage.class")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant CLASS_DATA_STORAGE =
         0x99391ccf5d97dbb7711a73831d943712d1774ca037a259af20891dc6f0d9f200;
-    function _getClassStorage() private pure returns (ClassStorage storage $) {
+    function _getClassStorage()
+        private
+        pure
+        returns (BookNFTStorage storage $)
+    {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             $.slot := CLASS_DATA_STORAGE
@@ -29,11 +40,6 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
     // End Constants
-
-    // Storage
-    uint256 private _currentIndex;
-    mapping(uint256 => NFTData) private nftDataMap;
-    // End Storage
 
     // Events
     event ContractURIUpdated();
@@ -63,24 +69,24 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
     }
 
     constructor(
-        MsgNewClass memory msgNewClass
+        MsgNewBookNFT memory msgNewBookNFT
     )
-        ERC721(msgNewClass.input.name, msgNewClass.input.symbol)
-        Ownable(msgNewClass.creator)
+        ERC721(msgNewBookNFT.config.name, msgNewBookNFT.config.symbol)
+        Ownable(msgNewBookNFT.creator)
     {
-        ClassStorage storage $ = _getClassStorage();
-        $.name = msgNewClass.input.name;
-        $.symbol = msgNewClass.input.symbol;
-        $.data.metadata = msgNewClass.input.metadata;
-        $.data.config = msgNewClass.input.config;
+        BookNFTStorage storage $ = _getClassStorage();
+        $.name = msgNewBookNFT.config.name;
+        $.symbol = msgNewBookNFT.config.symbol;
+        $.metadata = msgNewBookNFT.config.metadata;
+        $.max_supply = msgNewBookNFT.config.max_supply;
 
-        _currentIndex = 0;
+        $._currentIndex = 0;
 
-        for (uint i = 0; i < msgNewClass.minters.length; i++) {
-            _grantRole(MINTER_ROLE, msgNewClass.minters[i]);
+        for (uint i = 0; i < msgNewBookNFT.minters.length; i++) {
+            _grantRole(MINTER_ROLE, msgNewBookNFT.minters[i]);
         }
-        for (uint i = 0; i < msgNewClass.updaters.length; i++) {
-            _grantRole(UPDATER_ROLE, msgNewClass.updaters[i]);
+        for (uint i = 0; i < msgNewBookNFT.updaters.length; i++) {
+            _grantRole(UPDATER_ROLE, msgNewBookNFT.updaters[i]);
         }
     }
 
@@ -96,11 +102,12 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         return super.supportsInterface(interfaceId);
     }
 
-    function update(ClassInput memory classInput) public onlyUpdater {
-        ClassStorage storage $ = _getClassStorage();
-        $.name = classInput.name;
-        $.symbol = classInput.symbol;
-        $.data.metadata = classInput.metadata;
+    function update(BookConfig memory config) public onlyUpdater {
+        BookNFTStorage storage $ = _getClassStorage();
+        $.name = config.name;
+        $.symbol = config.symbol;
+        $.metadata = config.metadata;
+        $.max_supply = config.max_supply;
         emit ContractURIUpdated();
     }
 
@@ -135,9 +142,9 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
     }
 
     function _mint(address to, string[] memory metadataList) internal {
-        ClassStorage storage $ = _getClassStorage();
+        BookNFTStorage storage $ = _getClassStorage();
 
-        uint64 maxSupply = $.data.config.max_supply;
+        uint64 maxSupply = $.max_supply;
         uint quantity = metadataList.length;
 
         if (maxSupply != 0 && totalSupply() + quantity > maxSupply) {
@@ -145,40 +152,11 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         }
 
         for (uint i = 0; i < quantity; i++) {
-            nftDataMap[_currentIndex].metadata = metadataList[i];
-            _safeMint(to, _currentIndex);
-            _currentIndex++;
+            $.tokenURIMap[$._currentIndex] = metadataList[i];
+            _safeMint(to, $._currentIndex);
+            $._currentIndex++;
         }
     }
-
-    function name() public view override returns (string memory) {
-        ClassStorage storage $ = _getClassStorage();
-        return $.name;
-    }
-
-    function symbol() public view override returns (string memory) {
-        ClassStorage storage $ = _getClassStorage();
-        return $.symbol;
-    }
-
-    function contractURI() public view returns (string memory) {
-        return
-            string.concat(
-                "data:application/json;utf8,",
-                _getClassStorage().data.metadata
-            );
-    }
-
-    function tokenURI(
-        uint256 _tokenId
-    ) public view virtual override returns (string memory) {
-        return
-            string.concat(
-                "data:application/json;utf8,",
-                nftDataMap[_tokenId].metadata
-            );
-    }
-
     function transferWithMemo(
         address from,
         address to,
@@ -189,4 +167,63 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
 
         emit TransferWithMemo(from, to, _tokenId, memo);
     }
+
+    // Start Querying functions
+    /**
+     * getBookConfig
+     *
+     * getting the book config, owner can modify the book config field and use
+     * it in update function
+     *
+     * @return the book config
+     */
+    function getBookConfig() public view returns (BookConfig memory) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return
+            BookConfig({
+                name: $.name,
+                symbol: $.symbol,
+                metadata: $.metadata,
+                max_supply: $.max_supply
+            });
+    }
+
+    /**
+     * getCurrentIndex
+     *
+     * getting the current index of the book nft, this is the index of the next token to be minted
+     *
+     * @return the current index
+     */
+    function getCurrentIndex() public view returns (uint256) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return $._currentIndex;
+    }
+
+    function name() public view override returns (string memory) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return $.name;
+    }
+
+    function symbol() public view override returns (string memory) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return $.symbol;
+    }
+
+    function contractURI() public view returns (string memory) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return string.concat("data:application/json;utf8,", $.metadata);
+    }
+
+    function tokenURI(
+        uint256 _tokenId
+    ) public view virtual override returns (string memory) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return
+            string.concat(
+                "data:application/json;utf8,",
+                $.tokenURIMap[_tokenId]
+            );
+    }
+    // End Querying functions
 }

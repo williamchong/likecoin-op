@@ -40,7 +40,7 @@ describe("BookNFTClass", () => {
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
       likeProtocolOwnerSigner.on(
-        "NewClass",
+        "NewBookNFT",
         (id: string, params: any, event: any) => {
           event.removeListener();
           resolve({ id });
@@ -51,11 +51,11 @@ describe("BookNFTClass", () => {
       }, 20000);
     });
 
-    await likeProtocolOwnerSigner.newClass({
+    await likeProtocolOwnerSigner.newBookNFT({
       creator: this.classOwner,
       updaters: [this.classOwner, this.likerLand],
       minters: [this.classOwner, this.likerLand],
-      input: {
+      config: {
         name: "My Book",
         symbol: "KOOB",
         metadata: JSON.stringify({
@@ -69,9 +69,7 @@ describe("BookNFTClass", () => {
           external_link: "https://www.example.com",
           collaborators: [],
         }),
-        config: {
-          max_supply: 10,
-        },
+        max_supply: 10,
       },
     });
 
@@ -110,6 +108,38 @@ describe("BookNFTClass", () => {
     ).to.equal(false);
   });
 
+  it("should return the right current index", async function () {
+    expect(await nftClassContract.getCurrentIndex()).to.equal(0n);
+
+    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    const mintNFT = async () => {
+      await likeClassOwnerSigner
+        .mint(this.classOwner.address, [
+          JSON.stringify({
+            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+            image_data: "",
+            external_url: "https://www.google.com",
+            description: "202412191729 #0001 Description",
+            name: "202412191729 #0001",
+            attributes: [
+              {
+                trait_type: "ISCN ID",
+                value:
+                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+              },
+            ],
+            background_color: "",
+            animation_url: "",
+            youtube_url: "",
+          }),
+        ])
+        .then((tx) => tx.wait());
+    };
+
+    await expect(mintNFT()).to.be.not.rejected;
+    expect(await nftClassContract.getCurrentIndex()).to.equal(1n);
+  });
+
   it("should allow class owner to update class and mint NFT", async function () {
     const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
     expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
@@ -130,9 +160,7 @@ describe("BookNFTClass", () => {
             external_link: "https://www.example.com",
             collaborators: [],
           }),
-          config: {
-            max_supply: 10,
-          },
+          max_supply: 10,
         })
         .then((tx) => tx.wait());
     };
@@ -176,9 +204,9 @@ describe("BookNFTClass", () => {
 
     const updateClass = async () => {
       await likeProtocolClassOwnerSigner
-        .updateClass({
+        .updateBookNFT({
           classId: nftClassId,
-          input: {
+          config: {
             name: "My Book",
             symbol: "KOOB",
             metadata: JSON.stringify({
@@ -192,9 +220,7 @@ describe("BookNFTClass", () => {
               external_link: "https://www.example.com",
               collaborators: [],
             }),
-            config: {
-              max_supply: 10,
-            },
+            max_supply: 10,
           },
         })
         .then((tx) => tx.wait());
@@ -256,15 +282,13 @@ describe("BookNFTClass", () => {
     );
 
     await expect(
-      likeProtocolRandomSigner.updateClass({
+      likeProtocolRandomSigner.updateBookNFT({
         classId: nftClassId,
-        input: {
+        config: {
           name: "Hi Jack",
           symbol: "HIJACK",
           metadata: JSON.stringify({}),
-          config: {
-            max_supply: 0,
-          },
+          max_supply: 0,
         },
       }),
     ).to.be.rejected;
@@ -566,7 +590,7 @@ describe("BookNFT permission control", () => {
     );
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewClass", (id, params, event) => {
+      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
         event.removeListener();
         resolve({ id });
       });
@@ -577,11 +601,11 @@ describe("BookNFT permission control", () => {
     });
 
     likeProtocolOwnerSigner
-      .newClass({
+      .newBookNFT({
         creator: this.classOwner,
         updaters: [this.classOwner, this.likerLand],
         minters: [this.classOwner, this.likerLand],
-        input: {
+        config: {
           name: "My Book",
           symbol: "KOOB",
           metadata: JSON.stringify({
@@ -595,9 +619,7 @@ describe("BookNFT permission control", () => {
             external_link: "https://www.example.com",
             collaborators: [],
           }),
-          config: {
-            max_supply: 10,
-          },
+          max_supply: 10,
         },
       })
       .then((tx) => tx.wait());
@@ -733,7 +755,7 @@ describe("BookNFT ownership transfer", () => {
     );
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewClass", (id, params, event) => {
+      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
         event.removeListener();
         resolve({ id });
       });
@@ -744,11 +766,11 @@ describe("BookNFT ownership transfer", () => {
     });
 
     likeProtocolOwnerSigner
-      .newClass({
+      .newBookNFT({
         creator: this.classOwner,
         updaters: [this.classOwner, this.likerLand],
         minters: [this.classOwner, this.likerLand],
-        input: {
+        config: {
           name: "My Book",
           symbol: "KOOB",
           metadata: JSON.stringify({
@@ -762,9 +784,7 @@ describe("BookNFT ownership transfer", () => {
             external_link: "https://www.example.com",
             collaborators: [],
           }),
-          config: {
-            max_supply: 10,
-          },
+          max_supply: 10,
         },
       })
       .then((tx) => tx.wait());
