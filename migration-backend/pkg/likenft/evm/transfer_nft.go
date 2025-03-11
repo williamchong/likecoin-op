@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"math/big"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -45,6 +46,10 @@ func (l *LikeProtocol) TransferNFT(
 	err = l.Client.SendTransaction(opts.Context, tx)
 	if err != nil {
 		mylogger.Error("l.Client.SendTransaction", "err", err)
+		if strings.Contains(err.Error(), "nonce too low") {
+			// retry
+			return l.TransferNFT(ctx, logger, evmClassId, from, to, tokenId)
+		}
 	}
 
 	txReceipt, err := ethereum.AwaitTx(ctx, mylogger, l.Client, tx)

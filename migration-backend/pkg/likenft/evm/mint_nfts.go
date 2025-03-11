@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/likecoin/like-migration-backend/pkg/ethereum"
@@ -40,6 +41,10 @@ func (l *LikeProtocol) MintNFTs(
 	err = l.Client.SendTransaction(opts.Context, tx)
 	if err != nil {
 		mylogger.Error("l.Client.SendTransaction", "err", err)
+		if strings.Contains(err.Error(), "nonce too low") {
+			// retry
+			return l.MintNFTs(ctx, logger, msgMintNFTsFromTokenId)
+		}
 	}
 
 	txReceipt, err := ethereum.AwaitTx(ctx, mylogger, l.Client, tx)

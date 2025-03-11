@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -42,6 +43,10 @@ func (l *LikeProtocol) NewBookNFT(
 	err = l.Client.SendTransaction(opts.Context, tx)
 	if err != nil {
 		mylogger.Error("l.Client.SendTransaction", "err", err)
+		if strings.Contains(err.Error(), "nonce too low") {
+			// retry
+			return l.NewBookNFT(ctx, logger, msgNewBookNFT)
+		}
 	}
 
 	txReceipt, err := ethereum.AwaitTx(ctx, mylogger, l.Client, tx)
