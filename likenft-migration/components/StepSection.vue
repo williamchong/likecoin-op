@@ -24,10 +24,10 @@
           'text-2xl',
         ]"
       >
-        <FontAwesomeIcon :icon="icon" />
+        <FontAwesomeIcon :icon="icon" :class="['font-black']" />
       </div>
     </div>
-    <div :class="['flex-1']">
+    <div :class="['flex-1', 'min-w-0']">
       <slot />
       <slot v-if="stepState === 'past'" name="past" />
       <slot v-if="stepState === 'current'" name="current" />

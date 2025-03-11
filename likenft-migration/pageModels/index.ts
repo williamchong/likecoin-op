@@ -1,3 +1,9 @@
+import {
+  CompletedLikeNFTAssetMigration,
+  LikeNFTAssetMigration,
+} from '~/apis/models/likenftAssetMigration';
+import { LikeNFTAssetSnapshot } from '~/apis/models/likenftAssetSnapshot';
+
 export interface StepStateStep1 {
   step: 1;
 }
@@ -54,6 +60,34 @@ export interface StepStateStep3Init {
   likerId: string | null;
 }
 
+export interface StepStateStep3MigrationPreview {
+  step: 3;
+  state: 'MigrationPreview';
+  cosmosAddress: string;
+  ethAddress: string;
+  avatar: string | null;
+  likerId: string | null;
+  migrationPreview: LikeNFTAssetSnapshot;
+}
+
+export interface StepStateStep4MigrationResult {
+  step: 4;
+  cosmosAddress: string;
+  ethAddress: string;
+  avatar: string | null;
+  likerId: string | null;
+  migration: LikeNFTAssetMigration;
+}
+
+export interface StepStateEnd {
+  step: 99999;
+  cosmosAddress: string;
+  ethAddress: string;
+  avatar: string | null;
+  likerId: string | null;
+  migration: CompletedLikeNFTAssetMigration;
+}
+
 export type StepState =
   | StepStateStep1
   | StepStateStep2Init
@@ -62,7 +96,10 @@ export type StepState =
   | StepStateStep2LikerIdEvmConnected
   | StepStateStep2EthConnected
   | StepStateStep2LikerIdMigrated
-  | StepStateStep3Init;
+  | StepStateStep3Init
+  | StepStateStep3MigrationPreview
+  | StepStateStep4MigrationResult
+  | StepStateEnd;
 
 export function introductionConfirmed(_: StepStateStep1): StepStateStep2Init {
   return {
@@ -147,5 +184,51 @@ export function initMigrationPreview(
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
     likerId: prev.likerId,
+  };
+}
+
+export function migrationPreviewFetched(
+  prev: StepStateStep3Init | StepStateStep3MigrationPreview,
+  snapshot: LikeNFTAssetSnapshot
+): StepStateStep3MigrationPreview {
+  return {
+    step: 3,
+    state: 'MigrationPreview',
+    cosmosAddress: prev.cosmosAddress,
+    ethAddress: prev.ethAddress,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    migrationPreview: snapshot,
+  };
+}
+
+export function migrationResultFetched(
+  prev:
+    | StepStateStep2LikerIdMigrated
+    | StepStateStep3MigrationPreview
+    | StepStateStep4MigrationResult,
+  migration: LikeNFTAssetMigration
+): StepStateStep4MigrationResult {
+  return {
+    step: 4,
+    cosmosAddress: prev.cosmosAddress,
+    ethAddress: prev.ethAddress,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    migration,
+  };
+}
+
+export function migrationCompleted(
+  prev: StepStateStep2LikerIdMigrated | StepStateStep4MigrationResult,
+  completedMigration: CompletedLikeNFTAssetMigration
+): StepStateEnd {
+  return {
+    step: 99999,
+    cosmosAddress: prev.cosmosAddress,
+    ethAddress: prev.ethAddress,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    migration: completedMigration,
   };
 }

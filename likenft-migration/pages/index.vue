@@ -64,45 +64,244 @@
             </div>
           </template>
         </StepSection>
-        <StepSection :step="3" :current-step="currentStep.step"></StepSection>
-        <StepSection :step="4" :current-step="currentStep.step"></StepSection>
+        <StepSection :step="3" :current-step="currentStep.step">
+          <template #future>
+            <h2
+              :class="[
+                'text-base',
+                'font-semibold',
+                'leading-[30px]',
+                'text-likecoin-darkgrey',
+              ]"
+            >
+              {{ $t('migrate.preview') }}
+            </h2>
+          </template>
+          <template v-if="migrationPreview != null" #current>
+            <div :class="['flex', 'flex-row', 'gap-1']">
+              <h2
+                :class="[
+                  'text-base',
+                  'font-semibold',
+                  'leading-[30px]',
+                  'text-likecoin-darkgrey',
+                ]"
+              >
+                {{ $t('migrate.preview') }}
+              </h2>
+              <UTooltip
+                v-if="
+                  migrationPreview.block_time != null &&
+                  migrationPreview.block_height != null
+                "
+                :text="
+                  $t('section.asset-preview.tooltip', {
+                    date: _formatDate(migrationPreview.block_time),
+                    height: _formatNumber(migrationPreview.block_height),
+                  })
+                "
+                :ui="{
+                  base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
+                }"
+                ><FontAwesomeIcon
+                  icon="circle-exclamation"
+                  :class="[
+                    'text-sm',
+                    'leading-[30px]',
+                    'text-likecoin-votecolor-yes',
+                  ]"
+              /></UTooltip>
+            </div>
+            <SectionAssetPreview
+              v-if="migrationPreview != null"
+              :class="['max-w-full', 'mt-2']"
+              :snapshot="migrationPreview"
+              @confirmMigration="handleConfirmMigrate"
+            />
+          </template>
+          <template #past>
+            <h2
+              :class="[
+                'text-base',
+                'font-semibold',
+                'leading-[30px]',
+                'text-likecoin-darkgrey',
+              ]"
+            >
+              {{ $t('migrate.preview') }}
+            </h2>
+          </template>
+        </StepSection>
+        <StepSection :step="4" :current-step="currentStep.step">
+          <template #future>
+            <h2
+              :class="[
+                'text-base',
+                'font-semibold',
+                'leading-[30px]',
+                'text-likecoin-darkgrey',
+              ]"
+            >
+              {{ $t('section.start-migration.title') }}
+            </h2>
+          </template>
+          <template #current>
+            <div
+              :class="[
+                'flex',
+                'flex-row',
+                'items-center',
+                'justify-between',
+                'min-h-[30px]',
+              ]"
+            >
+              <h2
+                :class="[
+                  'text-base',
+                  'font-semibold',
+                  'text-likecoin-darkgrey',
+                ]"
+              >
+                {{ $t('section.migration-result.title') }}
+                <span
+                  v-if="
+                    migration != null &&
+                    (migration.status === 'in_progress' ||
+                      migration.status === 'init')
+                  "
+                >
+                  {{ $t('section.migration-result.in-progress') }}
+                </span>
+              </h2>
+              <LoadingIcon />
+            </div>
+            <SectionMigrationResult
+              v-if="migration != null"
+              :class="['max-w-full', 'mt-2']"
+              :migration="migration"
+            />
+          </template>
+          <template #past>
+            <div
+              :class="['flex', 'flex-row', 'items-center', 'justify-between']"
+            >
+              <div
+                :class="[
+                  'min-h-[30px]',
+                  'flex',
+                  'flex-col',
+                  'justify-center',
+                  'gap-1',
+                ]"
+              >
+                <h2
+                  :class="[
+                    'text-base',
+                    'font-semibold',
+                    'leading-[20px]',
+                    'text-likecoin-darkgrey',
+                  ]"
+                >
+                  {{ $t('section.migration-result.title') }}
+                </h2>
+                <p
+                  v-if="
+                    migration != null &&
+                    migration.status === 'failed' &&
+                    failedMigrationCount != null &&
+                    failedMigrationCount > 0
+                  "
+                  :class="['text-xs', 'text-likecoin-votecolor-no']"
+                >
+                  <FontAwesomeIcon icon="triangle-exclamation" />
+                  {{
+                    $t('section.migration-result.failed-message', {
+                      count: failedMigrationCount,
+                    })
+                  }}
+                </p>
+              </div>
+              <AppButton :class="['w-[120px]']" @click="handleRetryClick">
+                {{ $t('section.migration-result.retry') }}
+              </AppButton>
+            </div>
+            <SectionMigrationResult
+              v-if="migration != null"
+              :class="['max-w-full', 'mt-2']"
+              :migration="migration"
+            />
+          </template>
+        </StepSection>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import { isAxiosError } from 'axios';
+import { format as formatDate } from 'date-fns/format';
+import numeral from 'numeral';
 import Vue from 'vue';
 
+import { makeCreateMigrationAPI } from '~/apis/createMigration';
+import { makeCreateMigrationPreviewAPI } from '~/apis/createMigrationPreview';
+import { makeGetMigrationAPI } from '~/apis/getMigration';
+import { makeGetMigrationPreviewAPI } from '~/apis/getMigrationPreview';
 import { getSignMessage } from '~/apis/getSignMessage';
 import { makeGetUserProfileAPI } from '~/apis/getUserProfile';
 import { makeMigrateLikerIDAPI } from '~/apis/migrateLikerID';
 import {
+  isMigrationCompleted,
+  LikeNFTAssetMigration,
+} from '~/apis/models/likenftAssetMigration';
+import { LikeNFTAssetSnapshot } from '~/apis/models/likenftAssetSnapshot';
+import {
   initCosmosConnected,
   initEvmConnected,
+  initMigrationPreview,
   introductionConfirmed,
   likerIdEvmConnected,
   likerIdMigrated,
   likerIdResolved,
+  migrationCompleted,
+  migrationPreviewFetched,
+  migrationResultFetched,
   StepState,
+  StepStateEnd,
   StepStateStep2CosmosConnected,
   StepStateStep2LikerIdEvmConnected,
   StepStateStep2LikerIdMigrated,
   StepStateStep2LikerIdResolved,
+  StepStateStep3Init,
+  StepStateStep3MigrationPreview,
+  StepStateStep4MigrationResult,
 } from '~/pageModels';
+
+import UTooltip from '../nuxtui/components/UTooltip.vue';
 
 interface Data {
   isTransitioning: boolean;
 
   currentStep: StepState;
+
+  migrationPreviewFetchTimeout: ReturnType<typeof setTimeout> | null;
+  migrationFetchTimeout: ReturnType<typeof setTimeout> | null;
 }
 
 export default Vue.extend({
+  components: {
+    UTooltip,
+  },
+
+  filters: {},
   data(): Data {
     return {
       isTransitioning: false,
 
       currentStep: { step: 1 },
+
+      migrationPreviewFetchTimeout: null,
+      migrationFetchTimeout: null,
     };
   },
   computed: {
@@ -141,6 +340,83 @@ export default Vue.extend({
       }
       return null;
     },
+
+    migrationPreview(): LikeNFTAssetSnapshot | null {
+      if ('migrationPreview' in this.currentStep) {
+        return this.currentStep.migrationPreview;
+      }
+      return null;
+    },
+
+    migration(): LikeNFTAssetMigration | null {
+      if ('migration' in this.currentStep) {
+        return this.currentStep.migration;
+      }
+      return null;
+    },
+
+    failedMigrationCount(): number | null {
+      if ('migration' in this.currentStep) {
+        return (
+          this.currentStep.migration.classes.filter(
+            (c) => c.status === 'failed'
+          ).length +
+          this.currentStep.migration.nfts.filter((c) => c.status === 'failed')
+            .length
+        );
+      }
+      return null;
+    },
+  },
+
+  watch: {
+    migrationPreview(migrationPreview: LikeNFTAssetSnapshot | null) {
+      if (this.migrationPreviewFetchTimeout != null) {
+        clearTimeout(this.migrationPreviewFetchTimeout);
+        this.migrationPreviewFetchTimeout = null;
+      }
+      if (migrationPreview == null) {
+        return;
+      }
+      if (
+        this.currentStep.step !== 3 ||
+        this.currentStep.state !== 'MigrationPreview'
+      ) {
+        return;
+      }
+      if (
+        migrationPreview.status === 'init' ||
+        migrationPreview.status === 'in_progress'
+      ) {
+        const currentStep = this.currentStep;
+        this.migrationPreviewFetchTimeout = setTimeout(async () => {
+          this.currentStep = await this._asyncStateTransition(
+            currentStep,
+            (s) => this._getOrCreateMigrationPreview(s)
+          );
+        }, 1000);
+      }
+    },
+
+    migration(_: LikeNFTAssetMigration | null) {
+      if (this.migrationFetchTimeout != null) {
+        clearTimeout(this.migrationFetchTimeout);
+        this.migrationFetchTimeout = null;
+      }
+      if (this.currentStep.step !== 4) {
+        return;
+      }
+      const { migration } = this.currentStep;
+      if (migration.status === 'init' || migration.status === 'in_progress') {
+        const currentStep = this.currentStep;
+        this.migrationFetchTimeout = setTimeout(async () => {
+          this.currentStep = await this._asyncStateTransition(
+            currentStep,
+            (s) => this._refreshMigration(s)
+          );
+        }, 1000);
+      }
+    },
   },
   methods: {
     handleIntroductionSectionConfirmClick() {
@@ -160,6 +436,20 @@ export default Vue.extend({
         this.currentStep,
         (s) => this._checkLikerID(s, cosmosAddress)
       );
+
+      if (this.currentStep.state === 'LikerIdMigrated') {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          (s) => this._checkMigration(s)
+        );
+      }
+
+      if (this.currentStep.step === 3) {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          (s) => this._getOrCreateMigrationPreview(s)
+        );
+      }
     },
 
     async handleLikeCoinEVMWalletConnected(ethAddress: string) {
@@ -180,6 +470,37 @@ export default Vue.extend({
           );
         }
       }
+
+      if (this.currentStep.state === 'LikerIdMigrated') {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          (s) => this._checkMigration(s)
+        );
+      }
+
+      if (this.currentStep.step === 3) {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          (s) => this._getOrCreateMigrationPreview(s)
+        );
+      }
+    },
+
+    async handleConfirmMigrate() {
+      if (
+        this.currentStep.step !== 3 ||
+        this.currentStep.state !== 'MigrationPreview'
+      ) {
+        return;
+      }
+      this.currentStep = await this._asyncStateTransition(
+        this.currentStep,
+        (s) => this._createMigration(s)
+      );
+    },
+
+    handleRetryClick() {
+      alert('TODO: retry');
     },
 
     async _asyncStateTransition<S1 extends StepState, S2 extends StepState>(
@@ -284,6 +605,101 @@ export default Vue.extend({
       }
 
       return currentStep;
+    },
+
+    async _getOrCreateMigrationPreview(
+      s: StepStateStep3Init | StepStateStep3MigrationPreview
+    ): Promise<StepStateStep3MigrationPreview> {
+      const migrationPreview = await this._fetchMigrationPreview(
+        s.cosmosAddress
+      );
+
+      if (migrationPreview == null) {
+        const newMigrationPreview = await this._createMigrationPreview(
+          s.cosmosAddress
+        );
+        return migrationPreviewFetched(s, newMigrationPreview);
+      } else {
+        return migrationPreviewFetched(s, migrationPreview);
+      }
+    },
+
+    async _fetchMigrationPreview(cosmosWalletAddress: string) {
+      try {
+        const migrationResponse = await makeGetMigrationPreviewAPI(
+          cosmosWalletAddress
+        )(this.$apiClient)();
+        return migrationResponse.preview;
+      } catch (e) {
+        if (isAxiosError(e)) {
+          if (e.status === 404) {
+            return null;
+          }
+        }
+        throw e;
+      }
+    },
+
+    async _createMigrationPreview(cosmosWalletAddress: string) {
+      const migrationResponse = await makeCreateMigrationPreviewAPI(
+        this.$apiClient
+      )({ cosmos_address: cosmosWalletAddress });
+      return migrationResponse.preview;
+    },
+
+    async _createMigration(
+      s: StepStateStep3MigrationPreview
+    ): Promise<StepStateStep4MigrationResult> {
+      const migrationResponse = await makeCreateMigrationAPI(this.$apiClient)({
+        asset_snapshot_id: s.migrationPreview.id,
+        cosmos_address: s.cosmosAddress,
+        eth_address: s.ethAddress,
+      });
+      return migrationResultFetched(s, migrationResponse.migration);
+    },
+
+    async _refreshMigration(
+      s: StepStateStep4MigrationResult
+    ): Promise<StepStateStep4MigrationResult | StepStateEnd> {
+      const resp = await makeGetMigrationAPI(s.cosmosAddress)(
+        this.$apiClient
+      )();
+      // expect throw on error
+      if (isMigrationCompleted(resp.migration)) {
+        return migrationCompleted(s, resp.migration);
+      }
+      return migrationResultFetched(s, resp.migration);
+    },
+
+    async _checkMigration(
+      s: StepStateStep2LikerIdMigrated
+    ): Promise<
+      StepStateStep3Init | StepStateStep4MigrationResult | StepStateEnd
+    > {
+      try {
+        const resp = await makeGetMigrationAPI(s.cosmosAddress)(
+          this.$apiClient
+        )();
+        if (isMigrationCompleted(resp.migration)) {
+          return migrationCompleted(s, resp.migration);
+        }
+        return migrationResultFetched(s, resp.migration);
+      } catch (e) {
+        if (isAxiosError(e)) {
+          if (e.status === 404) {
+            return initMigrationPreview(s);
+          }
+        }
+        throw e;
+      }
+    },
+
+    _formatDate(value: Date) {
+      return formatDate(value, 'dd MMM, yyyy HH:mm:ss');
+    },
+
+    _formatNumber(value: number | string) {
+      return numeral(value).format('0,0');
     },
   },
 });
