@@ -9,10 +9,10 @@ import (
 
 func (l *LikeProtocol) MintNFTs(msgMintNFTsFromTokenId *like_protocol.MsgMintNFTsFromTokenId) (*types.Transaction, error) {
 	opts, err := l.transactOpts()
-
 	if err != nil {
 		return nil, fmt.Errorf("err l.transactOpts: %v", err)
 	}
+	opts.NoSend = true
 
 	instance, err := like_protocol.NewLikeProtocol(l.ContractAddress, l.Client)
 	if err != nil {
@@ -23,5 +23,6 @@ func (l *LikeProtocol) MintNFTs(msgMintNFTsFromTokenId *like_protocol.MsgMintNFT
 		return nil, fmt.Errorf("err instance.NewClass: %v", err)
 	}
 
-	return tx, nil
+	err = l.Client.SendTransaction(opts.Context, tx)
+	return tx, err
 }

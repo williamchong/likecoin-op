@@ -16,6 +16,7 @@ func (l *BookNFT) TransferClass(
 	if err != nil {
 		return nil, fmt.Errorf("err l.transactOpts: %v", err)
 	}
+	opts.NoSend = true
 
 	instance, err := book_nft.NewBookNft(evmClassId, l.Client)
 	if err != nil {
@@ -26,5 +27,6 @@ func (l *BookNFT) TransferClass(
 		return nil, fmt.Errorf("err book_nft.TransferOwnership: %v", err)
 	}
 
-	return tx, nil
+	err = l.Client.SendTransaction(opts.Context, tx)
+	return tx, err
 }

@@ -11,10 +11,10 @@ import (
 
 func (l *LikeProtocol) NewBookNFT(msgNewBookNFT like_protocol.MsgNewBookNFT) (*types.Transaction, error) {
 	opts, err := l.transactOpts()
-
 	if err != nil {
 		return nil, fmt.Errorf("err l.transactOpts: %v", err)
 	}
+	opts.NoSend = true
 
 	instance, err := like_protocol.NewLikeProtocol(l.ContractAddress, l.Client)
 	if err != nil {
@@ -24,7 +24,9 @@ func (l *LikeProtocol) NewBookNFT(msgNewBookNFT like_protocol.MsgNewBookNFT) (*t
 	if err != nil {
 		return nil, fmt.Errorf("err instance.NewBookNFT: %v", err)
 	}
-	return tx, nil
+
+	err = l.Client.SendTransaction(opts.Context, tx)
+	return tx, err
 }
 
 func (l *LikeProtocol) GetClassIdFromNewClassTransaction(txReceipt *types.Receipt) (*common.Address, error) {
