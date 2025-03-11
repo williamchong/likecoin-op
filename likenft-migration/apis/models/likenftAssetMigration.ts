@@ -71,3 +71,13 @@ export const LikeNFTAssetMigrationSchema = z.object({
 });
 
 export type LikeNFTAssetMigration = z.infer<typeof LikeNFTAssetMigrationSchema>;
+
+export type CompletedLikeNFTAssetMigration = LikeNFTAssetMigration & {
+  status: 'completed' | 'failed';
+};
+
+export function isMigrationCompleted(
+  m: LikeNFTAssetMigration
+): m is CompletedLikeNFTAssetMigration {
+  return m.status === 'completed' || m.status === 'failed';
+}
