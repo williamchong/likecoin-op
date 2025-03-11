@@ -29,17 +29,12 @@ var (
 	_ = abi.ConvertType
 )
 
-// ClassConfig is an auto generated low-level Go binding around an user-defined struct.
-type ClassConfig struct {
+// BookConfig is an auto generated low-level Go binding around an user-defined struct.
+type BookConfig struct {
+	Name      string
+	Symbol    string
+	Metadata  string
 	MaxSupply uint64
-}
-
-// ClassInput is an auto generated low-level Go binding around an user-defined struct.
-type ClassInput struct {
-	Name     string
-	Symbol   string
-	Metadata string
-	Config   ClassConfig
 }
 
 // MsgMintNFT is an auto generated low-level Go binding around an user-defined struct.
@@ -64,18 +59,18 @@ type MsgMintNFTsFromTokenId struct {
 	Inputs      []NFTData
 }
 
-// MsgNewClass is an auto generated low-level Go binding around an user-defined struct.
-type MsgNewClass struct {
+// MsgNewBookNFT is an auto generated low-level Go binding around an user-defined struct.
+type MsgNewBookNFT struct {
 	Creator  common.Address
 	Updaters []common.Address
 	Minters  []common.Address
-	Input    ClassInput
+	Config   BookConfig
 }
 
-// MsgUpdateClass is an auto generated low-level Go binding around an user-defined struct.
-type MsgUpdateClass struct {
+// MsgUpdateBookNFT is an auto generated low-level Go binding around an user-defined struct.
+type MsgUpdateBookNFT struct {
 	ClassId common.Address
-	Input   ClassInput
+	Config  BookConfig
 }
 
 // NFTData is an auto generated low-level Go binding around an user-defined struct.
@@ -85,7 +80,7 @@ type NFTData struct {
 
 // LikeProtocolMetaData contains all meta data concerning the LikeProtocol contract.
 var LikeProtocolMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EnforcedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ErrNftClassNotFound\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpectedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"classId\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"updaters\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"minters\",\"type\":\"address[]\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"uint64\",\"name\":\"max_supply\",\"type\":\"uint64\"}],\"internalType\":\"structClassConfig\",\"name\":\"config\",\"type\":\"tuple\"}],\"internalType\":\"structClassInput\",\"name\":\"input\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"structMsgNewClass\",\"name\":\"params\",\"type\":\"tuple\"}],\"name\":\"NewClass\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"initialOwner\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"classId\",\"type\":\"address\"}],\"name\":\"isBookNFT\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"classId\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"}],\"internalType\":\"structNFTData\",\"name\":\"input\",\"type\":\"tuple\"}],\"internalType\":\"structMsgMintNFT\",\"name\":\"msgMintNFT\",\"type\":\"tuple\"}],\"name\":\"mintNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"classId\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"}],\"internalType\":\"structNFTData[]\",\"name\":\"inputs\",\"type\":\"tuple[]\"}],\"internalType\":\"structMsgMintNFTs\",\"name\":\"msgMintNFTs\",\"type\":\"tuple\"}],\"name\":\"mintNFTs\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"updaters\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"minters\",\"type\":\"address[]\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"uint64\",\"name\":\"max_supply\",\"type\":\"uint64\"}],\"internalType\":\"structClassConfig\",\"name\":\"config\",\"type\":\"tuple\"}],\"internalType\":\"structClassInput\",\"name\":\"input\",\"type\":\"tuple\"}],\"internalType\":\"structMsgNewClass\",\"name\":\"msgNewClass\",\"type\":\"tuple\"}],\"name\":\"newClass\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"classId\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"fromTokenId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"}],\"internalType\":\"structNFTData[]\",\"name\":\"inputs\",\"type\":\"tuple[]\"}],\"internalType\":\"structMsgMintNFTsFromTokenId\",\"name\":\"msgMintNFTsFromTokenId\",\"type\":\"tuple\"}],\"name\":\"safeMintNFTsWithTokenId\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"classId\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"uint64\",\"name\":\"max_supply\",\"type\":\"uint64\"}],\"internalType\":\"structClassConfig\",\"name\":\"config\",\"type\":\"tuple\"}],\"internalType\":\"structClassInput\",\"name\":\"input\",\"type\":\"tuple\"}],\"internalType\":\"structMsgUpdateClass\",\"name\":\"msgUpdateClass\",\"type\":\"tuple\"}],\"name\":\"updateClass\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EnforcedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ErrNftClassNotFound\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpectedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"uint64\",\"name\":\"max_supply\",\"type\":\"uint64\"}],\"indexed\":false,\"internalType\":\"structBookConfig\",\"name\":\"config\",\"type\":\"tuple\"}],\"name\":\"NewBookNFT\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"dataStorage\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"initialOwner\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"classId\",\"type\":\"address\"}],\"name\":\"isBookNFT\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"classId\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"}],\"internalType\":\"structNFTData\",\"name\":\"input\",\"type\":\"tuple\"}],\"internalType\":\"structMsgMintNFT\",\"name\":\"msgMintNFT\",\"type\":\"tuple\"}],\"name\":\"mintNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"classId\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"}],\"internalType\":\"structNFTData[]\",\"name\":\"inputs\",\"type\":\"tuple[]\"}],\"internalType\":\"structMsgMintNFTs\",\"name\":\"msgMintNFTs\",\"type\":\"tuple\"}],\"name\":\"mintNFTs\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"updaters\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"minters\",\"type\":\"address[]\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"uint64\",\"name\":\"max_supply\",\"type\":\"uint64\"}],\"internalType\":\"structBookConfig\",\"name\":\"config\",\"type\":\"tuple\"}],\"internalType\":\"structMsgNewBookNFT\",\"name\":\"msgNewBookNFT\",\"type\":\"tuple\"}],\"name\":\"newBookNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"updaters\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"minters\",\"type\":\"address[]\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"uint64\",\"name\":\"max_supply\",\"type\":\"uint64\"}],\"internalType\":\"structBookConfig\",\"name\":\"config\",\"type\":\"tuple\"}],\"internalType\":\"structMsgNewBookNFT[]\",\"name\":\"msgNewBookNFTs\",\"type\":\"tuple[]\"}],\"name\":\"newBookNFTs\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"classId\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"fromTokenId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"}],\"internalType\":\"structNFTData[]\",\"name\":\"inputs\",\"type\":\"tuple[]\"}],\"internalType\":\"structMsgMintNFTsFromTokenId\",\"name\":\"msgMintNFTsFromTokenId\",\"type\":\"tuple\"}],\"name\":\"safeMintNFTsWithTokenId\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"classId\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"uint64\",\"name\":\"max_supply\",\"type\":\"uint64\"}],\"internalType\":\"structBookConfig\",\"name\":\"config\",\"type\":\"tuple\"}],\"internalType\":\"structMsgUpdateBookNFT\",\"name\":\"msgUpdateBookNFT\",\"type\":\"tuple\"}],\"name\":\"updateBookNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
 }
 
 // LikeProtocolABI is the input ABI used to generate the binding from.
@@ -263,6 +258,37 @@ func (_LikeProtocol *LikeProtocolSession) UPGRADEINTERFACEVERSION() (string, err
 // Solidity: function UPGRADE_INTERFACE_VERSION() view returns(string)
 func (_LikeProtocol *LikeProtocolCallerSession) UPGRADEINTERFACEVERSION() (string, error) {
 	return _LikeProtocol.Contract.UPGRADEINTERFACEVERSION(&_LikeProtocol.CallOpts)
+}
+
+// DataStorage is a free data retrieval call binding the contract method 0x8870455f.
+//
+// Solidity: function dataStorage() pure returns(bytes32)
+func (_LikeProtocol *LikeProtocolCaller) DataStorage(opts *bind.CallOpts) ([32]byte, error) {
+	var out []interface{}
+	err := _LikeProtocol.contract.Call(opts, &out, "dataStorage")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// DataStorage is a free data retrieval call binding the contract method 0x8870455f.
+//
+// Solidity: function dataStorage() pure returns(bytes32)
+func (_LikeProtocol *LikeProtocolSession) DataStorage() ([32]byte, error) {
+	return _LikeProtocol.Contract.DataStorage(&_LikeProtocol.CallOpts)
+}
+
+// DataStorage is a free data retrieval call binding the contract method 0x8870455f.
+//
+// Solidity: function dataStorage() pure returns(bytes32)
+func (_LikeProtocol *LikeProtocolCallerSession) DataStorage() ([32]byte, error) {
+	return _LikeProtocol.Contract.DataStorage(&_LikeProtocol.CallOpts)
 }
 
 // IsBookNFT is a free data retrieval call binding the contract method 0xd2380f1d.
@@ -452,25 +478,46 @@ func (_LikeProtocol *LikeProtocolTransactorSession) MintNFTs(msgMintNFTs MsgMint
 	return _LikeProtocol.Contract.MintNFTs(&_LikeProtocol.TransactOpts, msgMintNFTs)
 }
 
-// NewClass is a paid mutator transaction binding the contract method 0xf1773716.
+// NewBookNFT is a paid mutator transaction binding the contract method 0xa43e8cfa.
 //
-// Solidity: function newClass((address,address[],address[],(string,string,string,(uint64))) msgNewClass) returns()
-func (_LikeProtocol *LikeProtocolTransactor) NewClass(opts *bind.TransactOpts, msgNewClass MsgNewClass) (*types.Transaction, error) {
-	return _LikeProtocol.contract.Transact(opts, "newClass", msgNewClass)
+// Solidity: function newBookNFT((address,address[],address[],(string,string,string,uint64)) msgNewBookNFT) returns()
+func (_LikeProtocol *LikeProtocolTransactor) NewBookNFT(opts *bind.TransactOpts, msgNewBookNFT MsgNewBookNFT) (*types.Transaction, error) {
+	return _LikeProtocol.contract.Transact(opts, "newBookNFT", msgNewBookNFT)
 }
 
-// NewClass is a paid mutator transaction binding the contract method 0xf1773716.
+// NewBookNFT is a paid mutator transaction binding the contract method 0xa43e8cfa.
 //
-// Solidity: function newClass((address,address[],address[],(string,string,string,(uint64))) msgNewClass) returns()
-func (_LikeProtocol *LikeProtocolSession) NewClass(msgNewClass MsgNewClass) (*types.Transaction, error) {
-	return _LikeProtocol.Contract.NewClass(&_LikeProtocol.TransactOpts, msgNewClass)
+// Solidity: function newBookNFT((address,address[],address[],(string,string,string,uint64)) msgNewBookNFT) returns()
+func (_LikeProtocol *LikeProtocolSession) NewBookNFT(msgNewBookNFT MsgNewBookNFT) (*types.Transaction, error) {
+	return _LikeProtocol.Contract.NewBookNFT(&_LikeProtocol.TransactOpts, msgNewBookNFT)
 }
 
-// NewClass is a paid mutator transaction binding the contract method 0xf1773716.
+// NewBookNFT is a paid mutator transaction binding the contract method 0xa43e8cfa.
 //
-// Solidity: function newClass((address,address[],address[],(string,string,string,(uint64))) msgNewClass) returns()
-func (_LikeProtocol *LikeProtocolTransactorSession) NewClass(msgNewClass MsgNewClass) (*types.Transaction, error) {
-	return _LikeProtocol.Contract.NewClass(&_LikeProtocol.TransactOpts, msgNewClass)
+// Solidity: function newBookNFT((address,address[],address[],(string,string,string,uint64)) msgNewBookNFT) returns()
+func (_LikeProtocol *LikeProtocolTransactorSession) NewBookNFT(msgNewBookNFT MsgNewBookNFT) (*types.Transaction, error) {
+	return _LikeProtocol.Contract.NewBookNFT(&_LikeProtocol.TransactOpts, msgNewBookNFT)
+}
+
+// NewBookNFTs is a paid mutator transaction binding the contract method 0xd274a43f.
+//
+// Solidity: function newBookNFTs((address,address[],address[],(string,string,string,uint64))[] msgNewBookNFTs) returns()
+func (_LikeProtocol *LikeProtocolTransactor) NewBookNFTs(opts *bind.TransactOpts, msgNewBookNFTs []MsgNewBookNFT) (*types.Transaction, error) {
+	return _LikeProtocol.contract.Transact(opts, "newBookNFTs", msgNewBookNFTs)
+}
+
+// NewBookNFTs is a paid mutator transaction binding the contract method 0xd274a43f.
+//
+// Solidity: function newBookNFTs((address,address[],address[],(string,string,string,uint64))[] msgNewBookNFTs) returns()
+func (_LikeProtocol *LikeProtocolSession) NewBookNFTs(msgNewBookNFTs []MsgNewBookNFT) (*types.Transaction, error) {
+	return _LikeProtocol.Contract.NewBookNFTs(&_LikeProtocol.TransactOpts, msgNewBookNFTs)
+}
+
+// NewBookNFTs is a paid mutator transaction binding the contract method 0xd274a43f.
+//
+// Solidity: function newBookNFTs((address,address[],address[],(string,string,string,uint64))[] msgNewBookNFTs) returns()
+func (_LikeProtocol *LikeProtocolTransactorSession) NewBookNFTs(msgNewBookNFTs []MsgNewBookNFT) (*types.Transaction, error) {
+	return _LikeProtocol.Contract.NewBookNFTs(&_LikeProtocol.TransactOpts, msgNewBookNFTs)
 }
 
 // Pause is a paid mutator transaction binding the contract method 0x8456cb59.
@@ -578,25 +625,25 @@ func (_LikeProtocol *LikeProtocolTransactorSession) Unpause() (*types.Transactio
 	return _LikeProtocol.Contract.Unpause(&_LikeProtocol.TransactOpts)
 }
 
-// UpdateClass is a paid mutator transaction binding the contract method 0x01cd9666.
+// UpdateBookNFT is a paid mutator transaction binding the contract method 0x88a77dc7.
 //
-// Solidity: function updateClass((address,(string,string,string,(uint64))) msgUpdateClass) returns()
-func (_LikeProtocol *LikeProtocolTransactor) UpdateClass(opts *bind.TransactOpts, msgUpdateClass MsgUpdateClass) (*types.Transaction, error) {
-	return _LikeProtocol.contract.Transact(opts, "updateClass", msgUpdateClass)
+// Solidity: function updateBookNFT((address,(string,string,string,uint64)) msgUpdateBookNFT) returns()
+func (_LikeProtocol *LikeProtocolTransactor) UpdateBookNFT(opts *bind.TransactOpts, msgUpdateBookNFT MsgUpdateBookNFT) (*types.Transaction, error) {
+	return _LikeProtocol.contract.Transact(opts, "updateBookNFT", msgUpdateBookNFT)
 }
 
-// UpdateClass is a paid mutator transaction binding the contract method 0x01cd9666.
+// UpdateBookNFT is a paid mutator transaction binding the contract method 0x88a77dc7.
 //
-// Solidity: function updateClass((address,(string,string,string,(uint64))) msgUpdateClass) returns()
-func (_LikeProtocol *LikeProtocolSession) UpdateClass(msgUpdateClass MsgUpdateClass) (*types.Transaction, error) {
-	return _LikeProtocol.Contract.UpdateClass(&_LikeProtocol.TransactOpts, msgUpdateClass)
+// Solidity: function updateBookNFT((address,(string,string,string,uint64)) msgUpdateBookNFT) returns()
+func (_LikeProtocol *LikeProtocolSession) UpdateBookNFT(msgUpdateBookNFT MsgUpdateBookNFT) (*types.Transaction, error) {
+	return _LikeProtocol.Contract.UpdateBookNFT(&_LikeProtocol.TransactOpts, msgUpdateBookNFT)
 }
 
-// UpdateClass is a paid mutator transaction binding the contract method 0x01cd9666.
+// UpdateBookNFT is a paid mutator transaction binding the contract method 0x88a77dc7.
 //
-// Solidity: function updateClass((address,(string,string,string,(uint64))) msgUpdateClass) returns()
-func (_LikeProtocol *LikeProtocolTransactorSession) UpdateClass(msgUpdateClass MsgUpdateClass) (*types.Transaction, error) {
-	return _LikeProtocol.Contract.UpdateClass(&_LikeProtocol.TransactOpts, msgUpdateClass)
+// Solidity: function updateBookNFT((address,(string,string,string,uint64)) msgUpdateBookNFT) returns()
+func (_LikeProtocol *LikeProtocolTransactorSession) UpdateBookNFT(msgUpdateBookNFT MsgUpdateBookNFT) (*types.Transaction, error) {
+	return _LikeProtocol.Contract.UpdateBookNFT(&_LikeProtocol.TransactOpts, msgUpdateBookNFT)
 }
 
 // UpgradeToAndCall is a paid mutator transaction binding the contract method 0x4f1ef286.
@@ -754,9 +801,9 @@ func (_LikeProtocol *LikeProtocolFilterer) ParseInitialized(log types.Log) (*Lik
 	return event, nil
 }
 
-// LikeProtocolNewClassIterator is returned from FilterNewClass and is used to iterate over the raw logs and unpacked data for NewClass events raised by the LikeProtocol contract.
-type LikeProtocolNewClassIterator struct {
-	Event *LikeProtocolNewClass // Event containing the contract specifics and raw log
+// LikeProtocolNewBookNFTIterator is returned from FilterNewBookNFT and is used to iterate over the raw logs and unpacked data for NewBookNFT events raised by the LikeProtocol contract.
+type LikeProtocolNewBookNFTIterator struct {
+	Event *LikeProtocolNewBookNFT // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -770,7 +817,7 @@ type LikeProtocolNewClassIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *LikeProtocolNewClassIterator) Next() bool {
+func (it *LikeProtocolNewBookNFTIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -779,7 +826,7 @@ func (it *LikeProtocolNewClassIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(LikeProtocolNewClass)
+			it.Event = new(LikeProtocolNewBookNFT)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -794,7 +841,7 @@ func (it *LikeProtocolNewClassIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(LikeProtocolNewClass)
+		it.Event = new(LikeProtocolNewBookNFT)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -810,42 +857,42 @@ func (it *LikeProtocolNewClassIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *LikeProtocolNewClassIterator) Error() error {
+func (it *LikeProtocolNewBookNFTIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *LikeProtocolNewClassIterator) Close() error {
+func (it *LikeProtocolNewBookNFTIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// LikeProtocolNewClass represents a NewClass event raised by the LikeProtocol contract.
-type LikeProtocolNewClass struct {
-	ClassId common.Address
-	Params  MsgNewClass
+// LikeProtocolNewBookNFT represents a NewBookNFT event raised by the LikeProtocol contract.
+type LikeProtocolNewBookNFT struct {
+	BookNFT common.Address
+	Config  BookConfig
 	Raw     types.Log // Blockchain specific contextual infos
 }
 
-// FilterNewClass is a free log retrieval operation binding the contract event 0x2b6327e1e7e3916242db759523feaab8eb1bc65ed903a41a1ff88ee3c1ab9395.
+// FilterNewBookNFT is a free log retrieval operation binding the contract event 0xac1baa76250109980b8de5e2b9fcb185acd2bd5127c85c3e83cc05fb3aae5df8.
 //
-// Solidity: event NewClass(address classId, (address,address[],address[],(string,string,string,(uint64))) params)
-func (_LikeProtocol *LikeProtocolFilterer) FilterNewClass(opts *bind.FilterOpts) (*LikeProtocolNewClassIterator, error) {
+// Solidity: event NewBookNFT(address bookNFT, (string,string,string,uint64) config)
+func (_LikeProtocol *LikeProtocolFilterer) FilterNewBookNFT(opts *bind.FilterOpts) (*LikeProtocolNewBookNFTIterator, error) {
 
-	logs, sub, err := _LikeProtocol.contract.FilterLogs(opts, "NewClass")
+	logs, sub, err := _LikeProtocol.contract.FilterLogs(opts, "NewBookNFT")
 	if err != nil {
 		return nil, err
 	}
-	return &LikeProtocolNewClassIterator{contract: _LikeProtocol.contract, event: "NewClass", logs: logs, sub: sub}, nil
+	return &LikeProtocolNewBookNFTIterator{contract: _LikeProtocol.contract, event: "NewBookNFT", logs: logs, sub: sub}, nil
 }
 
-// WatchNewClass is a free log subscription operation binding the contract event 0x2b6327e1e7e3916242db759523feaab8eb1bc65ed903a41a1ff88ee3c1ab9395.
+// WatchNewBookNFT is a free log subscription operation binding the contract event 0xac1baa76250109980b8de5e2b9fcb185acd2bd5127c85c3e83cc05fb3aae5df8.
 //
-// Solidity: event NewClass(address classId, (address,address[],address[],(string,string,string,(uint64))) params)
-func (_LikeProtocol *LikeProtocolFilterer) WatchNewClass(opts *bind.WatchOpts, sink chan<- *LikeProtocolNewClass) (event.Subscription, error) {
+// Solidity: event NewBookNFT(address bookNFT, (string,string,string,uint64) config)
+func (_LikeProtocol *LikeProtocolFilterer) WatchNewBookNFT(opts *bind.WatchOpts, sink chan<- *LikeProtocolNewBookNFT) (event.Subscription, error) {
 
-	logs, sub, err := _LikeProtocol.contract.WatchLogs(opts, "NewClass")
+	logs, sub, err := _LikeProtocol.contract.WatchLogs(opts, "NewBookNFT")
 	if err != nil {
 		return nil, err
 	}
@@ -855,8 +902,8 @@ func (_LikeProtocol *LikeProtocolFilterer) WatchNewClass(opts *bind.WatchOpts, s
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(LikeProtocolNewClass)
-				if err := _LikeProtocol.contract.UnpackLog(event, "NewClass", log); err != nil {
+				event := new(LikeProtocolNewBookNFT)
+				if err := _LikeProtocol.contract.UnpackLog(event, "NewBookNFT", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -877,12 +924,12 @@ func (_LikeProtocol *LikeProtocolFilterer) WatchNewClass(opts *bind.WatchOpts, s
 	}), nil
 }
 
-// ParseNewClass is a log parse operation binding the contract event 0x2b6327e1e7e3916242db759523feaab8eb1bc65ed903a41a1ff88ee3c1ab9395.
+// ParseNewBookNFT is a log parse operation binding the contract event 0xac1baa76250109980b8de5e2b9fcb185acd2bd5127c85c3e83cc05fb3aae5df8.
 //
-// Solidity: event NewClass(address classId, (address,address[],address[],(string,string,string,(uint64))) params)
-func (_LikeProtocol *LikeProtocolFilterer) ParseNewClass(log types.Log) (*LikeProtocolNewClass, error) {
-	event := new(LikeProtocolNewClass)
-	if err := _LikeProtocol.contract.UnpackLog(event, "NewClass", log); err != nil {
+// Solidity: event NewBookNFT(address bookNFT, (string,string,string,uint64) config)
+func (_LikeProtocol *LikeProtocolFilterer) ParseNewBookNFT(log types.Log) (*LikeProtocolNewBookNFT, error) {
+	event := new(LikeProtocolNewBookNFT)
+	if err := _LikeProtocol.contract.UnpackLog(event, "NewBookNFT", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

@@ -66,17 +66,15 @@ func DoNewClassAction(
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)
 	}
-	tx, err := n.NewClass(like_protocol.MsgNewClass{
+	tx, err := n.NewBookNFT(like_protocol.MsgNewBookNFT{
 		Creator:  initialOwnerAddress,
 		Updaters: []common.Address{initialUpdaterAddress},
 		Minters:  []common.Address{initialMinterAddress},
-		Input: like_protocol.ClassInput{
-			Name:     cosmosClass.Name,
-			Symbol:   cosmosClass.Symbol,
-			Metadata: string(metadataBytes),
-			Config: like_protocol.ClassConfig{
-				MaxSupply: maxSupply,
-			},
+		Config: like_protocol.BookConfig{
+			Name:      cosmosClass.Name,
+			Symbol:    cosmosClass.Symbol,
+			Metadata:  string(metadataBytes),
+			MaxSupply: maxSupply,
 		},
 	})
 
