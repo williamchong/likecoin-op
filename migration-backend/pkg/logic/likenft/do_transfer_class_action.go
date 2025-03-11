@@ -10,7 +10,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
-	"github.com/likecoin/like-migration-backend/pkg/ethereum"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/model"
@@ -47,13 +46,7 @@ func DoTransferClassAction(
 
 	newOwnerAddress := common.HexToAddress(a.EvmOwner)
 	ethClassAddress := common.HexToAddress(a.EvmClassId)
-	tx, err := n.TransferClass(ethClassAddress, newOwnerAddress)
-
-	if err != nil {
-		return nil, doTransferClassActionFailed(db, a, err)
-	}
-
-	_, err = ethereum.AwaitTx(ctx, mylogger, n.Client, tx)
+	tx, _, err := n.TransferClass(ctx, mylogger, ethClassAddress, newOwnerAddress)
 
 	if err != nil {
 		return nil, doTransferClassActionFailed(db, a, err)

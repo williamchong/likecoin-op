@@ -16,7 +16,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
-	"github.com/likecoin/like-migration-backend/pkg/ethereum"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	cosmosmodel "github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
@@ -89,7 +88,7 @@ func DoMintNFTAction(
 		}
 
 		metadataString := string(metadataBytes)
-		tx, err = p.MintNFTs(&like_protocol.MsgMintNFTsFromTokenId{
+		tx, _, err = p.MintNFTs(ctx, mylogger, &like_protocol.MsgMintNFTsFromTokenId{
 			ClassId:     evmClassAddress,
 			To:          toOwner,
 			FromTokenId: totalSupply,
@@ -119,7 +118,7 @@ func DoMintNFTAction(
 			}
 
 			metadataString := string(metadataBytes)
-			tx, err = p.MintNFTs(&like_protocol.MsgMintNFTsFromTokenId{
+			tx, _, err = p.MintNFTs(ctx, mylogger, &like_protocol.MsgMintNFTsFromTokenId{
 				ClassId:     evmClassAddress,
 				To:          toOwner,
 				FromTokenId: totalSupply,
@@ -163,7 +162,7 @@ func DoMintNFTAction(
 						Metadata: metadataStr,
 					})
 				}
-				_, err = p.MintNFTs(&like_protocol.MsgMintNFTsFromTokenId{
+				_, _, err = p.MintNFTs(ctx, mylogger, &like_protocol.MsgMintNFTsFromTokenId{
 					ClassId:     evmClassAddress,
 					To:          initialBatchMintOwnerAddress,
 					FromTokenId: totalSupply,
@@ -173,17 +172,17 @@ func DoMintNFTAction(
 					return nil, doMintNFTActionFailed(db, a, err)
 				}
 			}
-			tx, err = p.TransferNFT(evmClassAddress, initialBatchMintOwnerAddress, toOwner, big.NewInt(int64(nftId)))
+			tx, _, err = p.TransferNFT(
+				ctx,
+				mylogger,
+				evmClassAddress,
+				initialBatchMintOwnerAddress,
+				toOwner,
+				big.NewInt(int64(nftId)))
 			if err != nil {
 				return nil, doMintNFTActionFailed(db, a, err)
 			}
 		}
-	}
-
-	_, err = ethereum.AwaitTx(ctx, mylogger, p.Client, tx)
-
-	if err != nil {
-		return nil, doMintNFTActionFailed(db, a, err)
 	}
 
 	evmTxHash := hexutil.Encode(tx.Hash().Bytes())

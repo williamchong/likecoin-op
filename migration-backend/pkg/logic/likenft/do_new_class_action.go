@@ -12,7 +12,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
-	"github.com/likecoin/like-migration-backend/pkg/ethereum"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/like_protocol"
@@ -68,7 +67,7 @@ func DoNewClassAction(
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)
 	}
-	tx, err := n.NewBookNFT(like_protocol.MsgNewBookNFT{
+	tx, txReceipt, err := n.NewBookNFT(ctx, mylogger, like_protocol.MsgNewBookNFT{
 		Creator:  initialOwnerAddress,
 		Updaters: []common.Address{initialUpdaterAddress},
 		Minters:  []common.Address{initialMinterAddress},
@@ -79,12 +78,6 @@ func DoNewClassAction(
 			MaxSupply: maxSupply,
 		},
 	})
-
-	if err != nil {
-		return nil, doNewClassActionFailed(db, a, err)
-	}
-
-	txReceipt, err := ethereum.AwaitTx(ctx, mylogger, n.Client, tx)
 
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)
