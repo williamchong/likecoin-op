@@ -169,6 +169,31 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         emit TransferWithMemo(from, to, _tokenId, memo);
     }
 
+    /**
+     * batchTransferWithMemo
+     *
+     * batch transfer with memo from one address to multiple addresses, it
+     * assume the parameters array length are the same.
+     * The tokens in `tokenIds` will be transferred to the addresses in the same
+     * position in `tos`
+     *
+     * @param from - the start token ids,
+     * @param tos - owner address to hold the new minted token
+     * @param tokenIds - list of metadata to supply
+     * @param memos - list of memo to supply
+     */
+    function batchTransferWithMemo(
+        address from,
+        address[] calldata tos,
+        uint256[] calldata tokenIds,
+        string[] calldata memos
+    ) external payable {
+        for (uint i = 0; i < tokenIds.length; i++) {
+            safeTransferFrom(from, tos[i], tokenIds[i]);
+            emit TransferWithMemo(from, tos[i], tokenIds[i], memos[i]);
+        }
+    }
+
     // Start Querying functions
     /**
      * getBookConfig
