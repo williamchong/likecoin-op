@@ -157,13 +157,14 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
             $._currentIndex++;
         }
     }
+
     function transferWithMemo(
         address from,
         address to,
         uint256 _tokenId,
         string calldata memo
     ) external payable {
-        transferFrom(from, to, _tokenId);
+        safeTransferFrom(from, to, _tokenId);
 
         emit TransferWithMemo(from, to, _tokenId, memo);
     }

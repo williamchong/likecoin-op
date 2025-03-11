@@ -124,6 +124,21 @@ describe("BookNFTToken", () => {
     expect((logs1[0] as EventLog).args[3]).to.equal("memo1");
   });
 
+  it("should not able to send with random signer", async function () {
+    const likeNFTClassRandomSigner = nftClassContract.connect(
+      this.randomSigner,
+    );
+    await expect(
+      likeNFTClassRandomSigner
+        .transferWithMemo(this.classOwner, this.randomSigner, 0, "memo1")
+        .then((tx) => tx.wait()),
+    ).to.be.rejectedWith(/ERC721InsufficientApproval/);
+
+    expect(await likeNFTClassRandomSigner.ownerOf(0)).to.equal(
+      this.classOwner.address,
+    );
+  });
+
   it("should be able to send with memo", async function () {
     const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
     const likeNFTClassRandomSigner = nftClassContract.connect(
