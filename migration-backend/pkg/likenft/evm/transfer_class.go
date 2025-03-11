@@ -12,6 +12,8 @@ func (l *BookNFT) TransferClass(
 	evmClassId common.Address,
 	newOwner common.Address,
 ) (*types.Transaction, error) {
+	mylogger := l.Logger.WithGroup("TransferClass")
+
 	opts, err := l.transactOpts()
 	if err != nil {
 		return nil, fmt.Errorf("err l.transactOpts: %v", err)
@@ -24,9 +26,14 @@ func (l *BookNFT) TransferClass(
 	}
 	tx, err := instance.TransferOwnership(opts, newOwner)
 	if err != nil {
+		mylogger.Error("instance.TransferOwnership", "err", err)
 		return nil, fmt.Errorf("err book_nft.TransferOwnership: %v", err)
 	}
+	mylogger = mylogger.With("txHash", tx.Hash().Hex())
 
 	err = l.Client.SendTransaction(opts.Context, tx)
+	if err != nil {
+		mylogger.Error("l.Client.SendTransaction", "err", err)
+	}
 	return tx, err
 }

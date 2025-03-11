@@ -10,6 +10,8 @@ import (
 )
 
 func (l *LikeProtocol) NewBookNFT(msgNewBookNFT like_protocol.MsgNewBookNFT) (*types.Transaction, error) {
+	mylogger := l.Logger.WithGroup("NewBookNFT")
+
 	opts, err := l.transactOpts()
 	if err != nil {
 		return nil, fmt.Errorf("err l.transactOpts: %v", err)
@@ -22,10 +24,15 @@ func (l *LikeProtocol) NewBookNFT(msgNewBookNFT like_protocol.MsgNewBookNFT) (*t
 	}
 	tx, err := instance.NewBookNFT(opts, msgNewBookNFT)
 	if err != nil {
+		mylogger.Error("instance.NewBookNFT", "err", err)
 		return nil, fmt.Errorf("err instance.NewBookNFT: %v", err)
 	}
+	mylogger = mylogger.With("txHash", tx.Hash().Hex())
 
 	err = l.Client.SendTransaction(opts.Context, tx)
+	if err != nil {
+		mylogger.Error("l.Client.SendTransaction", "err", err)
+	}
 	return tx, err
 }
 

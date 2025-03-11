@@ -15,6 +15,8 @@ func (l *LikeProtocol) TransferNFT(
 	to common.Address,
 	tokenId *big.Int,
 ) (*types.Transaction, error) {
+	mylogger := l.Logger.WithGroup("TransferNFT")
+
 	opts, err := l.transactOpts()
 	if err != nil {
 		return nil, fmt.Errorf("err l.transactOpts: %v", err)
@@ -29,7 +31,11 @@ func (l *LikeProtocol) TransferNFT(
 	if err != nil {
 		return nil, fmt.Errorf("err book_nft.TransferOwnership: %v", err)
 	}
+	mylogger = mylogger.With("txHash", tx.Hash().Hex())
 
 	err = l.Client.SendTransaction(opts.Context, tx)
+	if err != nil {
+		mylogger.Error("l.Client.SendTransaction", "err", err)
+	}
 	return tx, err
 }
