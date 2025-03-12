@@ -5,7 +5,9 @@ import hardhat, { ethers, upgrades } from "hardhat";
 async function main() {
   // We get the contract to deploy
   const LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-  console.log("Upgrading LikeProtocol...");
+  const [owner] = await ethers.getSigners();
+  console.log("Owner:", owner.address);
+  console.log("Upgrading LikeProtocol...", process.env.ERC721_PROXY_ADDRESS!);
 
   const newImplementationAddress = await upgrades.prepareUpgrade(
     process.env.ERC721_PROXY_ADDRESS!,
@@ -42,7 +44,10 @@ async function main() {
 
   // TODO: Prepare an upgrade proposal to safe
   const likeProtocol = LikeProtocol.attach(process.env.ERC721_PROXY_ADDRESS!);
-  await likeProtocol.upgradeToAndCall(newImplementationAddress, "0x");
+  console.log("Owner:", await likeProtocol.owner());
+  await likeProtocol.upgradeToAndCall(newImplementationAddress, "0x", {
+    gasLimit: 1500000,
+  });
 
   console.log(
     "LikeProtocol upgraded implementation to:",
