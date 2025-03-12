@@ -14,6 +14,7 @@ import (
 var ErrTxFailed = errors.New("tx failed")
 
 func AwaitTx(
+	ctx context.Context,
 	logger *slog.Logger,
 
 	c *ethclient.Client,
@@ -25,28 +26,94 @@ func AwaitTx(
 		With("txHash", txHash)
 
 	txReciptChan := make(chan *types.Receipt)
-	errorChan := make(chan error)
 
 	go func() {
 		for {
-			txReceipt, err := c.TransactionReceipt(context.Background(), tx.Hash())
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+			txReceipt, err := c.TransactionReceipt(ctx, tx.Hash())
 			if err != nil {
 				mylogger.Warn("fetch tx receipt failed", "error", err)
 				time.Sleep(1 * time.Second)
 				continue
 			}
-			if txReceipt.Status == 0 {
-				errorChan <- ErrTxFailed
-			} else {
-				txReciptChan <- txReceipt
+			txReciptChan <- txReceipt
+			return
+		}
+	}()
+
+	txReceipt := <-txReciptChan
+	_ = AwaitNonce(ctx, logger, c, txReceipt)
+	if txReceipt.Status == 0 {
+		return nil, ErrTxFailed
+	}
+	return txReceipt, nil
+}
+
+func AwaitNonce(
+	ctx context.Context,
+	logger *slog.Logger,
+
+	c *ethclient.Client,
+	txReceipt *types.Receipt,
+) error {
+	mylogger := logger.
+		WithGroup("AwaitNonce")
+
+	chainID, err := c.NetworkID(ctx)
+	if err != nil {
+		mylogger.Error("c.NetworkID", "err", err)
+		return err
+	}
+
+	tx, _, err := c.TransactionByHash(ctx, txReceipt.TxHash)
+	if err != nil {
+		mylogger.Error("c.TransactionByHash", "err", err)
+		return err
+	}
+	mylogger = mylogger.With("txNonce", tx.Nonce())
+
+	from, err := types.Sender(types.NewLondonSigner(chainID), tx)
+	if err != nil {
+		mylogger.Error("types.Sender", "err", err)
+		return err
+	}
+
+	successChan := make(chan interface{})
+	errorChan := make(chan error)
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				errorChan <- ctx.Err()
+				return
+			default:
 			}
+
+			nonce, err := c.NonceAt(ctx, from, nil)
+			if err != nil {
+				errorChan <- err
+				return
+			}
+			mylogger.Info("c.NonceAt", "remoteNonce", nonce)
+			if nonce > tx.Nonce() {
+				successChan <- struct{}{}
+				return
+			}
+
+			time.Sleep(1 * time.Second)
 		}
 	}()
 
 	select {
-	case err := <-errorChan:
-		return nil, err
-	case txReceipt := <-txReciptChan:
-		return txReceipt, nil
+	case err = <-errorChan:
+		mylogger.Error("errorChan", "err", err)
+		return err
+	case <-successChan:
+		return nil
 	}
 }

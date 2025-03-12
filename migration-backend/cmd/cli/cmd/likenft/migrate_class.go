@@ -1,6 +1,7 @@
 package likenft
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log/slog"
@@ -26,7 +27,21 @@ var migrateClassCmd = &cobra.Command{
 			return
 		}
 
-		envCfg := cmd.Context().Value(config.ContextKey).(*config.EnvConfig)
+		ctx := cmd.Context()
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
+		idStr := args[0]
+		id, err := strconv.ParseUint(idStr, 10, 64)
+		if err != nil {
+			panic(err)
+		}
+
+		logger := slog.New(slog.Default().Handler()).
+			WithGroup("migrateClassCmd").
+			With("id", id)
+
+		envCfg := ctx.Value(config.ContextKey).(*config.EnvConfig)
 		db, err := sql.Open("postgres", envCfg.DbConnectionStr)
 		if err != nil {
 			panic(err)
@@ -45,28 +60,21 @@ var migrateClassCmd = &cobra.Command{
 		contractAddress := common.HexToAddress(envCfg.EthLikeNFTContractAddress)
 
 		evmLikeNFTClient := evm.NewLikeProtocol(
+			logger,
 			ethClient,
 			privateKey,
 			envCfg.EthChainId,
 			contractAddress,
 		)
 		evmLikeNFTClassClient := evm.NewBookNFT(
+			logger,
 			ethClient,
 			privateKey,
 			envCfg.EthChainId,
 		)
 
-		idStr := args[0]
-		id, err := strconv.ParseUint(idStr, 10, 64)
-		if err != nil {
-			panic(err)
-		}
-
-		logger := slog.New(slog.Default().Handler()).
-			WithGroup("migrateClassCmd").
-			With("id", id)
-
 		mc, err := likenft.MigrateClassFromAssetMigration(
+			ctx,
 			logger,
 			db,
 			likenftClient,

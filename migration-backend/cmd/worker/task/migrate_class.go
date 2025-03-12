@@ -20,6 +20,9 @@ import (
 )
 
 func HandleMigrateClassTask(ctx context.Context, t *asynq.Task) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
 	envCfg := appcontext.ConfigFromContext(ctx)
 	db := appcontext.DBFromContext(ctx)
 	logger := appcontext.LoggerFromContext(ctx)
@@ -51,12 +54,14 @@ func HandleMigrateClassTask(ctx context.Context, t *asynq.Task) error {
 	contractAddress := common.HexToAddress(envCfg.EthLikeNFTContractAddress)
 
 	evmLikeProtocolClient := evm.NewLikeProtocol(
+		logger,
 		ethClient,
 		privateKey,
 		envCfg.EthChainId,
 		contractAddress,
 	)
 	evmLikeNFTClient := evm.NewBookNFT(
+		logger,
 		ethClient,
 		privateKey,
 		envCfg.EthChainId,
@@ -64,6 +69,7 @@ func HandleMigrateClassTask(ctx context.Context, t *asynq.Task) error {
 
 	mylogger.Info("running migrate class")
 	mc, err := likenft.MigrateClassFromAssetMigration(
+		ctx,
 		logger,
 		db,
 		likenftClient,

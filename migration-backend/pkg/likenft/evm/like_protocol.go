@@ -2,6 +2,7 @@ package evm
 
 import (
 	"crypto/ecdsa"
+	"log/slog"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -10,6 +11,7 @@ import (
 )
 
 type LikeProtocol struct {
+	Logger          *slog.Logger
 	Client          *ethclient.Client
 	PrivateKey      *ecdsa.PrivateKey
 	ChainID         *big.Int
@@ -17,12 +19,14 @@ type LikeProtocol struct {
 }
 
 func NewLikeProtocol(
+	logger *slog.Logger,
 	client *ethclient.Client,
 	privateKey *ecdsa.PrivateKey,
 	chainID *big.Int,
 	contractAddress common.Address,
 ) LikeProtocol {
 	return LikeProtocol{
+		Logger:          logger,
 		Client:          client,
 		PrivateKey:      privateKey,
 		ChainID:         chainID,

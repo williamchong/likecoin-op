@@ -1,6 +1,7 @@
 package likenft
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"log/slog"
@@ -13,6 +14,7 @@ import (
 )
 
 func MigrateClassFromAssetMigration(
+	ctx context.Context,
 	logger *slog.Logger,
 
 	db *sql.DB,
@@ -49,6 +51,7 @@ func MigrateClassFromAssetMigration(
 	defer RecalculateMigrationStatus(db, m.Id)
 
 	lastAction, err := MigrateClass(
+		ctx,
 		mylogger,
 		db,
 		c,
@@ -79,6 +82,7 @@ func MigrateClassFromAssetMigration(
 }
 
 func MigrateClass(
+	ctx context.Context,
 	logger *slog.Logger,
 
 	db *sql.DB,
@@ -115,6 +119,7 @@ func MigrateClass(
 	}
 
 	newClassAction, err = DoNewClassAction(
+		ctx,
 		mylogger,
 		db,
 		c,
@@ -134,6 +139,7 @@ func MigrateClass(
 	}
 
 	transferClassAction, err = DoTransferClassAction(
+		ctx,
 		mylogger,
 		db,
 		c,
