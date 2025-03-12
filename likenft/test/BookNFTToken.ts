@@ -279,7 +279,7 @@ describe("BookNFTToken batch actions", () => {
         }),
       ])
       .then((tx) => tx.wait());
-      await likeNFTClassOwnerSigner
+    await likeNFTClassOwnerSigner
       .mint(this.classOwner, [
         JSON.stringify({
           image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
@@ -300,7 +300,7 @@ describe("BookNFTToken batch actions", () => {
         }),
       ])
       .then((tx) => tx.wait());
-      await likeNFTClassOwnerSigner
+    await likeNFTClassOwnerSigner
       .mint(this.likerLand, [
         JSON.stringify({
           image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
@@ -370,7 +370,12 @@ describe("BookNFTToken batch actions", () => {
     const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
     await expect(
       likeNFTClassOwnerSigner
-        .batchTransferWithMemo(this.classOwner, [this.randomSigner], [2], ["batch memo1"])
+        .batchTransferWithMemo(
+          this.classOwner,
+          [this.randomSigner],
+          [2],
+          ["batch memo1"],
+        )
         .then((tx) => tx.wait()),
     ).to.be.rejectedWith(/ERC721InsufficientApproval/);
     expect(await likeNFTClassOwnerSigner.ownerOf(2)).to.equal(
