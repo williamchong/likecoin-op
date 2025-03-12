@@ -35,7 +35,11 @@ export default {
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: ['./assets/css/style.css', './assets/fontawesome/fontawesome.css'],
+  css: [
+    './assets/css/style.css',
+    './assets/fontawesome/fontawesome.css',
+    '@likecoin/wallet-connector/dist/style.css',
+  ],
 
   i18n,
 
@@ -44,6 +48,7 @@ export default {
     { src: '~/plugins/textEncoder' },
     '~/plugins/config.ts',
     '~/plugins/apiClient.ts',
+    '~/plugins/likeCoinWalletConnector.ts',
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -59,4 +64,38 @@ export default {
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: ['@nuxtjs/i18n', '@nuxtjs/axios'],
+
+  // Build Configuration: https://go.nuxtjs.dev/config-build
+  build: {
+    babel: {
+      presets: [
+        [
+          '@nuxt/babel-preset-app',
+          {
+            // Disable bable transform-exponentiation-operator
+            // https://github.com/starknet-io/starknet.js/issues/37#issuecomment-955797303
+            targets: {
+              browsers: [
+                'chrome >= 67',
+                'edge >= 79',
+                'firefox >= 68',
+                'opera >= 54',
+                'safari >= 14',
+              ],
+            },
+          },
+        ],
+      ],
+    },
+    transpile: [
+      '@cosmjs',
+      'cosmjs-types',
+      '@walletconnect',
+      '@web3modal',
+      'unstorage',
+      '@likecoin/wallet-connector',
+      'libsodium',
+      'web3',
+    ],
+  },
 };
