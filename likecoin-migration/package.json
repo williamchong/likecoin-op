@@ -1,0 +1,50 @@
+{
+  "name": "likecoin-migration",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "extract-translations": "vue-i18n-extract report --vueFiles './@(components|layouts|pages)/**/*.?(js|vue)' --languageFiles './i18n/*.?(json|yml|yaml|js)' --add --remove",
+    "postextract-translations": "find ./i18n -name '*.json' -exec npx sort-json {} \\;",
+    "check-translations": "vue-i18n-extract report --vueFiles './@(components|layouts|pages)/**/*.?(js|vue)' --languageFiles './i18n/*.?(json|yml|yaml|js)' --ci",
+    "build": "nuxt build",
+    "lint": "eslint .",
+    "check-format": "prettier -l .",
+    "format": "prettier . --write",
+    "start": "nuxt start",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "@nuxtjs/axios": "^5.13.6",
+    "@nuxtjs/i18n": "^7.3.1",
+    "axios": "^1.7.9",
+    "core-js": "^2.6.12",
+    "ethers": "^6.13.5",
+    "nuxt": "^2.15.8",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vue": "^2.7.10",
+    "vue-server-renderer": "^2.7.10",
+    "vue-template-compiler": "^2.7.10",
+    "web3": "^4.16.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.19.1",
+    "@nuxt/babel-preset-app": "^2.18.1",
+    "@nuxt/types": "^2.15.8",
+    "@nuxt/typescript-build": "^2.1.0",
+    "@nuxtjs/eslint-config-typescript": "^11.0.0",
+    "@nuxtjs/eslint-module": "^3.1.0",
+    "@nuxtjs/tailwindcss": "^6.13.1",
+    "eslint": "^8.24.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-nuxt": "^4.0.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-vue": "^9.5.1",
+    "postcss": "^8.4.17",
+    "prettier": "^2.7.1",
+    "sort-json": "^2.0.1",
+    "vue-i18n-extract": "^2.0.7"
+  }
+}
