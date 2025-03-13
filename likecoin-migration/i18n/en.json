@@ -16,6 +16,17 @@
     },
     "start-migration": {
       "title": "Start Migration"
+    },
+    "wallet-connect": {
+      "connect-likecoin-wallet": "Connect LikeCoin Wallet",
+      "connect-migration-wallet": "Connect Target Wallet",
+      "cosmos-address": "Cosmos Address",
+      "current-balance": "Current Balance",
+      "estimated-balance": "Estimated Balance",
+      "eth-address": "ETH Address",
+      "likecoin-wallet": "LikeCoin Wallet",
+      "liker-id": "Liker ID",
+      "migration-wallet": "Migration Wallet"
     }
   }
 }
