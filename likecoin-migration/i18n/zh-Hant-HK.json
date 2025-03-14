@@ -1,5 +1,11 @@
 {
   "index": {
     "get-started": ""
+  },
+  "section": {
+    "introduction": {
+      "confirm": "Confirm",
+      "text": "LikeCoin 已經升級 v3，同步遷移至以太坊 OP Mainnet。請盡早升級你於 v2 的 LikeCoin、電子書及 Writing NFT，以免被遺落。"
+    }
   }
 }
