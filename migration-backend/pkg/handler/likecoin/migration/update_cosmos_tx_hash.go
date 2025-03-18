@@ -10,6 +10,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	"github.com/likecoin/like-migration-backend/pkg/handler/model"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likecoin"
+	"github.com/likecoin/like-migration-backend/pkg/task"
 )
 
 type UpdateLikeCoinMigrationCosmosHandlerRequestBody struct {
@@ -54,6 +55,7 @@ func (p *UpdateLikeCoinMigrationCosmosHandler) ServeHTTP(w http.ResponseWriter, 
 	})
 
 	// TODO enqueue a job to continue migration
+	go p.enqueue(m.UserCosmosAddress)
 }
 
 func (p *UpdateLikeCoinMigrationCosmosHandler) handle(cosmosAddress string, req *UpdateLikeCoinMigrationCosmosHandlerRequestBody) (*model.LikeCoinMigration, error) {
@@ -64,4 +66,16 @@ func (p *UpdateLikeCoinMigrationCosmosHandler) handle(cosmosAddress string, req 
 	}
 
 	return model.LikeCoinMigrationFromModel(m), nil
+}
+
+func (p *UpdateLikeCoinMigrationCosmosHandler) enqueue(cosmosAddress string) error {
+	t, err := task.NewMigrateLikeCoinTask(cosmosAddress)
+	if err != nil {
+		return err
+	}
+	_, err = p.AsynqClient.Enqueue(t, asynq.MaxRetry(0))
+	if err != nil {
+		return err
+	}
+	return nil
 }

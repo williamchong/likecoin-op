@@ -3,10 +3,13 @@ package migration
 import (
 	"database/sql"
 	"net/http"
+
+	"github.com/hibiken/asynq"
 )
 
 type MigrationRouter struct {
 	Db                           *sql.DB
+	AsynqClient                  *asynq.Client
 	EthWalletPrivateKey          string
 	LikecoinBurningCosmosAddress string
 }
@@ -25,7 +28,8 @@ func (h *MigrationRouter) Router() *http.ServeMux {
 		LikecoinBurningCosmosAddress: h.LikecoinBurningCosmosAddress,
 	})
 	router.Handle("PUT /migration/{cosmosWalletAddress}/cosmos-tx-hash", &UpdateLikeCoinMigrationCosmosHandler{
-		Db: h.Db,
+		Db:          h.Db,
+		AsynqClient: h.AsynqClient,
 	})
 
 	return router
