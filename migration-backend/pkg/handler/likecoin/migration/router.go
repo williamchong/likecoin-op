@@ -14,6 +14,8 @@ type MigrationRouter struct {
 func (h *MigrationRouter) Router() *http.ServeMux {
 	router := http.NewServeMux()
 
+	router.Handle("POST /migration/eth-signing-message", &CreateEthSigningMessageHandler{})
+	router.Handle("POST /migration/cosmos-memo-data", &CreateCosmosMemoDataHandler{})
 	router.Handle("GET /migration/{cosmosWalletAddress}", &GetLatestLikeCoinMigrationHandler{
 		Db: h.Db,
 	})
