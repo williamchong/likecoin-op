@@ -4,11 +4,13 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/hibiken/asynq"
 	"github.com/likecoin/like-migration-backend/pkg/handler/likecoin/migration"
 )
 
 type LikeCoinRouter struct {
 	Db                           *sql.DB
+	AsynqClient                  *asynq.Client
 	EthWalletPrivateKey          string
 	LikecoinBurningCosmosAddress string
 }
@@ -18,6 +20,7 @@ func (h *LikeCoinRouter) Router() *http.ServeMux {
 
 	migrationRouter := migration.MigrationRouter{
 		Db:                           h.Db,
+		AsynqClient:                  h.AsynqClient,
 		EthWalletPrivateKey:          h.EthWalletPrivateKey,
 		LikecoinBurningCosmosAddress: h.LikecoinBurningCosmosAddress,
 	}

@@ -1,3 +1,7 @@
+.PHONY: decrypt-everything
+decrypt-everything:
+	blackbox_postdeploy
+
 .PHONY: operator-key-link
 operator-key-link:
 	ln -s ../deploy/env.operator likecoin/.env
@@ -18,9 +22,11 @@ local-node:
 .PHONY: abigen
 abigen:
 	make -C likenft build
+	make -C likecoin build
 	mkdir -p abi
 	cp likenft/artifacts/contracts/LikeProtocol.sol/LikeProtocol.json abi/
 	cp likenft/artifacts/contracts/BookNFT.sol/BookNFT.json abi/
+	cp likecoin/artifacts/contracts/EkilCoin.sol/EkilCoin.json abi/
 	# make -C likenft-indexer abigen
 	make -C migration-backend abigen
 
@@ -31,5 +37,5 @@ docker-images:
 	DOCKER_BUILD_ARGS=--push make -C likecoin-migration docker-image
 
 .PHONY: deploy
-deploy:
+deploy: decrypt-everything
 	make -C deploy deploy

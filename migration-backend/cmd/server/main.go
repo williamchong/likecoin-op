@@ -107,6 +107,7 @@ func main() {
 	mainMux.Handle("/likenft/", http.StripPrefix("/likenft", likeNFTRouter.Router()))
 	likeCoinRouter := likecoin.LikeCoinRouter{
 		Db:                           db,
+		AsynqClient:                  asynqClient,
 		EthWalletPrivateKey:          envCfg.EthWalletPrivateKey,
 		LikecoinBurningCosmosAddress: envCfg.LikecoinBurningCosmosAddress,
 	}

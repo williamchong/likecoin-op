@@ -1,0 +1,18 @@
+name: Test
+cases:
+  - originalamount: 10_000
+    originaldecimals: 9
+    newdecimals: 18
+    expected: 10_000_000_000_000
+  - originalamount: 10_000
+    originaldecimals: 9
+    newdecimals: 6
+    expected: 10
+  - originalamount: 1000
+    originaldecimals: 9
+    newdecimals: 6
+    expected: 1
+  - originalamount: 100
+    originaldecimals: 9
+    newdecimals: 6
+    expectedthrow: "err original amount too small to convert"
