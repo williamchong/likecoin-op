@@ -79,23 +79,47 @@
             />
           </template>
         </StepSection>
-        <StepSection
-          v-slot="{ isCurrent, isPast }"
-          :step="3"
-          :current-step="currentStep.step"
-        >
-          <h2
-            :class="[
-              'text-base',
-              {
-                ['font-semibold']: isCurrent() || isPast(),
-              },
-              'leading-[30px]',
-              'text-likecoin-darkgrey',
-            ]"
-          >
-            {{ $t('section.confirm-by-signing.title') }}
-          </h2>
+        <StepSection :step="3" :current-step="currentStep.step">
+          <template #future>
+            <h2
+              :class="['text-base', 'leading-[30px]', 'text-likecoin-darkgrey']"
+            >
+              {{ $t('section.confirm-by-signing.title') }}
+            </h2>
+          </template>
+          <template #current>
+            <SectionEvmSign
+              :signing-message="
+                currentStep.step === 3 ? currentStep.ethSigningMessage : ''
+              "
+              @signed="handleEvmSigned"
+            >
+              <template #title>
+                <h2
+                  :class="[
+                    'text-base',
+                    'font-semibold',
+                    'leading-[30px]',
+                    'text-likecoin-darkgrey',
+                  ]"
+                >
+                  {{ $t('section.confirm-by-signing.title') }}
+                </h2>
+              </template>
+            </SectionEvmSign>
+          </template>
+          <template #past>
+            <h2
+              :class="[
+                'text-base',
+                'leading-[30px]',
+                'font-semibold',
+                'text-likecoin-darkgrey',
+              ]"
+            >
+              {{ $t('section.confirm-by-signing.title') }}
+            </h2>
+          </template>
         </StepSection>
         <StepSection
           v-slot="{ isCurrent, isPast }"
@@ -126,19 +150,27 @@ import { LikeCoinWalletConnectorConnectionResult } from '@likecoin/wallet-connec
 import { Decimal } from 'decimal.js';
 import Vue from 'vue';
 
+import {
+  CreateEthSigningMessage,
+  makeCreateEthSigningMessageAPI,
+} from '~/apis/createEthSigningMessage';
 import { GetUserProfile, makeGetUserProfileAPI } from '~/apis/getUserProfile';
 import { ChainCoin } from '~/models/cosmosNetworkConfig';
 import {
   EitherEthConnected,
+  EthConnected,
+  ethSignConfirming,
   evmConnected,
   gasEstimated,
   initCosmosConnected,
   introductionConfirmed,
+  isEthConnected,
   likerIdResolved,
   StepState,
   StepStateStep2CosmosConnected,
   StepStateStep2GasEstimated,
   StepStateStep2LikerIdResolved,
+  StepStateStep3AwaitSignature,
 } from '~/pageModels';
 
 interface Data {
@@ -200,6 +232,9 @@ export default Vue.extend({
       }
       return makeGetUserProfileAPI(this.cosmosAddress)(this.$apiClient);
     },
+    createEthSigningMessage(): CreateEthSigningMessage {
+      return makeCreateEthSigningMessageAPI(this.$apiClient);
+    },
   },
 
   methods: {
@@ -235,12 +270,41 @@ export default Vue.extend({
           this._estimateBalance
         );
       }
+
+      if (
+        this.currentStep.step === 2 &&
+        this.currentStep.state === 'GasEstimated' &&
+        isEthConnected(this.currentStep)
+      ) {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          this._resolveEvmSigningMessage
+        );
+      }
     },
 
-    handleLikeCoinEVMWalletConnected(ethAddress: string) {
+    async handleLikeCoinEVMWalletConnected(ethAddress: string) {
       if (this.currentStep.step === 2) {
         this.currentStep = evmConnected(this.currentStep, ethAddress);
       }
+
+      if (
+        this.currentStep.step === 2 &&
+        this.currentStep.state === 'GasEstimated' &&
+        isEthConnected(this.currentStep)
+      ) {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          this._resolveEvmSigningMessage
+        );
+      }
+    },
+
+    handleEvmSigned(signature: string) {
+      if (this.currentStep.step !== 3) {
+        return;
+      }
+      alert(`TODO create migration ${signature}`);
     },
 
     async _asyncStateTransition<S1 extends StepState, S2 extends StepState>(
@@ -311,6 +375,15 @@ export default Vue.extend({
       };
 
       return gasEstimated(s, client, balance, gasEstimation, estimatedBalance);
+    },
+
+    async _resolveEvmSigningMessage(
+      prev: EthConnected<StepStateStep2GasEstimated>
+    ): Promise<StepStateStep3AwaitSignature> {
+      const m = await this.createEthSigningMessage({
+        amount: prev.estimatedBalance,
+      });
+      return ethSignConfirming(prev, m.signing_message);
     },
 
     async _estimateGas(

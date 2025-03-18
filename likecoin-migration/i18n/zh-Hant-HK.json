@@ -4,6 +4,8 @@
   },
   "section": {
     "confirm-by-signing": {
+      "message": "Please review the sign message from your ETH wallet",
+      "retry": "Retry",
       "title": "Confirm by signing"
     },
     "connect-wallet": {

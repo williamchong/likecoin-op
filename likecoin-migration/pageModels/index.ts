@@ -78,12 +78,28 @@ export interface StepStateStep2GasEstimated {
   estimatedBalance: ChainCoin;
 }
 
+export interface StepStateStep3AwaitSignature {
+  step: 3;
+  state: 'AwaitSignature';
+  cosmosAddress: string;
+  connection: LikeCoinWalletConnectorConnectionResult;
+  avatar: string | null;
+  likerId: string | null;
+  signingStargateClient: SigningStargateClient;
+  ethAddress: string;
+  ethSigningMessage: string;
+  gasEstimation: number;
+  currentBalance: ChainCoin;
+  estimatedBalance: ChainCoin;
+}
+
 export type StepState =
   | StepStateStep1
   | EitherEthConnected<StepStateStep2Init>
   | EitherEthConnected<StepStateStep2CosmosConnected>
   | EitherEthConnected<StepStateStep2LikerIdResolved>
-  | EitherEthConnected<StepStateStep2GasEstimated>;
+  | EitherEthConnected<StepStateStep2GasEstimated>
+  | StepStateStep3AwaitSignature;
 
 export function introductionConfirmed(
   _: StepStateStep1
@@ -164,4 +180,24 @@ export function gasEstimated(
     gasEstimation,
     estimatedBalance,
   }));
+}
+
+export function ethSignConfirming(
+  prev: EthConnected<StepStateStep2GasEstimated>,
+  ethSigningMessage: string
+): StepStateStep3AwaitSignature {
+  return {
+    step: 3,
+    state: 'AwaitSignature',
+    cosmosAddress: prev.cosmosAddress,
+    connection: prev.connection,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    signingStargateClient: prev.signingStargateClient,
+    ethAddress: prev.ethAddress,
+    ethSigningMessage,
+    currentBalance: prev.currentBalance,
+    gasEstimation: prev.gasEstimation,
+    estimatedBalance: prev.estimatedBalance,
+  };
 }
