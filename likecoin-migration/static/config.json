@@ -1,5 +1,7 @@
 {
   "isTestnet": true,
   "apiBaseURL": "http://localhost:8091",
-  "cosmosDepositAddress": "like155s3xuruk2vnynda9gq6x9e7uzvut74654mc4d"
+  "cosmosDepositAddress": "like155s3xuruk2vnynda9gq6x9e7uzvut74654mc4d",
+  "cosmosExplorerBaseURL": "https://node.testnet.like.co/",
+  "evmExplorerBaseURL": "https://sepolia-optimism.etherscan.io/"
 }
