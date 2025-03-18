@@ -80,6 +80,7 @@ abigen: SHELL=/bin/bash
 abigen:
 	mkdir -p pkg/likenft/evm/like_protocol
 	mkdir -p pkg/likenft/evm/book_nft
+	mkdir -p pkg/likecoin/evm/likecoin
 	go run github.com/ethereum/go-ethereum/cmd/abigen@latest \
 		--abi=<(cat ../abi/LikeProtocol.json | jq '.["abi"]') \
 		--pkg=like_protocol \
@@ -88,6 +89,10 @@ abigen:
 		--abi=<(cat ../abi/BookNFT.json | jq '.["abi"]') \
 		--pkg=book_nft \
 		--out=pkg/likenft/evm/book_nft/book_nft.go
+	go run github.com/ethereum/go-ethereum/cmd/abigen@latest \
+		--abi=<(cat ../abi/EkilCoin.json | jq '.["abi"]') \
+		--pkg=likecoin \
+		--out=pkg/likecoin/evm/likecoin/likecoin.go
 
 .PHONY: docker-image
 docker-image:
