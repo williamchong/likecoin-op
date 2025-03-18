@@ -1,4 +1,5 @@
 {
   "isTestnet": true,
-  "apiBaseURL": "http://localhost:8091"
+  "apiBaseURL": "http://localhost:8091",
+  "cosmosDepositAddress": "like155s3xuruk2vnynda9gq6x9e7uzvut74654mc4d"
 }
