@@ -1,0 +1,25 @@
+<template>
+  <div
+    :class="[
+      'relative',
+      'h-80',
+      'bg-like-green',
+      'bg-[url(~/assets/images/hero.png)]',
+      'bg-center',
+      'bg-no-repeat',
+    ]"
+  >
+    <div
+      :class="[
+        'absolute',
+        'flex',
+        'w-full',
+        'h-full',
+        'items-center',
+        'justify-center',
+      ]"
+    >
+      <slot />
+    </div>
+  </div>
+</template>
