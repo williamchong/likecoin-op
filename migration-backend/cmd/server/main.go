@@ -20,6 +20,7 @@ import (
 
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
+	"github.com/likecoin/like-migration-backend/pkg/handler/likecoin"
 	"github.com/likecoin/like-migration-backend/pkg/handler/likenft"
 	"github.com/likecoin/like-migration-backend/pkg/handler/user"
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
@@ -44,6 +45,7 @@ func main() {
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"HEAD", "GET", "POST", "PUT"},
 		AllowCredentials: true,
 	})
 
@@ -103,6 +105,12 @@ func main() {
 		InitialBatchMintNFTOwner: envCfg.InitialBatchMintNFTsOwner,
 	}
 	mainMux.Handle("/likenft/", http.StripPrefix("/likenft", likeNFTRouter.Router()))
+	likeCoinRouter := likecoin.LikeCoinRouter{
+		Db:                           db,
+		EthWalletPrivateKey:          envCfg.EthWalletPrivateKey,
+		LikecoinBurningCosmosAddress: envCfg.LikecoinBurningCosmosAddress,
+	}
+	mainMux.Handle("/likecoin/", http.StripPrefix("/likecoin", likeCoinRouter.Router()))
 
 	userRouter := user.UserRouter{
 		Db:          db,
