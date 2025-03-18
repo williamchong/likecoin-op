@@ -3,6 +3,7 @@ module github.com/likecoin/like-migration-backend
 go 1.22.10
 
 require (
+	cosmossdk.io/math v1.4.0
 	cosmossdk.io/x/nft v0.1.1
 	github.com/cosmos/cosmos-sdk v0.50.11
 	github.com/ethereum/go-ethereum v1.14.12
@@ -14,6 +15,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.10.9
 	github.com/rs/cors v1.11.1
+	github.com/shopspring/decimal v1.4.0
 	github.com/smartystreets/goconvey v1.8.1
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
@@ -28,7 +30,6 @@ require (
 	cosmossdk.io/depinject v1.1.0 // indirect
 	cosmossdk.io/errors v1.0.1 // indirect
 	cosmossdk.io/log v1.4.1 // indirect
-	cosmossdk.io/math v1.4.0 // indirect
 	cosmossdk.io/store v1.1.1 // indirect
 	cosmossdk.io/x/tx v0.13.7 // indirect
 	github.com/DataDog/zstd v1.5.5 // indirect
