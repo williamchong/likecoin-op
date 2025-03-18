@@ -3,7 +3,7 @@ FROM --platform=$BUILDPLATFORM node:23.7-slim as builder
 WORKDIR /usr/src/app
 COPY . ./
 RUN npm install
-RUN npm run build
+RUN npm run generate
 
 
 FROM nginx:alpine

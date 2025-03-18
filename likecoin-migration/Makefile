@@ -13,7 +13,7 @@ dev:
 
 .PHONY: build
 build:
-	npm run build
+	npm run generate
 
 .PHONY: lint
 lint:
@@ -23,6 +23,7 @@ lint:
 ci:
 	npm run check-format
 	npm run lint
+	npm run check-translations
 
 .PHONY: docker-image
 docker-image:
