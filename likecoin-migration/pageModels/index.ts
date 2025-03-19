@@ -1,6 +1,13 @@
 import { SigningStargateClient } from '@cosmjs/stargate';
 import { LikeCoinWalletConnectorConnectionResult } from '@likecoin/wallet-connector';
 
+import {
+  Completed,
+  Failed,
+  LikeCoinMigration,
+  Pending,
+  Polling,
+} from '~/apis/models/likeCoinMigration';
 import { ChainCoin } from '~/models/cosmosNetworkConfig';
 
 export interface StepStateStep1 {
@@ -93,13 +100,99 @@ export interface StepStateStep3AwaitSignature {
   estimatedBalance: ChainCoin;
 }
 
+export interface StepStateStep4Pending {
+  step: 4;
+  state: 'Pending';
+  cosmosAddress: string;
+  connection: LikeCoinWalletConnectorConnectionResult;
+  avatar: string | null;
+  likerId: string | null;
+  signingStargateClient: SigningStargateClient;
+  ethAddress: string;
+  evmSignature: string;
+  gasEstimation: number;
+  currentBalance: ChainCoin;
+  estimatedBalance: ChainCoin;
+  migration: Pending<LikeCoinMigration>;
+}
+
+export interface StepStateStep4Polling {
+  step: 4;
+  state: 'Polling';
+  cosmosAddress: string;
+  connection: LikeCoinWalletConnectorConnectionResult;
+  avatar: string | null;
+  likerId: string | null;
+  signingStargateClient: SigningStargateClient;
+  ethAddress: string;
+  evmSignature: string;
+  gasEstimation: number;
+  currentBalance: ChainCoin;
+  estimatedBalance: ChainCoin;
+  migration: Polling<LikeCoinMigration>;
+}
+
+export interface StepStateStep4PendingCosmosSignCancelled {
+  step: 4;
+  state: 'PendingCosmosSignCancelled';
+  cosmosAddress: string;
+  connection: LikeCoinWalletConnectorConnectionResult;
+  avatar: string | null;
+  likerId: string | null;
+  signingStargateClient: SigningStargateClient;
+  ethAddress: string;
+  evmSignature: string;
+  gasEstimation: number;
+  currentBalance: ChainCoin;
+  estimatedBalance: ChainCoin;
+  migration: Pending<LikeCoinMigration>;
+  cancelReason: string;
+}
+
+export interface StepStateStep4Failed {
+  step: 4;
+  state: 'Failed';
+  cosmosAddress: string;
+  connection: LikeCoinWalletConnectorConnectionResult;
+  avatar: string | null;
+  likerId: string | null;
+  signingStargateClient: SigningStargateClient;
+  ethAddress: string;
+  evmSignature: string;
+  gasEstimation: number;
+  currentBalance: ChainCoin;
+  estimatedBalance: ChainCoin;
+  migration: Failed<LikeCoinMigration>;
+  failedReason: string;
+}
+
+export interface StepStateStepEnd {
+  step: 99999;
+  cosmosAddress: string;
+  connection: LikeCoinWalletConnectorConnectionResult;
+  avatar: string | null;
+  likerId: string | null;
+  signingStargateClient: SigningStargateClient;
+  ethAddress: string;
+  evmSignature: string;
+  gasEstimation: number;
+  currentBalance: ChainCoin;
+  estimatedBalance: ChainCoin;
+  migration: Completed<LikeCoinMigration>;
+}
+
 export type StepState =
   | StepStateStep1
   | EitherEthConnected<StepStateStep2Init>
   | EitherEthConnected<StepStateStep2CosmosConnected>
   | EitherEthConnected<StepStateStep2LikerIdResolved>
   | EitherEthConnected<StepStateStep2GasEstimated>
-  | StepStateStep3AwaitSignature;
+  | StepStateStep3AwaitSignature
+  | StepStateStep4Pending
+  | StepStateStep4Polling
+  | StepStateStep4PendingCosmosSignCancelled
+  | StepStateStep4Failed
+  | StepStateStepEnd;
 
 export function introductionConfirmed(
   _: StepStateStep1
@@ -199,5 +292,204 @@ export function ethSignConfirming(
     currentBalance: prev.currentBalance,
     gasEstimation: prev.gasEstimation,
     estimatedBalance: prev.estimatedBalance,
+  };
+}
+
+export function pendingMigrationResolved(
+  prev:
+    | EitherEthConnected<StepStateStep2GasEstimated>
+    | StepStateStep3AwaitSignature
+    | StepStateStep4Pending
+    | StepStateStep4PendingCosmosSignCancelled
+    | StepStateStep4Polling,
+  migration: Pending<LikeCoinMigration>
+): StepStateStep4Pending {
+  return {
+    step: 4,
+    state: 'Pending',
+    cosmosAddress: prev.cosmosAddress,
+    connection: prev.connection,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    signingStargateClient: prev.signingStargateClient,
+    ethAddress: migration.user_eth_address,
+    evmSignature: migration.evm_signature,
+    gasEstimation: prev.gasEstimation,
+    currentBalance: prev.currentBalance,
+    estimatedBalance: prev.estimatedBalance,
+    migration,
+  };
+}
+
+export function pollingMigrationResolved(
+  prev:
+    | EitherEthConnected<StepStateStep2GasEstimated>
+    | StepStateStep3AwaitSignature
+    | StepStateStep4Pending
+    | StepStateStep4Polling,
+  migration: Polling<LikeCoinMigration>
+): StepStateStep4Polling {
+  return {
+    step: 4,
+    state: 'Polling',
+    cosmosAddress: prev.cosmosAddress,
+    connection: prev.connection,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    signingStargateClient: prev.signingStargateClient,
+    ethAddress: migration.user_eth_address,
+    evmSignature: migration.evm_signature,
+    gasEstimation: prev.gasEstimation,
+    currentBalance: prev.currentBalance,
+    estimatedBalance: prev.estimatedBalance,
+    migration,
+  };
+}
+
+export function completedMigrationResolved(
+  prev:
+    | EitherEthConnected<StepStateStep2GasEstimated>
+    | StepStateStep3AwaitSignature
+    | StepStateStep4Pending
+    | StepStateStep4Polling,
+  migration: Completed<LikeCoinMigration>
+): StepStateStepEnd {
+  return {
+    step: 99999,
+    cosmosAddress: prev.cosmosAddress,
+    connection: prev.connection,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    signingStargateClient: prev.signingStargateClient,
+    ethAddress: migration.user_eth_address,
+    evmSignature: migration.evm_signature,
+    gasEstimation: prev.gasEstimation,
+    currentBalance: prev.currentBalance,
+    estimatedBalance: prev.estimatedBalance,
+    migration,
+  };
+}
+
+export function failedMigrationResolved(
+  prev:
+    | EitherEthConnected<StepStateStep2GasEstimated>
+    | StepStateStep3AwaitSignature
+    | StepStateStep4Pending
+    | StepStateStep4Polling,
+  migration: Failed<LikeCoinMigration>
+): StepStateStep4Failed {
+  return {
+    step: 4,
+    state: 'Failed',
+    cosmosAddress: prev.cosmosAddress,
+    connection: prev.connection,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    signingStargateClient: prev.signingStargateClient,
+    ethAddress: migration.user_eth_address,
+    evmSignature: migration.evm_signature,
+    gasEstimation: prev.gasEstimation,
+    currentBalance: prev.currentBalance,
+    estimatedBalance: prev.estimatedBalance,
+    migration,
+    failedReason: migration.failed_reason,
+  };
+}
+
+export function migrationCreated(
+  prev: StepStateStep3AwaitSignature,
+  migration: Pending<LikeCoinMigration>
+): StepStateStep4Pending {
+  return {
+    step: 4,
+    state: 'Pending',
+    cosmosAddress: prev.cosmosAddress,
+    connection: prev.connection,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    signingStargateClient: prev.signingStargateClient,
+    ethAddress: prev.ethAddress,
+    evmSignature: migration.evm_signature,
+    gasEstimation: prev.gasEstimation,
+    currentBalance: prev.currentBalance,
+    estimatedBalance: prev.estimatedBalance,
+    migration,
+  };
+}
+
+export function migrationCancelledByCosmosNotSigned(
+  prev: StepStateStep4Pending,
+  cancelReason: string
+): StepStateStep4PendingCosmosSignCancelled {
+  return {
+    step: 4,
+    state: 'PendingCosmosSignCancelled',
+    cosmosAddress: prev.cosmosAddress,
+    connection: prev.connection,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    signingStargateClient: prev.signingStargateClient,
+    ethAddress: prev.ethAddress,
+    evmSignature: prev.migration.evm_signature,
+    gasEstimation: prev.gasEstimation,
+    currentBalance: prev.currentBalance,
+    estimatedBalance: prev.estimatedBalance,
+    migration: prev.migration,
+    cancelReason,
+  };
+}
+
+export function migrationRetryCosmosSign(
+  prev: StepStateStep4PendingCosmosSignCancelled
+): StepStateStep4Pending {
+  return {
+    step: 4,
+    state: 'Pending',
+    cosmosAddress: prev.cosmosAddress,
+    connection: prev.connection,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    signingStargateClient: prev.signingStargateClient,
+    ethAddress: prev.ethAddress,
+    evmSignature: prev.migration.evm_signature,
+    gasEstimation: prev.gasEstimation,
+    currentBalance: prev.currentBalance,
+    estimatedBalance: prev.estimatedBalance,
+    migration: prev.migration,
+  };
+}
+
+export function migrationRefreshed(
+  prev: StepStateStep4Polling,
+  migration: Polling<LikeCoinMigration>
+): StepStateStep4Polling {
+  return {
+    step: 4,
+    state: 'Polling',
+    cosmosAddress: prev.cosmosAddress,
+    connection: prev.connection,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    signingStargateClient: prev.signingStargateClient,
+    ethAddress: prev.ethAddress,
+    evmSignature: migration.evm_signature,
+    gasEstimation: prev.gasEstimation,
+    currentBalance: prev.currentBalance,
+    estimatedBalance: prev.estimatedBalance,
+    migration,
+  };
+}
+
+export function restart(
+  prev: StepStateStepEnd
+): EthNotConnected<StepStateStep2LikerIdResolved> {
+  return {
+    step: 2,
+    state: 'LikerIdResolved',
+    connection: prev.connection,
+    cosmosAddress: prev.cosmosAddress,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    ethAddress: null,
   };
 }
