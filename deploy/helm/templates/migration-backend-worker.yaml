@@ -24,5 +24,16 @@ spec:
         envFrom:
           - secretRef:
               name: {{ .Values.migrationBackend.name }}
+        env:
+          - name: COSMOS_LIKECOIN_NETWORK_CONFIG_PATH
+            value: "/app/cosmos-likecoin-network.json"
+        volumeMounts:
+          - name: cosmos-likecoin-network-config
+            mountPath: /app/cosmos-likecoin-network.json
+            subPath: cosmos-likecoin-network.json
         resources:
           {{- toYaml .Values.migrationBackend.worker.resources | nindent 12 }}
+      volumes:
+        - name: cosmos-likecoin-network-config
+          configMap:
+            name: {{ .Values.cosmosLikeCoinNetworkConfig.name }}

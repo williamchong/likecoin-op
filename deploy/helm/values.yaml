@@ -1,3 +1,6 @@
+cosmosLikeCoinNetworkConfig:
+  name: likecoin-network
+
 likecoinMigration:
   name: likecoin-migration
 
