@@ -6,6 +6,7 @@ export const ConfigSchema = z.object({
   cosmosDepositAddress: z.string(),
   cosmosExplorerBaseURL: z.string(),
   evmExplorerBaseURL: z.string(),
+  cosmosLikeCoinNetworkConfigPath: z.string(),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
