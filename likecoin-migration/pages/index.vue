@@ -202,7 +202,11 @@
 </template>
 
 <script lang="ts">
-import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate';
+import {
+  DeliverTxResponse,
+  parseCoins,
+  SigningStargateClient,
+} from '@cosmjs/stargate';
 import { LikeCoinWalletConnectorConnectionResult } from '@likecoin/wallet-connector';
 import { isAxiosError } from 'axios';
 import { Decimal } from 'decimal.js';
@@ -236,7 +240,12 @@ import {
   makeUpdateLikeCoinMigrationCosmosTxHash,
   UpdateLikeCoinMigrationCosmosTxHash,
 } from '~/apis/updateLikeCoinMigrationCosmosTxHash';
-import { ChainCoin } from '~/models/cosmosNetworkConfig';
+import {
+  ChainCoin,
+  convertViewCoinToChainCoin,
+  isChainCoin,
+  isViewCoin,
+} from '~/models/cosmosNetworkConfig';
 import {
   completedMigrationResolved,
   EitherEthConnected,
@@ -307,6 +316,21 @@ export default Vue.extend({
     currentBalance(): ChainCoin | null {
       if ('currentBalance' in this.currentStep) {
         return this.currentStep.currentBalance;
+      }
+      return null;
+    },
+    currentBalanceOverride(): ChainCoin | null {
+      if (
+        this.$route.query.currentBalanceOverride != null &&
+        typeof this.$route.query.currentBalanceOverride === 'string'
+      ) {
+        const coin = parseCoins(this.$route.query.currentBalanceOverride)[0];
+        if (isChainCoin(coin)) {
+          return coin;
+        }
+        if (isViewCoin(coin)) {
+          return convertViewCoinToChainCoin(coin, this.$cosmosNetworkConfig);
+        }
       }
       return null;
     },
@@ -582,10 +606,13 @@ export default Vue.extend({
         offlineSigner
       );
 
-      const balance = (await client.getBalance(
-        s.cosmosAddress,
-        this.$cosmosNetworkConfig.coinLookup[0].chainDenom
-      )) as unknown as ChainCoin;
+      const balance =
+        this.currentBalanceOverride != null
+          ? this.currentBalanceOverride
+          : ((await client.getBalance(
+              s.cosmosAddress,
+              this.$cosmosNetworkConfig.coinLookup[0].chainDenom
+            )) as unknown as ChainCoin);
 
       const cosmosMemoData = await this.createCosmosMemoData({
         ethAddress: isEthConnected(s) ? s.ethAddress : `0x${'0'.repeat(40)}`,
@@ -611,7 +638,7 @@ export default Vue.extend({
         gasEstimation *
           // Assume worst case user select high without insufficient fund
           // in the signing ui
-          tierMultiplier.high
+          tierMultiplier.average
       );
 
       const estimatedBalance: ChainCoin = {
