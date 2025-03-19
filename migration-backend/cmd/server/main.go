@@ -10,7 +10,6 @@ import (
 
 	"database/sql"
 
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/go-redis/redis"
 	"github.com/hibiken/asynq"
 	"github.com/joho/godotenv"
@@ -72,29 +71,11 @@ func main() {
 		TLSConfig:    opt.TLSConfig,
 	})
 
-	client, err := ethclient.Dial(envCfg.EthNetworkPublicRPCURL)
-
-	if err != nil {
-		panic(err)
-	}
-
 	cosmosAPI := api.NewCosmosAPI(envCfg.CosmosNodeUrl)
 	likenftCosmosClient := cosmos.NewLikeNFTCosmosClient(envCfg.CosmosNodeUrl)
 	likecoinAPI := likecoin_api.NewLikecoinAPI(envCfg.LikecoinAPIUrlBase)
 
 	mainMux.Handle("/healthz", &handler.HealthzHandler{})
-	mainMux.Handle("/init_likecoin_migration_from_cosmos", &handler.InitLikeCoinMigrationFromCosmosHandler{
-		Db:                     db,
-		EthClient:              client,
-		CosmosAPI:              cosmosAPI,
-		EthWalletPrivateKey:    envCfg.EthWalletPrivateKey,
-		EthNetworkPublicRPCURL: envCfg.EthNetworkPublicRPCURL,
-		EthTokenAddress:        envCfg.EthTokenAddress,
-	})
-	mainMux.Handle("/migration_record/", &handler.GetLikeCoinMigrationRecordHandler{
-		Db:        db,
-		EthClient: client,
-	})
 	likeNFTRouter := likenft.LikeNFTRouter{
 		Db:                  db,
 		AsynqClient:         asynqClient,
