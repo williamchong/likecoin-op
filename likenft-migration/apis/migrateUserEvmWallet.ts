@@ -7,7 +7,7 @@ export const RequestSchema = z.object({
   cosmos_signature: z.string(),
   cosmos_public_key: z.string(),
   cosmos_signature_content: z.string(),
-  signMethod: z.enum(['']),
+  signMethod: z.enum(['memo', 'ADR-036']),
 });
 
 export const ResponseSchema = z.object({

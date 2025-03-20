@@ -238,9 +238,8 @@
 </template>
 
 <script lang="ts">
-import { encodeSecp256k1Signature, makeSignDoc } from '@cosmjs/amino';
+import { OfflineAminoSigner } from '@cosmjs/amino';
 import { sortedJsonStringify } from '@cosmjs/amino/build/signdoc';
-import { SigningStargateClient } from '@cosmjs/stargate';
 import { isAxiosError } from 'axios';
 import { format as formatDate } from 'date-fns/format';
 import numeral from 'numeral';
@@ -260,6 +259,7 @@ import {
   LikeNFTAssetMigration,
 } from '~/apis/models/likenftAssetMigration';
 import { LikeNFTAssetSnapshot } from '~/apis/models/likenftAssetSnapshot';
+import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network';
 import {
   initCosmosConnected,
   initEvmConnected,
@@ -697,14 +697,13 @@ export default Vue.extend({
         return;
       }
       const {
-        offlineSigner,
         accounts: [account],
       } = connection;
-      const client = await SigningStargateClient.connectWithSigner(
-        this.$likeCoinWalletConnector.options.rpcURL,
-        // @ts-ignore
-        offlineSigner
-      );
+      const offlineSigner: OfflineAminoSigner = connection.offlineSigner as OfflineAminoSigner;
+      if (!offlineSigner.signAmino) {
+        alert('signAmino not supported');
+        return;
+      }
 
       const memo = JSON.stringify(
         makeMigrateUserEvmWalletMemoData({
@@ -715,47 +714,39 @@ export default Vue.extend({
           ts: new Date().getTime(),
         })
       );
-
-      const chainId = await client.getChainId();
-
-      const signatureContent = makeSignDoc(
-        [],
-        { amount: [{ amount: '0', denom: 'nanolike' }], gas: '0' },
+      const {
         chainId,
-        memo,
-        0,
-        0
-      );
+        coinMinimalDenom,
+      } = LIKECOIN_WALLET_CONNECTOR_CONFIG(this.$appConfig.isTestnet)
 
-      const txRaw = await client.sign(
+      const signingPayload = {
+        chain_id: chainId,
+        memo,
+        msgs: [],
+        fee: {
+          gas: '0',
+          amount: [
+            {
+              denom: coinMinimalDenom,
+              amount: '0',
+            },
+          ],
+        },
+        sequence: '0',
+        account_number: '0',
+      };
+
+      const { signed, signature } = await offlineSigner.signAmino(
         account.address,
-        [],
-        { amount: [{ amount: '0', denom: 'nanolike' }], gas: '0' },
-        memo,
-        {
-          accountNumber: 0,
-          chainId,
-          sequence: 0,
-        }
+        signingPayload
       );
-
-      const signature = encodeSecp256k1Signature(
-        account.pubkey,
-        txRaw.signatures[0]
-      );
-
-      console.log({
-        txRaw,
-        signatureContent,
-        signature,
-      });
 
       const resp = await this.migrateUserEvmWallet({
         cosmos_address: cosmosAddress,
         cosmos_public_key: signature.pub_key.value,
         cosmos_signature: signature.signature,
-        cosmos_signature_content: sortedJsonStringify(signatureContent),
-        signMethod: '',
+        cosmos_signature_content: sortedJsonStringify(signed),
+        signMethod: 'memo',
       });
 
       console.log({ resp });
