@@ -1,6 +1,7 @@
 {
   "isTestnet": true,
   "apiBaseURL": "http://localhost:8091",
+  "likeCoinAPIBaseURL": "https://api.rinkeby.like.co",
   "likerlandUrlBase": "https://rinkeby.liker.land",
   "crispWebsiteId": "4e80ff4a-e151-4393-a09b-14e6342ad11d"
 }

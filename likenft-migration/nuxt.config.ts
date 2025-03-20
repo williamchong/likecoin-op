@@ -49,6 +49,7 @@ export default {
     { src: '~/plugins/textEncoder' },
     '~/plugins/config.ts',
     '~/plugins/apiClient.ts',
+    '~/plugins/likeCoinApiClient.ts',
     '~/plugins/likeCoinWalletConnector.ts',
     '~/plugins/likeCoinEVMWalletConnector.ts',
     '~/plugins/crisp.ts',
