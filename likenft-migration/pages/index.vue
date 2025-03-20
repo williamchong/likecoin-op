@@ -238,6 +238,9 @@
 </template>
 
 <script lang="ts">
+import { encodeSecp256k1Signature, makeSignDoc } from '@cosmjs/amino';
+import { sortedJsonStringify } from '@cosmjs/amino/build/signdoc';
+import { SigningStargateClient } from '@cosmjs/stargate';
 import { isAxiosError } from 'axios';
 import { format as formatDate } from 'date-fns/format';
 import numeral from 'numeral';
@@ -245,11 +248,13 @@ import Vue from 'vue';
 
 import { makeCreateMigrationAPI } from '~/apis/createMigration';
 import { makeCreateMigrationPreviewAPI } from '~/apis/createMigrationPreview';
+import { makeGetLikeCoinUserAPI } from '~/apis/getLikeCoinUser';
 import { makeGetMigrationAPI } from '~/apis/getMigration';
 import { makeGetMigrationPreviewAPI } from '~/apis/getMigrationPreview';
 import { getSignMessage } from '~/apis/getSignMessage';
 import { makeGetUserProfileAPI } from '~/apis/getUserProfile';
 import { makeMigrateLikerIDAPI } from '~/apis/migrateLikerID';
+import { makeMigrateUserEvmWallet } from '~/apis/migrateUserEvmWallet';
 import {
   isMigrationCompleted,
   LikeNFTAssetMigration,
@@ -276,6 +281,7 @@ import {
   StepStateStep3MigrationPreview,
   StepStateStep4MigrationResult,
 } from '~/pageModels';
+import { makeMigrateUserEvmWalletMemoData } from '~/utils/cosmos';
 
 import UTooltip from '../nuxtui/components/UTooltip.vue';
 
@@ -311,6 +317,15 @@ export default Vue.extend({
 
     migrateLikerID() {
       return makeMigrateLikerIDAPI(this.$apiClient);
+    },
+
+    migrateUserEvmWallet() {
+      return makeMigrateUserEvmWallet(this.$likeCoinApiClient);
+    },
+
+    getLikeCoinUser() {
+      return (cosmosAddress: string) =>
+        makeGetLikeCoinUserAPI(cosmosAddress)(this.$likeCoinApiClient)();
     },
 
     likerId(): string | null {
@@ -436,20 +451,6 @@ export default Vue.extend({
         this.currentStep,
         (s) => this._checkLikerID(s, cosmosAddress)
       );
-
-      if (this.currentStep.state === 'LikerIdMigrated') {
-        this.currentStep = await this._asyncStateTransition(
-          this.currentStep,
-          (s) => this._checkMigration(s)
-        );
-      }
-
-      if (this.currentStep.step === 3) {
-        this.currentStep = await this._asyncStateTransition(
-          this.currentStep,
-          (s) => this._getOrCreateMigrationPreview(s)
-        );
-      }
     },
 
     async handleLikeCoinEVMWalletConnected(ethAddress: string) {
@@ -462,27 +463,16 @@ export default Vue.extend({
           this.currentStep = initEvmConnected(this.currentStep, ethAddress);
           break;
         }
+      }
+
+      switch (this.currentStep.state) {
         case 'LikerIdResolved': {
           this.currentStep = likerIdEvmConnected(this.currentStep, ethAddress);
-          this.currentStep = await this._asyncStateTransition(
-            this.currentStep,
-            (s) => this._doMigrateLikerID(s, s.cosmosAddress, s.ethAddress)
+          await this._migrateUserEvmWallet(
+            this.currentStep.cosmosAddress,
+            ethAddress
           );
         }
-      }
-
-      if (this.currentStep.state === 'LikerIdMigrated') {
-        this.currentStep = await this._asyncStateTransition(
-          this.currentStep,
-          (s) => this._checkMigration(s)
-        );
-      }
-
-      if (this.currentStep.step === 3) {
-        this.currentStep = await this._asyncStateTransition(
-          this.currentStep,
-          (s) => this._getOrCreateMigrationPreview(s)
-        );
       }
     },
 
@@ -522,23 +512,28 @@ export default Vue.extend({
       currentStep: StepStateStep2CosmosConnected,
       cosmosAddress: string
     ): Promise<StepStateStep2LikerIdResolved | StepStateStep2LikerIdMigrated> {
-      const userProfile = await makeGetUserProfileAPI(cosmosAddress)(
-        this.$apiClient
-      )();
-      const remoteEthAddress = userProfile.user_profile.eth_wallet_address;
-      if (remoteEthAddress != null) {
-        return likerIdMigrated(
-          currentStep,
-          userProfile.user_profile.liker_id,
-          userProfile.user_profile.avatar,
-          remoteEthAddress
-        );
-      } else {
-        return likerIdResolved(
-          currentStep,
-          userProfile.user_profile.avatar,
-          userProfile.user_profile.liker_id
-        );
+      try {
+        const userProfile = await this.getLikeCoinUser(cosmosAddress);
+        const remoteEthAddress = userProfile.evmWallet;
+        if (remoteEthAddress != null) {
+          return likerIdMigrated(
+            currentStep,
+            userProfile.user,
+            userProfile.avatar ?? null,
+            remoteEthAddress
+          );
+        } else {
+          return likerIdResolved(
+            currentStep,
+            userProfile.avatar ?? null,
+            userProfile.user
+          );
+        }
+      } catch (e) {
+        if (isAxiosError(e) && e.status === 404) {
+          return likerIdResolved(currentStep, null, null);
+        }
+        throw e;
       }
     },
 
@@ -559,6 +554,7 @@ export default Vue.extend({
         alert('cannot get wallet connector connection');
         return currentStep;
       }
+
       const {
         accounts: [account],
         offlineSigner,
@@ -692,6 +688,77 @@ export default Vue.extend({
         }
         throw e;
       }
+    },
+
+    async _migrateUserEvmWallet(cosmosAddress: string, ethAddress: string) {
+      const connection = await this.$likeCoinWalletConnector.initIfNecessary();
+      if (connection == null) {
+        alert('cannot get wallet connector connection');
+        return;
+      }
+      const {
+        offlineSigner,
+        accounts: [account],
+      } = connection;
+      const client = await SigningStargateClient.connectWithSigner(
+        this.$likeCoinWalletConnector.options.rpcURL,
+        // @ts-ignore
+        offlineSigner
+      );
+
+      const memo = JSON.stringify(
+        makeMigrateUserEvmWalletMemoData({
+          action: 'migrate',
+          cosmosWallet: cosmosAddress,
+          likeWallet: cosmosAddress,
+          evm_wallet: ethAddress,
+          ts: new Date().getTime(),
+        })
+      );
+
+      const chainId = await client.getChainId();
+
+      const signatureContent = makeSignDoc(
+        [],
+        { amount: [{ amount: '0', denom: 'nanolike' }], gas: '0' },
+        chainId,
+        memo,
+        0,
+        0
+      );
+
+      const txRaw = await client.sign(
+        account.address,
+        [],
+        { amount: [{ amount: '0', denom: 'nanolike' }], gas: '0' },
+        memo,
+        {
+          accountNumber: 0,
+          chainId,
+          sequence: 0,
+        }
+      );
+
+      const signature = encodeSecp256k1Signature(
+        account.pubkey,
+        txRaw.signatures[0]
+      );
+
+      console.log({
+        txRaw,
+        signatureContent,
+        signature,
+      });
+
+      const resp = await this.migrateUserEvmWallet({
+        cosmos_address: cosmosAddress,
+        cosmos_public_key: signature.pub_key.value,
+        cosmos_signature: signature.signature,
+        cosmos_signature_content: sortedJsonStringify(signatureContent),
+        signMethod: '',
+      });
+
+      console.log({ resp });
     },
 
     _formatDate(value: Date) {
