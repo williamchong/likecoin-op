@@ -92,6 +92,7 @@ export default {
     },
     transpile: [
       '@cosmjs',
+      'cosmjs-types',
       '@walletconnect',
       '@web3modal',
       'unstorage',
