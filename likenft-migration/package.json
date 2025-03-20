@@ -15,6 +15,7 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
+    "@cosmjs/amino": "^0.33.1",
     "@cosmjs/stargate": "^0.33.0",
     "@likecoin/evm-wallet-connector": "^0.1.0-alpha.8",
     "@likecoin/wallet-connector": "^0.27.1",
@@ -22,8 +23,8 @@
     "@nuxtjs/i18n": "^7.3.1",
     "axios": "^1.7.9",
     "core-js": "^2.6.12",
-    "date-fns": "^4.1.0",
     "crisp-sdk-web": "^1.0.25",
+    "date-fns": "^4.1.0",
     "ethers": "^6.13.5",
     "numeral": "^2.0.6",
     "nuxt": "^2.15.8",
