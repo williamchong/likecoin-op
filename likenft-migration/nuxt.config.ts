@@ -49,7 +49,7 @@ export default {
     { src: '~/plugins/textEncoder' },
     '~/plugins/config.ts',
     '~/plugins/apiClient.ts',
-    '~/plugins/likeCoinApiClient.ts',
+    '~/plugins/likeCoinAPIClient.ts',
     '~/plugins/likeCoinWalletConnector.ts',
     '~/plugins/likeCoinEVMWalletConnector.ts',
     '~/plugins/crisp.ts',
@@ -93,6 +93,7 @@ export default {
     },
     transpile: [
       '@cosmjs',
+      'cosmjs-types',
       '@walletconnect',
       '@web3modal',
       'unstorage',
