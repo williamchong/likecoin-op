@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"log/slog"
 	"net"
@@ -11,8 +12,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ethereum/go-ethereum/ethclient"
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
+
+	"github.com/likecoin/like-signer-backend/pkg/evm"
 
 	appcontext "github.com/likecoin/like-signer-backend/pkg/context"
 
@@ -41,7 +45,23 @@ func main() {
 		AllowCredentials: true,
 	})
 
-	mainRouter := MakeRouter()
+	ethClient, err := ethclient.Dial(envCfg.EvmNetworkPublicRpcUrl)
+	if err != nil {
+		panic(err)
+	}
+
+	db, err := sql.Open("postgres", envCfg.DbConnectionStr)
+	if err != nil {
+		panic(err)
+	}
+
+	evmClient := evm.NewClient(
+		db,
+		ethClient,
+		envCfg.EvmSignerPrivateKey,
+	)
+
+	mainRouter := MakeRouter(db, evmClient)
 
 	globalMiddlewares := middleware.MakeApplyMiddlewares(
 		c.Handler,
