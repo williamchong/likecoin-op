@@ -55,6 +55,14 @@ check-tidy:
 .PHONY: ci
 ci: check-tidy lint test
 
+.PHONY: create-migration
+create-migration:
+	sql-migrate new $(args)
+
+.PHONY: run-migration
+run-migration:
+	sql-migrate up
+
 .PHONY: docker-image
 docker-image:
 	docker buildx build --platform linux/amd64 . \

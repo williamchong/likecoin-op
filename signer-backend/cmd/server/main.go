@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/lib/pq"
 	"github.com/rs/cors"
 
 	appcontext "github.com/likecoin/like-signer-backend/pkg/context"

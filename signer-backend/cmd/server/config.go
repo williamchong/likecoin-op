@@ -5,9 +5,10 @@ import (
 )
 
 type EnvConfig struct {
-	ListenAddr  string `envconfig:"LISTEN_ADDR" default:"0.0.0.0:8091"`
-	ApiKey      string `envconfig:"API_KEY"`
-	RoutePrefix string `envconfig:"ROUTE_PREFIX" default:""`
+	ListenAddr      string `envconfig:"LISTEN_ADDR" default:"0.0.0.0:8091"`
+	DbConnectionStr string `envconfig:"DB_CONNECTION_STR"`
+	ApiKey          string `envconfig:"API_KEY"`
+	RoutePrefix     string `envconfig:"ROUTE_PREFIX" default:""`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {
