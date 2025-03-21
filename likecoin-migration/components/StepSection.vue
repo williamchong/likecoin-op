@@ -48,6 +48,7 @@ const stepIconMapping: { [key in number]: SupportedIcon | undefined } = {
   2: 'circle-2',
   3: 'circle-3',
   4: 'circle-4',
+  5: 'circle-5',
 };
 
 export default Vue.extend({

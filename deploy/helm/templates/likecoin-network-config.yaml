@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.cosmosLikeCoinNetworkConfig.name }}
+data:
+  cosmos-likecoin-network.json: |-
+{{ .Files.Get .Values.cosmosLikeCoinNetworkConfig.path | indent 4 }}
