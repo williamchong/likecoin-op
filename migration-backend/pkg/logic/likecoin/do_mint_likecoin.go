@@ -101,11 +101,6 @@ func DoMintLikeCoin(
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
-	if err != nil {
-		mylogger.Error("types.ParseCoinNormalized", "err", err)
-		return nil, doMintLikeCoinFailed(db, a, err)
-	}
-
 	message := GetEthSigningMessage(memo.Amount)
 
 	recoveredAddr, err := ethereum.RecoverAddress(memo.Signature, []byte(message))
