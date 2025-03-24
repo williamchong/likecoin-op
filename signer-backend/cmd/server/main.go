@@ -40,6 +40,7 @@ func main() {
 		c.Handler,
 		middleware.MakeRoutePrefixMiddle(envCfg.RoutePrefix),
 		middleware.MakeLoggerMiddleware(logger),
+		middleware.MakeAPIKeyMiddleware(envCfg.ApiKey),
 	)
 
 	server := &http.Server{
