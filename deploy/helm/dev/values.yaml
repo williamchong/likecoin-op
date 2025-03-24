@@ -26,7 +26,7 @@ migrationBackend:
     COSMOS_NODE_URL: https://node.testnet.like.co
     ROUTE_PREFIX: ""
     ETH_NETWORK_PUBLIC_RPC_URL: https://sepolia.optimism.io
-    ETH_CHAIN_ID: "11155420"
+    ETH_SIGNER_BASE_URL: http://signer-backend
     ETH_TOKEN_ADDRESS: "0x0FE55BE56FDDafD0A6Eaf6D28e7F26ACFf1C51f0"
     ETH_LIKENFT_CONTRACT_ADDRESS: "0x22a810ECE3446ACCC307Dc7d941711b8a21DDE2B"
     LIKECOIN_API_URL_BASE: https://api.rinkeby.like.co
@@ -42,3 +42,8 @@ migrationBackend:
     tls:
       secretName: like-migration-api.pandawork.com
       host: like-migration-api.pandawork.com
+
+signerBackend:
+  env:
+    ROUTE_PREFIX: ""
+    ETH_NETWORK_PUBLIC_RPC_URL: https://sepolia.optimism.io
