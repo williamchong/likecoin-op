@@ -8,6 +8,7 @@ import (
 
 	"github.com/likecoin/like-migration-backend/cmd/cli/cmd/likecoin"
 	"github.com/likecoin/like-migration-backend/cmd/cli/cmd/likenft"
+	"github.com/likecoin/like-migration-backend/cmd/cli/cmd/signer"
 	"github.com/likecoin/like-migration-backend/cmd/cli/config"
 )
 
@@ -28,4 +29,5 @@ func Execute(envCfg *config.EnvConfig) {
 func init() {
 	rootCmd.AddCommand(likenft.LikeNFTCmd)
 	rootCmd.AddCommand(likecoin.LikeCoinCmd)
+	rootCmd.AddCommand(signer.SignerCmd)
 }
