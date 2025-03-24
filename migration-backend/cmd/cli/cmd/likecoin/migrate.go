@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -17,6 +19,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/cosmos/model"
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/evm"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likecoin"
+	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
 
 var migrateCmd = &cobra.Command{
@@ -72,14 +75,21 @@ var migrateCmd = &cobra.Command{
 			cosmosLikeCoinNetworkConfig,
 		)
 
+		signer := signer.NewSignerClient(
+			&http.Client{
+				Timeout: 10 * time.Second,
+			},
+			envCfg.EthSignerBaseUrl,
+			envCfg.EthSignerAPIKey,
+		)
+
 		contractAddress := common.HexToAddress(envCfg.EthTokenAddress)
 		likeCoinClient := evm.NewLikeCoin(
 			logger,
 			ethClient,
-			envCfg.EthChainId,
+			signer,
 			contractAddress,
 		)
-		authedLikeCoinClient := likeCoinClient.Auth(envCfg.EthWalletPrivateKey)
 
 		migration, err := likecoin.DoMintLikeCoinByCosmosAddress(
 			ctx,
@@ -87,7 +97,7 @@ var migrateCmd = &cobra.Command{
 			db,
 			ethClient,
 			cosmosAPI,
-			authedLikeCoinClient,
+			likeCoinClient,
 			cosmosLikeCoinClient,
 			cosmosAddress,
 		)

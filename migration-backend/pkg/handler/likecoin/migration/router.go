@@ -5,12 +5,13 @@ import (
 	"net/http"
 
 	"github.com/hibiken/asynq"
+	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
 
 type MigrationRouter struct {
 	Db                           *sql.DB
 	AsynqClient                  *asynq.Client
-	EthWalletPrivateKey          string
+	Signer                       *signer.SignerClient
 	LikecoinBurningCosmosAddress string
 }
 
@@ -24,7 +25,7 @@ func (h *MigrationRouter) Router() *http.ServeMux {
 	})
 	router.Handle("POST /migration", &CreateLikeCoinMigrationHandler{
 		Db:                           h.Db,
-		EthWalletPrivateKey:          h.EthWalletPrivateKey,
+		Signer:                       h.Signer,
 		LikecoinBurningCosmosAddress: h.LikecoinBurningCosmosAddress,
 	})
 	router.Handle("PUT /migration/{cosmosWalletAddress}/cosmos-tx-hash", &UpdateLikeCoinMigrationCosmosHandler{
