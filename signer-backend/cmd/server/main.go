@@ -1,13 +1,19 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/rs/cors"
+
+	appcontext "github.com/likecoin/like-signer-backend/pkg/context"
 
 	"github.com/likecoin/like-signer-backend/pkg/middleware"
 
@@ -43,17 +49,34 @@ func main() {
 		middleware.MakeAPIKeyMiddleware(envCfg.ApiKey),
 	)
 
+	ctx := context.Background()
+	gracefulHandle := appcontext.NewGracefulHandle(logger, 10*time.Second)
+
 	server := &http.Server{
 		Addr:              envCfg.ListenAddr,
 		ReadHeaderTimeout: 3 * time.Second,
 		Handler:           globalMiddlewares(mainRouter),
+		BaseContext: func(l net.Listener) context.Context {
+			return appcontext.WithGracefulHandle(ctx, gracefulHandle)
+		},
 	}
 
 	logger.Info("listening",
 		"addr", envCfg.ListenAddr,
 	)
 
-	err = server.ListenAndServe()
+	go func() {
+		err = server.ListenAndServe()
+		if err != nil {
+			panic(err)
+		}
+	}()
+
+	<-gracefulHandle.Done(func(ctx context.Context) (context.Context, context.CancelFunc) {
+		return signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+	}, ctx)
+	logger.Info("shutting down server")
+	err = server.Shutdown(ctx)
 	if err != nil {
 		panic(err)
 	}
