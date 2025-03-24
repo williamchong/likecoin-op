@@ -13,6 +13,8 @@ var ContextKey = &contextKey{}
 type EnvConfig struct {
 	CosmosNodeUrl                   string   `envconfig:"COSMOS_NODE_URL"`
 	CosmosLikeCoinNetworkConfigPath string   `envconfig:"COSMOS_LIKECOIN_NETWORK_CONFIG_PATH"`
+	EthSignerBaseUrl                string   `envconfig:"ETH_SIGNER_BASE_URL"`
+	EthSignerAPIKey                 string   `envconfig:"ETH_SIGNER_API_KEY"`
 	EthWalletPrivateKey             string   `envconfig:"ETH_WALLET_PRIVATE_KEY"`
 	EthNetworkPublicRPCURL          string   `envconfig:"ETH_NETWORK_PUBLIC_RPC_URL"`
 	EthTokenAddress                 string   `envconfig:"ETH_TOKEN_ADDRESS"`
