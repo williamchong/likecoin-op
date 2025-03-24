@@ -32,7 +32,7 @@ func DoMintLikeCoinByCosmosAddress(
 	db *sql.DB,
 	ethClient *ethclient.Client,
 	cosmosAPI *api.CosmosAPI,
-	evmLikeCoinClient *evm.AuthedLikeCoin,
+	evmLikeCoinClient *evm.LikeCoin,
 	cosmosLikcCoinClient *cosmos.LikeCoin,
 
 	cosmosAddress string,
@@ -81,7 +81,7 @@ func DoMintLikeCoin(
 	db *sql.DB,
 	ethClient *ethclient.Client,
 	cosmosAPI *api.CosmosAPI,
-	evmLikeCoinClient *evm.AuthedLikeCoin,
+	evmLikeCoinClient *evm.LikeCoin,
 	cosmosLikcCoinClient *cosmos.LikeCoin,
 
 	a *model.LikeCoinMigration,
@@ -120,15 +120,14 @@ func DoMintLikeCoin(
 		return nil, doMintLikeCoinFailed(db, a, ErrEthAddressOnCosmosNotMatch)
 	}
 
-	mintingEthAddress, err := ethereum.PrivateKeyStringToAddress(evmLikeCoinClient.PrivateKeyStr)
+	mintingEthAddressStr, err := evmLikeCoinClient.Signer.GetSignerAddress()
 
 	if err != nil {
 		logger.Error("ethereum.PrivateKeyStringToAddress", "err", err)
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
-	mintingEthAddressStr := hexutil.Encode(mintingEthAddress.Bytes())
-	if !strings.EqualFold(mintingEthAddressStr, a.MintingEthAddress) {
+	if !strings.EqualFold(*mintingEthAddressStr, a.MintingEthAddress) {
 		logger.Error("minting eth address not match", "err", ErrMintingEthPrivateKeyNotMatchMintingEthAddress)
 		return nil, doMintLikeCoinFailed(db, a, ErrMintingEthPrivateKeyNotMatchMintingEthAddress)
 	}
@@ -161,7 +160,7 @@ func DoMintLikeCoin(
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
-	newDecimals, err := evmLikeCoinClient.LikeCoin.Decimals()
+	newDecimals, err := evmLikeCoinClient.Decimals()
 
 	if err != nil {
 		logger.Error("evmLikeCoinClient.LikeCoin.Decimals", "err", err)
@@ -195,22 +194,6 @@ func DoMintLikeCoin(
 
 	evmTxHash := hexutil.Encode(tx.Hash().Bytes())
 	a.EvmTxHash = &evmTxHash
-	a.Status = model.LikeCoinMigrationStatusEvmVerifying
-
-	err = appdb.UpdateLikeCoinMigration(db, a)
-
-	if err != nil {
-		logger.Error("appdb.UpdateLikeCoinMigration", "err", err)
-		return nil, doMintLikeCoinFailed(db, a, err)
-	}
-
-	_, err = ethereum.AwaitTx(ctx, mylogger, ethClient, tx)
-
-	if err != nil {
-		logger.Error("ethereum.AwaitTx", "err", err)
-		return nil, err
-	}
-
 	a.Status = model.LikeCoinMigrationStatusCompleted
 	err = appdb.UpdateLikeCoinMigration(db, a)
 

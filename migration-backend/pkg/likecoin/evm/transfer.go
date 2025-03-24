@@ -2,18 +2,17 @@ package evm
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"math/big"
-	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/likecoin/like-migration-backend/pkg/ethereum"
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/evm/likecoin"
+	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
 
-func (l *AuthedLikeCoin) TransferTo(
+func (l *LikeCoin) TransferTo(
 	ctx context.Context,
 	logger *slog.Logger,
 
@@ -24,36 +23,26 @@ func (l *AuthedLikeCoin) TransferTo(
 
 	mylogger := logger.WithGroup("MintNFTs")
 
-	opts, err := l.transactOpts()
+	r, err := signer.MakeCreateEvmTransactionRequestRequestBody(
+		likecoin.LikecoinMetaData, "transfer", to, value,
+	)(l.ContractAddress.Hex())
 	if err != nil {
-		return nil, nil, fmt.Errorf("err l.transactOpts: %v", err)
+		return nil, nil, err
 	}
-	opts.NoSend = true
-
-	instance, err := likecoin.NewLikecoin(l.LikeCoin.ContractAddress, l.LikeCoin.Client)
+	evmTxRequestResp, err := l.Signer.CreateEvmTransactionRequest(r)
 	if err != nil {
-		return nil, nil, fmt.Errorf("err likecoin.NewLikecoin: %v", err)
-	}
-
-	tx, err := instance.Transfer(opts, to, value)
-	if err != nil {
-		mylogger.Error("instance.TransferFrom", "err", err)
-		return nil, nil, fmt.Errorf("err instance.TransferFrom: %v", err)
-	}
-	mylogger = mylogger.With("txHash", tx.Hash().Hex()).With("txNonce", tx.Nonce())
-
-	err = l.LikeCoin.Client.SendTransaction(opts.Context, tx)
-	if err != nil {
-		mylogger.Error("l.Client.SendTransaction", "err", err)
-		if strings.Contains(err.Error(), "nonce too low") {
-			// retry
-			return l.TransferTo(ctx, logger, to, value)
-		}
+		return nil, nil, err
 	}
 
-	txReceipt, err := ethereum.AwaitTx(ctx, mylogger, l.LikeCoin.Client, tx)
+	txReceipt, err := ethereum.AwaitTx(ctx, mylogger, l.Client, l.Signer, *evmTxRequestResp.TransactionId)
+
 	if err != nil {
-		mylogger.Error("ethereum.AwaitTx", "err", err)
+		return nil, nil, err
+	}
+
+	tx, _, err := l.Client.TransactionByHash(ctx, txReceipt.TxHash)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	return tx, txReceipt, err
