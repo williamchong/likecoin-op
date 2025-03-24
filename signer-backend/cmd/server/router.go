@@ -16,6 +16,7 @@ func MakeRouter(
 	mainRouter := http.NewServeMux()
 
 	mainRouter.Handle("GET /healthz", handler.MakeHealthzHandler())
+	mainRouter.Handle("GET /signer-address", handler.NewSignerAddressHandler(evmClient))
 
 	mainRouter.Handle("/evm-transaction-request", evmtransactionrequest.MakeRouter(db, evmClient))
 	mainRouter.Handle("/evm-transaction-request/", evmtransactionrequest.MakeRouter(db, evmClient))
