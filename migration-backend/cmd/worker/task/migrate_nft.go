@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/hibiken/asynq"
 
@@ -16,6 +15,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likenft"
+	"github.com/likecoin/like-migration-backend/pkg/signer"
 	apptask "github.com/likecoin/like-migration-backend/pkg/task"
 )
 
@@ -46,24 +46,25 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 	if err != nil {
 		return err
 	}
-	privateKey, err := crypto.HexToECDSA(envCfg.EthWalletPrivateKey)
-	if err != nil {
-		return err
-	}
+	signer := signer.NewSignerClient(
+		&http.Client{
+			Timeout: 10 * time.Second,
+		},
+		envCfg.EthSignerBaseUrl,
+		envCfg.EthSignerAPIKey,
+	)
 	contractAddress := common.HexToAddress(envCfg.EthLikeNFTContractAddress)
 
 	evmLikeProtocolClient := evm.NewLikeProtocol(
 		logger,
 		ethClient,
-		privateKey,
-		envCfg.EthChainId,
+		signer,
 		contractAddress,
 	)
 	evmLikeNFTClient := evm.NewBookNFT(
 		logger,
 		ethClient,
-		privateKey,
-		envCfg.EthChainId,
+		signer,
 	)
 
 	mylogger.Info("running migrate nft")

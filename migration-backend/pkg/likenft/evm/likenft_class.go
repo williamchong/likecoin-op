@@ -1,39 +1,26 @@
 package evm
 
 import (
-	"crypto/ecdsa"
 	"log/slog"
-	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
 
 type BookNFT struct {
-	Logger     *slog.Logger
-	Client     *ethclient.Client
-	PrivateKey *ecdsa.PrivateKey
-	ChainID    *big.Int
+	Logger *slog.Logger
+	Client *ethclient.Client
+	Signer *signer.SignerClient
 }
 
 func NewBookNFT(
 	logger *slog.Logger,
 	client *ethclient.Client,
-	privateKey *ecdsa.PrivateKey,
-	chainID *big.Int,
+	signer *signer.SignerClient,
 ) BookNFT {
 	return BookNFT{
-		Logger:     logger,
-		Client:     client,
-		PrivateKey: privateKey,
-		ChainID:    chainID,
+		Logger: logger,
+		Client: client,
+		Signer: signer,
 	}
-}
-
-func (l *BookNFT) transactOpts() (*bind.TransactOpts, error) {
-	txOpts, err := bind.NewKeyedTransactorWithChainID(l.PrivateKey, l.ChainID)
-	if err != nil {
-		return nil, err
-	}
-	return txOpts, nil
 }

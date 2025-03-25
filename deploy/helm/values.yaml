@@ -52,6 +52,29 @@ migrationBackend:
 
     resources: {}
 
+signerBackend:
+  name: signer-backend
+
+  container:
+    imageRepository: chankiyu22/like-signer-backend
+    imagePullPolicy: IfNotPresent
+    port: 8091
+
+  service:
+    port: 80
+
+  resources: {}
+
+  worker:
+    name: signer-backend-worker
+
+    resources: {}
+
+  scheduler:
+    name: signer-backend-scheduler
+
+    resources: {}
+
 redis:
   name: redis
   container:

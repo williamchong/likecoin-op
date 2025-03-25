@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/likecoin/like-migration-backend/pkg/ethereum"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	"github.com/likecoin/like-migration-backend/pkg/handler/model"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likecoin"
+	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
 
 type CreateLikeCoinMigrationRequestBody struct {
@@ -26,7 +26,7 @@ type CreateLikeCoinMigrationResponseBody struct {
 
 type CreateLikeCoinMigrationHandler struct {
 	Db                           *sql.DB
-	EthWalletPrivateKey          string
+	Signer                       *signer.SignerClient
 	LikecoinBurningCosmosAddress string
 }
 
@@ -55,7 +55,7 @@ func (p *CreateLikeCoinMigrationHandler) ServeHTTP(w http.ResponseWriter, r *htt
 }
 
 func (p *CreateLikeCoinMigrationHandler) handle(req *CreateLikeCoinMigrationRequestBody) (*model.LikeCoinMigration, error) {
-	mintingEthAddress, err := ethereum.PrivateKeyStringToAddress(p.EthWalletPrivateKey)
+	mintingEthAddress, err := p.Signer.GetSignerAddress()
 
 	if err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func (p *CreateLikeCoinMigrationHandler) handle(req *CreateLikeCoinMigrationRequ
 
 	m, err := likecoin.CreateIfAllEnded(
 		p.Db,
-		mintingEthAddress.Hex(),
+		*mintingEthAddress,
 		req.EthAddress,
 		req.EvmSignature,
 		req.EvmSignatureMessage,

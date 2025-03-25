@@ -6,12 +6,13 @@ import (
 
 	"github.com/hibiken/asynq"
 	"github.com/likecoin/like-migration-backend/pkg/handler/likecoin/migration"
+	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
 
 type LikeCoinRouter struct {
 	Db                           *sql.DB
 	AsynqClient                  *asynq.Client
-	EthWalletPrivateKey          string
+	Signer                       *signer.SignerClient
 	LikecoinBurningCosmosAddress string
 }
 
@@ -21,7 +22,7 @@ func (h *LikeCoinRouter) Router() *http.ServeMux {
 	migrationRouter := migration.MigrationRouter{
 		Db:                           h.Db,
 		AsynqClient:                  h.AsynqClient,
-		EthWalletPrivateKey:          h.EthWalletPrivateKey,
+		Signer:                       h.Signer,
 		LikecoinBurningCosmosAddress: h.LikecoinBurningCosmosAddress,
 	}
 	// FIXME: Find a way to handle CRUD paths

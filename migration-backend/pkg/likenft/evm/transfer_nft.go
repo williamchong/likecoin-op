@@ -2,15 +2,14 @@ package evm
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"math/big"
-	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/likecoin/like-migration-backend/pkg/ethereum"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/book_nft"
+	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
 
 func (l *LikeProtocol) TransferNFT(
@@ -26,35 +25,26 @@ func (l *LikeProtocol) TransferNFT(
 
 	mylogger := logger.WithGroup("TransferNFT")
 
-	opts, err := l.transactOpts()
+	r, err := signer.MakeCreateEvmTransactionRequestRequestBody(
+		book_nft.BookNftMetaData, "transferFrom", from, to, tokenId,
+	)(evmClassId.Hex())
 	if err != nil {
-		return nil, nil, fmt.Errorf("err l.transactOpts: %v", err)
+		return nil, nil, err
 	}
-	opts.NoSend = true
-
-	instance, err := book_nft.NewBookNft(evmClassId, l.Client)
+	evmTxRequestResp, err := l.Signer.CreateEvmTransactionRequest(r)
 	if err != nil {
-		return nil, nil, fmt.Errorf("err book_nft.NewLikenftClass: %v", err)
-	}
-	tx, err := instance.TransferFrom(opts, from, to, tokenId)
-	if err != nil {
-		mylogger.Error("instance.TransferFrom", "err", err)
-		return nil, nil, fmt.Errorf("err instance.TransferFrom: %v", err)
-	}
-	mylogger = mylogger.With("txHash", tx.Hash().Hex()).With("txNonce", tx.Nonce())
-
-	err = l.Client.SendTransaction(opts.Context, tx)
-	if err != nil {
-		mylogger.Error("l.Client.SendTransaction", "err", err)
-		if strings.Contains(err.Error(), "nonce too low") {
-			// retry
-			return l.TransferNFT(ctx, logger, evmClassId, from, to, tokenId)
-		}
+		return nil, nil, err
 	}
 
-	txReceipt, err := ethereum.AwaitTx(ctx, mylogger, l.Client, tx)
+	txReceipt, err := ethereum.AwaitTx(ctx, mylogger, l.Client, l.Signer, *evmTxRequestResp.TransactionId)
+
 	if err != nil {
-		mylogger.Error("ethereum.AwaitTx", "err", err)
+		return nil, nil, err
+	}
+
+	tx, _, err := l.Client.TransactionByHash(ctx, txReceipt.TxHash)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	return tx, txReceipt, err

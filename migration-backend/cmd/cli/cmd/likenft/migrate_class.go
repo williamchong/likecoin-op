@@ -5,10 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/cobra"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likenft"
+	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
 
 var migrateClassCmd = &cobra.Command{
@@ -53,24 +55,27 @@ var migrateClassCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-		privateKey, err := crypto.HexToECDSA(envCfg.EthWalletPrivateKey)
-		if err != nil {
-			panic(err)
-		}
+
+		signer := signer.NewSignerClient(
+			&http.Client{
+				Timeout: 10 * time.Second,
+			},
+			envCfg.EthSignerBaseUrl,
+			envCfg.EthSignerAPIKey,
+		)
+
 		contractAddress := common.HexToAddress(envCfg.EthLikeNFTContractAddress)
 
 		evmLikeNFTClient := evm.NewLikeProtocol(
 			logger,
 			ethClient,
-			privateKey,
-			envCfg.EthChainId,
+			signer,
 			contractAddress,
 		)
 		evmLikeNFTClassClient := evm.NewBookNFT(
 			logger,
 			ethClient,
-			privateKey,
-			envCfg.EthChainId,
+			signer,
 		)
 
 		mc, err := likenft.MigrateClassFromAssetMigration(

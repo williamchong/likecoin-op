@@ -8,8 +8,9 @@ type EnvConfig struct {
 	ListenAddr                   string `envconfig:"LISTEN_ADDR" default:"0.0.0.0:8091"`
 	RoutePrefix                  string `envconfig:"ROUTE_PREFIX" default:""`
 	CosmosNodeUrl                string `envconfig:"COSMOS_NODE_URL"`
-	EthWalletPrivateKey          string `envconfig:"ETH_WALLET_PRIVATE_KEY"`
 	EthNetworkPublicRPCURL       string `envconfig:"ETH_NETWORK_PUBLIC_RPC_URL"`
+	EthSignerBaseUrl             string `envconfig:"ETH_SIGNER_BASE_URL"`
+	EthSignerAPIKey              string `envconfig:"ETH_SIGNER_API_KEY"`
 	EthTokenAddress              string `envconfig:"ETH_TOKEN_ADDRESS"`
 	DbConnectionStr              string `envconfig:"DB_CONNECTION_STR"`
 	RedisDsn                     string `envconfig:"REDIS_DSN" default:"redis://127.0.0.1:6379"`

@@ -24,6 +24,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/handler/user"
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
+	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
 
 func main() {
@@ -71,6 +72,14 @@ func main() {
 		TLSConfig:    opt.TLSConfig,
 	})
 
+	signer := signer.NewSignerClient(
+		&http.Client{
+			Timeout: 10 * time.Second,
+		},
+		envCfg.EthSignerBaseUrl,
+		envCfg.EthSignerAPIKey,
+	)
+
 	cosmosAPI := api.NewCosmosAPI(envCfg.CosmosNodeUrl)
 	likenftCosmosClient := cosmos.NewLikeNFTCosmosClient(envCfg.CosmosNodeUrl)
 	likecoinAPI := likecoin_api.NewLikecoinAPI(envCfg.LikecoinAPIUrlBase)
@@ -89,7 +98,7 @@ func main() {
 	likeCoinRouter := likecoin.LikeCoinRouter{
 		Db:                           db,
 		AsynqClient:                  asynqClient,
-		EthWalletPrivateKey:          envCfg.EthWalletPrivateKey,
+		Signer:                       signer,
 		LikecoinBurningCosmosAddress: envCfg.LikecoinBurningCosmosAddress,
 	}
 	mainMux.Handle("/likecoin/", http.StripPrefix("/likecoin", likeCoinRouter.Router()))

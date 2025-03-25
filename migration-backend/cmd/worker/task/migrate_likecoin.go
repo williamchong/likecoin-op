@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -16,6 +18,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/cosmos/model"
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/evm"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likecoin"
+	"github.com/likecoin/like-migration-backend/pkg/signer"
 	apptask "github.com/likecoin/like-migration-backend/pkg/task"
 )
 
@@ -63,14 +66,21 @@ func HandleMigrateLikeCoinTask(ctx context.Context, t *asynq.Task) error {
 		cosmosLikeCoinNetworkConfig,
 	)
 
+	signer := signer.NewSignerClient(
+		&http.Client{
+			Timeout: 10 * time.Second,
+		},
+		envCfg.EthSignerBaseUrl,
+		envCfg.EthSignerAPIKey,
+	)
+
 	contractAddress := common.HexToAddress(envCfg.EthTokenAddress)
 	likeCoinClient := evm.NewLikeCoin(
 		logger,
 		ethClient,
-		envCfg.EthChainId,
+		signer,
 		contractAddress,
 	)
-	authedLikeCoinClient := likeCoinClient.Auth(envCfg.EthWalletPrivateKey)
 
 	mylogger.Info("running migrate likecoin")
 
@@ -80,7 +90,7 @@ func HandleMigrateLikeCoinTask(ctx context.Context, t *asynq.Task) error {
 		db,
 		ethClient,
 		cosmosAPI,
-		authedLikeCoinClient,
+		likeCoinClient,
 		cosmosLikeCoinClient,
 		p.CosmosAddress,
 	)

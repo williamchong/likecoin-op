@@ -6,9 +6,10 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
 
 var ErrTxFailed = errors.New("tx failed")
@@ -18,102 +19,76 @@ func AwaitTx(
 	logger *slog.Logger,
 
 	c *ethclient.Client,
-	tx *types.Transaction,
+	s *signer.SignerClient,
+	evmTxRequestId uint64,
 ) (*types.Receipt, error) {
-	txHash := hexutil.Encode(tx.Hash().Bytes())
 	mylogger := logger.
 		WithGroup("AwaitTx").
-		With("txHash", txHash)
+		With("evmTxRequestId", evmTxRequestId)
 
-	txReciptChan := make(chan *types.Receipt)
+	errchan := make(chan error)
+	txHashChan := make(chan common.Hash)
 
 	go func() {
 		for {
 			select {
 			case <-ctx.Done():
+				mylogger.Warn("context cancelled")
+				errchan <- ctx.Err()
 				return
-			default:
+			case <-time.After(1 * time.Second):
 			}
-			txReceipt, err := c.TransactionReceipt(ctx, tx.Hash())
+
+			mylogger.Info("checking tx status...")
+			txState, err := s.GetTransactionHash(evmTxRequestId)
+
 			if err != nil {
-				mylogger.Warn("fetch tx receipt failed", "error", err)
-				time.Sleep(1 * time.Second)
+				mylogger.Error("get transaction hash error", "err", err)
+				errchan <- err
+				return
+			}
+
+			if txState.FailedReason != nil {
+				mylogger.Error("failed", "error", *txState.FailedReason)
+				errchan <- errors.New(*txState.FailedReason)
+				return
+			}
+
+			switch *txState.Status {
+			case signer.EvmTransactionRequestStatusInit:
+				mylogger.Info("init")
 				continue
+			case signer.EvmTransactionRequestStatusInProgress:
+				mylogger.Info("in_progress")
+				continue
+			case signer.EvmTransactionRequestStatusSubmitted:
+				mylogger.Info("submitted")
+				continue
+			case signer.EvmTransactionRequestStatusMined:
+				mylogger.Info("mined")
+				txHash := common.HexToHash(*txState.TxHash)
+				txHashChan <- txHash
+				return
+			case signer.EvmTransactionRequestStatusFailed:
+				mylogger.Error("failed", "error", *txState.FailedReason)
+				errchan <- errors.New(*txState.FailedReason)
+				return
 			}
-			txReciptChan <- txReceipt
-			return
 		}
 	}()
 
-	txReceipt := <-txReciptChan
-	_ = AwaitNonce(ctx, logger, c, txReceipt)
-	if txReceipt.Status == 0 {
-		return nil, ErrTxFailed
-	}
-	return txReceipt, nil
-}
-
-func AwaitNonce(
-	ctx context.Context,
-	logger *slog.Logger,
-
-	c *ethclient.Client,
-	txReceipt *types.Receipt,
-) error {
-	mylogger := logger.
-		WithGroup("AwaitNonce")
-
-	chainID, err := c.NetworkID(ctx)
-	if err != nil {
-		mylogger.Error("c.NetworkID", "err", err)
-		return err
-	}
-
-	tx, _, err := c.TransactionByHash(ctx, txReceipt.TxHash)
-	if err != nil {
-		mylogger.Error("c.TransactionByHash", "err", err)
-		return err
-	}
-	mylogger = mylogger.With("txNonce", tx.Nonce())
-
-	from, err := types.Sender(types.NewLondonSigner(chainID), tx)
-	if err != nil {
-		mylogger.Error("types.Sender", "err", err)
-		return err
-	}
-
-	successChan := make(chan interface{})
-	errorChan := make(chan error)
-
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				errorChan <- ctx.Err()
-				return
-			default:
-			}
-
-			nonce, err := c.NonceAt(ctx, from, nil)
-			if err != nil {
-				errorChan <- err
-				return
-			}
-			mylogger.Info("c.NonceAt", "remoteNonce", nonce)
-			if nonce > tx.Nonce() {
-				successChan <- struct{}{}
-				return
-			}
-
-			time.Sleep(1 * time.Second)
-		}
-	}()
-
+	var txHash common.Hash
 	select {
-	case err = <-errorChan:
-		mylogger.Error("errorChan", "err", err)
-		return err
-	case <-successChan:
-		return nil
+	case err := <-errchan:
+		return nil, err
+	case txHash = <-txHashChan:
 	}
+
+	txReceipt, err := c.TransactionReceipt(ctx, txHash)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return txReceipt, nil
 }

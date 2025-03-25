@@ -32,7 +32,7 @@ func DoMintLikeCoinByCosmosAddress(
 	db *sql.DB,
 	ethClient *ethclient.Client,
 	cosmosAPI *api.CosmosAPI,
-	evmLikeCoinClient *evm.AuthedLikeCoin,
+	evmLikeCoinClient *evm.LikeCoin,
 	cosmosLikcCoinClient *cosmos.LikeCoin,
 
 	cosmosAddress string,
@@ -81,7 +81,7 @@ func DoMintLikeCoin(
 	db *sql.DB,
 	ethClient *ethclient.Client,
 	cosmosAPI *api.CosmosAPI,
-	evmLikeCoinClient *evm.AuthedLikeCoin,
+	evmLikeCoinClient *evm.LikeCoin,
 	cosmosLikcCoinClient *cosmos.LikeCoin,
 
 	a *model.LikeCoinMigration,
@@ -91,18 +91,13 @@ func DoMintLikeCoin(
 
 	txResponse, err := cosmosAPI.QueryTransaction(*a.CosmosTxHash)
 	if err != nil {
-		logger.Error("cosmosAPI.QueryTransaction", "err", err)
+		mylogger.Error("cosmosAPI.QueryTransaction", "err", err)
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 	memoString := txResponse.Tx.Body.Memo
 	memo, err := ParseMemoData(memoString)
 	if err != nil {
-		logger.Error("likecoin.ParseMemoData", "err", err)
-		return nil, doMintLikeCoinFailed(db, a, err)
-	}
-
-	if err != nil {
-		logger.Error("types.ParseCoinNormalized", "err", err)
+		mylogger.Error("likecoin.ParseMemoData", "err", err)
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
@@ -110,26 +105,25 @@ func DoMintLikeCoin(
 
 	recoveredAddr, err := ethereum.RecoverAddress(memo.Signature, []byte(message))
 	if err != nil {
-		logger.Error("ethereum.RecoverAddress", "err", err)
+		mylogger.Error("ethereum.RecoverAddress", "err", err)
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
 	recoveredAddrStr := hexutil.Encode(recoveredAddr.Bytes())
 	if !strings.EqualFold(recoveredAddrStr, a.UserEthAddress) {
-		logger.Error("strings.EqualFold(recoveredAddrStr, a.UserCosmosAddress)", "err", ErrEthAddressOnCosmosNotMatch, "recoveredAddrStr", recoveredAddrStr, "a.UserCosmosAddress", a.UserCosmosAddress)
+		mylogger.Error("strings.EqualFold(recoveredAddrStr, a.UserCosmosAddress)", "err", ErrEthAddressOnCosmosNotMatch, "recoveredAddrStr", recoveredAddrStr, "a.UserCosmosAddress", a.UserCosmosAddress)
 		return nil, doMintLikeCoinFailed(db, a, ErrEthAddressOnCosmosNotMatch)
 	}
 
-	mintingEthAddress, err := ethereum.PrivateKeyStringToAddress(evmLikeCoinClient.PrivateKeyStr)
+	mintingEthAddressStr, err := evmLikeCoinClient.Signer.GetSignerAddress()
 
 	if err != nil {
-		logger.Error("ethereum.PrivateKeyStringToAddress", "err", err)
+		mylogger.Error("ethereum.PrivateKeyStringToAddress", "err", err)
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
-	mintingEthAddressStr := hexutil.Encode(mintingEthAddress.Bytes())
-	if !strings.EqualFold(mintingEthAddressStr, a.MintingEthAddress) {
-		logger.Error("minting eth address not match", "err", ErrMintingEthPrivateKeyNotMatchMintingEthAddress)
+	if !strings.EqualFold(*mintingEthAddressStr, a.MintingEthAddress) {
+		mylogger.Error("minting eth address not match", "err", ErrMintingEthPrivateKeyNotMatchMintingEthAddress)
 		return nil, doMintLikeCoinFailed(db, a, ErrMintingEthPrivateKeyNotMatchMintingEthAddress)
 	}
 
@@ -137,12 +131,12 @@ func DoMintLikeCoin(
 	cosmosCoinDb, err := types.ParseCoinNormalized(a.Amount)
 
 	if err != nil {
-		logger.Error("types.ParseCoinNormalized(a.Amount)", "err", err)
+		mylogger.Error("types.ParseCoinNormalized(a.Amount)", "err", err)
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
 	if cosmosCoinMemo.Amount != cosmosCoinDb.Amount && cosmosCoinMemo.Denom != cosmosCoinDb.Denom {
-		logger.Error("coin not matched", "err", ErrAmountNotMatch)
+		mylogger.Error("coin not matched", "err", ErrAmountNotMatch)
 		return nil, doMintLikeCoinFailed(db, a, ErrAmountNotMatch)
 	}
 
@@ -150,28 +144,28 @@ func DoMintLikeCoin(
 	err = appdb.UpdateLikeCoinMigration(db, a)
 
 	if err != nil {
-		logger.Error("appdb.UpdateLikeCoinMigration", "err", err)
+		mylogger.Error("appdb.UpdateLikeCoinMigration", "err", err)
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
 	oldDecimals, err := cosmosLikcCoinClient.Decimals()
 
 	if err != nil {
-		logger.Error("cosmosLikcCoinClient.Decimal", "err", err)
+		mylogger.Error("cosmosLikcCoinClient.Decimal", "err", err)
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
-	newDecimals, err := evmLikeCoinClient.LikeCoin.Decimals()
+	newDecimals, err := evmLikeCoinClient.Decimals()
 
 	if err != nil {
-		logger.Error("evmLikeCoinClient.LikeCoin.Decimals", "err", err)
+		mylogger.Error("evmLikeCoinClient.LikeCoin.Decimals", "err", err)
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
 	evmAmount, err := util.ConvertAmountByDecimals(
 		cosmosCoinDb.Amount, oldDecimals, newDecimals)
 
-	logger.Info(
+	mylogger.Info(
 		"Coin conversion info",
 		"cosmosCoin", cosmosCoinDb.String(),
 		"oldDecimals", oldDecimals,
@@ -180,37 +174,21 @@ func DoMintLikeCoin(
 	)
 
 	if err != nil {
-		logger.Error("util.ConvertAmountByDecimals", "err", err)
+		mylogger.Error("util.ConvertAmountByDecimals", "err", err)
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
 	tx, _, err := evmLikeCoinClient.TransferTo(
-		ctx, logger, *recoveredAddr, evmAmount,
+		ctx, mylogger, *recoveredAddr, evmAmount,
 	)
 
 	if err != nil {
-		logger.Error("ethereum.TransferToken", "err", err)
+		mylogger.Error("ethereum.TransferToken", "err", err)
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
 	evmTxHash := hexutil.Encode(tx.Hash().Bytes())
 	a.EvmTxHash = &evmTxHash
-	a.Status = model.LikeCoinMigrationStatusEvmVerifying
-
-	err = appdb.UpdateLikeCoinMigration(db, a)
-
-	if err != nil {
-		logger.Error("appdb.UpdateLikeCoinMigration", "err", err)
-		return nil, doMintLikeCoinFailed(db, a, err)
-	}
-
-	_, err = ethereum.AwaitTx(ctx, mylogger, ethClient, tx)
-
-	if err != nil {
-		logger.Error("ethereum.AwaitTx", "err", err)
-		return nil, err
-	}
-
 	a.Status = model.LikeCoinMigrationStatusCompleted
 	err = appdb.UpdateLikeCoinMigration(db, a)
 
