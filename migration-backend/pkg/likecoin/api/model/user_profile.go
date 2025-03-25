@@ -6,4 +6,5 @@ type UserProfile struct {
 	Avatar       string `json:"avatar"`
 	CosmosWallet string `json:"cosmosWallet"`
 	LikeWallet   string `json:"likeWallet"`
+	EVMWallet    string `json:"evmWallet"`
 }
