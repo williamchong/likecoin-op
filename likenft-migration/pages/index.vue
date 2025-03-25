@@ -582,12 +582,14 @@ export default Vue.extend({
         );
 
       await this.migrateLikerID({
+        cosmos_address: cosmosAddress,
         cosmos_pub_key: result.pub_key.value,
         cosmos_signature: cosmosSignature,
         eth_address: ethAddress,
         eth_signature: signedMessage,
         like_id: currentStep.likerId,
-        signing_message: signMessage.message,
+        cosmos_signing_message: signMessage.message,
+        eth_signing_message: signMessage.message,
       });
 
       // Check again on likerland to see if eth address is migrated

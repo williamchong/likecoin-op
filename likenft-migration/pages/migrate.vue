@@ -414,12 +414,14 @@ export default Vue.extend({
         );
 
         await this.migrateLikerID({
+          cosmos_address: s.data.cosmosWalletAddress,
           cosmos_pub_key: result.pub_key.value,
           cosmos_signature: cosmosSignature,
           eth_address: s.data.evmWalletAddress,
           eth_signature: signedMessage,
           like_id: this.likerID,
-          signing_message: signMessage.message,
+          cosmos_signing_message: signMessage.message,
+          eth_signing_message: signMessage.message,
         });
 
         this.isEthAddressMigrated = true;
