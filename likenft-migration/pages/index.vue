@@ -238,6 +238,8 @@
 </template>
 
 <script lang="ts">
+import { OfflineAminoSigner } from '@cosmjs/amino';
+import { sortedJsonStringify } from '@cosmjs/amino/build/signdoc';
 import { isAxiosError } from 'axios';
 import { format as formatDate } from 'date-fns/format';
 import numeral from 'numeral';
@@ -255,6 +257,7 @@ import {
   LikeNFTAssetMigration,
 } from '~/apis/models/likenftAssetMigration';
 import { LikeNFTAssetSnapshot } from '~/apis/models/likenftAssetSnapshot';
+import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network';
 import {
   initCosmosConnected,
   initEvmConnected,
@@ -561,18 +564,39 @@ export default Vue.extend({
       }
       const {
         accounts: [account],
-        offlineSigner,
       } = connection;
 
-      if (!offlineSigner.signArbitrary) {
-        alert('signArbitrary not supported');
+      // FIXME: only works on keplr
+      const offlineSigner: OfflineAminoSigner =
+        connection.offlineSigner as OfflineAminoSigner;
+      if (!offlineSigner.signAmino) {
         return currentStep;
       }
 
-      const result = await offlineSigner.signArbitrary(
-        this.$likeCoinWalletConnector.options.chainId,
+      const { chainId, coinMinimalDenom } = LIKECOIN_WALLET_CONNECTOR_CONFIG(
+        this.$appConfig.isTestnet
+      );
+
+      const signingPayload = {
+        chain_id: chainId,
+        memo: signMessage.message,
+        msgs: [],
+        fee: {
+          gas: '0',
+          amount: [
+            {
+              denom: coinMinimalDenom,
+              amount: '0',
+            },
+          ],
+        },
+        sequence: '0',
+        account_number: '0',
+      };
+
+      const { signature: result } = await offlineSigner.signAmino(
         account.address,
-        signMessage.message
+        signingPayload
       );
       const cosmosSignature = result.signature;
 
@@ -588,7 +612,7 @@ export default Vue.extend({
         eth_address: ethAddress,
         eth_signature: signedMessage,
         like_id: currentStep.likerId,
-        cosmos_signing_message: signMessage.message,
+        cosmos_signing_message: sortedJsonStringify(signingPayload),
         eth_signing_message: signMessage.message,
       });
 
