@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/likecoin/like-migration-backend/cmd/cli/config"
+	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likenft"
@@ -50,6 +51,7 @@ var migrateClassCmd = &cobra.Command{
 		}
 
 		likenftClient := cosmos.NewLikeNFTCosmosClient(envCfg.CosmosNodeUrl)
+		likecoinAPI := likecoin_api.NewLikecoinAPI(envCfg.LikecoinAPIUrlBase)
 
 		ethClient, err := ethclient.Dial(envCfg.EthNetworkPublicRPCURL)
 		if err != nil {
@@ -83,6 +85,7 @@ var migrateClassCmd = &cobra.Command{
 			logger,
 			db,
 			likenftClient,
+			likecoinAPI,
 			&evmLikeNFTClient,
 			&evmLikeNFTClassClient,
 			envCfg.InitialNewClassOwner,

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
+	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/model"
@@ -19,6 +20,7 @@ func MigrateNFTFromAssetMigration(
 
 	db *sql.DB,
 	c *cosmos.LikeNFTCosmosClient,
+	likecoinAPI *likecoin_api.LikecoinAPI,
 	p *evm.LikeProtocol,
 	n *evm.BookNFT,
 
@@ -55,6 +57,7 @@ func MigrateNFTFromAssetMigration(
 		mylogger,
 		db,
 		c,
+		likecoinAPI,
 		p,
 		n,
 		initialClassOwner,
@@ -89,6 +92,7 @@ func MigrateNFT(
 
 	db *sql.DB,
 	c *cosmos.LikeNFTCosmosClient,
+	likecoinAPI *likecoin_api.LikecoinAPI,
 	p *evm.LikeProtocol,
 	n *evm.BookNFT,
 
@@ -127,6 +131,7 @@ func MigrateNFT(
 		mylogger,
 		db,
 		c,
+		likecoinAPI,
 		p,
 		newClassAction,
 	)
