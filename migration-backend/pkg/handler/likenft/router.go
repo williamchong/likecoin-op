@@ -8,6 +8,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
 	"github.com/likecoin/like-migration-backend/pkg/handler/likenft/migration"
 	"github.com/likecoin/like-migration-backend/pkg/handler/likenft/migration_preview"
+	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 )
 
@@ -16,6 +17,7 @@ type LikeNFTRouter struct {
 	AsynqClient         *asynq.Client
 	CosmosAPI           *api.CosmosAPI
 	LikeNFTCosmosClient *cosmos.LikeNFTCosmosClient
+	LikecoinAPI         *likecoin_api.LikecoinAPI
 	LikerlandUrlBase    string
 
 	InitialNewClassOwner     string
@@ -28,7 +30,9 @@ func (h *LikeNFTRouter) Router() *http.ServeMux {
 	router.Handle("POST /signing_message", &CreateSigningMessageHandler{
 		Db: h.Db,
 	})
-	router.Handle("POST /likerid/migration", &LikerIDMigrationHandler{})
+	router.Handle("POST /likerid/migration", &LikerIDMigrationHandler{
+		LikecoinAPI: h.LikecoinAPI,
+	})
 
 	migrationPreviewRouter := &migration_preview.MigrationPreviewRouter{
 		Db:                  h.Db,

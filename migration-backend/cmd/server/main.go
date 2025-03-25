@@ -90,6 +90,7 @@ func main() {
 		AsynqClient:         asynqClient,
 		CosmosAPI:           cosmosAPI,
 		LikeNFTCosmosClient: likenftCosmosClient,
+		LikecoinAPI:         likecoinAPI,
 
 		InitialNewClassOwner:     envCfg.InitialNewClassOwner,
 		InitialBatchMintNFTOwner: envCfg.InitialBatchMintNFTsOwner,
