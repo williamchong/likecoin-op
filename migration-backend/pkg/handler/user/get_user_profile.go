@@ -1,12 +1,10 @@
 package user
 
 import (
-	"database/sql"
 	"errors"
 	"net/http"
 	"strings"
 
-	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	api_model "github.com/likecoin/like-migration-backend/pkg/handler/user/model"
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
@@ -19,7 +17,6 @@ type GetUserProfileResponseBody struct {
 
 type GetUserProfileHandler struct {
 	LikecoinAPI *likecoin_api.LikecoinAPI
-	Db          *sql.DB
 }
 
 func (h *GetUserProfileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -55,18 +52,6 @@ func (h *GetUserProfileHandler) handle(cosmosWalletAddress string) (*api_model.U
 	} else {
 		userProfile.LikerID = &likecoinUserProfile.User
 		userProfile.Avatar = &likecoinUserProfile.Avatar
-	}
-
-	// TODO: the eth address should be retrieved from likerland
-	sign, err := appdb.QueryNFTSigningMessageByCosmosAddress(h.Db, cosmosWalletAddress)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			// continue
-		} else {
-			return nil, err
-		}
-	} else {
-		userProfile.EthWalletAddress = &sign.EthAddress
 	}
 
 	return userProfile, nil

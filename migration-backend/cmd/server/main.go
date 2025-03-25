@@ -105,7 +105,6 @@ func main() {
 	mainMux.Handle("/likecoin/", http.StripPrefix("/likecoin", likeCoinRouter.Router()))
 
 	userRouter := user.UserRouter{
-		Db:          db,
 		LikecoinAPI: likecoinAPI,
 	}
 	mainMux.Handle("/user/", http.StripPrefix("/user", userRouter.Router()))
