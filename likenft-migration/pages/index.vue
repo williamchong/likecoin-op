@@ -122,47 +122,77 @@
               {{ $t('migrate.preview') }}
             </h2>
           </template>
-          <template v-if="migrationPreview != null" #current>
-            <div :class="['flex', 'flex-row', 'gap-1']">
-              <h2
-                :class="[
-                  'text-base',
-                  'font-semibold',
-                  'leading-[30px]',
-                  'text-likecoin-darkgrey',
-                ]"
-              >
-                {{ $t('migrate.preview') }}
-              </h2>
-              <UTooltip
-                v-if="
-                  migrationPreview.block_time != null &&
-                  migrationPreview.block_height != null
-                "
-                :text="
-                  $t('section.asset-preview.tooltip', {
-                    date: _formatDate(migrationPreview.block_time),
-                    height: _formatNumber(migrationPreview.block_height),
-                  })
-                "
-                :ui="{
-                  base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
-                }"
-                ><FontAwesomeIcon
-                  icon="circle-exclamation"
+          <template v-if="currentStep.step === 4" #current>
+            <template v-if="currentStep.state === 'MigrationPreview'">
+              <div :class="['flex', 'flex-row', 'gap-1']">
+                <h2
                   :class="[
-                    'text-sm',
+                    'text-base',
+                    'font-semibold',
                     'leading-[30px]',
-                    'text-likecoin-votecolor-yes',
+                    'text-likecoin-darkgrey',
                   ]"
-              /></UTooltip>
-            </div>
-            <SectionAssetPreview
-              v-if="migrationPreview != null"
-              :class="['max-w-full', 'mt-2']"
-              :snapshot="migrationPreview"
-              @confirmMigration="handleConfirmMigrate"
-            />
+                >
+                  {{ $t('migrate.preview') }}
+                </h2>
+                <UTooltip
+                  v-if="
+                    currentStep.migrationPreview.block_time != null &&
+                    currentStep.migrationPreview.block_height != null
+                  "
+                  :text="
+                    $t('section.asset-preview.tooltip', {
+                      date: _formatDate(
+                        currentStep.migrationPreview.block_time
+                      ),
+                      height: _formatNumber(
+                        currentStep.migrationPreview.block_height
+                      ),
+                    })
+                  "
+                  :ui="{
+                    base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
+                  }"
+                  ><FontAwesomeIcon
+                    icon="circle-exclamation"
+                    :class="[
+                      'text-sm',
+                      'leading-[30px]',
+                      'text-likecoin-votecolor-yes',
+                    ]"
+                /></UTooltip>
+              </div>
+              <SectionAssetPreview
+                v-if="currentStep.migrationPreview != null"
+                :class="['max-w-full', 'mt-2']"
+                :snapshot="currentStep.migrationPreview"
+                @confirmMigration="handleConfirmMigrate"
+              />
+            </template>
+            <template v-if="currentStep.state === 'MigrationRetryPreview'">
+              <div :class="['flex', 'flex-row', 'gap-1']">
+                <h2
+                  :class="[
+                    'text-base',
+                    'font-semibold',
+                    'leading-[30px]',
+                    'text-likecoin-darkgrey',
+                  ]"
+                >
+                  {{ $t('migrate.preview') }}
+                </h2>
+              </div>
+              <SectionMigrationResult
+                :class="['max-w-full', 'mt-2']"
+                :migration="currentStep.failedMigration"
+                :initial-status="'failed'"
+              />
+              <div :class="['mt-4', 'flex', 'flex-row', 'justify-end']">
+                <AppButton @click="handleConfirmMigrate">
+                  {{ $t('section.asset-preview.confirm-retry') }}
+                </AppButton>
+              </div>
+            </template>
           </template>
           <template #past>
             <h2
@@ -313,6 +343,7 @@ import {
   migrationFailed,
   migrationPreviewFetched,
   migrationResultFetched,
+  migrationRetried,
   signMessageRequested,
   StepState,
   StepStateCompleted,
@@ -553,7 +584,15 @@ export default Vue.extend({
     },
 
     handleRetryClick() {
-      alert('TODO: retry');
+      if (
+        this.currentStep.step === 99999 &&
+        this.currentStep.state === 'Failed'
+      ) {
+        this.currentStep = migrationRetried(
+          this.currentStep,
+          this.currentStep.migration
+        );
+      }
     },
 
     async _asyncStateTransition<S1 extends StepState, S2 extends StepState>(

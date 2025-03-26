@@ -275,3 +275,18 @@ export function migrationFailed(
     migration: failedMigration,
   };
 }
+
+export function migrationRetried(
+  prev: StepStateFailed,
+  failedMigration: FailedLikeNFTAssetMigration
+): StepStateStep4MigrationRetryPreview {
+  return {
+    step: 4,
+    state: 'MigrationRetryPreview',
+    cosmosAddress: prev.cosmosAddress,
+    ethAddress: prev.ethAddress,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    failedMigration,
+  };
+}
