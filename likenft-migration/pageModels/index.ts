@@ -1,5 +1,6 @@
 import {
   CompletedLikeNFTAssetMigration,
+  FailedLikeNFTAssetMigration,
   LikeNFTAssetMigration,
 } from '~/apis/models/likenftAssetMigration';
 import { LikeNFTAssetSnapshot } from '~/apis/models/likenftAssetSnapshot';
@@ -82,11 +83,32 @@ export interface StepStateStep5MigrationResult {
 
 export interface StepStateEnd {
   step: 99999;
+  state: 'End';
   cosmosAddress: string;
   ethAddress: string;
   avatar: string | null;
   likerId: string | null;
   migration: CompletedLikeNFTAssetMigration;
+}
+
+export interface StepStateCompleted {
+  step: 99999;
+  state: 'Completed';
+  cosmosAddress: string;
+  ethAddress: string;
+  avatar: string | null;
+  likerId: string | null;
+  migration: CompletedLikeNFTAssetMigration;
+}
+
+export interface StepStateFailed {
+  step: 99999;
+  state: 'Failed';
+  cosmosAddress: string;
+  ethAddress: string;
+  avatar: string | null;
+  likerId: string | null;
+  migration: FailedLikeNFTAssetMigration;
 }
 
 export type StepState =
@@ -100,6 +122,8 @@ export type StepState =
   | StepStateStep4Init
   | StepStateStep4MigrationPreview
   | StepStateStep5MigrationResult
+  | StepStateCompleted
+  | StepStateFailed
   | StepStateEnd;
 
 export function introductionConfirmed(_: StepStateStep1): StepStateStep2Init {
@@ -228,6 +252,7 @@ export function migrationCompleted(
 ): StepStateEnd {
   return {
     step: 99999,
+    state: 'End',
     cosmosAddress: prev.cosmosAddress,
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
