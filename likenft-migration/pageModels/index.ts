@@ -81,16 +81,6 @@ export interface StepStateStep5MigrationResult {
   migration: LikeNFTAssetMigration;
 }
 
-export interface StepStateEnd {
-  step: 99999;
-  state: 'End';
-  cosmosAddress: string;
-  ethAddress: string;
-  avatar: string | null;
-  likerId: string | null;
-  migration: CompletedLikeNFTAssetMigration;
-}
-
 export interface StepStateCompleted {
   step: 99999;
   state: 'Completed';
@@ -123,8 +113,7 @@ export type StepState =
   | StepStateStep4MigrationPreview
   | StepStateStep5MigrationResult
   | StepStateCompleted
-  | StepStateFailed
-  | StepStateEnd;
+  | StepStateFailed;
 
 export function introductionConfirmed(_: StepStateStep1): StepStateStep2Init {
   return {
