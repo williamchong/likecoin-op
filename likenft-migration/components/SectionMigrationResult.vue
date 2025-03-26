@@ -118,6 +118,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue';
+import { PropValidator } from 'vue/types/options';
 import type { TranslateResult } from 'vue-i18n';
 
 import {
@@ -179,6 +180,10 @@ export default Vue.extend({
     UTable,
   },
   props: {
+    initialStatus: {
+      type: String as PropType<Data['selectedStatus']>,
+      default: 'all-items',
+    } as PropValidator<Data['selectedStatus']>,
     migration: {
       type: Object as PropType<LikeNFTAssetMigration>,
       required: true,
@@ -186,7 +191,7 @@ export default Vue.extend({
   },
   data(): Data {
     return {
-      selectedStatus: 'all-items',
+      selectedStatus: this.initialStatus,
     };
   },
   computed: {
