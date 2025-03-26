@@ -72,6 +72,16 @@ export interface StepStateStep4MigrationPreview {
   migrationPreview: LikeNFTAssetSnapshot;
 }
 
+export interface StepStateStep4MigrationRetryPreview {
+  step: 4;
+  state: 'MigrationRetryPreview';
+  cosmosAddress: string;
+  ethAddress: string;
+  avatar: string | null;
+  likerId: string | null;
+  failedMigration: FailedLikeNFTAssetMigration;
+}
+
 export interface StepStateStep5MigrationResult {
   step: 5;
   cosmosAddress: string;
@@ -111,6 +121,7 @@ export type StepState =
   | StepStateStep3Signing
   | StepStateStep4Init
   | StepStateStep4MigrationPreview
+  | StepStateStep4MigrationRetryPreview
   | StepStateStep5MigrationResult
   | StepStateCompleted
   | StepStateFailed;
