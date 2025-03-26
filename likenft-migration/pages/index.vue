@@ -296,7 +296,11 @@
                   }}
                 </p>
               </div>
-              <AppButton :class="['w-[120px]']" @click="handleRetryClick">
+              <AppButton
+                v-if="failedMigrationCount != null && failedMigrationCount > 0"
+                :class="['w-[120px]']"
+                @click="handleRetryClick"
+              >
                 {{ $t('section.migration-result.retry') }}
               </AppButton>
             </div>
@@ -333,6 +337,10 @@ import {
 } from '~/apis/models/likenftAssetMigration';
 import { LikeNFTAssetSnapshot } from '~/apis/models/likenftAssetSnapshot';
 import {
+  makeRetryMigrationAPI,
+  RetryMigrationRequest,
+} from '~/apis/retryMigration';
+import {
   initCosmosConnected,
   initEvmConnected,
   introductionConfirmed,
@@ -354,6 +362,7 @@ import {
   StepStateStep3Signing,
   StepStateStep4Init,
   StepStateStep4MigrationPreview,
+  StepStateStep4MigrationRetryPreview,
   StepStateStep5MigrationResult,
 } from '~/pageModels';
 
@@ -446,6 +455,11 @@ export default Vue.extend({
         );
       }
       return null;
+    },
+
+    retryMigration() {
+      return (cosmosAddress: string, req: RetryMigrationRequest) =>
+        makeRetryMigrationAPI(cosmosAddress)(this.$apiClient)(req);
     },
   },
 
@@ -579,6 +593,16 @@ export default Vue.extend({
         this.currentStep = await this._asyncStateTransition(
           this.currentStep,
           (s) => this._createMigration(s)
+        );
+      }
+
+      if (
+        this.currentStep.step === 4 &&
+        this.currentStep.state === 'MigrationRetryPreview'
+      ) {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          (s) => this._retryMigration(s)
         );
       }
     },
@@ -723,6 +747,23 @@ export default Vue.extend({
         asset_snapshot_id: s.migrationPreview.id,
         cosmos_address: s.cosmosAddress,
         eth_address: s.ethAddress,
+      });
+      return migrationResultFetched(s, migrationResponse.migration);
+    },
+
+    async _retryMigration(
+      s: StepStateStep4MigrationRetryPreview
+    ): Promise<StepStateStep5MigrationResult> {
+      const migrationResponse = await this.retryMigration(s.cosmosAddress, {
+        book_nft_collection: s.failedMigration.classes
+          .filter((c) => c.status === 'failed')
+          .map((c) => c.cosmos_class_id),
+        book_nft: s.failedMigration.nfts
+          .filter((n) => n.status === 'failed')
+          .map((n) => ({
+            class_id: n.cosmos_class_id,
+            nft_id: n.cosmos_nft_id,
+          })),
       });
       return migrationResultFetched(s, migrationResponse.migration);
     },

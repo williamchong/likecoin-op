@@ -19,6 +19,7 @@
   "section": {
     "asset-preview": {
       "confirm-migration": "Confirm Migration",
+      "confirm-retry": "Confirm Retry",
       "table": {
         "data": {
           "type": {

@@ -233,6 +233,7 @@ export function migrationResultFetched(
   prev:
     | StepStateStep4Init
     | StepStateStep4MigrationPreview
+    | StepStateStep4MigrationRetryPreview
     | StepStateStep5MigrationResult,
   migration: LikeNFTAssetMigration
 ): StepStateStep5MigrationResult {
