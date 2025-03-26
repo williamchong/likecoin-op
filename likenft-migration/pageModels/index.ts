@@ -249,14 +249,29 @@ export function migrationResultFetched(
 export function migrationCompleted(
   prev: StepStateStep4Init | StepStateStep5MigrationResult,
   completedMigration: CompletedLikeNFTAssetMigration
-): StepStateEnd {
+): StepStateCompleted {
   return {
     step: 99999,
-    state: 'End',
+    state: 'Completed',
     cosmosAddress: prev.cosmosAddress,
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
     likerId: prev.likerId,
     migration: completedMigration,
+  };
+}
+
+export function migrationFailed(
+  prev: StepStateStep4Init | StepStateStep5MigrationResult,
+  failedMigration: FailedLikeNFTAssetMigration
+): StepStateFailed {
+  return {
+    step: 99999,
+    state: 'Failed',
+    cosmosAddress: prev.cosmosAddress,
+    ethAddress: prev.ethAddress,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    migration: failedMigration,
   };
 }

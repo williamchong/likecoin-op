@@ -298,6 +298,7 @@ import { makeGetUserProfileAPI } from '~/apis/getUserProfile';
 import { makeMigrateLikerIDAPI } from '~/apis/migrateLikerID';
 import {
   isMigrationCompleted,
+  isMigrationFailed,
   LikeNFTAssetMigration,
 } from '~/apis/models/likenftAssetMigration';
 import { LikeNFTAssetSnapshot } from '~/apis/models/likenftAssetSnapshot';
@@ -309,11 +310,13 @@ import {
   likerIdMigrated,
   likerIdResolved,
   migrationCompleted,
+  migrationFailed,
   migrationPreviewFetched,
   migrationResultFetched,
   signMessageRequested,
   StepState,
-  StepStateEnd,
+  StepStateCompleted,
+  StepStateFailed,
   StepStateStep2CosmosConnected,
   StepStateStep2LikerIdEvmConnected,
   StepStateStep2LikerIdResolved,
@@ -687,13 +690,18 @@ export default Vue.extend({
 
     async _refreshMigration(
       s: StepStateStep5MigrationResult
-    ): Promise<StepStateStep5MigrationResult | StepStateEnd> {
+    ): Promise<
+      StepStateStep5MigrationResult | StepStateCompleted | StepStateFailed
+    > {
       const resp = await makeGetMigrationAPI(s.cosmosAddress)(
         this.$apiClient
       )();
       // expect throw on error
       if (isMigrationCompleted(resp.migration)) {
         return migrationCompleted(s, resp.migration);
+      }
+      if (isMigrationFailed(resp.migration)) {
+        return migrationFailed(s, resp.migration);
       }
       return migrationResultFetched(s, resp.migration);
     },
@@ -703,7 +711,8 @@ export default Vue.extend({
     ): Promise<
       | StepStateStep4MigrationPreview
       | StepStateStep5MigrationResult
-      | StepStateEnd
+      | StepStateCompleted
+      | StepStateFailed
     > {
       try {
         const resp = await makeGetMigrationAPI(s.cosmosAddress)(
@@ -711,6 +720,9 @@ export default Vue.extend({
         )();
         if (isMigrationCompleted(resp.migration)) {
           return migrationCompleted(s, resp.migration);
+        }
+        if (isMigrationFailed(resp.migration)) {
+          return migrationFailed(s, resp.migration);
         }
         return migrationResultFetched(s, resp.migration);
       } catch (e) {
