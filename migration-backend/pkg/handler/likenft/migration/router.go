@@ -29,6 +29,10 @@ func (h *MigrationRouter) Router() *http.ServeMux {
 		InitialNewClassOwner:     h.InitialNewClassOwner,
 		InitialBatchMintNFTOwner: h.InitialBatchMintNFTOwner,
 	})
+	router.Handle("PUT /migration/{cosmosWalletAddress}", &RetryMigrationHandler{
+		Db:          h.Db,
+		AsynqClient: h.AsynqClient,
+	})
 
 	return router
 }
