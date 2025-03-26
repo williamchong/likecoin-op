@@ -58,6 +58,7 @@ var WorkerCmd = &cobra.Command{
 		mux.HandleFunc(apptask.TypeMigrateClass, task.HandleMigrateClassTask)
 		mux.HandleFunc(apptask.TypeMigrateNFT, task.HandleMigrateNFTTask)
 		mux.HandleFunc(apptask.TypeEnqueueLikeNFTAssetMigration, task.HandleEnqueueLikeNFTAssetMigration)
+		mux.HandleFunc(apptask.TypeEnqueueFailedLikeNFTAssetMigration, task.HandleEnqueueFailedLikeNFTAssetMigration)
 		mux.HandleFunc(apptask.TypeMigrateLikeCoin, task.HandleMigrateLikeCoinTask)
 		// ...register other handlers...
 

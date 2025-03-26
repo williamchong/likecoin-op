@@ -14,4 +14,5 @@ func init() {
 	EnqueueCmd.AddCommand(MigrateClassCmd)
 	EnqueueCmd.AddCommand(MigrateNFTCmd)
 	EnqueueCmd.AddCommand(EnqueueLikeNFTAssetMigrationCmd)
+	EnqueueCmd.AddCommand(EnqueueFailedLikeNFTAssetMigrationCmd)
 }
