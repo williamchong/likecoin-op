@@ -29,11 +29,9 @@ type CreateMigrationResponseBody struct {
 }
 
 type CreateMigrationHandler struct {
-	Db                       *sql.DB
-	LikecoinAPI              *likecoin_api.LikecoinAPI
-	AsynqClient              *asynq.Client
-	InitialNewClassOwner     string
-	InitialBatchMintNFTOwner string
+	Db          *sql.DB
+	LikecoinAPI *likecoin_api.LikecoinAPI
+	AsynqClient *asynq.Client
 }
 
 var ErrMigrationExists = fmt.Errorf("error migration exists")
