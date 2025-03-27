@@ -261,7 +261,6 @@ import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network';
 import {
   initCosmosConnected,
   initEvmConnected,
-  initMigrationPreview,
   introductionConfirmed,
   likerIdEvmConnected,
   likerIdMigrated,
@@ -273,7 +272,6 @@ import {
   StepStateEnd,
   StepStateStep2CosmosConnected,
   StepStateStep2LikerIdEvmConnected,
-  StepStateStep2LikerIdMigrated,
   StepStateStep2LikerIdResolved,
   StepStateStep3Init,
   StepStateStep3MigrationPreview,
@@ -440,17 +438,10 @@ export default Vue.extend({
         (s) => this._checkLikerID(s, cosmosAddress)
       );
 
-      if (this.currentStep.state === 'LikerIdMigrated') {
+      if (this.currentStep.step === 3 && this.currentStep.state === 'Init') {
         this.currentStep = await this._asyncStateTransition(
           this.currentStep,
           (s) => this._checkMigration(s)
-        );
-      }
-
-      if (this.currentStep.step === 3) {
-        this.currentStep = await this._asyncStateTransition(
-          this.currentStep,
-          (s) => this._getOrCreateMigrationPreview(s)
         );
       }
     },
@@ -474,17 +465,10 @@ export default Vue.extend({
         }
       }
 
-      if (this.currentStep.state === 'LikerIdMigrated') {
+      if (this.currentStep.step === 3 && this.currentStep.state === 'Init') {
         this.currentStep = await this._asyncStateTransition(
           this.currentStep,
           (s) => this._checkMigration(s)
-        );
-      }
-
-      if (this.currentStep.step === 3) {
-        this.currentStep = await this._asyncStateTransition(
-          this.currentStep,
-          (s) => this._getOrCreateMigrationPreview(s)
         );
       }
     },
@@ -524,7 +508,7 @@ export default Vue.extend({
     async _checkLikerID(
       currentStep: StepStateStep2CosmosConnected,
       cosmosAddress: string
-    ): Promise<StepStateStep2LikerIdResolved | StepStateStep2LikerIdMigrated> {
+    ): Promise<StepStateStep2LikerIdResolved | StepStateStep3Init> {
       const userProfile = await makeGetUserProfileAPI(cosmosAddress)(
         this.$apiClient
       )();
@@ -549,9 +533,7 @@ export default Vue.extend({
       currentStep: StepStateStep2LikerIdEvmConnected,
       cosmosAddress: string,
       ethAddress: string
-    ): Promise<
-      StepStateStep2LikerIdEvmConnected | StepStateStep2LikerIdMigrated
-    > {
+    ): Promise<StepStateStep2LikerIdEvmConnected | StepStateStep3Init> {
       const signMessage = await this.getSignMessage({
         cosmos_address: cosmosAddress,
         eth_address: ethAddress,
@@ -698,9 +680,11 @@ export default Vue.extend({
     },
 
     async _checkMigration(
-      s: StepStateStep2LikerIdMigrated
+      s: StepStateStep3Init
     ): Promise<
-      StepStateStep3Init | StepStateStep4MigrationResult | StepStateEnd
+      | StepStateStep3MigrationPreview
+      | StepStateStep4MigrationResult
+      | StepStateEnd
     > {
       try {
         const resp = await makeGetMigrationAPI(s.cosmosAddress)(
@@ -713,7 +697,7 @@ export default Vue.extend({
       } catch (e) {
         if (isAxiosError(e)) {
           if (e.status === 404) {
-            return initMigrationPreview(s);
+            return this._getOrCreateMigrationPreview(s);
           }
         }
         throw e;
