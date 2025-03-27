@@ -42,7 +42,8 @@
       "tooltip": "This is a snapshot taken on {date} [{height}], if you found there is something missing or misalign with your current NFT wallet, please contact us for more assistant."
     },
     "confirm-by-signing": {
-      "retry": "重試"
+      "retry": "重試",
+      "title": "確認 & 簽署"
     },
     "introduction": {
       "confirm": "確認",

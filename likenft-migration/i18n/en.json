@@ -42,7 +42,8 @@
       "tooltip": "This is a snapshot taken on {date} [{height}], if you found there is something missing or misalign with your current NFT wallet, please contact us for more assistant."
     },
     "confirm-by-signing": {
-      "retry": "Retry"
+      "retry": "Retry",
+      "title": "Confirm by Signing"
     },
     "introduction": {
       "confirm": "Confirm",

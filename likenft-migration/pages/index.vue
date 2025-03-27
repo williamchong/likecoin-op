@@ -74,6 +74,51 @@
                 'text-likecoin-darkgrey',
               ]"
             >
+              {{ $t('section.confirm-by-signing.title') }}
+            </h2>
+          </template>
+          <template v-if="currentStep.step === 3" #current>
+            <SectionSign
+              :signing-message="currentStep.signMessage"
+              @signed="handleSigned"
+            >
+              <template #title>
+                <h2
+                  :class="[
+                    'text-base',
+                    'font-semibold',
+                    'leading-[30px]',
+                    'text-likecoin-darkgrey',
+                  ]"
+                >
+                  {{ $t('section.confirm-by-signing.title') }}
+                </h2>
+              </template>
+            </SectionSign>
+          </template>
+          <template #past>
+            <h2
+              :class="[
+                'text-base',
+                'font-semibold',
+                'leading-[30px]',
+                'text-likecoin-darkgrey',
+              ]"
+            >
+              {{ $t('section.confirm-by-signing.title') }}
+            </h2>
+          </template>
+        </StepSection>
+        <StepSection :step="4" :current-step="currentStep.step">
+          <template #future>
+            <h2
+              :class="[
+                'text-base',
+                'font-semibold',
+                'leading-[30px]',
+                'text-likecoin-darkgrey',
+              ]"
+            >
               {{ $t('migrate.preview') }}
             </h2>
           </template>
@@ -132,7 +177,7 @@
             </h2>
           </template>
         </StepSection>
-        <StepSection :step="4" :current-step="currentStep.step">
+        <StepSection :step="5" :current-step="currentStep.step">
           <template #future>
             <h2
               :class="[
@@ -238,8 +283,7 @@
 </template>
 
 <script lang="ts">
-import { OfflineAminoSigner } from '@cosmjs/amino';
-import { sortedJsonStringify } from '@cosmjs/amino/build/signdoc';
+import { StdSignature } from '@keplr-wallet/types';
 import { isAxiosError } from 'axios';
 import { format as formatDate } from 'date-fns/format';
 import numeral from 'numeral';
@@ -257,7 +301,6 @@ import {
   LikeNFTAssetMigration,
 } from '~/apis/models/likenftAssetMigration';
 import { LikeNFTAssetSnapshot } from '~/apis/models/likenftAssetSnapshot';
-import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network';
 import {
   initCosmosConnected,
   initEvmConnected,
@@ -268,14 +311,16 @@ import {
   migrationCompleted,
   migrationPreviewFetched,
   migrationResultFetched,
+  signMessageRequested,
   StepState,
   StepStateEnd,
   StepStateStep2CosmosConnected,
   StepStateStep2LikerIdEvmConnected,
   StepStateStep2LikerIdResolved,
-  StepStateStep3Init,
-  StepStateStep3MigrationPreview,
-  StepStateStep4MigrationResult,
+  StepStateStep3Signing,
+  StepStateStep4Init,
+  StepStateStep4MigrationPreview,
+  StepStateStep5MigrationResult,
 } from '~/pageModels';
 
 import UTooltip from '../nuxtui/components/UTooltip.vue';
@@ -380,7 +425,7 @@ export default Vue.extend({
         return;
       }
       if (
-        this.currentStep.step !== 3 ||
+        this.currentStep.step !== 4 ||
         this.currentStep.state !== 'MigrationPreview'
       ) {
         return;
@@ -404,7 +449,7 @@ export default Vue.extend({
         clearTimeout(this.migrationFetchTimeout);
         this.migrationFetchTimeout = null;
       }
-      if (this.currentStep.step !== 4) {
+      if (this.currentStep.step !== 5) {
         return;
       }
       const { migration } = this.currentStep;
@@ -438,7 +483,7 @@ export default Vue.extend({
         (s) => this._checkLikerID(s, cosmosAddress)
       );
 
-      if (this.currentStep.step === 3 && this.currentStep.state === 'Init') {
+      if (this.currentStep.step === 4 && this.currentStep.state === 'Init') {
         this.currentStep = await this._asyncStateTransition(
           this.currentStep,
           (s) => this._checkMigration(s)
@@ -460,12 +505,31 @@ export default Vue.extend({
           this.currentStep = likerIdEvmConnected(this.currentStep, ethAddress);
           this.currentStep = await this._asyncStateTransition(
             this.currentStep,
-            (s) => this._doMigrateLikerID(s, s.cosmosAddress, s.ethAddress)
+            (s) => this._requestSignMessage(s)
           );
         }
       }
+    },
 
-      if (this.currentStep.step === 3 && this.currentStep.state === 'Init') {
+    async handleSigned(
+      cosmosSigningMessage: string,
+      cosmosSignature: StdSignature,
+      ethSignature: string
+    ) {
+      if (this.currentStep.step === 3 && this.currentStep.state === 'Signing') {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          (s) =>
+            this._doMigrateLikerID(
+              s,
+              cosmosSigningMessage,
+              cosmosSignature,
+              ethSignature
+            )
+        );
+      }
+
+      if (this.currentStep.step === 4 && this.currentStep.state === 'Init') {
         this.currentStep = await this._asyncStateTransition(
           this.currentStep,
           (s) => this._checkMigration(s)
@@ -475,15 +539,14 @@ export default Vue.extend({
 
     async handleConfirmMigrate() {
       if (
-        this.currentStep.step !== 3 ||
-        this.currentStep.state !== 'MigrationPreview'
+        this.currentStep.step === 4 &&
+        this.currentStep.state === 'MigrationPreview'
       ) {
-        return;
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          (s) => this._createMigration(s)
+        );
       }
-      this.currentStep = await this._asyncStateTransition(
-        this.currentStep,
-        (s) => this._createMigration(s)
-      );
     },
 
     handleRetryClick() {
@@ -508,7 +571,7 @@ export default Vue.extend({
     async _checkLikerID(
       currentStep: StepStateStep2CosmosConnected,
       cosmosAddress: string
-    ): Promise<StepStateStep2LikerIdResolved | StepStateStep3Init> {
+    ): Promise<StepStateStep2LikerIdResolved | StepStateStep4Init> {
       const userProfile = await makeGetUserProfileAPI(cosmosAddress)(
         this.$apiClient
       )();
@@ -529,79 +592,36 @@ export default Vue.extend({
       }
     },
 
-    async _doMigrateLikerID(
-      currentStep: StepStateStep2LikerIdEvmConnected,
-      cosmosAddress: string,
-      ethAddress: string
-    ): Promise<StepStateStep2LikerIdEvmConnected | StepStateStep3Init> {
+    async _requestSignMessage(
+      currentStep: StepStateStep2LikerIdEvmConnected
+    ): Promise<StepStateStep3Signing> {
       const signMessage = await this.getSignMessage({
-        cosmos_address: cosmosAddress,
-        eth_address: ethAddress,
+        cosmos_address: currentStep.cosmosAddress,
+        eth_address: currentStep.ethAddress,
         liker_id: currentStep.likerId,
       });
-      const connection = await this.$likeCoinWalletConnector.initIfNecessary();
-      if (connection == null) {
-        alert('cannot get wallet connector connection');
-        return currentStep;
-      }
-      const {
-        accounts: [account],
-      } = connection;
+      return signMessageRequested(currentStep, signMessage.message);
+    },
 
-      // FIXME: only works on keplr
-      const offlineSigner: OfflineAminoSigner =
-        connection.offlineSigner as OfflineAminoSigner;
-      if (!offlineSigner.signAmino) {
-        return currentStep;
-      }
-
-      const { chainId, coinMinimalDenom } = LIKECOIN_WALLET_CONNECTOR_CONFIG(
-        this.$appConfig.isTestnet
-      );
-
-      const signingPayload = {
-        chain_id: chainId,
-        memo: signMessage.message,
-        msgs: [],
-        fee: {
-          gas: '0',
-          amount: [
-            {
-              denom: coinMinimalDenom,
-              amount: '0',
-            },
-          ],
-        },
-        sequence: '0',
-        account_number: '0',
-      };
-
-      const { signature: result } = await offlineSigner.signAmino(
-        account.address,
-        signingPayload
-      );
-      const cosmosSignature = result.signature;
-
-      const signedMessage =
-        await this.$likeCoinEVMWalletConnector.connector.signMessage(
-          signMessage.message
-        );
-
+    async _doMigrateLikerID(
+      currentStep: StepStateStep3Signing,
+      cosmosSigningMessage: string,
+      cosmosSignature: StdSignature,
+      ethSignature: string
+    ): Promise<StepStateStep3Signing | StepStateStep4Init> {
       await this.migrateLikerID({
-        cosmos_address: cosmosAddress,
-        cosmos_pub_key: result.pub_key.value,
-        cosmos_signature: cosmosSignature,
-        eth_address: ethAddress,
-        eth_signature: signedMessage,
+        cosmos_address: currentStep.cosmosAddress,
+        cosmos_pub_key: cosmosSignature.pub_key.value,
+        cosmos_signature: cosmosSignature.signature,
+        eth_address: currentStep.ethAddress,
+        eth_signature: ethSignature,
         like_id: currentStep.likerId,
-        cosmos_signing_message: sortedJsonStringify(signingPayload),
-        eth_signing_message: signMessage.message,
+        cosmos_signing_message: cosmosSigningMessage,
+        eth_signing_message: currentStep.signMessage,
       });
-
-      // Check again on likerland to see if eth address is migrated
-      const userProfile = await makeGetUserProfileAPI(cosmosAddress)(
-        this.$apiClient
-      )();
+      const userProfile = await makeGetUserProfileAPI(
+        currentStep.cosmosAddress
+      )(this.$apiClient)();
       const remoteEthAddress = userProfile.user_profile.eth_wallet_address;
       if (remoteEthAddress != null) {
         return likerIdMigrated(
@@ -611,13 +631,12 @@ export default Vue.extend({
           remoteEthAddress
         );
       }
-
       return currentStep;
     },
 
     async _getOrCreateMigrationPreview(
-      s: StepStateStep3Init | StepStateStep3MigrationPreview
-    ): Promise<StepStateStep3MigrationPreview> {
+      s: StepStateStep4Init | StepStateStep4MigrationPreview
+    ): Promise<StepStateStep4MigrationPreview> {
       const migrationPreview = await this._fetchMigrationPreview(
         s.cosmosAddress
       );
@@ -656,8 +675,8 @@ export default Vue.extend({
     },
 
     async _createMigration(
-      s: StepStateStep3MigrationPreview
-    ): Promise<StepStateStep4MigrationResult> {
+      s: StepStateStep4MigrationPreview
+    ): Promise<StepStateStep5MigrationResult> {
       const migrationResponse = await makeCreateMigrationAPI(this.$apiClient)({
         asset_snapshot_id: s.migrationPreview.id,
         cosmos_address: s.cosmosAddress,
@@ -667,8 +686,8 @@ export default Vue.extend({
     },
 
     async _refreshMigration(
-      s: StepStateStep4MigrationResult
-    ): Promise<StepStateStep4MigrationResult | StepStateEnd> {
+      s: StepStateStep5MigrationResult
+    ): Promise<StepStateStep5MigrationResult | StepStateEnd> {
       const resp = await makeGetMigrationAPI(s.cosmosAddress)(
         this.$apiClient
       )();
@@ -680,10 +699,10 @@ export default Vue.extend({
     },
 
     async _checkMigration(
-      s: StepStateStep3Init
+      s: StepStateStep4Init
     ): Promise<
-      | StepStateStep3MigrationPreview
-      | StepStateStep4MigrationResult
+      | StepStateStep4MigrationPreview
+      | StepStateStep5MigrationResult
       | StepStateEnd
     > {
       try {

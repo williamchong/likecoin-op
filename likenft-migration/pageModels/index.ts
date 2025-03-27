@@ -42,8 +42,18 @@ export interface StepStateStep2EthConnected {
   ethAddress: string;
 }
 
-export interface StepStateStep3Init {
+export interface StepStateStep3Signing {
   step: 3;
+  state: 'Signing';
+  cosmosAddress: string;
+  ethAddress: string;
+  avatar: string | null;
+  likerId: string | null;
+  signMessage: string;
+}
+
+export interface StepStateStep4Init {
+  step: 4;
   state: 'Init';
   cosmosAddress: string;
   ethAddress: string;
@@ -51,8 +61,8 @@ export interface StepStateStep3Init {
   likerId: string | null;
 }
 
-export interface StepStateStep3MigrationPreview {
-  step: 3;
+export interface StepStateStep4MigrationPreview {
+  step: 4;
   state: 'MigrationPreview';
   cosmosAddress: string;
   ethAddress: string;
@@ -61,8 +71,8 @@ export interface StepStateStep3MigrationPreview {
   migrationPreview: LikeNFTAssetSnapshot;
 }
 
-export interface StepStateStep4MigrationResult {
-  step: 4;
+export interface StepStateStep5MigrationResult {
+  step: 5;
   cosmosAddress: string;
   ethAddress: string;
   avatar: string | null;
@@ -86,9 +96,10 @@ export type StepState =
   | StepStateStep2LikerIdResolved
   | StepStateStep2LikerIdEvmConnected
   | StepStateStep2EthConnected
-  | StepStateStep3Init
-  | StepStateStep3MigrationPreview
-  | StepStateStep4MigrationResult
+  | StepStateStep3Signing
+  | StepStateStep4Init
+  | StepStateStep4MigrationPreview
+  | StepStateStep5MigrationResult
   | StepStateEnd;
 
 export function introductionConfirmed(_: StepStateStep1): StepStateStep2Init {
@@ -149,13 +160,13 @@ export function likerIdEvmConnected(
 }
 
 export function likerIdMigrated(
-  prev: StepStateStep2CosmosConnected | StepStateStep2LikerIdEvmConnected,
+  prev: StepStateStep2CosmosConnected | StepStateStep3Signing,
   likerId: string | null,
   avatar: string | null,
   ethAddress: string
-): StepStateStep3Init {
+): StepStateStep4Init {
   return {
-    step: 3,
+    step: 4,
     state: 'Init',
     cosmosAddress: prev.cosmosAddress,
     ethAddress,
@@ -164,12 +175,27 @@ export function likerIdMigrated(
   };
 }
 
-export function migrationPreviewFetched(
-  prev: StepStateStep3Init | StepStateStep3MigrationPreview,
-  snapshot: LikeNFTAssetSnapshot
-): StepStateStep3MigrationPreview {
+export function signMessageRequested(
+  prev: StepStateStep2LikerIdEvmConnected,
+  signMessage: string
+): StepStateStep3Signing {
   return {
     step: 3,
+    state: 'Signing',
+    cosmosAddress: prev.cosmosAddress,
+    ethAddress: prev.ethAddress,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    signMessage,
+  };
+}
+
+export function migrationPreviewFetched(
+  prev: StepStateStep4Init | StepStateStep4MigrationPreview,
+  snapshot: LikeNFTAssetSnapshot
+): StepStateStep4MigrationPreview {
+  return {
+    step: 4,
     state: 'MigrationPreview',
     cosmosAddress: prev.cosmosAddress,
     ethAddress: prev.ethAddress,
@@ -181,13 +207,13 @@ export function migrationPreviewFetched(
 
 export function migrationResultFetched(
   prev:
-    | StepStateStep3Init
-    | StepStateStep3MigrationPreview
-    | StepStateStep4MigrationResult,
+    | StepStateStep4Init
+    | StepStateStep4MigrationPreview
+    | StepStateStep5MigrationResult,
   migration: LikeNFTAssetMigration
-): StepStateStep4MigrationResult {
+): StepStateStep5MigrationResult {
   return {
-    step: 4,
+    step: 5,
     cosmosAddress: prev.cosmosAddress,
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
@@ -197,7 +223,7 @@ export function migrationResultFetched(
 }
 
 export function migrationCompleted(
-  prev: StepStateStep3Init | StepStateStep4MigrationResult,
+  prev: StepStateStep4Init | StepStateStep5MigrationResult,
   completedMigration: CompletedLikeNFTAssetMigration
 ): StepStateEnd {
   return {
