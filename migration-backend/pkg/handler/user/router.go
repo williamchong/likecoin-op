@@ -13,7 +13,7 @@ type UserRouter struct {
 func (h *UserRouter) Router() *http.ServeMux {
 	router := http.NewServeMux()
 
-	router.Handle("GET /profile/", &GetUserProfileHandler{
+	router.Handle("GET /profile/", &GetUserEVMMigrateHandler{
 		LikecoinAPI: h.LikecoinAPI,
 	})
 
