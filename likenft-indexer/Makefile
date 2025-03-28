@@ -1,6 +1,12 @@
 -include .env
 export
 
+.PHONY: secret
+secret:
+	@curl -s https://raw.githubusercontent.com/oursky/devsecops-secret/v1.0/generate-secret.sh \
+		| bash -s -- \
+		.env.example .env
+
 # Build the application
 all: build test
 templ-install:

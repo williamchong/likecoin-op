@@ -8,6 +8,11 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## MakeFile
 
+Init env file
+```bash
+make secret
+```
+
 Run build make command with tests
 ```bash
 make all
