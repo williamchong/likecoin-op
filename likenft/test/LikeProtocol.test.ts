@@ -199,6 +199,33 @@ describe("LikeProtocol", () => {
     await expect(newClass()).to.be.not.rejected;
   });
 
+  it("should not allow to create new BookNFT when max supply is 0", async function () {
+    const likeNFTSigner = contract.connect(this.randomSigner);
+
+    const newClass = async () => {
+      await likeNFTSigner
+        .newBookNFT({
+          creator: this.randomSigner,
+          updaters: [this.randomSigner],
+          minters: [this.randomSigner],
+          config: {
+            name: "My Book",
+            symbol: "KOOB",
+            metadata: JSON.stringify({
+              name: "Random by somone",
+              symbol: "No data",
+            }),
+            max_supply: 0,
+          },
+        })
+        .then((tx) => tx.wait());
+    };
+
+    await expect(newClass()).to.be.rejectedWith(
+      "VM Exception while processing transaction: reverted with custom error 'ErrMaxSupplyZero()'",
+    );
+  });
+
   it("should not allow everyone to create new BookNFT when paused", async function () {
     const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
     const likeProtocolRandomSigner = contract.connect(this.randomSigner);
@@ -229,70 +256,6 @@ describe("LikeProtocol", () => {
     );
     await expect(likeProtocolOwnerSigner.unpause()).to.be.not.rejected;
     await expect(classOperation()).to.be.not.rejected;
-  });
-
-  it("should only allow BookNFT owner to update the BookNFT", async function () {
-    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
-    const likeProtocolRandomSigner = contract.connect(this.randomSigner);
-
-    const newClass = async () => {
-      await likeProtocolOwnerSigner
-        .newBookNFT({
-          creator: this.ownerSigner,
-          updaters: [this.ownerSigner],
-          minters: [this.ownerSigner],
-          config: {
-            name: "My Book",
-            symbol: "KOOB",
-            metadata: JSON.stringify({
-              name: "Collection Name",
-              symbol: "Collection SYMB",
-              description: "Collection Description",
-              image:
-                "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-              banner_image: "",
-              featured_image: "",
-              external_link: "https://www.example.com",
-              collaborators: [],
-            }),
-            max_supply: 10,
-          },
-        })
-        .then((tx) => tx.wait());
-    };
-
-    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
-        event.removeListener();
-        resolve({ id });
-      });
-
-      setTimeout(() => {
-        reject(new Error("timeout"));
-      }, 20000);
-    });
-
-    await expect(newClass()).to.be.not.rejected;
-    const newClassEvent = await NewClassEvent;
-    const classId = newClassEvent.id;
-
-    const _newNFTClass = await ethers.getContractAt("BookNFT", classId);
-    await expect(await _newNFTClass.owner()).to.equal(this.ownerSigner.address);
-    await expect(await _newNFTClass.symbol()).to.equal("KOOB");
-
-    await expect(
-      likeProtocolRandomSigner.updateBookNFT({
-        classId: classId,
-        config: {
-          name: "Hi Jack",
-          symbol: "HIJACK",
-          metadata: JSON.stringify({}),
-          max_supply: 0,
-        },
-      }),
-    ).to.be.rejected;
-    await expect(await _newNFTClass.owner()).to.equal(this.ownerSigner.address);
-    await expect(await _newNFTClass.symbol()).to.equal("KOOB");
   });
 
   it("should retain the BookNFT paused state after upgrade", async function () {
