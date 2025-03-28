@@ -32,6 +32,20 @@ generate:
 	@echo "Generating..."
 	go generate ./ent
 
+.PHONY: abigen
+abigen: SHELL=/bin/bash
+abigen:
+		mkdir -p internal/evm/like_protocol
+		mkdir -p internal/evm/book_nft
+		go run github.com/ethereum/go-ethereum/cmd/abigen@latest \
+			--abi=<(cat ../abi/LikeProtocol.json | jq '.["abi"]') \
+			--pkg=like_protocol \
+			--out=internal/evm/like_protocol/like_protocol.go
+		go run github.com/ethereum/go-ethereum/cmd/abigen@latest \
+			--abi=<(cat ../abi/BookNFT.json | jq '.["abi"]') \
+			--pkg=book_nft \
+			--out=internal/evm/book_nft/book_nft.go
+
 .PHONY: migration
 migration:
 	atlas migrate diff "${MIGRATION_NAME}" \

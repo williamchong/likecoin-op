@@ -27,7 +27,7 @@ abigen:
 	cp likenft/artifacts/contracts/LikeProtocol.sol/LikeProtocol.json abi/
 	cp likenft/artifacts/contracts/BookNFT.sol/BookNFT.json abi/
 	cp likecoin/artifacts/contracts/EkilCoin.sol/EkilCoin.json abi/
-	# make -C likenft-indexer abigen
+	make -C likenft-indexer abigen
 	make -C migration-backend abigen
 
 .PHONY: docker-images
