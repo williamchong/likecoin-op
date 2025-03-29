@@ -335,12 +335,12 @@ func (nq *NFTQuery) WithClass(opts ...func(*NFTClassQuery)) *NFTQuery {
 // Example:
 //
 //	var v []struct {
-//		TokenID uint64 `json:"token_id,omitempty"`
+//		ContractAddress string `json:"contract_address,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.NFT.Query().
-//		GroupBy(nft.FieldTokenID).
+//		GroupBy(nft.FieldContractAddress).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (nq *NFTQuery) GroupBy(field string, fields ...string) *NFTGroupBy {
@@ -358,11 +358,11 @@ func (nq *NFTQuery) GroupBy(field string, fields ...string) *NFTGroupBy {
 // Example:
 //
 //	var v []struct {
-//		TokenID uint64 `json:"token_id,omitempty"`
+//		ContractAddress string `json:"contract_address,omitempty"`
 //	}
 //
 //	client.NFT.Query().
-//		Select(nft.FieldTokenID).
+//		Select(nft.FieldContractAddress).
 //		Scan(ctx, &v)
 func (nq *NFTQuery) Select(fields ...string) *NFTSelect {
 	nq.ctx.Fields = append(nq.ctx.Fields, fields...)

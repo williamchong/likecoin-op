@@ -338,16 +338,6 @@ func (ncu *NFTClassUpdate) check() error {
 			return &ValidationError{Name: "total_supply", err: fmt.Errorf(`ent: validator failed for field "NFTClass.total_supply": %w`, err)}
 		}
 	}
-	if v, ok := ncu.mutation.BannerImage(); ok {
-		if err := nftclass.BannerImageValidator(v); err != nil {
-			return &ValidationError{Name: "banner_image", err: fmt.Errorf(`ent: validator failed for field "NFTClass.banner_image": %w`, err)}
-		}
-	}
-	if v, ok := ncu.mutation.FeaturedImage(); ok {
-		if err := nftclass.FeaturedImageValidator(v); err != nil {
-			return &ValidationError{Name: "featured_image", err: fmt.Errorf(`ent: validator failed for field "NFTClass.featured_image": %w`, err)}
-		}
-	}
 	if v, ok := ncu.mutation.DeployerAddress(); ok {
 		if err := nftclass.DeployerAddressValidator(v); err != nil {
 			return &ValidationError{Name: "deployer_address", err: fmt.Errorf(`ent: validator failed for field "NFTClass.deployer_address": %w`, err)}
@@ -841,16 +831,6 @@ func (ncuo *NFTClassUpdateOne) check() error {
 	if v, ok := ncuo.mutation.TotalSupply(); ok {
 		if err := nftclass.TotalSupplyValidator(v); err != nil {
 			return &ValidationError{Name: "total_supply", err: fmt.Errorf(`ent: validator failed for field "NFTClass.total_supply": %w`, err)}
-		}
-	}
-	if v, ok := ncuo.mutation.BannerImage(); ok {
-		if err := nftclass.BannerImageValidator(v); err != nil {
-			return &ValidationError{Name: "banner_image", err: fmt.Errorf(`ent: validator failed for field "NFTClass.banner_image": %w`, err)}
-		}
-	}
-	if v, ok := ncuo.mutation.FeaturedImage(); ok {
-		if err := nftclass.FeaturedImageValidator(v); err != nil {
-			return &ValidationError{Name: "featured_image", err: fmt.Errorf(`ent: validator failed for field "NFTClass.featured_image": %w`, err)}
 		}
 	}
 	if v, ok := ncuo.mutation.DeployerAddress(); ok {

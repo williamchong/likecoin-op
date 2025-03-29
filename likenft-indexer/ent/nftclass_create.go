@@ -206,18 +206,8 @@ func (ncc *NFTClassCreate) check() error {
 	if _, ok := ncc.mutation.BannerImage(); !ok {
 		return &ValidationError{Name: "banner_image", err: errors.New(`ent: missing required field "NFTClass.banner_image"`)}
 	}
-	if v, ok := ncc.mutation.BannerImage(); ok {
-		if err := nftclass.BannerImageValidator(v); err != nil {
-			return &ValidationError{Name: "banner_image", err: fmt.Errorf(`ent: validator failed for field "NFTClass.banner_image": %w`, err)}
-		}
-	}
 	if _, ok := ncc.mutation.FeaturedImage(); !ok {
 		return &ValidationError{Name: "featured_image", err: errors.New(`ent: missing required field "NFTClass.featured_image"`)}
-	}
-	if v, ok := ncc.mutation.FeaturedImage(); ok {
-		if err := nftclass.FeaturedImageValidator(v); err != nil {
-			return &ValidationError{Name: "featured_image", err: fmt.Errorf(`ent: validator failed for field "NFTClass.featured_image": %w`, err)}
-		}
 	}
 	if _, ok := ncc.mutation.DeployerAddress(); !ok {
 		return &ValidationError{Name: "deployer_address", err: errors.New(`ent: missing required field "NFTClass.deployer_address"`)}

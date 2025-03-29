@@ -21,20 +21,36 @@ var (
 		Name:       "accounts",
 		Columns:    AccountsColumns,
 		PrimaryKey: []*schema.Column{AccountsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "account_cosmos_address",
+				Unique:  false,
+				Columns: []*schema.Column{AccountsColumns[1]},
+			},
+		},
 	}
 	// EvmEventsColumns holds the columns for the "evm_events" table.
 	EvmEventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "transaction_hash", Type: field.TypeString, Unique: true},
+		{Name: "transaction_hash", Type: field.TypeString},
+		{Name: "transaction_index", Type: field.TypeUint},
 		{Name: "block_hash", Type: field.TypeString},
 		{Name: "block_number", Type: field.TypeUint64},
-		{Name: "log_index", Type: field.TypeUint64},
+		{Name: "log_index", Type: field.TypeUint},
 		{Name: "address", Type: field.TypeString},
 		{Name: "topic0", Type: field.TypeString},
-		{Name: "topic1", Type: field.TypeString},
-		{Name: "topic2", Type: field.TypeString},
-		{Name: "topic3", Type: field.TypeString},
-		{Name: "data", Type: field.TypeString},
+		{Name: "topic0_hex", Type: field.TypeString},
+		{Name: "topic1", Type: field.TypeString, Nullable: true},
+		{Name: "topic1_hex", Type: field.TypeString, Nullable: true},
+		{Name: "topic2", Type: field.TypeString, Nullable: true},
+		{Name: "topic2_hex", Type: field.TypeString, Nullable: true},
+		{Name: "topic3", Type: field.TypeString, Nullable: true},
+		{Name: "topic3_hex", Type: field.TypeString, Nullable: true},
+		{Name: "data", Type: field.TypeString, Nullable: true},
+		{Name: "data_hex", Type: field.TypeString, Nullable: true},
+		{Name: "removed", Type: field.TypeBool},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"received", "enqueued", "processing", "processed", "failed"}},
+		{Name: "failed_reason", Type: field.TypeString, Nullable: true},
 		{Name: "timestamp", Type: field.TypeTime},
 	}
 	// EvmEventsTable holds the schema information for the "evm_events" table.
@@ -42,18 +58,66 @@ var (
 		Name:       "evm_events",
 		Columns:    EvmEventsColumns,
 		PrimaryKey: []*schema.Column{EvmEventsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "evmevent_transaction_hash_transaction_index_block_number_log_index",
+				Unique:  true,
+				Columns: []*schema.Column{EvmEventsColumns[1], EvmEventsColumns[2], EvmEventsColumns[4], EvmEventsColumns[5]},
+			},
+			{
+				Name:    "evmevent_block_number",
+				Unique:  false,
+				Columns: []*schema.Column{EvmEventsColumns[4]},
+			},
+			{
+				Name:    "evmevent_log_index",
+				Unique:  false,
+				Columns: []*schema.Column{EvmEventsColumns[5]},
+			},
+			{
+				Name:    "evmevent_address",
+				Unique:  false,
+				Columns: []*schema.Column{EvmEventsColumns[6]},
+			},
+		},
+	}
+	// EvmEventProcessedBlockHeightsColumns holds the columns for the "evm_event_processed_block_heights" table.
+	EvmEventProcessedBlockHeightsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "contract_type", Type: field.TypeEnum, Enums: []string{"book_nft", "like_protocol"}},
+		{Name: "contract_address", Type: field.TypeString},
+		{Name: "event", Type: field.TypeEnum, Enums: []string{"ContractURIUpdated", "NewBookNFT", "OwnershipTransferred", "TransferWithMemo"}},
+		{Name: "block_height", Type: field.TypeUint64},
+	}
+	// EvmEventProcessedBlockHeightsTable holds the schema information for the "evm_event_processed_block_heights" table.
+	EvmEventProcessedBlockHeightsTable = &schema.Table{
+		Name:       "evm_event_processed_block_heights",
+		Columns:    EvmEventProcessedBlockHeightsColumns,
+		PrimaryKey: []*schema.Column{EvmEventProcessedBlockHeightsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "evmeventprocessedblockheight_contract_type_contract_address_event",
+				Unique:  true,
+				Columns: []*schema.Column{EvmEventProcessedBlockHeightsColumns[1], EvmEventProcessedBlockHeightsColumns[2], EvmEventProcessedBlockHeightsColumns[3]},
+			},
+		},
 	}
 	// NftsColumns holds the columns for the "nfts" table.
 	NftsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "token_id", Type: field.TypeUint64, Unique: true},
-		{Name: "token_url", Type: field.TypeString, Nullable: true},
-		{Name: "raw", Type: field.TypeJSON, Nullable: true},
+		{Name: "contract_address", Type: field.TypeString, Size: 42},
+		{Name: "token_id", Type: field.TypeString},
+		{Name: "token_uri", Type: field.TypeString},
+		{Name: "image", Type: field.TypeString},
+		{Name: "image_data", Type: field.TypeString, Nullable: true},
+		{Name: "external_url", Type: field.TypeString, Nullable: true},
+		{Name: "description", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString},
-		{Name: "description", Type: field.TypeString, Nullable: true},
-		{Name: "image", Type: field.TypeJSON, Nullable: true},
 		{Name: "attributes", Type: field.TypeJSON, Nullable: true},
-		{Name: "owner_address", Type: field.TypeString},
+		{Name: "background_color", Type: field.TypeString, Nullable: true},
+		{Name: "animation_url", Type: field.TypeString, Nullable: true},
+		{Name: "youtube_url", Type: field.TypeString, Nullable: true},
+		{Name: "owner_address", Type: field.TypeString, Size: 42},
 		{Name: "minted_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "account_nfts", Type: field.TypeInt, Nullable: true},
@@ -67,15 +131,27 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "nfts_accounts_nfts",
-				Columns:    []*schema.Column{NftsColumns[11]},
+				Columns:    []*schema.Column{NftsColumns[16]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "nfts_nft_classes_nfts",
-				Columns:    []*schema.Column{NftsColumns[12]},
+				Columns:    []*schema.Column{NftsColumns[17]},
 				RefColumns: []*schema.Column{NftClassesColumns[0]},
 				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "nft_contract_address_token_id",
+				Unique:  true,
+				Columns: []*schema.Column{NftsColumns[1], NftsColumns[2]},
+			},
+			{
+				Name:    "nft_owner_address",
+				Unique:  false,
+				Columns: []*schema.Column{NftsColumns[13]},
 			},
 		},
 	}
@@ -110,13 +186,56 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "nftclass_owner_address",
+				Unique:  false,
+				Columns: []*schema.Column{NftClassesColumns[4]},
+			},
+			{
+				Name:    "nftclass_deployer_address",
+				Unique:  false,
+				Columns: []*schema.Column{NftClassesColumns[10]},
+			},
+		},
+	}
+	// TransactionMemosColumns holds the columns for the "transaction_memos" table.
+	TransactionMemosColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "transaction_hash", Type: field.TypeString},
+		{Name: "book_nft_id", Type: field.TypeString},
+		{Name: "from", Type: field.TypeString},
+		{Name: "to", Type: field.TypeString},
+		{Name: "token_id", Type: field.TypeUint64},
+		{Name: "memo", Type: field.TypeString},
+		{Name: "block_number", Type: field.TypeUint64},
+	}
+	// TransactionMemosTable holds the schema information for the "transaction_memos" table.
+	TransactionMemosTable = &schema.Table{
+		Name:       "transaction_memos",
+		Columns:    TransactionMemosColumns,
+		PrimaryKey: []*schema.Column{TransactionMemosColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "transactionmemo_transaction_hash_book_nft_id_token_id",
+				Unique:  true,
+				Columns: []*schema.Column{TransactionMemosColumns[1], TransactionMemosColumns[2], TransactionMemosColumns[5]},
+			},
+			{
+				Name:    "transactionmemo_book_nft_id_token_id",
+				Unique:  false,
+				Columns: []*schema.Column{TransactionMemosColumns[2], TransactionMemosColumns[5]},
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AccountsTable,
 		EvmEventsTable,
+		EvmEventProcessedBlockHeightsTable,
 		NftsTable,
 		NftClassesTable,
+		TransactionMemosTable,
 	}
 )
 

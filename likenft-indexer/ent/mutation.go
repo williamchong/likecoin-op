@@ -8,9 +8,13 @@ import (
 	"fmt"
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/evmevent"
+	"likenft-indexer/ent/evmeventprocessedblockheight"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/predicate"
+	"likenft-indexer/ent/transactionmemo"
+	"likenft-indexer/internal/evm/model"
+	"math/big"
 	"sync"
 	"time"
 
@@ -27,10 +31,12 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAccount  = "Account"
-	TypeEVMEvent = "EVMEvent"
-	TypeNFT      = "NFT"
-	TypeNFTClass = "NFTClass"
+	TypeAccount                      = "Account"
+	TypeEVMEvent                     = "EVMEvent"
+	TypeEVMEventProcessedBlockHeight = "EVMEventProcessedBlockHeight"
+	TypeNFT                          = "NFT"
+	TypeNFTClass                     = "NFTClass"
+	TypeTransactionMemo              = "TransactionMemo"
 )
 
 // AccountMutation represents an operation that mutates the Account nodes in the graph.
@@ -687,26 +693,36 @@ func (m *AccountMutation) ResetEdge(name string) error {
 // EVMEventMutation represents an operation that mutates the EVMEvent nodes in the graph.
 type EVMEventMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	transaction_hash *string
-	block_hash       *string
-	block_number     *uint64
-	addblock_number  *int64
-	log_index        *uint64
-	addlog_index     *int64
-	address          *string
-	topic0           *string
-	topic1           *string
-	topic2           *string
-	topic3           *string
-	data             *string
-	timestamp        *time.Time
-	clearedFields    map[string]struct{}
-	done             bool
-	oldValue         func(context.Context) (*EVMEvent, error)
-	predicates       []predicate.EVMEvent
+	op                   Op
+	typ                  string
+	id                   *int
+	transaction_hash     *string
+	transaction_index    *uint
+	addtransaction_index *int
+	block_hash           *string
+	block_number         *uint64
+	addblock_number      *int64
+	log_index            *uint
+	addlog_index         *int
+	address              *string
+	topic0               *string
+	topic0_hex           *string
+	topic1               *string
+	topic1_hex           *string
+	topic2               *string
+	topic2_hex           *string
+	topic3               *string
+	topic3_hex           *string
+	data                 *string
+	data_hex             *string
+	removed              *bool
+	status               *evmevent.Status
+	failed_reason        *string
+	timestamp            *time.Time
+	clearedFields        map[string]struct{}
+	done                 bool
+	oldValue             func(context.Context) (*EVMEvent, error)
+	predicates           []predicate.EVMEvent
 }
 
 var _ ent.Mutation = (*EVMEventMutation)(nil)
@@ -843,6 +859,62 @@ func (m *EVMEventMutation) ResetTransactionHash() {
 	m.transaction_hash = nil
 }
 
+// SetTransactionIndex sets the "transaction_index" field.
+func (m *EVMEventMutation) SetTransactionIndex(u uint) {
+	m.transaction_index = &u
+	m.addtransaction_index = nil
+}
+
+// TransactionIndex returns the value of the "transaction_index" field in the mutation.
+func (m *EVMEventMutation) TransactionIndex() (r uint, exists bool) {
+	v := m.transaction_index
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTransactionIndex returns the old "transaction_index" field's value of the EVMEvent entity.
+// If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventMutation) OldTransactionIndex(ctx context.Context) (v uint, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTransactionIndex is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTransactionIndex requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTransactionIndex: %w", err)
+	}
+	return oldValue.TransactionIndex, nil
+}
+
+// AddTransactionIndex adds u to the "transaction_index" field.
+func (m *EVMEventMutation) AddTransactionIndex(u int) {
+	if m.addtransaction_index != nil {
+		*m.addtransaction_index += u
+	} else {
+		m.addtransaction_index = &u
+	}
+}
+
+// AddedTransactionIndex returns the value that was added to the "transaction_index" field in this mutation.
+func (m *EVMEventMutation) AddedTransactionIndex() (r int, exists bool) {
+	v := m.addtransaction_index
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTransactionIndex resets all changes to the "transaction_index" field.
+func (m *EVMEventMutation) ResetTransactionIndex() {
+	m.transaction_index = nil
+	m.addtransaction_index = nil
+}
+
 // SetBlockHash sets the "block_hash" field.
 func (m *EVMEventMutation) SetBlockHash(s string) {
 	m.block_hash = &s
@@ -936,13 +1008,13 @@ func (m *EVMEventMutation) ResetBlockNumber() {
 }
 
 // SetLogIndex sets the "log_index" field.
-func (m *EVMEventMutation) SetLogIndex(u uint64) {
+func (m *EVMEventMutation) SetLogIndex(u uint) {
 	m.log_index = &u
 	m.addlog_index = nil
 }
 
 // LogIndex returns the value of the "log_index" field in the mutation.
-func (m *EVMEventMutation) LogIndex() (r uint64, exists bool) {
+func (m *EVMEventMutation) LogIndex() (r uint, exists bool) {
 	v := m.log_index
 	if v == nil {
 		return
@@ -953,7 +1025,7 @@ func (m *EVMEventMutation) LogIndex() (r uint64, exists bool) {
 // OldLogIndex returns the old "log_index" field's value of the EVMEvent entity.
 // If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EVMEventMutation) OldLogIndex(ctx context.Context) (v uint64, err error) {
+func (m *EVMEventMutation) OldLogIndex(ctx context.Context) (v uint, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldLogIndex is only allowed on UpdateOne operations")
 	}
@@ -968,7 +1040,7 @@ func (m *EVMEventMutation) OldLogIndex(ctx context.Context) (v uint64, err error
 }
 
 // AddLogIndex adds u to the "log_index" field.
-func (m *EVMEventMutation) AddLogIndex(u int64) {
+func (m *EVMEventMutation) AddLogIndex(u int) {
 	if m.addlog_index != nil {
 		*m.addlog_index += u
 	} else {
@@ -977,7 +1049,7 @@ func (m *EVMEventMutation) AddLogIndex(u int64) {
 }
 
 // AddedLogIndex returns the value that was added to the "log_index" field in this mutation.
-func (m *EVMEventMutation) AddedLogIndex() (r int64, exists bool) {
+func (m *EVMEventMutation) AddedLogIndex() (r int, exists bool) {
 	v := m.addlog_index
 	if v == nil {
 		return
@@ -1063,6 +1135,42 @@ func (m *EVMEventMutation) ResetTopic0() {
 	m.topic0 = nil
 }
 
+// SetTopic0Hex sets the "topic0_hex" field.
+func (m *EVMEventMutation) SetTopic0Hex(s string) {
+	m.topic0_hex = &s
+}
+
+// Topic0Hex returns the value of the "topic0_hex" field in the mutation.
+func (m *EVMEventMutation) Topic0Hex() (r string, exists bool) {
+	v := m.topic0_hex
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTopic0Hex returns the old "topic0_hex" field's value of the EVMEvent entity.
+// If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventMutation) OldTopic0Hex(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTopic0Hex is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTopic0Hex requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTopic0Hex: %w", err)
+	}
+	return oldValue.Topic0Hex, nil
+}
+
+// ResetTopic0Hex resets all changes to the "topic0_hex" field.
+func (m *EVMEventMutation) ResetTopic0Hex() {
+	m.topic0_hex = nil
+}
+
 // SetTopic1 sets the "topic1" field.
 func (m *EVMEventMutation) SetTopic1(s string) {
 	m.topic1 = &s
@@ -1080,7 +1188,7 @@ func (m *EVMEventMutation) Topic1() (r string, exists bool) {
 // OldTopic1 returns the old "topic1" field's value of the EVMEvent entity.
 // If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EVMEventMutation) OldTopic1(ctx context.Context) (v string, err error) {
+func (m *EVMEventMutation) OldTopic1(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldTopic1 is only allowed on UpdateOne operations")
 	}
@@ -1094,9 +1202,71 @@ func (m *EVMEventMutation) OldTopic1(ctx context.Context) (v string, err error) 
 	return oldValue.Topic1, nil
 }
 
+// ClearTopic1 clears the value of the "topic1" field.
+func (m *EVMEventMutation) ClearTopic1() {
+	m.topic1 = nil
+	m.clearedFields[evmevent.FieldTopic1] = struct{}{}
+}
+
+// Topic1Cleared returns if the "topic1" field was cleared in this mutation.
+func (m *EVMEventMutation) Topic1Cleared() bool {
+	_, ok := m.clearedFields[evmevent.FieldTopic1]
+	return ok
+}
+
 // ResetTopic1 resets all changes to the "topic1" field.
 func (m *EVMEventMutation) ResetTopic1() {
 	m.topic1 = nil
+	delete(m.clearedFields, evmevent.FieldTopic1)
+}
+
+// SetTopic1Hex sets the "topic1_hex" field.
+func (m *EVMEventMutation) SetTopic1Hex(s string) {
+	m.topic1_hex = &s
+}
+
+// Topic1Hex returns the value of the "topic1_hex" field in the mutation.
+func (m *EVMEventMutation) Topic1Hex() (r string, exists bool) {
+	v := m.topic1_hex
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTopic1Hex returns the old "topic1_hex" field's value of the EVMEvent entity.
+// If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventMutation) OldTopic1Hex(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTopic1Hex is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTopic1Hex requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTopic1Hex: %w", err)
+	}
+	return oldValue.Topic1Hex, nil
+}
+
+// ClearTopic1Hex clears the value of the "topic1_hex" field.
+func (m *EVMEventMutation) ClearTopic1Hex() {
+	m.topic1_hex = nil
+	m.clearedFields[evmevent.FieldTopic1Hex] = struct{}{}
+}
+
+// Topic1HexCleared returns if the "topic1_hex" field was cleared in this mutation.
+func (m *EVMEventMutation) Topic1HexCleared() bool {
+	_, ok := m.clearedFields[evmevent.FieldTopic1Hex]
+	return ok
+}
+
+// ResetTopic1Hex resets all changes to the "topic1_hex" field.
+func (m *EVMEventMutation) ResetTopic1Hex() {
+	m.topic1_hex = nil
+	delete(m.clearedFields, evmevent.FieldTopic1Hex)
 }
 
 // SetTopic2 sets the "topic2" field.
@@ -1116,7 +1286,7 @@ func (m *EVMEventMutation) Topic2() (r string, exists bool) {
 // OldTopic2 returns the old "topic2" field's value of the EVMEvent entity.
 // If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EVMEventMutation) OldTopic2(ctx context.Context) (v string, err error) {
+func (m *EVMEventMutation) OldTopic2(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldTopic2 is only allowed on UpdateOne operations")
 	}
@@ -1130,9 +1300,71 @@ func (m *EVMEventMutation) OldTopic2(ctx context.Context) (v string, err error) 
 	return oldValue.Topic2, nil
 }
 
+// ClearTopic2 clears the value of the "topic2" field.
+func (m *EVMEventMutation) ClearTopic2() {
+	m.topic2 = nil
+	m.clearedFields[evmevent.FieldTopic2] = struct{}{}
+}
+
+// Topic2Cleared returns if the "topic2" field was cleared in this mutation.
+func (m *EVMEventMutation) Topic2Cleared() bool {
+	_, ok := m.clearedFields[evmevent.FieldTopic2]
+	return ok
+}
+
 // ResetTopic2 resets all changes to the "topic2" field.
 func (m *EVMEventMutation) ResetTopic2() {
 	m.topic2 = nil
+	delete(m.clearedFields, evmevent.FieldTopic2)
+}
+
+// SetTopic2Hex sets the "topic2_hex" field.
+func (m *EVMEventMutation) SetTopic2Hex(s string) {
+	m.topic2_hex = &s
+}
+
+// Topic2Hex returns the value of the "topic2_hex" field in the mutation.
+func (m *EVMEventMutation) Topic2Hex() (r string, exists bool) {
+	v := m.topic2_hex
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTopic2Hex returns the old "topic2_hex" field's value of the EVMEvent entity.
+// If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventMutation) OldTopic2Hex(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTopic2Hex is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTopic2Hex requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTopic2Hex: %w", err)
+	}
+	return oldValue.Topic2Hex, nil
+}
+
+// ClearTopic2Hex clears the value of the "topic2_hex" field.
+func (m *EVMEventMutation) ClearTopic2Hex() {
+	m.topic2_hex = nil
+	m.clearedFields[evmevent.FieldTopic2Hex] = struct{}{}
+}
+
+// Topic2HexCleared returns if the "topic2_hex" field was cleared in this mutation.
+func (m *EVMEventMutation) Topic2HexCleared() bool {
+	_, ok := m.clearedFields[evmevent.FieldTopic2Hex]
+	return ok
+}
+
+// ResetTopic2Hex resets all changes to the "topic2_hex" field.
+func (m *EVMEventMutation) ResetTopic2Hex() {
+	m.topic2_hex = nil
+	delete(m.clearedFields, evmevent.FieldTopic2Hex)
 }
 
 // SetTopic3 sets the "topic3" field.
@@ -1152,7 +1384,7 @@ func (m *EVMEventMutation) Topic3() (r string, exists bool) {
 // OldTopic3 returns the old "topic3" field's value of the EVMEvent entity.
 // If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EVMEventMutation) OldTopic3(ctx context.Context) (v string, err error) {
+func (m *EVMEventMutation) OldTopic3(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldTopic3 is only allowed on UpdateOne operations")
 	}
@@ -1166,9 +1398,71 @@ func (m *EVMEventMutation) OldTopic3(ctx context.Context) (v string, err error) 
 	return oldValue.Topic3, nil
 }
 
+// ClearTopic3 clears the value of the "topic3" field.
+func (m *EVMEventMutation) ClearTopic3() {
+	m.topic3 = nil
+	m.clearedFields[evmevent.FieldTopic3] = struct{}{}
+}
+
+// Topic3Cleared returns if the "topic3" field was cleared in this mutation.
+func (m *EVMEventMutation) Topic3Cleared() bool {
+	_, ok := m.clearedFields[evmevent.FieldTopic3]
+	return ok
+}
+
 // ResetTopic3 resets all changes to the "topic3" field.
 func (m *EVMEventMutation) ResetTopic3() {
 	m.topic3 = nil
+	delete(m.clearedFields, evmevent.FieldTopic3)
+}
+
+// SetTopic3Hex sets the "topic3_hex" field.
+func (m *EVMEventMutation) SetTopic3Hex(s string) {
+	m.topic3_hex = &s
+}
+
+// Topic3Hex returns the value of the "topic3_hex" field in the mutation.
+func (m *EVMEventMutation) Topic3Hex() (r string, exists bool) {
+	v := m.topic3_hex
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTopic3Hex returns the old "topic3_hex" field's value of the EVMEvent entity.
+// If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventMutation) OldTopic3Hex(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTopic3Hex is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTopic3Hex requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTopic3Hex: %w", err)
+	}
+	return oldValue.Topic3Hex, nil
+}
+
+// ClearTopic3Hex clears the value of the "topic3_hex" field.
+func (m *EVMEventMutation) ClearTopic3Hex() {
+	m.topic3_hex = nil
+	m.clearedFields[evmevent.FieldTopic3Hex] = struct{}{}
+}
+
+// Topic3HexCleared returns if the "topic3_hex" field was cleared in this mutation.
+func (m *EVMEventMutation) Topic3HexCleared() bool {
+	_, ok := m.clearedFields[evmevent.FieldTopic3Hex]
+	return ok
+}
+
+// ResetTopic3Hex resets all changes to the "topic3_hex" field.
+func (m *EVMEventMutation) ResetTopic3Hex() {
+	m.topic3_hex = nil
+	delete(m.clearedFields, evmevent.FieldTopic3Hex)
 }
 
 // SetData sets the "data" field.
@@ -1188,7 +1482,7 @@ func (m *EVMEventMutation) Data() (r string, exists bool) {
 // OldData returns the old "data" field's value of the EVMEvent entity.
 // If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EVMEventMutation) OldData(ctx context.Context) (v string, err error) {
+func (m *EVMEventMutation) OldData(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldData is only allowed on UpdateOne operations")
 	}
@@ -1202,9 +1496,192 @@ func (m *EVMEventMutation) OldData(ctx context.Context) (v string, err error) {
 	return oldValue.Data, nil
 }
 
+// ClearData clears the value of the "data" field.
+func (m *EVMEventMutation) ClearData() {
+	m.data = nil
+	m.clearedFields[evmevent.FieldData] = struct{}{}
+}
+
+// DataCleared returns if the "data" field was cleared in this mutation.
+func (m *EVMEventMutation) DataCleared() bool {
+	_, ok := m.clearedFields[evmevent.FieldData]
+	return ok
+}
+
 // ResetData resets all changes to the "data" field.
 func (m *EVMEventMutation) ResetData() {
 	m.data = nil
+	delete(m.clearedFields, evmevent.FieldData)
+}
+
+// SetDataHex sets the "data_hex" field.
+func (m *EVMEventMutation) SetDataHex(s string) {
+	m.data_hex = &s
+}
+
+// DataHex returns the value of the "data_hex" field in the mutation.
+func (m *EVMEventMutation) DataHex() (r string, exists bool) {
+	v := m.data_hex
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDataHex returns the old "data_hex" field's value of the EVMEvent entity.
+// If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventMutation) OldDataHex(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDataHex is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDataHex requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDataHex: %w", err)
+	}
+	return oldValue.DataHex, nil
+}
+
+// ClearDataHex clears the value of the "data_hex" field.
+func (m *EVMEventMutation) ClearDataHex() {
+	m.data_hex = nil
+	m.clearedFields[evmevent.FieldDataHex] = struct{}{}
+}
+
+// DataHexCleared returns if the "data_hex" field was cleared in this mutation.
+func (m *EVMEventMutation) DataHexCleared() bool {
+	_, ok := m.clearedFields[evmevent.FieldDataHex]
+	return ok
+}
+
+// ResetDataHex resets all changes to the "data_hex" field.
+func (m *EVMEventMutation) ResetDataHex() {
+	m.data_hex = nil
+	delete(m.clearedFields, evmevent.FieldDataHex)
+}
+
+// SetRemoved sets the "removed" field.
+func (m *EVMEventMutation) SetRemoved(b bool) {
+	m.removed = &b
+}
+
+// Removed returns the value of the "removed" field in the mutation.
+func (m *EVMEventMutation) Removed() (r bool, exists bool) {
+	v := m.removed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRemoved returns the old "removed" field's value of the EVMEvent entity.
+// If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventMutation) OldRemoved(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRemoved is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRemoved requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRemoved: %w", err)
+	}
+	return oldValue.Removed, nil
+}
+
+// ResetRemoved resets all changes to the "removed" field.
+func (m *EVMEventMutation) ResetRemoved() {
+	m.removed = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *EVMEventMutation) SetStatus(e evmevent.Status) {
+	m.status = &e
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *EVMEventMutation) Status() (r evmevent.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the EVMEvent entity.
+// If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventMutation) OldStatus(ctx context.Context) (v evmevent.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *EVMEventMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetFailedReason sets the "failed_reason" field.
+func (m *EVMEventMutation) SetFailedReason(s string) {
+	m.failed_reason = &s
+}
+
+// FailedReason returns the value of the "failed_reason" field in the mutation.
+func (m *EVMEventMutation) FailedReason() (r string, exists bool) {
+	v := m.failed_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFailedReason returns the old "failed_reason" field's value of the EVMEvent entity.
+// If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventMutation) OldFailedReason(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFailedReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFailedReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFailedReason: %w", err)
+	}
+	return oldValue.FailedReason, nil
+}
+
+// ClearFailedReason clears the value of the "failed_reason" field.
+func (m *EVMEventMutation) ClearFailedReason() {
+	m.failed_reason = nil
+	m.clearedFields[evmevent.FieldFailedReason] = struct{}{}
+}
+
+// FailedReasonCleared returns if the "failed_reason" field was cleared in this mutation.
+func (m *EVMEventMutation) FailedReasonCleared() bool {
+	_, ok := m.clearedFields[evmevent.FieldFailedReason]
+	return ok
+}
+
+// ResetFailedReason resets all changes to the "failed_reason" field.
+func (m *EVMEventMutation) ResetFailedReason() {
+	m.failed_reason = nil
+	delete(m.clearedFields, evmevent.FieldFailedReason)
 }
 
 // SetTimestamp sets the "timestamp" field.
@@ -1277,9 +1754,12 @@ func (m *EVMEventMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EVMEventMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 20)
 	if m.transaction_hash != nil {
 		fields = append(fields, evmevent.FieldTransactionHash)
+	}
+	if m.transaction_index != nil {
+		fields = append(fields, evmevent.FieldTransactionIndex)
 	}
 	if m.block_hash != nil {
 		fields = append(fields, evmevent.FieldBlockHash)
@@ -1296,17 +1776,41 @@ func (m *EVMEventMutation) Fields() []string {
 	if m.topic0 != nil {
 		fields = append(fields, evmevent.FieldTopic0)
 	}
+	if m.topic0_hex != nil {
+		fields = append(fields, evmevent.FieldTopic0Hex)
+	}
 	if m.topic1 != nil {
 		fields = append(fields, evmevent.FieldTopic1)
+	}
+	if m.topic1_hex != nil {
+		fields = append(fields, evmevent.FieldTopic1Hex)
 	}
 	if m.topic2 != nil {
 		fields = append(fields, evmevent.FieldTopic2)
 	}
+	if m.topic2_hex != nil {
+		fields = append(fields, evmevent.FieldTopic2Hex)
+	}
 	if m.topic3 != nil {
 		fields = append(fields, evmevent.FieldTopic3)
 	}
+	if m.topic3_hex != nil {
+		fields = append(fields, evmevent.FieldTopic3Hex)
+	}
 	if m.data != nil {
 		fields = append(fields, evmevent.FieldData)
+	}
+	if m.data_hex != nil {
+		fields = append(fields, evmevent.FieldDataHex)
+	}
+	if m.removed != nil {
+		fields = append(fields, evmevent.FieldRemoved)
+	}
+	if m.status != nil {
+		fields = append(fields, evmevent.FieldStatus)
+	}
+	if m.failed_reason != nil {
+		fields = append(fields, evmevent.FieldFailedReason)
 	}
 	if m.timestamp != nil {
 		fields = append(fields, evmevent.FieldTimestamp)
@@ -1321,6 +1825,8 @@ func (m *EVMEventMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case evmevent.FieldTransactionHash:
 		return m.TransactionHash()
+	case evmevent.FieldTransactionIndex:
+		return m.TransactionIndex()
 	case evmevent.FieldBlockHash:
 		return m.BlockHash()
 	case evmevent.FieldBlockNumber:
@@ -1331,14 +1837,30 @@ func (m *EVMEventMutation) Field(name string) (ent.Value, bool) {
 		return m.Address()
 	case evmevent.FieldTopic0:
 		return m.Topic0()
+	case evmevent.FieldTopic0Hex:
+		return m.Topic0Hex()
 	case evmevent.FieldTopic1:
 		return m.Topic1()
+	case evmevent.FieldTopic1Hex:
+		return m.Topic1Hex()
 	case evmevent.FieldTopic2:
 		return m.Topic2()
+	case evmevent.FieldTopic2Hex:
+		return m.Topic2Hex()
 	case evmevent.FieldTopic3:
 		return m.Topic3()
+	case evmevent.FieldTopic3Hex:
+		return m.Topic3Hex()
 	case evmevent.FieldData:
 		return m.Data()
+	case evmevent.FieldDataHex:
+		return m.DataHex()
+	case evmevent.FieldRemoved:
+		return m.Removed()
+	case evmevent.FieldStatus:
+		return m.Status()
+	case evmevent.FieldFailedReason:
+		return m.FailedReason()
 	case evmevent.FieldTimestamp:
 		return m.Timestamp()
 	}
@@ -1352,6 +1874,8 @@ func (m *EVMEventMutation) OldField(ctx context.Context, name string) (ent.Value
 	switch name {
 	case evmevent.FieldTransactionHash:
 		return m.OldTransactionHash(ctx)
+	case evmevent.FieldTransactionIndex:
+		return m.OldTransactionIndex(ctx)
 	case evmevent.FieldBlockHash:
 		return m.OldBlockHash(ctx)
 	case evmevent.FieldBlockNumber:
@@ -1362,14 +1886,30 @@ func (m *EVMEventMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldAddress(ctx)
 	case evmevent.FieldTopic0:
 		return m.OldTopic0(ctx)
+	case evmevent.FieldTopic0Hex:
+		return m.OldTopic0Hex(ctx)
 	case evmevent.FieldTopic1:
 		return m.OldTopic1(ctx)
+	case evmevent.FieldTopic1Hex:
+		return m.OldTopic1Hex(ctx)
 	case evmevent.FieldTopic2:
 		return m.OldTopic2(ctx)
+	case evmevent.FieldTopic2Hex:
+		return m.OldTopic2Hex(ctx)
 	case evmevent.FieldTopic3:
 		return m.OldTopic3(ctx)
+	case evmevent.FieldTopic3Hex:
+		return m.OldTopic3Hex(ctx)
 	case evmevent.FieldData:
 		return m.OldData(ctx)
+	case evmevent.FieldDataHex:
+		return m.OldDataHex(ctx)
+	case evmevent.FieldRemoved:
+		return m.OldRemoved(ctx)
+	case evmevent.FieldStatus:
+		return m.OldStatus(ctx)
+	case evmevent.FieldFailedReason:
+		return m.OldFailedReason(ctx)
 	case evmevent.FieldTimestamp:
 		return m.OldTimestamp(ctx)
 	}
@@ -1388,6 +1928,13 @@ func (m *EVMEventMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetTransactionHash(v)
 		return nil
+	case evmevent.FieldTransactionIndex:
+		v, ok := value.(uint)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTransactionIndex(v)
+		return nil
 	case evmevent.FieldBlockHash:
 		v, ok := value.(string)
 		if !ok {
@@ -1403,7 +1950,7 @@ func (m *EVMEventMutation) SetField(name string, value ent.Value) error {
 		m.SetBlockNumber(v)
 		return nil
 	case evmevent.FieldLogIndex:
-		v, ok := value.(uint64)
+		v, ok := value.(uint)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1423,12 +1970,26 @@ func (m *EVMEventMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetTopic0(v)
 		return nil
+	case evmevent.FieldTopic0Hex:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTopic0Hex(v)
+		return nil
 	case evmevent.FieldTopic1:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTopic1(v)
+		return nil
+	case evmevent.FieldTopic1Hex:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTopic1Hex(v)
 		return nil
 	case evmevent.FieldTopic2:
 		v, ok := value.(string)
@@ -1437,6 +1998,13 @@ func (m *EVMEventMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetTopic2(v)
 		return nil
+	case evmevent.FieldTopic2Hex:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTopic2Hex(v)
+		return nil
 	case evmevent.FieldTopic3:
 		v, ok := value.(string)
 		if !ok {
@@ -1444,12 +2012,47 @@ func (m *EVMEventMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetTopic3(v)
 		return nil
+	case evmevent.FieldTopic3Hex:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTopic3Hex(v)
+		return nil
 	case evmevent.FieldData:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetData(v)
+		return nil
+	case evmevent.FieldDataHex:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDataHex(v)
+		return nil
+	case evmevent.FieldRemoved:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRemoved(v)
+		return nil
+	case evmevent.FieldStatus:
+		v, ok := value.(evmevent.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case evmevent.FieldFailedReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFailedReason(v)
 		return nil
 	case evmevent.FieldTimestamp:
 		v, ok := value.(time.Time)
@@ -1466,6 +2069,9 @@ func (m *EVMEventMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *EVMEventMutation) AddedFields() []string {
 	var fields []string
+	if m.addtransaction_index != nil {
+		fields = append(fields, evmevent.FieldTransactionIndex)
+	}
 	if m.addblock_number != nil {
 		fields = append(fields, evmevent.FieldBlockNumber)
 	}
@@ -1480,6 +2086,8 @@ func (m *EVMEventMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *EVMEventMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case evmevent.FieldTransactionIndex:
+		return m.AddedTransactionIndex()
 	case evmevent.FieldBlockNumber:
 		return m.AddedBlockNumber()
 	case evmevent.FieldLogIndex:
@@ -1493,6 +2101,13 @@ func (m *EVMEventMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *EVMEventMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case evmevent.FieldTransactionIndex:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTransactionIndex(v)
+		return nil
 	case evmevent.FieldBlockNumber:
 		v, ok := value.(int64)
 		if !ok {
@@ -1501,7 +2116,7 @@ func (m *EVMEventMutation) AddField(name string, value ent.Value) error {
 		m.AddBlockNumber(v)
 		return nil
 	case evmevent.FieldLogIndex:
-		v, ok := value.(int64)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1514,7 +2129,35 @@ func (m *EVMEventMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *EVMEventMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(evmevent.FieldTopic1) {
+		fields = append(fields, evmevent.FieldTopic1)
+	}
+	if m.FieldCleared(evmevent.FieldTopic1Hex) {
+		fields = append(fields, evmevent.FieldTopic1Hex)
+	}
+	if m.FieldCleared(evmevent.FieldTopic2) {
+		fields = append(fields, evmevent.FieldTopic2)
+	}
+	if m.FieldCleared(evmevent.FieldTopic2Hex) {
+		fields = append(fields, evmevent.FieldTopic2Hex)
+	}
+	if m.FieldCleared(evmevent.FieldTopic3) {
+		fields = append(fields, evmevent.FieldTopic3)
+	}
+	if m.FieldCleared(evmevent.FieldTopic3Hex) {
+		fields = append(fields, evmevent.FieldTopic3Hex)
+	}
+	if m.FieldCleared(evmevent.FieldData) {
+		fields = append(fields, evmevent.FieldData)
+	}
+	if m.FieldCleared(evmevent.FieldDataHex) {
+		fields = append(fields, evmevent.FieldDataHex)
+	}
+	if m.FieldCleared(evmevent.FieldFailedReason) {
+		fields = append(fields, evmevent.FieldFailedReason)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1527,6 +2170,35 @@ func (m *EVMEventMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *EVMEventMutation) ClearField(name string) error {
+	switch name {
+	case evmevent.FieldTopic1:
+		m.ClearTopic1()
+		return nil
+	case evmevent.FieldTopic1Hex:
+		m.ClearTopic1Hex()
+		return nil
+	case evmevent.FieldTopic2:
+		m.ClearTopic2()
+		return nil
+	case evmevent.FieldTopic2Hex:
+		m.ClearTopic2Hex()
+		return nil
+	case evmevent.FieldTopic3:
+		m.ClearTopic3()
+		return nil
+	case evmevent.FieldTopic3Hex:
+		m.ClearTopic3Hex()
+		return nil
+	case evmevent.FieldData:
+		m.ClearData()
+		return nil
+	case evmevent.FieldDataHex:
+		m.ClearDataHex()
+		return nil
+	case evmevent.FieldFailedReason:
+		m.ClearFailedReason()
+		return nil
+	}
 	return fmt.Errorf("unknown EVMEvent nullable field %s", name)
 }
 
@@ -1536,6 +2208,9 @@ func (m *EVMEventMutation) ResetField(name string) error {
 	switch name {
 	case evmevent.FieldTransactionHash:
 		m.ResetTransactionHash()
+		return nil
+	case evmevent.FieldTransactionIndex:
+		m.ResetTransactionIndex()
 		return nil
 	case evmevent.FieldBlockHash:
 		m.ResetBlockHash()
@@ -1552,17 +2227,41 @@ func (m *EVMEventMutation) ResetField(name string) error {
 	case evmevent.FieldTopic0:
 		m.ResetTopic0()
 		return nil
+	case evmevent.FieldTopic0Hex:
+		m.ResetTopic0Hex()
+		return nil
 	case evmevent.FieldTopic1:
 		m.ResetTopic1()
+		return nil
+	case evmevent.FieldTopic1Hex:
+		m.ResetTopic1Hex()
 		return nil
 	case evmevent.FieldTopic2:
 		m.ResetTopic2()
 		return nil
+	case evmevent.FieldTopic2Hex:
+		m.ResetTopic2Hex()
+		return nil
 	case evmevent.FieldTopic3:
 		m.ResetTopic3()
 		return nil
+	case evmevent.FieldTopic3Hex:
+		m.ResetTopic3Hex()
+		return nil
 	case evmevent.FieldData:
 		m.ResetData()
+		return nil
+	case evmevent.FieldDataHex:
+		m.ResetDataHex()
+		return nil
+	case evmevent.FieldRemoved:
+		m.ResetRemoved()
+		return nil
+	case evmevent.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case evmevent.FieldFailedReason:
+		m.ResetFailedReason()
 		return nil
 	case evmevent.FieldTimestamp:
 		m.ResetTimestamp()
@@ -1619,31 +2318,560 @@ func (m *EVMEventMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown EVMEvent edge %s", name)
 }
 
+// EVMEventProcessedBlockHeightMutation represents an operation that mutates the EVMEventProcessedBlockHeight nodes in the graph.
+type EVMEventProcessedBlockHeightMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int
+	contract_type    *evmeventprocessedblockheight.ContractType
+	contract_address *string
+	event            *evmeventprocessedblockheight.Event
+	block_height     *uint64
+	addblock_height  *int64
+	clearedFields    map[string]struct{}
+	done             bool
+	oldValue         func(context.Context) (*EVMEventProcessedBlockHeight, error)
+	predicates       []predicate.EVMEventProcessedBlockHeight
+}
+
+var _ ent.Mutation = (*EVMEventProcessedBlockHeightMutation)(nil)
+
+// evmeventprocessedblockheightOption allows management of the mutation configuration using functional options.
+type evmeventprocessedblockheightOption func(*EVMEventProcessedBlockHeightMutation)
+
+// newEVMEventProcessedBlockHeightMutation creates new mutation for the EVMEventProcessedBlockHeight entity.
+func newEVMEventProcessedBlockHeightMutation(c config, op Op, opts ...evmeventprocessedblockheightOption) *EVMEventProcessedBlockHeightMutation {
+	m := &EVMEventProcessedBlockHeightMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeEVMEventProcessedBlockHeight,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withEVMEventProcessedBlockHeightID sets the ID field of the mutation.
+func withEVMEventProcessedBlockHeightID(id int) evmeventprocessedblockheightOption {
+	return func(m *EVMEventProcessedBlockHeightMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *EVMEventProcessedBlockHeight
+		)
+		m.oldValue = func(ctx context.Context) (*EVMEventProcessedBlockHeight, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().EVMEventProcessedBlockHeight.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withEVMEventProcessedBlockHeight sets the old EVMEventProcessedBlockHeight of the mutation.
+func withEVMEventProcessedBlockHeight(node *EVMEventProcessedBlockHeight) evmeventprocessedblockheightOption {
+	return func(m *EVMEventProcessedBlockHeightMutation) {
+		m.oldValue = func(context.Context) (*EVMEventProcessedBlockHeight, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m EVMEventProcessedBlockHeightMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m EVMEventProcessedBlockHeightMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *EVMEventProcessedBlockHeightMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *EVMEventProcessedBlockHeightMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().EVMEventProcessedBlockHeight.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetContractType sets the "contract_type" field.
+func (m *EVMEventProcessedBlockHeightMutation) SetContractType(et evmeventprocessedblockheight.ContractType) {
+	m.contract_type = &et
+}
+
+// ContractType returns the value of the "contract_type" field in the mutation.
+func (m *EVMEventProcessedBlockHeightMutation) ContractType() (r evmeventprocessedblockheight.ContractType, exists bool) {
+	v := m.contract_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContractType returns the old "contract_type" field's value of the EVMEventProcessedBlockHeight entity.
+// If the EVMEventProcessedBlockHeight object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventProcessedBlockHeightMutation) OldContractType(ctx context.Context) (v evmeventprocessedblockheight.ContractType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContractType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContractType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContractType: %w", err)
+	}
+	return oldValue.ContractType, nil
+}
+
+// ResetContractType resets all changes to the "contract_type" field.
+func (m *EVMEventProcessedBlockHeightMutation) ResetContractType() {
+	m.contract_type = nil
+}
+
+// SetContractAddress sets the "contract_address" field.
+func (m *EVMEventProcessedBlockHeightMutation) SetContractAddress(s string) {
+	m.contract_address = &s
+}
+
+// ContractAddress returns the value of the "contract_address" field in the mutation.
+func (m *EVMEventProcessedBlockHeightMutation) ContractAddress() (r string, exists bool) {
+	v := m.contract_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContractAddress returns the old "contract_address" field's value of the EVMEventProcessedBlockHeight entity.
+// If the EVMEventProcessedBlockHeight object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventProcessedBlockHeightMutation) OldContractAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContractAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContractAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContractAddress: %w", err)
+	}
+	return oldValue.ContractAddress, nil
+}
+
+// ResetContractAddress resets all changes to the "contract_address" field.
+func (m *EVMEventProcessedBlockHeightMutation) ResetContractAddress() {
+	m.contract_address = nil
+}
+
+// SetEvent sets the "event" field.
+func (m *EVMEventProcessedBlockHeightMutation) SetEvent(e evmeventprocessedblockheight.Event) {
+	m.event = &e
+}
+
+// Event returns the value of the "event" field in the mutation.
+func (m *EVMEventProcessedBlockHeightMutation) Event() (r evmeventprocessedblockheight.Event, exists bool) {
+	v := m.event
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEvent returns the old "event" field's value of the EVMEventProcessedBlockHeight entity.
+// If the EVMEventProcessedBlockHeight object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventProcessedBlockHeightMutation) OldEvent(ctx context.Context) (v evmeventprocessedblockheight.Event, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEvent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEvent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEvent: %w", err)
+	}
+	return oldValue.Event, nil
+}
+
+// ResetEvent resets all changes to the "event" field.
+func (m *EVMEventProcessedBlockHeightMutation) ResetEvent() {
+	m.event = nil
+}
+
+// SetBlockHeight sets the "block_height" field.
+func (m *EVMEventProcessedBlockHeightMutation) SetBlockHeight(u uint64) {
+	m.block_height = &u
+	m.addblock_height = nil
+}
+
+// BlockHeight returns the value of the "block_height" field in the mutation.
+func (m *EVMEventProcessedBlockHeightMutation) BlockHeight() (r uint64, exists bool) {
+	v := m.block_height
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBlockHeight returns the old "block_height" field's value of the EVMEventProcessedBlockHeight entity.
+// If the EVMEventProcessedBlockHeight object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventProcessedBlockHeightMutation) OldBlockHeight(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBlockHeight is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBlockHeight requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBlockHeight: %w", err)
+	}
+	return oldValue.BlockHeight, nil
+}
+
+// AddBlockHeight adds u to the "block_height" field.
+func (m *EVMEventProcessedBlockHeightMutation) AddBlockHeight(u int64) {
+	if m.addblock_height != nil {
+		*m.addblock_height += u
+	} else {
+		m.addblock_height = &u
+	}
+}
+
+// AddedBlockHeight returns the value that was added to the "block_height" field in this mutation.
+func (m *EVMEventProcessedBlockHeightMutation) AddedBlockHeight() (r int64, exists bool) {
+	v := m.addblock_height
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBlockHeight resets all changes to the "block_height" field.
+func (m *EVMEventProcessedBlockHeightMutation) ResetBlockHeight() {
+	m.block_height = nil
+	m.addblock_height = nil
+}
+
+// Where appends a list predicates to the EVMEventProcessedBlockHeightMutation builder.
+func (m *EVMEventProcessedBlockHeightMutation) Where(ps ...predicate.EVMEventProcessedBlockHeight) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the EVMEventProcessedBlockHeightMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *EVMEventProcessedBlockHeightMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.EVMEventProcessedBlockHeight, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *EVMEventProcessedBlockHeightMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *EVMEventProcessedBlockHeightMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (EVMEventProcessedBlockHeight).
+func (m *EVMEventProcessedBlockHeightMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *EVMEventProcessedBlockHeightMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.contract_type != nil {
+		fields = append(fields, evmeventprocessedblockheight.FieldContractType)
+	}
+	if m.contract_address != nil {
+		fields = append(fields, evmeventprocessedblockheight.FieldContractAddress)
+	}
+	if m.event != nil {
+		fields = append(fields, evmeventprocessedblockheight.FieldEvent)
+	}
+	if m.block_height != nil {
+		fields = append(fields, evmeventprocessedblockheight.FieldBlockHeight)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *EVMEventProcessedBlockHeightMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case evmeventprocessedblockheight.FieldContractType:
+		return m.ContractType()
+	case evmeventprocessedblockheight.FieldContractAddress:
+		return m.ContractAddress()
+	case evmeventprocessedblockheight.FieldEvent:
+		return m.Event()
+	case evmeventprocessedblockheight.FieldBlockHeight:
+		return m.BlockHeight()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *EVMEventProcessedBlockHeightMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case evmeventprocessedblockheight.FieldContractType:
+		return m.OldContractType(ctx)
+	case evmeventprocessedblockheight.FieldContractAddress:
+		return m.OldContractAddress(ctx)
+	case evmeventprocessedblockheight.FieldEvent:
+		return m.OldEvent(ctx)
+	case evmeventprocessedblockheight.FieldBlockHeight:
+		return m.OldBlockHeight(ctx)
+	}
+	return nil, fmt.Errorf("unknown EVMEventProcessedBlockHeight field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EVMEventProcessedBlockHeightMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case evmeventprocessedblockheight.FieldContractType:
+		v, ok := value.(evmeventprocessedblockheight.ContractType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContractType(v)
+		return nil
+	case evmeventprocessedblockheight.FieldContractAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContractAddress(v)
+		return nil
+	case evmeventprocessedblockheight.FieldEvent:
+		v, ok := value.(evmeventprocessedblockheight.Event)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEvent(v)
+		return nil
+	case evmeventprocessedblockheight.FieldBlockHeight:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBlockHeight(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EVMEventProcessedBlockHeight field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *EVMEventProcessedBlockHeightMutation) AddedFields() []string {
+	var fields []string
+	if m.addblock_height != nil {
+		fields = append(fields, evmeventprocessedblockheight.FieldBlockHeight)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *EVMEventProcessedBlockHeightMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case evmeventprocessedblockheight.FieldBlockHeight:
+		return m.AddedBlockHeight()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EVMEventProcessedBlockHeightMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case evmeventprocessedblockheight.FieldBlockHeight:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBlockHeight(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EVMEventProcessedBlockHeight numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *EVMEventProcessedBlockHeightMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *EVMEventProcessedBlockHeightMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *EVMEventProcessedBlockHeightMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown EVMEventProcessedBlockHeight nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *EVMEventProcessedBlockHeightMutation) ResetField(name string) error {
+	switch name {
+	case evmeventprocessedblockheight.FieldContractType:
+		m.ResetContractType()
+		return nil
+	case evmeventprocessedblockheight.FieldContractAddress:
+		m.ResetContractAddress()
+		return nil
+	case evmeventprocessedblockheight.FieldEvent:
+		m.ResetEvent()
+		return nil
+	case evmeventprocessedblockheight.FieldBlockHeight:
+		m.ResetBlockHeight()
+		return nil
+	}
+	return fmt.Errorf("unknown EVMEventProcessedBlockHeight field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *EVMEventProcessedBlockHeightMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *EVMEventProcessedBlockHeightMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *EVMEventProcessedBlockHeightMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *EVMEventProcessedBlockHeightMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *EVMEventProcessedBlockHeightMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *EVMEventProcessedBlockHeightMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *EVMEventProcessedBlockHeightMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown EVMEventProcessedBlockHeight unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *EVMEventProcessedBlockHeightMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown EVMEventProcessedBlockHeight edge %s", name)
+}
+
 // NFTMutation represents an operation that mutates the NFT nodes in the graph.
 type NFTMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	token_id      *uint64
-	addtoken_id   *int64
-	token_url     *string
-	raw           *map[string]interface{}
-	name          *string
-	description   *string
-	image         *map[string]interface{}
-	attributes    *map[string]interface{}
-	owner_address *string
-	minted_at     *time.Time
-	updated_at    *time.Time
-	clearedFields map[string]struct{}
-	owner         *int
-	clearedowner  bool
-	class         *int
-	clearedclass  bool
-	done          bool
-	oldValue      func(context.Context) (*NFT, error)
-	predicates    []predicate.NFT
+	op               Op
+	typ              string
+	id               *int
+	contract_address *string
+	token_id         **big.Int
+	token_uri        *string
+	image            *string
+	image_data       *string
+	external_url     *string
+	description      *string
+	name             *string
+	attributes       *[]model.ERC721MetadataAttribute
+	appendattributes []model.ERC721MetadataAttribute
+	background_color *string
+	animation_url    *string
+	youtube_url      *string
+	owner_address    *string
+	minted_at        *time.Time
+	updated_at       *time.Time
+	clearedFields    map[string]struct{}
+	owner            *int
+	clearedowner     bool
+	class            *int
+	clearedclass     bool
+	done             bool
+	oldValue         func(context.Context) (*NFT, error)
+	predicates       []predicate.NFT
 }
 
 var _ ent.Mutation = (*NFTMutation)(nil)
@@ -1744,14 +2972,49 @@ func (m *NFTMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetContractAddress sets the "contract_address" field.
+func (m *NFTMutation) SetContractAddress(s string) {
+	m.contract_address = &s
+}
+
+// ContractAddress returns the value of the "contract_address" field in the mutation.
+func (m *NFTMutation) ContractAddress() (r string, exists bool) {
+	v := m.contract_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContractAddress returns the old "contract_address" field's value of the NFT entity.
+// If the NFT object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NFTMutation) OldContractAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContractAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContractAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContractAddress: %w", err)
+	}
+	return oldValue.ContractAddress, nil
+}
+
+// ResetContractAddress resets all changes to the "contract_address" field.
+func (m *NFTMutation) ResetContractAddress() {
+	m.contract_address = nil
+}
+
 // SetTokenID sets the "token_id" field.
-func (m *NFTMutation) SetTokenID(u uint64) {
-	m.token_id = &u
-	m.addtoken_id = nil
+func (m *NFTMutation) SetTokenID(b *big.Int) {
+	m.token_id = &b
 }
 
 // TokenID returns the value of the "token_id" field in the mutation.
-func (m *NFTMutation) TokenID() (r uint64, exists bool) {
+func (m *NFTMutation) TokenID() (r *big.Int, exists bool) {
 	v := m.token_id
 	if v == nil {
 		return
@@ -1762,7 +3025,7 @@ func (m *NFTMutation) TokenID() (r uint64, exists bool) {
 // OldTokenID returns the old "token_id" field's value of the NFT entity.
 // If the NFT object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NFTMutation) OldTokenID(ctx context.Context) (v uint64, err error) {
+func (m *NFTMutation) OldTokenID(ctx context.Context) (v *big.Int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldTokenID is only allowed on UpdateOne operations")
 	}
@@ -1776,126 +3039,215 @@ func (m *NFTMutation) OldTokenID(ctx context.Context) (v uint64, err error) {
 	return oldValue.TokenID, nil
 }
 
-// AddTokenID adds u to the "token_id" field.
-func (m *NFTMutation) AddTokenID(u int64) {
-	if m.addtoken_id != nil {
-		*m.addtoken_id += u
-	} else {
-		m.addtoken_id = &u
-	}
-}
-
-// AddedTokenID returns the value that was added to the "token_id" field in this mutation.
-func (m *NFTMutation) AddedTokenID() (r int64, exists bool) {
-	v := m.addtoken_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetTokenID resets all changes to the "token_id" field.
 func (m *NFTMutation) ResetTokenID() {
 	m.token_id = nil
-	m.addtoken_id = nil
 }
 
-// SetTokenURL sets the "token_url" field.
-func (m *NFTMutation) SetTokenURL(s string) {
-	m.token_url = &s
+// SetTokenURI sets the "token_uri" field.
+func (m *NFTMutation) SetTokenURI(s string) {
+	m.token_uri = &s
 }
 
-// TokenURL returns the value of the "token_url" field in the mutation.
-func (m *NFTMutation) TokenURL() (r string, exists bool) {
-	v := m.token_url
+// TokenURI returns the value of the "token_uri" field in the mutation.
+func (m *NFTMutation) TokenURI() (r string, exists bool) {
+	v := m.token_uri
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldTokenURL returns the old "token_url" field's value of the NFT entity.
+// OldTokenURI returns the old "token_uri" field's value of the NFT entity.
 // If the NFT object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NFTMutation) OldTokenURL(ctx context.Context) (v string, err error) {
+func (m *NFTMutation) OldTokenURI(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTokenURL is only allowed on UpdateOne operations")
+		return v, errors.New("OldTokenURI is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTokenURL requires an ID field in the mutation")
+		return v, errors.New("OldTokenURI requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTokenURL: %w", err)
+		return v, fmt.Errorf("querying old value for OldTokenURI: %w", err)
 	}
-	return oldValue.TokenURL, nil
+	return oldValue.TokenURI, nil
 }
 
-// ClearTokenURL clears the value of the "token_url" field.
-func (m *NFTMutation) ClearTokenURL() {
-	m.token_url = nil
-	m.clearedFields[nft.FieldTokenURL] = struct{}{}
+// ResetTokenURI resets all changes to the "token_uri" field.
+func (m *NFTMutation) ResetTokenURI() {
+	m.token_uri = nil
 }
 
-// TokenURLCleared returns if the "token_url" field was cleared in this mutation.
-func (m *NFTMutation) TokenURLCleared() bool {
-	_, ok := m.clearedFields[nft.FieldTokenURL]
-	return ok
+// SetImage sets the "image" field.
+func (m *NFTMutation) SetImage(s string) {
+	m.image = &s
 }
 
-// ResetTokenURL resets all changes to the "token_url" field.
-func (m *NFTMutation) ResetTokenURL() {
-	m.token_url = nil
-	delete(m.clearedFields, nft.FieldTokenURL)
-}
-
-// SetRaw sets the "raw" field.
-func (m *NFTMutation) SetRaw(value map[string]interface{}) {
-	m.raw = &value
-}
-
-// Raw returns the value of the "raw" field in the mutation.
-func (m *NFTMutation) Raw() (r map[string]interface{}, exists bool) {
-	v := m.raw
+// Image returns the value of the "image" field in the mutation.
+func (m *NFTMutation) Image() (r string, exists bool) {
+	v := m.image
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldRaw returns the old "raw" field's value of the NFT entity.
+// OldImage returns the old "image" field's value of the NFT entity.
 // If the NFT object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NFTMutation) OldRaw(ctx context.Context) (v map[string]interface{}, err error) {
+func (m *NFTMutation) OldImage(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRaw is only allowed on UpdateOne operations")
+		return v, errors.New("OldImage is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRaw requires an ID field in the mutation")
+		return v, errors.New("OldImage requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRaw: %w", err)
+		return v, fmt.Errorf("querying old value for OldImage: %w", err)
 	}
-	return oldValue.Raw, nil
+	return oldValue.Image, nil
 }
 
-// ClearRaw clears the value of the "raw" field.
-func (m *NFTMutation) ClearRaw() {
-	m.raw = nil
-	m.clearedFields[nft.FieldRaw] = struct{}{}
+// ResetImage resets all changes to the "image" field.
+func (m *NFTMutation) ResetImage() {
+	m.image = nil
 }
 
-// RawCleared returns if the "raw" field was cleared in this mutation.
-func (m *NFTMutation) RawCleared() bool {
-	_, ok := m.clearedFields[nft.FieldRaw]
+// SetImageData sets the "image_data" field.
+func (m *NFTMutation) SetImageData(s string) {
+	m.image_data = &s
+}
+
+// ImageData returns the value of the "image_data" field in the mutation.
+func (m *NFTMutation) ImageData() (r string, exists bool) {
+	v := m.image_data
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImageData returns the old "image_data" field's value of the NFT entity.
+// If the NFT object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NFTMutation) OldImageData(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImageData is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImageData requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImageData: %w", err)
+	}
+	return oldValue.ImageData, nil
+}
+
+// ClearImageData clears the value of the "image_data" field.
+func (m *NFTMutation) ClearImageData() {
+	m.image_data = nil
+	m.clearedFields[nft.FieldImageData] = struct{}{}
+}
+
+// ImageDataCleared returns if the "image_data" field was cleared in this mutation.
+func (m *NFTMutation) ImageDataCleared() bool {
+	_, ok := m.clearedFields[nft.FieldImageData]
 	return ok
 }
 
-// ResetRaw resets all changes to the "raw" field.
-func (m *NFTMutation) ResetRaw() {
-	m.raw = nil
-	delete(m.clearedFields, nft.FieldRaw)
+// ResetImageData resets all changes to the "image_data" field.
+func (m *NFTMutation) ResetImageData() {
+	m.image_data = nil
+	delete(m.clearedFields, nft.FieldImageData)
+}
+
+// SetExternalURL sets the "external_url" field.
+func (m *NFTMutation) SetExternalURL(s string) {
+	m.external_url = &s
+}
+
+// ExternalURL returns the value of the "external_url" field in the mutation.
+func (m *NFTMutation) ExternalURL() (r string, exists bool) {
+	v := m.external_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExternalURL returns the old "external_url" field's value of the NFT entity.
+// If the NFT object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NFTMutation) OldExternalURL(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExternalURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExternalURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExternalURL: %w", err)
+	}
+	return oldValue.ExternalURL, nil
+}
+
+// ClearExternalURL clears the value of the "external_url" field.
+func (m *NFTMutation) ClearExternalURL() {
+	m.external_url = nil
+	m.clearedFields[nft.FieldExternalURL] = struct{}{}
+}
+
+// ExternalURLCleared returns if the "external_url" field was cleared in this mutation.
+func (m *NFTMutation) ExternalURLCleared() bool {
+	_, ok := m.clearedFields[nft.FieldExternalURL]
+	return ok
+}
+
+// ResetExternalURL resets all changes to the "external_url" field.
+func (m *NFTMutation) ResetExternalURL() {
+	m.external_url = nil
+	delete(m.clearedFields, nft.FieldExternalURL)
+}
+
+// SetDescription sets the "description" field.
+func (m *NFTMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *NFTMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the NFT entity.
+// If the NFT object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NFTMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *NFTMutation) ResetDescription() {
+	m.description = nil
 }
 
 // SetName sets the "name" field.
@@ -1934,111 +3286,14 @@ func (m *NFTMutation) ResetName() {
 	m.name = nil
 }
 
-// SetDescription sets the "description" field.
-func (m *NFTMutation) SetDescription(s string) {
-	m.description = &s
-}
-
-// Description returns the value of the "description" field in the mutation.
-func (m *NFTMutation) Description() (r string, exists bool) {
-	v := m.description
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDescription returns the old "description" field's value of the NFT entity.
-// If the NFT object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NFTMutation) OldDescription(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDescription requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
-	}
-	return oldValue.Description, nil
-}
-
-// ClearDescription clears the value of the "description" field.
-func (m *NFTMutation) ClearDescription() {
-	m.description = nil
-	m.clearedFields[nft.FieldDescription] = struct{}{}
-}
-
-// DescriptionCleared returns if the "description" field was cleared in this mutation.
-func (m *NFTMutation) DescriptionCleared() bool {
-	_, ok := m.clearedFields[nft.FieldDescription]
-	return ok
-}
-
-// ResetDescription resets all changes to the "description" field.
-func (m *NFTMutation) ResetDescription() {
-	m.description = nil
-	delete(m.clearedFields, nft.FieldDescription)
-}
-
-// SetImage sets the "image" field.
-func (m *NFTMutation) SetImage(value map[string]interface{}) {
-	m.image = &value
-}
-
-// Image returns the value of the "image" field in the mutation.
-func (m *NFTMutation) Image() (r map[string]interface{}, exists bool) {
-	v := m.image
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldImage returns the old "image" field's value of the NFT entity.
-// If the NFT object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NFTMutation) OldImage(ctx context.Context) (v map[string]interface{}, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldImage is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldImage requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldImage: %w", err)
-	}
-	return oldValue.Image, nil
-}
-
-// ClearImage clears the value of the "image" field.
-func (m *NFTMutation) ClearImage() {
-	m.image = nil
-	m.clearedFields[nft.FieldImage] = struct{}{}
-}
-
-// ImageCleared returns if the "image" field was cleared in this mutation.
-func (m *NFTMutation) ImageCleared() bool {
-	_, ok := m.clearedFields[nft.FieldImage]
-	return ok
-}
-
-// ResetImage resets all changes to the "image" field.
-func (m *NFTMutation) ResetImage() {
-	m.image = nil
-	delete(m.clearedFields, nft.FieldImage)
-}
-
 // SetAttributes sets the "attributes" field.
-func (m *NFTMutation) SetAttributes(value map[string]interface{}) {
-	m.attributes = &value
+func (m *NFTMutation) SetAttributes(ma []model.ERC721MetadataAttribute) {
+	m.attributes = &ma
+	m.appendattributes = nil
 }
 
 // Attributes returns the value of the "attributes" field in the mutation.
-func (m *NFTMutation) Attributes() (r map[string]interface{}, exists bool) {
+func (m *NFTMutation) Attributes() (r []model.ERC721MetadataAttribute, exists bool) {
 	v := m.attributes
 	if v == nil {
 		return
@@ -2049,7 +3304,7 @@ func (m *NFTMutation) Attributes() (r map[string]interface{}, exists bool) {
 // OldAttributes returns the old "attributes" field's value of the NFT entity.
 // If the NFT object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NFTMutation) OldAttributes(ctx context.Context) (v map[string]interface{}, err error) {
+func (m *NFTMutation) OldAttributes(ctx context.Context) (v []model.ERC721MetadataAttribute, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldAttributes is only allowed on UpdateOne operations")
 	}
@@ -2063,9 +3318,23 @@ func (m *NFTMutation) OldAttributes(ctx context.Context) (v map[string]interface
 	return oldValue.Attributes, nil
 }
 
+// AppendAttributes adds ma to the "attributes" field.
+func (m *NFTMutation) AppendAttributes(ma []model.ERC721MetadataAttribute) {
+	m.appendattributes = append(m.appendattributes, ma...)
+}
+
+// AppendedAttributes returns the list of values that were appended to the "attributes" field in this mutation.
+func (m *NFTMutation) AppendedAttributes() ([]model.ERC721MetadataAttribute, bool) {
+	if len(m.appendattributes) == 0 {
+		return nil, false
+	}
+	return m.appendattributes, true
+}
+
 // ClearAttributes clears the value of the "attributes" field.
 func (m *NFTMutation) ClearAttributes() {
 	m.attributes = nil
+	m.appendattributes = nil
 	m.clearedFields[nft.FieldAttributes] = struct{}{}
 }
 
@@ -2078,7 +3347,155 @@ func (m *NFTMutation) AttributesCleared() bool {
 // ResetAttributes resets all changes to the "attributes" field.
 func (m *NFTMutation) ResetAttributes() {
 	m.attributes = nil
+	m.appendattributes = nil
 	delete(m.clearedFields, nft.FieldAttributes)
+}
+
+// SetBackgroundColor sets the "background_color" field.
+func (m *NFTMutation) SetBackgroundColor(s string) {
+	m.background_color = &s
+}
+
+// BackgroundColor returns the value of the "background_color" field in the mutation.
+func (m *NFTMutation) BackgroundColor() (r string, exists bool) {
+	v := m.background_color
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBackgroundColor returns the old "background_color" field's value of the NFT entity.
+// If the NFT object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NFTMutation) OldBackgroundColor(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBackgroundColor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBackgroundColor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBackgroundColor: %w", err)
+	}
+	return oldValue.BackgroundColor, nil
+}
+
+// ClearBackgroundColor clears the value of the "background_color" field.
+func (m *NFTMutation) ClearBackgroundColor() {
+	m.background_color = nil
+	m.clearedFields[nft.FieldBackgroundColor] = struct{}{}
+}
+
+// BackgroundColorCleared returns if the "background_color" field was cleared in this mutation.
+func (m *NFTMutation) BackgroundColorCleared() bool {
+	_, ok := m.clearedFields[nft.FieldBackgroundColor]
+	return ok
+}
+
+// ResetBackgroundColor resets all changes to the "background_color" field.
+func (m *NFTMutation) ResetBackgroundColor() {
+	m.background_color = nil
+	delete(m.clearedFields, nft.FieldBackgroundColor)
+}
+
+// SetAnimationURL sets the "animation_url" field.
+func (m *NFTMutation) SetAnimationURL(s string) {
+	m.animation_url = &s
+}
+
+// AnimationURL returns the value of the "animation_url" field in the mutation.
+func (m *NFTMutation) AnimationURL() (r string, exists bool) {
+	v := m.animation_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAnimationURL returns the old "animation_url" field's value of the NFT entity.
+// If the NFT object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NFTMutation) OldAnimationURL(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAnimationURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAnimationURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAnimationURL: %w", err)
+	}
+	return oldValue.AnimationURL, nil
+}
+
+// ClearAnimationURL clears the value of the "animation_url" field.
+func (m *NFTMutation) ClearAnimationURL() {
+	m.animation_url = nil
+	m.clearedFields[nft.FieldAnimationURL] = struct{}{}
+}
+
+// AnimationURLCleared returns if the "animation_url" field was cleared in this mutation.
+func (m *NFTMutation) AnimationURLCleared() bool {
+	_, ok := m.clearedFields[nft.FieldAnimationURL]
+	return ok
+}
+
+// ResetAnimationURL resets all changes to the "animation_url" field.
+func (m *NFTMutation) ResetAnimationURL() {
+	m.animation_url = nil
+	delete(m.clearedFields, nft.FieldAnimationURL)
+}
+
+// SetYoutubeURL sets the "youtube_url" field.
+func (m *NFTMutation) SetYoutubeURL(s string) {
+	m.youtube_url = &s
+}
+
+// YoutubeURL returns the value of the "youtube_url" field in the mutation.
+func (m *NFTMutation) YoutubeURL() (r string, exists bool) {
+	v := m.youtube_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYoutubeURL returns the old "youtube_url" field's value of the NFT entity.
+// If the NFT object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NFTMutation) OldYoutubeURL(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYoutubeURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYoutubeURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYoutubeURL: %w", err)
+	}
+	return oldValue.YoutubeURL, nil
+}
+
+// ClearYoutubeURL clears the value of the "youtube_url" field.
+func (m *NFTMutation) ClearYoutubeURL() {
+	m.youtube_url = nil
+	m.clearedFields[nft.FieldYoutubeURL] = struct{}{}
+}
+
+// YoutubeURLCleared returns if the "youtube_url" field was cleared in this mutation.
+func (m *NFTMutation) YoutubeURLCleared() bool {
+	_, ok := m.clearedFields[nft.FieldYoutubeURL]
+	return ok
+}
+
+// ResetYoutubeURL resets all changes to the "youtube_url" field.
+func (m *NFTMutation) ResetYoutubeURL() {
+	m.youtube_url = nil
+	delete(m.clearedFields, nft.FieldYoutubeURL)
 }
 
 // SetOwnerAddress sets the "owner_address" field.
@@ -2301,27 +3718,42 @@ func (m *NFTMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *NFTMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 15)
+	if m.contract_address != nil {
+		fields = append(fields, nft.FieldContractAddress)
+	}
 	if m.token_id != nil {
 		fields = append(fields, nft.FieldTokenID)
 	}
-	if m.token_url != nil {
-		fields = append(fields, nft.FieldTokenURL)
-	}
-	if m.raw != nil {
-		fields = append(fields, nft.FieldRaw)
-	}
-	if m.name != nil {
-		fields = append(fields, nft.FieldName)
-	}
-	if m.description != nil {
-		fields = append(fields, nft.FieldDescription)
+	if m.token_uri != nil {
+		fields = append(fields, nft.FieldTokenURI)
 	}
 	if m.image != nil {
 		fields = append(fields, nft.FieldImage)
 	}
+	if m.image_data != nil {
+		fields = append(fields, nft.FieldImageData)
+	}
+	if m.external_url != nil {
+		fields = append(fields, nft.FieldExternalURL)
+	}
+	if m.description != nil {
+		fields = append(fields, nft.FieldDescription)
+	}
+	if m.name != nil {
+		fields = append(fields, nft.FieldName)
+	}
 	if m.attributes != nil {
 		fields = append(fields, nft.FieldAttributes)
+	}
+	if m.background_color != nil {
+		fields = append(fields, nft.FieldBackgroundColor)
+	}
+	if m.animation_url != nil {
+		fields = append(fields, nft.FieldAnimationURL)
+	}
+	if m.youtube_url != nil {
+		fields = append(fields, nft.FieldYoutubeURL)
 	}
 	if m.owner_address != nil {
 		fields = append(fields, nft.FieldOwnerAddress)
@@ -2340,20 +3772,30 @@ func (m *NFTMutation) Fields() []string {
 // schema.
 func (m *NFTMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case nft.FieldContractAddress:
+		return m.ContractAddress()
 	case nft.FieldTokenID:
 		return m.TokenID()
-	case nft.FieldTokenURL:
-		return m.TokenURL()
-	case nft.FieldRaw:
-		return m.Raw()
-	case nft.FieldName:
-		return m.Name()
-	case nft.FieldDescription:
-		return m.Description()
+	case nft.FieldTokenURI:
+		return m.TokenURI()
 	case nft.FieldImage:
 		return m.Image()
+	case nft.FieldImageData:
+		return m.ImageData()
+	case nft.FieldExternalURL:
+		return m.ExternalURL()
+	case nft.FieldDescription:
+		return m.Description()
+	case nft.FieldName:
+		return m.Name()
 	case nft.FieldAttributes:
 		return m.Attributes()
+	case nft.FieldBackgroundColor:
+		return m.BackgroundColor()
+	case nft.FieldAnimationURL:
+		return m.AnimationURL()
+	case nft.FieldYoutubeURL:
+		return m.YoutubeURL()
 	case nft.FieldOwnerAddress:
 		return m.OwnerAddress()
 	case nft.FieldMintedAt:
@@ -2369,20 +3811,30 @@ func (m *NFTMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *NFTMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case nft.FieldContractAddress:
+		return m.OldContractAddress(ctx)
 	case nft.FieldTokenID:
 		return m.OldTokenID(ctx)
-	case nft.FieldTokenURL:
-		return m.OldTokenURL(ctx)
-	case nft.FieldRaw:
-		return m.OldRaw(ctx)
-	case nft.FieldName:
-		return m.OldName(ctx)
-	case nft.FieldDescription:
-		return m.OldDescription(ctx)
+	case nft.FieldTokenURI:
+		return m.OldTokenURI(ctx)
 	case nft.FieldImage:
 		return m.OldImage(ctx)
+	case nft.FieldImageData:
+		return m.OldImageData(ctx)
+	case nft.FieldExternalURL:
+		return m.OldExternalURL(ctx)
+	case nft.FieldDescription:
+		return m.OldDescription(ctx)
+	case nft.FieldName:
+		return m.OldName(ctx)
 	case nft.FieldAttributes:
 		return m.OldAttributes(ctx)
+	case nft.FieldBackgroundColor:
+		return m.OldBackgroundColor(ctx)
+	case nft.FieldAnimationURL:
+		return m.OldAnimationURL(ctx)
+	case nft.FieldYoutubeURL:
+		return m.OldYoutubeURL(ctx)
 	case nft.FieldOwnerAddress:
 		return m.OldOwnerAddress(ctx)
 	case nft.FieldMintedAt:
@@ -2398,33 +3850,47 @@ func (m *NFTMutation) OldField(ctx context.Context, name string) (ent.Value, err
 // type.
 func (m *NFTMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case nft.FieldContractAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContractAddress(v)
+		return nil
 	case nft.FieldTokenID:
-		v, ok := value.(uint64)
+		v, ok := value.(*big.Int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTokenID(v)
 		return nil
-	case nft.FieldTokenURL:
+	case nft.FieldTokenURI:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetTokenURL(v)
+		m.SetTokenURI(v)
 		return nil
-	case nft.FieldRaw:
-		v, ok := value.(map[string]interface{})
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetRaw(v)
-		return nil
-	case nft.FieldName:
+	case nft.FieldImage:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetImage(v)
+		return nil
+	case nft.FieldImageData:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImageData(v)
+		return nil
+	case nft.FieldExternalURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExternalURL(v)
 		return nil
 	case nft.FieldDescription:
 		v, ok := value.(string)
@@ -2433,19 +3899,40 @@ func (m *NFTMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDescription(v)
 		return nil
-	case nft.FieldImage:
-		v, ok := value.(map[string]interface{})
+	case nft.FieldName:
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetImage(v)
+		m.SetName(v)
 		return nil
 	case nft.FieldAttributes:
-		v, ok := value.(map[string]interface{})
+		v, ok := value.([]model.ERC721MetadataAttribute)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAttributes(v)
+		return nil
+	case nft.FieldBackgroundColor:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBackgroundColor(v)
+		return nil
+	case nft.FieldAnimationURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAnimationURL(v)
+		return nil
+	case nft.FieldYoutubeURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYoutubeURL(v)
 		return nil
 	case nft.FieldOwnerAddress:
 		v, ok := value.(string)
@@ -2475,21 +3962,13 @@ func (m *NFTMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *NFTMutation) AddedFields() []string {
-	var fields []string
-	if m.addtoken_id != nil {
-		fields = append(fields, nft.FieldTokenID)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *NFTMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case nft.FieldTokenID:
-		return m.AddedTokenID()
-	}
 	return nil, false
 }
 
@@ -2498,13 +3977,6 @@ func (m *NFTMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *NFTMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case nft.FieldTokenID:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddTokenID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown NFT numeric field %s", name)
 }
@@ -2513,20 +3985,23 @@ func (m *NFTMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *NFTMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(nft.FieldTokenURL) {
-		fields = append(fields, nft.FieldTokenURL)
+	if m.FieldCleared(nft.FieldImageData) {
+		fields = append(fields, nft.FieldImageData)
 	}
-	if m.FieldCleared(nft.FieldRaw) {
-		fields = append(fields, nft.FieldRaw)
-	}
-	if m.FieldCleared(nft.FieldDescription) {
-		fields = append(fields, nft.FieldDescription)
-	}
-	if m.FieldCleared(nft.FieldImage) {
-		fields = append(fields, nft.FieldImage)
+	if m.FieldCleared(nft.FieldExternalURL) {
+		fields = append(fields, nft.FieldExternalURL)
 	}
 	if m.FieldCleared(nft.FieldAttributes) {
 		fields = append(fields, nft.FieldAttributes)
+	}
+	if m.FieldCleared(nft.FieldBackgroundColor) {
+		fields = append(fields, nft.FieldBackgroundColor)
+	}
+	if m.FieldCleared(nft.FieldAnimationURL) {
+		fields = append(fields, nft.FieldAnimationURL)
+	}
+	if m.FieldCleared(nft.FieldYoutubeURL) {
+		fields = append(fields, nft.FieldYoutubeURL)
 	}
 	return fields
 }
@@ -2542,20 +4017,23 @@ func (m *NFTMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *NFTMutation) ClearField(name string) error {
 	switch name {
-	case nft.FieldTokenURL:
-		m.ClearTokenURL()
+	case nft.FieldImageData:
+		m.ClearImageData()
 		return nil
-	case nft.FieldRaw:
-		m.ClearRaw()
-		return nil
-	case nft.FieldDescription:
-		m.ClearDescription()
-		return nil
-	case nft.FieldImage:
-		m.ClearImage()
+	case nft.FieldExternalURL:
+		m.ClearExternalURL()
 		return nil
 	case nft.FieldAttributes:
 		m.ClearAttributes()
+		return nil
+	case nft.FieldBackgroundColor:
+		m.ClearBackgroundColor()
+		return nil
+	case nft.FieldAnimationURL:
+		m.ClearAnimationURL()
+		return nil
+	case nft.FieldYoutubeURL:
+		m.ClearYoutubeURL()
 		return nil
 	}
 	return fmt.Errorf("unknown NFT nullable field %s", name)
@@ -2565,26 +4043,41 @@ func (m *NFTMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *NFTMutation) ResetField(name string) error {
 	switch name {
+	case nft.FieldContractAddress:
+		m.ResetContractAddress()
+		return nil
 	case nft.FieldTokenID:
 		m.ResetTokenID()
 		return nil
-	case nft.FieldTokenURL:
-		m.ResetTokenURL()
-		return nil
-	case nft.FieldRaw:
-		m.ResetRaw()
-		return nil
-	case nft.FieldName:
-		m.ResetName()
-		return nil
-	case nft.FieldDescription:
-		m.ResetDescription()
+	case nft.FieldTokenURI:
+		m.ResetTokenURI()
 		return nil
 	case nft.FieldImage:
 		m.ResetImage()
 		return nil
+	case nft.FieldImageData:
+		m.ResetImageData()
+		return nil
+	case nft.FieldExternalURL:
+		m.ResetExternalURL()
+		return nil
+	case nft.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case nft.FieldName:
+		m.ResetName()
+		return nil
 	case nft.FieldAttributes:
 		m.ResetAttributes()
+		return nil
+	case nft.FieldBackgroundColor:
+		m.ResetBackgroundColor()
+		return nil
+	case nft.FieldAnimationURL:
+		m.ResetAnimationURL()
+		return nil
+	case nft.FieldYoutubeURL:
+		m.ResetYoutubeURL()
 		return nil
 	case nft.FieldOwnerAddress:
 		m.ResetOwnerAddress()
@@ -3928,4 +5421,723 @@ func (m *NFTClassMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown NFTClass edge %s", name)
+}
+
+// TransactionMemoMutation represents an operation that mutates the TransactionMemo nodes in the graph.
+type TransactionMemoMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int
+	transaction_hash *string
+	book_nft_id      *string
+	from             *string
+	to               *string
+	token_id         *uint64
+	addtoken_id      *int64
+	memo             *string
+	block_number     *uint64
+	addblock_number  *int64
+	clearedFields    map[string]struct{}
+	done             bool
+	oldValue         func(context.Context) (*TransactionMemo, error)
+	predicates       []predicate.TransactionMemo
+}
+
+var _ ent.Mutation = (*TransactionMemoMutation)(nil)
+
+// transactionmemoOption allows management of the mutation configuration using functional options.
+type transactionmemoOption func(*TransactionMemoMutation)
+
+// newTransactionMemoMutation creates new mutation for the TransactionMemo entity.
+func newTransactionMemoMutation(c config, op Op, opts ...transactionmemoOption) *TransactionMemoMutation {
+	m := &TransactionMemoMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTransactionMemo,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTransactionMemoID sets the ID field of the mutation.
+func withTransactionMemoID(id int) transactionmemoOption {
+	return func(m *TransactionMemoMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TransactionMemo
+		)
+		m.oldValue = func(ctx context.Context) (*TransactionMemo, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TransactionMemo.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTransactionMemo sets the old TransactionMemo of the mutation.
+func withTransactionMemo(node *TransactionMemo) transactionmemoOption {
+	return func(m *TransactionMemoMutation) {
+		m.oldValue = func(context.Context) (*TransactionMemo, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TransactionMemoMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TransactionMemoMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TransactionMemoMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TransactionMemoMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TransactionMemo.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetTransactionHash sets the "transaction_hash" field.
+func (m *TransactionMemoMutation) SetTransactionHash(s string) {
+	m.transaction_hash = &s
+}
+
+// TransactionHash returns the value of the "transaction_hash" field in the mutation.
+func (m *TransactionMemoMutation) TransactionHash() (r string, exists bool) {
+	v := m.transaction_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTransactionHash returns the old "transaction_hash" field's value of the TransactionMemo entity.
+// If the TransactionMemo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMemoMutation) OldTransactionHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTransactionHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTransactionHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTransactionHash: %w", err)
+	}
+	return oldValue.TransactionHash, nil
+}
+
+// ResetTransactionHash resets all changes to the "transaction_hash" field.
+func (m *TransactionMemoMutation) ResetTransactionHash() {
+	m.transaction_hash = nil
+}
+
+// SetBookNftID sets the "book_nft_id" field.
+func (m *TransactionMemoMutation) SetBookNftID(s string) {
+	m.book_nft_id = &s
+}
+
+// BookNftID returns the value of the "book_nft_id" field in the mutation.
+func (m *TransactionMemoMutation) BookNftID() (r string, exists bool) {
+	v := m.book_nft_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBookNftID returns the old "book_nft_id" field's value of the TransactionMemo entity.
+// If the TransactionMemo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMemoMutation) OldBookNftID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBookNftID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBookNftID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBookNftID: %w", err)
+	}
+	return oldValue.BookNftID, nil
+}
+
+// ResetBookNftID resets all changes to the "book_nft_id" field.
+func (m *TransactionMemoMutation) ResetBookNftID() {
+	m.book_nft_id = nil
+}
+
+// SetFrom sets the "from" field.
+func (m *TransactionMemoMutation) SetFrom(s string) {
+	m.from = &s
+}
+
+// From returns the value of the "from" field in the mutation.
+func (m *TransactionMemoMutation) From() (r string, exists bool) {
+	v := m.from
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFrom returns the old "from" field's value of the TransactionMemo entity.
+// If the TransactionMemo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMemoMutation) OldFrom(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFrom is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFrom requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFrom: %w", err)
+	}
+	return oldValue.From, nil
+}
+
+// ResetFrom resets all changes to the "from" field.
+func (m *TransactionMemoMutation) ResetFrom() {
+	m.from = nil
+}
+
+// SetTo sets the "to" field.
+func (m *TransactionMemoMutation) SetTo(s string) {
+	m.to = &s
+}
+
+// To returns the value of the "to" field in the mutation.
+func (m *TransactionMemoMutation) To() (r string, exists bool) {
+	v := m.to
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTo returns the old "to" field's value of the TransactionMemo entity.
+// If the TransactionMemo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMemoMutation) OldTo(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTo is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTo requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTo: %w", err)
+	}
+	return oldValue.To, nil
+}
+
+// ResetTo resets all changes to the "to" field.
+func (m *TransactionMemoMutation) ResetTo() {
+	m.to = nil
+}
+
+// SetTokenID sets the "token_id" field.
+func (m *TransactionMemoMutation) SetTokenID(u uint64) {
+	m.token_id = &u
+	m.addtoken_id = nil
+}
+
+// TokenID returns the value of the "token_id" field in the mutation.
+func (m *TransactionMemoMutation) TokenID() (r uint64, exists bool) {
+	v := m.token_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTokenID returns the old "token_id" field's value of the TransactionMemo entity.
+// If the TransactionMemo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMemoMutation) OldTokenID(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTokenID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTokenID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTokenID: %w", err)
+	}
+	return oldValue.TokenID, nil
+}
+
+// AddTokenID adds u to the "token_id" field.
+func (m *TransactionMemoMutation) AddTokenID(u int64) {
+	if m.addtoken_id != nil {
+		*m.addtoken_id += u
+	} else {
+		m.addtoken_id = &u
+	}
+}
+
+// AddedTokenID returns the value that was added to the "token_id" field in this mutation.
+func (m *TransactionMemoMutation) AddedTokenID() (r int64, exists bool) {
+	v := m.addtoken_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTokenID resets all changes to the "token_id" field.
+func (m *TransactionMemoMutation) ResetTokenID() {
+	m.token_id = nil
+	m.addtoken_id = nil
+}
+
+// SetMemo sets the "memo" field.
+func (m *TransactionMemoMutation) SetMemo(s string) {
+	m.memo = &s
+}
+
+// Memo returns the value of the "memo" field in the mutation.
+func (m *TransactionMemoMutation) Memo() (r string, exists bool) {
+	v := m.memo
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMemo returns the old "memo" field's value of the TransactionMemo entity.
+// If the TransactionMemo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMemoMutation) OldMemo(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMemo is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMemo requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMemo: %w", err)
+	}
+	return oldValue.Memo, nil
+}
+
+// ResetMemo resets all changes to the "memo" field.
+func (m *TransactionMemoMutation) ResetMemo() {
+	m.memo = nil
+}
+
+// SetBlockNumber sets the "block_number" field.
+func (m *TransactionMemoMutation) SetBlockNumber(u uint64) {
+	m.block_number = &u
+	m.addblock_number = nil
+}
+
+// BlockNumber returns the value of the "block_number" field in the mutation.
+func (m *TransactionMemoMutation) BlockNumber() (r uint64, exists bool) {
+	v := m.block_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBlockNumber returns the old "block_number" field's value of the TransactionMemo entity.
+// If the TransactionMemo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMemoMutation) OldBlockNumber(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBlockNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBlockNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBlockNumber: %w", err)
+	}
+	return oldValue.BlockNumber, nil
+}
+
+// AddBlockNumber adds u to the "block_number" field.
+func (m *TransactionMemoMutation) AddBlockNumber(u int64) {
+	if m.addblock_number != nil {
+		*m.addblock_number += u
+	} else {
+		m.addblock_number = &u
+	}
+}
+
+// AddedBlockNumber returns the value that was added to the "block_number" field in this mutation.
+func (m *TransactionMemoMutation) AddedBlockNumber() (r int64, exists bool) {
+	v := m.addblock_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBlockNumber resets all changes to the "block_number" field.
+func (m *TransactionMemoMutation) ResetBlockNumber() {
+	m.block_number = nil
+	m.addblock_number = nil
+}
+
+// Where appends a list predicates to the TransactionMemoMutation builder.
+func (m *TransactionMemoMutation) Where(ps ...predicate.TransactionMemo) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TransactionMemoMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TransactionMemoMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TransactionMemo, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TransactionMemoMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TransactionMemoMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TransactionMemo).
+func (m *TransactionMemoMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TransactionMemoMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.transaction_hash != nil {
+		fields = append(fields, transactionmemo.FieldTransactionHash)
+	}
+	if m.book_nft_id != nil {
+		fields = append(fields, transactionmemo.FieldBookNftID)
+	}
+	if m.from != nil {
+		fields = append(fields, transactionmemo.FieldFrom)
+	}
+	if m.to != nil {
+		fields = append(fields, transactionmemo.FieldTo)
+	}
+	if m.token_id != nil {
+		fields = append(fields, transactionmemo.FieldTokenID)
+	}
+	if m.memo != nil {
+		fields = append(fields, transactionmemo.FieldMemo)
+	}
+	if m.block_number != nil {
+		fields = append(fields, transactionmemo.FieldBlockNumber)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TransactionMemoMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case transactionmemo.FieldTransactionHash:
+		return m.TransactionHash()
+	case transactionmemo.FieldBookNftID:
+		return m.BookNftID()
+	case transactionmemo.FieldFrom:
+		return m.From()
+	case transactionmemo.FieldTo:
+		return m.To()
+	case transactionmemo.FieldTokenID:
+		return m.TokenID()
+	case transactionmemo.FieldMemo:
+		return m.Memo()
+	case transactionmemo.FieldBlockNumber:
+		return m.BlockNumber()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TransactionMemoMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case transactionmemo.FieldTransactionHash:
+		return m.OldTransactionHash(ctx)
+	case transactionmemo.FieldBookNftID:
+		return m.OldBookNftID(ctx)
+	case transactionmemo.FieldFrom:
+		return m.OldFrom(ctx)
+	case transactionmemo.FieldTo:
+		return m.OldTo(ctx)
+	case transactionmemo.FieldTokenID:
+		return m.OldTokenID(ctx)
+	case transactionmemo.FieldMemo:
+		return m.OldMemo(ctx)
+	case transactionmemo.FieldBlockNumber:
+		return m.OldBlockNumber(ctx)
+	}
+	return nil, fmt.Errorf("unknown TransactionMemo field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TransactionMemoMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case transactionmemo.FieldTransactionHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTransactionHash(v)
+		return nil
+	case transactionmemo.FieldBookNftID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBookNftID(v)
+		return nil
+	case transactionmemo.FieldFrom:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFrom(v)
+		return nil
+	case transactionmemo.FieldTo:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTo(v)
+		return nil
+	case transactionmemo.FieldTokenID:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTokenID(v)
+		return nil
+	case transactionmemo.FieldMemo:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMemo(v)
+		return nil
+	case transactionmemo.FieldBlockNumber:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBlockNumber(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TransactionMemo field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TransactionMemoMutation) AddedFields() []string {
+	var fields []string
+	if m.addtoken_id != nil {
+		fields = append(fields, transactionmemo.FieldTokenID)
+	}
+	if m.addblock_number != nil {
+		fields = append(fields, transactionmemo.FieldBlockNumber)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TransactionMemoMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case transactionmemo.FieldTokenID:
+		return m.AddedTokenID()
+	case transactionmemo.FieldBlockNumber:
+		return m.AddedBlockNumber()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TransactionMemoMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case transactionmemo.FieldTokenID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTokenID(v)
+		return nil
+	case transactionmemo.FieldBlockNumber:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBlockNumber(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TransactionMemo numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TransactionMemoMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TransactionMemoMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TransactionMemoMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown TransactionMemo nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TransactionMemoMutation) ResetField(name string) error {
+	switch name {
+	case transactionmemo.FieldTransactionHash:
+		m.ResetTransactionHash()
+		return nil
+	case transactionmemo.FieldBookNftID:
+		m.ResetBookNftID()
+		return nil
+	case transactionmemo.FieldFrom:
+		m.ResetFrom()
+		return nil
+	case transactionmemo.FieldTo:
+		m.ResetTo()
+		return nil
+	case transactionmemo.FieldTokenID:
+		m.ResetTokenID()
+		return nil
+	case transactionmemo.FieldMemo:
+		m.ResetMemo()
+		return nil
+	case transactionmemo.FieldBlockNumber:
+		m.ResetBlockNumber()
+		return nil
+	}
+	return fmt.Errorf("unknown TransactionMemo field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TransactionMemoMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TransactionMemoMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TransactionMemoMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TransactionMemoMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TransactionMemoMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TransactionMemoMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TransactionMemoMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown TransactionMemo unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TransactionMemoMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown TransactionMemo edge %s", name)
 }

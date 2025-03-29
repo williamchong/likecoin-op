@@ -16,10 +16,14 @@ type Tx struct {
 	Account *AccountClient
 	// EVMEvent is the client for interacting with the EVMEvent builders.
 	EVMEvent *EVMEventClient
+	// EVMEventProcessedBlockHeight is the client for interacting with the EVMEventProcessedBlockHeight builders.
+	EVMEventProcessedBlockHeight *EVMEventProcessedBlockHeightClient
 	// NFT is the client for interacting with the NFT builders.
 	NFT *NFTClient
 	// NFTClass is the client for interacting with the NFTClass builders.
 	NFTClass *NFTClassClient
+	// TransactionMemo is the client for interacting with the TransactionMemo builders.
+	TransactionMemo *TransactionMemoClient
 
 	// lazily loaded.
 	client     *Client
@@ -153,8 +157,10 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
 	tx.EVMEvent = NewEVMEventClient(tx.config)
+	tx.EVMEventProcessedBlockHeight = NewEVMEventProcessedBlockHeightClient(tx.config)
 	tx.NFT = NewNFTClient(tx.config)
 	tx.NFTClass = NewNFTClassClient(tx.config)
+	tx.TransactionMemo = NewTransactionMemoClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

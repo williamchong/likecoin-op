@@ -19,24 +19,42 @@ type EVMEvent struct {
 	ID int `json:"id,omitempty"`
 	// TransactionHash holds the value of the "transaction_hash" field.
 	TransactionHash string `json:"transaction_hash,omitempty"`
+	// TransactionIndex holds the value of the "transaction_index" field.
+	TransactionIndex uint `json:"transaction_index,omitempty"`
 	// BlockHash holds the value of the "block_hash" field.
 	BlockHash string `json:"block_hash,omitempty"`
 	// BlockNumber holds the value of the "block_number" field.
 	BlockNumber uint64 `json:"block_number,omitempty"`
 	// LogIndex holds the value of the "log_index" field.
-	LogIndex uint64 `json:"log_index,omitempty"`
+	LogIndex uint `json:"log_index,omitempty"`
 	// Address holds the value of the "address" field.
 	Address string `json:"address,omitempty"`
 	// Topic0 holds the value of the "topic0" field.
 	Topic0 string `json:"topic0,omitempty"`
+	// Topic0Hex holds the value of the "topic0_hex" field.
+	Topic0Hex string `json:"topic0_hex,omitempty"`
 	// Topic1 holds the value of the "topic1" field.
-	Topic1 string `json:"topic1,omitempty"`
+	Topic1 *string `json:"topic1,omitempty"`
+	// Topic1Hex holds the value of the "topic1_hex" field.
+	Topic1Hex *string `json:"topic1_hex,omitempty"`
 	// Topic2 holds the value of the "topic2" field.
-	Topic2 string `json:"topic2,omitempty"`
+	Topic2 *string `json:"topic2,omitempty"`
+	// Topic2Hex holds the value of the "topic2_hex" field.
+	Topic2Hex *string `json:"topic2_hex,omitempty"`
 	// Topic3 holds the value of the "topic3" field.
-	Topic3 string `json:"topic3,omitempty"`
+	Topic3 *string `json:"topic3,omitempty"`
+	// Topic3Hex holds the value of the "topic3_hex" field.
+	Topic3Hex *string `json:"topic3_hex,omitempty"`
 	// Data holds the value of the "data" field.
-	Data string `json:"data,omitempty"`
+	Data *string `json:"data,omitempty"`
+	// DataHex holds the value of the "data_hex" field.
+	DataHex *string `json:"data_hex,omitempty"`
+	// Removed holds the value of the "removed" field.
+	Removed bool `json:"removed,omitempty"`
+	// Status holds the value of the "status" field.
+	Status evmevent.Status `json:"status,omitempty"`
+	// FailedReason holds the value of the "failed_reason" field.
+	FailedReason *string `json:"failed_reason,omitempty"`
 	// Timestamp holds the value of the "timestamp" field.
 	Timestamp    time.Time `json:"timestamp,omitempty"`
 	selectValues sql.SelectValues
@@ -47,9 +65,11 @@ func (*EVMEvent) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case evmevent.FieldID, evmevent.FieldBlockNumber, evmevent.FieldLogIndex:
+		case evmevent.FieldRemoved:
+			values[i] = new(sql.NullBool)
+		case evmevent.FieldID, evmevent.FieldTransactionIndex, evmevent.FieldBlockNumber, evmevent.FieldLogIndex:
 			values[i] = new(sql.NullInt64)
-		case evmevent.FieldTransactionHash, evmevent.FieldBlockHash, evmevent.FieldAddress, evmevent.FieldTopic0, evmevent.FieldTopic1, evmevent.FieldTopic2, evmevent.FieldTopic3, evmevent.FieldData:
+		case evmevent.FieldTransactionHash, evmevent.FieldBlockHash, evmevent.FieldAddress, evmevent.FieldTopic0, evmevent.FieldTopic0Hex, evmevent.FieldTopic1, evmevent.FieldTopic1Hex, evmevent.FieldTopic2, evmevent.FieldTopic2Hex, evmevent.FieldTopic3, evmevent.FieldTopic3Hex, evmevent.FieldData, evmevent.FieldDataHex, evmevent.FieldStatus, evmevent.FieldFailedReason:
 			values[i] = new(sql.NullString)
 		case evmevent.FieldTimestamp:
 			values[i] = new(sql.NullTime)
@@ -80,6 +100,12 @@ func (ee *EVMEvent) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ee.TransactionHash = value.String
 			}
+		case evmevent.FieldTransactionIndex:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field transaction_index", values[i])
+			} else if value.Valid {
+				ee.TransactionIndex = uint(value.Int64)
+			}
 		case evmevent.FieldBlockHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field block_hash", values[i])
@@ -96,7 +122,7 @@ func (ee *EVMEvent) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field log_index", values[i])
 			} else if value.Valid {
-				ee.LogIndex = uint64(value.Int64)
+				ee.LogIndex = uint(value.Int64)
 			}
 		case evmevent.FieldAddress:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -110,29 +136,86 @@ func (ee *EVMEvent) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ee.Topic0 = value.String
 			}
+		case evmevent.FieldTopic0Hex:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field topic0_hex", values[i])
+			} else if value.Valid {
+				ee.Topic0Hex = value.String
+			}
 		case evmevent.FieldTopic1:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field topic1", values[i])
 			} else if value.Valid {
-				ee.Topic1 = value.String
+				ee.Topic1 = new(string)
+				*ee.Topic1 = value.String
+			}
+		case evmevent.FieldTopic1Hex:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field topic1_hex", values[i])
+			} else if value.Valid {
+				ee.Topic1Hex = new(string)
+				*ee.Topic1Hex = value.String
 			}
 		case evmevent.FieldTopic2:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field topic2", values[i])
 			} else if value.Valid {
-				ee.Topic2 = value.String
+				ee.Topic2 = new(string)
+				*ee.Topic2 = value.String
+			}
+		case evmevent.FieldTopic2Hex:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field topic2_hex", values[i])
+			} else if value.Valid {
+				ee.Topic2Hex = new(string)
+				*ee.Topic2Hex = value.String
 			}
 		case evmevent.FieldTopic3:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field topic3", values[i])
 			} else if value.Valid {
-				ee.Topic3 = value.String
+				ee.Topic3 = new(string)
+				*ee.Topic3 = value.String
+			}
+		case evmevent.FieldTopic3Hex:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field topic3_hex", values[i])
+			} else if value.Valid {
+				ee.Topic3Hex = new(string)
+				*ee.Topic3Hex = value.String
 			}
 		case evmevent.FieldData:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field data", values[i])
 			} else if value.Valid {
-				ee.Data = value.String
+				ee.Data = new(string)
+				*ee.Data = value.String
+			}
+		case evmevent.FieldDataHex:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field data_hex", values[i])
+			} else if value.Valid {
+				ee.DataHex = new(string)
+				*ee.DataHex = value.String
+			}
+		case evmevent.FieldRemoved:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field removed", values[i])
+			} else if value.Valid {
+				ee.Removed = value.Bool
+			}
+		case evmevent.FieldStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				ee.Status = evmevent.Status(value.String)
+			}
+		case evmevent.FieldFailedReason:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field failed_reason", values[i])
+			} else if value.Valid {
+				ee.FailedReason = new(string)
+				*ee.FailedReason = value.String
 			}
 		case evmevent.FieldTimestamp:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -179,6 +262,9 @@ func (ee *EVMEvent) String() string {
 	builder.WriteString("transaction_hash=")
 	builder.WriteString(ee.TransactionHash)
 	builder.WriteString(", ")
+	builder.WriteString("transaction_index=")
+	builder.WriteString(fmt.Sprintf("%v", ee.TransactionIndex))
+	builder.WriteString(", ")
 	builder.WriteString("block_hash=")
 	builder.WriteString(ee.BlockHash)
 	builder.WriteString(", ")
@@ -194,17 +280,59 @@ func (ee *EVMEvent) String() string {
 	builder.WriteString("topic0=")
 	builder.WriteString(ee.Topic0)
 	builder.WriteString(", ")
-	builder.WriteString("topic1=")
-	builder.WriteString(ee.Topic1)
+	builder.WriteString("topic0_hex=")
+	builder.WriteString(ee.Topic0Hex)
 	builder.WriteString(", ")
-	builder.WriteString("topic2=")
-	builder.WriteString(ee.Topic2)
+	if v := ee.Topic1; v != nil {
+		builder.WriteString("topic1=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
-	builder.WriteString("topic3=")
-	builder.WriteString(ee.Topic3)
+	if v := ee.Topic1Hex; v != nil {
+		builder.WriteString("topic1_hex=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
-	builder.WriteString("data=")
-	builder.WriteString(ee.Data)
+	if v := ee.Topic2; v != nil {
+		builder.WriteString("topic2=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := ee.Topic2Hex; v != nil {
+		builder.WriteString("topic2_hex=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := ee.Topic3; v != nil {
+		builder.WriteString("topic3=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := ee.Topic3Hex; v != nil {
+		builder.WriteString("topic3_hex=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := ee.Data; v != nil {
+		builder.WriteString("data=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := ee.DataHex; v != nil {
+		builder.WriteString("data_hex=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	builder.WriteString("removed=")
+	builder.WriteString(fmt.Sprintf("%v", ee.Removed))
+	builder.WriteString(", ")
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", ee.Status))
+	builder.WriteString(", ")
+	if v := ee.FailedReason; v != nil {
+		builder.WriteString("failed_reason=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("timestamp=")
 	builder.WriteString(ee.Timestamp.Format(time.ANSIC))

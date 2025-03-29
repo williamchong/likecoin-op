@@ -9,6 +9,8 @@ import (
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
+	"likenft-indexer/internal/evm/model"
+	"math/big"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -22,35 +24,55 @@ type NFTCreate struct {
 	hooks    []Hook
 }
 
+// SetContractAddress sets the "contract_address" field.
+func (nc *NFTCreate) SetContractAddress(s string) *NFTCreate {
+	nc.mutation.SetContractAddress(s)
+	return nc
+}
+
 // SetTokenID sets the "token_id" field.
-func (nc *NFTCreate) SetTokenID(u uint64) *NFTCreate {
-	nc.mutation.SetTokenID(u)
+func (nc *NFTCreate) SetTokenID(b *big.Int) *NFTCreate {
+	nc.mutation.SetTokenID(b)
 	return nc
 }
 
-// SetTokenURL sets the "token_url" field.
-func (nc *NFTCreate) SetTokenURL(s string) *NFTCreate {
-	nc.mutation.SetTokenURL(s)
+// SetTokenURI sets the "token_uri" field.
+func (nc *NFTCreate) SetTokenURI(s string) *NFTCreate {
+	nc.mutation.SetTokenURI(s)
 	return nc
 }
 
-// SetNillableTokenURL sets the "token_url" field if the given value is not nil.
-func (nc *NFTCreate) SetNillableTokenURL(s *string) *NFTCreate {
+// SetImage sets the "image" field.
+func (nc *NFTCreate) SetImage(s string) *NFTCreate {
+	nc.mutation.SetImage(s)
+	return nc
+}
+
+// SetImageData sets the "image_data" field.
+func (nc *NFTCreate) SetImageData(s string) *NFTCreate {
+	nc.mutation.SetImageData(s)
+	return nc
+}
+
+// SetNillableImageData sets the "image_data" field if the given value is not nil.
+func (nc *NFTCreate) SetNillableImageData(s *string) *NFTCreate {
 	if s != nil {
-		nc.SetTokenURL(*s)
+		nc.SetImageData(*s)
 	}
 	return nc
 }
 
-// SetRaw sets the "raw" field.
-func (nc *NFTCreate) SetRaw(m map[string]interface{}) *NFTCreate {
-	nc.mutation.SetRaw(m)
+// SetExternalURL sets the "external_url" field.
+func (nc *NFTCreate) SetExternalURL(s string) *NFTCreate {
+	nc.mutation.SetExternalURL(s)
 	return nc
 }
 
-// SetName sets the "name" field.
-func (nc *NFTCreate) SetName(s string) *NFTCreate {
-	nc.mutation.SetName(s)
+// SetNillableExternalURL sets the "external_url" field if the given value is not nil.
+func (nc *NFTCreate) SetNillableExternalURL(s *string) *NFTCreate {
+	if s != nil {
+		nc.SetExternalURL(*s)
+	}
 	return nc
 }
 
@@ -60,23 +82,57 @@ func (nc *NFTCreate) SetDescription(s string) *NFTCreate {
 	return nc
 }
 
-// SetNillableDescription sets the "description" field if the given value is not nil.
-func (nc *NFTCreate) SetNillableDescription(s *string) *NFTCreate {
-	if s != nil {
-		nc.SetDescription(*s)
-	}
-	return nc
-}
-
-// SetImage sets the "image" field.
-func (nc *NFTCreate) SetImage(m map[string]interface{}) *NFTCreate {
-	nc.mutation.SetImage(m)
+// SetName sets the "name" field.
+func (nc *NFTCreate) SetName(s string) *NFTCreate {
+	nc.mutation.SetName(s)
 	return nc
 }
 
 // SetAttributes sets the "attributes" field.
-func (nc *NFTCreate) SetAttributes(m map[string]interface{}) *NFTCreate {
-	nc.mutation.SetAttributes(m)
+func (nc *NFTCreate) SetAttributes(ma []model.ERC721MetadataAttribute) *NFTCreate {
+	nc.mutation.SetAttributes(ma)
+	return nc
+}
+
+// SetBackgroundColor sets the "background_color" field.
+func (nc *NFTCreate) SetBackgroundColor(s string) *NFTCreate {
+	nc.mutation.SetBackgroundColor(s)
+	return nc
+}
+
+// SetNillableBackgroundColor sets the "background_color" field if the given value is not nil.
+func (nc *NFTCreate) SetNillableBackgroundColor(s *string) *NFTCreate {
+	if s != nil {
+		nc.SetBackgroundColor(*s)
+	}
+	return nc
+}
+
+// SetAnimationURL sets the "animation_url" field.
+func (nc *NFTCreate) SetAnimationURL(s string) *NFTCreate {
+	nc.mutation.SetAnimationURL(s)
+	return nc
+}
+
+// SetNillableAnimationURL sets the "animation_url" field if the given value is not nil.
+func (nc *NFTCreate) SetNillableAnimationURL(s *string) *NFTCreate {
+	if s != nil {
+		nc.SetAnimationURL(*s)
+	}
+	return nc
+}
+
+// SetYoutubeURL sets the "youtube_url" field.
+func (nc *NFTCreate) SetYoutubeURL(s string) *NFTCreate {
+	nc.mutation.SetYoutubeURL(s)
+	return nc
+}
+
+// SetNillableYoutubeURL sets the "youtube_url" field if the given value is not nil.
+func (nc *NFTCreate) SetNillableYoutubeURL(s *string) *NFTCreate {
+	if s != nil {
+		nc.SetYoutubeURL(*s)
+	}
 	return nc
 }
 
@@ -170,8 +226,40 @@ func (nc *NFTCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (nc *NFTCreate) check() error {
+	if _, ok := nc.mutation.ContractAddress(); !ok {
+		return &ValidationError{Name: "contract_address", err: errors.New(`ent: missing required field "NFT.contract_address"`)}
+	}
+	if v, ok := nc.mutation.ContractAddress(); ok {
+		if err := nft.ContractAddressValidator(v); err != nil {
+			return &ValidationError{Name: "contract_address", err: fmt.Errorf(`ent: validator failed for field "NFT.contract_address": %w`, err)}
+		}
+	}
 	if _, ok := nc.mutation.TokenID(); !ok {
 		return &ValidationError{Name: "token_id", err: errors.New(`ent: missing required field "NFT.token_id"`)}
+	}
+	if _, ok := nc.mutation.TokenURI(); !ok {
+		return &ValidationError{Name: "token_uri", err: errors.New(`ent: missing required field "NFT.token_uri"`)}
+	}
+	if v, ok := nc.mutation.TokenURI(); ok {
+		if err := nft.TokenURIValidator(v); err != nil {
+			return &ValidationError{Name: "token_uri", err: fmt.Errorf(`ent: validator failed for field "NFT.token_uri": %w`, err)}
+		}
+	}
+	if _, ok := nc.mutation.Image(); !ok {
+		return &ValidationError{Name: "image", err: errors.New(`ent: missing required field "NFT.image"`)}
+	}
+	if v, ok := nc.mutation.Image(); ok {
+		if err := nft.ImageValidator(v); err != nil {
+			return &ValidationError{Name: "image", err: fmt.Errorf(`ent: validator failed for field "NFT.image": %w`, err)}
+		}
+	}
+	if _, ok := nc.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "NFT.description"`)}
+	}
+	if v, ok := nc.mutation.Description(); ok {
+		if err := nft.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "NFT.description": %w`, err)}
+		}
 	}
 	if _, ok := nc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "NFT.name"`)}
@@ -202,7 +290,10 @@ func (nc *NFTCreate) sqlSave(ctx context.Context) (*NFT, error) {
 	if err := nc.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := nc.createSpec()
+	_node, _spec, err := nc.createSpec()
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, nc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
@@ -216,38 +307,62 @@ func (nc *NFTCreate) sqlSave(ctx context.Context) (*NFT, error) {
 	return _node, nil
 }
 
-func (nc *NFTCreate) createSpec() (*NFT, *sqlgraph.CreateSpec) {
+func (nc *NFTCreate) createSpec() (*NFT, *sqlgraph.CreateSpec, error) {
 	var (
 		_node = &NFT{config: nc.config}
 		_spec = sqlgraph.NewCreateSpec(nft.Table, sqlgraph.NewFieldSpec(nft.FieldID, field.TypeInt))
 	)
+	if value, ok := nc.mutation.ContractAddress(); ok {
+		_spec.SetField(nft.FieldContractAddress, field.TypeString, value)
+		_node.ContractAddress = value
+	}
 	if value, ok := nc.mutation.TokenID(); ok {
-		_spec.SetField(nft.FieldTokenID, field.TypeUint64, value)
+		vv, err := nft.ValueScanner.TokenID.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(nft.FieldTokenID, field.TypeString, vv)
 		_node.TokenID = value
 	}
-	if value, ok := nc.mutation.TokenURL(); ok {
-		_spec.SetField(nft.FieldTokenURL, field.TypeString, value)
-		_node.TokenURL = value
+	if value, ok := nc.mutation.TokenURI(); ok {
+		_spec.SetField(nft.FieldTokenURI, field.TypeString, value)
+		_node.TokenURI = value
 	}
-	if value, ok := nc.mutation.Raw(); ok {
-		_spec.SetField(nft.FieldRaw, field.TypeJSON, value)
-		_node.Raw = value
+	if value, ok := nc.mutation.Image(); ok {
+		_spec.SetField(nft.FieldImage, field.TypeString, value)
+		_node.Image = value
 	}
-	if value, ok := nc.mutation.Name(); ok {
-		_spec.SetField(nft.FieldName, field.TypeString, value)
-		_node.Name = value
+	if value, ok := nc.mutation.ImageData(); ok {
+		_spec.SetField(nft.FieldImageData, field.TypeString, value)
+		_node.ImageData = &value
+	}
+	if value, ok := nc.mutation.ExternalURL(); ok {
+		_spec.SetField(nft.FieldExternalURL, field.TypeString, value)
+		_node.ExternalURL = &value
 	}
 	if value, ok := nc.mutation.Description(); ok {
 		_spec.SetField(nft.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if value, ok := nc.mutation.Image(); ok {
-		_spec.SetField(nft.FieldImage, field.TypeJSON, value)
-		_node.Image = value
+	if value, ok := nc.mutation.Name(); ok {
+		_spec.SetField(nft.FieldName, field.TypeString, value)
+		_node.Name = value
 	}
 	if value, ok := nc.mutation.Attributes(); ok {
 		_spec.SetField(nft.FieldAttributes, field.TypeJSON, value)
 		_node.Attributes = value
+	}
+	if value, ok := nc.mutation.BackgroundColor(); ok {
+		_spec.SetField(nft.FieldBackgroundColor, field.TypeString, value)
+		_node.BackgroundColor = &value
+	}
+	if value, ok := nc.mutation.AnimationURL(); ok {
+		_spec.SetField(nft.FieldAnimationURL, field.TypeString, value)
+		_node.AnimationURL = &value
+	}
+	if value, ok := nc.mutation.YoutubeURL(); ok {
+		_spec.SetField(nft.FieldYoutubeURL, field.TypeString, value)
+		_node.YoutubeURL = &value
 	}
 	if value, ok := nc.mutation.OwnerAddress(); ok {
 		_spec.SetField(nft.FieldOwnerAddress, field.TypeString, value)
@@ -295,7 +410,7 @@ func (nc *NFTCreate) createSpec() (*NFT, *sqlgraph.CreateSpec) {
 		_node.nft_class_nfts = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return _node, _spec
+	return _node, _spec, nil
 }
 
 // NFTCreateBulk is the builder for creating many NFT entities in bulk.
@@ -326,7 +441,10 @@ func (ncb *NFTCreateBulk) Save(ctx context.Context) ([]*NFT, error) {
 				}
 				builder.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = builder.createSpec()
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ncb.builders[i+1].mutation)
 				} else {

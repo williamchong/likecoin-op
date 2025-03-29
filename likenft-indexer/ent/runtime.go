@@ -4,9 +4,14 @@ package ent
 
 import (
 	"likenft-indexer/ent/evmevent"
+	"likenft-indexer/ent/evmeventprocessedblockheight"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/schema"
+	"likenft-indexer/ent/transactionmemo"
+	"math/big"
+
+	"entgo.io/ent/schema/field"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -20,27 +25,84 @@ func init() {
 	// evmevent.TransactionHashValidator is a validator for the "transaction_hash" field. It is called by the builders before save.
 	evmevent.TransactionHashValidator = evmeventDescTransactionHash.Validators[0].(func(string) error)
 	// evmeventDescBlockHash is the schema descriptor for block_hash field.
-	evmeventDescBlockHash := evmeventFields[1].Descriptor()
+	evmeventDescBlockHash := evmeventFields[2].Descriptor()
 	// evmevent.BlockHashValidator is a validator for the "block_hash" field. It is called by the builders before save.
 	evmevent.BlockHashValidator = evmeventDescBlockHash.Validators[0].(func(string) error)
 	// evmeventDescAddress is the schema descriptor for address field.
-	evmeventDescAddress := evmeventFields[4].Descriptor()
+	evmeventDescAddress := evmeventFields[5].Descriptor()
 	// evmevent.AddressValidator is a validator for the "address" field. It is called by the builders before save.
 	evmevent.AddressValidator = evmeventDescAddress.Validators[0].(func(string) error)
 	// evmeventDescTopic0 is the schema descriptor for topic0 field.
-	evmeventDescTopic0 := evmeventFields[5].Descriptor()
+	evmeventDescTopic0 := evmeventFields[6].Descriptor()
 	// evmevent.Topic0Validator is a validator for the "topic0" field. It is called by the builders before save.
 	evmevent.Topic0Validator = evmeventDescTopic0.Validators[0].(func(string) error)
+	// evmeventDescTopic0Hex is the schema descriptor for topic0_hex field.
+	evmeventDescTopic0Hex := evmeventFields[7].Descriptor()
+	// evmevent.Topic0HexValidator is a validator for the "topic0_hex" field. It is called by the builders before save.
+	evmevent.Topic0HexValidator = evmeventDescTopic0Hex.Validators[0].(func(string) error)
+	evmeventprocessedblockheightFields := schema.EVMEventProcessedBlockHeight{}.Fields()
+	_ = evmeventprocessedblockheightFields
+	// evmeventprocessedblockheightDescContractAddress is the schema descriptor for contract_address field.
+	evmeventprocessedblockheightDescContractAddress := evmeventprocessedblockheightFields[1].Descriptor()
+	// evmeventprocessedblockheight.ContractAddressValidator is a validator for the "contract_address" field. It is called by the builders before save.
+	evmeventprocessedblockheight.ContractAddressValidator = evmeventprocessedblockheightDescContractAddress.Validators[0].(func(string) error)
 	nftFields := schema.NFT{}.Fields()
 	_ = nftFields
+	// nftDescContractAddress is the schema descriptor for contract_address field.
+	nftDescContractAddress := nftFields[0].Descriptor()
+	// nft.ContractAddressValidator is a validator for the "contract_address" field. It is called by the builders before save.
+	nft.ContractAddressValidator = func() func(string) error {
+		validators := nftDescContractAddress.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(contract_address string) error {
+			for _, fn := range fns {
+				if err := fn(contract_address); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// nftDescTokenID is the schema descriptor for token_id field.
+	nftDescTokenID := nftFields[1].Descriptor()
+	nft.ValueScanner.TokenID = nftDescTokenID.ValueScanner.(field.TypeValueScanner[*big.Int])
+	// nftDescTokenURI is the schema descriptor for token_uri field.
+	nftDescTokenURI := nftFields[2].Descriptor()
+	// nft.TokenURIValidator is a validator for the "token_uri" field. It is called by the builders before save.
+	nft.TokenURIValidator = nftDescTokenURI.Validators[0].(func(string) error)
+	// nftDescImage is the schema descriptor for image field.
+	nftDescImage := nftFields[3].Descriptor()
+	// nft.ImageValidator is a validator for the "image" field. It is called by the builders before save.
+	nft.ImageValidator = nftDescImage.Validators[0].(func(string) error)
+	// nftDescDescription is the schema descriptor for description field.
+	nftDescDescription := nftFields[6].Descriptor()
+	// nft.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	nft.DescriptionValidator = nftDescDescription.Validators[0].(func(string) error)
 	// nftDescName is the schema descriptor for name field.
-	nftDescName := nftFields[3].Descriptor()
+	nftDescName := nftFields[7].Descriptor()
 	// nft.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	nft.NameValidator = nftDescName.Validators[0].(func(string) error)
 	// nftDescOwnerAddress is the schema descriptor for owner_address field.
-	nftDescOwnerAddress := nftFields[7].Descriptor()
+	nftDescOwnerAddress := nftFields[12].Descriptor()
 	// nft.OwnerAddressValidator is a validator for the "owner_address" field. It is called by the builders before save.
-	nft.OwnerAddressValidator = nftDescOwnerAddress.Validators[0].(func(string) error)
+	nft.OwnerAddressValidator = func() func(string) error {
+		validators := nftDescOwnerAddress.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(owner_address string) error {
+			for _, fn := range fns {
+				if err := fn(owner_address); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	nftclassFields := schema.NFTClass{}.Fields()
 	_ = nftclassFields
 	// nftclassDescName is the schema descriptor for name field.
@@ -55,14 +117,6 @@ func init() {
 	nftclassDescTotalSupply := nftclassFields[5].Descriptor()
 	// nftclass.TotalSupplyValidator is a validator for the "total_supply" field. It is called by the builders before save.
 	nftclass.TotalSupplyValidator = nftclassDescTotalSupply.Validators[0].(func(int) error)
-	// nftclassDescBannerImage is the schema descriptor for banner_image field.
-	nftclassDescBannerImage := nftclassFields[7].Descriptor()
-	// nftclass.BannerImageValidator is a validator for the "banner_image" field. It is called by the builders before save.
-	nftclass.BannerImageValidator = nftclassDescBannerImage.Validators[0].(func(string) error)
-	// nftclassDescFeaturedImage is the schema descriptor for featured_image field.
-	nftclassDescFeaturedImage := nftclassFields[8].Descriptor()
-	// nftclass.FeaturedImageValidator is a validator for the "featured_image" field. It is called by the builders before save.
-	nftclass.FeaturedImageValidator = nftclassDescFeaturedImage.Validators[0].(func(string) error)
 	// nftclassDescDeployerAddress is the schema descriptor for deployer_address field.
 	nftclassDescDeployerAddress := nftclassFields[9].Descriptor()
 	// nftclass.DeployerAddressValidator is a validator for the "deployer_address" field. It is called by the builders before save.
@@ -71,4 +125,22 @@ func init() {
 	nftclassDescDeployedBlockNumber := nftclassFields[10].Descriptor()
 	// nftclass.DeployedBlockNumberValidator is a validator for the "deployed_block_number" field. It is called by the builders before save.
 	nftclass.DeployedBlockNumberValidator = nftclassDescDeployedBlockNumber.Validators[0].(func(string) error)
+	transactionmemoFields := schema.TransactionMemo{}.Fields()
+	_ = transactionmemoFields
+	// transactionmemoDescTransactionHash is the schema descriptor for transaction_hash field.
+	transactionmemoDescTransactionHash := transactionmemoFields[0].Descriptor()
+	// transactionmemo.TransactionHashValidator is a validator for the "transaction_hash" field. It is called by the builders before save.
+	transactionmemo.TransactionHashValidator = transactionmemoDescTransactionHash.Validators[0].(func(string) error)
+	// transactionmemoDescBookNftID is the schema descriptor for book_nft_id field.
+	transactionmemoDescBookNftID := transactionmemoFields[1].Descriptor()
+	// transactionmemo.BookNftIDValidator is a validator for the "book_nft_id" field. It is called by the builders before save.
+	transactionmemo.BookNftIDValidator = transactionmemoDescBookNftID.Validators[0].(func(string) error)
+	// transactionmemoDescFrom is the schema descriptor for from field.
+	transactionmemoDescFrom := transactionmemoFields[2].Descriptor()
+	// transactionmemo.FromValidator is a validator for the "from" field. It is called by the builders before save.
+	transactionmemo.FromValidator = transactionmemoDescFrom.Validators[0].(func(string) error)
+	// transactionmemoDescTo is the schema descriptor for to field.
+	transactionmemoDescTo := transactionmemoFields[3].Descriptor()
+	// transactionmemo.ToValidator is a validator for the "to" field. It is called by the builders before save.
+	transactionmemo.ToValidator = transactionmemoDescTo.Validators[0].(func(string) error)
 }

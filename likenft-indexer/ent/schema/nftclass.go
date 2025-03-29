@@ -25,8 +25,8 @@ func (NFTClass) Fields() []ent.Field {
 		// Raw metadata from the contract
 		field.JSON("metadata", map[string]any{}).Optional(),
 		// Start Prepopulate fields
-		field.String("banner_image").NotEmpty(),
-		field.String("featured_image").NotEmpty(),
+		field.String("banner_image"),
+		field.String("featured_image"),
 		// End Prepopulate fields
 		field.String("deployer_address").NotEmpty(),
 		field.String("deployed_block_number").NotEmpty(),

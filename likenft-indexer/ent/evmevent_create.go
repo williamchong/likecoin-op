@@ -26,6 +26,12 @@ func (eec *EVMEventCreate) SetTransactionHash(s string) *EVMEventCreate {
 	return eec
 }
 
+// SetTransactionIndex sets the "transaction_index" field.
+func (eec *EVMEventCreate) SetTransactionIndex(u uint) *EVMEventCreate {
+	eec.mutation.SetTransactionIndex(u)
+	return eec
+}
+
 // SetBlockHash sets the "block_hash" field.
 func (eec *EVMEventCreate) SetBlockHash(s string) *EVMEventCreate {
 	eec.mutation.SetBlockHash(s)
@@ -39,7 +45,7 @@ func (eec *EVMEventCreate) SetBlockNumber(u uint64) *EVMEventCreate {
 }
 
 // SetLogIndex sets the "log_index" field.
-func (eec *EVMEventCreate) SetLogIndex(u uint64) *EVMEventCreate {
+func (eec *EVMEventCreate) SetLogIndex(u uint) *EVMEventCreate {
 	eec.mutation.SetLogIndex(u)
 	return eec
 }
@@ -56,9 +62,37 @@ func (eec *EVMEventCreate) SetTopic0(s string) *EVMEventCreate {
 	return eec
 }
 
+// SetTopic0Hex sets the "topic0_hex" field.
+func (eec *EVMEventCreate) SetTopic0Hex(s string) *EVMEventCreate {
+	eec.mutation.SetTopic0Hex(s)
+	return eec
+}
+
 // SetTopic1 sets the "topic1" field.
 func (eec *EVMEventCreate) SetTopic1(s string) *EVMEventCreate {
 	eec.mutation.SetTopic1(s)
+	return eec
+}
+
+// SetNillableTopic1 sets the "topic1" field if the given value is not nil.
+func (eec *EVMEventCreate) SetNillableTopic1(s *string) *EVMEventCreate {
+	if s != nil {
+		eec.SetTopic1(*s)
+	}
+	return eec
+}
+
+// SetTopic1Hex sets the "topic1_hex" field.
+func (eec *EVMEventCreate) SetTopic1Hex(s string) *EVMEventCreate {
+	eec.mutation.SetTopic1Hex(s)
+	return eec
+}
+
+// SetNillableTopic1Hex sets the "topic1_hex" field if the given value is not nil.
+func (eec *EVMEventCreate) SetNillableTopic1Hex(s *string) *EVMEventCreate {
+	if s != nil {
+		eec.SetTopic1Hex(*s)
+	}
 	return eec
 }
 
@@ -68,15 +102,107 @@ func (eec *EVMEventCreate) SetTopic2(s string) *EVMEventCreate {
 	return eec
 }
 
+// SetNillableTopic2 sets the "topic2" field if the given value is not nil.
+func (eec *EVMEventCreate) SetNillableTopic2(s *string) *EVMEventCreate {
+	if s != nil {
+		eec.SetTopic2(*s)
+	}
+	return eec
+}
+
+// SetTopic2Hex sets the "topic2_hex" field.
+func (eec *EVMEventCreate) SetTopic2Hex(s string) *EVMEventCreate {
+	eec.mutation.SetTopic2Hex(s)
+	return eec
+}
+
+// SetNillableTopic2Hex sets the "topic2_hex" field if the given value is not nil.
+func (eec *EVMEventCreate) SetNillableTopic2Hex(s *string) *EVMEventCreate {
+	if s != nil {
+		eec.SetTopic2Hex(*s)
+	}
+	return eec
+}
+
 // SetTopic3 sets the "topic3" field.
 func (eec *EVMEventCreate) SetTopic3(s string) *EVMEventCreate {
 	eec.mutation.SetTopic3(s)
 	return eec
 }
 
+// SetNillableTopic3 sets the "topic3" field if the given value is not nil.
+func (eec *EVMEventCreate) SetNillableTopic3(s *string) *EVMEventCreate {
+	if s != nil {
+		eec.SetTopic3(*s)
+	}
+	return eec
+}
+
+// SetTopic3Hex sets the "topic3_hex" field.
+func (eec *EVMEventCreate) SetTopic3Hex(s string) *EVMEventCreate {
+	eec.mutation.SetTopic3Hex(s)
+	return eec
+}
+
+// SetNillableTopic3Hex sets the "topic3_hex" field if the given value is not nil.
+func (eec *EVMEventCreate) SetNillableTopic3Hex(s *string) *EVMEventCreate {
+	if s != nil {
+		eec.SetTopic3Hex(*s)
+	}
+	return eec
+}
+
 // SetData sets the "data" field.
 func (eec *EVMEventCreate) SetData(s string) *EVMEventCreate {
 	eec.mutation.SetData(s)
+	return eec
+}
+
+// SetNillableData sets the "data" field if the given value is not nil.
+func (eec *EVMEventCreate) SetNillableData(s *string) *EVMEventCreate {
+	if s != nil {
+		eec.SetData(*s)
+	}
+	return eec
+}
+
+// SetDataHex sets the "data_hex" field.
+func (eec *EVMEventCreate) SetDataHex(s string) *EVMEventCreate {
+	eec.mutation.SetDataHex(s)
+	return eec
+}
+
+// SetNillableDataHex sets the "data_hex" field if the given value is not nil.
+func (eec *EVMEventCreate) SetNillableDataHex(s *string) *EVMEventCreate {
+	if s != nil {
+		eec.SetDataHex(*s)
+	}
+	return eec
+}
+
+// SetRemoved sets the "removed" field.
+func (eec *EVMEventCreate) SetRemoved(b bool) *EVMEventCreate {
+	eec.mutation.SetRemoved(b)
+	return eec
+}
+
+// SetStatus sets the "status" field.
+func (eec *EVMEventCreate) SetStatus(e evmevent.Status) *EVMEventCreate {
+	eec.mutation.SetStatus(e)
+	return eec
+}
+
+// SetFailedReason sets the "failed_reason" field.
+func (eec *EVMEventCreate) SetFailedReason(s string) *EVMEventCreate {
+	eec.mutation.SetFailedReason(s)
+	return eec
+}
+
+// SetNillableFailedReason sets the "failed_reason" field if the given value is not nil.
+func (eec *EVMEventCreate) SetNillableFailedReason(s *string) *EVMEventCreate {
+	if s != nil {
+		eec.SetFailedReason(*s)
+	}
 	return eec
 }
 
@@ -128,6 +254,9 @@ func (eec *EVMEventCreate) check() error {
 			return &ValidationError{Name: "transaction_hash", err: fmt.Errorf(`ent: validator failed for field "EVMEvent.transaction_hash": %w`, err)}
 		}
 	}
+	if _, ok := eec.mutation.TransactionIndex(); !ok {
+		return &ValidationError{Name: "transaction_index", err: errors.New(`ent: missing required field "EVMEvent.transaction_index"`)}
+	}
 	if _, ok := eec.mutation.BlockHash(); !ok {
 		return &ValidationError{Name: "block_hash", err: errors.New(`ent: missing required field "EVMEvent.block_hash"`)}
 	}
@@ -158,17 +287,24 @@ func (eec *EVMEventCreate) check() error {
 			return &ValidationError{Name: "topic0", err: fmt.Errorf(`ent: validator failed for field "EVMEvent.topic0": %w`, err)}
 		}
 	}
-	if _, ok := eec.mutation.Topic1(); !ok {
-		return &ValidationError{Name: "topic1", err: errors.New(`ent: missing required field "EVMEvent.topic1"`)}
+	if _, ok := eec.mutation.Topic0Hex(); !ok {
+		return &ValidationError{Name: "topic0_hex", err: errors.New(`ent: missing required field "EVMEvent.topic0_hex"`)}
 	}
-	if _, ok := eec.mutation.Topic2(); !ok {
-		return &ValidationError{Name: "topic2", err: errors.New(`ent: missing required field "EVMEvent.topic2"`)}
+	if v, ok := eec.mutation.Topic0Hex(); ok {
+		if err := evmevent.Topic0HexValidator(v); err != nil {
+			return &ValidationError{Name: "topic0_hex", err: fmt.Errorf(`ent: validator failed for field "EVMEvent.topic0_hex": %w`, err)}
+		}
 	}
-	if _, ok := eec.mutation.Topic3(); !ok {
-		return &ValidationError{Name: "topic3", err: errors.New(`ent: missing required field "EVMEvent.topic3"`)}
+	if _, ok := eec.mutation.Removed(); !ok {
+		return &ValidationError{Name: "removed", err: errors.New(`ent: missing required field "EVMEvent.removed"`)}
 	}
-	if _, ok := eec.mutation.Data(); !ok {
-		return &ValidationError{Name: "data", err: errors.New(`ent: missing required field "EVMEvent.data"`)}
+	if _, ok := eec.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "EVMEvent.status"`)}
+	}
+	if v, ok := eec.mutation.Status(); ok {
+		if err := evmevent.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "EVMEvent.status": %w`, err)}
+		}
 	}
 	if _, ok := eec.mutation.Timestamp(); !ok {
 		return &ValidationError{Name: "timestamp", err: errors.New(`ent: missing required field "EVMEvent.timestamp"`)}
@@ -203,6 +339,10 @@ func (eec *EVMEventCreate) createSpec() (*EVMEvent, *sqlgraph.CreateSpec) {
 		_spec.SetField(evmevent.FieldTransactionHash, field.TypeString, value)
 		_node.TransactionHash = value
 	}
+	if value, ok := eec.mutation.TransactionIndex(); ok {
+		_spec.SetField(evmevent.FieldTransactionIndex, field.TypeUint, value)
+		_node.TransactionIndex = value
+	}
 	if value, ok := eec.mutation.BlockHash(); ok {
 		_spec.SetField(evmevent.FieldBlockHash, field.TypeString, value)
 		_node.BlockHash = value
@@ -212,7 +352,7 @@ func (eec *EVMEventCreate) createSpec() (*EVMEvent, *sqlgraph.CreateSpec) {
 		_node.BlockNumber = value
 	}
 	if value, ok := eec.mutation.LogIndex(); ok {
-		_spec.SetField(evmevent.FieldLogIndex, field.TypeUint64, value)
+		_spec.SetField(evmevent.FieldLogIndex, field.TypeUint, value)
 		_node.LogIndex = value
 	}
 	if value, ok := eec.mutation.Address(); ok {
@@ -223,21 +363,53 @@ func (eec *EVMEventCreate) createSpec() (*EVMEvent, *sqlgraph.CreateSpec) {
 		_spec.SetField(evmevent.FieldTopic0, field.TypeString, value)
 		_node.Topic0 = value
 	}
+	if value, ok := eec.mutation.Topic0Hex(); ok {
+		_spec.SetField(evmevent.FieldTopic0Hex, field.TypeString, value)
+		_node.Topic0Hex = value
+	}
 	if value, ok := eec.mutation.Topic1(); ok {
 		_spec.SetField(evmevent.FieldTopic1, field.TypeString, value)
-		_node.Topic1 = value
+		_node.Topic1 = &value
+	}
+	if value, ok := eec.mutation.Topic1Hex(); ok {
+		_spec.SetField(evmevent.FieldTopic1Hex, field.TypeString, value)
+		_node.Topic1Hex = &value
 	}
 	if value, ok := eec.mutation.Topic2(); ok {
 		_spec.SetField(evmevent.FieldTopic2, field.TypeString, value)
-		_node.Topic2 = value
+		_node.Topic2 = &value
+	}
+	if value, ok := eec.mutation.Topic2Hex(); ok {
+		_spec.SetField(evmevent.FieldTopic2Hex, field.TypeString, value)
+		_node.Topic2Hex = &value
 	}
 	if value, ok := eec.mutation.Topic3(); ok {
 		_spec.SetField(evmevent.FieldTopic3, field.TypeString, value)
-		_node.Topic3 = value
+		_node.Topic3 = &value
+	}
+	if value, ok := eec.mutation.Topic3Hex(); ok {
+		_spec.SetField(evmevent.FieldTopic3Hex, field.TypeString, value)
+		_node.Topic3Hex = &value
 	}
 	if value, ok := eec.mutation.Data(); ok {
 		_spec.SetField(evmevent.FieldData, field.TypeString, value)
-		_node.Data = value
+		_node.Data = &value
+	}
+	if value, ok := eec.mutation.DataHex(); ok {
+		_spec.SetField(evmevent.FieldDataHex, field.TypeString, value)
+		_node.DataHex = &value
+	}
+	if value, ok := eec.mutation.Removed(); ok {
+		_spec.SetField(evmevent.FieldRemoved, field.TypeBool, value)
+		_node.Removed = value
+	}
+	if value, ok := eec.mutation.Status(); ok {
+		_spec.SetField(evmevent.FieldStatus, field.TypeEnum, value)
+		_node.Status = value
+	}
+	if value, ok := eec.mutation.FailedReason(); ok {
+		_spec.SetField(evmevent.FieldFailedReason, field.TypeString, value)
+		_node.FailedReason = &value
 	}
 	if value, ok := eec.mutation.Timestamp(); ok {
 		_spec.SetField(evmevent.FieldTimestamp, field.TypeTime, value)

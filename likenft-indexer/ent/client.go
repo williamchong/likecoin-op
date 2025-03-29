@@ -13,8 +13,10 @@ import (
 
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/evmevent"
+	"likenft-indexer/ent/evmeventprocessedblockheight"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
+	"likenft-indexer/ent/transactionmemo"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -31,10 +33,14 @@ type Client struct {
 	Account *AccountClient
 	// EVMEvent is the client for interacting with the EVMEvent builders.
 	EVMEvent *EVMEventClient
+	// EVMEventProcessedBlockHeight is the client for interacting with the EVMEventProcessedBlockHeight builders.
+	EVMEventProcessedBlockHeight *EVMEventProcessedBlockHeightClient
 	// NFT is the client for interacting with the NFT builders.
 	NFT *NFTClient
 	// NFTClass is the client for interacting with the NFTClass builders.
 	NFTClass *NFTClassClient
+	// TransactionMemo is the client for interacting with the TransactionMemo builders.
+	TransactionMemo *TransactionMemoClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -48,8 +54,10 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Account = NewAccountClient(c.config)
 	c.EVMEvent = NewEVMEventClient(c.config)
+	c.EVMEventProcessedBlockHeight = NewEVMEventProcessedBlockHeightClient(c.config)
 	c.NFT = NewNFTClient(c.config)
 	c.NFTClass = NewNFTClassClient(c.config)
+	c.TransactionMemo = NewTransactionMemoClient(c.config)
 }
 
 type (
@@ -140,12 +148,14 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Account:  NewAccountClient(cfg),
-		EVMEvent: NewEVMEventClient(cfg),
-		NFT:      NewNFTClient(cfg),
-		NFTClass: NewNFTClassClient(cfg),
+		ctx:                          ctx,
+		config:                       cfg,
+		Account:                      NewAccountClient(cfg),
+		EVMEvent:                     NewEVMEventClient(cfg),
+		EVMEventProcessedBlockHeight: NewEVMEventProcessedBlockHeightClient(cfg),
+		NFT:                          NewNFTClient(cfg),
+		NFTClass:                     NewNFTClassClient(cfg),
+		TransactionMemo:              NewTransactionMemoClient(cfg),
 	}, nil
 }
 
@@ -163,12 +173,14 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Account:  NewAccountClient(cfg),
-		EVMEvent: NewEVMEventClient(cfg),
-		NFT:      NewNFTClient(cfg),
-		NFTClass: NewNFTClassClient(cfg),
+		ctx:                          ctx,
+		config:                       cfg,
+		Account:                      NewAccountClient(cfg),
+		EVMEvent:                     NewEVMEventClient(cfg),
+		EVMEventProcessedBlockHeight: NewEVMEventProcessedBlockHeightClient(cfg),
+		NFT:                          NewNFTClient(cfg),
+		NFTClass:                     NewNFTClassClient(cfg),
+		TransactionMemo:              NewTransactionMemoClient(cfg),
 	}, nil
 }
 
@@ -197,19 +209,23 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Account.Use(hooks...)
-	c.EVMEvent.Use(hooks...)
-	c.NFT.Use(hooks...)
-	c.NFTClass.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Account, c.EVMEvent, c.EVMEventProcessedBlockHeight, c.NFT, c.NFTClass,
+		c.TransactionMemo,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Account.Intercept(interceptors...)
-	c.EVMEvent.Intercept(interceptors...)
-	c.NFT.Intercept(interceptors...)
-	c.NFTClass.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Account, c.EVMEvent, c.EVMEventProcessedBlockHeight, c.NFT, c.NFTClass,
+		c.TransactionMemo,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -219,10 +235,14 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Account.mutate(ctx, m)
 	case *EVMEventMutation:
 		return c.EVMEvent.mutate(ctx, m)
+	case *EVMEventProcessedBlockHeightMutation:
+		return c.EVMEventProcessedBlockHeight.mutate(ctx, m)
 	case *NFTMutation:
 		return c.NFT.mutate(ctx, m)
 	case *NFTClassMutation:
 		return c.NFTClass.mutate(ctx, m)
+	case *TransactionMemoMutation:
+		return c.TransactionMemo.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -523,6 +543,139 @@ func (c *EVMEventClient) mutate(ctx context.Context, m *EVMEventMutation) (Value
 		return (&EVMEventDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown EVMEvent mutation op: %q", m.Op())
+	}
+}
+
+// EVMEventProcessedBlockHeightClient is a client for the EVMEventProcessedBlockHeight schema.
+type EVMEventProcessedBlockHeightClient struct {
+	config
+}
+
+// NewEVMEventProcessedBlockHeightClient returns a client for the EVMEventProcessedBlockHeight from the given config.
+func NewEVMEventProcessedBlockHeightClient(c config) *EVMEventProcessedBlockHeightClient {
+	return &EVMEventProcessedBlockHeightClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `evmeventprocessedblockheight.Hooks(f(g(h())))`.
+func (c *EVMEventProcessedBlockHeightClient) Use(hooks ...Hook) {
+	c.hooks.EVMEventProcessedBlockHeight = append(c.hooks.EVMEventProcessedBlockHeight, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `evmeventprocessedblockheight.Intercept(f(g(h())))`.
+func (c *EVMEventProcessedBlockHeightClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EVMEventProcessedBlockHeight = append(c.inters.EVMEventProcessedBlockHeight, interceptors...)
+}
+
+// Create returns a builder for creating a EVMEventProcessedBlockHeight entity.
+func (c *EVMEventProcessedBlockHeightClient) Create() *EVMEventProcessedBlockHeightCreate {
+	mutation := newEVMEventProcessedBlockHeightMutation(c.config, OpCreate)
+	return &EVMEventProcessedBlockHeightCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EVMEventProcessedBlockHeight entities.
+func (c *EVMEventProcessedBlockHeightClient) CreateBulk(builders ...*EVMEventProcessedBlockHeightCreate) *EVMEventProcessedBlockHeightCreateBulk {
+	return &EVMEventProcessedBlockHeightCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EVMEventProcessedBlockHeightClient) MapCreateBulk(slice any, setFunc func(*EVMEventProcessedBlockHeightCreate, int)) *EVMEventProcessedBlockHeightCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EVMEventProcessedBlockHeightCreateBulk{err: fmt.Errorf("calling to EVMEventProcessedBlockHeightClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EVMEventProcessedBlockHeightCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EVMEventProcessedBlockHeightCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EVMEventProcessedBlockHeight.
+func (c *EVMEventProcessedBlockHeightClient) Update() *EVMEventProcessedBlockHeightUpdate {
+	mutation := newEVMEventProcessedBlockHeightMutation(c.config, OpUpdate)
+	return &EVMEventProcessedBlockHeightUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EVMEventProcessedBlockHeightClient) UpdateOne(eepbh *EVMEventProcessedBlockHeight) *EVMEventProcessedBlockHeightUpdateOne {
+	mutation := newEVMEventProcessedBlockHeightMutation(c.config, OpUpdateOne, withEVMEventProcessedBlockHeight(eepbh))
+	return &EVMEventProcessedBlockHeightUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EVMEventProcessedBlockHeightClient) UpdateOneID(id int) *EVMEventProcessedBlockHeightUpdateOne {
+	mutation := newEVMEventProcessedBlockHeightMutation(c.config, OpUpdateOne, withEVMEventProcessedBlockHeightID(id))
+	return &EVMEventProcessedBlockHeightUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EVMEventProcessedBlockHeight.
+func (c *EVMEventProcessedBlockHeightClient) Delete() *EVMEventProcessedBlockHeightDelete {
+	mutation := newEVMEventProcessedBlockHeightMutation(c.config, OpDelete)
+	return &EVMEventProcessedBlockHeightDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EVMEventProcessedBlockHeightClient) DeleteOne(eepbh *EVMEventProcessedBlockHeight) *EVMEventProcessedBlockHeightDeleteOne {
+	return c.DeleteOneID(eepbh.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EVMEventProcessedBlockHeightClient) DeleteOneID(id int) *EVMEventProcessedBlockHeightDeleteOne {
+	builder := c.Delete().Where(evmeventprocessedblockheight.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EVMEventProcessedBlockHeightDeleteOne{builder}
+}
+
+// Query returns a query builder for EVMEventProcessedBlockHeight.
+func (c *EVMEventProcessedBlockHeightClient) Query() *EVMEventProcessedBlockHeightQuery {
+	return &EVMEventProcessedBlockHeightQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEVMEventProcessedBlockHeight},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EVMEventProcessedBlockHeight entity by its id.
+func (c *EVMEventProcessedBlockHeightClient) Get(ctx context.Context, id int) (*EVMEventProcessedBlockHeight, error) {
+	return c.Query().Where(evmeventprocessedblockheight.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EVMEventProcessedBlockHeightClient) GetX(ctx context.Context, id int) *EVMEventProcessedBlockHeight {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *EVMEventProcessedBlockHeightClient) Hooks() []Hook {
+	return c.hooks.EVMEventProcessedBlockHeight
+}
+
+// Interceptors returns the client interceptors.
+func (c *EVMEventProcessedBlockHeightClient) Interceptors() []Interceptor {
+	return c.inters.EVMEventProcessedBlockHeight
+}
+
+func (c *EVMEventProcessedBlockHeightClient) mutate(ctx context.Context, m *EVMEventProcessedBlockHeightMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EVMEventProcessedBlockHeightCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EVMEventProcessedBlockHeightUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EVMEventProcessedBlockHeightUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EVMEventProcessedBlockHeightDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown EVMEventProcessedBlockHeight mutation op: %q", m.Op())
 	}
 }
 
@@ -856,12 +1009,147 @@ func (c *NFTClassClient) mutate(ctx context.Context, m *NFTClassMutation) (Value
 	}
 }
 
+// TransactionMemoClient is a client for the TransactionMemo schema.
+type TransactionMemoClient struct {
+	config
+}
+
+// NewTransactionMemoClient returns a client for the TransactionMemo from the given config.
+func NewTransactionMemoClient(c config) *TransactionMemoClient {
+	return &TransactionMemoClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `transactionmemo.Hooks(f(g(h())))`.
+func (c *TransactionMemoClient) Use(hooks ...Hook) {
+	c.hooks.TransactionMemo = append(c.hooks.TransactionMemo, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `transactionmemo.Intercept(f(g(h())))`.
+func (c *TransactionMemoClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TransactionMemo = append(c.inters.TransactionMemo, interceptors...)
+}
+
+// Create returns a builder for creating a TransactionMemo entity.
+func (c *TransactionMemoClient) Create() *TransactionMemoCreate {
+	mutation := newTransactionMemoMutation(c.config, OpCreate)
+	return &TransactionMemoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TransactionMemo entities.
+func (c *TransactionMemoClient) CreateBulk(builders ...*TransactionMemoCreate) *TransactionMemoCreateBulk {
+	return &TransactionMemoCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TransactionMemoClient) MapCreateBulk(slice any, setFunc func(*TransactionMemoCreate, int)) *TransactionMemoCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TransactionMemoCreateBulk{err: fmt.Errorf("calling to TransactionMemoClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TransactionMemoCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TransactionMemoCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TransactionMemo.
+func (c *TransactionMemoClient) Update() *TransactionMemoUpdate {
+	mutation := newTransactionMemoMutation(c.config, OpUpdate)
+	return &TransactionMemoUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TransactionMemoClient) UpdateOne(tm *TransactionMemo) *TransactionMemoUpdateOne {
+	mutation := newTransactionMemoMutation(c.config, OpUpdateOne, withTransactionMemo(tm))
+	return &TransactionMemoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TransactionMemoClient) UpdateOneID(id int) *TransactionMemoUpdateOne {
+	mutation := newTransactionMemoMutation(c.config, OpUpdateOne, withTransactionMemoID(id))
+	return &TransactionMemoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TransactionMemo.
+func (c *TransactionMemoClient) Delete() *TransactionMemoDelete {
+	mutation := newTransactionMemoMutation(c.config, OpDelete)
+	return &TransactionMemoDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TransactionMemoClient) DeleteOne(tm *TransactionMemo) *TransactionMemoDeleteOne {
+	return c.DeleteOneID(tm.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TransactionMemoClient) DeleteOneID(id int) *TransactionMemoDeleteOne {
+	builder := c.Delete().Where(transactionmemo.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TransactionMemoDeleteOne{builder}
+}
+
+// Query returns a query builder for TransactionMemo.
+func (c *TransactionMemoClient) Query() *TransactionMemoQuery {
+	return &TransactionMemoQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTransactionMemo},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TransactionMemo entity by its id.
+func (c *TransactionMemoClient) Get(ctx context.Context, id int) (*TransactionMemo, error) {
+	return c.Query().Where(transactionmemo.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TransactionMemoClient) GetX(ctx context.Context, id int) *TransactionMemo {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *TransactionMemoClient) Hooks() []Hook {
+	return c.hooks.TransactionMemo
+}
+
+// Interceptors returns the client interceptors.
+func (c *TransactionMemoClient) Interceptors() []Interceptor {
+	return c.inters.TransactionMemo
+}
+
+func (c *TransactionMemoClient) mutate(ctx context.Context, m *TransactionMemoMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TransactionMemoCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TransactionMemoUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TransactionMemoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TransactionMemoDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TransactionMemo mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Account, EVMEvent, NFT, NFTClass []ent.Hook
+		Account, EVMEvent, EVMEventProcessedBlockHeight, NFT, NFTClass,
+		TransactionMemo []ent.Hook
 	}
 	inters struct {
-		Account, EVMEvent, NFT, NFTClass []ent.Interceptor
+		Account, EVMEvent, EVMEventProcessedBlockHeight, NFT, NFTClass,
+		TransactionMemo []ent.Interceptor
 	}
 )

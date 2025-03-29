@@ -59,6 +59,11 @@ func TransactionHash(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEQ(FieldTransactionHash, v))
 }
 
+// TransactionIndex applies equality check predicate on the "transaction_index" field. It's identical to TransactionIndexEQ.
+func TransactionIndex(v uint) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldTransactionIndex, v))
+}
+
 // BlockHash applies equality check predicate on the "block_hash" field. It's identical to BlockHashEQ.
 func BlockHash(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEQ(FieldBlockHash, v))
@@ -70,7 +75,7 @@ func BlockNumber(v uint64) predicate.EVMEvent {
 }
 
 // LogIndex applies equality check predicate on the "log_index" field. It's identical to LogIndexEQ.
-func LogIndex(v uint64) predicate.EVMEvent {
+func LogIndex(v uint) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEQ(FieldLogIndex, v))
 }
 
@@ -84,9 +89,19 @@ func Topic0(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEQ(FieldTopic0, v))
 }
 
+// Topic0Hex applies equality check predicate on the "topic0_hex" field. It's identical to Topic0HexEQ.
+func Topic0Hex(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldTopic0Hex, v))
+}
+
 // Topic1 applies equality check predicate on the "topic1" field. It's identical to Topic1EQ.
 func Topic1(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEQ(FieldTopic1, v))
+}
+
+// Topic1Hex applies equality check predicate on the "topic1_hex" field. It's identical to Topic1HexEQ.
+func Topic1Hex(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldTopic1Hex, v))
 }
 
 // Topic2 applies equality check predicate on the "topic2" field. It's identical to Topic2EQ.
@@ -94,14 +109,39 @@ func Topic2(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEQ(FieldTopic2, v))
 }
 
+// Topic2Hex applies equality check predicate on the "topic2_hex" field. It's identical to Topic2HexEQ.
+func Topic2Hex(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldTopic2Hex, v))
+}
+
 // Topic3 applies equality check predicate on the "topic3" field. It's identical to Topic3EQ.
 func Topic3(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEQ(FieldTopic3, v))
 }
 
+// Topic3Hex applies equality check predicate on the "topic3_hex" field. It's identical to Topic3HexEQ.
+func Topic3Hex(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldTopic3Hex, v))
+}
+
 // Data applies equality check predicate on the "data" field. It's identical to DataEQ.
 func Data(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEQ(FieldData, v))
+}
+
+// DataHex applies equality check predicate on the "data_hex" field. It's identical to DataHexEQ.
+func DataHex(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldDataHex, v))
+}
+
+// Removed applies equality check predicate on the "removed" field. It's identical to RemovedEQ.
+func Removed(v bool) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldRemoved, v))
+}
+
+// FailedReason applies equality check predicate on the "failed_reason" field. It's identical to FailedReasonEQ.
+func FailedReason(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldFailedReason, v))
 }
 
 // Timestamp applies equality check predicate on the "timestamp" field. It's identical to TimestampEQ.
@@ -172,6 +212,46 @@ func TransactionHashEqualFold(v string) predicate.EVMEvent {
 // TransactionHashContainsFold applies the ContainsFold predicate on the "transaction_hash" field.
 func TransactionHashContainsFold(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldContainsFold(FieldTransactionHash, v))
+}
+
+// TransactionIndexEQ applies the EQ predicate on the "transaction_index" field.
+func TransactionIndexEQ(v uint) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldTransactionIndex, v))
+}
+
+// TransactionIndexNEQ applies the NEQ predicate on the "transaction_index" field.
+func TransactionIndexNEQ(v uint) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNEQ(FieldTransactionIndex, v))
+}
+
+// TransactionIndexIn applies the In predicate on the "transaction_index" field.
+func TransactionIndexIn(vs ...uint) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIn(FieldTransactionIndex, vs...))
+}
+
+// TransactionIndexNotIn applies the NotIn predicate on the "transaction_index" field.
+func TransactionIndexNotIn(vs ...uint) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotIn(FieldTransactionIndex, vs...))
+}
+
+// TransactionIndexGT applies the GT predicate on the "transaction_index" field.
+func TransactionIndexGT(v uint) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGT(FieldTransactionIndex, v))
+}
+
+// TransactionIndexGTE applies the GTE predicate on the "transaction_index" field.
+func TransactionIndexGTE(v uint) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGTE(FieldTransactionIndex, v))
+}
+
+// TransactionIndexLT applies the LT predicate on the "transaction_index" field.
+func TransactionIndexLT(v uint) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLT(FieldTransactionIndex, v))
+}
+
+// TransactionIndexLTE applies the LTE predicate on the "transaction_index" field.
+func TransactionIndexLTE(v uint) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLTE(FieldTransactionIndex, v))
 }
 
 // BlockHashEQ applies the EQ predicate on the "block_hash" field.
@@ -280,42 +360,42 @@ func BlockNumberLTE(v uint64) predicate.EVMEvent {
 }
 
 // LogIndexEQ applies the EQ predicate on the "log_index" field.
-func LogIndexEQ(v uint64) predicate.EVMEvent {
+func LogIndexEQ(v uint) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEQ(FieldLogIndex, v))
 }
 
 // LogIndexNEQ applies the NEQ predicate on the "log_index" field.
-func LogIndexNEQ(v uint64) predicate.EVMEvent {
+func LogIndexNEQ(v uint) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldNEQ(FieldLogIndex, v))
 }
 
 // LogIndexIn applies the In predicate on the "log_index" field.
-func LogIndexIn(vs ...uint64) predicate.EVMEvent {
+func LogIndexIn(vs ...uint) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldIn(FieldLogIndex, vs...))
 }
 
 // LogIndexNotIn applies the NotIn predicate on the "log_index" field.
-func LogIndexNotIn(vs ...uint64) predicate.EVMEvent {
+func LogIndexNotIn(vs ...uint) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldNotIn(FieldLogIndex, vs...))
 }
 
 // LogIndexGT applies the GT predicate on the "log_index" field.
-func LogIndexGT(v uint64) predicate.EVMEvent {
+func LogIndexGT(v uint) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldGT(FieldLogIndex, v))
 }
 
 // LogIndexGTE applies the GTE predicate on the "log_index" field.
-func LogIndexGTE(v uint64) predicate.EVMEvent {
+func LogIndexGTE(v uint) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldGTE(FieldLogIndex, v))
 }
 
 // LogIndexLT applies the LT predicate on the "log_index" field.
-func LogIndexLT(v uint64) predicate.EVMEvent {
+func LogIndexLT(v uint) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldLT(FieldLogIndex, v))
 }
 
 // LogIndexLTE applies the LTE predicate on the "log_index" field.
-func LogIndexLTE(v uint64) predicate.EVMEvent {
+func LogIndexLTE(v uint) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldLTE(FieldLogIndex, v))
 }
 
@@ -449,6 +529,71 @@ func Topic0ContainsFold(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldContainsFold(FieldTopic0, v))
 }
 
+// Topic0HexEQ applies the EQ predicate on the "topic0_hex" field.
+func Topic0HexEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldTopic0Hex, v))
+}
+
+// Topic0HexNEQ applies the NEQ predicate on the "topic0_hex" field.
+func Topic0HexNEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNEQ(FieldTopic0Hex, v))
+}
+
+// Topic0HexIn applies the In predicate on the "topic0_hex" field.
+func Topic0HexIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIn(FieldTopic0Hex, vs...))
+}
+
+// Topic0HexNotIn applies the NotIn predicate on the "topic0_hex" field.
+func Topic0HexNotIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotIn(FieldTopic0Hex, vs...))
+}
+
+// Topic0HexGT applies the GT predicate on the "topic0_hex" field.
+func Topic0HexGT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGT(FieldTopic0Hex, v))
+}
+
+// Topic0HexGTE applies the GTE predicate on the "topic0_hex" field.
+func Topic0HexGTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGTE(FieldTopic0Hex, v))
+}
+
+// Topic0HexLT applies the LT predicate on the "topic0_hex" field.
+func Topic0HexLT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLT(FieldTopic0Hex, v))
+}
+
+// Topic0HexLTE applies the LTE predicate on the "topic0_hex" field.
+func Topic0HexLTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLTE(FieldTopic0Hex, v))
+}
+
+// Topic0HexContains applies the Contains predicate on the "topic0_hex" field.
+func Topic0HexContains(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContains(FieldTopic0Hex, v))
+}
+
+// Topic0HexHasPrefix applies the HasPrefix predicate on the "topic0_hex" field.
+func Topic0HexHasPrefix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasPrefix(FieldTopic0Hex, v))
+}
+
+// Topic0HexHasSuffix applies the HasSuffix predicate on the "topic0_hex" field.
+func Topic0HexHasSuffix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasSuffix(FieldTopic0Hex, v))
+}
+
+// Topic0HexEqualFold applies the EqualFold predicate on the "topic0_hex" field.
+func Topic0HexEqualFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEqualFold(FieldTopic0Hex, v))
+}
+
+// Topic0HexContainsFold applies the ContainsFold predicate on the "topic0_hex" field.
+func Topic0HexContainsFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContainsFold(FieldTopic0Hex, v))
+}
+
 // Topic1EQ applies the EQ predicate on the "topic1" field.
 func Topic1EQ(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEQ(FieldTopic1, v))
@@ -504,6 +649,16 @@ func Topic1HasSuffix(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldHasSuffix(FieldTopic1, v))
 }
 
+// Topic1IsNil applies the IsNil predicate on the "topic1" field.
+func Topic1IsNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIsNull(FieldTopic1))
+}
+
+// Topic1NotNil applies the NotNil predicate on the "topic1" field.
+func Topic1NotNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotNull(FieldTopic1))
+}
+
 // Topic1EqualFold applies the EqualFold predicate on the "topic1" field.
 func Topic1EqualFold(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEqualFold(FieldTopic1, v))
@@ -512,6 +667,81 @@ func Topic1EqualFold(v string) predicate.EVMEvent {
 // Topic1ContainsFold applies the ContainsFold predicate on the "topic1" field.
 func Topic1ContainsFold(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldContainsFold(FieldTopic1, v))
+}
+
+// Topic1HexEQ applies the EQ predicate on the "topic1_hex" field.
+func Topic1HexEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldTopic1Hex, v))
+}
+
+// Topic1HexNEQ applies the NEQ predicate on the "topic1_hex" field.
+func Topic1HexNEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNEQ(FieldTopic1Hex, v))
+}
+
+// Topic1HexIn applies the In predicate on the "topic1_hex" field.
+func Topic1HexIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIn(FieldTopic1Hex, vs...))
+}
+
+// Topic1HexNotIn applies the NotIn predicate on the "topic1_hex" field.
+func Topic1HexNotIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotIn(FieldTopic1Hex, vs...))
+}
+
+// Topic1HexGT applies the GT predicate on the "topic1_hex" field.
+func Topic1HexGT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGT(FieldTopic1Hex, v))
+}
+
+// Topic1HexGTE applies the GTE predicate on the "topic1_hex" field.
+func Topic1HexGTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGTE(FieldTopic1Hex, v))
+}
+
+// Topic1HexLT applies the LT predicate on the "topic1_hex" field.
+func Topic1HexLT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLT(FieldTopic1Hex, v))
+}
+
+// Topic1HexLTE applies the LTE predicate on the "topic1_hex" field.
+func Topic1HexLTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLTE(FieldTopic1Hex, v))
+}
+
+// Topic1HexContains applies the Contains predicate on the "topic1_hex" field.
+func Topic1HexContains(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContains(FieldTopic1Hex, v))
+}
+
+// Topic1HexHasPrefix applies the HasPrefix predicate on the "topic1_hex" field.
+func Topic1HexHasPrefix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasPrefix(FieldTopic1Hex, v))
+}
+
+// Topic1HexHasSuffix applies the HasSuffix predicate on the "topic1_hex" field.
+func Topic1HexHasSuffix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasSuffix(FieldTopic1Hex, v))
+}
+
+// Topic1HexIsNil applies the IsNil predicate on the "topic1_hex" field.
+func Topic1HexIsNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIsNull(FieldTopic1Hex))
+}
+
+// Topic1HexNotNil applies the NotNil predicate on the "topic1_hex" field.
+func Topic1HexNotNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotNull(FieldTopic1Hex))
+}
+
+// Topic1HexEqualFold applies the EqualFold predicate on the "topic1_hex" field.
+func Topic1HexEqualFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEqualFold(FieldTopic1Hex, v))
+}
+
+// Topic1HexContainsFold applies the ContainsFold predicate on the "topic1_hex" field.
+func Topic1HexContainsFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContainsFold(FieldTopic1Hex, v))
 }
 
 // Topic2EQ applies the EQ predicate on the "topic2" field.
@@ -569,6 +799,16 @@ func Topic2HasSuffix(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldHasSuffix(FieldTopic2, v))
 }
 
+// Topic2IsNil applies the IsNil predicate on the "topic2" field.
+func Topic2IsNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIsNull(FieldTopic2))
+}
+
+// Topic2NotNil applies the NotNil predicate on the "topic2" field.
+func Topic2NotNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotNull(FieldTopic2))
+}
+
 // Topic2EqualFold applies the EqualFold predicate on the "topic2" field.
 func Topic2EqualFold(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEqualFold(FieldTopic2, v))
@@ -577,6 +817,81 @@ func Topic2EqualFold(v string) predicate.EVMEvent {
 // Topic2ContainsFold applies the ContainsFold predicate on the "topic2" field.
 func Topic2ContainsFold(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldContainsFold(FieldTopic2, v))
+}
+
+// Topic2HexEQ applies the EQ predicate on the "topic2_hex" field.
+func Topic2HexEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldTopic2Hex, v))
+}
+
+// Topic2HexNEQ applies the NEQ predicate on the "topic2_hex" field.
+func Topic2HexNEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNEQ(FieldTopic2Hex, v))
+}
+
+// Topic2HexIn applies the In predicate on the "topic2_hex" field.
+func Topic2HexIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIn(FieldTopic2Hex, vs...))
+}
+
+// Topic2HexNotIn applies the NotIn predicate on the "topic2_hex" field.
+func Topic2HexNotIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotIn(FieldTopic2Hex, vs...))
+}
+
+// Topic2HexGT applies the GT predicate on the "topic2_hex" field.
+func Topic2HexGT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGT(FieldTopic2Hex, v))
+}
+
+// Topic2HexGTE applies the GTE predicate on the "topic2_hex" field.
+func Topic2HexGTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGTE(FieldTopic2Hex, v))
+}
+
+// Topic2HexLT applies the LT predicate on the "topic2_hex" field.
+func Topic2HexLT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLT(FieldTopic2Hex, v))
+}
+
+// Topic2HexLTE applies the LTE predicate on the "topic2_hex" field.
+func Topic2HexLTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLTE(FieldTopic2Hex, v))
+}
+
+// Topic2HexContains applies the Contains predicate on the "topic2_hex" field.
+func Topic2HexContains(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContains(FieldTopic2Hex, v))
+}
+
+// Topic2HexHasPrefix applies the HasPrefix predicate on the "topic2_hex" field.
+func Topic2HexHasPrefix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasPrefix(FieldTopic2Hex, v))
+}
+
+// Topic2HexHasSuffix applies the HasSuffix predicate on the "topic2_hex" field.
+func Topic2HexHasSuffix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasSuffix(FieldTopic2Hex, v))
+}
+
+// Topic2HexIsNil applies the IsNil predicate on the "topic2_hex" field.
+func Topic2HexIsNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIsNull(FieldTopic2Hex))
+}
+
+// Topic2HexNotNil applies the NotNil predicate on the "topic2_hex" field.
+func Topic2HexNotNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotNull(FieldTopic2Hex))
+}
+
+// Topic2HexEqualFold applies the EqualFold predicate on the "topic2_hex" field.
+func Topic2HexEqualFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEqualFold(FieldTopic2Hex, v))
+}
+
+// Topic2HexContainsFold applies the ContainsFold predicate on the "topic2_hex" field.
+func Topic2HexContainsFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContainsFold(FieldTopic2Hex, v))
 }
 
 // Topic3EQ applies the EQ predicate on the "topic3" field.
@@ -634,6 +949,16 @@ func Topic3HasSuffix(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldHasSuffix(FieldTopic3, v))
 }
 
+// Topic3IsNil applies the IsNil predicate on the "topic3" field.
+func Topic3IsNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIsNull(FieldTopic3))
+}
+
+// Topic3NotNil applies the NotNil predicate on the "topic3" field.
+func Topic3NotNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotNull(FieldTopic3))
+}
+
 // Topic3EqualFold applies the EqualFold predicate on the "topic3" field.
 func Topic3EqualFold(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEqualFold(FieldTopic3, v))
@@ -642,6 +967,81 @@ func Topic3EqualFold(v string) predicate.EVMEvent {
 // Topic3ContainsFold applies the ContainsFold predicate on the "topic3" field.
 func Topic3ContainsFold(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldContainsFold(FieldTopic3, v))
+}
+
+// Topic3HexEQ applies the EQ predicate on the "topic3_hex" field.
+func Topic3HexEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldTopic3Hex, v))
+}
+
+// Topic3HexNEQ applies the NEQ predicate on the "topic3_hex" field.
+func Topic3HexNEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNEQ(FieldTopic3Hex, v))
+}
+
+// Topic3HexIn applies the In predicate on the "topic3_hex" field.
+func Topic3HexIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIn(FieldTopic3Hex, vs...))
+}
+
+// Topic3HexNotIn applies the NotIn predicate on the "topic3_hex" field.
+func Topic3HexNotIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotIn(FieldTopic3Hex, vs...))
+}
+
+// Topic3HexGT applies the GT predicate on the "topic3_hex" field.
+func Topic3HexGT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGT(FieldTopic3Hex, v))
+}
+
+// Topic3HexGTE applies the GTE predicate on the "topic3_hex" field.
+func Topic3HexGTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGTE(FieldTopic3Hex, v))
+}
+
+// Topic3HexLT applies the LT predicate on the "topic3_hex" field.
+func Topic3HexLT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLT(FieldTopic3Hex, v))
+}
+
+// Topic3HexLTE applies the LTE predicate on the "topic3_hex" field.
+func Topic3HexLTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLTE(FieldTopic3Hex, v))
+}
+
+// Topic3HexContains applies the Contains predicate on the "topic3_hex" field.
+func Topic3HexContains(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContains(FieldTopic3Hex, v))
+}
+
+// Topic3HexHasPrefix applies the HasPrefix predicate on the "topic3_hex" field.
+func Topic3HexHasPrefix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasPrefix(FieldTopic3Hex, v))
+}
+
+// Topic3HexHasSuffix applies the HasSuffix predicate on the "topic3_hex" field.
+func Topic3HexHasSuffix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasSuffix(FieldTopic3Hex, v))
+}
+
+// Topic3HexIsNil applies the IsNil predicate on the "topic3_hex" field.
+func Topic3HexIsNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIsNull(FieldTopic3Hex))
+}
+
+// Topic3HexNotNil applies the NotNil predicate on the "topic3_hex" field.
+func Topic3HexNotNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotNull(FieldTopic3Hex))
+}
+
+// Topic3HexEqualFold applies the EqualFold predicate on the "topic3_hex" field.
+func Topic3HexEqualFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEqualFold(FieldTopic3Hex, v))
+}
+
+// Topic3HexContainsFold applies the ContainsFold predicate on the "topic3_hex" field.
+func Topic3HexContainsFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContainsFold(FieldTopic3Hex, v))
 }
 
 // DataEQ applies the EQ predicate on the "data" field.
@@ -699,6 +1099,16 @@ func DataHasSuffix(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldHasSuffix(FieldData, v))
 }
 
+// DataIsNil applies the IsNil predicate on the "data" field.
+func DataIsNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIsNull(FieldData))
+}
+
+// DataNotNil applies the NotNil predicate on the "data" field.
+func DataNotNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotNull(FieldData))
+}
+
 // DataEqualFold applies the EqualFold predicate on the "data" field.
 func DataEqualFold(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEqualFold(FieldData, v))
@@ -707,6 +1117,186 @@ func DataEqualFold(v string) predicate.EVMEvent {
 // DataContainsFold applies the ContainsFold predicate on the "data" field.
 func DataContainsFold(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldContainsFold(FieldData, v))
+}
+
+// DataHexEQ applies the EQ predicate on the "data_hex" field.
+func DataHexEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldDataHex, v))
+}
+
+// DataHexNEQ applies the NEQ predicate on the "data_hex" field.
+func DataHexNEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNEQ(FieldDataHex, v))
+}
+
+// DataHexIn applies the In predicate on the "data_hex" field.
+func DataHexIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIn(FieldDataHex, vs...))
+}
+
+// DataHexNotIn applies the NotIn predicate on the "data_hex" field.
+func DataHexNotIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotIn(FieldDataHex, vs...))
+}
+
+// DataHexGT applies the GT predicate on the "data_hex" field.
+func DataHexGT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGT(FieldDataHex, v))
+}
+
+// DataHexGTE applies the GTE predicate on the "data_hex" field.
+func DataHexGTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGTE(FieldDataHex, v))
+}
+
+// DataHexLT applies the LT predicate on the "data_hex" field.
+func DataHexLT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLT(FieldDataHex, v))
+}
+
+// DataHexLTE applies the LTE predicate on the "data_hex" field.
+func DataHexLTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLTE(FieldDataHex, v))
+}
+
+// DataHexContains applies the Contains predicate on the "data_hex" field.
+func DataHexContains(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContains(FieldDataHex, v))
+}
+
+// DataHexHasPrefix applies the HasPrefix predicate on the "data_hex" field.
+func DataHexHasPrefix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasPrefix(FieldDataHex, v))
+}
+
+// DataHexHasSuffix applies the HasSuffix predicate on the "data_hex" field.
+func DataHexHasSuffix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasSuffix(FieldDataHex, v))
+}
+
+// DataHexIsNil applies the IsNil predicate on the "data_hex" field.
+func DataHexIsNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIsNull(FieldDataHex))
+}
+
+// DataHexNotNil applies the NotNil predicate on the "data_hex" field.
+func DataHexNotNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotNull(FieldDataHex))
+}
+
+// DataHexEqualFold applies the EqualFold predicate on the "data_hex" field.
+func DataHexEqualFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEqualFold(FieldDataHex, v))
+}
+
+// DataHexContainsFold applies the ContainsFold predicate on the "data_hex" field.
+func DataHexContainsFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContainsFold(FieldDataHex, v))
+}
+
+// RemovedEQ applies the EQ predicate on the "removed" field.
+func RemovedEQ(v bool) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldRemoved, v))
+}
+
+// RemovedNEQ applies the NEQ predicate on the "removed" field.
+func RemovedNEQ(v bool) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNEQ(FieldRemoved, v))
+}
+
+// StatusEQ applies the EQ predicate on the "status" field.
+func StatusEQ(v Status) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldStatus, v))
+}
+
+// StatusNEQ applies the NEQ predicate on the "status" field.
+func StatusNEQ(v Status) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNEQ(FieldStatus, v))
+}
+
+// StatusIn applies the In predicate on the "status" field.
+func StatusIn(vs ...Status) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIn(FieldStatus, vs...))
+}
+
+// StatusNotIn applies the NotIn predicate on the "status" field.
+func StatusNotIn(vs ...Status) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotIn(FieldStatus, vs...))
+}
+
+// FailedReasonEQ applies the EQ predicate on the "failed_reason" field.
+func FailedReasonEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldFailedReason, v))
+}
+
+// FailedReasonNEQ applies the NEQ predicate on the "failed_reason" field.
+func FailedReasonNEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNEQ(FieldFailedReason, v))
+}
+
+// FailedReasonIn applies the In predicate on the "failed_reason" field.
+func FailedReasonIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIn(FieldFailedReason, vs...))
+}
+
+// FailedReasonNotIn applies the NotIn predicate on the "failed_reason" field.
+func FailedReasonNotIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotIn(FieldFailedReason, vs...))
+}
+
+// FailedReasonGT applies the GT predicate on the "failed_reason" field.
+func FailedReasonGT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGT(FieldFailedReason, v))
+}
+
+// FailedReasonGTE applies the GTE predicate on the "failed_reason" field.
+func FailedReasonGTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGTE(FieldFailedReason, v))
+}
+
+// FailedReasonLT applies the LT predicate on the "failed_reason" field.
+func FailedReasonLT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLT(FieldFailedReason, v))
+}
+
+// FailedReasonLTE applies the LTE predicate on the "failed_reason" field.
+func FailedReasonLTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLTE(FieldFailedReason, v))
+}
+
+// FailedReasonContains applies the Contains predicate on the "failed_reason" field.
+func FailedReasonContains(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContains(FieldFailedReason, v))
+}
+
+// FailedReasonHasPrefix applies the HasPrefix predicate on the "failed_reason" field.
+func FailedReasonHasPrefix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasPrefix(FieldFailedReason, v))
+}
+
+// FailedReasonHasSuffix applies the HasSuffix predicate on the "failed_reason" field.
+func FailedReasonHasSuffix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasSuffix(FieldFailedReason, v))
+}
+
+// FailedReasonIsNil applies the IsNil predicate on the "failed_reason" field.
+func FailedReasonIsNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIsNull(FieldFailedReason))
+}
+
+// FailedReasonNotNil applies the NotNil predicate on the "failed_reason" field.
+func FailedReasonNotNil() predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotNull(FieldFailedReason))
+}
+
+// FailedReasonEqualFold applies the EqualFold predicate on the "failed_reason" field.
+func FailedReasonEqualFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEqualFold(FieldFailedReason, v))
+}
+
+// FailedReasonContainsFold applies the ContainsFold predicate on the "failed_reason" field.
+func FailedReasonContainsFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContainsFold(FieldFailedReason, v))
 }
 
 // TimestampEQ applies the EQ predicate on the "timestamp" field.

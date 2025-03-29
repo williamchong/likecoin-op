@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/evmevent"
+	"likenft-indexer/ent/evmeventprocessedblockheight"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
+	"likenft-indexer/ent/transactionmemo"
 	"reflect"
 	"sync"
 
@@ -76,10 +78,12 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			account.Table:  account.ValidColumn,
-			evmevent.Table: evmevent.ValidColumn,
-			nft.Table:      nft.ValidColumn,
-			nftclass.Table: nftclass.ValidColumn,
+			account.Table:                      account.ValidColumn,
+			evmevent.Table:                     evmevent.ValidColumn,
+			evmeventprocessedblockheight.Table: evmeventprocessedblockheight.ValidColumn,
+			nft.Table:                          nft.ValidColumn,
+			nftclass.Table:                     nftclass.ValidColumn,
+			transactionmemo.Table:              transactionmemo.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

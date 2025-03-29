@@ -106,10 +106,6 @@ var (
 	SymbolValidator func(string) error
 	// TotalSupplyValidator is a validator for the "total_supply" field. It is called by the builders before save.
 	TotalSupplyValidator func(int) error
-	// BannerImageValidator is a validator for the "banner_image" field. It is called by the builders before save.
-	BannerImageValidator func(string) error
-	// FeaturedImageValidator is a validator for the "featured_image" field. It is called by the builders before save.
-	FeaturedImageValidator func(string) error
 	// DeployerAddressValidator is a validator for the "deployer_address" field. It is called by the builders before save.
 	DeployerAddressValidator func(string) error
 	// DeployedBlockNumberValidator is a validator for the "deployed_block_number" field. It is called by the builders before save.

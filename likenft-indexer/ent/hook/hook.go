@@ -32,6 +32,18 @@ func (f EVMEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EVMEventMutation", m)
 }
 
+// The EVMEventProcessedBlockHeightFunc type is an adapter to allow the use of ordinary
+// function as EVMEventProcessedBlockHeight mutator.
+type EVMEventProcessedBlockHeightFunc func(context.Context, *ent.EVMEventProcessedBlockHeightMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EVMEventProcessedBlockHeightFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.EVMEventProcessedBlockHeightMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EVMEventProcessedBlockHeightMutation", m)
+}
+
 // The NFTFunc type is an adapter to allow the use of ordinary
 // function as NFT mutator.
 type NFTFunc func(context.Context, *ent.NFTMutation) (ent.Value, error)
@@ -54,6 +66,18 @@ func (f NFTClassFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.NFTClassMutation", m)
+}
+
+// The TransactionMemoFunc type is an adapter to allow the use of ordinary
+// function as TransactionMemo mutator.
+type TransactionMemoFunc func(context.Context, *ent.TransactionMemoMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TransactionMemoFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TransactionMemoMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TransactionMemoMutation", m)
 }
 
 // Condition is a hook condition function.

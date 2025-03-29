@@ -10,10 +10,13 @@ import (
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/predicate"
+	"likenft-indexer/internal/evm/model"
+	"math/big"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,70 +33,91 @@ func (nu *NFTUpdate) Where(ps ...predicate.NFT) *NFTUpdate {
 	return nu
 }
 
+// SetContractAddress sets the "contract_address" field.
+func (nu *NFTUpdate) SetContractAddress(s string) *NFTUpdate {
+	nu.mutation.SetContractAddress(s)
+	return nu
+}
+
+// SetNillableContractAddress sets the "contract_address" field if the given value is not nil.
+func (nu *NFTUpdate) SetNillableContractAddress(s *string) *NFTUpdate {
+	if s != nil {
+		nu.SetContractAddress(*s)
+	}
+	return nu
+}
+
 // SetTokenID sets the "token_id" field.
-func (nu *NFTUpdate) SetTokenID(u uint64) *NFTUpdate {
-	nu.mutation.ResetTokenID()
-	nu.mutation.SetTokenID(u)
+func (nu *NFTUpdate) SetTokenID(b *big.Int) *NFTUpdate {
+	nu.mutation.SetTokenID(b)
 	return nu
 }
 
-// SetNillableTokenID sets the "token_id" field if the given value is not nil.
-func (nu *NFTUpdate) SetNillableTokenID(u *uint64) *NFTUpdate {
-	if u != nil {
-		nu.SetTokenID(*u)
-	}
+// SetTokenURI sets the "token_uri" field.
+func (nu *NFTUpdate) SetTokenURI(s string) *NFTUpdate {
+	nu.mutation.SetTokenURI(s)
 	return nu
 }
 
-// AddTokenID adds u to the "token_id" field.
-func (nu *NFTUpdate) AddTokenID(u int64) *NFTUpdate {
-	nu.mutation.AddTokenID(u)
-	return nu
-}
-
-// SetTokenURL sets the "token_url" field.
-func (nu *NFTUpdate) SetTokenURL(s string) *NFTUpdate {
-	nu.mutation.SetTokenURL(s)
-	return nu
-}
-
-// SetNillableTokenURL sets the "token_url" field if the given value is not nil.
-func (nu *NFTUpdate) SetNillableTokenURL(s *string) *NFTUpdate {
+// SetNillableTokenURI sets the "token_uri" field if the given value is not nil.
+func (nu *NFTUpdate) SetNillableTokenURI(s *string) *NFTUpdate {
 	if s != nil {
-		nu.SetTokenURL(*s)
+		nu.SetTokenURI(*s)
 	}
 	return nu
 }
 
-// ClearTokenURL clears the value of the "token_url" field.
-func (nu *NFTUpdate) ClearTokenURL() *NFTUpdate {
-	nu.mutation.ClearTokenURL()
+// SetImage sets the "image" field.
+func (nu *NFTUpdate) SetImage(s string) *NFTUpdate {
+	nu.mutation.SetImage(s)
 	return nu
 }
 
-// SetRaw sets the "raw" field.
-func (nu *NFTUpdate) SetRaw(m map[string]interface{}) *NFTUpdate {
-	nu.mutation.SetRaw(m)
-	return nu
-}
-
-// ClearRaw clears the value of the "raw" field.
-func (nu *NFTUpdate) ClearRaw() *NFTUpdate {
-	nu.mutation.ClearRaw()
-	return nu
-}
-
-// SetName sets the "name" field.
-func (nu *NFTUpdate) SetName(s string) *NFTUpdate {
-	nu.mutation.SetName(s)
-	return nu
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (nu *NFTUpdate) SetNillableName(s *string) *NFTUpdate {
+// SetNillableImage sets the "image" field if the given value is not nil.
+func (nu *NFTUpdate) SetNillableImage(s *string) *NFTUpdate {
 	if s != nil {
-		nu.SetName(*s)
+		nu.SetImage(*s)
 	}
+	return nu
+}
+
+// SetImageData sets the "image_data" field.
+func (nu *NFTUpdate) SetImageData(s string) *NFTUpdate {
+	nu.mutation.SetImageData(s)
+	return nu
+}
+
+// SetNillableImageData sets the "image_data" field if the given value is not nil.
+func (nu *NFTUpdate) SetNillableImageData(s *string) *NFTUpdate {
+	if s != nil {
+		nu.SetImageData(*s)
+	}
+	return nu
+}
+
+// ClearImageData clears the value of the "image_data" field.
+func (nu *NFTUpdate) ClearImageData() *NFTUpdate {
+	nu.mutation.ClearImageData()
+	return nu
+}
+
+// SetExternalURL sets the "external_url" field.
+func (nu *NFTUpdate) SetExternalURL(s string) *NFTUpdate {
+	nu.mutation.SetExternalURL(s)
+	return nu
+}
+
+// SetNillableExternalURL sets the "external_url" field if the given value is not nil.
+func (nu *NFTUpdate) SetNillableExternalURL(s *string) *NFTUpdate {
+	if s != nil {
+		nu.SetExternalURL(*s)
+	}
+	return nu
+}
+
+// ClearExternalURL clears the value of the "external_url" field.
+func (nu *NFTUpdate) ClearExternalURL() *NFTUpdate {
+	nu.mutation.ClearExternalURL()
 	return nu
 }
 
@@ -111,33 +135,95 @@ func (nu *NFTUpdate) SetNillableDescription(s *string) *NFTUpdate {
 	return nu
 }
 
-// ClearDescription clears the value of the "description" field.
-func (nu *NFTUpdate) ClearDescription() *NFTUpdate {
-	nu.mutation.ClearDescription()
+// SetName sets the "name" field.
+func (nu *NFTUpdate) SetName(s string) *NFTUpdate {
+	nu.mutation.SetName(s)
 	return nu
 }
 
-// SetImage sets the "image" field.
-func (nu *NFTUpdate) SetImage(m map[string]interface{}) *NFTUpdate {
-	nu.mutation.SetImage(m)
-	return nu
-}
-
-// ClearImage clears the value of the "image" field.
-func (nu *NFTUpdate) ClearImage() *NFTUpdate {
-	nu.mutation.ClearImage()
+// SetNillableName sets the "name" field if the given value is not nil.
+func (nu *NFTUpdate) SetNillableName(s *string) *NFTUpdate {
+	if s != nil {
+		nu.SetName(*s)
+	}
 	return nu
 }
 
 // SetAttributes sets the "attributes" field.
-func (nu *NFTUpdate) SetAttributes(m map[string]interface{}) *NFTUpdate {
-	nu.mutation.SetAttributes(m)
+func (nu *NFTUpdate) SetAttributes(ma []model.ERC721MetadataAttribute) *NFTUpdate {
+	nu.mutation.SetAttributes(ma)
+	return nu
+}
+
+// AppendAttributes appends ma to the "attributes" field.
+func (nu *NFTUpdate) AppendAttributes(ma []model.ERC721MetadataAttribute) *NFTUpdate {
+	nu.mutation.AppendAttributes(ma)
 	return nu
 }
 
 // ClearAttributes clears the value of the "attributes" field.
 func (nu *NFTUpdate) ClearAttributes() *NFTUpdate {
 	nu.mutation.ClearAttributes()
+	return nu
+}
+
+// SetBackgroundColor sets the "background_color" field.
+func (nu *NFTUpdate) SetBackgroundColor(s string) *NFTUpdate {
+	nu.mutation.SetBackgroundColor(s)
+	return nu
+}
+
+// SetNillableBackgroundColor sets the "background_color" field if the given value is not nil.
+func (nu *NFTUpdate) SetNillableBackgroundColor(s *string) *NFTUpdate {
+	if s != nil {
+		nu.SetBackgroundColor(*s)
+	}
+	return nu
+}
+
+// ClearBackgroundColor clears the value of the "background_color" field.
+func (nu *NFTUpdate) ClearBackgroundColor() *NFTUpdate {
+	nu.mutation.ClearBackgroundColor()
+	return nu
+}
+
+// SetAnimationURL sets the "animation_url" field.
+func (nu *NFTUpdate) SetAnimationURL(s string) *NFTUpdate {
+	nu.mutation.SetAnimationURL(s)
+	return nu
+}
+
+// SetNillableAnimationURL sets the "animation_url" field if the given value is not nil.
+func (nu *NFTUpdate) SetNillableAnimationURL(s *string) *NFTUpdate {
+	if s != nil {
+		nu.SetAnimationURL(*s)
+	}
+	return nu
+}
+
+// ClearAnimationURL clears the value of the "animation_url" field.
+func (nu *NFTUpdate) ClearAnimationURL() *NFTUpdate {
+	nu.mutation.ClearAnimationURL()
+	return nu
+}
+
+// SetYoutubeURL sets the "youtube_url" field.
+func (nu *NFTUpdate) SetYoutubeURL(s string) *NFTUpdate {
+	nu.mutation.SetYoutubeURL(s)
+	return nu
+}
+
+// SetNillableYoutubeURL sets the "youtube_url" field if the given value is not nil.
+func (nu *NFTUpdate) SetNillableYoutubeURL(s *string) *NFTUpdate {
+	if s != nil {
+		nu.SetYoutubeURL(*s)
+	}
+	return nu
+}
+
+// ClearYoutubeURL clears the value of the "youtube_url" field.
+func (nu *NFTUpdate) ClearYoutubeURL() *NFTUpdate {
+	nu.mutation.ClearYoutubeURL()
 	return nu
 }
 
@@ -267,6 +353,26 @@ func (nu *NFTUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (nu *NFTUpdate) check() error {
+	if v, ok := nu.mutation.ContractAddress(); ok {
+		if err := nft.ContractAddressValidator(v); err != nil {
+			return &ValidationError{Name: "contract_address", err: fmt.Errorf(`ent: validator failed for field "NFT.contract_address": %w`, err)}
+		}
+	}
+	if v, ok := nu.mutation.TokenURI(); ok {
+		if err := nft.TokenURIValidator(v); err != nil {
+			return &ValidationError{Name: "token_uri", err: fmt.Errorf(`ent: validator failed for field "NFT.token_uri": %w`, err)}
+		}
+	}
+	if v, ok := nu.mutation.Image(); ok {
+		if err := nft.ImageValidator(v); err != nil {
+			return &ValidationError{Name: "image", err: fmt.Errorf(`ent: validator failed for field "NFT.image": %w`, err)}
+		}
+	}
+	if v, ok := nu.mutation.Description(); ok {
+		if err := nft.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "NFT.description": %w`, err)}
+		}
+	}
 	if v, ok := nu.mutation.Name(); ok {
 		if err := nft.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "NFT.name": %w`, err)}
@@ -292,44 +398,68 @@ func (nu *NFTUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := nu.mutation.ContractAddress(); ok {
+		_spec.SetField(nft.FieldContractAddress, field.TypeString, value)
+	}
 	if value, ok := nu.mutation.TokenID(); ok {
-		_spec.SetField(nft.FieldTokenID, field.TypeUint64, value)
+		vv, err := nft.ValueScanner.TokenID.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(nft.FieldTokenID, field.TypeString, vv)
 	}
-	if value, ok := nu.mutation.AddedTokenID(); ok {
-		_spec.AddField(nft.FieldTokenID, field.TypeUint64, value)
+	if value, ok := nu.mutation.TokenURI(); ok {
+		_spec.SetField(nft.FieldTokenURI, field.TypeString, value)
 	}
-	if value, ok := nu.mutation.TokenURL(); ok {
-		_spec.SetField(nft.FieldTokenURL, field.TypeString, value)
+	if value, ok := nu.mutation.Image(); ok {
+		_spec.SetField(nft.FieldImage, field.TypeString, value)
 	}
-	if nu.mutation.TokenURLCleared() {
-		_spec.ClearField(nft.FieldTokenURL, field.TypeString)
+	if value, ok := nu.mutation.ImageData(); ok {
+		_spec.SetField(nft.FieldImageData, field.TypeString, value)
 	}
-	if value, ok := nu.mutation.Raw(); ok {
-		_spec.SetField(nft.FieldRaw, field.TypeJSON, value)
+	if nu.mutation.ImageDataCleared() {
+		_spec.ClearField(nft.FieldImageData, field.TypeString)
 	}
-	if nu.mutation.RawCleared() {
-		_spec.ClearField(nft.FieldRaw, field.TypeJSON)
+	if value, ok := nu.mutation.ExternalURL(); ok {
+		_spec.SetField(nft.FieldExternalURL, field.TypeString, value)
 	}
-	if value, ok := nu.mutation.Name(); ok {
-		_spec.SetField(nft.FieldName, field.TypeString, value)
+	if nu.mutation.ExternalURLCleared() {
+		_spec.ClearField(nft.FieldExternalURL, field.TypeString)
 	}
 	if value, ok := nu.mutation.Description(); ok {
 		_spec.SetField(nft.FieldDescription, field.TypeString, value)
 	}
-	if nu.mutation.DescriptionCleared() {
-		_spec.ClearField(nft.FieldDescription, field.TypeString)
-	}
-	if value, ok := nu.mutation.Image(); ok {
-		_spec.SetField(nft.FieldImage, field.TypeJSON, value)
-	}
-	if nu.mutation.ImageCleared() {
-		_spec.ClearField(nft.FieldImage, field.TypeJSON)
+	if value, ok := nu.mutation.Name(); ok {
+		_spec.SetField(nft.FieldName, field.TypeString, value)
 	}
 	if value, ok := nu.mutation.Attributes(); ok {
 		_spec.SetField(nft.FieldAttributes, field.TypeJSON, value)
 	}
+	if value, ok := nu.mutation.AppendedAttributes(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, nft.FieldAttributes, value)
+		})
+	}
 	if nu.mutation.AttributesCleared() {
 		_spec.ClearField(nft.FieldAttributes, field.TypeJSON)
+	}
+	if value, ok := nu.mutation.BackgroundColor(); ok {
+		_spec.SetField(nft.FieldBackgroundColor, field.TypeString, value)
+	}
+	if nu.mutation.BackgroundColorCleared() {
+		_spec.ClearField(nft.FieldBackgroundColor, field.TypeString)
+	}
+	if value, ok := nu.mutation.AnimationURL(); ok {
+		_spec.SetField(nft.FieldAnimationURL, field.TypeString, value)
+	}
+	if nu.mutation.AnimationURLCleared() {
+		_spec.ClearField(nft.FieldAnimationURL, field.TypeString)
+	}
+	if value, ok := nu.mutation.YoutubeURL(); ok {
+		_spec.SetField(nft.FieldYoutubeURL, field.TypeString, value)
+	}
+	if nu.mutation.YoutubeURLCleared() {
+		_spec.ClearField(nft.FieldYoutubeURL, field.TypeString)
 	}
 	if value, ok := nu.mutation.OwnerAddress(); ok {
 		_spec.SetField(nft.FieldOwnerAddress, field.TypeString, value)
@@ -418,70 +548,91 @@ type NFTUpdateOne struct {
 	mutation *NFTMutation
 }
 
+// SetContractAddress sets the "contract_address" field.
+func (nuo *NFTUpdateOne) SetContractAddress(s string) *NFTUpdateOne {
+	nuo.mutation.SetContractAddress(s)
+	return nuo
+}
+
+// SetNillableContractAddress sets the "contract_address" field if the given value is not nil.
+func (nuo *NFTUpdateOne) SetNillableContractAddress(s *string) *NFTUpdateOne {
+	if s != nil {
+		nuo.SetContractAddress(*s)
+	}
+	return nuo
+}
+
 // SetTokenID sets the "token_id" field.
-func (nuo *NFTUpdateOne) SetTokenID(u uint64) *NFTUpdateOne {
-	nuo.mutation.ResetTokenID()
-	nuo.mutation.SetTokenID(u)
+func (nuo *NFTUpdateOne) SetTokenID(b *big.Int) *NFTUpdateOne {
+	nuo.mutation.SetTokenID(b)
 	return nuo
 }
 
-// SetNillableTokenID sets the "token_id" field if the given value is not nil.
-func (nuo *NFTUpdateOne) SetNillableTokenID(u *uint64) *NFTUpdateOne {
-	if u != nil {
-		nuo.SetTokenID(*u)
-	}
+// SetTokenURI sets the "token_uri" field.
+func (nuo *NFTUpdateOne) SetTokenURI(s string) *NFTUpdateOne {
+	nuo.mutation.SetTokenURI(s)
 	return nuo
 }
 
-// AddTokenID adds u to the "token_id" field.
-func (nuo *NFTUpdateOne) AddTokenID(u int64) *NFTUpdateOne {
-	nuo.mutation.AddTokenID(u)
-	return nuo
-}
-
-// SetTokenURL sets the "token_url" field.
-func (nuo *NFTUpdateOne) SetTokenURL(s string) *NFTUpdateOne {
-	nuo.mutation.SetTokenURL(s)
-	return nuo
-}
-
-// SetNillableTokenURL sets the "token_url" field if the given value is not nil.
-func (nuo *NFTUpdateOne) SetNillableTokenURL(s *string) *NFTUpdateOne {
+// SetNillableTokenURI sets the "token_uri" field if the given value is not nil.
+func (nuo *NFTUpdateOne) SetNillableTokenURI(s *string) *NFTUpdateOne {
 	if s != nil {
-		nuo.SetTokenURL(*s)
+		nuo.SetTokenURI(*s)
 	}
 	return nuo
 }
 
-// ClearTokenURL clears the value of the "token_url" field.
-func (nuo *NFTUpdateOne) ClearTokenURL() *NFTUpdateOne {
-	nuo.mutation.ClearTokenURL()
+// SetImage sets the "image" field.
+func (nuo *NFTUpdateOne) SetImage(s string) *NFTUpdateOne {
+	nuo.mutation.SetImage(s)
 	return nuo
 }
 
-// SetRaw sets the "raw" field.
-func (nuo *NFTUpdateOne) SetRaw(m map[string]interface{}) *NFTUpdateOne {
-	nuo.mutation.SetRaw(m)
-	return nuo
-}
-
-// ClearRaw clears the value of the "raw" field.
-func (nuo *NFTUpdateOne) ClearRaw() *NFTUpdateOne {
-	nuo.mutation.ClearRaw()
-	return nuo
-}
-
-// SetName sets the "name" field.
-func (nuo *NFTUpdateOne) SetName(s string) *NFTUpdateOne {
-	nuo.mutation.SetName(s)
-	return nuo
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (nuo *NFTUpdateOne) SetNillableName(s *string) *NFTUpdateOne {
+// SetNillableImage sets the "image" field if the given value is not nil.
+func (nuo *NFTUpdateOne) SetNillableImage(s *string) *NFTUpdateOne {
 	if s != nil {
-		nuo.SetName(*s)
+		nuo.SetImage(*s)
 	}
+	return nuo
+}
+
+// SetImageData sets the "image_data" field.
+func (nuo *NFTUpdateOne) SetImageData(s string) *NFTUpdateOne {
+	nuo.mutation.SetImageData(s)
+	return nuo
+}
+
+// SetNillableImageData sets the "image_data" field if the given value is not nil.
+func (nuo *NFTUpdateOne) SetNillableImageData(s *string) *NFTUpdateOne {
+	if s != nil {
+		nuo.SetImageData(*s)
+	}
+	return nuo
+}
+
+// ClearImageData clears the value of the "image_data" field.
+func (nuo *NFTUpdateOne) ClearImageData() *NFTUpdateOne {
+	nuo.mutation.ClearImageData()
+	return nuo
+}
+
+// SetExternalURL sets the "external_url" field.
+func (nuo *NFTUpdateOne) SetExternalURL(s string) *NFTUpdateOne {
+	nuo.mutation.SetExternalURL(s)
+	return nuo
+}
+
+// SetNillableExternalURL sets the "external_url" field if the given value is not nil.
+func (nuo *NFTUpdateOne) SetNillableExternalURL(s *string) *NFTUpdateOne {
+	if s != nil {
+		nuo.SetExternalURL(*s)
+	}
+	return nuo
+}
+
+// ClearExternalURL clears the value of the "external_url" field.
+func (nuo *NFTUpdateOne) ClearExternalURL() *NFTUpdateOne {
+	nuo.mutation.ClearExternalURL()
 	return nuo
 }
 
@@ -499,33 +650,95 @@ func (nuo *NFTUpdateOne) SetNillableDescription(s *string) *NFTUpdateOne {
 	return nuo
 }
 
-// ClearDescription clears the value of the "description" field.
-func (nuo *NFTUpdateOne) ClearDescription() *NFTUpdateOne {
-	nuo.mutation.ClearDescription()
+// SetName sets the "name" field.
+func (nuo *NFTUpdateOne) SetName(s string) *NFTUpdateOne {
+	nuo.mutation.SetName(s)
 	return nuo
 }
 
-// SetImage sets the "image" field.
-func (nuo *NFTUpdateOne) SetImage(m map[string]interface{}) *NFTUpdateOne {
-	nuo.mutation.SetImage(m)
-	return nuo
-}
-
-// ClearImage clears the value of the "image" field.
-func (nuo *NFTUpdateOne) ClearImage() *NFTUpdateOne {
-	nuo.mutation.ClearImage()
+// SetNillableName sets the "name" field if the given value is not nil.
+func (nuo *NFTUpdateOne) SetNillableName(s *string) *NFTUpdateOne {
+	if s != nil {
+		nuo.SetName(*s)
+	}
 	return nuo
 }
 
 // SetAttributes sets the "attributes" field.
-func (nuo *NFTUpdateOne) SetAttributes(m map[string]interface{}) *NFTUpdateOne {
-	nuo.mutation.SetAttributes(m)
+func (nuo *NFTUpdateOne) SetAttributes(ma []model.ERC721MetadataAttribute) *NFTUpdateOne {
+	nuo.mutation.SetAttributes(ma)
+	return nuo
+}
+
+// AppendAttributes appends ma to the "attributes" field.
+func (nuo *NFTUpdateOne) AppendAttributes(ma []model.ERC721MetadataAttribute) *NFTUpdateOne {
+	nuo.mutation.AppendAttributes(ma)
 	return nuo
 }
 
 // ClearAttributes clears the value of the "attributes" field.
 func (nuo *NFTUpdateOne) ClearAttributes() *NFTUpdateOne {
 	nuo.mutation.ClearAttributes()
+	return nuo
+}
+
+// SetBackgroundColor sets the "background_color" field.
+func (nuo *NFTUpdateOne) SetBackgroundColor(s string) *NFTUpdateOne {
+	nuo.mutation.SetBackgroundColor(s)
+	return nuo
+}
+
+// SetNillableBackgroundColor sets the "background_color" field if the given value is not nil.
+func (nuo *NFTUpdateOne) SetNillableBackgroundColor(s *string) *NFTUpdateOne {
+	if s != nil {
+		nuo.SetBackgroundColor(*s)
+	}
+	return nuo
+}
+
+// ClearBackgroundColor clears the value of the "background_color" field.
+func (nuo *NFTUpdateOne) ClearBackgroundColor() *NFTUpdateOne {
+	nuo.mutation.ClearBackgroundColor()
+	return nuo
+}
+
+// SetAnimationURL sets the "animation_url" field.
+func (nuo *NFTUpdateOne) SetAnimationURL(s string) *NFTUpdateOne {
+	nuo.mutation.SetAnimationURL(s)
+	return nuo
+}
+
+// SetNillableAnimationURL sets the "animation_url" field if the given value is not nil.
+func (nuo *NFTUpdateOne) SetNillableAnimationURL(s *string) *NFTUpdateOne {
+	if s != nil {
+		nuo.SetAnimationURL(*s)
+	}
+	return nuo
+}
+
+// ClearAnimationURL clears the value of the "animation_url" field.
+func (nuo *NFTUpdateOne) ClearAnimationURL() *NFTUpdateOne {
+	nuo.mutation.ClearAnimationURL()
+	return nuo
+}
+
+// SetYoutubeURL sets the "youtube_url" field.
+func (nuo *NFTUpdateOne) SetYoutubeURL(s string) *NFTUpdateOne {
+	nuo.mutation.SetYoutubeURL(s)
+	return nuo
+}
+
+// SetNillableYoutubeURL sets the "youtube_url" field if the given value is not nil.
+func (nuo *NFTUpdateOne) SetNillableYoutubeURL(s *string) *NFTUpdateOne {
+	if s != nil {
+		nuo.SetYoutubeURL(*s)
+	}
+	return nuo
+}
+
+// ClearYoutubeURL clears the value of the "youtube_url" field.
+func (nuo *NFTUpdateOne) ClearYoutubeURL() *NFTUpdateOne {
+	nuo.mutation.ClearYoutubeURL()
 	return nuo
 }
 
@@ -668,6 +881,26 @@ func (nuo *NFTUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (nuo *NFTUpdateOne) check() error {
+	if v, ok := nuo.mutation.ContractAddress(); ok {
+		if err := nft.ContractAddressValidator(v); err != nil {
+			return &ValidationError{Name: "contract_address", err: fmt.Errorf(`ent: validator failed for field "NFT.contract_address": %w`, err)}
+		}
+	}
+	if v, ok := nuo.mutation.TokenURI(); ok {
+		if err := nft.TokenURIValidator(v); err != nil {
+			return &ValidationError{Name: "token_uri", err: fmt.Errorf(`ent: validator failed for field "NFT.token_uri": %w`, err)}
+		}
+	}
+	if v, ok := nuo.mutation.Image(); ok {
+		if err := nft.ImageValidator(v); err != nil {
+			return &ValidationError{Name: "image", err: fmt.Errorf(`ent: validator failed for field "NFT.image": %w`, err)}
+		}
+	}
+	if v, ok := nuo.mutation.Description(); ok {
+		if err := nft.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "NFT.description": %w`, err)}
+		}
+	}
 	if v, ok := nuo.mutation.Name(); ok {
 		if err := nft.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "NFT.name": %w`, err)}
@@ -710,44 +943,68 @@ func (nuo *NFTUpdateOne) sqlSave(ctx context.Context) (_node *NFT, err error) {
 			}
 		}
 	}
+	if value, ok := nuo.mutation.ContractAddress(); ok {
+		_spec.SetField(nft.FieldContractAddress, field.TypeString, value)
+	}
 	if value, ok := nuo.mutation.TokenID(); ok {
-		_spec.SetField(nft.FieldTokenID, field.TypeUint64, value)
+		vv, err := nft.ValueScanner.TokenID.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(nft.FieldTokenID, field.TypeString, vv)
 	}
-	if value, ok := nuo.mutation.AddedTokenID(); ok {
-		_spec.AddField(nft.FieldTokenID, field.TypeUint64, value)
+	if value, ok := nuo.mutation.TokenURI(); ok {
+		_spec.SetField(nft.FieldTokenURI, field.TypeString, value)
 	}
-	if value, ok := nuo.mutation.TokenURL(); ok {
-		_spec.SetField(nft.FieldTokenURL, field.TypeString, value)
+	if value, ok := nuo.mutation.Image(); ok {
+		_spec.SetField(nft.FieldImage, field.TypeString, value)
 	}
-	if nuo.mutation.TokenURLCleared() {
-		_spec.ClearField(nft.FieldTokenURL, field.TypeString)
+	if value, ok := nuo.mutation.ImageData(); ok {
+		_spec.SetField(nft.FieldImageData, field.TypeString, value)
 	}
-	if value, ok := nuo.mutation.Raw(); ok {
-		_spec.SetField(nft.FieldRaw, field.TypeJSON, value)
+	if nuo.mutation.ImageDataCleared() {
+		_spec.ClearField(nft.FieldImageData, field.TypeString)
 	}
-	if nuo.mutation.RawCleared() {
-		_spec.ClearField(nft.FieldRaw, field.TypeJSON)
+	if value, ok := nuo.mutation.ExternalURL(); ok {
+		_spec.SetField(nft.FieldExternalURL, field.TypeString, value)
 	}
-	if value, ok := nuo.mutation.Name(); ok {
-		_spec.SetField(nft.FieldName, field.TypeString, value)
+	if nuo.mutation.ExternalURLCleared() {
+		_spec.ClearField(nft.FieldExternalURL, field.TypeString)
 	}
 	if value, ok := nuo.mutation.Description(); ok {
 		_spec.SetField(nft.FieldDescription, field.TypeString, value)
 	}
-	if nuo.mutation.DescriptionCleared() {
-		_spec.ClearField(nft.FieldDescription, field.TypeString)
-	}
-	if value, ok := nuo.mutation.Image(); ok {
-		_spec.SetField(nft.FieldImage, field.TypeJSON, value)
-	}
-	if nuo.mutation.ImageCleared() {
-		_spec.ClearField(nft.FieldImage, field.TypeJSON)
+	if value, ok := nuo.mutation.Name(); ok {
+		_spec.SetField(nft.FieldName, field.TypeString, value)
 	}
 	if value, ok := nuo.mutation.Attributes(); ok {
 		_spec.SetField(nft.FieldAttributes, field.TypeJSON, value)
 	}
+	if value, ok := nuo.mutation.AppendedAttributes(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, nft.FieldAttributes, value)
+		})
+	}
 	if nuo.mutation.AttributesCleared() {
 		_spec.ClearField(nft.FieldAttributes, field.TypeJSON)
+	}
+	if value, ok := nuo.mutation.BackgroundColor(); ok {
+		_spec.SetField(nft.FieldBackgroundColor, field.TypeString, value)
+	}
+	if nuo.mutation.BackgroundColorCleared() {
+		_spec.ClearField(nft.FieldBackgroundColor, field.TypeString)
+	}
+	if value, ok := nuo.mutation.AnimationURL(); ok {
+		_spec.SetField(nft.FieldAnimationURL, field.TypeString, value)
+	}
+	if nuo.mutation.AnimationURLCleared() {
+		_spec.ClearField(nft.FieldAnimationURL, field.TypeString)
+	}
+	if value, ok := nuo.mutation.YoutubeURL(); ok {
+		_spec.SetField(nft.FieldYoutubeURL, field.TypeString, value)
+	}
+	if nuo.mutation.YoutubeURLCleared() {
+		_spec.ClearField(nft.FieldYoutubeURL, field.TypeString)
 	}
 	if value, ok := nuo.mutation.OwnerAddress(); ok {
 		_spec.SetField(nft.FieldOwnerAddress, field.TypeString, value)

@@ -3,7 +3,9 @@
 package nft
 
 import (
+	"fmt"
 	"likenft-indexer/ent/predicate"
+	"math/big"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -55,14 +57,40 @@ func IDLTE(id int) predicate.NFT {
 	return predicate.NFT(sql.FieldLTE(FieldID, id))
 }
 
-// TokenID applies equality check predicate on the "token_id" field. It's identical to TokenIDEQ.
-func TokenID(v uint64) predicate.NFT {
-	return predicate.NFT(sql.FieldEQ(FieldTokenID, v))
+// ContractAddress applies equality check predicate on the "contract_address" field. It's identical to ContractAddressEQ.
+func ContractAddress(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldContractAddress, v))
 }
 
-// TokenURL applies equality check predicate on the "token_url" field. It's identical to TokenURLEQ.
-func TokenURL(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldEQ(FieldTokenURL, v))
+// TokenID applies equality check predicate on the "token_id" field. It's identical to TokenIDEQ.
+func TokenID(v *big.Int) predicate.NFT {
+	vc, err := ValueScanner.TokenID.Value(v)
+	return predicate.NFTOrErr(sql.FieldEQ(FieldTokenID, vc), err)
+}
+
+// TokenURI applies equality check predicate on the "token_uri" field. It's identical to TokenURIEQ.
+func TokenURI(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldTokenURI, v))
+}
+
+// Image applies equality check predicate on the "image" field. It's identical to ImageEQ.
+func Image(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldImage, v))
+}
+
+// ImageData applies equality check predicate on the "image_data" field. It's identical to ImageDataEQ.
+func ImageData(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldImageData, v))
+}
+
+// ExternalURL applies equality check predicate on the "external_url" field. It's identical to ExternalURLEQ.
+func ExternalURL(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldExternalURL, v))
+}
+
+// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
+func Description(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldDescription, v))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
@@ -70,9 +98,19 @@ func Name(v string) predicate.NFT {
 	return predicate.NFT(sql.FieldEQ(FieldName, v))
 }
 
-// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
-func Description(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldEQ(FieldDescription, v))
+// BackgroundColor applies equality check predicate on the "background_color" field. It's identical to BackgroundColorEQ.
+func BackgroundColor(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldBackgroundColor, v))
+}
+
+// AnimationURL applies equality check predicate on the "animation_url" field. It's identical to AnimationURLEQ.
+func AnimationURL(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldAnimationURL, v))
+}
+
+// YoutubeURL applies equality check predicate on the "youtube_url" field. It's identical to YoutubeURLEQ.
+func YoutubeURL(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldYoutubeURL, v))
 }
 
 // OwnerAddress applies equality check predicate on the "owner_address" field. It's identical to OwnerAddressEQ.
@@ -90,129 +128,528 @@ func UpdatedAt(v time.Time) predicate.NFT {
 	return predicate.NFT(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
+// ContractAddressEQ applies the EQ predicate on the "contract_address" field.
+func ContractAddressEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldContractAddress, v))
+}
+
+// ContractAddressNEQ applies the NEQ predicate on the "contract_address" field.
+func ContractAddressNEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldNEQ(FieldContractAddress, v))
+}
+
+// ContractAddressIn applies the In predicate on the "contract_address" field.
+func ContractAddressIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldIn(FieldContractAddress, vs...))
+}
+
+// ContractAddressNotIn applies the NotIn predicate on the "contract_address" field.
+func ContractAddressNotIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldNotIn(FieldContractAddress, vs...))
+}
+
+// ContractAddressGT applies the GT predicate on the "contract_address" field.
+func ContractAddressGT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGT(FieldContractAddress, v))
+}
+
+// ContractAddressGTE applies the GTE predicate on the "contract_address" field.
+func ContractAddressGTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGTE(FieldContractAddress, v))
+}
+
+// ContractAddressLT applies the LT predicate on the "contract_address" field.
+func ContractAddressLT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLT(FieldContractAddress, v))
+}
+
+// ContractAddressLTE applies the LTE predicate on the "contract_address" field.
+func ContractAddressLTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLTE(FieldContractAddress, v))
+}
+
+// ContractAddressContains applies the Contains predicate on the "contract_address" field.
+func ContractAddressContains(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContains(FieldContractAddress, v))
+}
+
+// ContractAddressHasPrefix applies the HasPrefix predicate on the "contract_address" field.
+func ContractAddressHasPrefix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasPrefix(FieldContractAddress, v))
+}
+
+// ContractAddressHasSuffix applies the HasSuffix predicate on the "contract_address" field.
+func ContractAddressHasSuffix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasSuffix(FieldContractAddress, v))
+}
+
+// ContractAddressEqualFold applies the EqualFold predicate on the "contract_address" field.
+func ContractAddressEqualFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEqualFold(FieldContractAddress, v))
+}
+
+// ContractAddressContainsFold applies the ContainsFold predicate on the "contract_address" field.
+func ContractAddressContainsFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContainsFold(FieldContractAddress, v))
+}
+
 // TokenIDEQ applies the EQ predicate on the "token_id" field.
-func TokenIDEQ(v uint64) predicate.NFT {
-	return predicate.NFT(sql.FieldEQ(FieldTokenID, v))
+func TokenIDEQ(v *big.Int) predicate.NFT {
+	vc, err := ValueScanner.TokenID.Value(v)
+	return predicate.NFTOrErr(sql.FieldEQ(FieldTokenID, vc), err)
 }
 
 // TokenIDNEQ applies the NEQ predicate on the "token_id" field.
-func TokenIDNEQ(v uint64) predicate.NFT {
-	return predicate.NFT(sql.FieldNEQ(FieldTokenID, v))
+func TokenIDNEQ(v *big.Int) predicate.NFT {
+	vc, err := ValueScanner.TokenID.Value(v)
+	return predicate.NFTOrErr(sql.FieldNEQ(FieldTokenID, vc), err)
 }
 
 // TokenIDIn applies the In predicate on the "token_id" field.
-func TokenIDIn(vs ...uint64) predicate.NFT {
-	return predicate.NFT(sql.FieldIn(FieldTokenID, vs...))
+func TokenIDIn(vs ...*big.Int) predicate.NFT {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.TokenID.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.NFTOrErr(sql.FieldIn(FieldTokenID, v...), err)
 }
 
 // TokenIDNotIn applies the NotIn predicate on the "token_id" field.
-func TokenIDNotIn(vs ...uint64) predicate.NFT {
-	return predicate.NFT(sql.FieldNotIn(FieldTokenID, vs...))
+func TokenIDNotIn(vs ...*big.Int) predicate.NFT {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.TokenID.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.NFTOrErr(sql.FieldNotIn(FieldTokenID, v...), err)
 }
 
 // TokenIDGT applies the GT predicate on the "token_id" field.
-func TokenIDGT(v uint64) predicate.NFT {
-	return predicate.NFT(sql.FieldGT(FieldTokenID, v))
+func TokenIDGT(v *big.Int) predicate.NFT {
+	vc, err := ValueScanner.TokenID.Value(v)
+	return predicate.NFTOrErr(sql.FieldGT(FieldTokenID, vc), err)
 }
 
 // TokenIDGTE applies the GTE predicate on the "token_id" field.
-func TokenIDGTE(v uint64) predicate.NFT {
-	return predicate.NFT(sql.FieldGTE(FieldTokenID, v))
+func TokenIDGTE(v *big.Int) predicate.NFT {
+	vc, err := ValueScanner.TokenID.Value(v)
+	return predicate.NFTOrErr(sql.FieldGTE(FieldTokenID, vc), err)
 }
 
 // TokenIDLT applies the LT predicate on the "token_id" field.
-func TokenIDLT(v uint64) predicate.NFT {
-	return predicate.NFT(sql.FieldLT(FieldTokenID, v))
+func TokenIDLT(v *big.Int) predicate.NFT {
+	vc, err := ValueScanner.TokenID.Value(v)
+	return predicate.NFTOrErr(sql.FieldLT(FieldTokenID, vc), err)
 }
 
 // TokenIDLTE applies the LTE predicate on the "token_id" field.
-func TokenIDLTE(v uint64) predicate.NFT {
-	return predicate.NFT(sql.FieldLTE(FieldTokenID, v))
+func TokenIDLTE(v *big.Int) predicate.NFT {
+	vc, err := ValueScanner.TokenID.Value(v)
+	return predicate.NFTOrErr(sql.FieldLTE(FieldTokenID, vc), err)
 }
 
-// TokenURLEQ applies the EQ predicate on the "token_url" field.
-func TokenURLEQ(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldEQ(FieldTokenURL, v))
+// TokenIDContains applies the Contains predicate on the "token_id" field.
+func TokenIDContains(v *big.Int) predicate.NFT {
+	vc, err := ValueScanner.TokenID.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("token_id value is not a string: %T", vc)
+	}
+	return predicate.NFTOrErr(sql.FieldContains(FieldTokenID, vcs), err)
 }
 
-// TokenURLNEQ applies the NEQ predicate on the "token_url" field.
-func TokenURLNEQ(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldNEQ(FieldTokenURL, v))
+// TokenIDHasPrefix applies the HasPrefix predicate on the "token_id" field.
+func TokenIDHasPrefix(v *big.Int) predicate.NFT {
+	vc, err := ValueScanner.TokenID.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("token_id value is not a string: %T", vc)
+	}
+	return predicate.NFTOrErr(sql.FieldHasPrefix(FieldTokenID, vcs), err)
 }
 
-// TokenURLIn applies the In predicate on the "token_url" field.
-func TokenURLIn(vs ...string) predicate.NFT {
-	return predicate.NFT(sql.FieldIn(FieldTokenURL, vs...))
+// TokenIDHasSuffix applies the HasSuffix predicate on the "token_id" field.
+func TokenIDHasSuffix(v *big.Int) predicate.NFT {
+	vc, err := ValueScanner.TokenID.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("token_id value is not a string: %T", vc)
+	}
+	return predicate.NFTOrErr(sql.FieldHasSuffix(FieldTokenID, vcs), err)
 }
 
-// TokenURLNotIn applies the NotIn predicate on the "token_url" field.
-func TokenURLNotIn(vs ...string) predicate.NFT {
-	return predicate.NFT(sql.FieldNotIn(FieldTokenURL, vs...))
+// TokenIDEqualFold applies the EqualFold predicate on the "token_id" field.
+func TokenIDEqualFold(v *big.Int) predicate.NFT {
+	vc, err := ValueScanner.TokenID.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("token_id value is not a string: %T", vc)
+	}
+	return predicate.NFTOrErr(sql.FieldEqualFold(FieldTokenID, vcs), err)
 }
 
-// TokenURLGT applies the GT predicate on the "token_url" field.
-func TokenURLGT(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldGT(FieldTokenURL, v))
+// TokenIDContainsFold applies the ContainsFold predicate on the "token_id" field.
+func TokenIDContainsFold(v *big.Int) predicate.NFT {
+	vc, err := ValueScanner.TokenID.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("token_id value is not a string: %T", vc)
+	}
+	return predicate.NFTOrErr(sql.FieldContainsFold(FieldTokenID, vcs), err)
 }
 
-// TokenURLGTE applies the GTE predicate on the "token_url" field.
-func TokenURLGTE(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldGTE(FieldTokenURL, v))
+// TokenURIEQ applies the EQ predicate on the "token_uri" field.
+func TokenURIEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldTokenURI, v))
 }
 
-// TokenURLLT applies the LT predicate on the "token_url" field.
-func TokenURLLT(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldLT(FieldTokenURL, v))
+// TokenURINEQ applies the NEQ predicate on the "token_uri" field.
+func TokenURINEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldNEQ(FieldTokenURI, v))
 }
 
-// TokenURLLTE applies the LTE predicate on the "token_url" field.
-func TokenURLLTE(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldLTE(FieldTokenURL, v))
+// TokenURIIn applies the In predicate on the "token_uri" field.
+func TokenURIIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldIn(FieldTokenURI, vs...))
 }
 
-// TokenURLContains applies the Contains predicate on the "token_url" field.
-func TokenURLContains(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldContains(FieldTokenURL, v))
+// TokenURINotIn applies the NotIn predicate on the "token_uri" field.
+func TokenURINotIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldNotIn(FieldTokenURI, vs...))
 }
 
-// TokenURLHasPrefix applies the HasPrefix predicate on the "token_url" field.
-func TokenURLHasPrefix(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldHasPrefix(FieldTokenURL, v))
+// TokenURIGT applies the GT predicate on the "token_uri" field.
+func TokenURIGT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGT(FieldTokenURI, v))
 }
 
-// TokenURLHasSuffix applies the HasSuffix predicate on the "token_url" field.
-func TokenURLHasSuffix(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldHasSuffix(FieldTokenURL, v))
+// TokenURIGTE applies the GTE predicate on the "token_uri" field.
+func TokenURIGTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGTE(FieldTokenURI, v))
 }
 
-// TokenURLIsNil applies the IsNil predicate on the "token_url" field.
-func TokenURLIsNil() predicate.NFT {
-	return predicate.NFT(sql.FieldIsNull(FieldTokenURL))
+// TokenURILT applies the LT predicate on the "token_uri" field.
+func TokenURILT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLT(FieldTokenURI, v))
 }
 
-// TokenURLNotNil applies the NotNil predicate on the "token_url" field.
-func TokenURLNotNil() predicate.NFT {
-	return predicate.NFT(sql.FieldNotNull(FieldTokenURL))
+// TokenURILTE applies the LTE predicate on the "token_uri" field.
+func TokenURILTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLTE(FieldTokenURI, v))
 }
 
-// TokenURLEqualFold applies the EqualFold predicate on the "token_url" field.
-func TokenURLEqualFold(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldEqualFold(FieldTokenURL, v))
+// TokenURIContains applies the Contains predicate on the "token_uri" field.
+func TokenURIContains(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContains(FieldTokenURI, v))
 }
 
-// TokenURLContainsFold applies the ContainsFold predicate on the "token_url" field.
-func TokenURLContainsFold(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldContainsFold(FieldTokenURL, v))
+// TokenURIHasPrefix applies the HasPrefix predicate on the "token_uri" field.
+func TokenURIHasPrefix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasPrefix(FieldTokenURI, v))
 }
 
-// RawIsNil applies the IsNil predicate on the "raw" field.
-func RawIsNil() predicate.NFT {
-	return predicate.NFT(sql.FieldIsNull(FieldRaw))
+// TokenURIHasSuffix applies the HasSuffix predicate on the "token_uri" field.
+func TokenURIHasSuffix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasSuffix(FieldTokenURI, v))
 }
 
-// RawNotNil applies the NotNil predicate on the "raw" field.
-func RawNotNil() predicate.NFT {
-	return predicate.NFT(sql.FieldNotNull(FieldRaw))
+// TokenURIEqualFold applies the EqualFold predicate on the "token_uri" field.
+func TokenURIEqualFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEqualFold(FieldTokenURI, v))
+}
+
+// TokenURIContainsFold applies the ContainsFold predicate on the "token_uri" field.
+func TokenURIContainsFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContainsFold(FieldTokenURI, v))
+}
+
+// ImageEQ applies the EQ predicate on the "image" field.
+func ImageEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldImage, v))
+}
+
+// ImageNEQ applies the NEQ predicate on the "image" field.
+func ImageNEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldNEQ(FieldImage, v))
+}
+
+// ImageIn applies the In predicate on the "image" field.
+func ImageIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldIn(FieldImage, vs...))
+}
+
+// ImageNotIn applies the NotIn predicate on the "image" field.
+func ImageNotIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldNotIn(FieldImage, vs...))
+}
+
+// ImageGT applies the GT predicate on the "image" field.
+func ImageGT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGT(FieldImage, v))
+}
+
+// ImageGTE applies the GTE predicate on the "image" field.
+func ImageGTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGTE(FieldImage, v))
+}
+
+// ImageLT applies the LT predicate on the "image" field.
+func ImageLT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLT(FieldImage, v))
+}
+
+// ImageLTE applies the LTE predicate on the "image" field.
+func ImageLTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLTE(FieldImage, v))
+}
+
+// ImageContains applies the Contains predicate on the "image" field.
+func ImageContains(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContains(FieldImage, v))
+}
+
+// ImageHasPrefix applies the HasPrefix predicate on the "image" field.
+func ImageHasPrefix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasPrefix(FieldImage, v))
+}
+
+// ImageHasSuffix applies the HasSuffix predicate on the "image" field.
+func ImageHasSuffix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasSuffix(FieldImage, v))
+}
+
+// ImageEqualFold applies the EqualFold predicate on the "image" field.
+func ImageEqualFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEqualFold(FieldImage, v))
+}
+
+// ImageContainsFold applies the ContainsFold predicate on the "image" field.
+func ImageContainsFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContainsFold(FieldImage, v))
+}
+
+// ImageDataEQ applies the EQ predicate on the "image_data" field.
+func ImageDataEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldImageData, v))
+}
+
+// ImageDataNEQ applies the NEQ predicate on the "image_data" field.
+func ImageDataNEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldNEQ(FieldImageData, v))
+}
+
+// ImageDataIn applies the In predicate on the "image_data" field.
+func ImageDataIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldIn(FieldImageData, vs...))
+}
+
+// ImageDataNotIn applies the NotIn predicate on the "image_data" field.
+func ImageDataNotIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldNotIn(FieldImageData, vs...))
+}
+
+// ImageDataGT applies the GT predicate on the "image_data" field.
+func ImageDataGT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGT(FieldImageData, v))
+}
+
+// ImageDataGTE applies the GTE predicate on the "image_data" field.
+func ImageDataGTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGTE(FieldImageData, v))
+}
+
+// ImageDataLT applies the LT predicate on the "image_data" field.
+func ImageDataLT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLT(FieldImageData, v))
+}
+
+// ImageDataLTE applies the LTE predicate on the "image_data" field.
+func ImageDataLTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLTE(FieldImageData, v))
+}
+
+// ImageDataContains applies the Contains predicate on the "image_data" field.
+func ImageDataContains(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContains(FieldImageData, v))
+}
+
+// ImageDataHasPrefix applies the HasPrefix predicate on the "image_data" field.
+func ImageDataHasPrefix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasPrefix(FieldImageData, v))
+}
+
+// ImageDataHasSuffix applies the HasSuffix predicate on the "image_data" field.
+func ImageDataHasSuffix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasSuffix(FieldImageData, v))
+}
+
+// ImageDataIsNil applies the IsNil predicate on the "image_data" field.
+func ImageDataIsNil() predicate.NFT {
+	return predicate.NFT(sql.FieldIsNull(FieldImageData))
+}
+
+// ImageDataNotNil applies the NotNil predicate on the "image_data" field.
+func ImageDataNotNil() predicate.NFT {
+	return predicate.NFT(sql.FieldNotNull(FieldImageData))
+}
+
+// ImageDataEqualFold applies the EqualFold predicate on the "image_data" field.
+func ImageDataEqualFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEqualFold(FieldImageData, v))
+}
+
+// ImageDataContainsFold applies the ContainsFold predicate on the "image_data" field.
+func ImageDataContainsFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContainsFold(FieldImageData, v))
+}
+
+// ExternalURLEQ applies the EQ predicate on the "external_url" field.
+func ExternalURLEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldExternalURL, v))
+}
+
+// ExternalURLNEQ applies the NEQ predicate on the "external_url" field.
+func ExternalURLNEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldNEQ(FieldExternalURL, v))
+}
+
+// ExternalURLIn applies the In predicate on the "external_url" field.
+func ExternalURLIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldIn(FieldExternalURL, vs...))
+}
+
+// ExternalURLNotIn applies the NotIn predicate on the "external_url" field.
+func ExternalURLNotIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldNotIn(FieldExternalURL, vs...))
+}
+
+// ExternalURLGT applies the GT predicate on the "external_url" field.
+func ExternalURLGT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGT(FieldExternalURL, v))
+}
+
+// ExternalURLGTE applies the GTE predicate on the "external_url" field.
+func ExternalURLGTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGTE(FieldExternalURL, v))
+}
+
+// ExternalURLLT applies the LT predicate on the "external_url" field.
+func ExternalURLLT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLT(FieldExternalURL, v))
+}
+
+// ExternalURLLTE applies the LTE predicate on the "external_url" field.
+func ExternalURLLTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLTE(FieldExternalURL, v))
+}
+
+// ExternalURLContains applies the Contains predicate on the "external_url" field.
+func ExternalURLContains(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContains(FieldExternalURL, v))
+}
+
+// ExternalURLHasPrefix applies the HasPrefix predicate on the "external_url" field.
+func ExternalURLHasPrefix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasPrefix(FieldExternalURL, v))
+}
+
+// ExternalURLHasSuffix applies the HasSuffix predicate on the "external_url" field.
+func ExternalURLHasSuffix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasSuffix(FieldExternalURL, v))
+}
+
+// ExternalURLIsNil applies the IsNil predicate on the "external_url" field.
+func ExternalURLIsNil() predicate.NFT {
+	return predicate.NFT(sql.FieldIsNull(FieldExternalURL))
+}
+
+// ExternalURLNotNil applies the NotNil predicate on the "external_url" field.
+func ExternalURLNotNil() predicate.NFT {
+	return predicate.NFT(sql.FieldNotNull(FieldExternalURL))
+}
+
+// ExternalURLEqualFold applies the EqualFold predicate on the "external_url" field.
+func ExternalURLEqualFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEqualFold(FieldExternalURL, v))
+}
+
+// ExternalURLContainsFold applies the ContainsFold predicate on the "external_url" field.
+func ExternalURLContainsFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContainsFold(FieldExternalURL, v))
+}
+
+// DescriptionEQ applies the EQ predicate on the "description" field.
+func DescriptionEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldDescription, v))
+}
+
+// DescriptionNEQ applies the NEQ predicate on the "description" field.
+func DescriptionNEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldNEQ(FieldDescription, v))
+}
+
+// DescriptionIn applies the In predicate on the "description" field.
+func DescriptionIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldIn(FieldDescription, vs...))
+}
+
+// DescriptionNotIn applies the NotIn predicate on the "description" field.
+func DescriptionNotIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldNotIn(FieldDescription, vs...))
+}
+
+// DescriptionGT applies the GT predicate on the "description" field.
+func DescriptionGT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGT(FieldDescription, v))
+}
+
+// DescriptionGTE applies the GTE predicate on the "description" field.
+func DescriptionGTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGTE(FieldDescription, v))
+}
+
+// DescriptionLT applies the LT predicate on the "description" field.
+func DescriptionLT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLT(FieldDescription, v))
+}
+
+// DescriptionLTE applies the LTE predicate on the "description" field.
+func DescriptionLTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLTE(FieldDescription, v))
+}
+
+// DescriptionContains applies the Contains predicate on the "description" field.
+func DescriptionContains(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContains(FieldDescription, v))
+}
+
+// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
+func DescriptionHasPrefix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasPrefix(FieldDescription, v))
+}
+
+// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
+func DescriptionHasSuffix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEqualFold(FieldDescription, v))
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
@@ -280,91 +717,6 @@ func NameContainsFold(v string) predicate.NFT {
 	return predicate.NFT(sql.FieldContainsFold(FieldName, v))
 }
 
-// DescriptionEQ applies the EQ predicate on the "description" field.
-func DescriptionEQ(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldEQ(FieldDescription, v))
-}
-
-// DescriptionNEQ applies the NEQ predicate on the "description" field.
-func DescriptionNEQ(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldNEQ(FieldDescription, v))
-}
-
-// DescriptionIn applies the In predicate on the "description" field.
-func DescriptionIn(vs ...string) predicate.NFT {
-	return predicate.NFT(sql.FieldIn(FieldDescription, vs...))
-}
-
-// DescriptionNotIn applies the NotIn predicate on the "description" field.
-func DescriptionNotIn(vs ...string) predicate.NFT {
-	return predicate.NFT(sql.FieldNotIn(FieldDescription, vs...))
-}
-
-// DescriptionGT applies the GT predicate on the "description" field.
-func DescriptionGT(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldGT(FieldDescription, v))
-}
-
-// DescriptionGTE applies the GTE predicate on the "description" field.
-func DescriptionGTE(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldGTE(FieldDescription, v))
-}
-
-// DescriptionLT applies the LT predicate on the "description" field.
-func DescriptionLT(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldLT(FieldDescription, v))
-}
-
-// DescriptionLTE applies the LTE predicate on the "description" field.
-func DescriptionLTE(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldLTE(FieldDescription, v))
-}
-
-// DescriptionContains applies the Contains predicate on the "description" field.
-func DescriptionContains(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldContains(FieldDescription, v))
-}
-
-// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
-func DescriptionHasPrefix(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldHasPrefix(FieldDescription, v))
-}
-
-// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
-func DescriptionHasSuffix(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldHasSuffix(FieldDescription, v))
-}
-
-// DescriptionIsNil applies the IsNil predicate on the "description" field.
-func DescriptionIsNil() predicate.NFT {
-	return predicate.NFT(sql.FieldIsNull(FieldDescription))
-}
-
-// DescriptionNotNil applies the NotNil predicate on the "description" field.
-func DescriptionNotNil() predicate.NFT {
-	return predicate.NFT(sql.FieldNotNull(FieldDescription))
-}
-
-// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
-func DescriptionEqualFold(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldEqualFold(FieldDescription, v))
-}
-
-// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
-func DescriptionContainsFold(v string) predicate.NFT {
-	return predicate.NFT(sql.FieldContainsFold(FieldDescription, v))
-}
-
-// ImageIsNil applies the IsNil predicate on the "image" field.
-func ImageIsNil() predicate.NFT {
-	return predicate.NFT(sql.FieldIsNull(FieldImage))
-}
-
-// ImageNotNil applies the NotNil predicate on the "image" field.
-func ImageNotNil() predicate.NFT {
-	return predicate.NFT(sql.FieldNotNull(FieldImage))
-}
-
 // AttributesIsNil applies the IsNil predicate on the "attributes" field.
 func AttributesIsNil() predicate.NFT {
 	return predicate.NFT(sql.FieldIsNull(FieldAttributes))
@@ -373,6 +725,231 @@ func AttributesIsNil() predicate.NFT {
 // AttributesNotNil applies the NotNil predicate on the "attributes" field.
 func AttributesNotNil() predicate.NFT {
 	return predicate.NFT(sql.FieldNotNull(FieldAttributes))
+}
+
+// BackgroundColorEQ applies the EQ predicate on the "background_color" field.
+func BackgroundColorEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldBackgroundColor, v))
+}
+
+// BackgroundColorNEQ applies the NEQ predicate on the "background_color" field.
+func BackgroundColorNEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldNEQ(FieldBackgroundColor, v))
+}
+
+// BackgroundColorIn applies the In predicate on the "background_color" field.
+func BackgroundColorIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldIn(FieldBackgroundColor, vs...))
+}
+
+// BackgroundColorNotIn applies the NotIn predicate on the "background_color" field.
+func BackgroundColorNotIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldNotIn(FieldBackgroundColor, vs...))
+}
+
+// BackgroundColorGT applies the GT predicate on the "background_color" field.
+func BackgroundColorGT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGT(FieldBackgroundColor, v))
+}
+
+// BackgroundColorGTE applies the GTE predicate on the "background_color" field.
+func BackgroundColorGTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGTE(FieldBackgroundColor, v))
+}
+
+// BackgroundColorLT applies the LT predicate on the "background_color" field.
+func BackgroundColorLT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLT(FieldBackgroundColor, v))
+}
+
+// BackgroundColorLTE applies the LTE predicate on the "background_color" field.
+func BackgroundColorLTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLTE(FieldBackgroundColor, v))
+}
+
+// BackgroundColorContains applies the Contains predicate on the "background_color" field.
+func BackgroundColorContains(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContains(FieldBackgroundColor, v))
+}
+
+// BackgroundColorHasPrefix applies the HasPrefix predicate on the "background_color" field.
+func BackgroundColorHasPrefix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasPrefix(FieldBackgroundColor, v))
+}
+
+// BackgroundColorHasSuffix applies the HasSuffix predicate on the "background_color" field.
+func BackgroundColorHasSuffix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasSuffix(FieldBackgroundColor, v))
+}
+
+// BackgroundColorIsNil applies the IsNil predicate on the "background_color" field.
+func BackgroundColorIsNil() predicate.NFT {
+	return predicate.NFT(sql.FieldIsNull(FieldBackgroundColor))
+}
+
+// BackgroundColorNotNil applies the NotNil predicate on the "background_color" field.
+func BackgroundColorNotNil() predicate.NFT {
+	return predicate.NFT(sql.FieldNotNull(FieldBackgroundColor))
+}
+
+// BackgroundColorEqualFold applies the EqualFold predicate on the "background_color" field.
+func BackgroundColorEqualFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEqualFold(FieldBackgroundColor, v))
+}
+
+// BackgroundColorContainsFold applies the ContainsFold predicate on the "background_color" field.
+func BackgroundColorContainsFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContainsFold(FieldBackgroundColor, v))
+}
+
+// AnimationURLEQ applies the EQ predicate on the "animation_url" field.
+func AnimationURLEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldAnimationURL, v))
+}
+
+// AnimationURLNEQ applies the NEQ predicate on the "animation_url" field.
+func AnimationURLNEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldNEQ(FieldAnimationURL, v))
+}
+
+// AnimationURLIn applies the In predicate on the "animation_url" field.
+func AnimationURLIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldIn(FieldAnimationURL, vs...))
+}
+
+// AnimationURLNotIn applies the NotIn predicate on the "animation_url" field.
+func AnimationURLNotIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldNotIn(FieldAnimationURL, vs...))
+}
+
+// AnimationURLGT applies the GT predicate on the "animation_url" field.
+func AnimationURLGT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGT(FieldAnimationURL, v))
+}
+
+// AnimationURLGTE applies the GTE predicate on the "animation_url" field.
+func AnimationURLGTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGTE(FieldAnimationURL, v))
+}
+
+// AnimationURLLT applies the LT predicate on the "animation_url" field.
+func AnimationURLLT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLT(FieldAnimationURL, v))
+}
+
+// AnimationURLLTE applies the LTE predicate on the "animation_url" field.
+func AnimationURLLTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLTE(FieldAnimationURL, v))
+}
+
+// AnimationURLContains applies the Contains predicate on the "animation_url" field.
+func AnimationURLContains(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContains(FieldAnimationURL, v))
+}
+
+// AnimationURLHasPrefix applies the HasPrefix predicate on the "animation_url" field.
+func AnimationURLHasPrefix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasPrefix(FieldAnimationURL, v))
+}
+
+// AnimationURLHasSuffix applies the HasSuffix predicate on the "animation_url" field.
+func AnimationURLHasSuffix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasSuffix(FieldAnimationURL, v))
+}
+
+// AnimationURLIsNil applies the IsNil predicate on the "animation_url" field.
+func AnimationURLIsNil() predicate.NFT {
+	return predicate.NFT(sql.FieldIsNull(FieldAnimationURL))
+}
+
+// AnimationURLNotNil applies the NotNil predicate on the "animation_url" field.
+func AnimationURLNotNil() predicate.NFT {
+	return predicate.NFT(sql.FieldNotNull(FieldAnimationURL))
+}
+
+// AnimationURLEqualFold applies the EqualFold predicate on the "animation_url" field.
+func AnimationURLEqualFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEqualFold(FieldAnimationURL, v))
+}
+
+// AnimationURLContainsFold applies the ContainsFold predicate on the "animation_url" field.
+func AnimationURLContainsFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContainsFold(FieldAnimationURL, v))
+}
+
+// YoutubeURLEQ applies the EQ predicate on the "youtube_url" field.
+func YoutubeURLEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEQ(FieldYoutubeURL, v))
+}
+
+// YoutubeURLNEQ applies the NEQ predicate on the "youtube_url" field.
+func YoutubeURLNEQ(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldNEQ(FieldYoutubeURL, v))
+}
+
+// YoutubeURLIn applies the In predicate on the "youtube_url" field.
+func YoutubeURLIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldIn(FieldYoutubeURL, vs...))
+}
+
+// YoutubeURLNotIn applies the NotIn predicate on the "youtube_url" field.
+func YoutubeURLNotIn(vs ...string) predicate.NFT {
+	return predicate.NFT(sql.FieldNotIn(FieldYoutubeURL, vs...))
+}
+
+// YoutubeURLGT applies the GT predicate on the "youtube_url" field.
+func YoutubeURLGT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGT(FieldYoutubeURL, v))
+}
+
+// YoutubeURLGTE applies the GTE predicate on the "youtube_url" field.
+func YoutubeURLGTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldGTE(FieldYoutubeURL, v))
+}
+
+// YoutubeURLLT applies the LT predicate on the "youtube_url" field.
+func YoutubeURLLT(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLT(FieldYoutubeURL, v))
+}
+
+// YoutubeURLLTE applies the LTE predicate on the "youtube_url" field.
+func YoutubeURLLTE(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldLTE(FieldYoutubeURL, v))
+}
+
+// YoutubeURLContains applies the Contains predicate on the "youtube_url" field.
+func YoutubeURLContains(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContains(FieldYoutubeURL, v))
+}
+
+// YoutubeURLHasPrefix applies the HasPrefix predicate on the "youtube_url" field.
+func YoutubeURLHasPrefix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasPrefix(FieldYoutubeURL, v))
+}
+
+// YoutubeURLHasSuffix applies the HasSuffix predicate on the "youtube_url" field.
+func YoutubeURLHasSuffix(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldHasSuffix(FieldYoutubeURL, v))
+}
+
+// YoutubeURLIsNil applies the IsNil predicate on the "youtube_url" field.
+func YoutubeURLIsNil() predicate.NFT {
+	return predicate.NFT(sql.FieldIsNull(FieldYoutubeURL))
+}
+
+// YoutubeURLNotNil applies the NotNil predicate on the "youtube_url" field.
+func YoutubeURLNotNil() predicate.NFT {
+	return predicate.NFT(sql.FieldNotNull(FieldYoutubeURL))
+}
+
+// YoutubeURLEqualFold applies the EqualFold predicate on the "youtube_url" field.
+func YoutubeURLEqualFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldEqualFold(FieldYoutubeURL, v))
+}
+
+// YoutubeURLContainsFold applies the ContainsFold predicate on the "youtube_url" field.
+func YoutubeURLContainsFold(v string) predicate.NFT {
+	return predicate.NFT(sql.FieldContainsFold(FieldYoutubeURL, v))
 }
 
 // OwnerAddressEQ applies the EQ predicate on the "owner_address" field.

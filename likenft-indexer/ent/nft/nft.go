@@ -3,8 +3,11 @@
 package nft
 
 import (
+	"math/big"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 )
 
 const (
@@ -12,20 +15,30 @@ const (
 	Label = "nft"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldContractAddress holds the string denoting the contract_address field in the database.
+	FieldContractAddress = "contract_address"
 	// FieldTokenID holds the string denoting the token_id field in the database.
 	FieldTokenID = "token_id"
-	// FieldTokenURL holds the string denoting the token_url field in the database.
-	FieldTokenURL = "token_url"
-	// FieldRaw holds the string denoting the raw field in the database.
-	FieldRaw = "raw"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
-	// FieldDescription holds the string denoting the description field in the database.
-	FieldDescription = "description"
+	// FieldTokenURI holds the string denoting the token_uri field in the database.
+	FieldTokenURI = "token_uri"
 	// FieldImage holds the string denoting the image field in the database.
 	FieldImage = "image"
+	// FieldImageData holds the string denoting the image_data field in the database.
+	FieldImageData = "image_data"
+	// FieldExternalURL holds the string denoting the external_url field in the database.
+	FieldExternalURL = "external_url"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
 	// FieldAttributes holds the string denoting the attributes field in the database.
 	FieldAttributes = "attributes"
+	// FieldBackgroundColor holds the string denoting the background_color field in the database.
+	FieldBackgroundColor = "background_color"
+	// FieldAnimationURL holds the string denoting the animation_url field in the database.
+	FieldAnimationURL = "animation_url"
+	// FieldYoutubeURL holds the string denoting the youtube_url field in the database.
+	FieldYoutubeURL = "youtube_url"
 	// FieldOwnerAddress holds the string denoting the owner_address field in the database.
 	FieldOwnerAddress = "owner_address"
 	// FieldMintedAt holds the string denoting the minted_at field in the database.
@@ -57,13 +70,18 @@ const (
 // Columns holds all SQL columns for nft fields.
 var Columns = []string{
 	FieldID,
+	FieldContractAddress,
 	FieldTokenID,
-	FieldTokenURL,
-	FieldRaw,
-	FieldName,
-	FieldDescription,
+	FieldTokenURI,
 	FieldImage,
+	FieldImageData,
+	FieldExternalURL,
+	FieldDescription,
+	FieldName,
 	FieldAttributes,
+	FieldBackgroundColor,
+	FieldAnimationURL,
+	FieldYoutubeURL,
 	FieldOwnerAddress,
 	FieldMintedAt,
 	FieldUpdatedAt,
@@ -92,10 +110,22 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// ContractAddressValidator is a validator for the "contract_address" field. It is called by the builders before save.
+	ContractAddressValidator func(string) error
+	// TokenURIValidator is a validator for the "token_uri" field. It is called by the builders before save.
+	TokenURIValidator func(string) error
+	// ImageValidator is a validator for the "image" field. It is called by the builders before save.
+	ImageValidator func(string) error
+	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	DescriptionValidator func(string) error
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
 	// OwnerAddressValidator is a validator for the "owner_address" field. It is called by the builders before save.
 	OwnerAddressValidator func(string) error
+	// ValueScanner of all NFT fields.
+	ValueScanner struct {
+		TokenID field.TypeValueScanner[*big.Int]
+	}
 )
 
 // OrderOption defines the ordering options for the NFT queries.
@@ -106,14 +136,39 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByContractAddress orders the results by the contract_address field.
+func ByContractAddress(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldContractAddress, opts...).ToFunc()
+}
+
 // ByTokenID orders the results by the token_id field.
 func ByTokenID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTokenID, opts...).ToFunc()
 }
 
-// ByTokenURL orders the results by the token_url field.
-func ByTokenURL(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldTokenURL, opts...).ToFunc()
+// ByTokenURI orders the results by the token_uri field.
+func ByTokenURI(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTokenURI, opts...).ToFunc()
+}
+
+// ByImage orders the results by the image field.
+func ByImage(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImage, opts...).ToFunc()
+}
+
+// ByImageData orders the results by the image_data field.
+func ByImageData(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImageData, opts...).ToFunc()
+}
+
+// ByExternalURL orders the results by the external_url field.
+func ByExternalURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExternalURL, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
@@ -121,9 +176,19 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByDescription orders the results by the description field.
-func ByDescription(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+// ByBackgroundColor orders the results by the background_color field.
+func ByBackgroundColor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBackgroundColor, opts...).ToFunc()
+}
+
+// ByAnimationURL orders the results by the animation_url field.
+func ByAnimationURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAnimationURL, opts...).ToFunc()
+}
+
+// ByYoutubeURL orders the results by the youtube_url field.
+func ByYoutubeURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldYoutubeURL, opts...).ToFunc()
 }
 
 // ByOwnerAddress orders the results by the owner_address field.

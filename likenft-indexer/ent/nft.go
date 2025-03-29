@@ -8,6 +8,8 @@ import (
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
+	"likenft-indexer/internal/evm/model"
+	"math/big"
 	"strings"
 	"time"
 
@@ -20,20 +22,30 @@ type NFT struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// ContractAddress holds the value of the "contract_address" field.
+	ContractAddress string `json:"contract_address,omitempty"`
 	// TokenID holds the value of the "token_id" field.
-	TokenID uint64 `json:"token_id,omitempty"`
-	// TokenURL holds the value of the "token_url" field.
-	TokenURL string `json:"token_url,omitempty"`
-	// Raw holds the value of the "raw" field.
-	Raw map[string]interface{} `json:"raw,omitempty"`
-	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty"`
+	TokenID *big.Int `json:"token_id,omitempty"`
+	// TokenURI holds the value of the "token_uri" field.
+	TokenURI string `json:"token_uri,omitempty"`
+	// Image holds the value of the "image" field.
+	Image string `json:"image,omitempty"`
+	// ImageData holds the value of the "image_data" field.
+	ImageData *string `json:"image_data,omitempty"`
+	// ExternalURL holds the value of the "external_url" field.
+	ExternalURL *string `json:"external_url,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
-	// Image holds the value of the "image" field.
-	Image map[string]interface{} `json:"image,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
 	// Attributes holds the value of the "attributes" field.
-	Attributes map[string]interface{} `json:"attributes,omitempty"`
+	Attributes []model.ERC721MetadataAttribute `json:"attributes,omitempty"`
+	// BackgroundColor holds the value of the "background_color" field.
+	BackgroundColor *string `json:"background_color,omitempty"`
+	// AnimationURL holds the value of the "animation_url" field.
+	AnimationURL *string `json:"animation_url,omitempty"`
+	// YoutubeURL holds the value of the "youtube_url" field.
+	YoutubeURL *string `json:"youtube_url,omitempty"`
 	// OwnerAddress holds the value of the "owner_address" field.
 	OwnerAddress string `json:"owner_address,omitempty"`
 	// MintedAt holds the value of the "minted_at" field.
@@ -86,14 +98,16 @@ func (*NFT) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case nft.FieldRaw, nft.FieldImage, nft.FieldAttributes:
+		case nft.FieldAttributes:
 			values[i] = new([]byte)
-		case nft.FieldID, nft.FieldTokenID:
+		case nft.FieldID:
 			values[i] = new(sql.NullInt64)
-		case nft.FieldTokenURL, nft.FieldName, nft.FieldDescription, nft.FieldOwnerAddress:
+		case nft.FieldContractAddress, nft.FieldTokenURI, nft.FieldImage, nft.FieldImageData, nft.FieldExternalURL, nft.FieldDescription, nft.FieldName, nft.FieldBackgroundColor, nft.FieldAnimationURL, nft.FieldYoutubeURL, nft.FieldOwnerAddress:
 			values[i] = new(sql.NullString)
 		case nft.FieldMintedAt, nft.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case nft.FieldTokenID:
+			values[i] = nft.ValueScanner.TokenID.ScanValue()
 		case nft.ForeignKeys[0]: // account_nfts
 			values[i] = new(sql.NullInt64)
 		case nft.ForeignKeys[1]: // nft_class_nfts
@@ -119,31 +133,43 @@ func (n *NFT) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			n.ID = int(value.Int64)
+		case nft.FieldContractAddress:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field contract_address", values[i])
+			} else if value.Valid {
+				n.ContractAddress = value.String
+			}
 		case nft.FieldTokenID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field token_id", values[i])
-			} else if value.Valid {
-				n.TokenID = uint64(value.Int64)
+			if value, err := nft.ValueScanner.TokenID.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				n.TokenID = value
 			}
-		case nft.FieldTokenURL:
+		case nft.FieldTokenURI:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field token_url", values[i])
+				return fmt.Errorf("unexpected type %T for field token_uri", values[i])
 			} else if value.Valid {
-				n.TokenURL = value.String
+				n.TokenURI = value.String
 			}
-		case nft.FieldRaw:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field raw", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &n.Raw); err != nil {
-					return fmt.Errorf("unmarshal field raw: %w", err)
-				}
-			}
-		case nft.FieldName:
+		case nft.FieldImage:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
+				return fmt.Errorf("unexpected type %T for field image", values[i])
 			} else if value.Valid {
-				n.Name = value.String
+				n.Image = value.String
+			}
+		case nft.FieldImageData:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field image_data", values[i])
+			} else if value.Valid {
+				n.ImageData = new(string)
+				*n.ImageData = value.String
+			}
+		case nft.FieldExternalURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field external_url", values[i])
+			} else if value.Valid {
+				n.ExternalURL = new(string)
+				*n.ExternalURL = value.String
 			}
 		case nft.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -151,13 +177,11 @@ func (n *NFT) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				n.Description = value.String
 			}
-		case nft.FieldImage:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field image", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &n.Image); err != nil {
-					return fmt.Errorf("unmarshal field image: %w", err)
-				}
+		case nft.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				n.Name = value.String
 			}
 		case nft.FieldAttributes:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -166,6 +190,27 @@ func (n *NFT) assignValues(columns []string, values []any) error {
 				if err := json.Unmarshal(*value, &n.Attributes); err != nil {
 					return fmt.Errorf("unmarshal field attributes: %w", err)
 				}
+			}
+		case nft.FieldBackgroundColor:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field background_color", values[i])
+			} else if value.Valid {
+				n.BackgroundColor = new(string)
+				*n.BackgroundColor = value.String
+			}
+		case nft.FieldAnimationURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field animation_url", values[i])
+			} else if value.Valid {
+				n.AnimationURL = new(string)
+				*n.AnimationURL = value.String
+			}
+		case nft.FieldYoutubeURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field youtube_url", values[i])
+			} else if value.Valid {
+				n.YoutubeURL = new(string)
+				*n.YoutubeURL = value.String
 			}
 		case nft.FieldOwnerAddress:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -245,26 +290,51 @@ func (n *NFT) String() string {
 	var builder strings.Builder
 	builder.WriteString("NFT(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", n.ID))
+	builder.WriteString("contract_address=")
+	builder.WriteString(n.ContractAddress)
+	builder.WriteString(", ")
 	builder.WriteString("token_id=")
 	builder.WriteString(fmt.Sprintf("%v", n.TokenID))
 	builder.WriteString(", ")
-	builder.WriteString("token_url=")
-	builder.WriteString(n.TokenURL)
+	builder.WriteString("token_uri=")
+	builder.WriteString(n.TokenURI)
 	builder.WriteString(", ")
-	builder.WriteString("raw=")
-	builder.WriteString(fmt.Sprintf("%v", n.Raw))
+	builder.WriteString("image=")
+	builder.WriteString(n.Image)
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(n.Name)
+	if v := n.ImageData; v != nil {
+		builder.WriteString("image_data=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := n.ExternalURL; v != nil {
+		builder.WriteString("external_url=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(n.Description)
 	builder.WriteString(", ")
-	builder.WriteString("image=")
-	builder.WriteString(fmt.Sprintf("%v", n.Image))
+	builder.WriteString("name=")
+	builder.WriteString(n.Name)
 	builder.WriteString(", ")
 	builder.WriteString("attributes=")
 	builder.WriteString(fmt.Sprintf("%v", n.Attributes))
+	builder.WriteString(", ")
+	if v := n.BackgroundColor; v != nil {
+		builder.WriteString("background_color=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := n.AnimationURL; v != nil {
+		builder.WriteString("animation_url=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := n.YoutubeURL; v != nil {
+		builder.WriteString("youtube_url=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("owner_address=")
 	builder.WriteString(n.OwnerAddress)

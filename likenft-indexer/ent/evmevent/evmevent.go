@@ -3,6 +3,8 @@
 package evmevent
 
 import (
+	"fmt"
+
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -13,6 +15,8 @@ const (
 	FieldID = "id"
 	// FieldTransactionHash holds the string denoting the transaction_hash field in the database.
 	FieldTransactionHash = "transaction_hash"
+	// FieldTransactionIndex holds the string denoting the transaction_index field in the database.
+	FieldTransactionIndex = "transaction_index"
 	// FieldBlockHash holds the string denoting the block_hash field in the database.
 	FieldBlockHash = "block_hash"
 	// FieldBlockNumber holds the string denoting the block_number field in the database.
@@ -23,14 +27,30 @@ const (
 	FieldAddress = "address"
 	// FieldTopic0 holds the string denoting the topic0 field in the database.
 	FieldTopic0 = "topic0"
+	// FieldTopic0Hex holds the string denoting the topic0_hex field in the database.
+	FieldTopic0Hex = "topic0_hex"
 	// FieldTopic1 holds the string denoting the topic1 field in the database.
 	FieldTopic1 = "topic1"
+	// FieldTopic1Hex holds the string denoting the topic1_hex field in the database.
+	FieldTopic1Hex = "topic1_hex"
 	// FieldTopic2 holds the string denoting the topic2 field in the database.
 	FieldTopic2 = "topic2"
+	// FieldTopic2Hex holds the string denoting the topic2_hex field in the database.
+	FieldTopic2Hex = "topic2_hex"
 	// FieldTopic3 holds the string denoting the topic3 field in the database.
 	FieldTopic3 = "topic3"
+	// FieldTopic3Hex holds the string denoting the topic3_hex field in the database.
+	FieldTopic3Hex = "topic3_hex"
 	// FieldData holds the string denoting the data field in the database.
 	FieldData = "data"
+	// FieldDataHex holds the string denoting the data_hex field in the database.
+	FieldDataHex = "data_hex"
+	// FieldRemoved holds the string denoting the removed field in the database.
+	FieldRemoved = "removed"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
+	// FieldFailedReason holds the string denoting the failed_reason field in the database.
+	FieldFailedReason = "failed_reason"
 	// FieldTimestamp holds the string denoting the timestamp field in the database.
 	FieldTimestamp = "timestamp"
 	// Table holds the table name of the evmevent in the database.
@@ -41,15 +61,24 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldTransactionHash,
+	FieldTransactionIndex,
 	FieldBlockHash,
 	FieldBlockNumber,
 	FieldLogIndex,
 	FieldAddress,
 	FieldTopic0,
+	FieldTopic0Hex,
 	FieldTopic1,
+	FieldTopic1Hex,
 	FieldTopic2,
+	FieldTopic2Hex,
 	FieldTopic3,
+	FieldTopic3Hex,
 	FieldData,
+	FieldDataHex,
+	FieldRemoved,
+	FieldStatus,
+	FieldFailedReason,
 	FieldTimestamp,
 }
 
@@ -72,7 +101,35 @@ var (
 	AddressValidator func(string) error
 	// Topic0Validator is a validator for the "topic0" field. It is called by the builders before save.
 	Topic0Validator func(string) error
+	// Topic0HexValidator is a validator for the "topic0_hex" field. It is called by the builders before save.
+	Topic0HexValidator func(string) error
 )
+
+// Status defines the type for the "status" enum field.
+type Status string
+
+// Status values.
+const (
+	StatusReceived   Status = "received"
+	StatusEnqueued   Status = "enqueued"
+	StatusProcessing Status = "processing"
+	StatusProcessed  Status = "processed"
+	StatusFailed     Status = "failed"
+)
+
+func (s Status) String() string {
+	return string(s)
+}
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s Status) error {
+	switch s {
+	case StatusReceived, StatusEnqueued, StatusProcessing, StatusProcessed, StatusFailed:
+		return nil
+	default:
+		return fmt.Errorf("evmevent: invalid enum value for status field: %q", s)
+	}
+}
 
 // OrderOption defines the ordering options for the EVMEvent queries.
 type OrderOption func(*sql.Selector)
@@ -85,6 +142,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByTransactionHash orders the results by the transaction_hash field.
 func ByTransactionHash(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTransactionHash, opts...).ToFunc()
+}
+
+// ByTransactionIndex orders the results by the transaction_index field.
+func ByTransactionIndex(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTransactionIndex, opts...).ToFunc()
 }
 
 // ByBlockHash orders the results by the block_hash field.
@@ -112,9 +174,19 @@ func ByTopic0(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTopic0, opts...).ToFunc()
 }
 
+// ByTopic0Hex orders the results by the topic0_hex field.
+func ByTopic0Hex(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTopic0Hex, opts...).ToFunc()
+}
+
 // ByTopic1 orders the results by the topic1 field.
 func ByTopic1(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTopic1, opts...).ToFunc()
+}
+
+// ByTopic1Hex orders the results by the topic1_hex field.
+func ByTopic1Hex(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTopic1Hex, opts...).ToFunc()
 }
 
 // ByTopic2 orders the results by the topic2 field.
@@ -122,14 +194,44 @@ func ByTopic2(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTopic2, opts...).ToFunc()
 }
 
+// ByTopic2Hex orders the results by the topic2_hex field.
+func ByTopic2Hex(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTopic2Hex, opts...).ToFunc()
+}
+
 // ByTopic3 orders the results by the topic3 field.
 func ByTopic3(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTopic3, opts...).ToFunc()
 }
 
+// ByTopic3Hex orders the results by the topic3_hex field.
+func ByTopic3Hex(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTopic3Hex, opts...).ToFunc()
+}
+
 // ByData orders the results by the data field.
 func ByData(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldData, opts...).ToFunc()
+}
+
+// ByDataHex orders the results by the data_hex field.
+func ByDataHex(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDataHex, opts...).ToFunc()
+}
+
+// ByRemoved orders the results by the removed field.
+func ByRemoved(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRemoved, opts...).ToFunc()
+}
+
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByFailedReason orders the results by the failed_reason field.
+func ByFailedReason(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFailedReason, opts...).ToFunc()
 }
 
 // ByTimestamp orders the results by the timestamp field.
