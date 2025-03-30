@@ -32,4 +32,5 @@ func Execute(
 }
 
 func init() {
+	rootCmd.AddCommand(AcquireNewEVMEvents)
 }
