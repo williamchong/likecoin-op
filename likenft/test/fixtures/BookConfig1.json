@@ -1,15 +1,15 @@
 {
-    "name": "My Book 1",
-    "symbol": "KOOB1",
-    "metadata": {
-      "name": "Collection Name 1",
-      "symbol": "Collection SYMB 1",
-      "description": "Collection Description 1",
-      "image": "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-      "banner_image": "",
-      "featured_image": "",
-      "external_link": "https://www.example.com",
-      "collaborators": []
-    },
-    "max_supply": 10
-  }
+  "name": "My Book 1",
+  "symbol": "KOOB1",
+  "metadata": {
+    "name": "Collection Name 1",
+    "symbol": "Collection SYMB 1",
+    "description": "Collection Description 1",
+    "image": "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
+    "banner_image": "",
+    "featured_image": "",
+    "external_link": "https://www.example.com",
+    "collaborators": []
+  },
+  "max_supply": 10
+}

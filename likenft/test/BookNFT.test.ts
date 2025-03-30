@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { EventLog, BaseContract } from "ethers";
 import { ethers, upgrades } from "hardhat";
+import { BookConfigLoader } from "./BookConfigLoader";
 
 describe("BookNFTClass", () => {
   before(async function () {
@@ -51,26 +52,16 @@ describe("BookNFTClass", () => {
       }, 20000);
     });
 
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+
     await likeProtocolOwnerSigner.newBookNFT({
       creator: this.classOwner,
       updaters: [this.classOwner, this.likerLand],
       minters: [this.classOwner, this.likerLand],
-      config: {
-        name: "My Book",
-        symbol: "KOOB",
-        metadata: JSON.stringify({
-          name: "Collection Name",
-          symbol: "Collection SYMB",
-          description: "Collection Description",
-          image:
-            "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-          banner_image: "",
-          featured_image: "",
-          external_link: "https://www.example.com",
-          collaborators: [],
-        }),
-        max_supply: 10,
-      },
+      config: bookConfig,
+      max_supply: 10,
     });
 
     const newClassEvent = await NewClassEvent;
@@ -160,7 +151,7 @@ describe("BookNFTClass", () => {
             external_link: "https://www.example.com",
             collaborators: [],
           }),
-          max_supply: 10,
+          max_supply: 20,
         })
         .then((tx) => tx.wait());
     };
@@ -197,36 +188,32 @@ describe("BookNFTClass", () => {
     await expect(updateClass()).to.be.not.rejected;
   });
 
-
-  it("should not class owner to update class with decreasing max supply", async function () {
+  it("should reject update class with decreasing max supply", async function () {
     const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
-
-    const updateClass = async () => {
-      await likeClassOwnerSigner
-        .update({
-          name: "My Book",
-          symbol: "KOOB",
-          metadata: JSON.stringify({
-            name: "Collection Name",
-            symbol: "Collection SYMB",
-            description: "Collection Description",
-            image:
-              "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-            banner_image: "",
-            featured_image: "",
-            external_link: "https://www.example.com",
-            collaborators: [],
-          }),
-          max_supply: 5,
-        })
-        .then((tx) => tx.wait());
-    };
-
-    await expect(updateClass()).to.be.rejectedWith(
-      "ErrMaxSupplyCannotDecrease()",
+    await expect(await nftClassContract.owner()).to.equal(
+      this.classOwner.address,
     );
-    await expect(await nftClassContract.symbol()).to.equal("KOOB");
+
+    await expect(likeClassOwnerSigner
+      .update({
+        name: "My Book",
+        symbol: "KOOB",
+        metadata: JSON.stringify({
+          name: "Collection Name",
+          symbol: "Collection SYMB",
+          description: "Collection Description",
+          image:
+            "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
+          banner_image: "",
+          featured_image: "",
+          external_link: "https://www.example.com",
+          collaborators: [],
+        }),
+        max_supply: 5,
+      })
+    ).to.be.rejectedWith("ErrSupplyDecrease");
+
+    expect(await nftClassContract.symbol()).to.equal("KOOB");
   });
 
   it("should not allow random address update class", async function () {
@@ -252,41 +239,45 @@ describe("BookNFTClass", () => {
     await expect(await nftClassContract.totalSupply()).to.equal(0n);
     const mintNFT = async () => {
       await likeClassOwnerSigner
-        .batchMint([
-          this.classOwner.address,
-          this.classOwner.address,
-        ], [
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "202412191729 #0001 Description",
-            name: "202412191729 #0001",
-            attributes: [{
-              trait_type: "ISCN ID",
-              value:
-                "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-            }],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "202412191729 #0001 Description",
-            name: "202412191729 #0001",
-            attributes: [{
-              trait_type: "ISCN ID",
-              value:
-                "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-            }],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-        ])
+        .batchMint(
+          [this.classOwner.address, this.classOwner.address],
+          [
+            JSON.stringify({
+              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+              image_data: "",
+              external_url: "https://www.google.com",
+              description: "202412191729 #0001 Description",
+              name: "202412191729 #0001",
+              attributes: [
+                {
+                  trait_type: "ISCN ID",
+                  value:
+                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+                },
+              ],
+              background_color: "",
+              animation_url: "",
+              youtube_url: "",
+            }),
+            JSON.stringify({
+              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+              image_data: "",
+              external_url: "https://www.google.com",
+              description: "202412191729 #0001 Description",
+              name: "202412191729 #0001",
+              attributes: [
+                {
+                  trait_type: "ISCN ID",
+                  value:
+                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+                },
+              ],
+              background_color: "",
+              animation_url: "",
+              youtube_url: "",
+            }),
+          ],
+        )
         .then((tx) => tx.wait());
     };
     await expect(mintNFT()).to.be.not.rejected;
@@ -373,7 +364,6 @@ describe("BookNFTClass", () => {
       "ErrTokenIdMintFails(3)",
     );
   });
-
 });
 
 describe("BookNFT permission control", () => {
@@ -799,5 +789,168 @@ describe("BookNFT ownership transfer", () => {
     await expect(
       await nftClassContract.balanceOf(this.randomSigner.address),
     ).to.equal(0n);
+  });
+});
+
+describe("BookNFT config validation", () => {
+  before(async function () {
+    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
+    const [protocolOwner, classOwner, likerLand, randomSigner] =
+      await ethers.getSigners();
+
+    this.protocolOwner = protocolOwner;
+    this.classOwner = classOwner;
+    this.likerLand = likerLand;
+    this.randomSigner = randomSigner;
+  });
+
+  let deployment: BaseContract;
+  let contractAddress: string;
+  let protocolContract: BaseContract;
+  let nftClassId: string;
+  let nftClassContract: BaseContract;
+  beforeEach(async function () {
+    const likeProtocol = await upgrades.deployProxy(
+      this.LikeProtocol,
+      [this.protocolOwner.address],
+      {
+        initializer: "initialize",
+      },
+    );
+    deployment = await likeProtocol.waitForDeployment();
+    contractAddress = await deployment.getAddress();
+    protocolContract = await ethers.getContractAt(
+      "LikeProtocol",
+      contractAddress,
+    );
+
+    const likeProtocolOwnerSigner = protocolContract.connect(
+      this.protocolOwner,
+    );
+
+    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
+      likeProtocolOwnerSigner.on(
+        "NewBookNFT",
+        (id: string, params: any, event: any) => {
+          event.removeListener();
+          resolve({ id });
+        },
+      );
+      setTimeout(() => {
+        reject(new Error("timeout"));
+      }, 20000);
+    });
+
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+
+    await likeProtocolOwnerSigner.newBookNFT({
+      creator: this.classOwner,
+      updaters: [this.classOwner, this.likerLand],
+      minters: [this.classOwner, this.likerLand],
+      config: bookConfig,
+      max_supply: 10,
+    });
+
+    const newClassEvent = await NewClassEvent;
+    nftClassId = newClassEvent.id;
+    nftClassContract = await ethers.getContractAt("BookNFT", nftClassId);
+    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
+  });
+
+  it("should retuen correct config", async function () {
+    const config = await nftClassContract.getBookConfig();
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+    expect(config.max_supply).to.equal(BigInt(bookConfig.max_supply));
+    expect(config.metadata).to.equal(bookConfig.metadata);
+    expect(config.name).to.equal(bookConfig.name);
+    expect(config.symbol).to.equal(bookConfig.symbol);
+  });
+
+  it("should reject empty name in constructor", async function () {
+    const likeProtocolOwnerSigner = protocolContract.connect(
+      this.protocolOwner,
+    );
+
+    await expect(
+      likeProtocolOwnerSigner.newBookNFT({
+        creator: this.classOwner,
+        updaters: [this.classOwner],
+        minters: [this.classOwner],
+        config: {
+          name: "",
+          symbol: "TEST",
+          metadata: JSON.stringify({
+            name: "Test Collection",
+            description: "Test Description",
+          }),
+          max_supply: 10,
+        },
+      }),
+    ).to.be.rejectedWith("ErrEmptyName()");
+  });
+
+  it("should reject decreasing max supply in update", async function () {
+    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
+
+    await expect(
+      likeClassOwnerSigner.update({
+        name: "Valid Name",
+        symbol: "TEST",
+        metadata: JSON.stringify({
+          name: "Test Collection",
+          description: "Test Description",
+        }),
+        max_supply: 5,
+      }),
+    ).to.be.rejectedWith("ErrSupplyDecrease");
+  });
+
+  it("should reject empty symbol in update", async function () {
+    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
+
+    await expect(
+      likeClassOwnerSigner.update({
+        name: "Valid Name",
+        symbol: "",
+        metadata: JSON.stringify({
+          name: "Test Collection",
+          description: "Test Description",
+        }),
+        max_supply: 10,
+      }),
+    ).to.be.rejectedWith("ErrEmptySymbol()");
+  });
+
+  it("should not allow zero max supply in update", async function () {
+    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
+
+    await expect(
+      likeClassOwnerSigner.update({
+        name: "Valid Name",
+        symbol: "TEST",
+        metadata: JSON.stringify({
+          name: "Test Collection",
+          description: "Test Description",
+        }),
+        max_supply: 0,
+      }),
+    ).to.be.rejectedWith("ErrMaxSupplyZero()");
+  });
+
+  it("should not verify metadata JSON", async function () {
+    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
+
+    await expect(
+      likeClassOwnerSigner.update({
+        name: "Valid Name",
+        symbol: "TEST",
+        metadata: "invalid json",
+        max_supply: 10,
+      }),
+    ).to.be.not.rejected;
   });
 });

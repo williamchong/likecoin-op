@@ -392,7 +392,9 @@ describe("LikeProtocol events", () => {
       }, 60000);
     });
 
-    const bookConfig = BookConfigLoader.load("./test/fixtures/BookConfig0.json");
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
     expect(bookConfig.name).to.equal("My Book");
     expect(bookConfig.symbol).to.equal("KOOB");
 
@@ -420,12 +422,13 @@ describe("LikeProtocol events", () => {
       const ids: string[] = [];
       const listener = (id: string, params: any, event: any) => {
         ids.push(id);
-        if (ids.length === 2) {  // We expect 2 events
+        if (ids.length === 2) {
+          // We expect 2 events
           likeProtocolOwnerSigner.off("NewBookNFT", listener);
           resolve(ids);
         }
       };
-      
+
       likeProtocolOwnerSigner.on("NewBookNFT", listener);
 
       setTimeout(() => {
@@ -433,8 +436,12 @@ describe("LikeProtocol events", () => {
       }, 60000); // Longer timeout just in case, but won't wait unless there's an issue
     });
 
-    const bookConfig = BookConfigLoader.load("./test/fixtures/BookConfig0.json");
-    const bookConfig1 = BookConfigLoader.load("./test/fixtures/BookConfig1.json");
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+    const bookConfig1 = BookConfigLoader.load(
+      "./test/fixtures/BookConfig1.json",
+    );
     expect(bookConfig.name).to.equal("My Book");
     expect(bookConfig.symbol).to.equal("KOOB");
     expect(bookConfig1.name).to.equal("My Book 1");
@@ -442,17 +449,20 @@ describe("LikeProtocol events", () => {
 
     const newClasses = async () => {
       await likeProtocolOwnerSigner
-        .newBookNFTs([{
-          creator: this.ownerSigner,
-          updaters: [this.ownerSigner],
-          minters: [this.ownerSigner],
-          config: bookConfig,
-        }, {
-          creator: this.ownerSigner,
-          updaters: [this.ownerSigner],
-          minters: [this.ownerSigner],
-          config: bookConfig1,
-        }])
+        .newBookNFTs([
+          {
+            creator: this.ownerSigner,
+            updaters: [this.ownerSigner],
+            minters: [this.ownerSigner],
+            config: bookConfig,
+          },
+          {
+            creator: this.ownerSigner,
+            updaters: [this.ownerSigner],
+            minters: [this.ownerSigner],
+            config: bookConfig1,
+          },
+        ])
         .then((tx) => tx.wait());
     };
 

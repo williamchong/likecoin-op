@@ -9,8 +9,10 @@ import {BookConfig} from "../types/BookConfig.sol";
 import {MsgNewBookNFT} from "../types/msgs/MsgNewBookNFT.sol";
 
 error ErrUnauthorized();
+error ErrEmptyName();
+error ErrEmptySymbol();
+error ErrInvalidMetadata();
 error ErrMaxSupplyZero();
-error ErrMaxSupplyCannotDecrease();
 error ErrNftNoSupply();
 error ErrTokenIdMintFails(uint256 nextTokenId);
 
@@ -73,14 +75,13 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         ERC721(msgNewBookNFT.config.name, msgNewBookNFT.config.symbol)
         Ownable(msgNewBookNFT.creator)
     {
+        _validateBookConfig(msgNewBookNFT.config);
+
         BookNFTStorage storage $ = _getClassStorage();
         $.name = msgNewBookNFT.config.name;
         $.symbol = msgNewBookNFT.config.symbol;
-        $.metadata = msgNewBookNFT.config.metadata;
         $.max_supply = msgNewBookNFT.config.max_supply;
-        if ($.max_supply == 0) {
-            revert ErrMaxSupplyZero();
-        }
+        $.metadata = msgNewBookNFT.config.metadata;
 
         $._currentIndex = 0;
 
@@ -104,18 +105,27 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         return super.supportsInterface(interfaceId);
     }
 
-    function update(BookConfig calldata config) public onlyUpdater {
-        BookNFTStorage storage $ = _getClassStorage();
-        $.name = config.name;
-        $.symbol = config.symbol;
-        $.metadata = config.metadata;
+    function _validateBookConfig(BookConfig memory config) internal pure {
+        if (bytes(config.name).length == 0) {
+            revert ErrEmptyName();
+        }
+        if (bytes(config.symbol).length == 0) {
+            revert ErrEmptySymbol();
+        }
         if (config.max_supply == 0) {
             revert ErrMaxSupplyZero();
         }
-        if (config.max_supply < $.max_supply) {
-            revert ErrMaxSupplyCannotDecrease();
-        }
+    }
+
+    function update(BookConfig calldata config) public onlyUpdater {
+        _validateBookConfig(config);
+        BookNFTStorage storage $ = _getClassStorage();
+        require(config.max_supply >= $.max_supply, "ErrSupplyDecrease");
+
+        $.name = config.name;
+        $.symbol = config.symbol;
         $.max_supply = config.max_supply;
+        $.metadata = config.metadata;
         emit ContractURIUpdated();
     }
 
@@ -196,7 +206,11 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
      * @param to - owner address to hold the new minted token
      * @param metadata - metadata to supply
      */
-    function _mintWithEvent(address from, address to, string calldata metadata) internal {
+    function _mintWithEvent(
+        address from,
+        address to,
+        string calldata metadata
+    ) internal {
         BookNFTStorage storage $ = _getClassStorage();
         $.tokenURIMap[$._currentIndex] = metadata;
         _safeMint(to, $._currentIndex);
