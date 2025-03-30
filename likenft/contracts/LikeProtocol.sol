@@ -22,9 +22,9 @@ contract LikeProtocol is
     struct LikeNFTStorage {
         mapping(address classId => BookNFT) classIdClassMapping;
     }
-    // keccak256(abi.encode(uint256(keccak256("likenft.storage")) - 1)) & ~bytes32(uint256(0xff))
+    // keccak256(abi.encode(uint256(keccak256("likeprotocol.storage")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant DATA_STORAGE =
-        0xf59cae2d8704429a88f4a038c4cff8d2643dc6b4647d519013fb42e0b4344200;
+        0xe3ffde652b1592025b57f85d2c64876717f9cdf4e44b57422a295c18d0719a00;
     function _getLikeNFTStorage()
         private
         pure

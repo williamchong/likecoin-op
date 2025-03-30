@@ -194,8 +194,8 @@ describe("BookNFTClass", () => {
       this.classOwner.address,
     );
 
-    await expect(likeClassOwnerSigner
-      .update({
+    await expect(
+      likeClassOwnerSigner.update({
         name: "My Book",
         symbol: "KOOB",
         metadata: JSON.stringify({
@@ -210,7 +210,7 @@ describe("BookNFTClass", () => {
           collaborators: [],
         }),
         max_supply: 5,
-      })
+      }),
     ).to.be.rejectedWith("ErrSupplyDecrease");
 
     expect(await nftClassContract.symbol()).to.equal("KOOB");
