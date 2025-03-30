@@ -3,7 +3,9 @@ package evm
 import (
 	"context"
 	"fmt"
-	"strings"
+
+	"likenft-indexer/internal/evm/book_nft"
+	"likenft-indexer/internal/evm/like_protocol"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -12,7 +14,9 @@ import (
 )
 
 type EvmClient struct {
-	client *ethclient.Client
+	client          *ethclient.Client
+	LikeProtocolABI *abi.ABI
+	BookNFTABI      *abi.ABI
 }
 
 func NewEvmClient(url string) (*EvmClient, error) {
@@ -20,8 +24,21 @@ func NewEvmClient(url string) (*EvmClient, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	likeprotocolABI, err := like_protocol.LikeProtocolMetaData.GetAbi()
+	if err != nil {
+		return nil, err
+	}
+
+	booknftABI, err := book_nft.BookNftMetaData.GetAbi()
+	if err != nil {
+		return nil, err
+	}
+
 	return &EvmClient{
-		client: client,
+		client:          client,
+		LikeProtocolABI: likeprotocolABI,
+		BookNFTABI:      booknftABI,
 	}, nil
 }
 
@@ -33,24 +50,11 @@ func (c *EvmClient) GetNonce(address common.Address) (uint64, error) {
 	return nonce, nil
 }
 
-// The ABI for the LikeProtocol,
-// TODO: generate from the contract
-const ownerABI = `[{
-    "inputs": [],
-    "name": "owner",
-    "outputs": [{"name": "", "type": "address"}],
-    "stateMutability": "view",
-    "type": "function"
-}]`
-
 func (c *EvmClient) GetLikeProtocolOwner() (ownerAddress common.Address, err error) {
 	// TODO: get from env
 	contractAddress := common.HexToAddress("0xfF79df388742f248c61A633938710559c61faEF1")
 
-	parsedABI, err := abi.JSON(strings.NewReader(ownerABI))
-	if err != nil {
-		return common.Address{}, fmt.Errorf("failed to parse ABI: %v", err)
-	}
+	parsedABI := c.LikeProtocolABI
 
 	data, err := parsedABI.Pack("owner")
 	if err != nil {
