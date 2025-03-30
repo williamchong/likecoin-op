@@ -21,7 +21,7 @@ func (NFTClass) Fields() []ent.Field {
 		field.String("owner_address").Nillable().Optional(),
 		// Minter addresses is commonly bookstore addresses
 		field.JSON("minter_addresses", []string{}).Optional(),
-		field.Int("total_supply").Positive(),
+		field.Int("total_supply").NonNegative(),
 		// Raw metadata from the contract
 		field.JSON("metadata", map[string]any{}).Optional(),
 		// Start Prepopulate fields
@@ -45,7 +45,7 @@ func (NFTClass) Edges() []ent.Edge {
 	}
 }
 
-func (NFTClass) Index() []ent.Index {
+func (NFTClass) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("owner_address"),
 		index.Fields("deployer_address"),
