@@ -78,7 +78,7 @@ contract LikeProtocol is
         MsgNewBookNFT[] calldata msgNewBookNFTs
     ) public whenNotPaused {
         for (uint i = 0; i < msgNewBookNFTs.length; i++) {
-            new BookNFT(msgNewBookNFTs[i]);
+            newBookNFT(msgNewBookNFTs[i]);
         }
     }
 
