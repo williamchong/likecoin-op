@@ -57,6 +57,9 @@ async function main() {
   }
   
   await hardhat.run("verify:verify", {
+    address: bookNFTAddress,
+  });
+  await hardhat.run("verify:verify", {
     address: implementationAddress,
   });
 }
