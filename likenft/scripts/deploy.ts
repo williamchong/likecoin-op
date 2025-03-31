@@ -15,7 +15,7 @@ async function main() {
     updaters: [],
     minters: [],
     config: {
-      name: "BookNFT Implementation",
+      name: "BookNFT Implementation", 
       symbol: "BOOKNFTV0",
       metadata: "{}",
       max_supply: 10n,
@@ -55,6 +55,7 @@ async function main() {
     console.log("Skipping verification on localhost");
     return;
   }
+  
   await hardhat.run("verify:verify", {
     address: implementationAddress,
   });

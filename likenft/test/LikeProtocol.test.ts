@@ -49,9 +49,6 @@ describe("LikeProtocol", () => {
     expect(await newLikeProtocol.protocolDataStorage()).to.equal(
       "0xe3ffde652b1592025b57f85d2c64876717f9cdf4e44b57422a295c18d0719a00",
     );
-    expect(await newLikeProtocol.bookNFTStorage()).to.equal(
-      "0x8303e9d27d04c843c8d4a08966b1e1be0214fc0b3375d79db0a8252068c41f00",
-    );
   });
 
   it("should have the correct bookNFTImplementation", async function () {
@@ -514,5 +511,54 @@ describe("LikeProtocol events", () => {
 
     bookNFTOwnerSigner = bookNFTOwnerSigner.attach(classIds[1]);
     expect(await bookNFTOwnerSigner.symbol()).to.equal(bookConfig1.symbol);
+  });
+});
+
+describe("LikeProtocol as BeaconProxy", () => {
+  before(async function () {
+    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
+    this.LikeProtocolMock = await ethers.getContractFactory("LikeProtocolMock");
+    this.BookNFT = await ethers.getContractFactory("BookNFT");
+    this.BookNFTMock = await ethers.getContractFactory("BookNFTMock");
+    const [ownerSigner, randomSigner] = await ethers.getSigners();
+
+    this.ownerSigner = ownerSigner;
+    this.randomSigner = randomSigner;
+  });
+
+  let deployment: BaseContract;
+  let contractAddress: string;
+  let contract: any;
+  let bookNFTContractAddress: string;
+  let bookNFTMockContractAddress: string;
+  beforeEach(async function () {
+    const {
+      likeProtocol,
+      likeProtocolDeployment,
+      likeProtocolAddress,
+      likeProtocolContract,
+      bookNFT,
+      bookNFTDeployment,
+      bookNFTAddress,
+      bookNFTContract,
+    } = await createProtocol(this.ownerSigner);
+
+    deployment = likeProtocolDeployment;
+    contractAddress = likeProtocolAddress;
+    contract = likeProtocolContract;
+    bookNFTContractAddress = bookNFTAddress;
+
+    const bookNFTMockDeployment = await this.BookNFTMock.deploy();
+    bookNFTMockContractAddress = await bookNFTMockDeployment.getAddress();
+  });
+
+  it("should only owner can upgrade the implementation", async function () {
+    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
+    const likeProtocolRandomSigner = contract.connect(this.randomSigner);
+
+    await expect(likeProtocolOwnerSigner.upgradeTo(bookNFTMockContractAddress))
+      .to.be.not.rejected;
+    await expect(likeProtocolRandomSigner.upgradeTo(bookNFTMockContractAddress))
+      .to.be.rejected;
   });
 });
