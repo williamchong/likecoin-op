@@ -1,8 +1,9 @@
 import { expect } from "chai";
 import { EventLog, BaseContract } from "ethers";
 import { ethers, upgrades } from "hardhat";
-import { BookConfigLoader } from "./BookConfigLoader";
 
+import { BookConfigLoader } from "./BookConfigLoader";
+import { createProtocol } from "./ProtocolFactory";
 describe("BookNFTClass", () => {
   before(async function () {
     this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
@@ -21,19 +22,20 @@ describe("BookNFTClass", () => {
   let nftClassId: string;
   let nftClassContract: BaseContract;
   beforeEach(async function () {
-    const likeProtocol = await upgrades.deployProxy(
-      this.LikeProtocol,
-      [this.protocolOwner.address],
-      {
-        initializer: "initialize",
-      },
-    );
-    deployment = await likeProtocol.waitForDeployment();
-    contractAddress = await deployment.getAddress();
-    protocolContract = await ethers.getContractAt(
-      "LikeProtocol",
-      contractAddress,
-    );
+    const {
+      likeProtocol,
+      likeProtocolDeployment,
+      likeProtocolAddress,
+      likeProtocolContract,
+      bookNFT,
+      bookNFTDeployment,
+      bookNFTAddress,
+      bookNFTContract,
+    } = await createProtocol(this.protocolOwner);
+
+    deployment = likeProtocolDeployment;
+    contractAddress = likeProtocolAddress;
+    protocolContract = likeProtocolContract;
 
     const likeProtocolOwnerSigner = protocolContract.connect(
       this.protocolOwner,
@@ -61,7 +63,6 @@ describe("BookNFTClass", () => {
       updaters: [this.classOwner, this.likerLand],
       minters: [this.classOwner, this.likerLand],
       config: bookConfig,
-      max_supply: 10,
     });
 
     const newClassEvent = await NewClassEvent;
@@ -384,19 +385,21 @@ describe("BookNFT permission control", () => {
   let nftClassId: string;
   let nftClassContract: BaseContract;
   beforeEach(async function () {
-    const likeProtocol = await upgrades.deployProxy(
-      this.LikeProtocol,
-      [this.protocolOwner.address],
-      {
-        initializer: "initialize",
-      },
-    );
-    deployment = await likeProtocol.waitForDeployment();
-    contractAddress = await deployment.getAddress();
-    protocolContract = await ethers.getContractAt(
-      "LikeProtocol",
-      contractAddress,
-    );
+    const {
+      likeProtocol,
+      likeProtocolDeployment,
+      likeProtocolAddress,
+      likeProtocolContract,
+      bookNFT,
+      bookNFTDeployment,
+      bookNFTAddress,
+      bookNFTContract,
+    } = await createProtocol(this.protocolOwner);
+
+    deployment = likeProtocolDeployment;
+    contractAddress = likeProtocolAddress;
+    protocolContract = likeProtocolContract;
+
     const likeProtocolOwnerSigner = protocolContract.connect(
       this.protocolOwner,
     );
@@ -548,19 +551,20 @@ describe("BookNFT ownership transfer", () => {
   let nftClassId: string;
   let nftClassContract: BaseContract;
   beforeEach(async function () {
-    const likeProtocol = await upgrades.deployProxy(
-      this.LikeProtocol,
-      [this.protocolOwner.address],
-      {
-        initializer: "initialize",
-      },
-    );
-    deployment = await likeProtocol.waitForDeployment();
-    contractAddress = await deployment.getAddress();
-    protocolContract = await ethers.getContractAt(
-      "LikeProtocol",
-      contractAddress,
-    );
+    const {
+      likeProtocol,
+      likeProtocolDeployment,
+      likeProtocolAddress,
+      likeProtocolContract,
+      bookNFT,
+      bookNFTDeployment,
+      bookNFTAddress,
+      bookNFTContract,
+    } = await createProtocol(this.protocolOwner);
+
+    deployment = likeProtocolDeployment;
+    contractAddress = likeProtocolAddress;
+    protocolContract = likeProtocolContract;
 
     const likeProtocolOwnerSigner = protocolContract.connect(
       this.protocolOwner,
@@ -810,19 +814,20 @@ describe("BookNFT config validation", () => {
   let nftClassId: string;
   let nftClassContract: BaseContract;
   beforeEach(async function () {
-    const likeProtocol = await upgrades.deployProxy(
-      this.LikeProtocol,
-      [this.protocolOwner.address],
-      {
-        initializer: "initialize",
-      },
-    );
-    deployment = await likeProtocol.waitForDeployment();
-    contractAddress = await deployment.getAddress();
-    protocolContract = await ethers.getContractAt(
-      "LikeProtocol",
-      contractAddress,
-    );
+    const {
+      likeProtocol,
+      likeProtocolDeployment,
+      likeProtocolAddress,
+      likeProtocolContract,
+      bookNFT,
+      bookNFTDeployment,
+      bookNFTAddress,
+      bookNFTContract,
+    } = await createProtocol(this.protocolOwner);
+
+    deployment = likeProtocolDeployment;
+    contractAddress = likeProtocolAddress;
+    protocolContract = likeProtocolContract;
 
     const likeProtocolOwnerSigner = protocolContract.connect(
       this.protocolOwner,
