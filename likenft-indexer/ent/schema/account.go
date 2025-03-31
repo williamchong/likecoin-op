@@ -29,7 +29,7 @@ func (Account) Edges() []ent.Edge {
 	}
 }
 
-func (Account) Index() []ent.Index {
+func (Account) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("cosmos_address"),
 	}
