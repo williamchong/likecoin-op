@@ -4,7 +4,9 @@ import (
 	"log"
 
 	"likenft-indexer/cmd/worker/context"
+	"likenft-indexer/cmd/worker/task"
 
+	"github.com/hibiken/asynq"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +17,17 @@ var schedulerCmd = &cobra.Command{
 		ctx := cmd.Context()
 		scheduler := context.AsynqSchedulerFromContext(ctx)
 
+		checkReceivedEVMEventsTask, err := task.NewCheckReceivedEVMEventsTask()
+		if err != nil {
+			log.Fatalf("could not create task: %v", err)
+		}
+
 		// ... Register tasks
+		_, err = scheduler.Register("* * * * *", checkReceivedEVMEventsTask, asynq.MaxRetry(0))
+		if err != nil {
+			log.Fatalf("could not register task: %v", err)
+		}
+
 		if err := scheduler.Run(); err != nil {
 			log.Fatalf("could not run server: %v", err)
 		}
