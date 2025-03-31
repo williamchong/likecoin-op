@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"likenft-indexer/cmd/worker/context"
+	"likenft-indexer/cmd/worker/task"
 
 	"github.com/hibiken/asynq"
 	_ "github.com/lib/pq"
@@ -21,6 +22,7 @@ var workerCmd = &cobra.Command{
 
 		// mux maps a type to a handler
 		mux := asynq.NewServeMux()
+		mux.HandleFunc(task.TypeAcquireEVMEventsTaskPayload, task.HandleAcquireEVMEventsTask)
 
 		// ...register other handlers...
 		mux.Use(context.AsynqMiddlewareWithConfigContext(envCfg))
