@@ -64,6 +64,10 @@ func HandleCheckBookNFTs(ctx context.Context, t *asynq.Task) error {
 		if err != nil {
 			mylogger.Error("handleCheckBookNFTs_enqueueAcquireContractURIUpdatedEVMEvent", "err", err)
 		}
+		err = handleCheckBookNFTs_enqueueAcquireOwnershipTransferredEVMEvent(mylogger, asynqClient, nftClass)
+		if err != nil {
+			mylogger.Error("handleCheckBookNFTs_enqueueAcquireOwnershipTransferredEVMEvent", "err", err)
+		}
 	}
 
 	return nil
@@ -90,6 +94,23 @@ func handleCheckBookNFTs_enqueueAcquireContractURIUpdatedEVMEvent(logger *slog.L
 	myLogger := logger.With("nftClass dbID", nftClass.ID)
 	myLogger.Info("Enqueueing AcquireContractURIUpdatedEVMEvent task...")
 	t, err := NewAcquireEVMEventsTask(nftClass.Address, evmeventprocessedblockheight.EventContractURIUpdated)
+	if err != nil {
+		myLogger.Error("Cannot create task", "err", err)
+		return err
+	}
+	taskInfo, err := asynqClient.Enqueue(t, asynq.MaxRetry(0))
+	if err != nil {
+		myLogger.Error("Cannot enqueue task", "err", err)
+		return err
+	}
+	myLogger.Info("task enqueued", "taskId", taskInfo.ID)
+	return nil
+}
+
+func handleCheckBookNFTs_enqueueAcquireOwnershipTransferredEVMEvent(logger *slog.Logger, asynqClient *asynq.Client, nftClass *ent.NFTClass) error {
+	myLogger := logger.With("nftClass dbID", nftClass.ID)
+	myLogger.Info("Enqueueing AcquireOwnershipTransferredEVMEvent task...")
+	t, err := NewAcquireEVMEventsTask(nftClass.Address, evmeventprocessedblockheight.EventOwnershipTransferred)
 	if err != nil {
 		myLogger.Error("Cannot create task", "err", err)
 		return err
