@@ -18,6 +18,11 @@ var schedulerCmd = &cobra.Command{
 		cfg := context.ConfigFromContext(ctx)
 		scheduler := context.AsynqSchedulerFromContext(ctx)
 
+		checkBookNFTsTask, err := task.NewCheckBookNFTsTask()
+		if err != nil {
+			log.Fatalf("could not create task: %v", err)
+		}
+
 		checkLikeProtocolTask, err := task.NewCheckLikeProtocolTask(
 			cfg.EthLikeProtocolContractAddress,
 		)
@@ -31,6 +36,10 @@ var schedulerCmd = &cobra.Command{
 		}
 
 		// ... Register tasks
+		_, err = scheduler.Register("* * * * *", checkBookNFTsTask, asynq.MaxRetry(0))
+		if err != nil {
+			log.Fatalf("could not register task: %v", err)
+		}
 		_, err = scheduler.Register("* * * * *", checkLikeProtocolTask, asynq.MaxRetry(0))
 		if err != nil {
 			log.Fatalf("could not register task: %v", err)
