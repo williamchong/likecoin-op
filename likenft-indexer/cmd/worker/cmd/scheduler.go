@@ -15,7 +15,15 @@ var schedulerCmd = &cobra.Command{
 	Short: "Start scheduelr",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := cmd.Context()
+		cfg := context.ConfigFromContext(ctx)
 		scheduler := context.AsynqSchedulerFromContext(ctx)
+
+		checkLikeProtocolTask, err := task.NewCheckLikeProtocolTask(
+			cfg.EthLikeProtocolContractAddress,
+		)
+		if err != nil {
+			log.Fatalf("could not create task: %v", err)
+		}
 
 		checkReceivedEVMEventsTask, err := task.NewCheckReceivedEVMEventsTask()
 		if err != nil {
@@ -23,6 +31,10 @@ var schedulerCmd = &cobra.Command{
 		}
 
 		// ... Register tasks
+		_, err = scheduler.Register("* * * * *", checkLikeProtocolTask, asynq.MaxRetry(0))
+		if err != nil {
+			log.Fatalf("could not register task: %v", err)
+		}
 		_, err = scheduler.Register("* * * * *", checkReceivedEVMEventsTask, asynq.MaxRetry(0))
 		if err != nil {
 			log.Fatalf("could not register task: %v", err)

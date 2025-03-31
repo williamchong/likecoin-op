@@ -23,6 +23,7 @@ var workerCmd = &cobra.Command{
 		// mux maps a type to a handler
 		mux := asynq.NewServeMux()
 		mux.HandleFunc(task.TypeAcquireEVMEventsTaskPayload, task.HandleAcquireEVMEventsTask)
+		mux.HandleFunc(task.TypeCheckLikeProtocolPayload, task.HandleCheckLikeProtocol)
 		mux.HandleFunc(task.TypeCheckReceivedEVMEventsPayload, task.HandleCheckReceivedEVMEvents)
 		mux.HandleFunc(task.TypeProcessEVMEventPayload, task.HandleProcessEVMEvent)
 
