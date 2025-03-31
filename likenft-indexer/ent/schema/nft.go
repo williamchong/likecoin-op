@@ -1,6 +1,10 @@
 package schema
 
 import (
+	"math/big"
+
+	"likenft-indexer/internal/evm/model"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
@@ -8,6 +12,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
+
+//go:generate go generate ../../ent
 
 // NFT holds the schema definition for the NFT entity.
 type NFT struct {
@@ -23,17 +29,23 @@ func (NFT) Annotations() []schema.Annotation {
 // Fields of the NFT.
 func (NFT) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint64("token_id").Unique(),
-		field.String("token_url").Optional(),
-		// Storing the content of the token_url as raw json
-		field.JSON("raw", map[string]any{}).Optional(),
+		field.String("contract_address").MaxLen(42).NotEmpty(),
+		field.String("token_id").
+			GoType(&big.Int{}).
+			ValueScanner(field.TextValueScanner[*big.Int]{}),
+		field.String("token_uri").NotEmpty(),
 		// START Prepopulate field
+		field.String("image").NotEmpty(),
+		field.String("image_data").Nillable().Optional(),
+		field.String("external_url").Nillable().Optional(),
+		field.String("description").NotEmpty(),
 		field.String("name").NotEmpty(),
-		field.String("description").Optional(),
-		field.JSON("image", map[string]any{}).Optional(),
-		field.JSON("attributes", map[string]any{}).Optional(),
+		field.JSON("attributes", []model.ERC721MetadataAttribute{}).Optional(),
+		field.String("background_color").Nillable().Optional(),
+		field.String("animation_url").Nillable().Optional(),
+		field.String("youtube_url").Nillable().Optional(),
 		// END Prepopulate field
-		field.String("owner_address").NotEmpty(),
+		field.String("owner_address").MaxLen(42).NotEmpty(),
 		field.Time("minted_at"),
 		field.Time("updated_at"),
 	}
@@ -51,8 +63,9 @@ func (NFT) Edges() []ent.Edge {
 	}
 }
 
-func (NFT) Index() []ent.Index {
+func (NFT) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("contract_address", "token_id").Unique(),
 		index.Fields("owner_address"),
 	}
 }
