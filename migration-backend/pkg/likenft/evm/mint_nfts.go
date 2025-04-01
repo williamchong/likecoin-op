@@ -3,26 +3,31 @@ package evm
 import (
 	"context"
 	"log/slog"
+	"math/big"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/likecoin/like-migration-backend/pkg/ethereum"
-	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/like_protocol"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/book_nft"
 	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
 
-func (l *LikeProtocol) MintNFTs(
+func (l *BookNFT) MintNFTs(
 	ctx context.Context,
 	logger *slog.Logger,
 
-	msgMintNFTsFromTokenId *like_protocol.MsgMintNFTsFromTokenId,
+	classId common.Address,
+	fromTokenId *big.Int,
+	to common.Address,
+	metadataList []string,
 ) (*types.Transaction, *types.Receipt, error) {
 	logger.Info("MintNFTs")
 
 	mylogger := logger.WithGroup("MintNFTs")
 
 	r, err := signer.MakeCreateEvmTransactionRequestRequestBody(
-		like_protocol.LikeProtocolMetaData, "safeMintNFTsWithTokenId", *msgMintNFTsFromTokenId,
-	)(l.ContractAddress.Hex())
+		book_nft.BookNftMetaData, "safeMintWithTokenId", fromTokenId, to, metadataList,
+	)(classId.Hex())
 	if err != nil {
 		return nil, nil, err
 	}
