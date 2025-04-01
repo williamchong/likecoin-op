@@ -3,13 +3,13 @@ package likenft
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
-	"github.com/google/uuid"
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
+	likecoin_api_model "github.com/likecoin/like-migration-backend/pkg/likecoin/api/model"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
@@ -54,42 +54,40 @@ func (p *CreateSigningMessageHandler) ServeHTTP(w http.ResponseWriter, r *http.R
 	})
 }
 
-func getSignMessage(
-	cosmosAddress string,
-	likerID string,
-	ethAddress string,
-	nonce string,
-	issueTime time.Time,
-) string {
-	return fmt.Sprintf(`Liker ID: %s
-Cosmos address: %s
-Eth address: %s
-Nonce: %s
-UTC Timestamp: %d`, likerID, cosmosAddress, ethAddress, nonce, issueTime.UnixMicro())
-}
-
 func (p *CreateSigningMessageHandler) handle(
 	db *sql.DB,
 	cosmosAddress string,
 	likerID string,
 	ethAddress string,
 ) (string, error) {
-	nonce := uuid.New().String()
 	issueTime := time.Now()
-	m := getSignMessage(cosmosAddress, likerID, ethAddress, nonce, issueTime)
+
+	memo := likecoin_api_model.MigrateUserEVMWalletMemo{
+		Action:       likecoin_api_model.MigrateUserEVMWalletMemoActionMigrate,
+		CosmosWallet: cosmosAddress,
+		LikerWallet:  cosmosAddress,
+		Ts:           uint64(issueTime.UnixMilli()),
+		EvmWallet:    ethAddress,
+	}
+
+	jsonMemo, err := json.Marshal(memo)
+	if err != nil {
+		return "", err
+	}
+
 	n := model.NFTSigningMessage{
 		CosmosAddress: cosmosAddress,
 		LikerID:       likerID,
 		EthAddress:    ethAddress,
-		Nonce:         nonce,
-		Message:       m,
+		Nonce:         strconv.FormatInt(issueTime.UnixMilli(), 10),
+		Message:       string(jsonMemo),
 		IssueTime:     issueTime,
 	}
-	err := appdb.InsertNFTSigningMessage(db, &n)
+	err = appdb.InsertNFTSigningMessage(db, &n)
 
 	if err != nil {
 		return "", err
 	}
 
-	return m, nil
+	return string(jsonMemo), nil
 }
