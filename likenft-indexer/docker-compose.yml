@@ -1,0 +1,30 @@
+services:
+  psql_bp:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+    healthcheck:
+      test: pg_isready -d ${DB_DATABASE} -U ${DB_USERNAME} -p 5432 -h localhost
+      interval: 1s
+      timeout: 1s
+      retries: 30
+    volumes:
+      - psql_volume_bp:/var/lib/postgresql/data
+
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - '6381:6379'
+    volumes:
+      - redis_data:/data
+
+volumes:
+  psql_volume_bp:
+  redis_data:
+    driver: local

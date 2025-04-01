@@ -1,0 +1,65 @@
+package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
+)
+
+// EVMEvent holds the schema definition for the EVMEvent entity.
+type EVMEvent struct {
+	ent.Schema
+}
+
+// Fields of the EVMEvent.
+func (EVMEvent) Fields() []ent.Field {
+	return []ent.Field{
+		// Multiple events may share the same transaction hash
+		// E.g. mint multiple
+		field.String("transaction_hash").NotEmpty(),
+		field.Uint("transaction_index"),
+		field.String("block_hash").NotEmpty(),
+		field.Uint64("block_number"),
+		field.Uint("log_index"),
+		field.String("address").NotEmpty(),
+		field.String("topic0").NotEmpty(),
+		field.String("topic0_hex").NotEmpty(),
+		field.String("topic1").Nillable().Optional(),
+		field.String("topic1_hex").Nillable().Optional(),
+		field.String("topic2").Nillable().Optional(),
+		field.String("topic2_hex").Nillable().Optional(),
+		field.String("topic3").Nillable().Optional(),
+		field.String("topic3_hex").Nillable().Optional(),
+		field.String("data").Nillable().Optional(),
+		field.String("data_hex").Nillable().Optional(),
+		field.Bool("removed"),
+		field.Enum("status").Values(
+			"received",
+			"enqueued",
+			"processing",
+			"processed",
+			"failed",
+		),
+		field.String("failed_reason").Nillable().Optional(),
+		field.Time("timestamp"),
+	}
+}
+
+// Edges of the EVMEvent.
+func (EVMEvent) Edges() []ent.Edge {
+	return nil
+}
+
+func (EVMEvent) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields(
+			"transaction_hash",
+			"transaction_index",
+			"block_number",
+			"log_index",
+		).Unique(),
+		index.Fields("block_number"),
+		index.Fields("log_index"),
+		index.Fields("address"),
+	}
+}
