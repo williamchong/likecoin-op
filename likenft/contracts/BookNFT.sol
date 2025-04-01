@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import {ERC721, ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {ERC721EnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import {BookConfig} from "../types/BookConfig.sol";
 import {MsgNewBookNFT} from "../types/msgs/MsgNewBookNFT.sol";
@@ -16,7 +18,12 @@ error ErrMaxSupplyZero();
 error ErrNftNoSupply();
 error ErrTokenIdMintFails(uint256 nextTokenId);
 
-contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
+contract BookNFT is
+    Initializable,
+    ERC721EnumerableUpgradeable,
+    OwnableUpgradeable,
+    AccessControlUpgradeable
+{
     struct BookNFTStorage {
         string name;
         string symbol;
@@ -70,12 +77,12 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         _;
     }
 
-    constructor(
-        MsgNewBookNFT memory msgNewBookNFT
-    )
-        ERC721(msgNewBookNFT.config.name, msgNewBookNFT.config.symbol)
-        Ownable(msgNewBookNFT.creator)
-    {
+    function initialize(MsgNewBookNFT memory msgNewBookNFT) public initializer {
+        __ERC721_init(msgNewBookNFT.config.name, msgNewBookNFT.config.symbol);
+        __ERC721Enumerable_init();
+        __Ownable_init(msgNewBookNFT.creator);
+        __AccessControl_init();
+
         _validateBookConfig(msgNewBookNFT.config);
 
         BookNFTStorage storage $ = _getClassStorage();
@@ -100,7 +107,7 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         public
         view
         virtual
-        override(ERC721Enumerable, AccessControl)
+        override(ERC721EnumerableUpgradeable, AccessControlUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
