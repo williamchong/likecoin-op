@@ -2,9 +2,10 @@ package api
 
 import (
 	"context"
-	"likenft-indexer/ent"
 	"net/http"
 	"strconv"
+
+	"likenft-indexer/ent"
 )
 
 type NFTHandler struct {
