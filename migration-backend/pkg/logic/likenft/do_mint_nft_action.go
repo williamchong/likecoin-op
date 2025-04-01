@@ -19,7 +19,6 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	cosmosmodel "github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
-	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/like_protocol"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
@@ -88,16 +87,15 @@ func DoMintNFTAction(
 		}
 
 		metadataString := string(metadataBytes)
-		tx, _, err = p.MintNFTs(ctx, mylogger, &like_protocol.MsgMintNFTsFromTokenId{
-			ClassId:     evmClassAddress,
-			To:          toOwner,
-			FromTokenId: totalSupply,
-			Inputs: []like_protocol.NFTData{
-				{
-					Metadata: metadataString,
-				},
-			},
-		})
+		tx, _, err = c.MintNFTs(
+			ctx,
+			mylogger,
+			evmClassAddress,
+			totalSupply,
+			toOwner,
+			[]string{
+				metadataString,
+			})
 		if err != nil {
 			return nil, doMintNFTActionFailed(db, a, err)
 		}
@@ -118,16 +116,15 @@ func DoMintNFTAction(
 			}
 
 			metadataString := string(metadataBytes)
-			tx, _, err = p.MintNFTs(ctx, mylogger, &like_protocol.MsgMintNFTsFromTokenId{
-				ClassId:     evmClassAddress,
-				To:          toOwner,
-				FromTokenId: totalSupply,
-				Inputs: []like_protocol.NFTData{
-					{
-						Metadata: metadataString,
-					},
-				},
-			})
+			tx, _, err = c.MintNFTs(
+				ctx,
+				mylogger,
+				evmClassAddress,
+				totalSupply,
+				toOwner,
+				[]string{
+					metadataString,
+				})
 			if err != nil {
 				return nil, doMintNFTActionFailed(db, a, err)
 			}
@@ -143,7 +140,7 @@ func DoMintNFTAction(
 					return nil, doMintNFTActionFailed(db, a, err)
 				}
 
-				inputs := make([]like_protocol.NFTData, 0)
+				metadataList := make([]string, 0)
 				for i := big.NewInt(0); i.Cmp(desireBatchMintAmount) == -1; i = i.Add(i, big.NewInt(1)) {
 					cosmosNFTIdx := slices.IndexFunc(cosmosNFTs.NFTs, func(n cosmosmodel.NFT) bool {
 						return MakeMatchNFTIdRegex(big.NewInt(0).Add(totalSupply, i).String()).MatchString(n.Id)
@@ -158,16 +155,16 @@ func DoMintNFTAction(
 						}
 						metadataStr = string(metadataBytes)
 					}
-					inputs = append(inputs, like_protocol.NFTData{
-						Metadata: metadataStr,
-					})
+					metadataList = append(metadataList, metadataStr)
 				}
-				_, _, err = p.MintNFTs(ctx, mylogger, &like_protocol.MsgMintNFTsFromTokenId{
-					ClassId:     evmClassAddress,
-					To:          initialBatchMintOwnerAddress,
-					FromTokenId: totalSupply,
-					Inputs:      inputs,
-				})
+				_, _, err = c.MintNFTs(
+					ctx,
+					mylogger,
+					evmClassAddress,
+					totalSupply,
+					initialBatchMintOwnerAddress,
+					metadataList,
+				)
 				if err != nil {
 					return nil, doMintNFTActionFailed(db, a, err)
 				}
