@@ -25,9 +25,10 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         uint256 _currentIndex;
         mapping(uint256 => string) tokenURIMap;
     }
-    // keccak256(abi.encode(uint256(keccak256("likenft.storage.class")) - 1)) & ~bytes32(uint256(0xff))
+
+    // keccak256(abi.encode(uint256(keccak256("likeprotocol.booknft.storage")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant CLASS_DATA_STORAGE =
-        0x99391ccf5d97dbb7711a73831d943712d1774ca037a259af20891dc6f0d9f200;
+        0x8303e9d27d04c843c8d4a08966b1e1be0214fc0b3375d79db0a8252068c41f00;
     function _getClassStorage()
         private
         pure

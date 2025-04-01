@@ -30,6 +30,22 @@ describe("LikeProtocol", () => {
     contract = await ethers.getContractAt("LikeProtocol", contractAddress);
   });
 
+  it("should have the correct STORAGE_SLOT", async function () {
+    const likeProtocolMockOwnerSigner = this.LikeProtocolMock.connect(
+      this.ownerSigner,
+    );
+    const newLikeProtocol = await upgrades.upgradeProxy(
+      contractAddress,
+      likeProtocolMockOwnerSigner,
+    );
+    expect(await newLikeProtocol.protocolDataStorage()).to.equal(
+      "0xe3ffde652b1592025b57f85d2c64876717f9cdf4e44b57422a295c18d0719a00",
+    );
+    expect(await newLikeProtocol.bookNFTStorage()).to.equal(
+      "0x8303e9d27d04c843c8d4a08966b1e1be0214fc0b3375d79db0a8252068c41f00",
+    );
+  });
+
   it("should be upgradable", async function () {
     const likeProtocolMockOwnerSigner = this.LikeProtocolMock.connect(
       this.ownerSigner,
