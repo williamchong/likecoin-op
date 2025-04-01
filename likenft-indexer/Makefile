@@ -48,6 +48,12 @@ migrate-down:
 		--dev-url "docker://postgres/15/test?search_path=${DB_SCHEMA}" \
 		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@localhost:5432/${DB_DATABASE}?sslmode=disable&search_path=${DB_SCHEMA}"
 
+.PHONY: fmt
+fmt:
+	find ./cmd -name '*.go' -not -name 'wire_gen.go' -not -name '*_mock_test.go' | sort | xargs goimports -w -format-only -local likenft-indexer
+	find ./ent/schema -name '*.go' | sort | xargs goimports -w -format-only -local likenft-indexer
+	find ./internal -name '*.go' | sort | xargs goimports -w -format-only -local likenft-indexer
+
 build: tailwind-install templ-install generate
 	@echo "Building..."
 	templ generate
