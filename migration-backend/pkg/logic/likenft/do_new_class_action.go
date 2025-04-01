@@ -57,11 +57,14 @@ func DoNewClassAction(
 	initialMinterAddress := common.HexToAddress(a.InitialMinter)
 	initialUpdaterAddress := common.HexToAddress(a.InitialUpdater)
 
-	maxSupply := uint64(0)
+	maxSupply := ^uint64(0)
 	if cosmosClass.Data.Config.MaxSupply != "" {
 		maxSupply, err = strconv.ParseUint(cosmosClass.Data.Config.MaxSupply, 10, 64)
 		if err != nil {
 			return nil, doNewClassActionFailed(db, a, err)
+		}
+		if maxSupply == 0 {
+			maxSupply = ^uint64(0)
 		}
 	}
 
