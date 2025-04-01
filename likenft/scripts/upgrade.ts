@@ -36,7 +36,7 @@ async function main() {
         newImplementationAddress,
       );
     } else {
-      if (network.name !== "localhost") {
+      if (hardhat.network.name !== "localhost") {
         throw e;
       }
     }
