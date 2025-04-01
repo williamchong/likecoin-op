@@ -12,6 +12,7 @@ import (
 	"github.com/hibiken/asynq"
 
 	appcontext "github.com/likecoin/like-migration-backend/cmd/worker/context"
+	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likenft"
@@ -41,6 +42,8 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 		},
 		NodeURL: envCfg.CosmosNodeUrl,
 	}
+
+	likecoinAPI := likecoin_api.NewLikecoinAPI(envCfg.LikecoinAPIUrlBase)
 
 	ethClient, err := ethclient.Dial(envCfg.EthNetworkPublicRPCURL)
 	if err != nil {
@@ -73,6 +76,7 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 		logger,
 		db,
 		likenftClient,
+		likecoinAPI,
 		&evmLikeProtocolClient,
 		&evmLikeNFTClient,
 		envCfg.InitialNewClassOwner,

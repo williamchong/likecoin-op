@@ -15,6 +15,7 @@ type EnvConfig struct {
 	EthNetworkPublicRPCURL          string `envconfig:"ETH_NETWORK_PUBLIC_RPC_URL"`
 	EthTokenAddress                 string `envconfig:"ETH_TOKEN_ADDRESS"`
 	EthLikeNFTContractAddress       string `envconfig:"ETH_LIKENFT_CONTRACT_ADDRESS"`
+	LikecoinAPIUrlBase              string `envconfig:"LIKECOIN_API_URL_BASE"`
 
 	InitialNewClassOwner      string `envconfig:"INITIAL_NEW_CLASS_OWNER"`
 	InitialNewClassMinter     string `envconfig:"INITIAL_NEW_CLASS_MINTER"`

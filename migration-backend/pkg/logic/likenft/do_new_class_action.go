@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
+	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/like_protocol"
@@ -24,6 +25,7 @@ func DoNewClassAction(
 
 	db *sql.DB,
 	c *cosmos.LikeNFTCosmosClient,
+	likecoinAPI *likecoin_api.LikecoinAPI,
 	n *evm.LikeProtocol,
 	a *model.LikeNFTMigrationActionNewClass,
 ) (*model.LikeNFTMigrationActionNewClass, error) {
@@ -98,6 +100,16 @@ func DoNewClassAction(
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)
 	}
+
+	go SubmitEvmBookMigrated(
+		context.Background(),
+		mylogger,
+		db,
+		likecoinAPI,
+		a.CosmosClassId,
+		evmClassId,
+	)
+
 	return a, nil
 }
 
