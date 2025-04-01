@@ -6,11 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hibiken/asynq"
 	"github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	api_model "github.com/likecoin/like-migration-backend/pkg/handler/model"
+	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 	"github.com/likecoin/like-migration-backend/pkg/task"
 )
@@ -28,6 +30,7 @@ type CreateMigrationResponseBody struct {
 
 type CreateMigrationHandler struct {
 	Db                       *sql.DB
+	LikecoinAPI              *likecoin_api.LikecoinAPI
 	AsynqClient              *asynq.Client
 	InitialNewClassOwner     string
 	InitialBatchMintNFTOwner string
@@ -65,13 +68,13 @@ func (h *CreateMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *CreateMigrationHandler) handle(req CreateMigrationRequestBody) (*api_model.LikeNFTAssetMigration, error) {
-	signingMessage, err := db.QueryNFTSigningMessageByCosmosAddress(h.Db, req.CosmosAddress)
+	userEVMMigrateResp, err := h.LikecoinAPI.GetUserEVMMigrate(req.CosmosAddress)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if signingMessage.EthAddress != req.EthAddress {
+	if userEVMMigrateResp.EVMWallet == nil || !strings.EqualFold(*userEVMMigrateResp.EVMWallet, req.EthAddress) {
 		return nil, ErrSignedEthAddressNotMatch
 	}
 

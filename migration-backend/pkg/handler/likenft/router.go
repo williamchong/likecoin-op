@@ -50,6 +50,7 @@ func (h *LikeNFTRouter) Router() *http.ServeMux {
 	migrationRouter := &migration.MigrationRouter{
 		Db:                       h.Db,
 		AsynqClient:              h.AsynqClient,
+		LikecoinAPI:              h.LikecoinAPI,
 		InitialNewClassOwner:     h.InitialNewClassOwner,
 		InitialBatchMintNFTOwner: h.InitialBatchMintNFTOwner,
 	}
