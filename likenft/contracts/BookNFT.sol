@@ -134,7 +134,7 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         address to,
         string[] calldata metadataList
     ) external onlyMinter {
-        _ensureEnoughtSupply(metadataList.length);
+        _ensureEnoughSupply(metadataList.length);
         for (uint i = 0; i < metadataList.length; i++) {
             _mintWithEvent(_msgSender(), to, metadataList[i]);
         }
@@ -152,7 +152,7 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         address[] calldata tos,
         string[] calldata metadataList
     ) external onlyMinter {
-        _ensureEnoughtSupply(metadataList.length);
+        _ensureEnoughSupply(metadataList.length);
         for (uint i = 0; i < tos.length; i++) {
             _mintWithEvent(_msgSender(), tos[i], metadataList[i]);
         }
@@ -178,7 +178,7 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         if (totalSupply() != fromTokenId) {
             revert ErrTokenIdMintFails(totalSupply());
         }
-        _ensureEnoughtSupply(metadataList.length);
+        _ensureEnoughSupply(metadataList.length);
         for (uint i = 0; i < metadataList.length; i++) {
             _mintWithEvent(_msgSender(), to, metadataList[i]);
         }
@@ -191,7 +191,7 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
      *
      * @param quantity - the quantity of the tokens to mint
      */
-    function _ensureEnoughtSupply(uint quantity) internal view {
+    function _ensureEnoughSupply(uint quantity) internal view {
         BookNFTStorage storage $ = _getClassStorage();
         if (totalSupply() + quantity > $.max_supply) {
             revert ErrNftNoSupply();
