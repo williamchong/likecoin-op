@@ -148,7 +148,7 @@ describe("BookNFTClass", () => {
       await likeClassOwnerSigner
         .update({
           name: "My Book",
-          symbol: "KOOB",
+          symbol: "NEWBOOK",
           metadata: JSON.stringify({
             name: "Collection Name",
             symbol: "Collection SYMB",
@@ -190,72 +190,43 @@ describe("BookNFTClass", () => {
     };
 
     await expect(updateClass()).to.be.not.rejected;
+    await expect(await nftClassContract.symbol()).to.equal("NEWBOOK");
     await expect(await nftClassContract.totalSupply()).to.equal(0n);
     await expect(mintNFT()).to.be.not.rejected;
     await expect(await nftClassContract.totalSupply()).to.equal(1n);
     await expect(updateClass()).to.be.not.rejected;
   });
 
-  it("should allow class owner to update class and mint NFT via protocol contract", async function () {
-    const likeProtocolClassOwnerSigner = protocolContract.connect(
-      this.classOwner,
-    );
+
+  it("should not class owner to update class with decreasing max supply", async function () {
+    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
     expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
 
     const updateClass = async () => {
-      await likeProtocolClassOwnerSigner
-        .updateBookNFT({
-          classId: nftClassId,
-          config: {
-            name: "My Book",
-            symbol: "KOOB",
-            metadata: JSON.stringify({
-              name: "Collection Name",
-              symbol: "Collection SYMB",
-              description: "Collection Description",
-              image:
-                "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-              banner_image: "",
-              featured_image: "",
-              external_link: "https://www.example.com",
-              collaborators: [],
-            }),
-            max_supply: 10,
-          },
+      await likeClassOwnerSigner
+        .update({
+          name: "My Book",
+          symbol: "KOOB",
+          metadata: JSON.stringify({
+            name: "Collection Name",
+            symbol: "Collection SYMB",
+            description: "Collection Description",
+            image:
+              "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
+            banner_image: "",
+            featured_image: "",
+            external_link: "https://www.example.com",
+            collaborators: [],
+          }),
+          max_supply: 5,
         })
         .then((tx) => tx.wait());
     };
 
-    const mintNFT = async () => {
-      await likeProtocolClassOwnerSigner
-        .mintNFT({
-          to: this.classOwner.address,
-          classId: nftClassId,
-          input: {
-            metadata: JSON.stringify({
-              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-              image_data: "",
-              external_url: "https://www.google.com",
-              description: "202412191729 #0001 Description",
-              name: "202412191729 #0001",
-              attributes: [
-                {
-                  trait_type: "ISCN ID",
-                  value:
-                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-                },
-              ],
-            }),
-          },
-        })
-        .then((tx) => tx.wait());
-    };
-
-    await expect(updateClass()).to.be.not.rejected;
-    await expect(await nftClassContract.totalSupply()).to.equal(0n);
-    await expect(mintNFT()).to.be.not.rejected;
-    await expect(await nftClassContract.totalSupply()).to.equal(1n);
-    await expect(updateClass()).to.be.not.rejected;
+    await expect(updateClass()).to.be.rejectedWith(
+      "ErrMaxSupplyCannotDecrease()",
+    );
+    await expect(await nftClassContract.symbol()).to.equal("KOOB");
   });
 
   it("should not allow random address update class", async function () {
@@ -276,111 +247,46 @@ describe("BookNFTClass", () => {
     await expect(await nftClassContract.symbol()).to.equal("KOOB");
   });
 
-  it("should not allow random address update class via protocol contract", async function () {
-    const likeProtocolRandomSigner = protocolContract.connect(
-      this.randomSigner,
-    );
-
-    await expect(
-      likeProtocolRandomSigner.updateBookNFT({
-        classId: nftClassId,
-        config: {
-          name: "Hi Jack",
-          symbol: "HIJACK",
-          metadata: JSON.stringify({}),
-          max_supply: 0,
-        },
-      }),
-    ).to.be.rejected;
-
-    await expect(await nftClassContract.owner()).to.equal(
-      this.classOwner.address,
-    );
-    await expect(await nftClassContract.symbol()).to.equal("KOOB");
-  });
-
-  it("should allow class owner to mint NFT via protocol contract", async function () {
-    const likeProtocolClassOwnerSigner = protocolContract.connect(
-      this.classOwner,
-    );
-    const mintNFT = async () => {
-      await likeProtocolClassOwnerSigner
-        .mintNFT({
-          to: this.classOwner,
-          classId: nftClassId,
-          input: {
-            metadata: JSON.stringify({
-              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-              image_data: "",
-              external_url: "https://www.google.com",
-              description: "202412191729 #0001 Description",
-              name: "202412191729 #0001",
-              attributes: [
-                {
-                  trait_type: "ISCN ID",
-                  value:
-                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-                },
-              ],
-              background_color: "",
-              animation_url: "",
-              youtube_url: "",
-            }),
-          },
-        })
-        .then((tx) => tx.wait());
-    };
-    await expect(mintNFT()).to.be.not.rejected;
-  });
-
   it("should allow class owner to mintNFTs in batch", async function () {
-    const likeClassOwnerSigner = protocolContract.connect(this.classOwner);
+    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    await expect(await nftClassContract.totalSupply()).to.equal(0n);
     const mintNFT = async () => {
       await likeClassOwnerSigner
-        .mintNFTs({
-          to: this.classOwner,
-          classId: nftClassId,
-          inputs: [
-            {
-              metadata: JSON.stringify({
-                image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-                image_data: "",
-                external_url: "https://www.google.com",
-                description: "202412191729 #0001 Description",
-                name: "202412191729 #0001",
-                attributes: [
-                  {
-                    trait_type: "ISCN ID",
-                    value:
-                      "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-                  },
-                ],
-                background_color: "",
-                animation_url: "",
-                youtube_url: "",
-              }),
-            },
-            {
-              metadata: JSON.stringify({
-                image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-                image_data: "",
-                external_url: "https://www.google.com",
-                description: "202412191729 #0001 Description",
-                name: "202412191729 #0001",
-                attributes: [
-                  {
-                    trait_type: "ISCN ID",
-                    value:
-                      "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-                  },
-                ],
-                background_color: "",
-                animation_url: "",
-                youtube_url: "",
-              }),
-            },
-          ],
-        })
+        .batchMint([
+          this.classOwner.address,
+          this.classOwner.address,
+        ], [
+          JSON.stringify({
+            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+            image_data: "",
+            external_url: "https://www.google.com",
+            description: "202412191729 #0001 Description",
+            name: "202412191729 #0001",
+            attributes: [{
+              trait_type: "ISCN ID",
+              value:
+                "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+            }],
+            background_color: "",
+            animation_url: "",
+            youtube_url: "",
+          }),
+          JSON.stringify({
+            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+            image_data: "",
+            external_url: "https://www.google.com",
+            description: "202412191729 #0001 Description",
+            name: "202412191729 #0001",
+            attributes: [{
+              trait_type: "ISCN ID",
+              value:
+                "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+            }],
+            background_color: "",
+            animation_url: "",
+            youtube_url: "",
+          }),
+        ])
         .then((tx) => tx.wait());
     };
     await expect(mintNFT()).to.be.not.rejected;
@@ -468,90 +374,6 @@ describe("BookNFTClass", () => {
     );
   });
 
-  it("should check token id when safe mint with token id via protocol contract", async function () {
-    const likeProtocolOwnerSigner = protocolContract.connect(this.classOwner);
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
-
-    const mintNFT = async () => {
-      await likeProtocolOwnerSigner
-        .mintNFT({
-          to: this.classOwner.address,
-          classId: nftClassId,
-          input: {
-            metadata: JSON.stringify({
-              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-              image_data: "",
-              external_url: "https://www.google.com",
-              description: "202412191729 #0001 Description",
-              name: "202412191729 #0001",
-              attributes: [
-                {
-                  trait_type: "ISCN ID",
-                  value:
-                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-                },
-              ],
-            }),
-          },
-        })
-        .then((tx) => tx.wait());
-    };
-
-    const safeMintNFTsWithTokenId = async (fromTokenId: number) => {
-      await likeProtocolOwnerSigner
-        .safeMintNFTsWithTokenId({
-          to: this.classOwner.address,
-          classId: nftClassId,
-          fromTokenId,
-          inputs: [
-            {
-              metadata: JSON.stringify({
-                image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-                image_data: "",
-                external_url: "https://www.google.com",
-                description: "202412191729 #0001 Description",
-                name: "202412191729 #0002",
-                attributes: [
-                  {
-                    trait_type: "ISCN ID",
-                    value:
-                      "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-                  },
-                ],
-              }),
-            },
-            {
-              metadata: JSON.stringify({
-                image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-                image_data: "",
-                external_url: "https://www.google.com",
-                description: "202412191729 #0001 Description",
-                name: "202412191729 #0003",
-                attributes: [
-                  {
-                    trait_type: "ISCN ID",
-                    value:
-                      "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-                  },
-                ],
-              }),
-            },
-          ],
-        })
-        .then((tx) => tx.wait());
-    };
-
-    await expect(mintNFT()).to.be.not.rejected;
-    await expect(await nftClassContract.totalSupply()).to.equal(1n);
-    await expect(safeMintNFTsWithTokenId(0)).to.be.rejectedWith(
-      "ErrTokenIdMintFails(1)",
-    );
-    await expect(safeMintNFTsWithTokenId(1)).to.be.not.rejected;
-    await expect(await nftClassContract.totalSupply()).to.equal(3n);
-    await expect(safeMintNFTsWithTokenId(1)).to.be.rejectedWith(
-      "ErrTokenIdMintFails(3)",
-    );
-  });
 });
 
 describe("BookNFT permission control", () => {

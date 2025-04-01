@@ -7,9 +7,10 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import {BookConfig} from "../types/BookConfig.sol";
 import {MsgNewBookNFT} from "../types/msgs/MsgNewBookNFT.sol";
-import {NFTData} from "../types/NFTData.sol";
 
 error ErrUnauthorized();
+error ErrMaxSupplyZero();
+error ErrMaxSupplyCannotDecrease();
 error ErrNftNoSupply();
 error ErrTokenIdMintFails(uint256 nextTokenId);
 
@@ -53,16 +54,14 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
     // End Events
 
     modifier onlyMinter() {
-        // FIXME: tx.origin is prone to phishing attacks
-        if (!hasRole(MINTER_ROLE, tx.origin)) {
+        if (!hasRole(MINTER_ROLE, _msgSender())) {
             revert ErrUnauthorized();
         }
         _;
     }
 
     modifier onlyUpdater() {
-        // FIXME: tx.origin is prone to phishing attacks
-        if (!hasRole(UPDATER_ROLE, tx.origin)) {
+        if (!hasRole(UPDATER_ROLE, _msgSender())) {
             revert ErrUnauthorized();
         }
         _;
@@ -79,6 +78,9 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         $.symbol = msgNewBookNFT.config.symbol;
         $.metadata = msgNewBookNFT.config.metadata;
         $.max_supply = msgNewBookNFT.config.max_supply;
+        if ($.max_supply == 0) {
+            revert ErrMaxSupplyZero();
+        }
 
         $._currentIndex = 0;
 
@@ -102,11 +104,17 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         return super.supportsInterface(interfaceId);
     }
 
-    function update(BookConfig memory config) public onlyUpdater {
+    function update(BookConfig calldata config) public onlyUpdater {
         BookNFTStorage storage $ = _getClassStorage();
         $.name = config.name;
         $.symbol = config.symbol;
         $.metadata = config.metadata;
+        if (config.max_supply == 0) {
+            revert ErrMaxSupplyZero();
+        }
+        if (config.max_supply < $.max_supply) {
+            revert ErrMaxSupplyCannotDecrease();
+        }
         $.max_supply = config.max_supply;
         emit ContractURIUpdated();
     }
@@ -115,7 +123,28 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         address to,
         string[] calldata metadataList
     ) external onlyMinter {
-        _mint(to, metadataList);
+        _ensureEnoughtSupply(metadataList.length);
+        for (uint i = 0; i < metadataList.length; i++) {
+            _mintWithEvent(_msgSender(), to, metadataList[i]);
+        }
+    }
+
+    /**
+     * batchMint
+     *
+     * batch mint with metadata list
+     *
+     * @param tos - owner address to hold the new minted token
+     * @param metadataList - list of metadata to supply, the length of the list should be the same as the length of the tos. Metadata will fill the corresponding position of the tos.
+     */
+    function batchMint(
+        address[] calldata tos,
+        string[] calldata metadataList
+    ) external onlyMinter {
+        _ensureEnoughtSupply(metadataList.length);
+        for (uint i = 0; i < tos.length; i++) {
+            _mintWithEvent(_msgSender(), tos[i], metadataList[i]);
+        }
     }
 
     /**
@@ -138,25 +167,41 @@ contract BookNFT is ERC721Enumerable, Ownable, AccessControl {
         if (totalSupply() != fromTokenId) {
             revert ErrTokenIdMintFails(totalSupply());
         }
-        _mint(to, metadataList);
+        _ensureEnoughtSupply(metadataList.length);
+        for (uint i = 0; i < metadataList.length; i++) {
+            _mintWithEvent(_msgSender(), to, metadataList[i]);
+        }
     }
 
-    function _mint(address to, string[] memory metadataList) internal {
+    /**
+     * _ensureEnoughtSupply
+     *
+     * ensure the supply is enough
+     *
+     * @param quantity - the quantity of the tokens to mint
+     */
+    function _ensureEnoughtSupply(uint quantity) internal view {
         BookNFTStorage storage $ = _getClassStorage();
-
-        uint64 maxSupply = $.max_supply;
-        uint quantity = metadataList.length;
-
-        if (maxSupply != 0 && totalSupply() + quantity > maxSupply) {
+        if (totalSupply() + quantity > $.max_supply) {
             revert ErrNftNoSupply();
         }
+    }
 
-        for (uint i = 0; i < quantity; i++) {
-            $.tokenURIMap[$._currentIndex] = metadataList[i];
-            _safeMint(to, $._currentIndex);
-            emit TransferWithMemo(tx.origin, to, $._currentIndex, "_mint");
-            $._currentIndex++;
-        }
+    /**
+     * _mintWithEvent
+     *
+     * mint a new token with metadata, caller should ensure the supply is enough.
+     *
+     * @param from - the address that is transferring the token
+     * @param to - owner address to hold the new minted token
+     * @param metadata - metadata to supply
+     */
+    function _mintWithEvent(address from, address to, string calldata metadata) internal {
+        BookNFTStorage storage $ = _getClassStorage();
+        $.tokenURIMap[$._currentIndex] = metadata;
+        _safeMint(to, $._currentIndex);
+        emit TransferWithMemo(from, to, $._currentIndex, "_mint");
+        $._currentIndex++;
     }
 
     function transferWithMemo(
