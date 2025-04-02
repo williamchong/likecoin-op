@@ -80,6 +80,10 @@ build: tailwind-install templ-install generate
 	./tailwindcss -i cmd/web/styles/input.css -o cmd/web/assets/css/output.css
 	go build -o main cmd/api/main.go
 
+.PHONY: build-worker-cli
+build-worker-cli:
+	go build -o likenft-indexer-worker-cli ./cmd/worker
+
 # Run the application
 run:
 	@go run cmd/api/main.go
