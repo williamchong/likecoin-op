@@ -63,7 +63,7 @@ migrate-up:
 	@echo "Migrating up..."
 	atlas migrate apply \
 		--dir "file://ent/migrate/migrations" \
-		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@localhost:5432/${DB_DATABASE}?sslmode=disable&search_path=${DB_SCHEMA}"
+		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}?sslmode=disable&search_path=${DB_SCHEMA}"
 
 .PHONY: migrate-down
 migrate-down:
@@ -71,7 +71,7 @@ migrate-down:
 	atlas migrate down \
 		--dir "file://ent/migrate/migrations" \
 		--dev-url "docker://postgres/15/test?search_path=${DB_SCHEMA}" \
-		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@localhost:5432/${DB_DATABASE}?sslmode=disable&search_path=${DB_SCHEMA}"
+		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}?sslmode=disable&search_path=${DB_SCHEMA}"
 
 .PHONY: fmt
 fmt:
