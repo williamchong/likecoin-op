@@ -75,6 +75,9 @@ signerBackend:
 
     resources: {}
 
+likenftIndexer:
+  name: likenft-indexer
+
 redis:
   name: redis
   container:
