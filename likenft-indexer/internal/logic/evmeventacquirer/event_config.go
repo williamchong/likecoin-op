@@ -20,11 +20,11 @@ type LogsRetriever func(
 ) ([]types.Log, error)
 
 type eventAcquirerDeps struct {
-	evmClient *evm.EvmClient
+	evmClient evm.EVMQueryClient
 }
 
 func makeEventProcessorDeps(
-	evmClient *evm.EvmClient,
+	evmClient evm.EVMQueryClient,
 ) *eventAcquirerDeps {
 	return &eventAcquirerDeps{
 		evmClient: evmClient,

@@ -16,7 +16,7 @@ func init() {
 		func(inj *eventAcquirerDeps) eventConfig {
 			return eventConfig{
 				ContractType: evmeventprocessedblockheight.ContractTypeBookNft,
-				Abi:          inj.evmClient.BookNFTABI,
+				Abi:          inj.evmClient.GetBookNFTABI(),
 				LogsRetriever: func(
 					ctx context.Context,
 					logger *slog.Logger,

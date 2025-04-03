@@ -35,7 +35,7 @@ var _ EvmEventsAcquirer = &evmEventsAcquirer{}
 func MakeEvmEventsAcquirer(
 	evmEventProcessedBlockHeightRepository database.EVMEventProcessedBlockHeightRepository,
 	evmEventRepository database.EVMEventRepository,
-	evmClient *evm.EvmClient,
+	evmClient evm.EVMQueryClient,
 ) EvmEventsAcquirer {
 	return &evmEventsAcquirer{
 		evmEventProcessedBlockHeightRepository: evmEventProcessedBlockHeightRepository,
