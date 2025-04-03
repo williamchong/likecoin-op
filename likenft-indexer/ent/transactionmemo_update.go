@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"likenft-indexer/ent/predicate"
+	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/ent/transactionmemo"
 
 	"entgo.io/ent/dialect/sql"
@@ -84,23 +85,23 @@ func (tmu *TransactionMemoUpdate) SetNillableTo(s *string) *TransactionMemoUpdat
 }
 
 // SetTokenID sets the "token_id" field.
-func (tmu *TransactionMemoUpdate) SetTokenID(u uint64) *TransactionMemoUpdate {
+func (tmu *TransactionMemoUpdate) SetTokenID(t typeutil.Uint64) *TransactionMemoUpdate {
 	tmu.mutation.ResetTokenID()
-	tmu.mutation.SetTokenID(u)
+	tmu.mutation.SetTokenID(t)
 	return tmu
 }
 
 // SetNillableTokenID sets the "token_id" field if the given value is not nil.
-func (tmu *TransactionMemoUpdate) SetNillableTokenID(u *uint64) *TransactionMemoUpdate {
-	if u != nil {
-		tmu.SetTokenID(*u)
+func (tmu *TransactionMemoUpdate) SetNillableTokenID(t *typeutil.Uint64) *TransactionMemoUpdate {
+	if t != nil {
+		tmu.SetTokenID(*t)
 	}
 	return tmu
 }
 
-// AddTokenID adds u to the "token_id" field.
-func (tmu *TransactionMemoUpdate) AddTokenID(u int64) *TransactionMemoUpdate {
-	tmu.mutation.AddTokenID(u)
+// AddTokenID adds t to the "token_id" field.
+func (tmu *TransactionMemoUpdate) AddTokenID(t typeutil.Uint64) *TransactionMemoUpdate {
+	tmu.mutation.AddTokenID(t)
 	return tmu
 }
 
@@ -119,23 +120,23 @@ func (tmu *TransactionMemoUpdate) SetNillableMemo(s *string) *TransactionMemoUpd
 }
 
 // SetBlockNumber sets the "block_number" field.
-func (tmu *TransactionMemoUpdate) SetBlockNumber(u uint64) *TransactionMemoUpdate {
+func (tmu *TransactionMemoUpdate) SetBlockNumber(t typeutil.Uint64) *TransactionMemoUpdate {
 	tmu.mutation.ResetBlockNumber()
-	tmu.mutation.SetBlockNumber(u)
+	tmu.mutation.SetBlockNumber(t)
 	return tmu
 }
 
 // SetNillableBlockNumber sets the "block_number" field if the given value is not nil.
-func (tmu *TransactionMemoUpdate) SetNillableBlockNumber(u *uint64) *TransactionMemoUpdate {
-	if u != nil {
-		tmu.SetBlockNumber(*u)
+func (tmu *TransactionMemoUpdate) SetNillableBlockNumber(t *typeutil.Uint64) *TransactionMemoUpdate {
+	if t != nil {
+		tmu.SetBlockNumber(*t)
 	}
 	return tmu
 }
 
-// AddBlockNumber adds u to the "block_number" field.
-func (tmu *TransactionMemoUpdate) AddBlockNumber(u int64) *TransactionMemoUpdate {
-	tmu.mutation.AddBlockNumber(u)
+// AddBlockNumber adds t to the "block_number" field.
+func (tmu *TransactionMemoUpdate) AddBlockNumber(t typeutil.Uint64) *TransactionMemoUpdate {
+	tmu.mutation.AddBlockNumber(t)
 	return tmu
 }
 
@@ -221,19 +222,35 @@ func (tmu *TransactionMemoUpdate) sqlSave(ctx context.Context) (n int, err error
 		_spec.SetField(transactionmemo.FieldTo, field.TypeString, value)
 	}
 	if value, ok := tmu.mutation.TokenID(); ok {
-		_spec.SetField(transactionmemo.FieldTokenID, field.TypeUint64, value)
+		vv, err := transactionmemo.ValueScanner.TokenID.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(transactionmemo.FieldTokenID, field.TypeUint64, vv)
 	}
 	if value, ok := tmu.mutation.AddedTokenID(); ok {
-		_spec.AddField(transactionmemo.FieldTokenID, field.TypeUint64, value)
+		vv, err := transactionmemo.ValueScanner.TokenID.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.AddField(transactionmemo.FieldTokenID, field.TypeUint64, vv)
 	}
 	if value, ok := tmu.mutation.Memo(); ok {
 		_spec.SetField(transactionmemo.FieldMemo, field.TypeString, value)
 	}
 	if value, ok := tmu.mutation.BlockNumber(); ok {
-		_spec.SetField(transactionmemo.FieldBlockNumber, field.TypeUint64, value)
+		vv, err := transactionmemo.ValueScanner.BlockNumber.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(transactionmemo.FieldBlockNumber, field.TypeUint64, vv)
 	}
 	if value, ok := tmu.mutation.AddedBlockNumber(); ok {
-		_spec.AddField(transactionmemo.FieldBlockNumber, field.TypeUint64, value)
+		vv, err := transactionmemo.ValueScanner.BlockNumber.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.AddField(transactionmemo.FieldBlockNumber, field.TypeUint64, vv)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tmu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -312,23 +329,23 @@ func (tmuo *TransactionMemoUpdateOne) SetNillableTo(s *string) *TransactionMemoU
 }
 
 // SetTokenID sets the "token_id" field.
-func (tmuo *TransactionMemoUpdateOne) SetTokenID(u uint64) *TransactionMemoUpdateOne {
+func (tmuo *TransactionMemoUpdateOne) SetTokenID(t typeutil.Uint64) *TransactionMemoUpdateOne {
 	tmuo.mutation.ResetTokenID()
-	tmuo.mutation.SetTokenID(u)
+	tmuo.mutation.SetTokenID(t)
 	return tmuo
 }
 
 // SetNillableTokenID sets the "token_id" field if the given value is not nil.
-func (tmuo *TransactionMemoUpdateOne) SetNillableTokenID(u *uint64) *TransactionMemoUpdateOne {
-	if u != nil {
-		tmuo.SetTokenID(*u)
+func (tmuo *TransactionMemoUpdateOne) SetNillableTokenID(t *typeutil.Uint64) *TransactionMemoUpdateOne {
+	if t != nil {
+		tmuo.SetTokenID(*t)
 	}
 	return tmuo
 }
 
-// AddTokenID adds u to the "token_id" field.
-func (tmuo *TransactionMemoUpdateOne) AddTokenID(u int64) *TransactionMemoUpdateOne {
-	tmuo.mutation.AddTokenID(u)
+// AddTokenID adds t to the "token_id" field.
+func (tmuo *TransactionMemoUpdateOne) AddTokenID(t typeutil.Uint64) *TransactionMemoUpdateOne {
+	tmuo.mutation.AddTokenID(t)
 	return tmuo
 }
 
@@ -347,23 +364,23 @@ func (tmuo *TransactionMemoUpdateOne) SetNillableMemo(s *string) *TransactionMem
 }
 
 // SetBlockNumber sets the "block_number" field.
-func (tmuo *TransactionMemoUpdateOne) SetBlockNumber(u uint64) *TransactionMemoUpdateOne {
+func (tmuo *TransactionMemoUpdateOne) SetBlockNumber(t typeutil.Uint64) *TransactionMemoUpdateOne {
 	tmuo.mutation.ResetBlockNumber()
-	tmuo.mutation.SetBlockNumber(u)
+	tmuo.mutation.SetBlockNumber(t)
 	return tmuo
 }
 
 // SetNillableBlockNumber sets the "block_number" field if the given value is not nil.
-func (tmuo *TransactionMemoUpdateOne) SetNillableBlockNumber(u *uint64) *TransactionMemoUpdateOne {
-	if u != nil {
-		tmuo.SetBlockNumber(*u)
+func (tmuo *TransactionMemoUpdateOne) SetNillableBlockNumber(t *typeutil.Uint64) *TransactionMemoUpdateOne {
+	if t != nil {
+		tmuo.SetBlockNumber(*t)
 	}
 	return tmuo
 }
 
-// AddBlockNumber adds u to the "block_number" field.
-func (tmuo *TransactionMemoUpdateOne) AddBlockNumber(u int64) *TransactionMemoUpdateOne {
-	tmuo.mutation.AddBlockNumber(u)
+// AddBlockNumber adds t to the "block_number" field.
+func (tmuo *TransactionMemoUpdateOne) AddBlockNumber(t typeutil.Uint64) *TransactionMemoUpdateOne {
+	tmuo.mutation.AddBlockNumber(t)
 	return tmuo
 }
 
@@ -479,19 +496,35 @@ func (tmuo *TransactionMemoUpdateOne) sqlSave(ctx context.Context) (_node *Trans
 		_spec.SetField(transactionmemo.FieldTo, field.TypeString, value)
 	}
 	if value, ok := tmuo.mutation.TokenID(); ok {
-		_spec.SetField(transactionmemo.FieldTokenID, field.TypeUint64, value)
+		vv, err := transactionmemo.ValueScanner.TokenID.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(transactionmemo.FieldTokenID, field.TypeUint64, vv)
 	}
 	if value, ok := tmuo.mutation.AddedTokenID(); ok {
-		_spec.AddField(transactionmemo.FieldTokenID, field.TypeUint64, value)
+		vv, err := transactionmemo.ValueScanner.TokenID.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.AddField(transactionmemo.FieldTokenID, field.TypeUint64, vv)
 	}
 	if value, ok := tmuo.mutation.Memo(); ok {
 		_spec.SetField(transactionmemo.FieldMemo, field.TypeString, value)
 	}
 	if value, ok := tmuo.mutation.BlockNumber(); ok {
-		_spec.SetField(transactionmemo.FieldBlockNumber, field.TypeUint64, value)
+		vv, err := transactionmemo.ValueScanner.BlockNumber.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(transactionmemo.FieldBlockNumber, field.TypeUint64, vv)
 	}
 	if value, ok := tmuo.mutation.AddedBlockNumber(); ok {
-		_spec.AddField(transactionmemo.FieldBlockNumber, field.TypeUint64, value)
+		vv, err := transactionmemo.ValueScanner.BlockNumber.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.AddField(transactionmemo.FieldBlockNumber, field.TypeUint64, vv)
 	}
 	_node = &TransactionMemo{config: tmuo.config}
 	_spec.Assign = _node.assignValues

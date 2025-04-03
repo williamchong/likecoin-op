@@ -4,8 +4,10 @@ package evmeventprocessedblockheight
 
 import (
 	"fmt"
+	"likenft-indexer/ent/schema/typeutil"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/schema/field"
 )
 
 const (
@@ -47,6 +49,10 @@ func ValidColumn(column string) bool {
 var (
 	// ContractAddressValidator is a validator for the "contract_address" field. It is called by the builders before save.
 	ContractAddressValidator func(string) error
+	// ValueScanner of all EVMEventProcessedBlockHeight fields.
+	ValueScanner struct {
+		BlockHeight field.TypeValueScanner[typeutil.Uint64]
+	}
 )
 
 // ContractType defines the type for the "contract_type" enum field.

@@ -3,8 +3,12 @@
 package nftclass
 
 import (
+	"likenft-indexer/ent/schema/typeutil"
+	"math/big"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 )
 
 const (
@@ -24,6 +28,8 @@ const (
 	FieldMinterAddresses = "minter_addresses"
 	// FieldTotalSupply holds the string denoting the total_supply field in the database.
 	FieldTotalSupply = "total_supply"
+	// FieldMaxSupply holds the string denoting the max_supply field in the database.
+	FieldMaxSupply = "max_supply"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
 	// FieldBannerImage holds the string denoting the banner_image field in the database.
@@ -69,6 +75,7 @@ var Columns = []string{
 	FieldOwnerAddress,
 	FieldMinterAddresses,
 	FieldTotalSupply,
+	FieldMaxSupply,
 	FieldMetadata,
 	FieldBannerImage,
 	FieldFeaturedImage,
@@ -104,12 +111,14 @@ var (
 	NameValidator func(string) error
 	// SymbolValidator is a validator for the "symbol" field. It is called by the builders before save.
 	SymbolValidator func(string) error
-	// TotalSupplyValidator is a validator for the "total_supply" field. It is called by the builders before save.
-	TotalSupplyValidator func(int) error
 	// DeployerAddressValidator is a validator for the "deployer_address" field. It is called by the builders before save.
 	DeployerAddressValidator func(string) error
-	// DeployedBlockNumberValidator is a validator for the "deployed_block_number" field. It is called by the builders before save.
-	DeployedBlockNumberValidator func(string) error
+	// ValueScanner of all NFTClass fields.
+	ValueScanner struct {
+		TotalSupply         field.TypeValueScanner[*big.Int]
+		MaxSupply           field.TypeValueScanner[typeutil.Uint64]
+		DeployedBlockNumber field.TypeValueScanner[typeutil.Uint64]
+	}
 )
 
 // OrderOption defines the ordering options for the NFTClass queries.
@@ -143,6 +152,11 @@ func ByOwnerAddress(opts ...sql.OrderTermOption) OrderOption {
 // ByTotalSupply orders the results by the total_supply field.
 func ByTotalSupply(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTotalSupply, opts...).ToFunc()
+}
+
+// ByMaxSupply orders the results by the max_supply field.
+func ByMaxSupply(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMaxSupply, opts...).ToFunc()
 }
 
 // ByBannerImage orders the results by the banner_image field.

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/ent/predicate"
+	"likenft-indexer/ent/schema/typeutil"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -78,23 +79,23 @@ func (eeu *EVMEventUpdate) SetNillableBlockHash(s *string) *EVMEventUpdate {
 }
 
 // SetBlockNumber sets the "block_number" field.
-func (eeu *EVMEventUpdate) SetBlockNumber(u uint64) *EVMEventUpdate {
+func (eeu *EVMEventUpdate) SetBlockNumber(t typeutil.Uint64) *EVMEventUpdate {
 	eeu.mutation.ResetBlockNumber()
-	eeu.mutation.SetBlockNumber(u)
+	eeu.mutation.SetBlockNumber(t)
 	return eeu
 }
 
 // SetNillableBlockNumber sets the "block_number" field if the given value is not nil.
-func (eeu *EVMEventUpdate) SetNillableBlockNumber(u *uint64) *EVMEventUpdate {
-	if u != nil {
-		eeu.SetBlockNumber(*u)
+func (eeu *EVMEventUpdate) SetNillableBlockNumber(t *typeutil.Uint64) *EVMEventUpdate {
+	if t != nil {
+		eeu.SetBlockNumber(*t)
 	}
 	return eeu
 }
 
-// AddBlockNumber adds u to the "block_number" field.
-func (eeu *EVMEventUpdate) AddBlockNumber(u int64) *EVMEventUpdate {
-	eeu.mutation.AddBlockNumber(u)
+// AddBlockNumber adds t to the "block_number" field.
+func (eeu *EVMEventUpdate) AddBlockNumber(t typeutil.Uint64) *EVMEventUpdate {
+	eeu.mutation.AddBlockNumber(t)
 	return eeu
 }
 
@@ -475,10 +476,18 @@ func (eeu *EVMEventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(evmevent.FieldBlockHash, field.TypeString, value)
 	}
 	if value, ok := eeu.mutation.BlockNumber(); ok {
-		_spec.SetField(evmevent.FieldBlockNumber, field.TypeUint64, value)
+		vv, err := evmevent.ValueScanner.BlockNumber.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(evmevent.FieldBlockNumber, field.TypeUint64, vv)
 	}
 	if value, ok := eeu.mutation.AddedBlockNumber(); ok {
-		_spec.AddField(evmevent.FieldBlockNumber, field.TypeUint64, value)
+		vv, err := evmevent.ValueScanner.BlockNumber.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.AddField(evmevent.FieldBlockNumber, field.TypeUint64, vv)
 	}
 	if value, ok := eeu.mutation.LogIndex(); ok {
 		_spec.SetField(evmevent.FieldLogIndex, field.TypeUint, value)
@@ -628,23 +637,23 @@ func (eeuo *EVMEventUpdateOne) SetNillableBlockHash(s *string) *EVMEventUpdateOn
 }
 
 // SetBlockNumber sets the "block_number" field.
-func (eeuo *EVMEventUpdateOne) SetBlockNumber(u uint64) *EVMEventUpdateOne {
+func (eeuo *EVMEventUpdateOne) SetBlockNumber(t typeutil.Uint64) *EVMEventUpdateOne {
 	eeuo.mutation.ResetBlockNumber()
-	eeuo.mutation.SetBlockNumber(u)
+	eeuo.mutation.SetBlockNumber(t)
 	return eeuo
 }
 
 // SetNillableBlockNumber sets the "block_number" field if the given value is not nil.
-func (eeuo *EVMEventUpdateOne) SetNillableBlockNumber(u *uint64) *EVMEventUpdateOne {
-	if u != nil {
-		eeuo.SetBlockNumber(*u)
+func (eeuo *EVMEventUpdateOne) SetNillableBlockNumber(t *typeutil.Uint64) *EVMEventUpdateOne {
+	if t != nil {
+		eeuo.SetBlockNumber(*t)
 	}
 	return eeuo
 }
 
-// AddBlockNumber adds u to the "block_number" field.
-func (eeuo *EVMEventUpdateOne) AddBlockNumber(u int64) *EVMEventUpdateOne {
-	eeuo.mutation.AddBlockNumber(u)
+// AddBlockNumber adds t to the "block_number" field.
+func (eeuo *EVMEventUpdateOne) AddBlockNumber(t typeutil.Uint64) *EVMEventUpdateOne {
+	eeuo.mutation.AddBlockNumber(t)
 	return eeuo
 }
 
@@ -1055,10 +1064,18 @@ func (eeuo *EVMEventUpdateOne) sqlSave(ctx context.Context) (_node *EVMEvent, er
 		_spec.SetField(evmevent.FieldBlockHash, field.TypeString, value)
 	}
 	if value, ok := eeuo.mutation.BlockNumber(); ok {
-		_spec.SetField(evmevent.FieldBlockNumber, field.TypeUint64, value)
+		vv, err := evmevent.ValueScanner.BlockNumber.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(evmevent.FieldBlockNumber, field.TypeUint64, vv)
 	}
 	if value, ok := eeuo.mutation.AddedBlockNumber(); ok {
-		_spec.AddField(evmevent.FieldBlockNumber, field.TypeUint64, value)
+		vv, err := evmevent.ValueScanner.BlockNumber.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.AddField(evmevent.FieldBlockNumber, field.TypeUint64, vv)
 	}
 	if value, ok := eeuo.mutation.LogIndex(); ok {
 		_spec.SetField(evmevent.FieldLogIndex, field.TypeUint, value)

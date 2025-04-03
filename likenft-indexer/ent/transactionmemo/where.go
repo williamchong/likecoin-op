@@ -4,6 +4,7 @@ package transactionmemo
 
 import (
 	"likenft-indexer/ent/predicate"
+	"likenft-indexer/ent/schema/typeutil"
 
 	"entgo.io/ent/dialect/sql"
 )
@@ -74,8 +75,9 @@ func To(v string) predicate.TransactionMemo {
 }
 
 // TokenID applies equality check predicate on the "token_id" field. It's identical to TokenIDEQ.
-func TokenID(v uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldEQ(FieldTokenID, v))
+func TokenID(v typeutil.Uint64) predicate.TransactionMemo {
+	vc, err := ValueScanner.TokenID.Value(v)
+	return predicate.TransactionMemoOrErr(sql.FieldEQ(FieldTokenID, vc), err)
 }
 
 // Memo applies equality check predicate on the "memo" field. It's identical to MemoEQ.
@@ -84,8 +86,9 @@ func Memo(v string) predicate.TransactionMemo {
 }
 
 // BlockNumber applies equality check predicate on the "block_number" field. It's identical to BlockNumberEQ.
-func BlockNumber(v uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldEQ(FieldBlockNumber, v))
+func BlockNumber(v typeutil.Uint64) predicate.TransactionMemo {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.TransactionMemoOrErr(sql.FieldEQ(FieldBlockNumber, vc), err)
 }
 
 // TransactionHashEQ applies the EQ predicate on the "transaction_hash" field.
@@ -349,43 +352,67 @@ func ToContainsFold(v string) predicate.TransactionMemo {
 }
 
 // TokenIDEQ applies the EQ predicate on the "token_id" field.
-func TokenIDEQ(v uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldEQ(FieldTokenID, v))
+func TokenIDEQ(v typeutil.Uint64) predicate.TransactionMemo {
+	vc, err := ValueScanner.TokenID.Value(v)
+	return predicate.TransactionMemoOrErr(sql.FieldEQ(FieldTokenID, vc), err)
 }
 
 // TokenIDNEQ applies the NEQ predicate on the "token_id" field.
-func TokenIDNEQ(v uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldNEQ(FieldTokenID, v))
+func TokenIDNEQ(v typeutil.Uint64) predicate.TransactionMemo {
+	vc, err := ValueScanner.TokenID.Value(v)
+	return predicate.TransactionMemoOrErr(sql.FieldNEQ(FieldTokenID, vc), err)
 }
 
 // TokenIDIn applies the In predicate on the "token_id" field.
-func TokenIDIn(vs ...uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldIn(FieldTokenID, vs...))
+func TokenIDIn(vs ...typeutil.Uint64) predicate.TransactionMemo {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.TokenID.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.TransactionMemoOrErr(sql.FieldIn(FieldTokenID, v...), err)
 }
 
 // TokenIDNotIn applies the NotIn predicate on the "token_id" field.
-func TokenIDNotIn(vs ...uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldNotIn(FieldTokenID, vs...))
+func TokenIDNotIn(vs ...typeutil.Uint64) predicate.TransactionMemo {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.TokenID.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.TransactionMemoOrErr(sql.FieldNotIn(FieldTokenID, v...), err)
 }
 
 // TokenIDGT applies the GT predicate on the "token_id" field.
-func TokenIDGT(v uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldGT(FieldTokenID, v))
+func TokenIDGT(v typeutil.Uint64) predicate.TransactionMemo {
+	vc, err := ValueScanner.TokenID.Value(v)
+	return predicate.TransactionMemoOrErr(sql.FieldGT(FieldTokenID, vc), err)
 }
 
 // TokenIDGTE applies the GTE predicate on the "token_id" field.
-func TokenIDGTE(v uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldGTE(FieldTokenID, v))
+func TokenIDGTE(v typeutil.Uint64) predicate.TransactionMemo {
+	vc, err := ValueScanner.TokenID.Value(v)
+	return predicate.TransactionMemoOrErr(sql.FieldGTE(FieldTokenID, vc), err)
 }
 
 // TokenIDLT applies the LT predicate on the "token_id" field.
-func TokenIDLT(v uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldLT(FieldTokenID, v))
+func TokenIDLT(v typeutil.Uint64) predicate.TransactionMemo {
+	vc, err := ValueScanner.TokenID.Value(v)
+	return predicate.TransactionMemoOrErr(sql.FieldLT(FieldTokenID, vc), err)
 }
 
 // TokenIDLTE applies the LTE predicate on the "token_id" field.
-func TokenIDLTE(v uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldLTE(FieldTokenID, v))
+func TokenIDLTE(v typeutil.Uint64) predicate.TransactionMemo {
+	vc, err := ValueScanner.TokenID.Value(v)
+	return predicate.TransactionMemoOrErr(sql.FieldLTE(FieldTokenID, vc), err)
 }
 
 // MemoEQ applies the EQ predicate on the "memo" field.
@@ -454,43 +481,67 @@ func MemoContainsFold(v string) predicate.TransactionMemo {
 }
 
 // BlockNumberEQ applies the EQ predicate on the "block_number" field.
-func BlockNumberEQ(v uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldEQ(FieldBlockNumber, v))
+func BlockNumberEQ(v typeutil.Uint64) predicate.TransactionMemo {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.TransactionMemoOrErr(sql.FieldEQ(FieldBlockNumber, vc), err)
 }
 
 // BlockNumberNEQ applies the NEQ predicate on the "block_number" field.
-func BlockNumberNEQ(v uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldNEQ(FieldBlockNumber, v))
+func BlockNumberNEQ(v typeutil.Uint64) predicate.TransactionMemo {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.TransactionMemoOrErr(sql.FieldNEQ(FieldBlockNumber, vc), err)
 }
 
 // BlockNumberIn applies the In predicate on the "block_number" field.
-func BlockNumberIn(vs ...uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldIn(FieldBlockNumber, vs...))
+func BlockNumberIn(vs ...typeutil.Uint64) predicate.TransactionMemo {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.BlockNumber.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.TransactionMemoOrErr(sql.FieldIn(FieldBlockNumber, v...), err)
 }
 
 // BlockNumberNotIn applies the NotIn predicate on the "block_number" field.
-func BlockNumberNotIn(vs ...uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldNotIn(FieldBlockNumber, vs...))
+func BlockNumberNotIn(vs ...typeutil.Uint64) predicate.TransactionMemo {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.BlockNumber.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.TransactionMemoOrErr(sql.FieldNotIn(FieldBlockNumber, v...), err)
 }
 
 // BlockNumberGT applies the GT predicate on the "block_number" field.
-func BlockNumberGT(v uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldGT(FieldBlockNumber, v))
+func BlockNumberGT(v typeutil.Uint64) predicate.TransactionMemo {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.TransactionMemoOrErr(sql.FieldGT(FieldBlockNumber, vc), err)
 }
 
 // BlockNumberGTE applies the GTE predicate on the "block_number" field.
-func BlockNumberGTE(v uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldGTE(FieldBlockNumber, v))
+func BlockNumberGTE(v typeutil.Uint64) predicate.TransactionMemo {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.TransactionMemoOrErr(sql.FieldGTE(FieldBlockNumber, vc), err)
 }
 
 // BlockNumberLT applies the LT predicate on the "block_number" field.
-func BlockNumberLT(v uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldLT(FieldBlockNumber, v))
+func BlockNumberLT(v typeutil.Uint64) predicate.TransactionMemo {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.TransactionMemoOrErr(sql.FieldLT(FieldBlockNumber, vc), err)
 }
 
 // BlockNumberLTE applies the LTE predicate on the "block_number" field.
-func BlockNumberLTE(v uint64) predicate.TransactionMemo {
-	return predicate.TransactionMemo(sql.FieldLTE(FieldBlockNumber, v))
+func BlockNumberLTE(v typeutil.Uint64) predicate.TransactionMemo {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.TransactionMemoOrErr(sql.FieldLTE(FieldBlockNumber, vc), err)
 }
 
 // And groups predicates with the AND operator between them.

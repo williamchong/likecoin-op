@@ -35,7 +35,7 @@ var (
 		{Name: "transaction_hash", Type: field.TypeString},
 		{Name: "transaction_index", Type: field.TypeUint},
 		{Name: "block_hash", Type: field.TypeString},
-		{Name: "block_number", Type: field.TypeUint64},
+		{Name: "block_number", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
 		{Name: "log_index", Type: field.TypeUint},
 		{Name: "address", Type: field.TypeString},
 		{Name: "topic0", Type: field.TypeString},
@@ -87,7 +87,7 @@ var (
 		{Name: "contract_type", Type: field.TypeEnum, Enums: []string{"book_nft", "like_protocol"}},
 		{Name: "contract_address", Type: field.TypeString},
 		{Name: "event", Type: field.TypeEnum, Enums: []string{"ContractURIUpdated", "NewBookNFT", "OwnershipTransferred", "TransferWithMemo"}},
-		{Name: "block_height", Type: field.TypeUint64},
+		{Name: "block_height", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
 	}
 	// EvmEventProcessedBlockHeightsTable holds the schema information for the "evm_event_processed_block_heights" table.
 	EvmEventProcessedBlockHeightsTable = &schema.Table{
@@ -107,12 +107,12 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "contract_address", Type: field.TypeString, Size: 42},
 		{Name: "token_id", Type: field.TypeString},
-		{Name: "token_uri", Type: field.TypeString},
-		{Name: "image", Type: field.TypeString},
+		{Name: "token_uri", Type: field.TypeString, Nullable: true},
+		{Name: "image", Type: field.TypeString, Nullable: true},
 		{Name: "image_data", Type: field.TypeString, Nullable: true},
 		{Name: "external_url", Type: field.TypeString, Nullable: true},
-		{Name: "description", Type: field.TypeString},
-		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "name", Type: field.TypeString, Nullable: true},
 		{Name: "attributes", Type: field.TypeJSON, Nullable: true},
 		{Name: "background_color", Type: field.TypeString, Nullable: true},
 		{Name: "animation_url", Type: field.TypeString, Nullable: true},
@@ -163,12 +163,13 @@ var (
 		{Name: "symbol", Type: field.TypeString},
 		{Name: "owner_address", Type: field.TypeString, Nullable: true},
 		{Name: "minter_addresses", Type: field.TypeJSON, Nullable: true},
-		{Name: "total_supply", Type: field.TypeInt},
+		{Name: "total_supply", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "max_supply", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "banner_image", Type: field.TypeString},
 		{Name: "featured_image", Type: field.TypeString},
 		{Name: "deployer_address", Type: field.TypeString},
-		{Name: "deployed_block_number", Type: field.TypeString},
+		{Name: "deployed_block_number", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
 		{Name: "minted_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "account_nft_classes", Type: field.TypeInt, Nullable: true},
@@ -181,7 +182,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "nft_classes_accounts_nft_classes",
-				Columns:    []*schema.Column{NftClassesColumns[14]},
+				Columns:    []*schema.Column{NftClassesColumns[15]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -195,7 +196,7 @@ var (
 			{
 				Name:    "nftclass_deployer_address",
 				Unique:  false,
-				Columns: []*schema.Column{NftClassesColumns[10]},
+				Columns: []*schema.Column{NftClassesColumns[11]},
 			},
 		},
 	}
@@ -206,9 +207,9 @@ var (
 		{Name: "book_nft_id", Type: field.TypeString},
 		{Name: "from", Type: field.TypeString},
 		{Name: "to", Type: field.TypeString},
-		{Name: "token_id", Type: field.TypeUint64},
+		{Name: "token_id", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
 		{Name: "memo", Type: field.TypeString},
-		{Name: "block_number", Type: field.TypeUint64},
+		{Name: "block_number", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
 	}
 	// TransactionMemosTable holds the schema information for the "transaction_memos" table.
 	TransactionMemosTable = &schema.Table{
@@ -240,10 +241,29 @@ var (
 )
 
 func init() {
+	EvmEventsTable.Annotation = &entsql.Annotation{}
+	EvmEventsTable.Annotation.Checks = map[string]string{
+		"uint64_block_number_check": "block_number >= 0",
+	}
+	EvmEventProcessedBlockHeightsTable.Annotation = &entsql.Annotation{}
+	EvmEventProcessedBlockHeightsTable.Annotation.Checks = map[string]string{
+		"uint64_block_height_check": "block_height >= 0",
+	}
 	NftsTable.ForeignKeys[0].RefTable = AccountsTable
 	NftsTable.ForeignKeys[1].RefTable = NftClassesTable
 	NftsTable.Annotation = &entsql.Annotation{
 		Table: "nfts",
 	}
 	NftClassesTable.ForeignKeys[0].RefTable = AccountsTable
+	NftClassesTable.Annotation = &entsql.Annotation{}
+	NftClassesTable.Annotation.Checks = map[string]string{
+		"uint64_deployed_block_number_check": "deployed_block_number >= 0",
+		"uint64_max_supply_check":            "max_supply >= 0",
+		"uint64_total_supply_check":          "total_supply >= 0",
+	}
+	TransactionMemosTable.Annotation = &entsql.Annotation{}
+	TransactionMemosTable.Annotation.Checks = map[string]string{
+		"uint64_block_number_check": "block_number >= 0",
+		"uint64_token_id_check":     "token_id >= 0",
+	}
 }

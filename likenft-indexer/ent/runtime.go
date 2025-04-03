@@ -8,6 +8,7 @@ import (
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/schema"
+	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/ent/transactionmemo"
 	"math/big"
 
@@ -28,6 +29,9 @@ func init() {
 	evmeventDescBlockHash := evmeventFields[2].Descriptor()
 	// evmevent.BlockHashValidator is a validator for the "block_hash" field. It is called by the builders before save.
 	evmevent.BlockHashValidator = evmeventDescBlockHash.Validators[0].(func(string) error)
+	// evmeventDescBlockNumber is the schema descriptor for block_number field.
+	evmeventDescBlockNumber := evmeventFields[3].Descriptor()
+	evmevent.ValueScanner.BlockNumber = evmeventDescBlockNumber.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
 	// evmeventDescAddress is the schema descriptor for address field.
 	evmeventDescAddress := evmeventFields[5].Descriptor()
 	// evmevent.AddressValidator is a validator for the "address" field. It is called by the builders before save.
@@ -46,6 +50,9 @@ func init() {
 	evmeventprocessedblockheightDescContractAddress := evmeventprocessedblockheightFields[1].Descriptor()
 	// evmeventprocessedblockheight.ContractAddressValidator is a validator for the "contract_address" field. It is called by the builders before save.
 	evmeventprocessedblockheight.ContractAddressValidator = evmeventprocessedblockheightDescContractAddress.Validators[0].(func(string) error)
+	// evmeventprocessedblockheightDescBlockHeight is the schema descriptor for block_height field.
+	evmeventprocessedblockheightDescBlockHeight := evmeventprocessedblockheightFields[3].Descriptor()
+	evmeventprocessedblockheight.ValueScanner.BlockHeight = evmeventprocessedblockheightDescBlockHeight.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
 	nftFields := schema.NFT{}.Fields()
 	_ = nftFields
 	// nftDescContractAddress is the schema descriptor for contract_address field.
@@ -69,22 +76,6 @@ func init() {
 	// nftDescTokenID is the schema descriptor for token_id field.
 	nftDescTokenID := nftFields[1].Descriptor()
 	nft.ValueScanner.TokenID = nftDescTokenID.ValueScanner.(field.TypeValueScanner[*big.Int])
-	// nftDescTokenURI is the schema descriptor for token_uri field.
-	nftDescTokenURI := nftFields[2].Descriptor()
-	// nft.TokenURIValidator is a validator for the "token_uri" field. It is called by the builders before save.
-	nft.TokenURIValidator = nftDescTokenURI.Validators[0].(func(string) error)
-	// nftDescImage is the schema descriptor for image field.
-	nftDescImage := nftFields[3].Descriptor()
-	// nft.ImageValidator is a validator for the "image" field. It is called by the builders before save.
-	nft.ImageValidator = nftDescImage.Validators[0].(func(string) error)
-	// nftDescDescription is the schema descriptor for description field.
-	nftDescDescription := nftFields[6].Descriptor()
-	// nft.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
-	nft.DescriptionValidator = nftDescDescription.Validators[0].(func(string) error)
-	// nftDescName is the schema descriptor for name field.
-	nftDescName := nftFields[7].Descriptor()
-	// nft.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	nft.NameValidator = nftDescName.Validators[0].(func(string) error)
 	// nftDescOwnerAddress is the schema descriptor for owner_address field.
 	nftDescOwnerAddress := nftFields[12].Descriptor()
 	// nft.OwnerAddressValidator is a validator for the "owner_address" field. It is called by the builders before save.
@@ -115,16 +106,17 @@ func init() {
 	nftclass.SymbolValidator = nftclassDescSymbol.Validators[0].(func(string) error)
 	// nftclassDescTotalSupply is the schema descriptor for total_supply field.
 	nftclassDescTotalSupply := nftclassFields[5].Descriptor()
-	// nftclass.TotalSupplyValidator is a validator for the "total_supply" field. It is called by the builders before save.
-	nftclass.TotalSupplyValidator = nftclassDescTotalSupply.Validators[0].(func(int) error)
+	nftclass.ValueScanner.TotalSupply = nftclassDescTotalSupply.ValueScanner.(field.TypeValueScanner[*big.Int])
+	// nftclassDescMaxSupply is the schema descriptor for max_supply field.
+	nftclassDescMaxSupply := nftclassFields[6].Descriptor()
+	nftclass.ValueScanner.MaxSupply = nftclassDescMaxSupply.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
 	// nftclassDescDeployerAddress is the schema descriptor for deployer_address field.
-	nftclassDescDeployerAddress := nftclassFields[9].Descriptor()
+	nftclassDescDeployerAddress := nftclassFields[10].Descriptor()
 	// nftclass.DeployerAddressValidator is a validator for the "deployer_address" field. It is called by the builders before save.
 	nftclass.DeployerAddressValidator = nftclassDescDeployerAddress.Validators[0].(func(string) error)
 	// nftclassDescDeployedBlockNumber is the schema descriptor for deployed_block_number field.
-	nftclassDescDeployedBlockNumber := nftclassFields[10].Descriptor()
-	// nftclass.DeployedBlockNumberValidator is a validator for the "deployed_block_number" field. It is called by the builders before save.
-	nftclass.DeployedBlockNumberValidator = nftclassDescDeployedBlockNumber.Validators[0].(func(string) error)
+	nftclassDescDeployedBlockNumber := nftclassFields[11].Descriptor()
+	nftclass.ValueScanner.DeployedBlockNumber = nftclassDescDeployedBlockNumber.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
 	transactionmemoFields := schema.TransactionMemo{}.Fields()
 	_ = transactionmemoFields
 	// transactionmemoDescTransactionHash is the schema descriptor for transaction_hash field.
@@ -143,4 +135,10 @@ func init() {
 	transactionmemoDescTo := transactionmemoFields[3].Descriptor()
 	// transactionmemo.ToValidator is a validator for the "to" field. It is called by the builders before save.
 	transactionmemo.ToValidator = transactionmemoDescTo.Validators[0].(func(string) error)
+	// transactionmemoDescTokenID is the schema descriptor for token_id field.
+	transactionmemoDescTokenID := transactionmemoFields[4].Descriptor()
+	transactionmemo.ValueScanner.TokenID = transactionmemoDescTokenID.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
+	// transactionmemoDescBlockNumber is the schema descriptor for block_number field.
+	transactionmemoDescBlockNumber := transactionmemoFields[6].Descriptor()
+	transactionmemo.ValueScanner.BlockNumber = transactionmemoDescBlockNumber.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
 }

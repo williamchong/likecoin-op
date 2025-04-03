@@ -4,6 +4,7 @@ package ent
 
 import (
 	"fmt"
+	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/ent/transactionmemo"
 	"strings"
 
@@ -25,11 +26,11 @@ type TransactionMemo struct {
 	// To holds the value of the "to" field.
 	To string `json:"to,omitempty"`
 	// TokenID holds the value of the "token_id" field.
-	TokenID uint64 `json:"token_id,omitempty"`
+	TokenID typeutil.Uint64 `json:"token_id,omitempty"`
 	// Memo holds the value of the "memo" field.
 	Memo string `json:"memo,omitempty"`
 	// BlockNumber holds the value of the "block_number" field.
-	BlockNumber  uint64 `json:"block_number,omitempty"`
+	BlockNumber  typeutil.Uint64 `json:"block_number,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -38,10 +39,14 @@ func (*TransactionMemo) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case transactionmemo.FieldID, transactionmemo.FieldTokenID, transactionmemo.FieldBlockNumber:
+		case transactionmemo.FieldID:
 			values[i] = new(sql.NullInt64)
 		case transactionmemo.FieldTransactionHash, transactionmemo.FieldBookNftID, transactionmemo.FieldFrom, transactionmemo.FieldTo, transactionmemo.FieldMemo:
 			values[i] = new(sql.NullString)
+		case transactionmemo.FieldTokenID:
+			values[i] = transactionmemo.ValueScanner.TokenID.ScanValue()
+		case transactionmemo.FieldBlockNumber:
+			values[i] = transactionmemo.ValueScanner.BlockNumber.ScanValue()
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -88,10 +93,10 @@ func (tm *TransactionMemo) assignValues(columns []string, values []any) error {
 				tm.To = value.String
 			}
 		case transactionmemo.FieldTokenID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field token_id", values[i])
-			} else if value.Valid {
-				tm.TokenID = uint64(value.Int64)
+			if value, err := transactionmemo.ValueScanner.TokenID.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				tm.TokenID = value
 			}
 		case transactionmemo.FieldMemo:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -100,10 +105,10 @@ func (tm *TransactionMemo) assignValues(columns []string, values []any) error {
 				tm.Memo = value.String
 			}
 		case transactionmemo.FieldBlockNumber:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field block_number", values[i])
-			} else if value.Valid {
-				tm.BlockNumber = uint64(value.Int64)
+			if value, err := transactionmemo.ValueScanner.BlockNumber.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				tm.BlockNumber = value
 			}
 		default:
 			tm.selectValues.Set(columns[i], values[i])

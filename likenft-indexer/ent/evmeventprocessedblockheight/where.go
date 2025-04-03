@@ -4,6 +4,7 @@ package evmeventprocessedblockheight
 
 import (
 	"likenft-indexer/ent/predicate"
+	"likenft-indexer/ent/schema/typeutil"
 
 	"entgo.io/ent/dialect/sql"
 )
@@ -59,8 +60,9 @@ func ContractAddress(v string) predicate.EVMEventProcessedBlockHeight {
 }
 
 // BlockHeight applies equality check predicate on the "block_height" field. It's identical to BlockHeightEQ.
-func BlockHeight(v uint64) predicate.EVMEventProcessedBlockHeight {
-	return predicate.EVMEventProcessedBlockHeight(sql.FieldEQ(FieldBlockHeight, v))
+func BlockHeight(v typeutil.Uint64) predicate.EVMEventProcessedBlockHeight {
+	vc, err := ValueScanner.BlockHeight.Value(v)
+	return predicate.EVMEventProcessedBlockHeightOrErr(sql.FieldEQ(FieldBlockHeight, vc), err)
 }
 
 // ContractTypeEQ applies the EQ predicate on the "contract_type" field.
@@ -169,43 +171,67 @@ func EventNotIn(vs ...Event) predicate.EVMEventProcessedBlockHeight {
 }
 
 // BlockHeightEQ applies the EQ predicate on the "block_height" field.
-func BlockHeightEQ(v uint64) predicate.EVMEventProcessedBlockHeight {
-	return predicate.EVMEventProcessedBlockHeight(sql.FieldEQ(FieldBlockHeight, v))
+func BlockHeightEQ(v typeutil.Uint64) predicate.EVMEventProcessedBlockHeight {
+	vc, err := ValueScanner.BlockHeight.Value(v)
+	return predicate.EVMEventProcessedBlockHeightOrErr(sql.FieldEQ(FieldBlockHeight, vc), err)
 }
 
 // BlockHeightNEQ applies the NEQ predicate on the "block_height" field.
-func BlockHeightNEQ(v uint64) predicate.EVMEventProcessedBlockHeight {
-	return predicate.EVMEventProcessedBlockHeight(sql.FieldNEQ(FieldBlockHeight, v))
+func BlockHeightNEQ(v typeutil.Uint64) predicate.EVMEventProcessedBlockHeight {
+	vc, err := ValueScanner.BlockHeight.Value(v)
+	return predicate.EVMEventProcessedBlockHeightOrErr(sql.FieldNEQ(FieldBlockHeight, vc), err)
 }
 
 // BlockHeightIn applies the In predicate on the "block_height" field.
-func BlockHeightIn(vs ...uint64) predicate.EVMEventProcessedBlockHeight {
-	return predicate.EVMEventProcessedBlockHeight(sql.FieldIn(FieldBlockHeight, vs...))
+func BlockHeightIn(vs ...typeutil.Uint64) predicate.EVMEventProcessedBlockHeight {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.BlockHeight.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.EVMEventProcessedBlockHeightOrErr(sql.FieldIn(FieldBlockHeight, v...), err)
 }
 
 // BlockHeightNotIn applies the NotIn predicate on the "block_height" field.
-func BlockHeightNotIn(vs ...uint64) predicate.EVMEventProcessedBlockHeight {
-	return predicate.EVMEventProcessedBlockHeight(sql.FieldNotIn(FieldBlockHeight, vs...))
+func BlockHeightNotIn(vs ...typeutil.Uint64) predicate.EVMEventProcessedBlockHeight {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.BlockHeight.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.EVMEventProcessedBlockHeightOrErr(sql.FieldNotIn(FieldBlockHeight, v...), err)
 }
 
 // BlockHeightGT applies the GT predicate on the "block_height" field.
-func BlockHeightGT(v uint64) predicate.EVMEventProcessedBlockHeight {
-	return predicate.EVMEventProcessedBlockHeight(sql.FieldGT(FieldBlockHeight, v))
+func BlockHeightGT(v typeutil.Uint64) predicate.EVMEventProcessedBlockHeight {
+	vc, err := ValueScanner.BlockHeight.Value(v)
+	return predicate.EVMEventProcessedBlockHeightOrErr(sql.FieldGT(FieldBlockHeight, vc), err)
 }
 
 // BlockHeightGTE applies the GTE predicate on the "block_height" field.
-func BlockHeightGTE(v uint64) predicate.EVMEventProcessedBlockHeight {
-	return predicate.EVMEventProcessedBlockHeight(sql.FieldGTE(FieldBlockHeight, v))
+func BlockHeightGTE(v typeutil.Uint64) predicate.EVMEventProcessedBlockHeight {
+	vc, err := ValueScanner.BlockHeight.Value(v)
+	return predicate.EVMEventProcessedBlockHeightOrErr(sql.FieldGTE(FieldBlockHeight, vc), err)
 }
 
 // BlockHeightLT applies the LT predicate on the "block_height" field.
-func BlockHeightLT(v uint64) predicate.EVMEventProcessedBlockHeight {
-	return predicate.EVMEventProcessedBlockHeight(sql.FieldLT(FieldBlockHeight, v))
+func BlockHeightLT(v typeutil.Uint64) predicate.EVMEventProcessedBlockHeight {
+	vc, err := ValueScanner.BlockHeight.Value(v)
+	return predicate.EVMEventProcessedBlockHeightOrErr(sql.FieldLT(FieldBlockHeight, vc), err)
 }
 
 // BlockHeightLTE applies the LTE predicate on the "block_height" field.
-func BlockHeightLTE(v uint64) predicate.EVMEventProcessedBlockHeight {
-	return predicate.EVMEventProcessedBlockHeight(sql.FieldLTE(FieldBlockHeight, v))
+func BlockHeightLTE(v typeutil.Uint64) predicate.EVMEventProcessedBlockHeight {
+	vc, err := ValueScanner.BlockHeight.Value(v)
+	return predicate.EVMEventProcessedBlockHeightOrErr(sql.FieldLTE(FieldBlockHeight, vc), err)
 }
 
 // And groups predicates with the AND operator between them.

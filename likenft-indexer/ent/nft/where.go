@@ -362,6 +362,16 @@ func TokenURIHasSuffix(v string) predicate.NFT {
 	return predicate.NFT(sql.FieldHasSuffix(FieldTokenURI, v))
 }
 
+// TokenURIIsNil applies the IsNil predicate on the "token_uri" field.
+func TokenURIIsNil() predicate.NFT {
+	return predicate.NFT(sql.FieldIsNull(FieldTokenURI))
+}
+
+// TokenURINotNil applies the NotNil predicate on the "token_uri" field.
+func TokenURINotNil() predicate.NFT {
+	return predicate.NFT(sql.FieldNotNull(FieldTokenURI))
+}
+
 // TokenURIEqualFold applies the EqualFold predicate on the "token_uri" field.
 func TokenURIEqualFold(v string) predicate.NFT {
 	return predicate.NFT(sql.FieldEqualFold(FieldTokenURI, v))
@@ -425,6 +435,16 @@ func ImageHasPrefix(v string) predicate.NFT {
 // ImageHasSuffix applies the HasSuffix predicate on the "image" field.
 func ImageHasSuffix(v string) predicate.NFT {
 	return predicate.NFT(sql.FieldHasSuffix(FieldImage, v))
+}
+
+// ImageIsNil applies the IsNil predicate on the "image" field.
+func ImageIsNil() predicate.NFT {
+	return predicate.NFT(sql.FieldIsNull(FieldImage))
+}
+
+// ImageNotNil applies the NotNil predicate on the "image" field.
+func ImageNotNil() predicate.NFT {
+	return predicate.NFT(sql.FieldNotNull(FieldImage))
 }
 
 // ImageEqualFold applies the EqualFold predicate on the "image" field.
@@ -642,6 +662,16 @@ func DescriptionHasSuffix(v string) predicate.NFT {
 	return predicate.NFT(sql.FieldHasSuffix(FieldDescription, v))
 }
 
+// DescriptionIsNil applies the IsNil predicate on the "description" field.
+func DescriptionIsNil() predicate.NFT {
+	return predicate.NFT(sql.FieldIsNull(FieldDescription))
+}
+
+// DescriptionNotNil applies the NotNil predicate on the "description" field.
+func DescriptionNotNil() predicate.NFT {
+	return predicate.NFT(sql.FieldNotNull(FieldDescription))
+}
+
 // DescriptionEqualFold applies the EqualFold predicate on the "description" field.
 func DescriptionEqualFold(v string) predicate.NFT {
 	return predicate.NFT(sql.FieldEqualFold(FieldDescription, v))
@@ -705,6 +735,16 @@ func NameHasPrefix(v string) predicate.NFT {
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.NFT {
 	return predicate.NFT(sql.FieldHasSuffix(FieldName, v))
+}
+
+// NameIsNil applies the IsNil predicate on the "name" field.
+func NameIsNil() predicate.NFT {
+	return predicate.NFT(sql.FieldIsNull(FieldName))
+}
+
+// NameNotNil applies the NotNil predicate on the "name" field.
+func NameNotNil() predicate.NFT {
+	return predicate.NFT(sql.FieldNotNull(FieldName))
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
