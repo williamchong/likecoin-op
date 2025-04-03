@@ -7,6 +7,7 @@ import (
 
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
+	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/evm"
 	"likenft-indexer/internal/evm/book_nft"
@@ -136,9 +137,9 @@ func (e *transferWithMemoProcessor) Process(
 		BookNftID:       newBookNFTLog.Address.Hex(),
 		From:            transferWithMemoEvent.From.Hex(),
 		To:              transferWithMemoEvent.To.Hex(),
-		TokenID:         transferWithMemoEvent.TokenId.Uint64(),
+		TokenID:         typeutil.Uint64(transferWithMemoEvent.TokenId.Uint64()),
 		Memo:            transferWithMemoEvent.Memo,
-		BlockNumber:     newBookNFTLog.BlockNumber,
+		BlockNumber:     typeutil.Uint64(newBookNFTLog.BlockNumber),
 	})
 }
 

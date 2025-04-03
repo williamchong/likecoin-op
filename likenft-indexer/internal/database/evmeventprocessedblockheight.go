@@ -5,6 +5,7 @@ import (
 
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
+	"likenft-indexer/ent/schema/typeutil"
 )
 
 type EVMEventProcessedBlockHeightRepository interface {
@@ -60,7 +61,7 @@ func (s *evmEventProcessedBlockHeightRepository) GetEVMEventProcessedBlockHeight
 		return 0, err
 	}
 
-	return processedBlockHeight.BlockHeight, nil
+	return uint64(processedBlockHeight.BlockHeight), nil
 }
 
 func (s *evmEventProcessedBlockHeightRepository) UpdateEVMEventProcessedBlockHeight(
@@ -88,7 +89,7 @@ func (s *evmEventProcessedBlockHeightRepository) UpdateEVMEventProcessedBlockHei
 					SetContractType(contractType).
 					SetContractAddress(contractAddress).
 					SetEvent(event).
-					SetBlockHeight(blockHeight).
+					SetBlockHeight(typeutil.Uint64(blockHeight)).
 					Exec(ctx)
 			}
 			return err
@@ -98,7 +99,7 @@ func (s *evmEventProcessedBlockHeightRepository) UpdateEVMEventProcessedBlockHei
 			Update().
 			SetContractAddress(contractAddress).
 			SetEvent(event).
-			SetBlockHeight(blockHeight).
+			SetBlockHeight(typeutil.Uint64(blockHeight)).
 			Exec(ctx)
 	})
 }

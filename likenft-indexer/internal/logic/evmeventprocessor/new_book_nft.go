@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
-	"strconv"
 	"time"
 
 	"likenft-indexer/ent"
@@ -108,7 +107,7 @@ func (e *newBookNFTProcessor) Process(
 		BannerImage:         "",                                    // NO DATA
 		FeaturedImage:       "",                                    // NO DATA
 		DeployerAddress:     common.BytesToAddress([]byte{}).Hex(), // TODO
-		DeployedBlockNumber: strconv.FormatUint(evmEvent.BlockNumber, 10),
+		DeployedBlockNumber: evmEvent.BlockNumber,
 		MintedAt:            time.Now(), // TODO
 		UpdatedAt:           time.Now(), // TODO
 		Edges: ent.NFTClassEdges{
