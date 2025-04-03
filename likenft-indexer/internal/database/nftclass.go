@@ -53,6 +53,7 @@ func (r *nftClassRepository) InsertNFTClass(ctx context.Context, nftClass *ent.N
 			SetOwner(nftClass.Edges.Owner).
 			SetSymbol(nftClass.Symbol).
 			SetTotalSupply(nftClass.TotalSupply).
+			SetMaxSupply(nftClass.MaxSupply).
 			SetUpdatedAt(nftClass.UpdatedAt)
 
 		return builder.Exec(ctx)

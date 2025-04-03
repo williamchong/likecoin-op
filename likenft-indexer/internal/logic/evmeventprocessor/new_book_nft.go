@@ -9,6 +9,7 @@ import (
 
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
+	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/evm"
 	"likenft-indexer/internal/evm/like_protocol"
@@ -87,13 +88,21 @@ func (e *newBookNFTProcessor) Process(
 		return err
 	}
 
+	totalSupply, err := e.evmClient.GetTotalSupply(ctx, newBookNFTEvent.BookNFT)
+
+	if err != nil {
+		mylogger.Error("e.accountRepository.GetOrCreateAccount", "err", err)
+		return err
+	}
+
 	nftClass := &ent.NFTClass{
 		Address:             newBookNFTEvent.BookNFT.Hex(),
 		Name:                newBookNFTEvent.Config.Name,
 		Symbol:              newBookNFTEvent.Config.Symbol,
 		OwnerAddress:        nil,        // TODO
 		MinterAddresses:     []string{}, // TODO
-		TotalSupply:         int(newBookNFTEvent.Config.MaxSupply),
+		TotalSupply:         totalSupply,
+		MaxSupply:           typeutil.Uint64(newBookNFTEvent.Config.MaxSupply),
 		Metadata:            contractLevelMetadata,
 		BannerImage:         "",                                    // NO DATA
 		FeaturedImage:       "",                                    // NO DATA
