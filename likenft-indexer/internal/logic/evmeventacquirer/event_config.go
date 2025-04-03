@@ -30,6 +30,10 @@ type eventConfigCreator func(evmClient *evm.EvmClient) eventConfig
 var eventConfigMap = make(map[evmeventprocessedblockheight.Event]eventConfigCreator)
 
 func registerEventConfig(event evmeventprocessedblockheight.Event, creator eventConfigCreator) {
+	_, hasEvent := eventConfigMap[event]
+	if hasEvent {
+		panic(fmt.Errorf("event %s already registered", event))
+	}
 	eventConfigMap[event] = creator
 }
 

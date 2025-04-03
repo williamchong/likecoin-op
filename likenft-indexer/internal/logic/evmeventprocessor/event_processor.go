@@ -51,13 +51,12 @@ type eventProcessorCreator func(inj *eventProcessorDeps) eventProcessor
 
 var eventProcessorMap = make(map[string]eventProcessorCreator)
 
-func registerEventProcessor(event string, creator eventProcessorCreator) error {
+func registerEventProcessor(event string, creator eventProcessorCreator) {
 	_, hasEvent := eventProcessorMap[event]
 	if hasEvent {
-		return fmt.Errorf("event already registered")
+		panic(fmt.Errorf("event %s already registered", event))
 	}
 	eventProcessorMap[event] = creator
-	return nil
 }
 
 func getEventProcessor(event string) (eventProcessorCreator, error) {
