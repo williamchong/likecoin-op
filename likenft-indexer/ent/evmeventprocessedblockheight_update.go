@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
 	"likenft-indexer/ent/predicate"
+	"likenft-indexer/ent/schema/typeutil"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -70,23 +71,23 @@ func (eepbhu *EVMEventProcessedBlockHeightUpdate) SetNillableEvent(e *evmeventpr
 }
 
 // SetBlockHeight sets the "block_height" field.
-func (eepbhu *EVMEventProcessedBlockHeightUpdate) SetBlockHeight(u uint64) *EVMEventProcessedBlockHeightUpdate {
+func (eepbhu *EVMEventProcessedBlockHeightUpdate) SetBlockHeight(t typeutil.Uint64) *EVMEventProcessedBlockHeightUpdate {
 	eepbhu.mutation.ResetBlockHeight()
-	eepbhu.mutation.SetBlockHeight(u)
+	eepbhu.mutation.SetBlockHeight(t)
 	return eepbhu
 }
 
 // SetNillableBlockHeight sets the "block_height" field if the given value is not nil.
-func (eepbhu *EVMEventProcessedBlockHeightUpdate) SetNillableBlockHeight(u *uint64) *EVMEventProcessedBlockHeightUpdate {
-	if u != nil {
-		eepbhu.SetBlockHeight(*u)
+func (eepbhu *EVMEventProcessedBlockHeightUpdate) SetNillableBlockHeight(t *typeutil.Uint64) *EVMEventProcessedBlockHeightUpdate {
+	if t != nil {
+		eepbhu.SetBlockHeight(*t)
 	}
 	return eepbhu
 }
 
-// AddBlockHeight adds u to the "block_height" field.
-func (eepbhu *EVMEventProcessedBlockHeightUpdate) AddBlockHeight(u int64) *EVMEventProcessedBlockHeightUpdate {
-	eepbhu.mutation.AddBlockHeight(u)
+// AddBlockHeight adds t to the "block_height" field.
+func (eepbhu *EVMEventProcessedBlockHeightUpdate) AddBlockHeight(t typeutil.Uint64) *EVMEventProcessedBlockHeightUpdate {
+	eepbhu.mutation.AddBlockHeight(t)
 	return eepbhu
 }
 
@@ -164,10 +165,18 @@ func (eepbhu *EVMEventProcessedBlockHeightUpdate) sqlSave(ctx context.Context) (
 		_spec.SetField(evmeventprocessedblockheight.FieldEvent, field.TypeEnum, value)
 	}
 	if value, ok := eepbhu.mutation.BlockHeight(); ok {
-		_spec.SetField(evmeventprocessedblockheight.FieldBlockHeight, field.TypeUint64, value)
+		vv, err := evmeventprocessedblockheight.ValueScanner.BlockHeight.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(evmeventprocessedblockheight.FieldBlockHeight, field.TypeUint64, vv)
 	}
 	if value, ok := eepbhu.mutation.AddedBlockHeight(); ok {
-		_spec.AddField(evmeventprocessedblockheight.FieldBlockHeight, field.TypeUint64, value)
+		vv, err := evmeventprocessedblockheight.ValueScanner.BlockHeight.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.AddField(evmeventprocessedblockheight.FieldBlockHeight, field.TypeUint64, vv)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, eepbhu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -232,23 +241,23 @@ func (eepbhuo *EVMEventProcessedBlockHeightUpdateOne) SetNillableEvent(e *evmeve
 }
 
 // SetBlockHeight sets the "block_height" field.
-func (eepbhuo *EVMEventProcessedBlockHeightUpdateOne) SetBlockHeight(u uint64) *EVMEventProcessedBlockHeightUpdateOne {
+func (eepbhuo *EVMEventProcessedBlockHeightUpdateOne) SetBlockHeight(t typeutil.Uint64) *EVMEventProcessedBlockHeightUpdateOne {
 	eepbhuo.mutation.ResetBlockHeight()
-	eepbhuo.mutation.SetBlockHeight(u)
+	eepbhuo.mutation.SetBlockHeight(t)
 	return eepbhuo
 }
 
 // SetNillableBlockHeight sets the "block_height" field if the given value is not nil.
-func (eepbhuo *EVMEventProcessedBlockHeightUpdateOne) SetNillableBlockHeight(u *uint64) *EVMEventProcessedBlockHeightUpdateOne {
-	if u != nil {
-		eepbhuo.SetBlockHeight(*u)
+func (eepbhuo *EVMEventProcessedBlockHeightUpdateOne) SetNillableBlockHeight(t *typeutil.Uint64) *EVMEventProcessedBlockHeightUpdateOne {
+	if t != nil {
+		eepbhuo.SetBlockHeight(*t)
 	}
 	return eepbhuo
 }
 
-// AddBlockHeight adds u to the "block_height" field.
-func (eepbhuo *EVMEventProcessedBlockHeightUpdateOne) AddBlockHeight(u int64) *EVMEventProcessedBlockHeightUpdateOne {
-	eepbhuo.mutation.AddBlockHeight(u)
+// AddBlockHeight adds t to the "block_height" field.
+func (eepbhuo *EVMEventProcessedBlockHeightUpdateOne) AddBlockHeight(t typeutil.Uint64) *EVMEventProcessedBlockHeightUpdateOne {
+	eepbhuo.mutation.AddBlockHeight(t)
 	return eepbhuo
 }
 
@@ -356,10 +365,18 @@ func (eepbhuo *EVMEventProcessedBlockHeightUpdateOne) sqlSave(ctx context.Contex
 		_spec.SetField(evmeventprocessedblockheight.FieldEvent, field.TypeEnum, value)
 	}
 	if value, ok := eepbhuo.mutation.BlockHeight(); ok {
-		_spec.SetField(evmeventprocessedblockheight.FieldBlockHeight, field.TypeUint64, value)
+		vv, err := evmeventprocessedblockheight.ValueScanner.BlockHeight.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(evmeventprocessedblockheight.FieldBlockHeight, field.TypeUint64, vv)
 	}
 	if value, ok := eepbhuo.mutation.AddedBlockHeight(); ok {
-		_spec.AddField(evmeventprocessedblockheight.FieldBlockHeight, field.TypeUint64, value)
+		vv, err := evmeventprocessedblockheight.ValueScanner.BlockHeight.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.AddField(evmeventprocessedblockheight.FieldBlockHeight, field.TypeUint64, vv)
 	}
 	_node = &EVMEventProcessedBlockHeight{config: eepbhuo.config}
 	_spec.Assign = _node.assignValues

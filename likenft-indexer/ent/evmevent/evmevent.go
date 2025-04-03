@@ -4,8 +4,10 @@ package evmevent
 
 import (
 	"fmt"
+	"likenft-indexer/ent/schema/typeutil"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/schema/field"
 )
 
 const (
@@ -103,6 +105,10 @@ var (
 	Topic0Validator func(string) error
 	// Topic0HexValidator is a validator for the "topic0_hex" field. It is called by the builders before save.
 	Topic0HexValidator func(string) error
+	// ValueScanner of all EVMEvent fields.
+	ValueScanner struct {
+		BlockNumber field.TypeValueScanner[typeutil.Uint64]
+	}
 )
 
 // Status defines the type for the "status" enum field.

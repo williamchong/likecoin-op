@@ -27,17 +27,17 @@ type NFT struct {
 	// TokenID holds the value of the "token_id" field.
 	TokenID *big.Int `json:"token_id,omitempty"`
 	// TokenURI holds the value of the "token_uri" field.
-	TokenURI string `json:"token_uri,omitempty"`
+	TokenURI *string `json:"token_uri,omitempty"`
 	// Image holds the value of the "image" field.
-	Image string `json:"image,omitempty"`
+	Image *string `json:"image,omitempty"`
 	// ImageData holds the value of the "image_data" field.
 	ImageData *string `json:"image_data,omitempty"`
 	// ExternalURL holds the value of the "external_url" field.
 	ExternalURL *string `json:"external_url,omitempty"`
 	// Description holds the value of the "description" field.
-	Description string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty"`
 	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty"`
 	// Attributes holds the value of the "attributes" field.
 	Attributes []model.ERC721MetadataAttribute `json:"attributes,omitempty"`
 	// BackgroundColor holds the value of the "background_color" field.
@@ -149,13 +149,15 @@ func (n *NFT) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field token_uri", values[i])
 			} else if value.Valid {
-				n.TokenURI = value.String
+				n.TokenURI = new(string)
+				*n.TokenURI = value.String
 			}
 		case nft.FieldImage:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field image", values[i])
 			} else if value.Valid {
-				n.Image = value.String
+				n.Image = new(string)
+				*n.Image = value.String
 			}
 		case nft.FieldImageData:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -175,13 +177,15 @@ func (n *NFT) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
-				n.Description = value.String
+				n.Description = new(string)
+				*n.Description = value.String
 			}
 		case nft.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				n.Name = value.String
+				n.Name = new(string)
+				*n.Name = value.String
 			}
 		case nft.FieldAttributes:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -296,11 +300,15 @@ func (n *NFT) String() string {
 	builder.WriteString("token_id=")
 	builder.WriteString(fmt.Sprintf("%v", n.TokenID))
 	builder.WriteString(", ")
-	builder.WriteString("token_uri=")
-	builder.WriteString(n.TokenURI)
+	if v := n.TokenURI; v != nil {
+		builder.WriteString("token_uri=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
-	builder.WriteString("image=")
-	builder.WriteString(n.Image)
+	if v := n.Image; v != nil {
+		builder.WriteString("image=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	if v := n.ImageData; v != nil {
 		builder.WriteString("image_data=")
@@ -312,11 +320,15 @@ func (n *NFT) String() string {
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
-	builder.WriteString("description=")
-	builder.WriteString(n.Description)
+	if v := n.Description; v != nil {
+		builder.WriteString("description=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(n.Name)
+	if v := n.Name; v != nil {
+		builder.WriteString("name=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("attributes=")
 	builder.WriteString(fmt.Sprintf("%v", n.Attributes))

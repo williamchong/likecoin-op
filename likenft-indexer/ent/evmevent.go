@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"likenft-indexer/ent/evmevent"
+	"likenft-indexer/ent/schema/typeutil"
 	"strings"
 	"time"
 
@@ -24,7 +25,7 @@ type EVMEvent struct {
 	// BlockHash holds the value of the "block_hash" field.
 	BlockHash string `json:"block_hash,omitempty"`
 	// BlockNumber holds the value of the "block_number" field.
-	BlockNumber uint64 `json:"block_number,omitempty"`
+	BlockNumber typeutil.Uint64 `json:"block_number,omitempty"`
 	// LogIndex holds the value of the "log_index" field.
 	LogIndex uint `json:"log_index,omitempty"`
 	// Address holds the value of the "address" field.
@@ -67,12 +68,14 @@ func (*EVMEvent) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case evmevent.FieldRemoved:
 			values[i] = new(sql.NullBool)
-		case evmevent.FieldID, evmevent.FieldTransactionIndex, evmevent.FieldBlockNumber, evmevent.FieldLogIndex:
+		case evmevent.FieldID, evmevent.FieldTransactionIndex, evmevent.FieldLogIndex:
 			values[i] = new(sql.NullInt64)
 		case evmevent.FieldTransactionHash, evmevent.FieldBlockHash, evmevent.FieldAddress, evmevent.FieldTopic0, evmevent.FieldTopic0Hex, evmevent.FieldTopic1, evmevent.FieldTopic1Hex, evmevent.FieldTopic2, evmevent.FieldTopic2Hex, evmevent.FieldTopic3, evmevent.FieldTopic3Hex, evmevent.FieldData, evmevent.FieldDataHex, evmevent.FieldStatus, evmevent.FieldFailedReason:
 			values[i] = new(sql.NullString)
 		case evmevent.FieldTimestamp:
 			values[i] = new(sql.NullTime)
+		case evmevent.FieldBlockNumber:
+			values[i] = evmevent.ValueScanner.BlockNumber.ScanValue()
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -113,10 +116,10 @@ func (ee *EVMEvent) assignValues(columns []string, values []any) error {
 				ee.BlockHash = value.String
 			}
 		case evmevent.FieldBlockNumber:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field block_number", values[i])
-			} else if value.Valid {
-				ee.BlockNumber = uint64(value.Int64)
+			if value, err := evmevent.ValueScanner.BlockNumber.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				ee.BlockNumber = value
 			}
 		case evmevent.FieldLogIndex:
 			if value, ok := values[i].(*sql.NullInt64); !ok {

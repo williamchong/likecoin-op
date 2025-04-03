@@ -9,6 +9,9 @@ import (
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
+	"likenft-indexer/ent/schema/typeutil"
+	"likenft-indexer/internal/evm/model"
+	"math/big"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -61,14 +64,20 @@ func (ncc *NFTClassCreate) SetMinterAddresses(s []string) *NFTClassCreate {
 }
 
 // SetTotalSupply sets the "total_supply" field.
-func (ncc *NFTClassCreate) SetTotalSupply(i int) *NFTClassCreate {
-	ncc.mutation.SetTotalSupply(i)
+func (ncc *NFTClassCreate) SetTotalSupply(b *big.Int) *NFTClassCreate {
+	ncc.mutation.SetTotalSupply(b)
+	return ncc
+}
+
+// SetMaxSupply sets the "max_supply" field.
+func (ncc *NFTClassCreate) SetMaxSupply(t typeutil.Uint64) *NFTClassCreate {
+	ncc.mutation.SetMaxSupply(t)
 	return ncc
 }
 
 // SetMetadata sets the "metadata" field.
-func (ncc *NFTClassCreate) SetMetadata(m map[string]interface{}) *NFTClassCreate {
-	ncc.mutation.SetMetadata(m)
+func (ncc *NFTClassCreate) SetMetadata(mlm *model.ContractLevelMetadata) *NFTClassCreate {
+	ncc.mutation.SetMetadata(mlm)
 	return ncc
 }
 
@@ -91,8 +100,8 @@ func (ncc *NFTClassCreate) SetDeployerAddress(s string) *NFTClassCreate {
 }
 
 // SetDeployedBlockNumber sets the "deployed_block_number" field.
-func (ncc *NFTClassCreate) SetDeployedBlockNumber(s string) *NFTClassCreate {
-	ncc.mutation.SetDeployedBlockNumber(s)
+func (ncc *NFTClassCreate) SetDeployedBlockNumber(t typeutil.Uint64) *NFTClassCreate {
+	ncc.mutation.SetDeployedBlockNumber(t)
 	return ncc
 }
 
@@ -198,10 +207,8 @@ func (ncc *NFTClassCreate) check() error {
 	if _, ok := ncc.mutation.TotalSupply(); !ok {
 		return &ValidationError{Name: "total_supply", err: errors.New(`ent: missing required field "NFTClass.total_supply"`)}
 	}
-	if v, ok := ncc.mutation.TotalSupply(); ok {
-		if err := nftclass.TotalSupplyValidator(v); err != nil {
-			return &ValidationError{Name: "total_supply", err: fmt.Errorf(`ent: validator failed for field "NFTClass.total_supply": %w`, err)}
-		}
+	if _, ok := ncc.mutation.MaxSupply(); !ok {
+		return &ValidationError{Name: "max_supply", err: errors.New(`ent: missing required field "NFTClass.max_supply"`)}
 	}
 	if _, ok := ncc.mutation.BannerImage(); !ok {
 		return &ValidationError{Name: "banner_image", err: errors.New(`ent: missing required field "NFTClass.banner_image"`)}
@@ -220,11 +227,6 @@ func (ncc *NFTClassCreate) check() error {
 	if _, ok := ncc.mutation.DeployedBlockNumber(); !ok {
 		return &ValidationError{Name: "deployed_block_number", err: errors.New(`ent: missing required field "NFTClass.deployed_block_number"`)}
 	}
-	if v, ok := ncc.mutation.DeployedBlockNumber(); ok {
-		if err := nftclass.DeployedBlockNumberValidator(v); err != nil {
-			return &ValidationError{Name: "deployed_block_number", err: fmt.Errorf(`ent: validator failed for field "NFTClass.deployed_block_number": %w`, err)}
-		}
-	}
 	if _, ok := ncc.mutation.MintedAt(); !ok {
 		return &ValidationError{Name: "minted_at", err: errors.New(`ent: missing required field "NFTClass.minted_at"`)}
 	}
@@ -238,7 +240,10 @@ func (ncc *NFTClassCreate) sqlSave(ctx context.Context) (*NFTClass, error) {
 	if err := ncc.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := ncc.createSpec()
+	_node, _spec, err := ncc.createSpec()
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, ncc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
@@ -252,7 +257,7 @@ func (ncc *NFTClassCreate) sqlSave(ctx context.Context) (*NFTClass, error) {
 	return _node, nil
 }
 
-func (ncc *NFTClassCreate) createSpec() (*NFTClass, *sqlgraph.CreateSpec) {
+func (ncc *NFTClassCreate) createSpec() (*NFTClass, *sqlgraph.CreateSpec, error) {
 	var (
 		_node = &NFTClass{config: ncc.config}
 		_spec = sqlgraph.NewCreateSpec(nftclass.Table, sqlgraph.NewFieldSpec(nftclass.FieldID, field.TypeInt))
@@ -278,8 +283,20 @@ func (ncc *NFTClassCreate) createSpec() (*NFTClass, *sqlgraph.CreateSpec) {
 		_node.MinterAddresses = value
 	}
 	if value, ok := ncc.mutation.TotalSupply(); ok {
-		_spec.SetField(nftclass.FieldTotalSupply, field.TypeInt, value)
+		vv, err := nftclass.ValueScanner.TotalSupply.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(nftclass.FieldTotalSupply, field.TypeUint64, vv)
 		_node.TotalSupply = value
+	}
+	if value, ok := ncc.mutation.MaxSupply(); ok {
+		vv, err := nftclass.ValueScanner.MaxSupply.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(nftclass.FieldMaxSupply, field.TypeUint64, vv)
+		_node.MaxSupply = value
 	}
 	if value, ok := ncc.mutation.Metadata(); ok {
 		_spec.SetField(nftclass.FieldMetadata, field.TypeJSON, value)
@@ -298,7 +315,11 @@ func (ncc *NFTClassCreate) createSpec() (*NFTClass, *sqlgraph.CreateSpec) {
 		_node.DeployerAddress = value
 	}
 	if value, ok := ncc.mutation.DeployedBlockNumber(); ok {
-		_spec.SetField(nftclass.FieldDeployedBlockNumber, field.TypeString, value)
+		vv, err := nftclass.ValueScanner.DeployedBlockNumber.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(nftclass.FieldDeployedBlockNumber, field.TypeUint64, vv)
 		_node.DeployedBlockNumber = value
 	}
 	if value, ok := ncc.mutation.MintedAt(); ok {
@@ -342,7 +363,7 @@ func (ncc *NFTClassCreate) createSpec() (*NFTClass, *sqlgraph.CreateSpec) {
 		_node.account_nft_classes = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return _node, _spec
+	return _node, _spec, nil
 }
 
 // NFTClassCreateBulk is the builder for creating many NFTClass entities in bulk.
@@ -373,7 +394,10 @@ func (nccb *NFTClassCreateBulk) Save(ctx context.Context) ([]*NFTClass, error) {
 				}
 				builder.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = builder.createSpec()
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, nccb.builders[i+1].mutation)
 				} else {

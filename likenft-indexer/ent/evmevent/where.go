@@ -4,6 +4,7 @@ package evmevent
 
 import (
 	"likenft-indexer/ent/predicate"
+	"likenft-indexer/ent/schema/typeutil"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -70,8 +71,9 @@ func BlockHash(v string) predicate.EVMEvent {
 }
 
 // BlockNumber applies equality check predicate on the "block_number" field. It's identical to BlockNumberEQ.
-func BlockNumber(v uint64) predicate.EVMEvent {
-	return predicate.EVMEvent(sql.FieldEQ(FieldBlockNumber, v))
+func BlockNumber(v typeutil.Uint64) predicate.EVMEvent {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.EVMEventOrErr(sql.FieldEQ(FieldBlockNumber, vc), err)
 }
 
 // LogIndex applies equality check predicate on the "log_index" field. It's identical to LogIndexEQ.
@@ -320,43 +322,67 @@ func BlockHashContainsFold(v string) predicate.EVMEvent {
 }
 
 // BlockNumberEQ applies the EQ predicate on the "block_number" field.
-func BlockNumberEQ(v uint64) predicate.EVMEvent {
-	return predicate.EVMEvent(sql.FieldEQ(FieldBlockNumber, v))
+func BlockNumberEQ(v typeutil.Uint64) predicate.EVMEvent {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.EVMEventOrErr(sql.FieldEQ(FieldBlockNumber, vc), err)
 }
 
 // BlockNumberNEQ applies the NEQ predicate on the "block_number" field.
-func BlockNumberNEQ(v uint64) predicate.EVMEvent {
-	return predicate.EVMEvent(sql.FieldNEQ(FieldBlockNumber, v))
+func BlockNumberNEQ(v typeutil.Uint64) predicate.EVMEvent {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.EVMEventOrErr(sql.FieldNEQ(FieldBlockNumber, vc), err)
 }
 
 // BlockNumberIn applies the In predicate on the "block_number" field.
-func BlockNumberIn(vs ...uint64) predicate.EVMEvent {
-	return predicate.EVMEvent(sql.FieldIn(FieldBlockNumber, vs...))
+func BlockNumberIn(vs ...typeutil.Uint64) predicate.EVMEvent {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.BlockNumber.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.EVMEventOrErr(sql.FieldIn(FieldBlockNumber, v...), err)
 }
 
 // BlockNumberNotIn applies the NotIn predicate on the "block_number" field.
-func BlockNumberNotIn(vs ...uint64) predicate.EVMEvent {
-	return predicate.EVMEvent(sql.FieldNotIn(FieldBlockNumber, vs...))
+func BlockNumberNotIn(vs ...typeutil.Uint64) predicate.EVMEvent {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.BlockNumber.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.EVMEventOrErr(sql.FieldNotIn(FieldBlockNumber, v...), err)
 }
 
 // BlockNumberGT applies the GT predicate on the "block_number" field.
-func BlockNumberGT(v uint64) predicate.EVMEvent {
-	return predicate.EVMEvent(sql.FieldGT(FieldBlockNumber, v))
+func BlockNumberGT(v typeutil.Uint64) predicate.EVMEvent {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.EVMEventOrErr(sql.FieldGT(FieldBlockNumber, vc), err)
 }
 
 // BlockNumberGTE applies the GTE predicate on the "block_number" field.
-func BlockNumberGTE(v uint64) predicate.EVMEvent {
-	return predicate.EVMEvent(sql.FieldGTE(FieldBlockNumber, v))
+func BlockNumberGTE(v typeutil.Uint64) predicate.EVMEvent {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.EVMEventOrErr(sql.FieldGTE(FieldBlockNumber, vc), err)
 }
 
 // BlockNumberLT applies the LT predicate on the "block_number" field.
-func BlockNumberLT(v uint64) predicate.EVMEvent {
-	return predicate.EVMEvent(sql.FieldLT(FieldBlockNumber, v))
+func BlockNumberLT(v typeutil.Uint64) predicate.EVMEvent {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.EVMEventOrErr(sql.FieldLT(FieldBlockNumber, vc), err)
 }
 
 // BlockNumberLTE applies the LTE predicate on the "block_number" field.
-func BlockNumberLTE(v uint64) predicate.EVMEvent {
-	return predicate.EVMEvent(sql.FieldLTE(FieldBlockNumber, v))
+func BlockNumberLTE(v typeutil.Uint64) predicate.EVMEvent {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.EVMEventOrErr(sql.FieldLTE(FieldBlockNumber, vc), err)
 }
 
 // LogIndexEQ applies the EQ predicate on the "log_index" field.

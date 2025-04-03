@@ -2,17 +2,38 @@ package database
 
 import (
 	"context"
+	"math/big"
+	"time"
 
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/nftclass"
+	"likenft-indexer/ent/schema/typeutil"
+	"likenft-indexer/internal/evm/model"
 )
 
 type NFTClassRepository interface {
 	QueryAllNFTClasses(ctx context.Context) ([]*ent.NFTClass, error)
 	QueryNFTClassByAddress(ctx context.Context, address string) (*ent.NFTClass, error)
-	InsertNFTClass(ctx context.Context, nftClass *ent.NFTClass) error
-	UpdateMetadata(ctx context.Context, address string, metadata map[string]any) error
+	InsertNFTClass(
+		ctx context.Context,
+		address string,
+		name string,
+		symbol string,
+		ownerAddress *string,
+		minterAddresses []string,
+		totalSupply *big.Int,
+		maxSupply typeutil.Uint64,
+		metadata *model.ContractLevelMetadata,
+		bannerImage string,
+		featuredImage string,
+		deployerAddress string,
+		deployedBlockNumber typeutil.Uint64,
+		mintedAt time.Time,
+		owner *ent.Account,
+	) error
+	UpdateMetadata(ctx context.Context, address string, metadata *model.ContractLevelMetadata) error
 	UpdateOwner(ctx context.Context, address string, newOwner *ent.Account) error
+	UpdateTotalSupply(ctx context.Context, address string, newTotalSupply *big.Int) error
 }
 
 type nftClassRepository struct {
@@ -37,23 +58,40 @@ func (r *nftClassRepository) QueryNFTClassByAddress(ctx context.Context, address
 		Only(ctx)
 }
 
-func (r *nftClassRepository) InsertNFTClass(ctx context.Context, nftClass *ent.NFTClass) error {
+func (r *nftClassRepository) InsertNFTClass(
+	ctx context.Context,
+	address string,
+	name string,
+	symbol string,
+	ownerAddress *string,
+	minterAddresses []string,
+	totalSupply *big.Int,
+	maxSupply typeutil.Uint64,
+	metadata *model.ContractLevelMetadata,
+	bannerImage string,
+	featuredImage string,
+	deployerAddress string,
+	deployedBlockNumber typeutil.Uint64,
+	mintedAt time.Time,
+	owner *ent.Account,
+) error {
 	return WithTx(ctx, r.dbService.Client(), func(tx *ent.Tx) error {
 		builder := tx.NFTClass.Create().
-			SetAddress(nftClass.Address).
-			SetBannerImage(nftClass.BannerImage).
-			SetDeployedBlockNumber(nftClass.DeployedBlockNumber).
-			SetDeployerAddress(nftClass.DeployerAddress).
-			SetFeaturedImage(nftClass.FeaturedImage).
-			SetMetadata(nftClass.Metadata).
-			SetMintedAt(nftClass.MintedAt).
-			SetMinterAddresses(nftClass.MinterAddresses).
-			SetName(nftClass.Name).
-			SetNillableOwnerAddress(nftClass.OwnerAddress).
-			SetOwner(nftClass.Edges.Owner).
-			SetSymbol(nftClass.Symbol).
-			SetTotalSupply(nftClass.TotalSupply).
-			SetUpdatedAt(nftClass.UpdatedAt)
+			SetAddress(address).
+			SetName(name).
+			SetSymbol(symbol).
+			SetNillableOwnerAddress(ownerAddress).
+			SetMinterAddresses(minterAddresses).
+			SetTotalSupply(totalSupply).
+			SetMaxSupply(maxSupply).
+			SetMetadata(metadata).
+			SetBannerImage(bannerImage).
+			SetFeaturedImage(featuredImage).
+			SetDeployerAddress(deployerAddress).
+			SetDeployedBlockNumber(deployedBlockNumber).
+			SetMintedAt(mintedAt).
+			SetOwner(owner).
+			SetUpdatedAt(time.Now())
 
 		return builder.Exec(ctx)
 	})
@@ -62,7 +100,7 @@ func (r *nftClassRepository) InsertNFTClass(ctx context.Context, nftClass *ent.N
 func (r *nftClassRepository) UpdateMetadata(
 	ctx context.Context,
 	address string,
-	metadata map[string]any,
+	metadata *model.ContractLevelMetadata,
 ) error {
 	return WithTx(ctx, r.dbService.Client(), func(tx *ent.Tx) error {
 		_, err := tx.NFTClass.Query().
@@ -92,6 +130,25 @@ func (r *nftClassRepository) UpdateOwner(
 		}
 		return r.dbService.Client().NFTClass.Update().
 			SetOwner(newOwner).
+			Where(nftclass.AddressEqualFold(address)).
+			Exec(ctx)
+	})
+}
+
+func (r *nftClassRepository) UpdateTotalSupply(
+	ctx context.Context,
+	address string,
+	newTotalSupply *big.Int,
+) error {
+	return WithTx(ctx, r.dbService.Client(), func(tx *ent.Tx) error {
+		_, err := tx.NFTClass.Query().
+			Where(nftclass.AddressEqualFold(address)).
+			Only(ctx)
+		if err != nil {
+			return err
+		}
+		return r.dbService.Client().NFTClass.Update().
+			SetTotalSupply(newTotalSupply).
 			Where(nftclass.AddressEqualFold(address)).
 			Exec(ctx)
 	})

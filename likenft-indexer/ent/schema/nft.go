@@ -33,13 +33,13 @@ func (NFT) Fields() []ent.Field {
 		field.String("token_id").
 			GoType(&big.Int{}).
 			ValueScanner(field.TextValueScanner[*big.Int]{}),
-		field.String("token_uri").NotEmpty(),
+		field.String("token_uri").Nillable().Optional(),
 		// START Prepopulate field
-		field.String("image").NotEmpty(),
+		field.String("image").Nillable().Optional(),
 		field.String("image_data").Nillable().Optional(),
 		field.String("external_url").Nillable().Optional(),
-		field.String("description").NotEmpty(),
-		field.String("name").NotEmpty(),
+		field.String("description").Nillable().Optional(),
+		field.String("name").Nillable().Optional(),
 		field.JSON("attributes", []model.ERC721MetadataAttribute{}).Optional(),
 		field.String("background_color").Nillable().Optional(),
 		field.String("animation_url").Nillable().Optional(),

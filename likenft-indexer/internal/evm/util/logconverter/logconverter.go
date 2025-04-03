@@ -7,6 +7,7 @@ import (
 
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/evmevent"
+	"likenft-indexer/ent/schema/typeutil"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -84,7 +85,7 @@ func (c *LogConverter) ConvertLogToEvmEvent(log types.Log) (*ent.EVMEvent, error
 		TransactionHash:  log.TxHash.Hex(),
 		TransactionIndex: log.TxIndex,
 		BlockHash:        log.BlockHash.Hex(),
-		BlockNumber:      log.BlockNumber,
+		BlockNumber:      typeutil.Uint64(log.BlockNumber),
 		LogIndex:         log.Index,
 		Address:          log.Address.Hex(),
 		Topic0:           topic0,
@@ -125,7 +126,7 @@ func (c *LogConverter) ConvertEvmEventToLog(evmEvent *ent.EVMEvent) types.Log {
 		Address:     common.HexToAddress(evmEvent.Address),
 		Topics:      topics,
 		Data:        data,
-		BlockNumber: evmEvent.BlockNumber,
+		BlockNumber: uint64(evmEvent.BlockNumber),
 		TxHash:      common.HexToHash(evmEvent.TransactionHash),
 		TxIndex:     evmEvent.TransactionIndex,
 		BlockHash:   common.HexToHash(evmEvent.BlockHash),

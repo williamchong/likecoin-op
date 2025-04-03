@@ -10,6 +10,9 @@ import (
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/predicate"
+	"likenft-indexer/ent/schema/typeutil"
+	"likenft-indexer/internal/evm/model"
+	"math/big"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -112,29 +115,35 @@ func (ncu *NFTClassUpdate) ClearMinterAddresses() *NFTClassUpdate {
 }
 
 // SetTotalSupply sets the "total_supply" field.
-func (ncu *NFTClassUpdate) SetTotalSupply(i int) *NFTClassUpdate {
-	ncu.mutation.ResetTotalSupply()
-	ncu.mutation.SetTotalSupply(i)
+func (ncu *NFTClassUpdate) SetTotalSupply(b *big.Int) *NFTClassUpdate {
+	ncu.mutation.SetTotalSupply(b)
 	return ncu
 }
 
-// SetNillableTotalSupply sets the "total_supply" field if the given value is not nil.
-func (ncu *NFTClassUpdate) SetNillableTotalSupply(i *int) *NFTClassUpdate {
-	if i != nil {
-		ncu.SetTotalSupply(*i)
+// SetMaxSupply sets the "max_supply" field.
+func (ncu *NFTClassUpdate) SetMaxSupply(t typeutil.Uint64) *NFTClassUpdate {
+	ncu.mutation.ResetMaxSupply()
+	ncu.mutation.SetMaxSupply(t)
+	return ncu
+}
+
+// SetNillableMaxSupply sets the "max_supply" field if the given value is not nil.
+func (ncu *NFTClassUpdate) SetNillableMaxSupply(t *typeutil.Uint64) *NFTClassUpdate {
+	if t != nil {
+		ncu.SetMaxSupply(*t)
 	}
 	return ncu
 }
 
-// AddTotalSupply adds i to the "total_supply" field.
-func (ncu *NFTClassUpdate) AddTotalSupply(i int) *NFTClassUpdate {
-	ncu.mutation.AddTotalSupply(i)
+// AddMaxSupply adds t to the "max_supply" field.
+func (ncu *NFTClassUpdate) AddMaxSupply(t typeutil.Uint64) *NFTClassUpdate {
+	ncu.mutation.AddMaxSupply(t)
 	return ncu
 }
 
 // SetMetadata sets the "metadata" field.
-func (ncu *NFTClassUpdate) SetMetadata(m map[string]interface{}) *NFTClassUpdate {
-	ncu.mutation.SetMetadata(m)
+func (ncu *NFTClassUpdate) SetMetadata(mlm *model.ContractLevelMetadata) *NFTClassUpdate {
+	ncu.mutation.SetMetadata(mlm)
 	return ncu
 }
 
@@ -187,16 +196,23 @@ func (ncu *NFTClassUpdate) SetNillableDeployerAddress(s *string) *NFTClassUpdate
 }
 
 // SetDeployedBlockNumber sets the "deployed_block_number" field.
-func (ncu *NFTClassUpdate) SetDeployedBlockNumber(s string) *NFTClassUpdate {
-	ncu.mutation.SetDeployedBlockNumber(s)
+func (ncu *NFTClassUpdate) SetDeployedBlockNumber(t typeutil.Uint64) *NFTClassUpdate {
+	ncu.mutation.ResetDeployedBlockNumber()
+	ncu.mutation.SetDeployedBlockNumber(t)
 	return ncu
 }
 
 // SetNillableDeployedBlockNumber sets the "deployed_block_number" field if the given value is not nil.
-func (ncu *NFTClassUpdate) SetNillableDeployedBlockNumber(s *string) *NFTClassUpdate {
-	if s != nil {
-		ncu.SetDeployedBlockNumber(*s)
+func (ncu *NFTClassUpdate) SetNillableDeployedBlockNumber(t *typeutil.Uint64) *NFTClassUpdate {
+	if t != nil {
+		ncu.SetDeployedBlockNumber(*t)
 	}
+	return ncu
+}
+
+// AddDeployedBlockNumber adds t to the "deployed_block_number" field.
+func (ncu *NFTClassUpdate) AddDeployedBlockNumber(t typeutil.Uint64) *NFTClassUpdate {
+	ncu.mutation.AddDeployedBlockNumber(t)
 	return ncu
 }
 
@@ -333,19 +349,9 @@ func (ncu *NFTClassUpdate) check() error {
 			return &ValidationError{Name: "symbol", err: fmt.Errorf(`ent: validator failed for field "NFTClass.symbol": %w`, err)}
 		}
 	}
-	if v, ok := ncu.mutation.TotalSupply(); ok {
-		if err := nftclass.TotalSupplyValidator(v); err != nil {
-			return &ValidationError{Name: "total_supply", err: fmt.Errorf(`ent: validator failed for field "NFTClass.total_supply": %w`, err)}
-		}
-	}
 	if v, ok := ncu.mutation.DeployerAddress(); ok {
 		if err := nftclass.DeployerAddressValidator(v); err != nil {
 			return &ValidationError{Name: "deployer_address", err: fmt.Errorf(`ent: validator failed for field "NFTClass.deployer_address": %w`, err)}
-		}
-	}
-	if v, ok := ncu.mutation.DeployedBlockNumber(); ok {
-		if err := nftclass.DeployedBlockNumberValidator(v); err != nil {
-			return &ValidationError{Name: "deployed_block_number", err: fmt.Errorf(`ent: validator failed for field "NFTClass.deployed_block_number": %w`, err)}
 		}
 	}
 	return nil
@@ -390,10 +396,25 @@ func (ncu *NFTClassUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.ClearField(nftclass.FieldMinterAddresses, field.TypeJSON)
 	}
 	if value, ok := ncu.mutation.TotalSupply(); ok {
-		_spec.SetField(nftclass.FieldTotalSupply, field.TypeInt, value)
+		vv, err := nftclass.ValueScanner.TotalSupply.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(nftclass.FieldTotalSupply, field.TypeUint64, vv)
 	}
-	if value, ok := ncu.mutation.AddedTotalSupply(); ok {
-		_spec.AddField(nftclass.FieldTotalSupply, field.TypeInt, value)
+	if value, ok := ncu.mutation.MaxSupply(); ok {
+		vv, err := nftclass.ValueScanner.MaxSupply.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(nftclass.FieldMaxSupply, field.TypeUint64, vv)
+	}
+	if value, ok := ncu.mutation.AddedMaxSupply(); ok {
+		vv, err := nftclass.ValueScanner.MaxSupply.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.AddField(nftclass.FieldMaxSupply, field.TypeUint64, vv)
 	}
 	if value, ok := ncu.mutation.Metadata(); ok {
 		_spec.SetField(nftclass.FieldMetadata, field.TypeJSON, value)
@@ -411,7 +432,18 @@ func (ncu *NFTClassUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(nftclass.FieldDeployerAddress, field.TypeString, value)
 	}
 	if value, ok := ncu.mutation.DeployedBlockNumber(); ok {
-		_spec.SetField(nftclass.FieldDeployedBlockNumber, field.TypeString, value)
+		vv, err := nftclass.ValueScanner.DeployedBlockNumber.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(nftclass.FieldDeployedBlockNumber, field.TypeUint64, vv)
+	}
+	if value, ok := ncu.mutation.AddedDeployedBlockNumber(); ok {
+		vv, err := nftclass.ValueScanner.DeployedBlockNumber.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.AddField(nftclass.FieldDeployedBlockNumber, field.TypeUint64, vv)
 	}
 	if value, ok := ncu.mutation.MintedAt(); ok {
 		_spec.SetField(nftclass.FieldMintedAt, field.TypeTime, value)
@@ -594,29 +626,35 @@ func (ncuo *NFTClassUpdateOne) ClearMinterAddresses() *NFTClassUpdateOne {
 }
 
 // SetTotalSupply sets the "total_supply" field.
-func (ncuo *NFTClassUpdateOne) SetTotalSupply(i int) *NFTClassUpdateOne {
-	ncuo.mutation.ResetTotalSupply()
-	ncuo.mutation.SetTotalSupply(i)
+func (ncuo *NFTClassUpdateOne) SetTotalSupply(b *big.Int) *NFTClassUpdateOne {
+	ncuo.mutation.SetTotalSupply(b)
 	return ncuo
 }
 
-// SetNillableTotalSupply sets the "total_supply" field if the given value is not nil.
-func (ncuo *NFTClassUpdateOne) SetNillableTotalSupply(i *int) *NFTClassUpdateOne {
-	if i != nil {
-		ncuo.SetTotalSupply(*i)
+// SetMaxSupply sets the "max_supply" field.
+func (ncuo *NFTClassUpdateOne) SetMaxSupply(t typeutil.Uint64) *NFTClassUpdateOne {
+	ncuo.mutation.ResetMaxSupply()
+	ncuo.mutation.SetMaxSupply(t)
+	return ncuo
+}
+
+// SetNillableMaxSupply sets the "max_supply" field if the given value is not nil.
+func (ncuo *NFTClassUpdateOne) SetNillableMaxSupply(t *typeutil.Uint64) *NFTClassUpdateOne {
+	if t != nil {
+		ncuo.SetMaxSupply(*t)
 	}
 	return ncuo
 }
 
-// AddTotalSupply adds i to the "total_supply" field.
-func (ncuo *NFTClassUpdateOne) AddTotalSupply(i int) *NFTClassUpdateOne {
-	ncuo.mutation.AddTotalSupply(i)
+// AddMaxSupply adds t to the "max_supply" field.
+func (ncuo *NFTClassUpdateOne) AddMaxSupply(t typeutil.Uint64) *NFTClassUpdateOne {
+	ncuo.mutation.AddMaxSupply(t)
 	return ncuo
 }
 
 // SetMetadata sets the "metadata" field.
-func (ncuo *NFTClassUpdateOne) SetMetadata(m map[string]interface{}) *NFTClassUpdateOne {
-	ncuo.mutation.SetMetadata(m)
+func (ncuo *NFTClassUpdateOne) SetMetadata(mlm *model.ContractLevelMetadata) *NFTClassUpdateOne {
+	ncuo.mutation.SetMetadata(mlm)
 	return ncuo
 }
 
@@ -669,16 +707,23 @@ func (ncuo *NFTClassUpdateOne) SetNillableDeployerAddress(s *string) *NFTClassUp
 }
 
 // SetDeployedBlockNumber sets the "deployed_block_number" field.
-func (ncuo *NFTClassUpdateOne) SetDeployedBlockNumber(s string) *NFTClassUpdateOne {
-	ncuo.mutation.SetDeployedBlockNumber(s)
+func (ncuo *NFTClassUpdateOne) SetDeployedBlockNumber(t typeutil.Uint64) *NFTClassUpdateOne {
+	ncuo.mutation.ResetDeployedBlockNumber()
+	ncuo.mutation.SetDeployedBlockNumber(t)
 	return ncuo
 }
 
 // SetNillableDeployedBlockNumber sets the "deployed_block_number" field if the given value is not nil.
-func (ncuo *NFTClassUpdateOne) SetNillableDeployedBlockNumber(s *string) *NFTClassUpdateOne {
-	if s != nil {
-		ncuo.SetDeployedBlockNumber(*s)
+func (ncuo *NFTClassUpdateOne) SetNillableDeployedBlockNumber(t *typeutil.Uint64) *NFTClassUpdateOne {
+	if t != nil {
+		ncuo.SetDeployedBlockNumber(*t)
 	}
+	return ncuo
+}
+
+// AddDeployedBlockNumber adds t to the "deployed_block_number" field.
+func (ncuo *NFTClassUpdateOne) AddDeployedBlockNumber(t typeutil.Uint64) *NFTClassUpdateOne {
+	ncuo.mutation.AddDeployedBlockNumber(t)
 	return ncuo
 }
 
@@ -828,19 +873,9 @@ func (ncuo *NFTClassUpdateOne) check() error {
 			return &ValidationError{Name: "symbol", err: fmt.Errorf(`ent: validator failed for field "NFTClass.symbol": %w`, err)}
 		}
 	}
-	if v, ok := ncuo.mutation.TotalSupply(); ok {
-		if err := nftclass.TotalSupplyValidator(v); err != nil {
-			return &ValidationError{Name: "total_supply", err: fmt.Errorf(`ent: validator failed for field "NFTClass.total_supply": %w`, err)}
-		}
-	}
 	if v, ok := ncuo.mutation.DeployerAddress(); ok {
 		if err := nftclass.DeployerAddressValidator(v); err != nil {
 			return &ValidationError{Name: "deployer_address", err: fmt.Errorf(`ent: validator failed for field "NFTClass.deployer_address": %w`, err)}
-		}
-	}
-	if v, ok := ncuo.mutation.DeployedBlockNumber(); ok {
-		if err := nftclass.DeployedBlockNumberValidator(v); err != nil {
-			return &ValidationError{Name: "deployed_block_number", err: fmt.Errorf(`ent: validator failed for field "NFTClass.deployed_block_number": %w`, err)}
 		}
 	}
 	return nil
@@ -902,10 +937,25 @@ func (ncuo *NFTClassUpdateOne) sqlSave(ctx context.Context) (_node *NFTClass, er
 		_spec.ClearField(nftclass.FieldMinterAddresses, field.TypeJSON)
 	}
 	if value, ok := ncuo.mutation.TotalSupply(); ok {
-		_spec.SetField(nftclass.FieldTotalSupply, field.TypeInt, value)
+		vv, err := nftclass.ValueScanner.TotalSupply.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(nftclass.FieldTotalSupply, field.TypeUint64, vv)
 	}
-	if value, ok := ncuo.mutation.AddedTotalSupply(); ok {
-		_spec.AddField(nftclass.FieldTotalSupply, field.TypeInt, value)
+	if value, ok := ncuo.mutation.MaxSupply(); ok {
+		vv, err := nftclass.ValueScanner.MaxSupply.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(nftclass.FieldMaxSupply, field.TypeUint64, vv)
+	}
+	if value, ok := ncuo.mutation.AddedMaxSupply(); ok {
+		vv, err := nftclass.ValueScanner.MaxSupply.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.AddField(nftclass.FieldMaxSupply, field.TypeUint64, vv)
 	}
 	if value, ok := ncuo.mutation.Metadata(); ok {
 		_spec.SetField(nftclass.FieldMetadata, field.TypeJSON, value)
@@ -923,7 +973,18 @@ func (ncuo *NFTClassUpdateOne) sqlSave(ctx context.Context) (_node *NFTClass, er
 		_spec.SetField(nftclass.FieldDeployerAddress, field.TypeString, value)
 	}
 	if value, ok := ncuo.mutation.DeployedBlockNumber(); ok {
-		_spec.SetField(nftclass.FieldDeployedBlockNumber, field.TypeString, value)
+		vv, err := nftclass.ValueScanner.DeployedBlockNumber.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(nftclass.FieldDeployedBlockNumber, field.TypeUint64, vv)
+	}
+	if value, ok := ncuo.mutation.AddedDeployedBlockNumber(); ok {
+		vv, err := nftclass.ValueScanner.DeployedBlockNumber.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.AddField(nftclass.FieldDeployedBlockNumber, field.TypeUint64, vv)
 	}
 	if value, ok := ncuo.mutation.MintedAt(); ok {
 		_spec.SetField(nftclass.FieldMintedAt, field.TypeTime, value)

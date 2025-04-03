@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/nftclass"
+	"likenft-indexer/ent/schema/typeutil"
+	"likenft-indexer/internal/evm/model"
+	"math/big"
 	"strings"
 	"time"
 
@@ -30,9 +33,11 @@ type NFTClass struct {
 	// MinterAddresses holds the value of the "minter_addresses" field.
 	MinterAddresses []string `json:"minter_addresses,omitempty"`
 	// TotalSupply holds the value of the "total_supply" field.
-	TotalSupply int `json:"total_supply,omitempty"`
+	TotalSupply *big.Int `json:"total_supply,omitempty"`
+	// MaxSupply holds the value of the "max_supply" field.
+	MaxSupply typeutil.Uint64 `json:"max_supply,omitempty"`
 	// Metadata holds the value of the "metadata" field.
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	Metadata *model.ContractLevelMetadata `json:"metadata,omitempty"`
 	// BannerImage holds the value of the "banner_image" field.
 	BannerImage string `json:"banner_image,omitempty"`
 	// FeaturedImage holds the value of the "featured_image" field.
@@ -40,7 +45,7 @@ type NFTClass struct {
 	// DeployerAddress holds the value of the "deployer_address" field.
 	DeployerAddress string `json:"deployer_address,omitempty"`
 	// DeployedBlockNumber holds the value of the "deployed_block_number" field.
-	DeployedBlockNumber string `json:"deployed_block_number,omitempty"`
+	DeployedBlockNumber typeutil.Uint64 `json:"deployed_block_number,omitempty"`
 	// MintedAt holds the value of the "minted_at" field.
 	MintedAt time.Time `json:"minted_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -90,12 +95,18 @@ func (*NFTClass) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case nftclass.FieldMinterAddresses, nftclass.FieldMetadata:
 			values[i] = new([]byte)
-		case nftclass.FieldID, nftclass.FieldTotalSupply:
+		case nftclass.FieldID:
 			values[i] = new(sql.NullInt64)
-		case nftclass.FieldAddress, nftclass.FieldName, nftclass.FieldSymbol, nftclass.FieldOwnerAddress, nftclass.FieldBannerImage, nftclass.FieldFeaturedImage, nftclass.FieldDeployerAddress, nftclass.FieldDeployedBlockNumber:
+		case nftclass.FieldAddress, nftclass.FieldName, nftclass.FieldSymbol, nftclass.FieldOwnerAddress, nftclass.FieldBannerImage, nftclass.FieldFeaturedImage, nftclass.FieldDeployerAddress:
 			values[i] = new(sql.NullString)
 		case nftclass.FieldMintedAt, nftclass.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case nftclass.FieldTotalSupply:
+			values[i] = nftclass.ValueScanner.TotalSupply.ScanValue()
+		case nftclass.FieldMaxSupply:
+			values[i] = nftclass.ValueScanner.MaxSupply.ScanValue()
+		case nftclass.FieldDeployedBlockNumber:
+			values[i] = nftclass.ValueScanner.DeployedBlockNumber.ScanValue()
 		case nftclass.ForeignKeys[0]: // account_nft_classes
 			values[i] = new(sql.NullInt64)
 		default:
@@ -153,10 +164,16 @@ func (nc *NFTClass) assignValues(columns []string, values []any) error {
 				}
 			}
 		case nftclass.FieldTotalSupply:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field total_supply", values[i])
-			} else if value.Valid {
-				nc.TotalSupply = int(value.Int64)
+			if value, err := nftclass.ValueScanner.TotalSupply.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				nc.TotalSupply = value
+			}
+		case nftclass.FieldMaxSupply:
+			if value, err := nftclass.ValueScanner.MaxSupply.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				nc.MaxSupply = value
 			}
 		case nftclass.FieldMetadata:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -185,10 +202,10 @@ func (nc *NFTClass) assignValues(columns []string, values []any) error {
 				nc.DeployerAddress = value.String
 			}
 		case nftclass.FieldDeployedBlockNumber:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field deployed_block_number", values[i])
-			} else if value.Valid {
-				nc.DeployedBlockNumber = value.String
+			if value, err := nftclass.ValueScanner.DeployedBlockNumber.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				nc.DeployedBlockNumber = value
 			}
 		case nftclass.FieldMintedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -275,6 +292,9 @@ func (nc *NFTClass) String() string {
 	builder.WriteString("total_supply=")
 	builder.WriteString(fmt.Sprintf("%v", nc.TotalSupply))
 	builder.WriteString(", ")
+	builder.WriteString("max_supply=")
+	builder.WriteString(fmt.Sprintf("%v", nc.MaxSupply))
+	builder.WriteString(", ")
 	builder.WriteString("metadata=")
 	builder.WriteString(fmt.Sprintf("%v", nc.Metadata))
 	builder.WriteString(", ")
@@ -288,7 +308,7 @@ func (nc *NFTClass) String() string {
 	builder.WriteString(nc.DeployerAddress)
 	builder.WriteString(", ")
 	builder.WriteString("deployed_block_number=")
-	builder.WriteString(nc.DeployedBlockNumber)
+	builder.WriteString(fmt.Sprintf("%v", nc.DeployedBlockNumber))
 	builder.WriteString(", ")
 	builder.WriteString("minted_at=")
 	builder.WriteString(nc.MintedAt.Format(time.ANSIC))

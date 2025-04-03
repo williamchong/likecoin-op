@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
+	"likenft-indexer/ent/schema/typeutil"
 	"strings"
 
 	"entgo.io/ent"
@@ -23,7 +24,7 @@ type EVMEventProcessedBlockHeight struct {
 	// Event holds the value of the "event" field.
 	Event evmeventprocessedblockheight.Event `json:"event,omitempty"`
 	// BlockHeight holds the value of the "block_height" field.
-	BlockHeight  uint64 `json:"block_height,omitempty"`
+	BlockHeight  typeutil.Uint64 `json:"block_height,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -32,10 +33,12 @@ func (*EVMEventProcessedBlockHeight) scanValues(columns []string) ([]any, error)
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case evmeventprocessedblockheight.FieldID, evmeventprocessedblockheight.FieldBlockHeight:
+		case evmeventprocessedblockheight.FieldID:
 			values[i] = new(sql.NullInt64)
 		case evmeventprocessedblockheight.FieldContractType, evmeventprocessedblockheight.FieldContractAddress, evmeventprocessedblockheight.FieldEvent:
 			values[i] = new(sql.NullString)
+		case evmeventprocessedblockheight.FieldBlockHeight:
+			values[i] = evmeventprocessedblockheight.ValueScanner.BlockHeight.ScanValue()
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -76,10 +79,10 @@ func (eepbh *EVMEventProcessedBlockHeight) assignValues(columns []string, values
 				eepbh.Event = evmeventprocessedblockheight.Event(value.String)
 			}
 		case evmeventprocessedblockheight.FieldBlockHeight:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field block_height", values[i])
-			} else if value.Valid {
-				eepbh.BlockHeight = uint64(value.Int64)
+			if value, err := evmeventprocessedblockheight.ValueScanner.BlockHeight.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				eepbh.BlockHeight = value
 			}
 		default:
 			eepbh.selectValues.Set(columns[i], values[i])

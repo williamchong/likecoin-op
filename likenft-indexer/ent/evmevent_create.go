@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"likenft-indexer/ent/evmevent"
+	"likenft-indexer/ent/schema/typeutil"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -39,8 +40,8 @@ func (eec *EVMEventCreate) SetBlockHash(s string) *EVMEventCreate {
 }
 
 // SetBlockNumber sets the "block_number" field.
-func (eec *EVMEventCreate) SetBlockNumber(u uint64) *EVMEventCreate {
-	eec.mutation.SetBlockNumber(u)
+func (eec *EVMEventCreate) SetBlockNumber(t typeutil.Uint64) *EVMEventCreate {
+	eec.mutation.SetBlockNumber(t)
 	return eec
 }
 
@@ -316,7 +317,10 @@ func (eec *EVMEventCreate) sqlSave(ctx context.Context) (*EVMEvent, error) {
 	if err := eec.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := eec.createSpec()
+	_node, _spec, err := eec.createSpec()
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, eec.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
@@ -330,7 +334,7 @@ func (eec *EVMEventCreate) sqlSave(ctx context.Context) (*EVMEvent, error) {
 	return _node, nil
 }
 
-func (eec *EVMEventCreate) createSpec() (*EVMEvent, *sqlgraph.CreateSpec) {
+func (eec *EVMEventCreate) createSpec() (*EVMEvent, *sqlgraph.CreateSpec, error) {
 	var (
 		_node = &EVMEvent{config: eec.config}
 		_spec = sqlgraph.NewCreateSpec(evmevent.Table, sqlgraph.NewFieldSpec(evmevent.FieldID, field.TypeInt))
@@ -348,7 +352,11 @@ func (eec *EVMEventCreate) createSpec() (*EVMEvent, *sqlgraph.CreateSpec) {
 		_node.BlockHash = value
 	}
 	if value, ok := eec.mutation.BlockNumber(); ok {
-		_spec.SetField(evmevent.FieldBlockNumber, field.TypeUint64, value)
+		vv, err := evmevent.ValueScanner.BlockNumber.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(evmevent.FieldBlockNumber, field.TypeUint64, vv)
 		_node.BlockNumber = value
 	}
 	if value, ok := eec.mutation.LogIndex(); ok {
@@ -415,7 +423,7 @@ func (eec *EVMEventCreate) createSpec() (*EVMEvent, *sqlgraph.CreateSpec) {
 		_spec.SetField(evmevent.FieldTimestamp, field.TypeTime, value)
 		_node.Timestamp = value
 	}
-	return _node, _spec
+	return _node, _spec, nil
 }
 
 // EVMEventCreateBulk is the builder for creating many EVMEvent entities in bulk.
@@ -446,7 +454,10 @@ func (eecb *EVMEventCreateBulk) Save(ctx context.Context) ([]*EVMEvent, error) {
 				}
 				builder.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = builder.createSpec()
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, eecb.builders[i+1].mutation)
 				} else {

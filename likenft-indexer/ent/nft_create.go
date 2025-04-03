@@ -42,9 +42,25 @@ func (nc *NFTCreate) SetTokenURI(s string) *NFTCreate {
 	return nc
 }
 
+// SetNillableTokenURI sets the "token_uri" field if the given value is not nil.
+func (nc *NFTCreate) SetNillableTokenURI(s *string) *NFTCreate {
+	if s != nil {
+		nc.SetTokenURI(*s)
+	}
+	return nc
+}
+
 // SetImage sets the "image" field.
 func (nc *NFTCreate) SetImage(s string) *NFTCreate {
 	nc.mutation.SetImage(s)
+	return nc
+}
+
+// SetNillableImage sets the "image" field if the given value is not nil.
+func (nc *NFTCreate) SetNillableImage(s *string) *NFTCreate {
+	if s != nil {
+		nc.SetImage(*s)
+	}
 	return nc
 }
 
@@ -82,9 +98,25 @@ func (nc *NFTCreate) SetDescription(s string) *NFTCreate {
 	return nc
 }
 
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (nc *NFTCreate) SetNillableDescription(s *string) *NFTCreate {
+	if s != nil {
+		nc.SetDescription(*s)
+	}
+	return nc
+}
+
 // SetName sets the "name" field.
 func (nc *NFTCreate) SetName(s string) *NFTCreate {
 	nc.mutation.SetName(s)
+	return nc
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (nc *NFTCreate) SetNillableName(s *string) *NFTCreate {
+	if s != nil {
+		nc.SetName(*s)
+	}
 	return nc
 }
 
@@ -237,38 +269,6 @@ func (nc *NFTCreate) check() error {
 	if _, ok := nc.mutation.TokenID(); !ok {
 		return &ValidationError{Name: "token_id", err: errors.New(`ent: missing required field "NFT.token_id"`)}
 	}
-	if _, ok := nc.mutation.TokenURI(); !ok {
-		return &ValidationError{Name: "token_uri", err: errors.New(`ent: missing required field "NFT.token_uri"`)}
-	}
-	if v, ok := nc.mutation.TokenURI(); ok {
-		if err := nft.TokenURIValidator(v); err != nil {
-			return &ValidationError{Name: "token_uri", err: fmt.Errorf(`ent: validator failed for field "NFT.token_uri": %w`, err)}
-		}
-	}
-	if _, ok := nc.mutation.Image(); !ok {
-		return &ValidationError{Name: "image", err: errors.New(`ent: missing required field "NFT.image"`)}
-	}
-	if v, ok := nc.mutation.Image(); ok {
-		if err := nft.ImageValidator(v); err != nil {
-			return &ValidationError{Name: "image", err: fmt.Errorf(`ent: validator failed for field "NFT.image": %w`, err)}
-		}
-	}
-	if _, ok := nc.mutation.Description(); !ok {
-		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "NFT.description"`)}
-	}
-	if v, ok := nc.mutation.Description(); ok {
-		if err := nft.DescriptionValidator(v); err != nil {
-			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "NFT.description": %w`, err)}
-		}
-	}
-	if _, ok := nc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "NFT.name"`)}
-	}
-	if v, ok := nc.mutation.Name(); ok {
-		if err := nft.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "NFT.name": %w`, err)}
-		}
-	}
 	if _, ok := nc.mutation.OwnerAddress(); !ok {
 		return &ValidationError{Name: "owner_address", err: errors.New(`ent: missing required field "NFT.owner_address"`)}
 	}
@@ -326,11 +326,11 @@ func (nc *NFTCreate) createSpec() (*NFT, *sqlgraph.CreateSpec, error) {
 	}
 	if value, ok := nc.mutation.TokenURI(); ok {
 		_spec.SetField(nft.FieldTokenURI, field.TypeString, value)
-		_node.TokenURI = value
+		_node.TokenURI = &value
 	}
 	if value, ok := nc.mutation.Image(); ok {
 		_spec.SetField(nft.FieldImage, field.TypeString, value)
-		_node.Image = value
+		_node.Image = &value
 	}
 	if value, ok := nc.mutation.ImageData(); ok {
 		_spec.SetField(nft.FieldImageData, field.TypeString, value)
@@ -342,11 +342,11 @@ func (nc *NFTCreate) createSpec() (*NFT, *sqlgraph.CreateSpec, error) {
 	}
 	if value, ok := nc.mutation.Description(); ok {
 		_spec.SetField(nft.FieldDescription, field.TypeString, value)
-		_node.Description = value
+		_node.Description = &value
 	}
 	if value, ok := nc.mutation.Name(); ok {
 		_spec.SetField(nft.FieldName, field.TypeString, value)
-		_node.Name = value
+		_node.Name = &value
 	}
 	if value, ok := nc.mutation.Attributes(); ok {
 		_spec.SetField(nft.FieldAttributes, field.TypeJSON, value)

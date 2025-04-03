@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
+	"likenft-indexer/ent/schema/typeutil"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -38,8 +39,8 @@ func (eepbhc *EVMEventProcessedBlockHeightCreate) SetEvent(e evmeventprocessedbl
 }
 
 // SetBlockHeight sets the "block_height" field.
-func (eepbhc *EVMEventProcessedBlockHeightCreate) SetBlockHeight(u uint64) *EVMEventProcessedBlockHeightCreate {
-	eepbhc.mutation.SetBlockHeight(u)
+func (eepbhc *EVMEventProcessedBlockHeightCreate) SetBlockHeight(t typeutil.Uint64) *EVMEventProcessedBlockHeightCreate {
+	eepbhc.mutation.SetBlockHeight(t)
 	return eepbhc
 }
 
@@ -111,7 +112,10 @@ func (eepbhc *EVMEventProcessedBlockHeightCreate) sqlSave(ctx context.Context) (
 	if err := eepbhc.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := eepbhc.createSpec()
+	_node, _spec, err := eepbhc.createSpec()
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, eepbhc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
@@ -125,7 +129,7 @@ func (eepbhc *EVMEventProcessedBlockHeightCreate) sqlSave(ctx context.Context) (
 	return _node, nil
 }
 
-func (eepbhc *EVMEventProcessedBlockHeightCreate) createSpec() (*EVMEventProcessedBlockHeight, *sqlgraph.CreateSpec) {
+func (eepbhc *EVMEventProcessedBlockHeightCreate) createSpec() (*EVMEventProcessedBlockHeight, *sqlgraph.CreateSpec, error) {
 	var (
 		_node = &EVMEventProcessedBlockHeight{config: eepbhc.config}
 		_spec = sqlgraph.NewCreateSpec(evmeventprocessedblockheight.Table, sqlgraph.NewFieldSpec(evmeventprocessedblockheight.FieldID, field.TypeInt))
@@ -143,10 +147,14 @@ func (eepbhc *EVMEventProcessedBlockHeightCreate) createSpec() (*EVMEventProcess
 		_node.Event = value
 	}
 	if value, ok := eepbhc.mutation.BlockHeight(); ok {
-		_spec.SetField(evmeventprocessedblockheight.FieldBlockHeight, field.TypeUint64, value)
+		vv, err := evmeventprocessedblockheight.ValueScanner.BlockHeight.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(evmeventprocessedblockheight.FieldBlockHeight, field.TypeUint64, vv)
 		_node.BlockHeight = value
 	}
-	return _node, _spec
+	return _node, _spec, nil
 }
 
 // EVMEventProcessedBlockHeightCreateBulk is the builder for creating many EVMEventProcessedBlockHeight entities in bulk.
@@ -177,7 +185,10 @@ func (eepbhcb *EVMEventProcessedBlockHeightCreateBulk) Save(ctx context.Context)
 				}
 				builder.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = builder.createSpec()
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, eepbhcb.builders[i+1].mutation)
 				} else {

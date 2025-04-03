@@ -4,14 +4,15 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
-	"strconv"
 	"time"
 
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
+	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/evm"
 	"likenft-indexer/internal/evm/like_protocol"
+	"likenft-indexer/internal/evm/model"
 	"likenft-indexer/internal/evm/util/logconverter"
 	"likenft-indexer/internal/util/jsondatauri"
 
@@ -61,7 +62,7 @@ func (e *newBookNFTProcessor) Process(
 		return err
 	}
 
-	contractLevelMetadata := make(map[string]any)
+	contractLevelMetadata := new(model.ContractLevelMetadata)
 	err = jsondatauri.JSONDataUri(newBookNFTEvent.Config.Metadata).Resolve(e.httpClient, &contractLevelMetadata)
 
 	if err != nil {
@@ -70,6 +71,7 @@ func (e *newBookNFTProcessor) Process(
 	}
 
 	ownerAddress, err := e.evmClient.GetBookNFTOwner(ctx, newBookNFTEvent.BookNFT)
+	ownerAddressStr := ownerAddress.Hex()
 
 	if err != nil {
 		mylogger.Error("e.evmClient.GetBookNFTOwner", "err", err)
@@ -78,7 +80,7 @@ func (e *newBookNFTProcessor) Process(
 
 	account, err := e.accountRepository.GetOrCreateAccount(ctx, &ent.Account{
 		CosmosAddress: nil,
-		EvmAddress:    ownerAddress.Hex(),
+		EvmAddress:    ownerAddressStr,
 		Likeid:        nil,
 	})
 
@@ -87,26 +89,30 @@ func (e *newBookNFTProcessor) Process(
 		return err
 	}
 
-	nftClass := &ent.NFTClass{
-		Address:             newBookNFTEvent.BookNFT.Hex(),
-		Name:                newBookNFTEvent.Config.Name,
-		Symbol:              newBookNFTEvent.Config.Symbol,
-		OwnerAddress:        nil,        // TODO
-		MinterAddresses:     []string{}, // TODO
-		TotalSupply:         int(newBookNFTEvent.Config.MaxSupply),
-		Metadata:            contractLevelMetadata,
-		BannerImage:         "",                                    // NO DATA
-		FeaturedImage:       "",                                    // NO DATA
-		DeployerAddress:     common.BytesToAddress([]byte{}).Hex(), // TODO
-		DeployedBlockNumber: strconv.FormatUint(evmEvent.BlockNumber, 10),
-		MintedAt:            time.Now(), // TODO
-		UpdatedAt:           time.Now(), // TODO
-		Edges: ent.NFTClassEdges{
-			Owner: account,
-		},
+	totalSupply, err := e.evmClient.GetTotalSupply(ctx, newBookNFTEvent.BookNFT)
+
+	if err != nil {
+		mylogger.Error("e.accountRepository.GetOrCreateAccount", "err", err)
+		return err
 	}
 
-	return e.nftClassRepository.InsertNFTClass(ctx, nftClass)
+	return e.nftClassRepository.InsertNFTClass(
+		ctx,
+		newBookNFTEvent.BookNFT.Hex(),
+		newBookNFTEvent.Config.Name,
+		newBookNFTEvent.Config.Symbol,
+		&ownerAddressStr, // TODO
+		[]string{},       // TODO
+		totalSupply,
+		typeutil.Uint64(newBookNFTEvent.Config.MaxSupply),
+		contractLevelMetadata,
+		"",
+		"",
+		common.BytesToAddress([]byte{}).Hex(),
+		evmEvent.BlockNumber,
+		time.Now(),
+		account,
+	)
 }
 
 func init() {

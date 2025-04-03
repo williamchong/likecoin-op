@@ -12,6 +12,7 @@ import (
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/predicate"
+	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/ent/transactionmemo"
 	"likenft-indexer/internal/evm/model"
 	"math/big"
@@ -700,8 +701,8 @@ type EVMEventMutation struct {
 	transaction_index    *uint
 	addtransaction_index *int
 	block_hash           *string
-	block_number         *uint64
-	addblock_number      *int64
+	block_number         *typeutil.Uint64
+	addblock_number      *typeutil.Uint64
 	log_index            *uint
 	addlog_index         *int
 	address              *string
@@ -952,13 +953,13 @@ func (m *EVMEventMutation) ResetBlockHash() {
 }
 
 // SetBlockNumber sets the "block_number" field.
-func (m *EVMEventMutation) SetBlockNumber(u uint64) {
-	m.block_number = &u
+func (m *EVMEventMutation) SetBlockNumber(t typeutil.Uint64) {
+	m.block_number = &t
 	m.addblock_number = nil
 }
 
 // BlockNumber returns the value of the "block_number" field in the mutation.
-func (m *EVMEventMutation) BlockNumber() (r uint64, exists bool) {
+func (m *EVMEventMutation) BlockNumber() (r typeutil.Uint64, exists bool) {
 	v := m.block_number
 	if v == nil {
 		return
@@ -969,7 +970,7 @@ func (m *EVMEventMutation) BlockNumber() (r uint64, exists bool) {
 // OldBlockNumber returns the old "block_number" field's value of the EVMEvent entity.
 // If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EVMEventMutation) OldBlockNumber(ctx context.Context) (v uint64, err error) {
+func (m *EVMEventMutation) OldBlockNumber(ctx context.Context) (v typeutil.Uint64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldBlockNumber is only allowed on UpdateOne operations")
 	}
@@ -983,17 +984,17 @@ func (m *EVMEventMutation) OldBlockNumber(ctx context.Context) (v uint64, err er
 	return oldValue.BlockNumber, nil
 }
 
-// AddBlockNumber adds u to the "block_number" field.
-func (m *EVMEventMutation) AddBlockNumber(u int64) {
+// AddBlockNumber adds t to the "block_number" field.
+func (m *EVMEventMutation) AddBlockNumber(t typeutil.Uint64) {
 	if m.addblock_number != nil {
-		*m.addblock_number += u
+		*m.addblock_number += t
 	} else {
-		m.addblock_number = &u
+		m.addblock_number = &t
 	}
 }
 
 // AddedBlockNumber returns the value that was added to the "block_number" field in this mutation.
-func (m *EVMEventMutation) AddedBlockNumber() (r int64, exists bool) {
+func (m *EVMEventMutation) AddedBlockNumber() (r typeutil.Uint64, exists bool) {
 	v := m.addblock_number
 	if v == nil {
 		return
@@ -1943,7 +1944,7 @@ func (m *EVMEventMutation) SetField(name string, value ent.Value) error {
 		m.SetBlockHash(v)
 		return nil
 	case evmevent.FieldBlockNumber:
-		v, ok := value.(uint64)
+		v, ok := value.(typeutil.Uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2109,7 +2110,7 @@ func (m *EVMEventMutation) AddField(name string, value ent.Value) error {
 		m.AddTransactionIndex(v)
 		return nil
 	case evmevent.FieldBlockNumber:
-		v, ok := value.(int64)
+		v, ok := value.(typeutil.Uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2327,8 +2328,8 @@ type EVMEventProcessedBlockHeightMutation struct {
 	contract_type    *evmeventprocessedblockheight.ContractType
 	contract_address *string
 	event            *evmeventprocessedblockheight.Event
-	block_height     *uint64
-	addblock_height  *int64
+	block_height     *typeutil.Uint64
+	addblock_height  *typeutil.Uint64
 	clearedFields    map[string]struct{}
 	done             bool
 	oldValue         func(context.Context) (*EVMEventProcessedBlockHeight, error)
@@ -2542,13 +2543,13 @@ func (m *EVMEventProcessedBlockHeightMutation) ResetEvent() {
 }
 
 // SetBlockHeight sets the "block_height" field.
-func (m *EVMEventProcessedBlockHeightMutation) SetBlockHeight(u uint64) {
-	m.block_height = &u
+func (m *EVMEventProcessedBlockHeightMutation) SetBlockHeight(t typeutil.Uint64) {
+	m.block_height = &t
 	m.addblock_height = nil
 }
 
 // BlockHeight returns the value of the "block_height" field in the mutation.
-func (m *EVMEventProcessedBlockHeightMutation) BlockHeight() (r uint64, exists bool) {
+func (m *EVMEventProcessedBlockHeightMutation) BlockHeight() (r typeutil.Uint64, exists bool) {
 	v := m.block_height
 	if v == nil {
 		return
@@ -2559,7 +2560,7 @@ func (m *EVMEventProcessedBlockHeightMutation) BlockHeight() (r uint64, exists b
 // OldBlockHeight returns the old "block_height" field's value of the EVMEventProcessedBlockHeight entity.
 // If the EVMEventProcessedBlockHeight object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EVMEventProcessedBlockHeightMutation) OldBlockHeight(ctx context.Context) (v uint64, err error) {
+func (m *EVMEventProcessedBlockHeightMutation) OldBlockHeight(ctx context.Context) (v typeutil.Uint64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldBlockHeight is only allowed on UpdateOne operations")
 	}
@@ -2573,17 +2574,17 @@ func (m *EVMEventProcessedBlockHeightMutation) OldBlockHeight(ctx context.Contex
 	return oldValue.BlockHeight, nil
 }
 
-// AddBlockHeight adds u to the "block_height" field.
-func (m *EVMEventProcessedBlockHeightMutation) AddBlockHeight(u int64) {
+// AddBlockHeight adds t to the "block_height" field.
+func (m *EVMEventProcessedBlockHeightMutation) AddBlockHeight(t typeutil.Uint64) {
 	if m.addblock_height != nil {
-		*m.addblock_height += u
+		*m.addblock_height += t
 	} else {
-		m.addblock_height = &u
+		m.addblock_height = &t
 	}
 }
 
 // AddedBlockHeight returns the value that was added to the "block_height" field in this mutation.
-func (m *EVMEventProcessedBlockHeightMutation) AddedBlockHeight() (r int64, exists bool) {
+func (m *EVMEventProcessedBlockHeightMutation) AddedBlockHeight() (r typeutil.Uint64, exists bool) {
 	v := m.addblock_height
 	if v == nil {
 		return
@@ -2708,7 +2709,7 @@ func (m *EVMEventProcessedBlockHeightMutation) SetField(name string, value ent.V
 		m.SetEvent(v)
 		return nil
 	case evmeventprocessedblockheight.FieldBlockHeight:
-		v, ok := value.(uint64)
+		v, ok := value.(typeutil.Uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2745,7 +2746,7 @@ func (m *EVMEventProcessedBlockHeightMutation) AddedField(name string) (ent.Valu
 func (m *EVMEventProcessedBlockHeightMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case evmeventprocessedblockheight.FieldBlockHeight:
-		v, ok := value.(int64)
+		v, ok := value.(typeutil.Uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -3061,7 +3062,7 @@ func (m *NFTMutation) TokenURI() (r string, exists bool) {
 // OldTokenURI returns the old "token_uri" field's value of the NFT entity.
 // If the NFT object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NFTMutation) OldTokenURI(ctx context.Context) (v string, err error) {
+func (m *NFTMutation) OldTokenURI(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldTokenURI is only allowed on UpdateOne operations")
 	}
@@ -3075,9 +3076,22 @@ func (m *NFTMutation) OldTokenURI(ctx context.Context) (v string, err error) {
 	return oldValue.TokenURI, nil
 }
 
+// ClearTokenURI clears the value of the "token_uri" field.
+func (m *NFTMutation) ClearTokenURI() {
+	m.token_uri = nil
+	m.clearedFields[nft.FieldTokenURI] = struct{}{}
+}
+
+// TokenURICleared returns if the "token_uri" field was cleared in this mutation.
+func (m *NFTMutation) TokenURICleared() bool {
+	_, ok := m.clearedFields[nft.FieldTokenURI]
+	return ok
+}
+
 // ResetTokenURI resets all changes to the "token_uri" field.
 func (m *NFTMutation) ResetTokenURI() {
 	m.token_uri = nil
+	delete(m.clearedFields, nft.FieldTokenURI)
 }
 
 // SetImage sets the "image" field.
@@ -3097,7 +3111,7 @@ func (m *NFTMutation) Image() (r string, exists bool) {
 // OldImage returns the old "image" field's value of the NFT entity.
 // If the NFT object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NFTMutation) OldImage(ctx context.Context) (v string, err error) {
+func (m *NFTMutation) OldImage(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldImage is only allowed on UpdateOne operations")
 	}
@@ -3111,9 +3125,22 @@ func (m *NFTMutation) OldImage(ctx context.Context) (v string, err error) {
 	return oldValue.Image, nil
 }
 
+// ClearImage clears the value of the "image" field.
+func (m *NFTMutation) ClearImage() {
+	m.image = nil
+	m.clearedFields[nft.FieldImage] = struct{}{}
+}
+
+// ImageCleared returns if the "image" field was cleared in this mutation.
+func (m *NFTMutation) ImageCleared() bool {
+	_, ok := m.clearedFields[nft.FieldImage]
+	return ok
+}
+
 // ResetImage resets all changes to the "image" field.
 func (m *NFTMutation) ResetImage() {
 	m.image = nil
+	delete(m.clearedFields, nft.FieldImage)
 }
 
 // SetImageData sets the "image_data" field.
@@ -3231,7 +3258,7 @@ func (m *NFTMutation) Description() (r string, exists bool) {
 // OldDescription returns the old "description" field's value of the NFT entity.
 // If the NFT object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NFTMutation) OldDescription(ctx context.Context) (v string, err error) {
+func (m *NFTMutation) OldDescription(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
 	}
@@ -3245,9 +3272,22 @@ func (m *NFTMutation) OldDescription(ctx context.Context) (v string, err error) 
 	return oldValue.Description, nil
 }
 
+// ClearDescription clears the value of the "description" field.
+func (m *NFTMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[nft.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *NFTMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[nft.FieldDescription]
+	return ok
+}
+
 // ResetDescription resets all changes to the "description" field.
 func (m *NFTMutation) ResetDescription() {
 	m.description = nil
+	delete(m.clearedFields, nft.FieldDescription)
 }
 
 // SetName sets the "name" field.
@@ -3267,7 +3307,7 @@ func (m *NFTMutation) Name() (r string, exists bool) {
 // OldName returns the old "name" field's value of the NFT entity.
 // If the NFT object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NFTMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *NFTMutation) OldName(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldName is only allowed on UpdateOne operations")
 	}
@@ -3281,9 +3321,22 @@ func (m *NFTMutation) OldName(ctx context.Context) (v string, err error) {
 	return oldValue.Name, nil
 }
 
+// ClearName clears the value of the "name" field.
+func (m *NFTMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[nft.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *NFTMutation) NameCleared() bool {
+	_, ok := m.clearedFields[nft.FieldName]
+	return ok
+}
+
 // ResetName resets all changes to the "name" field.
 func (m *NFTMutation) ResetName() {
 	m.name = nil
+	delete(m.clearedFields, nft.FieldName)
 }
 
 // SetAttributes sets the "attributes" field.
@@ -3985,11 +4038,23 @@ func (m *NFTMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *NFTMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(nft.FieldTokenURI) {
+		fields = append(fields, nft.FieldTokenURI)
+	}
+	if m.FieldCleared(nft.FieldImage) {
+		fields = append(fields, nft.FieldImage)
+	}
 	if m.FieldCleared(nft.FieldImageData) {
 		fields = append(fields, nft.FieldImageData)
 	}
 	if m.FieldCleared(nft.FieldExternalURL) {
 		fields = append(fields, nft.FieldExternalURL)
+	}
+	if m.FieldCleared(nft.FieldDescription) {
+		fields = append(fields, nft.FieldDescription)
+	}
+	if m.FieldCleared(nft.FieldName) {
+		fields = append(fields, nft.FieldName)
 	}
 	if m.FieldCleared(nft.FieldAttributes) {
 		fields = append(fields, nft.FieldAttributes)
@@ -4017,11 +4082,23 @@ func (m *NFTMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *NFTMutation) ClearField(name string) error {
 	switch name {
+	case nft.FieldTokenURI:
+		m.ClearTokenURI()
+		return nil
+	case nft.FieldImage:
+		m.ClearImage()
+		return nil
 	case nft.FieldImageData:
 		m.ClearImageData()
 		return nil
 	case nft.FieldExternalURL:
 		m.ClearExternalURL()
+		return nil
+	case nft.FieldDescription:
+		m.ClearDescription()
+		return nil
+	case nft.FieldName:
+		m.ClearName()
 		return nil
 	case nft.FieldAttributes:
 		m.ClearAttributes()
@@ -4187,33 +4264,35 @@ func (m *NFTMutation) ResetEdge(name string) error {
 // NFTClassMutation represents an operation that mutates the NFTClass nodes in the graph.
 type NFTClassMutation struct {
 	config
-	op                     Op
-	typ                    string
-	id                     *int
-	address                *string
-	name                   *string
-	symbol                 *string
-	owner_address          *string
-	minter_addresses       *[]string
-	appendminter_addresses []string
-	total_supply           *int
-	addtotal_supply        *int
-	metadata               *map[string]interface{}
-	banner_image           *string
-	featured_image         *string
-	deployer_address       *string
-	deployed_block_number  *string
-	minted_at              *time.Time
-	updated_at             *time.Time
-	clearedFields          map[string]struct{}
-	nfts                   map[int]struct{}
-	removednfts            map[int]struct{}
-	clearednfts            bool
-	owner                  *int
-	clearedowner           bool
-	done                   bool
-	oldValue               func(context.Context) (*NFTClass, error)
-	predicates             []predicate.NFTClass
+	op                       Op
+	typ                      string
+	id                       *int
+	address                  *string
+	name                     *string
+	symbol                   *string
+	owner_address            *string
+	minter_addresses         *[]string
+	appendminter_addresses   []string
+	total_supply             **big.Int
+	max_supply               *typeutil.Uint64
+	addmax_supply            *typeutil.Uint64
+	metadata                 **model.ContractLevelMetadata
+	banner_image             *string
+	featured_image           *string
+	deployer_address         *string
+	deployed_block_number    *typeutil.Uint64
+	adddeployed_block_number *typeutil.Uint64
+	minted_at                *time.Time
+	updated_at               *time.Time
+	clearedFields            map[string]struct{}
+	nfts                     map[int]struct{}
+	removednfts              map[int]struct{}
+	clearednfts              bool
+	owner                    *int
+	clearedowner             bool
+	done                     bool
+	oldValue                 func(context.Context) (*NFTClass, error)
+	predicates               []predicate.NFTClass
 }
 
 var _ ent.Mutation = (*NFTClassMutation)(nil)
@@ -4537,13 +4616,12 @@ func (m *NFTClassMutation) ResetMinterAddresses() {
 }
 
 // SetTotalSupply sets the "total_supply" field.
-func (m *NFTClassMutation) SetTotalSupply(i int) {
-	m.total_supply = &i
-	m.addtotal_supply = nil
+func (m *NFTClassMutation) SetTotalSupply(b *big.Int) {
+	m.total_supply = &b
 }
 
 // TotalSupply returns the value of the "total_supply" field in the mutation.
-func (m *NFTClassMutation) TotalSupply() (r int, exists bool) {
+func (m *NFTClassMutation) TotalSupply() (r *big.Int, exists bool) {
 	v := m.total_supply
 	if v == nil {
 		return
@@ -4554,7 +4632,7 @@ func (m *NFTClassMutation) TotalSupply() (r int, exists bool) {
 // OldTotalSupply returns the old "total_supply" field's value of the NFTClass entity.
 // If the NFTClass object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NFTClassMutation) OldTotalSupply(ctx context.Context) (v int, err error) {
+func (m *NFTClassMutation) OldTotalSupply(ctx context.Context) (v *big.Int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldTotalSupply is only allowed on UpdateOne operations")
 	}
@@ -4568,37 +4646,74 @@ func (m *NFTClassMutation) OldTotalSupply(ctx context.Context) (v int, err error
 	return oldValue.TotalSupply, nil
 }
 
-// AddTotalSupply adds i to the "total_supply" field.
-func (m *NFTClassMutation) AddTotalSupply(i int) {
-	if m.addtotal_supply != nil {
-		*m.addtotal_supply += i
-	} else {
-		m.addtotal_supply = &i
-	}
+// ResetTotalSupply resets all changes to the "total_supply" field.
+func (m *NFTClassMutation) ResetTotalSupply() {
+	m.total_supply = nil
 }
 
-// AddedTotalSupply returns the value that was added to the "total_supply" field in this mutation.
-func (m *NFTClassMutation) AddedTotalSupply() (r int, exists bool) {
-	v := m.addtotal_supply
+// SetMaxSupply sets the "max_supply" field.
+func (m *NFTClassMutation) SetMaxSupply(t typeutil.Uint64) {
+	m.max_supply = &t
+	m.addmax_supply = nil
+}
+
+// MaxSupply returns the value of the "max_supply" field in the mutation.
+func (m *NFTClassMutation) MaxSupply() (r typeutil.Uint64, exists bool) {
+	v := m.max_supply
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetTotalSupply resets all changes to the "total_supply" field.
-func (m *NFTClassMutation) ResetTotalSupply() {
-	m.total_supply = nil
-	m.addtotal_supply = nil
+// OldMaxSupply returns the old "max_supply" field's value of the NFTClass entity.
+// If the NFTClass object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NFTClassMutation) OldMaxSupply(ctx context.Context) (v typeutil.Uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxSupply is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxSupply requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxSupply: %w", err)
+	}
+	return oldValue.MaxSupply, nil
+}
+
+// AddMaxSupply adds t to the "max_supply" field.
+func (m *NFTClassMutation) AddMaxSupply(t typeutil.Uint64) {
+	if m.addmax_supply != nil {
+		*m.addmax_supply += t
+	} else {
+		m.addmax_supply = &t
+	}
+}
+
+// AddedMaxSupply returns the value that was added to the "max_supply" field in this mutation.
+func (m *NFTClassMutation) AddedMaxSupply() (r typeutil.Uint64, exists bool) {
+	v := m.addmax_supply
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMaxSupply resets all changes to the "max_supply" field.
+func (m *NFTClassMutation) ResetMaxSupply() {
+	m.max_supply = nil
+	m.addmax_supply = nil
 }
 
 // SetMetadata sets the "metadata" field.
-func (m *NFTClassMutation) SetMetadata(value map[string]interface{}) {
-	m.metadata = &value
+func (m *NFTClassMutation) SetMetadata(mlm *model.ContractLevelMetadata) {
+	m.metadata = &mlm
 }
 
 // Metadata returns the value of the "metadata" field in the mutation.
-func (m *NFTClassMutation) Metadata() (r map[string]interface{}, exists bool) {
+func (m *NFTClassMutation) Metadata() (r *model.ContractLevelMetadata, exists bool) {
 	v := m.metadata
 	if v == nil {
 		return
@@ -4609,7 +4724,7 @@ func (m *NFTClassMutation) Metadata() (r map[string]interface{}, exists bool) {
 // OldMetadata returns the old "metadata" field's value of the NFTClass entity.
 // If the NFTClass object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NFTClassMutation) OldMetadata(ctx context.Context) (v map[string]interface{}, err error) {
+func (m *NFTClassMutation) OldMetadata(ctx context.Context) (v *model.ContractLevelMetadata, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldMetadata is only allowed on UpdateOne operations")
 	}
@@ -4750,12 +4865,13 @@ func (m *NFTClassMutation) ResetDeployerAddress() {
 }
 
 // SetDeployedBlockNumber sets the "deployed_block_number" field.
-func (m *NFTClassMutation) SetDeployedBlockNumber(s string) {
-	m.deployed_block_number = &s
+func (m *NFTClassMutation) SetDeployedBlockNumber(t typeutil.Uint64) {
+	m.deployed_block_number = &t
+	m.adddeployed_block_number = nil
 }
 
 // DeployedBlockNumber returns the value of the "deployed_block_number" field in the mutation.
-func (m *NFTClassMutation) DeployedBlockNumber() (r string, exists bool) {
+func (m *NFTClassMutation) DeployedBlockNumber() (r typeutil.Uint64, exists bool) {
 	v := m.deployed_block_number
 	if v == nil {
 		return
@@ -4766,7 +4882,7 @@ func (m *NFTClassMutation) DeployedBlockNumber() (r string, exists bool) {
 // OldDeployedBlockNumber returns the old "deployed_block_number" field's value of the NFTClass entity.
 // If the NFTClass object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NFTClassMutation) OldDeployedBlockNumber(ctx context.Context) (v string, err error) {
+func (m *NFTClassMutation) OldDeployedBlockNumber(ctx context.Context) (v typeutil.Uint64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDeployedBlockNumber is only allowed on UpdateOne operations")
 	}
@@ -4780,9 +4896,28 @@ func (m *NFTClassMutation) OldDeployedBlockNumber(ctx context.Context) (v string
 	return oldValue.DeployedBlockNumber, nil
 }
 
+// AddDeployedBlockNumber adds t to the "deployed_block_number" field.
+func (m *NFTClassMutation) AddDeployedBlockNumber(t typeutil.Uint64) {
+	if m.adddeployed_block_number != nil {
+		*m.adddeployed_block_number += t
+	} else {
+		m.adddeployed_block_number = &t
+	}
+}
+
+// AddedDeployedBlockNumber returns the value that was added to the "deployed_block_number" field in this mutation.
+func (m *NFTClassMutation) AddedDeployedBlockNumber() (r typeutil.Uint64, exists bool) {
+	v := m.adddeployed_block_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetDeployedBlockNumber resets all changes to the "deployed_block_number" field.
 func (m *NFTClassMutation) ResetDeployedBlockNumber() {
 	m.deployed_block_number = nil
+	m.adddeployed_block_number = nil
 }
 
 // SetMintedAt sets the "minted_at" field.
@@ -4984,7 +5119,7 @@ func (m *NFTClassMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *NFTClassMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 14)
 	if m.address != nil {
 		fields = append(fields, nftclass.FieldAddress)
 	}
@@ -5002,6 +5137,9 @@ func (m *NFTClassMutation) Fields() []string {
 	}
 	if m.total_supply != nil {
 		fields = append(fields, nftclass.FieldTotalSupply)
+	}
+	if m.max_supply != nil {
+		fields = append(fields, nftclass.FieldMaxSupply)
 	}
 	if m.metadata != nil {
 		fields = append(fields, nftclass.FieldMetadata)
@@ -5044,6 +5182,8 @@ func (m *NFTClassMutation) Field(name string) (ent.Value, bool) {
 		return m.MinterAddresses()
 	case nftclass.FieldTotalSupply:
 		return m.TotalSupply()
+	case nftclass.FieldMaxSupply:
+		return m.MaxSupply()
 	case nftclass.FieldMetadata:
 		return m.Metadata()
 	case nftclass.FieldBannerImage:
@@ -5079,6 +5219,8 @@ func (m *NFTClassMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldMinterAddresses(ctx)
 	case nftclass.FieldTotalSupply:
 		return m.OldTotalSupply(ctx)
+	case nftclass.FieldMaxSupply:
+		return m.OldMaxSupply(ctx)
 	case nftclass.FieldMetadata:
 		return m.OldMetadata(ctx)
 	case nftclass.FieldBannerImage:
@@ -5138,14 +5280,21 @@ func (m *NFTClassMutation) SetField(name string, value ent.Value) error {
 		m.SetMinterAddresses(v)
 		return nil
 	case nftclass.FieldTotalSupply:
-		v, ok := value.(int)
+		v, ok := value.(*big.Int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTotalSupply(v)
 		return nil
+	case nftclass.FieldMaxSupply:
+		v, ok := value.(typeutil.Uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxSupply(v)
+		return nil
 	case nftclass.FieldMetadata:
-		v, ok := value.(map[string]interface{})
+		v, ok := value.(*model.ContractLevelMetadata)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -5173,7 +5322,7 @@ func (m *NFTClassMutation) SetField(name string, value ent.Value) error {
 		m.SetDeployerAddress(v)
 		return nil
 	case nftclass.FieldDeployedBlockNumber:
-		v, ok := value.(string)
+		v, ok := value.(typeutil.Uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -5201,8 +5350,11 @@ func (m *NFTClassMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *NFTClassMutation) AddedFields() []string {
 	var fields []string
-	if m.addtotal_supply != nil {
-		fields = append(fields, nftclass.FieldTotalSupply)
+	if m.addmax_supply != nil {
+		fields = append(fields, nftclass.FieldMaxSupply)
+	}
+	if m.adddeployed_block_number != nil {
+		fields = append(fields, nftclass.FieldDeployedBlockNumber)
 	}
 	return fields
 }
@@ -5212,8 +5364,10 @@ func (m *NFTClassMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *NFTClassMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case nftclass.FieldTotalSupply:
-		return m.AddedTotalSupply()
+	case nftclass.FieldMaxSupply:
+		return m.AddedMaxSupply()
+	case nftclass.FieldDeployedBlockNumber:
+		return m.AddedDeployedBlockNumber()
 	}
 	return nil, false
 }
@@ -5223,12 +5377,19 @@ func (m *NFTClassMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *NFTClassMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case nftclass.FieldTotalSupply:
-		v, ok := value.(int)
+	case nftclass.FieldMaxSupply:
+		v, ok := value.(typeutil.Uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddTotalSupply(v)
+		m.AddMaxSupply(v)
+		return nil
+	case nftclass.FieldDeployedBlockNumber:
+		v, ok := value.(typeutil.Uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDeployedBlockNumber(v)
 		return nil
 	}
 	return fmt.Errorf("unknown NFTClass numeric field %s", name)
@@ -5295,6 +5456,9 @@ func (m *NFTClassMutation) ResetField(name string) error {
 		return nil
 	case nftclass.FieldTotalSupply:
 		m.ResetTotalSupply()
+		return nil
+	case nftclass.FieldMaxSupply:
+		m.ResetMaxSupply()
 		return nil
 	case nftclass.FieldMetadata:
 		m.ResetMetadata()
@@ -5433,11 +5597,11 @@ type TransactionMemoMutation struct {
 	book_nft_id      *string
 	from             *string
 	to               *string
-	token_id         *uint64
-	addtoken_id      *int64
+	token_id         *typeutil.Uint64
+	addtoken_id      *typeutil.Uint64
 	memo             *string
-	block_number     *uint64
-	addblock_number  *int64
+	block_number     *typeutil.Uint64
+	addblock_number  *typeutil.Uint64
 	clearedFields    map[string]struct{}
 	done             bool
 	oldValue         func(context.Context) (*TransactionMemo, error)
@@ -5687,13 +5851,13 @@ func (m *TransactionMemoMutation) ResetTo() {
 }
 
 // SetTokenID sets the "token_id" field.
-func (m *TransactionMemoMutation) SetTokenID(u uint64) {
-	m.token_id = &u
+func (m *TransactionMemoMutation) SetTokenID(t typeutil.Uint64) {
+	m.token_id = &t
 	m.addtoken_id = nil
 }
 
 // TokenID returns the value of the "token_id" field in the mutation.
-func (m *TransactionMemoMutation) TokenID() (r uint64, exists bool) {
+func (m *TransactionMemoMutation) TokenID() (r typeutil.Uint64, exists bool) {
 	v := m.token_id
 	if v == nil {
 		return
@@ -5704,7 +5868,7 @@ func (m *TransactionMemoMutation) TokenID() (r uint64, exists bool) {
 // OldTokenID returns the old "token_id" field's value of the TransactionMemo entity.
 // If the TransactionMemo object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TransactionMemoMutation) OldTokenID(ctx context.Context) (v uint64, err error) {
+func (m *TransactionMemoMutation) OldTokenID(ctx context.Context) (v typeutil.Uint64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldTokenID is only allowed on UpdateOne operations")
 	}
@@ -5718,17 +5882,17 @@ func (m *TransactionMemoMutation) OldTokenID(ctx context.Context) (v uint64, err
 	return oldValue.TokenID, nil
 }
 
-// AddTokenID adds u to the "token_id" field.
-func (m *TransactionMemoMutation) AddTokenID(u int64) {
+// AddTokenID adds t to the "token_id" field.
+func (m *TransactionMemoMutation) AddTokenID(t typeutil.Uint64) {
 	if m.addtoken_id != nil {
-		*m.addtoken_id += u
+		*m.addtoken_id += t
 	} else {
-		m.addtoken_id = &u
+		m.addtoken_id = &t
 	}
 }
 
 // AddedTokenID returns the value that was added to the "token_id" field in this mutation.
-func (m *TransactionMemoMutation) AddedTokenID() (r int64, exists bool) {
+func (m *TransactionMemoMutation) AddedTokenID() (r typeutil.Uint64, exists bool) {
 	v := m.addtoken_id
 	if v == nil {
 		return
@@ -5779,13 +5943,13 @@ func (m *TransactionMemoMutation) ResetMemo() {
 }
 
 // SetBlockNumber sets the "block_number" field.
-func (m *TransactionMemoMutation) SetBlockNumber(u uint64) {
-	m.block_number = &u
+func (m *TransactionMemoMutation) SetBlockNumber(t typeutil.Uint64) {
+	m.block_number = &t
 	m.addblock_number = nil
 }
 
 // BlockNumber returns the value of the "block_number" field in the mutation.
-func (m *TransactionMemoMutation) BlockNumber() (r uint64, exists bool) {
+func (m *TransactionMemoMutation) BlockNumber() (r typeutil.Uint64, exists bool) {
 	v := m.block_number
 	if v == nil {
 		return
@@ -5796,7 +5960,7 @@ func (m *TransactionMemoMutation) BlockNumber() (r uint64, exists bool) {
 // OldBlockNumber returns the old "block_number" field's value of the TransactionMemo entity.
 // If the TransactionMemo object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TransactionMemoMutation) OldBlockNumber(ctx context.Context) (v uint64, err error) {
+func (m *TransactionMemoMutation) OldBlockNumber(ctx context.Context) (v typeutil.Uint64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldBlockNumber is only allowed on UpdateOne operations")
 	}
@@ -5810,17 +5974,17 @@ func (m *TransactionMemoMutation) OldBlockNumber(ctx context.Context) (v uint64,
 	return oldValue.BlockNumber, nil
 }
 
-// AddBlockNumber adds u to the "block_number" field.
-func (m *TransactionMemoMutation) AddBlockNumber(u int64) {
+// AddBlockNumber adds t to the "block_number" field.
+func (m *TransactionMemoMutation) AddBlockNumber(t typeutil.Uint64) {
 	if m.addblock_number != nil {
-		*m.addblock_number += u
+		*m.addblock_number += t
 	} else {
-		m.addblock_number = &u
+		m.addblock_number = &t
 	}
 }
 
 // AddedBlockNumber returns the value that was added to the "block_number" field in this mutation.
-func (m *TransactionMemoMutation) AddedBlockNumber() (r int64, exists bool) {
+func (m *TransactionMemoMutation) AddedBlockNumber() (r typeutil.Uint64, exists bool) {
 	v := m.addblock_number
 	if v == nil {
 		return
@@ -5973,7 +6137,7 @@ func (m *TransactionMemoMutation) SetField(name string, value ent.Value) error {
 		m.SetTo(v)
 		return nil
 	case transactionmemo.FieldTokenID:
-		v, ok := value.(uint64)
+		v, ok := value.(typeutil.Uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -5987,7 +6151,7 @@ func (m *TransactionMemoMutation) SetField(name string, value ent.Value) error {
 		m.SetMemo(v)
 		return nil
 	case transactionmemo.FieldBlockNumber:
-		v, ok := value.(uint64)
+		v, ok := value.(typeutil.Uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -6029,14 +6193,14 @@ func (m *TransactionMemoMutation) AddedField(name string) (ent.Value, bool) {
 func (m *TransactionMemoMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case transactionmemo.FieldTokenID:
-		v, ok := value.(int64)
+		v, ok := value.(typeutil.Uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddTokenID(v)
 		return nil
 	case transactionmemo.FieldBlockNumber:
-		v, ok := value.(int64)
+		v, ok := value.(typeutil.Uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

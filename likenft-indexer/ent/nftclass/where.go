@@ -4,6 +4,7 @@ package nftclass
 
 import (
 	"likenft-indexer/ent/predicate"
+	"likenft-indexer/ent/schema/typeutil"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -75,9 +76,10 @@ func OwnerAddress(v string) predicate.NFTClass {
 	return predicate.NFTClass(sql.FieldEQ(FieldOwnerAddress, v))
 }
 
-// TotalSupply applies equality check predicate on the "total_supply" field. It's identical to TotalSupplyEQ.
-func TotalSupply(v int) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldEQ(FieldTotalSupply, v))
+// MaxSupply applies equality check predicate on the "max_supply" field. It's identical to MaxSupplyEQ.
+func MaxSupply(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.MaxSupply.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldEQ(FieldMaxSupply, vc), err)
 }
 
 // BannerImage applies equality check predicate on the "banner_image" field. It's identical to BannerImageEQ.
@@ -96,8 +98,9 @@ func DeployerAddress(v string) predicate.NFTClass {
 }
 
 // DeployedBlockNumber applies equality check predicate on the "deployed_block_number" field. It's identical to DeployedBlockNumberEQ.
-func DeployedBlockNumber(v string) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldEQ(FieldDeployedBlockNumber, v))
+func DeployedBlockNumber(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.DeployedBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldEQ(FieldDeployedBlockNumber, vc), err)
 }
 
 // MintedAt applies equality check predicate on the "minted_at" field. It's identical to MintedAtEQ.
@@ -390,44 +393,68 @@ func MinterAddressesNotNil() predicate.NFTClass {
 	return predicate.NFTClass(sql.FieldNotNull(FieldMinterAddresses))
 }
 
-// TotalSupplyEQ applies the EQ predicate on the "total_supply" field.
-func TotalSupplyEQ(v int) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldEQ(FieldTotalSupply, v))
+// MaxSupplyEQ applies the EQ predicate on the "max_supply" field.
+func MaxSupplyEQ(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.MaxSupply.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldEQ(FieldMaxSupply, vc), err)
 }
 
-// TotalSupplyNEQ applies the NEQ predicate on the "total_supply" field.
-func TotalSupplyNEQ(v int) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldNEQ(FieldTotalSupply, v))
+// MaxSupplyNEQ applies the NEQ predicate on the "max_supply" field.
+func MaxSupplyNEQ(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.MaxSupply.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldNEQ(FieldMaxSupply, vc), err)
 }
 
-// TotalSupplyIn applies the In predicate on the "total_supply" field.
-func TotalSupplyIn(vs ...int) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldIn(FieldTotalSupply, vs...))
+// MaxSupplyIn applies the In predicate on the "max_supply" field.
+func MaxSupplyIn(vs ...typeutil.Uint64) predicate.NFTClass {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.MaxSupply.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.NFTClassOrErr(sql.FieldIn(FieldMaxSupply, v...), err)
 }
 
-// TotalSupplyNotIn applies the NotIn predicate on the "total_supply" field.
-func TotalSupplyNotIn(vs ...int) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldNotIn(FieldTotalSupply, vs...))
+// MaxSupplyNotIn applies the NotIn predicate on the "max_supply" field.
+func MaxSupplyNotIn(vs ...typeutil.Uint64) predicate.NFTClass {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.MaxSupply.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.NFTClassOrErr(sql.FieldNotIn(FieldMaxSupply, v...), err)
 }
 
-// TotalSupplyGT applies the GT predicate on the "total_supply" field.
-func TotalSupplyGT(v int) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldGT(FieldTotalSupply, v))
+// MaxSupplyGT applies the GT predicate on the "max_supply" field.
+func MaxSupplyGT(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.MaxSupply.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldGT(FieldMaxSupply, vc), err)
 }
 
-// TotalSupplyGTE applies the GTE predicate on the "total_supply" field.
-func TotalSupplyGTE(v int) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldGTE(FieldTotalSupply, v))
+// MaxSupplyGTE applies the GTE predicate on the "max_supply" field.
+func MaxSupplyGTE(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.MaxSupply.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldGTE(FieldMaxSupply, vc), err)
 }
 
-// TotalSupplyLT applies the LT predicate on the "total_supply" field.
-func TotalSupplyLT(v int) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldLT(FieldTotalSupply, v))
+// MaxSupplyLT applies the LT predicate on the "max_supply" field.
+func MaxSupplyLT(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.MaxSupply.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldLT(FieldMaxSupply, vc), err)
 }
 
-// TotalSupplyLTE applies the LTE predicate on the "total_supply" field.
-func TotalSupplyLTE(v int) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldLTE(FieldTotalSupply, v))
+// MaxSupplyLTE applies the LTE predicate on the "max_supply" field.
+func MaxSupplyLTE(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.MaxSupply.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldLTE(FieldMaxSupply, vc), err)
 }
 
 // MetadataIsNil applies the IsNil predicate on the "metadata" field.
@@ -636,68 +663,67 @@ func DeployerAddressContainsFold(v string) predicate.NFTClass {
 }
 
 // DeployedBlockNumberEQ applies the EQ predicate on the "deployed_block_number" field.
-func DeployedBlockNumberEQ(v string) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldEQ(FieldDeployedBlockNumber, v))
+func DeployedBlockNumberEQ(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.DeployedBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldEQ(FieldDeployedBlockNumber, vc), err)
 }
 
 // DeployedBlockNumberNEQ applies the NEQ predicate on the "deployed_block_number" field.
-func DeployedBlockNumberNEQ(v string) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldNEQ(FieldDeployedBlockNumber, v))
+func DeployedBlockNumberNEQ(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.DeployedBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldNEQ(FieldDeployedBlockNumber, vc), err)
 }
 
 // DeployedBlockNumberIn applies the In predicate on the "deployed_block_number" field.
-func DeployedBlockNumberIn(vs ...string) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldIn(FieldDeployedBlockNumber, vs...))
+func DeployedBlockNumberIn(vs ...typeutil.Uint64) predicate.NFTClass {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.DeployedBlockNumber.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.NFTClassOrErr(sql.FieldIn(FieldDeployedBlockNumber, v...), err)
 }
 
 // DeployedBlockNumberNotIn applies the NotIn predicate on the "deployed_block_number" field.
-func DeployedBlockNumberNotIn(vs ...string) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldNotIn(FieldDeployedBlockNumber, vs...))
+func DeployedBlockNumberNotIn(vs ...typeutil.Uint64) predicate.NFTClass {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.DeployedBlockNumber.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.NFTClassOrErr(sql.FieldNotIn(FieldDeployedBlockNumber, v...), err)
 }
 
 // DeployedBlockNumberGT applies the GT predicate on the "deployed_block_number" field.
-func DeployedBlockNumberGT(v string) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldGT(FieldDeployedBlockNumber, v))
+func DeployedBlockNumberGT(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.DeployedBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldGT(FieldDeployedBlockNumber, vc), err)
 }
 
 // DeployedBlockNumberGTE applies the GTE predicate on the "deployed_block_number" field.
-func DeployedBlockNumberGTE(v string) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldGTE(FieldDeployedBlockNumber, v))
+func DeployedBlockNumberGTE(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.DeployedBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldGTE(FieldDeployedBlockNumber, vc), err)
 }
 
 // DeployedBlockNumberLT applies the LT predicate on the "deployed_block_number" field.
-func DeployedBlockNumberLT(v string) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldLT(FieldDeployedBlockNumber, v))
+func DeployedBlockNumberLT(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.DeployedBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldLT(FieldDeployedBlockNumber, vc), err)
 }
 
 // DeployedBlockNumberLTE applies the LTE predicate on the "deployed_block_number" field.
-func DeployedBlockNumberLTE(v string) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldLTE(FieldDeployedBlockNumber, v))
-}
-
-// DeployedBlockNumberContains applies the Contains predicate on the "deployed_block_number" field.
-func DeployedBlockNumberContains(v string) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldContains(FieldDeployedBlockNumber, v))
-}
-
-// DeployedBlockNumberHasPrefix applies the HasPrefix predicate on the "deployed_block_number" field.
-func DeployedBlockNumberHasPrefix(v string) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldHasPrefix(FieldDeployedBlockNumber, v))
-}
-
-// DeployedBlockNumberHasSuffix applies the HasSuffix predicate on the "deployed_block_number" field.
-func DeployedBlockNumberHasSuffix(v string) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldHasSuffix(FieldDeployedBlockNumber, v))
-}
-
-// DeployedBlockNumberEqualFold applies the EqualFold predicate on the "deployed_block_number" field.
-func DeployedBlockNumberEqualFold(v string) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldEqualFold(FieldDeployedBlockNumber, v))
-}
-
-// DeployedBlockNumberContainsFold applies the ContainsFold predicate on the "deployed_block_number" field.
-func DeployedBlockNumberContainsFold(v string) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldContainsFold(FieldDeployedBlockNumber, v))
+func DeployedBlockNumberLTE(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.DeployedBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldLTE(FieldDeployedBlockNumber, vc), err)
 }
 
 // MintedAtEQ applies the EQ predicate on the "minted_at" field.

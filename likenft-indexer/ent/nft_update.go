@@ -67,6 +67,12 @@ func (nu *NFTUpdate) SetNillableTokenURI(s *string) *NFTUpdate {
 	return nu
 }
 
+// ClearTokenURI clears the value of the "token_uri" field.
+func (nu *NFTUpdate) ClearTokenURI() *NFTUpdate {
+	nu.mutation.ClearTokenURI()
+	return nu
+}
+
 // SetImage sets the "image" field.
 func (nu *NFTUpdate) SetImage(s string) *NFTUpdate {
 	nu.mutation.SetImage(s)
@@ -78,6 +84,12 @@ func (nu *NFTUpdate) SetNillableImage(s *string) *NFTUpdate {
 	if s != nil {
 		nu.SetImage(*s)
 	}
+	return nu
+}
+
+// ClearImage clears the value of the "image" field.
+func (nu *NFTUpdate) ClearImage() *NFTUpdate {
+	nu.mutation.ClearImage()
 	return nu
 }
 
@@ -135,6 +147,12 @@ func (nu *NFTUpdate) SetNillableDescription(s *string) *NFTUpdate {
 	return nu
 }
 
+// ClearDescription clears the value of the "description" field.
+func (nu *NFTUpdate) ClearDescription() *NFTUpdate {
+	nu.mutation.ClearDescription()
+	return nu
+}
+
 // SetName sets the "name" field.
 func (nu *NFTUpdate) SetName(s string) *NFTUpdate {
 	nu.mutation.SetName(s)
@@ -146,6 +164,12 @@ func (nu *NFTUpdate) SetNillableName(s *string) *NFTUpdate {
 	if s != nil {
 		nu.SetName(*s)
 	}
+	return nu
+}
+
+// ClearName clears the value of the "name" field.
+func (nu *NFTUpdate) ClearName() *NFTUpdate {
+	nu.mutation.ClearName()
 	return nu
 }
 
@@ -358,26 +382,6 @@ func (nu *NFTUpdate) check() error {
 			return &ValidationError{Name: "contract_address", err: fmt.Errorf(`ent: validator failed for field "NFT.contract_address": %w`, err)}
 		}
 	}
-	if v, ok := nu.mutation.TokenURI(); ok {
-		if err := nft.TokenURIValidator(v); err != nil {
-			return &ValidationError{Name: "token_uri", err: fmt.Errorf(`ent: validator failed for field "NFT.token_uri": %w`, err)}
-		}
-	}
-	if v, ok := nu.mutation.Image(); ok {
-		if err := nft.ImageValidator(v); err != nil {
-			return &ValidationError{Name: "image", err: fmt.Errorf(`ent: validator failed for field "NFT.image": %w`, err)}
-		}
-	}
-	if v, ok := nu.mutation.Description(); ok {
-		if err := nft.DescriptionValidator(v); err != nil {
-			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "NFT.description": %w`, err)}
-		}
-	}
-	if v, ok := nu.mutation.Name(); ok {
-		if err := nft.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "NFT.name": %w`, err)}
-		}
-	}
 	if v, ok := nu.mutation.OwnerAddress(); ok {
 		if err := nft.OwnerAddressValidator(v); err != nil {
 			return &ValidationError{Name: "owner_address", err: fmt.Errorf(`ent: validator failed for field "NFT.owner_address": %w`, err)}
@@ -411,8 +415,14 @@ func (nu *NFTUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := nu.mutation.TokenURI(); ok {
 		_spec.SetField(nft.FieldTokenURI, field.TypeString, value)
 	}
+	if nu.mutation.TokenURICleared() {
+		_spec.ClearField(nft.FieldTokenURI, field.TypeString)
+	}
 	if value, ok := nu.mutation.Image(); ok {
 		_spec.SetField(nft.FieldImage, field.TypeString, value)
+	}
+	if nu.mutation.ImageCleared() {
+		_spec.ClearField(nft.FieldImage, field.TypeString)
 	}
 	if value, ok := nu.mutation.ImageData(); ok {
 		_spec.SetField(nft.FieldImageData, field.TypeString, value)
@@ -429,8 +439,14 @@ func (nu *NFTUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := nu.mutation.Description(); ok {
 		_spec.SetField(nft.FieldDescription, field.TypeString, value)
 	}
+	if nu.mutation.DescriptionCleared() {
+		_spec.ClearField(nft.FieldDescription, field.TypeString)
+	}
 	if value, ok := nu.mutation.Name(); ok {
 		_spec.SetField(nft.FieldName, field.TypeString, value)
+	}
+	if nu.mutation.NameCleared() {
+		_spec.ClearField(nft.FieldName, field.TypeString)
 	}
 	if value, ok := nu.mutation.Attributes(); ok {
 		_spec.SetField(nft.FieldAttributes, field.TypeJSON, value)
@@ -582,6 +598,12 @@ func (nuo *NFTUpdateOne) SetNillableTokenURI(s *string) *NFTUpdateOne {
 	return nuo
 }
 
+// ClearTokenURI clears the value of the "token_uri" field.
+func (nuo *NFTUpdateOne) ClearTokenURI() *NFTUpdateOne {
+	nuo.mutation.ClearTokenURI()
+	return nuo
+}
+
 // SetImage sets the "image" field.
 func (nuo *NFTUpdateOne) SetImage(s string) *NFTUpdateOne {
 	nuo.mutation.SetImage(s)
@@ -593,6 +615,12 @@ func (nuo *NFTUpdateOne) SetNillableImage(s *string) *NFTUpdateOne {
 	if s != nil {
 		nuo.SetImage(*s)
 	}
+	return nuo
+}
+
+// ClearImage clears the value of the "image" field.
+func (nuo *NFTUpdateOne) ClearImage() *NFTUpdateOne {
+	nuo.mutation.ClearImage()
 	return nuo
 }
 
@@ -650,6 +678,12 @@ func (nuo *NFTUpdateOne) SetNillableDescription(s *string) *NFTUpdateOne {
 	return nuo
 }
 
+// ClearDescription clears the value of the "description" field.
+func (nuo *NFTUpdateOne) ClearDescription() *NFTUpdateOne {
+	nuo.mutation.ClearDescription()
+	return nuo
+}
+
 // SetName sets the "name" field.
 func (nuo *NFTUpdateOne) SetName(s string) *NFTUpdateOne {
 	nuo.mutation.SetName(s)
@@ -661,6 +695,12 @@ func (nuo *NFTUpdateOne) SetNillableName(s *string) *NFTUpdateOne {
 	if s != nil {
 		nuo.SetName(*s)
 	}
+	return nuo
+}
+
+// ClearName clears the value of the "name" field.
+func (nuo *NFTUpdateOne) ClearName() *NFTUpdateOne {
+	nuo.mutation.ClearName()
 	return nuo
 }
 
@@ -886,26 +926,6 @@ func (nuo *NFTUpdateOne) check() error {
 			return &ValidationError{Name: "contract_address", err: fmt.Errorf(`ent: validator failed for field "NFT.contract_address": %w`, err)}
 		}
 	}
-	if v, ok := nuo.mutation.TokenURI(); ok {
-		if err := nft.TokenURIValidator(v); err != nil {
-			return &ValidationError{Name: "token_uri", err: fmt.Errorf(`ent: validator failed for field "NFT.token_uri": %w`, err)}
-		}
-	}
-	if v, ok := nuo.mutation.Image(); ok {
-		if err := nft.ImageValidator(v); err != nil {
-			return &ValidationError{Name: "image", err: fmt.Errorf(`ent: validator failed for field "NFT.image": %w`, err)}
-		}
-	}
-	if v, ok := nuo.mutation.Description(); ok {
-		if err := nft.DescriptionValidator(v); err != nil {
-			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "NFT.description": %w`, err)}
-		}
-	}
-	if v, ok := nuo.mutation.Name(); ok {
-		if err := nft.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "NFT.name": %w`, err)}
-		}
-	}
 	if v, ok := nuo.mutation.OwnerAddress(); ok {
 		if err := nft.OwnerAddressValidator(v); err != nil {
 			return &ValidationError{Name: "owner_address", err: fmt.Errorf(`ent: validator failed for field "NFT.owner_address": %w`, err)}
@@ -956,8 +976,14 @@ func (nuo *NFTUpdateOne) sqlSave(ctx context.Context) (_node *NFT, err error) {
 	if value, ok := nuo.mutation.TokenURI(); ok {
 		_spec.SetField(nft.FieldTokenURI, field.TypeString, value)
 	}
+	if nuo.mutation.TokenURICleared() {
+		_spec.ClearField(nft.FieldTokenURI, field.TypeString)
+	}
 	if value, ok := nuo.mutation.Image(); ok {
 		_spec.SetField(nft.FieldImage, field.TypeString, value)
+	}
+	if nuo.mutation.ImageCleared() {
+		_spec.ClearField(nft.FieldImage, field.TypeString)
 	}
 	if value, ok := nuo.mutation.ImageData(); ok {
 		_spec.SetField(nft.FieldImageData, field.TypeString, value)
@@ -974,8 +1000,14 @@ func (nuo *NFTUpdateOne) sqlSave(ctx context.Context) (_node *NFT, err error) {
 	if value, ok := nuo.mutation.Description(); ok {
 		_spec.SetField(nft.FieldDescription, field.TypeString, value)
 	}
+	if nuo.mutation.DescriptionCleared() {
+		_spec.ClearField(nft.FieldDescription, field.TypeString)
+	}
 	if value, ok := nuo.mutation.Name(); ok {
 		_spec.SetField(nft.FieldName, field.TypeString, value)
+	}
+	if nuo.mutation.NameCleared() {
+		_spec.ClearField(nft.FieldName, field.TypeString)
 	}
 	if value, ok := nuo.mutation.Attributes(); ok {
 		_spec.SetField(nft.FieldAttributes, field.TypeJSON, value)

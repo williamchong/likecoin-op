@@ -7,6 +7,7 @@ import (
 
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
+	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/evm"
 	"likenft-indexer/internal/evm/book_nft"
@@ -78,6 +79,13 @@ func (e *transferWithMemoProcessor) Process(
 		return err
 	}
 
+	totalSupply, err := e.evmClient.GetTotalSupply(ctx, contractAddress)
+
+	if err != nil {
+		mylogger.Error("e.evmClient.GetTotalSupply", "err", err)
+		return err
+	}
+
 	owner, err := e.accountRepository.GetOrCreateAccount(ctx, &ent.Account{
 		EvmAddress: transferWithMemoEvent.To.Hex(),
 	})
@@ -118,6 +126,28 @@ func (e *transferWithMemoProcessor) Process(
 		return err
 	}
 
+	err = e.nftClassRepository.UpdateTotalSupply(ctx, contractAddress.Hex(), totalSupply)
+
+	if err != nil {
+		mylogger.Error("e.nftClassRepository.UpdateTotalSupply", "err", err)
+		return err
+	}
+
+	err = e.transactionMemoRepository.InsertTransactionMemo(ctx, &ent.TransactionMemo{
+		TransactionHash: newBookNFTLog.TxHash.Hex(),
+		BookNftID:       newBookNFTLog.Address.Hex(),
+		From:            transferWithMemoEvent.From.Hex(),
+		To:              transferWithMemoEvent.To.Hex(),
+		TokenID:         typeutil.Uint64(transferWithMemoEvent.TokenId.Uint64()),
+		Memo:            transferWithMemoEvent.Memo,
+		BlockNumber:     typeutil.Uint64(newBookNFTLog.BlockNumber),
+	})
+
+	if err != nil {
+		mylogger.Error("e.transactionMemoRepository.InsertTransactionMemo", "err", err)
+		return err
+	}
+
 	err = e.nftRepository.UpdateOwner(
 		ctx,
 		contractAddress.Hex(),
@@ -127,19 +157,11 @@ func (e *transferWithMemoProcessor) Process(
 	)
 
 	if err != nil {
-		mylogger.Error("e.nftRepository.GetOrCreate", "err", err)
+		mylogger.Error("e.nftRepository.UpdateOwner", "err", err)
 		return err
 	}
 
-	return e.transactionMemoRepository.InsertTransactionMemo(ctx, &ent.TransactionMemo{
-		TransactionHash: newBookNFTLog.TxHash.Hex(),
-		BookNftID:       newBookNFTLog.Address.Hex(),
-		From:            transferWithMemoEvent.From.Hex(),
-		To:              transferWithMemoEvent.To.Hex(),
-		TokenID:         transferWithMemoEvent.TokenId.Uint64(),
-		Memo:            transferWithMemoEvent.Memo,
-		BlockNumber:     newBookNFTLog.BlockNumber,
-	})
+	return nil
 }
 
 func init() {

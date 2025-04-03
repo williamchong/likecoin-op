@@ -1,7 +1,12 @@
 package schema
 
 import (
+	"slices"
+
+	"likenft-indexer/ent/schema/typeutil"
+
 	"entgo.io/ent"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -25,7 +30,9 @@ func (EVMEventProcessedBlockHeight) Fields() []ent.Field {
 			"OwnershipTransferred",
 			"TransferWithMemo",
 		),
-		field.Uint64("block_height"),
+		field.Uint64("block_height").GoType(typeutil.Uint64(0)).
+			SchemaType(typeutil.Uint64SchemaType).
+			ValueScanner(typeutil.Uint64ValueScanner),
 	}
 }
 
@@ -38,4 +45,10 @@ func (EVMEventProcessedBlockHeight) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("contract_type", "contract_address", "event").Unique(),
 	}
+}
+
+func (EVMEventProcessedBlockHeight) Annotations() []schema.Annotation {
+	return slices.Concat(
+		typeutil.Uint64Annotations("block_height"),
+	)
 }

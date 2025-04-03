@@ -5,7 +5,6 @@ import (
 	"log/slog"
 
 	"likenft-indexer/ent/evmeventprocessedblockheight"
-	"likenft-indexer/internal/evm"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -14,17 +13,17 @@ import (
 func init() {
 	registerEventConfig(
 		evmeventprocessedblockheight.EventOwnershipTransferred,
-		func(evmClient *evm.EvmClient) eventConfig {
+		func(inj *eventAcquirerDeps) eventConfig {
 			return eventConfig{
 				ContractType: evmeventprocessedblockheight.ContractTypeBookNft,
-				Abi:          evmClient.BookNFTABI,
+				Abi:          inj.evmClient.GetBookNFTABI(),
 				LogsRetriever: func(
 					ctx context.Context,
 					logger *slog.Logger,
 					contractAddress string,
 					startBlock uint64,
 				) ([]types.Log, error) {
-					return evmClient.QueryBookNFTOwnershipTransferred(
+					return inj.evmClient.QueryBookNFTOwnershipTransferred(
 						ctx,
 						common.HexToAddress(contractAddress),
 						startBlock,

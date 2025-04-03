@@ -11,7 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
-func (c *EvmClient) QueryTransferWithMemo(
+func (c *evmQueryClient) QueryTransferWithMemo(
 	ctx context.Context,
 	contractAddress common.Address,
 	startBlock uint64,

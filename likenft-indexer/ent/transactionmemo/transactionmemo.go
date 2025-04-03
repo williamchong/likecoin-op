@@ -3,7 +3,10 @@
 package transactionmemo
 
 import (
+	"likenft-indexer/ent/schema/typeutil"
+
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/schema/field"
 )
 
 const (
@@ -60,6 +63,11 @@ var (
 	FromValidator func(string) error
 	// ToValidator is a validator for the "to" field. It is called by the builders before save.
 	ToValidator func(string) error
+	// ValueScanner of all TransactionMemo fields.
+	ValueScanner struct {
+		TokenID     field.TypeValueScanner[typeutil.Uint64]
+		BlockNumber field.TypeValueScanner[typeutil.Uint64]
+	}
 )
 
 // OrderOption defines the ordering options for the TransactionMemo queries.

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/ent/transactionmemo"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -44,8 +45,8 @@ func (tmc *TransactionMemoCreate) SetTo(s string) *TransactionMemoCreate {
 }
 
 // SetTokenID sets the "token_id" field.
-func (tmc *TransactionMemoCreate) SetTokenID(u uint64) *TransactionMemoCreate {
-	tmc.mutation.SetTokenID(u)
+func (tmc *TransactionMemoCreate) SetTokenID(t typeutil.Uint64) *TransactionMemoCreate {
+	tmc.mutation.SetTokenID(t)
 	return tmc
 }
 
@@ -56,8 +57,8 @@ func (tmc *TransactionMemoCreate) SetMemo(s string) *TransactionMemoCreate {
 }
 
 // SetBlockNumber sets the "block_number" field.
-func (tmc *TransactionMemoCreate) SetBlockNumber(u uint64) *TransactionMemoCreate {
-	tmc.mutation.SetBlockNumber(u)
+func (tmc *TransactionMemoCreate) SetBlockNumber(t typeutil.Uint64) *TransactionMemoCreate {
+	tmc.mutation.SetBlockNumber(t)
 	return tmc
 }
 
@@ -143,7 +144,10 @@ func (tmc *TransactionMemoCreate) sqlSave(ctx context.Context) (*TransactionMemo
 	if err := tmc.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := tmc.createSpec()
+	_node, _spec, err := tmc.createSpec()
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, tmc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
@@ -157,7 +161,7 @@ func (tmc *TransactionMemoCreate) sqlSave(ctx context.Context) (*TransactionMemo
 	return _node, nil
 }
 
-func (tmc *TransactionMemoCreate) createSpec() (*TransactionMemo, *sqlgraph.CreateSpec) {
+func (tmc *TransactionMemoCreate) createSpec() (*TransactionMemo, *sqlgraph.CreateSpec, error) {
 	var (
 		_node = &TransactionMemo{config: tmc.config}
 		_spec = sqlgraph.NewCreateSpec(transactionmemo.Table, sqlgraph.NewFieldSpec(transactionmemo.FieldID, field.TypeInt))
@@ -179,7 +183,11 @@ func (tmc *TransactionMemoCreate) createSpec() (*TransactionMemo, *sqlgraph.Crea
 		_node.To = value
 	}
 	if value, ok := tmc.mutation.TokenID(); ok {
-		_spec.SetField(transactionmemo.FieldTokenID, field.TypeUint64, value)
+		vv, err := transactionmemo.ValueScanner.TokenID.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(transactionmemo.FieldTokenID, field.TypeUint64, vv)
 		_node.TokenID = value
 	}
 	if value, ok := tmc.mutation.Memo(); ok {
@@ -187,10 +195,14 @@ func (tmc *TransactionMemoCreate) createSpec() (*TransactionMemo, *sqlgraph.Crea
 		_node.Memo = value
 	}
 	if value, ok := tmc.mutation.BlockNumber(); ok {
-		_spec.SetField(transactionmemo.FieldBlockNumber, field.TypeUint64, value)
+		vv, err := transactionmemo.ValueScanner.BlockNumber.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(transactionmemo.FieldBlockNumber, field.TypeUint64, vv)
 		_node.BlockNumber = value
 	}
-	return _node, _spec
+	return _node, _spec, nil
 }
 
 // TransactionMemoCreateBulk is the builder for creating many TransactionMemo entities in bulk.
@@ -221,7 +233,10 @@ func (tmcb *TransactionMemoCreateBulk) Save(ctx context.Context) ([]*Transaction
 				}
 				builder.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = builder.createSpec()
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, tmcb.builders[i+1].mutation)
 				} else {

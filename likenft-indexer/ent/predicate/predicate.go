@@ -12,8 +12,30 @@ type Account func(*sql.Selector)
 // EVMEvent is the predicate function for evmevent builders.
 type EVMEvent func(*sql.Selector)
 
+// EVMEventOrErr calls the predicate only if the error is not nit.
+func EVMEventOrErr(p EVMEvent, err error) EVMEvent {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
+
 // EVMEventProcessedBlockHeight is the predicate function for evmeventprocessedblockheight builders.
 type EVMEventProcessedBlockHeight func(*sql.Selector)
+
+// EVMEventProcessedBlockHeightOrErr calls the predicate only if the error is not nit.
+func EVMEventProcessedBlockHeightOrErr(p EVMEventProcessedBlockHeight, err error) EVMEventProcessedBlockHeight {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
 
 // NFT is the predicate function for nft builders.
 type NFT func(*sql.Selector)
@@ -32,5 +54,27 @@ func NFTOrErr(p NFT, err error) NFT {
 // NFTClass is the predicate function for nftclass builders.
 type NFTClass func(*sql.Selector)
 
+// NFTClassOrErr calls the predicate only if the error is not nit.
+func NFTClassOrErr(p NFTClass, err error) NFTClass {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
+
 // TransactionMemo is the predicate function for transactionmemo builders.
 type TransactionMemo func(*sql.Selector)
+
+// TransactionMemoOrErr calls the predicate only if the error is not nit.
+func TransactionMemoOrErr(p TransactionMemo, err error) TransactionMemo {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
