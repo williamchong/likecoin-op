@@ -1,3 +1,8 @@
+GIT_SHORT_HASH ?= $(shell git rev-parse --short=8 HEAD)
+TAG ?= $(GIT_SHORT_HASH)
+DEPLOY_DEV_DOCKER_IMAGE_NAME ?= chankiyu22/likenft-indexer
+DOCKER_BUILD_ARGS ?=
+
 -include .env
 export
 
@@ -58,7 +63,7 @@ migrate-up:
 	@echo "Migrating up..."
 	atlas migrate apply \
 		--dir "file://ent/migrate/migrations" \
-		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@localhost:5432/${DB_DATABASE}?sslmode=disable&search_path=${DB_SCHEMA}"
+		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}?sslmode=disable&search_path=${DB_SCHEMA}"
 
 .PHONY: migrate-down
 migrate-down:
@@ -66,7 +71,7 @@ migrate-down:
 	atlas migrate down \
 		--dir "file://ent/migrate/migrations" \
 		--dev-url "docker://postgres/15/test?search_path=${DB_SCHEMA}" \
-		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@localhost:5432/${DB_DATABASE}?sslmode=disable&search_path=${DB_SCHEMA}"
+		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}?sslmode=disable&search_path=${DB_SCHEMA}"
 
 .PHONY: fmt
 fmt:
@@ -79,6 +84,10 @@ build: tailwind-install templ-install generate
 	templ generate
 	./tailwindcss -i cmd/web/styles/input.css -o cmd/web/assets/css/output.css
 	go build -o main cmd/api/main.go
+
+.PHONY: build-worker-cli
+build-worker-cli:
+	go build -o likenft-indexer-worker-cli ./cmd/worker
 
 # Run the application
 run:
@@ -131,5 +140,13 @@ watch:
                 exit 1; \
             fi; \
         fi
+
+.PHONY: docker-image
+docker-image:
+	docker buildx build --platform linux/amd64 . \
+		--build-arg 'BUILD_TAG=$(TAG)' \
+		-t '$(DEPLOY_DEV_DOCKER_IMAGE_NAME):latest' \
+		-t '$(DEPLOY_DEV_DOCKER_IMAGE_NAME):$(TAG)' \
+		$(DOCKER_BUILD_ARGS)
 
 .PHONY: all build run test clean watch tailwind-install docker-run docker-down itest templ-install

@@ -75,6 +75,23 @@ signerBackend:
 
     resources: {}
 
+likenftIndexer:
+  name: likenft-indexer
+
+  container:
+    imageRepository: chankiyu22/likenft-indexer
+    imagePullPolicy: IfNotPresent
+
+  worker:
+    name: likenft-indexer-worker
+
+    resources: {}
+
+  scheduler:
+    name: likenft-indexer-scheduler
+
+    resources: {}
+
 redis:
   name: redis
   container:
