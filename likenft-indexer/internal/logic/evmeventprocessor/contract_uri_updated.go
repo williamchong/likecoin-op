@@ -9,6 +9,7 @@ import (
 	"likenft-indexer/ent/evmeventprocessedblockheight"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/evm"
+	"likenft-indexer/internal/evm/model"
 	"likenft-indexer/internal/evm/util/logconverter"
 )
 
@@ -50,7 +51,7 @@ func (e *contractURIUpdatedProcessor) Process(
 		return err
 	}
 
-	contractLevelMetadata := make(map[string]any)
+	contractLevelMetadata := new(model.ContractLevelMetadata)
 	err = contractURI.Resolve(e.httpClient, &contractLevelMetadata)
 
 	if err != nil {

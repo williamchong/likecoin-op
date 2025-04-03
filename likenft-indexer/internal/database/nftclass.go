@@ -5,13 +5,14 @@ import (
 
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/nftclass"
+	"likenft-indexer/internal/evm/model"
 )
 
 type NFTClassRepository interface {
 	QueryAllNFTClasses(ctx context.Context) ([]*ent.NFTClass, error)
 	QueryNFTClassByAddress(ctx context.Context, address string) (*ent.NFTClass, error)
 	InsertNFTClass(ctx context.Context, nftClass *ent.NFTClass) error
-	UpdateMetadata(ctx context.Context, address string, metadata map[string]any) error
+	UpdateMetadata(ctx context.Context, address string, metadata *model.ContractLevelMetadata) error
 	UpdateOwner(ctx context.Context, address string, newOwner *ent.Account) error
 }
 
@@ -63,7 +64,7 @@ func (r *nftClassRepository) InsertNFTClass(ctx context.Context, nftClass *ent.N
 func (r *nftClassRepository) UpdateMetadata(
 	ctx context.Context,
 	address string,
-	metadata map[string]any,
+	metadata *model.ContractLevelMetadata,
 ) error {
 	return WithTx(ctx, r.dbService.Client(), func(tx *ent.Tx) error {
 		_, err := tx.NFTClass.Query().

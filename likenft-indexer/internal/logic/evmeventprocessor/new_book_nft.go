@@ -13,6 +13,7 @@ import (
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/evm"
 	"likenft-indexer/internal/evm/like_protocol"
+	"likenft-indexer/internal/evm/model"
 	"likenft-indexer/internal/evm/util/logconverter"
 	"likenft-indexer/internal/util/jsondatauri"
 
@@ -62,7 +63,7 @@ func (e *newBookNFTProcessor) Process(
 		return err
 	}
 
-	contractLevelMetadata := make(map[string]any)
+	contractLevelMetadata := new(model.ContractLevelMetadata)
 	err = jsondatauri.JSONDataUri(newBookNFTEvent.Config.Metadata).Resolve(e.httpClient, &contractLevelMetadata)
 
 	if err != nil {
