@@ -71,6 +71,7 @@ func (e *newBookNFTProcessor) Process(
 	}
 
 	ownerAddress, err := e.evmClient.GetBookNFTOwner(ctx, newBookNFTEvent.BookNFT)
+	ownerAddressStr := ownerAddress.Hex()
 
 	if err != nil {
 		mylogger.Error("e.evmClient.GetBookNFTOwner", "err", err)
@@ -79,7 +80,7 @@ func (e *newBookNFTProcessor) Process(
 
 	account, err := e.accountRepository.GetOrCreateAccount(ctx, &ent.Account{
 		CosmosAddress: nil,
-		EvmAddress:    ownerAddress.Hex(),
+		EvmAddress:    ownerAddressStr,
 		Likeid:        nil,
 	})
 
@@ -95,27 +96,23 @@ func (e *newBookNFTProcessor) Process(
 		return err
 	}
 
-	nftClass := &ent.NFTClass{
-		Address:             newBookNFTEvent.BookNFT.Hex(),
-		Name:                newBookNFTEvent.Config.Name,
-		Symbol:              newBookNFTEvent.Config.Symbol,
-		OwnerAddress:        nil,        // TODO
-		MinterAddresses:     []string{}, // TODO
-		TotalSupply:         totalSupply,
-		MaxSupply:           typeutil.Uint64(newBookNFTEvent.Config.MaxSupply),
-		Metadata:            contractLevelMetadata,
-		BannerImage:         "",                                    // NO DATA
-		FeaturedImage:       "",                                    // NO DATA
-		DeployerAddress:     common.BytesToAddress([]byte{}).Hex(), // TODO
-		DeployedBlockNumber: evmEvent.BlockNumber,
-		MintedAt:            time.Now(), // TODO
-		UpdatedAt:           time.Now(), // TODO
-		Edges: ent.NFTClassEdges{
-			Owner: account,
-		},
-	}
-
-	return e.nftClassRepository.InsertNFTClass(ctx, nftClass)
+	return e.nftClassRepository.InsertNFTClass(
+		ctx,
+		newBookNFTEvent.BookNFT.Hex(),
+		newBookNFTEvent.Config.Name,
+		newBookNFTEvent.Config.Symbol,
+		&ownerAddressStr, // TODO
+		[]string{},       // TODO
+		totalSupply,
+		typeutil.Uint64(newBookNFTEvent.Config.MaxSupply),
+		contractLevelMetadata,
+		"",
+		"",
+		common.BytesToAddress([]byte{}).Hex(),
+		evmEvent.BlockNumber,
+		time.Now(),
+		account,
+	)
 }
 
 func init() {
