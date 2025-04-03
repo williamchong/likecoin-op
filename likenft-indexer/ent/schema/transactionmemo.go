@@ -1,7 +1,12 @@
 package schema
 
 import (
+	"slices"
+
+	"likenft-indexer/ent/schema/typeutil"
+
 	"entgo.io/ent"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -18,9 +23,13 @@ func (TransactionMemo) Fields() []ent.Field {
 			Comment("contract address of book nft"),
 		field.String("from").NotEmpty(),
 		field.String("to").NotEmpty(),
-		field.Uint64("token_id"),
+		field.Uint64("token_id").GoType(typeutil.Uint64(0)).
+			SchemaType(typeutil.Uint64SchemaType).
+			ValueScanner(typeutil.Uint64ValueScanner),
 		field.String("memo"),
-		field.Uint64("block_number"),
+		field.Uint64("block_number").GoType(typeutil.Uint64(0)).
+			SchemaType(typeutil.Uint64SchemaType).
+			ValueScanner(typeutil.Uint64ValueScanner),
 	}
 }
 
@@ -34,4 +43,11 @@ func (TransactionMemo) Indexes() []ent.Index {
 		index.Fields("transaction_hash", "book_nft_id", "token_id").Unique(),
 		index.Fields("book_nft_id", "token_id"),
 	}
+}
+
+func (TransactionMemo) Annotations() []schema.Annotation {
+	return slices.Concat(
+		typeutil.Uint64Annotations("token_id"),
+		typeutil.Uint64Annotations("block_number"),
+	)
 }

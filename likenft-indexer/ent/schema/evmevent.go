@@ -1,7 +1,12 @@
 package schema
 
 import (
+	"slices"
+
+	"likenft-indexer/ent/schema/typeutil"
+
 	"entgo.io/ent"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -19,7 +24,9 @@ func (EVMEvent) Fields() []ent.Field {
 		field.String("transaction_hash").NotEmpty(),
 		field.Uint("transaction_index"),
 		field.String("block_hash").NotEmpty(),
-		field.Uint64("block_number"),
+		field.Uint64("block_number").GoType(typeutil.Uint64(0)).
+			SchemaType(typeutil.Uint64SchemaType).
+			ValueScanner(typeutil.Uint64ValueScanner),
 		field.Uint("log_index"),
 		field.String("address").NotEmpty(),
 		field.String("topic0").NotEmpty(),
@@ -62,4 +69,10 @@ func (EVMEvent) Indexes() []ent.Index {
 		index.Fields("log_index"),
 		index.Fields("address"),
 	}
+}
+
+func (EVMEvent) Annotations() []schema.Annotation {
+	return slices.Concat(
+		typeutil.Uint64Annotations("block_number"),
+	)
 }
