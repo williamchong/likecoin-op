@@ -22,13 +22,22 @@ type MigrateUserEVMWalletRequest struct {
 	SignMethod             MigrateUserEVMWalletRequestSignMethod `json:"signMethod"`
 }
 
+type MigratedLikerLandUser struct {
+	Id                  string `json:"id"`
+	LikeWallet          string `json:"likeWallet"`
+	LastLoginMethod     string `json:"lastLoginMethod"`
+	RegisterLoginMethod string `json:"registerLoginMethod"`
+}
+
 type MigrateUserEVMWalletResponse struct {
-	IsMigratedLikerId     bool   `json:"isMigratedLikerId"`
-	IsMigratedLikerLand   bool   `json:"isMigratedLikerLand"`
-	MigratedLikerId       string `json:"migratedLikerId"`
-	MigratedLikerLandUser string `json:"migratedLikerLandUser"`
-	MigrateLikerIdError   string `json:"migrateLikerIdError"`
-	MigrateLikerLandError string `json:"migrateLikerLandError"`
+	IsMigratedBookUser    bool                   `json:"isMigratedBookUser"`
+	IsMigratedLikerId     bool                   `json:"isMigratedLikerId"`
+	IsMigratedLikerLand   bool                   `json:"isMigratedLikerLand"`
+	MigratedLikerId       string                 `json:"migratedLikerId"`
+	MigratedLikerLandUser *MigratedLikerLandUser `json:"migratedLikerLandUser"`
+	MigrateBookUserError  string                 `json:"migrateBookUserError"`
+	MigrateLikerIdError   string                 `json:"migrateLikerIdError"`
+	MigrateLikerLandError string                 `json:"migrateLikerLandError"`
 }
 
 func (a *LikecoinAPI) MigrateUserEVMWallet(
@@ -43,10 +52,11 @@ func (a *LikecoinAPI) MigrateUserEVMWallet(
 		fmt.Sprintf("%s/wallet/evm/migrate/user", a.LikecoinAPIUrlBase),
 		bytes.NewBuffer(requestBody),
 	)
-	req.Header.Set("Content-Type", "application/json")
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("Content-Type", "application/json")
+
 	resp, err := a.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err

@@ -13,12 +13,21 @@ export const RequestSchema = z.object({
   eth_signing_message: z.string(),
 });
 
+const MigratedLikerLandUserSchema = z.object({
+  id: z.string(),
+  likeWallet: z.string(),
+  lastLoginMethod: z.string(),
+  registerLoginMethod: z.string(),
+});
+
 export const ResponseSchema = z.object({
   response: z.object({
+    isMigratedBookUser: z.boolean(),
     isMigratedLikerId: z.boolean(),
     isMigratedLikerLand: z.boolean(),
     migratedLikerId: z.string(),
-    migratedLikerLandUser: z.string(),
+    migratedLikerLandUser: MigratedLikerLandUserSchema.nullable(),
+    migrateBookUserError: z.string(),
     migrateLikerIdError: z.string(),
     migrateLikerLandError: z.string(),
   }),
