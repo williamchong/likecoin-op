@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	"likenft-indexer/ent/schema/typeutil"
+	"likenft-indexer/internal/evm/model"
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
@@ -34,7 +35,7 @@ func (NFTClass) Fields() []ent.Field {
 			SchemaType(typeutil.Uint64SchemaType).
 			ValueScanner(typeutil.Uint64ValueScanner),
 		// Raw metadata from the contract
-		field.JSON("metadata", map[string]any{}).Optional(),
+		field.JSON("metadata", &model.ContractLevelMetadata{}).Optional(),
 		// Start Prepopulate fields
 		field.String("banner_image"),
 		field.String("featured_image"),
