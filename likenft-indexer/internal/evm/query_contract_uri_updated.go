@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
-func (c *EvmClient) QueryContractURIUpdated(
+func (c *evmQueryClient) QueryContractURIUpdated(
 	ctx context.Context,
 	contractAddress common.Address,
 	startBlock uint64,

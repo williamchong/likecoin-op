@@ -29,7 +29,7 @@ var AcquireNewEVMEvents = &cobra.Command{
 		logger := context.LoggerFromContext(ctx)
 
 		dbService := database.New()
-		evmClient, err := evm.NewEvmClient(cfg.EthNetworkPublicRPCURL)
+		evmClient, err := evm.NewEvmQueryClient(cfg.EthNetworkEventRPCURL)
 
 		if err != nil {
 			panic(err)
