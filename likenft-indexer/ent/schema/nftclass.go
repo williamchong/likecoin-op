@@ -4,6 +4,8 @@ import (
 	"math/big"
 	"slices"
 
+	"likenft-indexer/ent/schema/typeutil"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
@@ -28,6 +30,9 @@ func (NFTClass) Fields() []ent.Field {
 		field.Uint64("total_supply").GoType(&big.Int{}).
 			SchemaType(typeutil.Uint64SchemaType).
 			ValueScanner(field.TextValueScanner[*big.Int]{}),
+		field.Uint64("max_supply").GoType(typeutil.Uint64(0)).
+			SchemaType(typeutil.Uint64SchemaType).
+			ValueScanner(typeutil.Uint64ValueScanner),
 		// Raw metadata from the contract
 		field.JSON("metadata", map[string]any{}).Optional(),
 		// Start Prepopulate fields
@@ -63,6 +68,7 @@ func (NFTClass) Indexes() []ent.Index {
 func (NFTClass) Annotations() []schema.Annotation {
 	return slices.Concat(
 		typeutil.Uint64Annotations("total_supply"),
+		typeutil.Uint64Annotations("max_supply"),
 		typeutil.Uint64Annotations("deployed_block_number"),
 	)
 }
