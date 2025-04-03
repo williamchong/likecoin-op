@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"math/big"
 
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/nftclass"
@@ -14,6 +15,7 @@ type NFTClassRepository interface {
 	InsertNFTClass(ctx context.Context, nftClass *ent.NFTClass) error
 	UpdateMetadata(ctx context.Context, address string, metadata *model.ContractLevelMetadata) error
 	UpdateOwner(ctx context.Context, address string, newOwner *ent.Account) error
+	UpdateTotalSupply(ctx context.Context, address string, newTotalSupply *big.Int) error
 }
 
 type nftClassRepository struct {
@@ -94,6 +96,25 @@ func (r *nftClassRepository) UpdateOwner(
 		}
 		return r.dbService.Client().NFTClass.Update().
 			SetOwner(newOwner).
+			Where(nftclass.AddressEqualFold(address)).
+			Exec(ctx)
+	})
+}
+
+func (r *nftClassRepository) UpdateTotalSupply(
+	ctx context.Context,
+	address string,
+	newTotalSupply *big.Int,
+) error {
+	return WithTx(ctx, r.dbService.Client(), func(tx *ent.Tx) error {
+		_, err := tx.NFTClass.Query().
+			Where(nftclass.AddressEqualFold(address)).
+			Only(ctx)
+		if err != nil {
+			return err
+		}
+		return r.dbService.Client().NFTClass.Update().
+			SetTotalSupply(newTotalSupply).
 			Where(nftclass.AddressEqualFold(address)).
 			Exec(ctx)
 	})
