@@ -47,7 +47,7 @@ type MsgNewBookNFT struct {
 
 // LikeProtocolMetaData contains all meta data concerning the LikeProtocol contract.
 var LikeProtocolMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EnforcedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpectedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"uint64\",\"name\":\"max_supply\",\"type\":\"uint64\"}],\"indexed\":false,\"internalType\":\"structBookConfig\",\"name\":\"config\",\"type\":\"tuple\"}],\"name\":\"NewBookNFT\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"initialOwner\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"classId\",\"type\":\"address\"}],\"name\":\"isBookNFT\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"updaters\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"minters\",\"type\":\"address[]\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"uint64\",\"name\":\"max_supply\",\"type\":\"uint64\"}],\"internalType\":\"structBookConfig\",\"name\":\"config\",\"type\":\"tuple\"}],\"internalType\":\"structMsgNewBookNFT\",\"name\":\"msgNewBookNFT\",\"type\":\"tuple\"}],\"name\":\"newBookNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"updaters\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"minters\",\"type\":\"address[]\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"uint64\",\"name\":\"max_supply\",\"type\":\"uint64\"}],\"internalType\":\"structBookConfig\",\"name\":\"config\",\"type\":\"tuple\"}],\"internalType\":\"structMsgNewBookNFT[]\",\"name\":\"msgNewBookNFTs\",\"type\":\"tuple[]\"}],\"name\":\"newBookNFTs\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"BookNFTInvalidImplementation\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EnforcedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpectedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"}],\"name\":\"BookNFTImplementationUpgraded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"uint64\",\"name\":\"max_supply\",\"type\":\"uint64\"}],\"indexed\":false,\"internalType\":\"structBookConfig\",\"name\":\"config\",\"type\":\"tuple\"}],\"name\":\"NewBookNFT\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"implementation\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"initialOwner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"bookNFTImplementation\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"classId\",\"type\":\"address\"}],\"name\":\"isBookNFT\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"updaters\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"minters\",\"type\":\"address[]\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"uint64\",\"name\":\"max_supply\",\"type\":\"uint64\"}],\"internalType\":\"structBookConfig\",\"name\":\"config\",\"type\":\"tuple\"}],\"internalType\":\"structMsgNewBookNFT\",\"name\":\"msgNewBookNFT\",\"type\":\"tuple\"}],\"name\":\"newBookNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"updaters\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"minters\",\"type\":\"address[]\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"metadata\",\"type\":\"string\"},{\"internalType\":\"uint64\",\"name\":\"max_supply\",\"type\":\"uint64\"}],\"internalType\":\"structBookConfig\",\"name\":\"config\",\"type\":\"tuple\"}],\"internalType\":\"structMsgNewBookNFT[]\",\"name\":\"msgNewBookNFTs\",\"type\":\"tuple[]\"}],\"name\":\"newBookNFTs\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"}],\"name\":\"upgradeTo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
 }
 
 // LikeProtocolABI is the input ABI used to generate the binding from.
@@ -227,6 +227,37 @@ func (_LikeProtocol *LikeProtocolCallerSession) UPGRADEINTERFACEVERSION() (strin
 	return _LikeProtocol.Contract.UPGRADEINTERFACEVERSION(&_LikeProtocol.CallOpts)
 }
 
+// Implementation is a free data retrieval call binding the contract method 0x5c60da1b.
+//
+// Solidity: function implementation() view returns(address)
+func (_LikeProtocol *LikeProtocolCaller) Implementation(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _LikeProtocol.contract.Call(opts, &out, "implementation")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// Implementation is a free data retrieval call binding the contract method 0x5c60da1b.
+//
+// Solidity: function implementation() view returns(address)
+func (_LikeProtocol *LikeProtocolSession) Implementation() (common.Address, error) {
+	return _LikeProtocol.Contract.Implementation(&_LikeProtocol.CallOpts)
+}
+
+// Implementation is a free data retrieval call binding the contract method 0x5c60da1b.
+//
+// Solidity: function implementation() view returns(address)
+func (_LikeProtocol *LikeProtocolCallerSession) Implementation() (common.Address, error) {
+	return _LikeProtocol.Contract.Implementation(&_LikeProtocol.CallOpts)
+}
+
 // IsBookNFT is a free data retrieval call binding the contract method 0xd2380f1d.
 //
 // Solidity: function isBookNFT(address classId) view returns(bool)
@@ -351,25 +382,25 @@ func (_LikeProtocol *LikeProtocolCallerSession) ProxiableUUID() ([32]byte, error
 	return _LikeProtocol.Contract.ProxiableUUID(&_LikeProtocol.CallOpts)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xc4d66de8.
+// Initialize is a paid mutator transaction binding the contract method 0x485cc955.
 //
-// Solidity: function initialize(address initialOwner) returns()
-func (_LikeProtocol *LikeProtocolTransactor) Initialize(opts *bind.TransactOpts, initialOwner common.Address) (*types.Transaction, error) {
-	return _LikeProtocol.contract.Transact(opts, "initialize", initialOwner)
+// Solidity: function initialize(address initialOwner, address bookNFTImplementation) returns()
+func (_LikeProtocol *LikeProtocolTransactor) Initialize(opts *bind.TransactOpts, initialOwner common.Address, bookNFTImplementation common.Address) (*types.Transaction, error) {
+	return _LikeProtocol.contract.Transact(opts, "initialize", initialOwner, bookNFTImplementation)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xc4d66de8.
+// Initialize is a paid mutator transaction binding the contract method 0x485cc955.
 //
-// Solidity: function initialize(address initialOwner) returns()
-func (_LikeProtocol *LikeProtocolSession) Initialize(initialOwner common.Address) (*types.Transaction, error) {
-	return _LikeProtocol.Contract.Initialize(&_LikeProtocol.TransactOpts, initialOwner)
+// Solidity: function initialize(address initialOwner, address bookNFTImplementation) returns()
+func (_LikeProtocol *LikeProtocolSession) Initialize(initialOwner common.Address, bookNFTImplementation common.Address) (*types.Transaction, error) {
+	return _LikeProtocol.Contract.Initialize(&_LikeProtocol.TransactOpts, initialOwner, bookNFTImplementation)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xc4d66de8.
+// Initialize is a paid mutator transaction binding the contract method 0x485cc955.
 //
-// Solidity: function initialize(address initialOwner) returns()
-func (_LikeProtocol *LikeProtocolTransactorSession) Initialize(initialOwner common.Address) (*types.Transaction, error) {
-	return _LikeProtocol.Contract.Initialize(&_LikeProtocol.TransactOpts, initialOwner)
+// Solidity: function initialize(address initialOwner, address bookNFTImplementation) returns()
+func (_LikeProtocol *LikeProtocolTransactorSession) Initialize(initialOwner common.Address, bookNFTImplementation common.Address) (*types.Transaction, error) {
+	return _LikeProtocol.Contract.Initialize(&_LikeProtocol.TransactOpts, initialOwner, bookNFTImplementation)
 }
 
 // NewBookNFT is a paid mutator transaction binding the contract method 0xa43e8cfa.
@@ -498,6 +529,27 @@ func (_LikeProtocol *LikeProtocolTransactorSession) Unpause() (*types.Transactio
 	return _LikeProtocol.Contract.Unpause(&_LikeProtocol.TransactOpts)
 }
 
+// UpgradeTo is a paid mutator transaction binding the contract method 0x3659cfe6.
+//
+// Solidity: function upgradeTo(address newImplementation) returns()
+func (_LikeProtocol *LikeProtocolTransactor) UpgradeTo(opts *bind.TransactOpts, newImplementation common.Address) (*types.Transaction, error) {
+	return _LikeProtocol.contract.Transact(opts, "upgradeTo", newImplementation)
+}
+
+// UpgradeTo is a paid mutator transaction binding the contract method 0x3659cfe6.
+//
+// Solidity: function upgradeTo(address newImplementation) returns()
+func (_LikeProtocol *LikeProtocolSession) UpgradeTo(newImplementation common.Address) (*types.Transaction, error) {
+	return _LikeProtocol.Contract.UpgradeTo(&_LikeProtocol.TransactOpts, newImplementation)
+}
+
+// UpgradeTo is a paid mutator transaction binding the contract method 0x3659cfe6.
+//
+// Solidity: function upgradeTo(address newImplementation) returns()
+func (_LikeProtocol *LikeProtocolTransactorSession) UpgradeTo(newImplementation common.Address) (*types.Transaction, error) {
+	return _LikeProtocol.Contract.UpgradeTo(&_LikeProtocol.TransactOpts, newImplementation)
+}
+
 // UpgradeToAndCall is a paid mutator transaction binding the contract method 0x4f1ef286.
 //
 // Solidity: function upgradeToAndCall(address newImplementation, bytes data) payable returns()
@@ -517,6 +569,140 @@ func (_LikeProtocol *LikeProtocolSession) UpgradeToAndCall(newImplementation com
 // Solidity: function upgradeToAndCall(address newImplementation, bytes data) payable returns()
 func (_LikeProtocol *LikeProtocolTransactorSession) UpgradeToAndCall(newImplementation common.Address, data []byte) (*types.Transaction, error) {
 	return _LikeProtocol.Contract.UpgradeToAndCall(&_LikeProtocol.TransactOpts, newImplementation, data)
+}
+
+// LikeProtocolBookNFTImplementationUpgradedIterator is returned from FilterBookNFTImplementationUpgraded and is used to iterate over the raw logs and unpacked data for BookNFTImplementationUpgraded events raised by the LikeProtocol contract.
+type LikeProtocolBookNFTImplementationUpgradedIterator struct {
+	Event *LikeProtocolBookNFTImplementationUpgraded // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *LikeProtocolBookNFTImplementationUpgradedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(LikeProtocolBookNFTImplementationUpgraded)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(LikeProtocolBookNFTImplementationUpgraded)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *LikeProtocolBookNFTImplementationUpgradedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *LikeProtocolBookNFTImplementationUpgradedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// LikeProtocolBookNFTImplementationUpgraded represents a BookNFTImplementationUpgraded event raised by the LikeProtocol contract.
+type LikeProtocolBookNFTImplementationUpgraded struct {
+	NewImplementation common.Address
+	Raw               types.Log // Blockchain specific contextual infos
+}
+
+// FilterBookNFTImplementationUpgraded is a free log retrieval operation binding the contract event 0x079b6b58f11e5758083fb4e9adbfbee490af256ccca51426658d4349450125f1.
+//
+// Solidity: event BookNFTImplementationUpgraded(address newImplementation)
+func (_LikeProtocol *LikeProtocolFilterer) FilterBookNFTImplementationUpgraded(opts *bind.FilterOpts) (*LikeProtocolBookNFTImplementationUpgradedIterator, error) {
+
+	logs, sub, err := _LikeProtocol.contract.FilterLogs(opts, "BookNFTImplementationUpgraded")
+	if err != nil {
+		return nil, err
+	}
+	return &LikeProtocolBookNFTImplementationUpgradedIterator{contract: _LikeProtocol.contract, event: "BookNFTImplementationUpgraded", logs: logs, sub: sub}, nil
+}
+
+// WatchBookNFTImplementationUpgraded is a free log subscription operation binding the contract event 0x079b6b58f11e5758083fb4e9adbfbee490af256ccca51426658d4349450125f1.
+//
+// Solidity: event BookNFTImplementationUpgraded(address newImplementation)
+func (_LikeProtocol *LikeProtocolFilterer) WatchBookNFTImplementationUpgraded(opts *bind.WatchOpts, sink chan<- *LikeProtocolBookNFTImplementationUpgraded) (event.Subscription, error) {
+
+	logs, sub, err := _LikeProtocol.contract.WatchLogs(opts, "BookNFTImplementationUpgraded")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(LikeProtocolBookNFTImplementationUpgraded)
+				if err := _LikeProtocol.contract.UnpackLog(event, "BookNFTImplementationUpgraded", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseBookNFTImplementationUpgraded is a log parse operation binding the contract event 0x079b6b58f11e5758083fb4e9adbfbee490af256ccca51426658d4349450125f1.
+//
+// Solidity: event BookNFTImplementationUpgraded(address newImplementation)
+func (_LikeProtocol *LikeProtocolFilterer) ParseBookNFTImplementationUpgraded(log types.Log) (*LikeProtocolBookNFTImplementationUpgraded, error) {
+	event := new(LikeProtocolBookNFTImplementationUpgraded)
+	if err := _LikeProtocol.contract.UnpackLog(event, "BookNFTImplementationUpgraded", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
 }
 
 // LikeProtocolInitializedIterator is returned from FilterInitialized and is used to iterate over the raw logs and unpacked data for Initialized events raised by the LikeProtocol contract.
