@@ -19,13 +19,25 @@ type LogsRetriever func(
 	startBlock uint64,
 ) ([]types.Log, error)
 
+type eventAcquirerDeps struct {
+	evmClient *evm.EvmClient
+}
+
+func makeEventProcessorDeps(
+	evmClient *evm.EvmClient,
+) *eventAcquirerDeps {
+	return &eventAcquirerDeps{
+		evmClient: evmClient,
+	}
+}
+
 type eventConfig struct {
 	ContractType  evmeventprocessedblockheight.ContractType
 	Abi           *abi.ABI
 	LogsRetriever LogsRetriever
 }
 
-type eventConfigCreator func(evmClient *evm.EvmClient) eventConfig
+type eventConfigCreator func(inj *eventAcquirerDeps) eventConfig
 
 var eventConfigMap = make(map[evmeventprocessedblockheight.Event]eventConfigCreator)
 

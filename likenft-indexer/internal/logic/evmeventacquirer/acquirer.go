@@ -27,7 +27,7 @@ type EvmEventsAcquirer interface {
 type evmEventsAcquirer struct {
 	evmEventProcessedBlockHeightRepository database.EVMEventProcessedBlockHeightRepository
 	evmEventRepository                     database.EVMEventRepository
-	evmClient                              *evm.EvmClient
+	deps                                   *eventAcquirerDeps
 }
 
 var _ EvmEventsAcquirer = &evmEventsAcquirer{}
@@ -40,7 +40,9 @@ func MakeEvmEventsAcquirer(
 	return &evmEventsAcquirer{
 		evmEventProcessedBlockHeightRepository: evmEventProcessedBlockHeightRepository,
 		evmEventRepository:                     evmEventRepository,
-		evmClient:                              evmClient,
+		deps: makeEventProcessorDeps(
+			evmClient,
+		),
 	}
 }
 
@@ -49,7 +51,7 @@ func (a *evmEventsAcquirer) Acquire(ctx context.Context, logger *slog.Logger, co
 	if err != nil {
 		return err
 	}
-	eventConfig := eventConfigCreator(a.evmClient)
+	eventConfig := eventConfigCreator(a.deps)
 
 	return a.acquire(
 		ctx,
