@@ -70,6 +70,13 @@ jobs:
   migration-backend:
     runs-on: [ubuntu-latest]
 
+    services:
+      docker:
+        image: docker:dind
+        options: --privileged --shm-size=2g
+        ports:
+          - 2375:2375
+
     steps:
       - uses: actions/checkout@v4
 
