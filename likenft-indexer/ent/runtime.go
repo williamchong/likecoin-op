@@ -75,7 +75,7 @@ func init() {
 	}()
 	// nftDescTokenID is the schema descriptor for token_id field.
 	nftDescTokenID := nftFields[1].Descriptor()
-	nft.ValueScanner.TokenID = nftDescTokenID.ValueScanner.(field.TypeValueScanner[*big.Int])
+	nft.ValueScanner.TokenID = nftDescTokenID.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
 	// nftDescOwnerAddress is the schema descriptor for owner_address field.
 	nftDescOwnerAddress := nftFields[12].Descriptor()
 	// nft.OwnerAddressValidator is a validator for the "owner_address" field. It is called by the builders before save.
