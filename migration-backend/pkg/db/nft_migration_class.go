@@ -102,6 +102,63 @@ FROM likenft_asset_migration_class WHERE likenft_asset_migration_id = $1`,
 	return classes, nil
 }
 
+func QueryLikeNFTAssetMigrationClassesByNFTMigrationIdAndStatus(
+	tx TxLike,
+	migrationId uint64,
+	status model.LikeLikeNFTAssetAssetMigrationClassStatus,
+) ([]model.LikeNFTAssetMigrationClass, error) {
+	rows, err := tx.Query(
+		`SELECT
+	id,
+	likenft_asset_migration_id,
+	created_at,
+	cosmos_class_id,
+	name,
+	image,
+	status,
+	enqueue_time,
+	finish_time,
+	evm_tx_hash,
+	failed_reason
+FROM likenft_asset_migration_class
+WHERE likenft_asset_migration_id = $1
+	AND status = $2`,
+		migrationId,
+		status,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	classes := []model.LikeNFTAssetMigrationClass{}
+	for rows.Next() {
+		class := &model.LikeNFTAssetMigrationClass{}
+
+		err := rows.Scan(
+			&class.Id,
+			&class.LikeNFTAssetMigrationId,
+			&class.CreatedAt,
+			&class.CosmosClassId,
+			&class.Name,
+			&class.Image,
+			&class.Status,
+			&class.EnqueueTime,
+			&class.FinishTime,
+			&class.EvmTxHash,
+			&class.FailedReason,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		classes = append(classes, *class)
+	}
+
+	return classes, nil
+}
+
 func InsertLikeNFTAssetMigrationClasses(
 	tx TxLike,
 	classes []model.LikeNFTAssetMigrationClass,
