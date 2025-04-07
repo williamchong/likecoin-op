@@ -54,7 +54,6 @@ var WorkerCmd = &cobra.Command{
 
 		// mux maps a type to a handler
 		mux := asynq.NewServeMux()
-		mux.HandleFunc(task.TypeHelloWorld, task.HandleHelloWorldTask)
 		mux.HandleFunc(apptask.TypeMigrateClass, task.HandleMigrateClassTask)
 		mux.HandleFunc(apptask.TypeMigrateNFT, task.HandleMigrateNFTTask)
 		mux.HandleFunc(apptask.TypeEnqueueLikeNFTAssetMigration, task.HandleEnqueueLikeNFTAssetMigration)

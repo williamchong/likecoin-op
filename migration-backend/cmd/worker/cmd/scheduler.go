@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/likecoin/like-migration-backend/cmd/worker/context"
-	"github.com/likecoin/like-migration-backend/cmd/worker/task"
 )
 
 var SchedulerCmd = &cobra.Command{
@@ -33,13 +32,11 @@ var SchedulerCmd = &cobra.Command{
 				PoolSize:     opt.PoolSize,
 				TLSConfig:    opt.TLSConfig,
 			}, nil)
-		task, err := task.NewHelloWorldTask("periodic")
 		if err != nil {
 			log.Fatalf("could not create task: %v", err)
 		}
 
 		// ... Register tasks
-		_, err = scheduler.Register("* * * * *", task)
 
 		if err != nil {
 			log.Fatalf("could not register task: %v", err)
