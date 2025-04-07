@@ -368,11 +368,17 @@ export default Vue.extend({
     },
 
     cosmosTxUrl(): string {
-      return `${this.$appConfig.cosmosExplorerBaseURL}/cosmos/tx/v1beta1/txs/${this.cosmosTxHash}`;
+      return new URL(
+        `cosmos/tx/v1beta1/txs/${this.cosmosTxHash}`,
+        this.$appConfig.cosmosExplorerBaseURL
+      ).toString();
     },
 
     evmTxUrl(): string {
-      return `${this.$appConfig.evmExplorerBaseURL}/tx/${this.cosmosTxHash}`;
+      return new URL(
+        `/tx/${this.evmTxHash}`,
+        this.$appConfig.evmExplorerBaseURL
+      ).toString();
     },
   },
 
