@@ -22,15 +22,15 @@
     "migration-progress": {
       "balance-remaining-message": "There are still balance left, do you want to restart the migration?",
       "minting": {
-        "description": "[description]",
+        "description": "Transferring equivalent tokens on OP network",
         "title": "Minting"
       },
       "pending": {
-        "description": "[description]",
+        "description": "Request received and pending signature",
         "title": "Pending"
       },
       "receiving": {
-        "description": "[description]",
+        "description": "Verifying balance at migration contract",
         "title": "Receiving"
       },
       "restart": "Restart",
@@ -38,7 +38,7 @@
       "status": "Status",
       "title": "Migration in Progress",
       "verified": {
-        "description": "[description]",
+        "description": "Migration completed on Optimism chain",
         "title": "Verified"
       }
     },
