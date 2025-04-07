@@ -260,6 +260,7 @@ import {
   likerIdResolved,
   migrationCancelledByCosmosNotSigned,
   migrationRetryCosmosSign,
+  migrationRetryFailed,
   pendingMigrationResolved,
   pollingMigrationResolved,
   restart,
@@ -512,6 +513,8 @@ export default Vue.extend({
             this.currentStep,
             this._sendCosmosToken
           );
+        } else if (this.currentStep.state === 'Failed') {
+          this.currentStep = migrationRetryFailed(this.currentStep);
         }
       }
     },
