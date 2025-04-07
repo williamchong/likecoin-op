@@ -3,6 +3,7 @@ const defaultTheme = require('tailwindcss/defaultTheme');
 
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [...defaultConfig.content, 'nuxtui/**/*.{vue,js,jsx,mjs,ts,tsx}'],
   theme: {
     extend: {
