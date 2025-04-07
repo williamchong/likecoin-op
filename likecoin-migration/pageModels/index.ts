@@ -439,6 +439,24 @@ export function migrationCancelledByCosmosNotSigned(
   };
 }
 
+export function migrationRetryFailed(
+  prev: StepStateStep4Failed
+): EthNotConnected<StepStateStep2GasEstimated> {
+  return {
+    step: 2,
+    state: 'GasEstimated',
+    avatar: prev.avatar,
+    connection: prev.connection,
+    cosmosAddress: prev.cosmosAddress,
+    currentBalance: prev.currentBalance,
+    estimatedBalance: prev.estimatedBalance,
+    ethAddress: null,
+    gasEstimation: prev.gasEstimation,
+    likerId: prev.likerId,
+    signingStargateClient: prev.signingStargateClient,
+  };
+}
+
 export function migrationRetryCosmosSign(
   prev: StepStateStep4PendingCosmosSignCancelled
 ): StepStateStep4Pending {
