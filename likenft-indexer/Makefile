@@ -36,6 +36,7 @@ tailwind-install:
 generate:
 	@echo "Generating..."
 	go generate ./ent
+	go generate ./openapi
 
 .PHONY: abigen
 abigen: SHELL=/bin/bash
