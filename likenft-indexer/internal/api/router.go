@@ -11,19 +11,9 @@ import (
 
 func SetupRoutes(r *http.ServeMux, db *ent.Client) {
 	// Initialize handlers
-	nftHandler := NewNFTHandler(db)
-	nftClassHandler := NewNFTClassHandler(db)
 	openapiHandler := openapi.NewOpenAPIHandler(db)
 
 	r.Handle("/api/", http.StripPrefix("/api", openapiHandler))
-
-	// NFT routes
-	r.HandleFunc("GET /api/nfts", nftHandler.GetNFTs)
-	r.HandleFunc("GET /api/nft/{id}", nftHandler.GetNFTByID)
-
-	// NFT Class routes
-	r.HandleFunc("GET /api/nftclasses", nftClassHandler.GetNFTClasses)
-	r.HandleFunc("GET /api/nftclass/{id}", nftClassHandler.GetNFTClassByID)
 }
 
 func sendJSON(w http.ResponseWriter, data interface{}) {
