@@ -11,6 +11,7 @@ import (
 
 	cosmosmodel "github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/model"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/stretchr/testify/require"
 	goyaml "gopkg.in/yaml.v2"
@@ -58,6 +59,65 @@ func TestContractLevelMetadataFromCosmosClass(t *testing.T) {
 					}
 
 					contractLevelMetadata := evm.ContractLevelMetadataFromCosmosClass(cosmosClass.Class)
+					contractLevelMetadataStr, err := json.Marshal(contractLevelMetadata)
+					if err != nil {
+						panic(err)
+					}
+					require.JSONEq(t, testCase.ContractLevelMetadata, string(contractLevelMetadataStr))
+				})
+			}
+		}
+	})
+}
+
+func TestContractLevelMetadataFromCosmosClassAndISCN(t *testing.T) {
+	Convey("ContractLevelMetadataFromCosmosClassAndISCN", t, func() {
+		rootDir := "testdata/contract_level_metadata_from_cosmos_class_and_iscn/"
+		entries, err := os.ReadDir(rootDir)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, e := range entries {
+			fullPath := path.Join(rootDir, e.Name())
+			f, err := os.Open(fullPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer f.Close()
+
+			type TestCase struct {
+				Name                  string `json:"name"`
+				CosmosClassResponse   string `json:"cosmosclassresponse"`
+				ISCNDataResponse      string `json:"iscndataresponse"`
+				ContractLevelMetadata string `json:"contractlevelmetadata"`
+			}
+
+			decoder := goyaml.NewDecoder(f)
+
+			for {
+				var testCase TestCase
+				err := decoder.Decode(&testCase)
+				if errors.Is(err, io.EOF) {
+					break
+				} else if err != nil {
+					panic(err)
+				}
+
+				Convey(fmt.Sprintf("%s/%s", fullPath, testCase.Name), func() {
+					var cosmosClass struct {
+						Class *cosmosmodel.Class `json:"class"`
+					}
+					var iscn = model.ISCN{}
+					err := json.Unmarshal([]byte(testCase.CosmosClassResponse), &cosmosClass)
+					if err != nil {
+						panic(err)
+					}
+					err = json.Unmarshal([]byte(testCase.ISCNDataResponse), &iscn)
+					if err != nil {
+						panic(err)
+					}
+
+					contractLevelMetadata := evm.ContractLevelMetadataFromCosmosClassAndISCN(cosmosClass.Class, &iscn)
 					contractLevelMetadataStr, err := json.Marshal(contractLevelMetadata)
 					if err != nil {
 						panic(err)

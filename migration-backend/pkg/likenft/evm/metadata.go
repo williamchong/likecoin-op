@@ -7,6 +7,7 @@ import (
 
 	cosmosmodel "github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
 	evmmodel "github.com/likecoin/like-migration-backend/pkg/likenft/evm/model"
+	likenftmodel "github.com/likecoin/like-migration-backend/pkg/likenft/model"
 )
 
 func ContractLevelMetadataFromCosmosClass(c *cosmosmodel.Class) *evmmodel.ContractLevelMetadata {
@@ -16,6 +17,65 @@ func ContractLevelMetadataFromCosmosClass(c *cosmosmodel.Class) *evmmodel.Contra
 		Description:  c.Description,
 		Image:        c.Data.Metadata.Image,
 		ExternalLink: c.Data.Metadata.ExternalURL,
+	}
+}
+
+func ContractLevelMetadataFromCosmosClassAndISCN(c *cosmosmodel.Class, iscn *likenftmodel.ISCN) *evmmodel.ContractLevelMetadata {
+	iscnRecord := iscn.Records[0].Data
+
+	attributes := make([]evmmodel.ContractLevelMetadataAttributes, 0)
+
+	if iscnRecord.ContentMetadata.Author != nil {
+		author := iscnRecord.ContentMetadata.Author.Name()
+		attributes = append(attributes, evmmodel.ContractLevelMetadataAttributes{
+			TraitType: "Author",
+			Value:     author,
+		})
+	}
+
+	if iscnRecord.ContentMetadata.Publisher != "" {
+		attributes = append(attributes, evmmodel.ContractLevelMetadataAttributes{
+			TraitType: "Publisher",
+			Value:     iscnRecord.ContentMetadata.Publisher,
+		})
+	}
+
+	return &evmmodel.ContractLevelMetadata{
+		Description:  iscnRecord.ContentMetadata.Description,
+		Name:         iscnRecord.ContentMetadata.Name,
+		Symbol:       c.Symbol,
+		Image:        c.Data.Metadata.Image,
+		ExternalLink: c.Data.Metadata.ExternalURL,
+
+		ContractLevelMetadataISCN: evmmodel.ContractLevelMetadataISCN{
+			Message:                      c.Data.Metadata.Message,
+			NftMetaCollectionId:          c.Data.Metadata.NFTMetaCollectionID,
+			NftMetaCollectionName:        c.Data.Metadata.NFTMetaCollectionName,
+			NftMetaCollectionDescrption:  c.Data.Metadata.NFTMetaCollectionDescrption,
+			NftMetaCollectionDescription: c.Data.Metadata.NFTMetaCollectionDescription,
+			Context:                      iscnRecord.ContentMetadata.Context,
+			Type:                         iscnRecord.ContentMetadata.Type,
+			Author:                       iscnRecord.ContentMetadata.Author,
+			InLanguage:                   iscnRecord.ContentMetadata.InLanguage,
+			ISBN:                         iscnRecord.ContentMetadata.ISBN,
+			Keywords:                     iscnRecord.ContentMetadata.Keywords,
+			Publisher:                    iscnRecord.ContentMetadata.Publisher,
+			SameAs:                       iscnRecord.ContentMetadata.SameAs,
+			UsageInfo:                    iscnRecord.ContentMetadata.UsageInfo,
+			Version:                      iscnRecord.ContentMetadata.Version,
+			ThumbnailUrl:                 iscnRecord.ContentMetadata.ThumbnailUrl,
+			Url:                          iscnRecord.ContentMetadata.Url,
+			RecordNotes:                  iscnRecord.RecordNotes,
+			DateCreated:                  iscnRecord.RecordTimestamp,
+			DatePublished:                iscnRecord.ContentMetadata.DatePublished,
+			ExifInfo:                     iscnRecord.ContentMetadata.ExifInfo,
+			ContentFingerprints:          iscnRecord.ContentFingerprints,
+			Attributes:                   attributes,
+			LikeCoin: &evmmodel.ContractLevelMetadataLikeCoin{
+				ISCNIdPrefix: c.Data.Parent.IscnIdPrefix,
+				ClassId:      c.Id,
+			},
+		},
 	}
 }
 
