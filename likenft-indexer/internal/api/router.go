@@ -6,12 +6,16 @@ import (
 	"net/http"
 
 	"likenft-indexer/ent"
+	"likenft-indexer/internal/api/openapi"
 )
 
 func SetupRoutes(r *http.ServeMux, db *ent.Client) {
 	// Initialize handlers
 	nftHandler := NewNFTHandler(db)
 	nftClassHandler := NewNFTClassHandler(db)
+	openapiHandler := openapi.NewOpenAPIHandler(db)
+
+	r.Handle("/api/", http.StripPrefix("/api", openapiHandler))
 
 	// NFT routes
 	r.HandleFunc("GET /api/nfts", nftHandler.GetNFTs)
