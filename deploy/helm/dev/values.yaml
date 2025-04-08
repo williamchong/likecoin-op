@@ -52,3 +52,11 @@ likenftIndexer:
   env:
     ETH_NETWORK_PUBLIC_RPC_URL: https://sepolia.optimism.io
     ETH_LIKE_PROTOCOL_CONTRACT_ADDRESS: "0x01B25559B03AA22458d286C99b9fFfd4400ad093"
+    PORT: "8091"
+
+  api:
+    ingress:
+      host: likenft-indexer.pandawork.com
+      tls:
+        secretName: likenft-indexer.pandawork.com
+        host: likenft-indexer.pandawork.com

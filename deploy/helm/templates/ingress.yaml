@@ -42,6 +42,16 @@ spec:
                 name: {{ .Values.migrationBackend.name }}
                 port:
                   number: {{ .Values.migrationBackend.service.port }}
+    - host: {{ .Values.likenftIndexer.api.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.likenftIndexer.api.name }}
+                port:
+                  number: {{ .Values.likenftIndexer.api.service.port }}
   tls:
     - hosts:
         - {{ .Values.likecoinMigration.ingress.tls.host }}
@@ -52,3 +62,6 @@ spec:
     - hosts:
         - {{ .Values.migrationBackend.ingress.tls.host }}
       secretName: {{ .Values.migrationBackend.ingress.tls.secretName }}
+    - hosts:
+        - {{ .Values.likenftIndexer.api.ingress.tls.host }}
+      secretName: {{ .Values.likenftIndexer.api.ingress.tls.secretName }}
