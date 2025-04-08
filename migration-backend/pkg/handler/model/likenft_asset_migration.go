@@ -6,7 +6,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
-type LikeNFTAssetMigration struct {
+type LikeNFTAssetMigrationBase struct {
 	Id                     uint64                            `json:"id"`
 	CreatedAt              time.Time                         `json:"created_at"`
 	LikeNFTAssetSnapshotId uint64                            `json:"likenft_asset_snapshot_id"`
@@ -14,8 +14,12 @@ type LikeNFTAssetMigration struct {
 	EthAddress             string                            `json:"eth_address"`
 	Status                 model.LikeNFTAssetMigrationStatus `json:"status"`
 	FailedReason           *string                           `json:"failed_reason"`
-	Classes                []LikeNFTAssetMigrationClass      `json:"classes"`
-	NFTs                   []LikeNFTAssetMigrationNFT        `json:"nfts"`
+}
+
+type LikeNFTAssetMigration struct {
+	LikeNFTAssetMigrationBase
+	Classes []LikeNFTAssetMigrationClass `json:"classes"`
+	NFTs    []LikeNFTAssetMigrationNFT   `json:"nfts"`
 }
 
 func LikeNFTAssetMigrationFromModel(m *model.LikeNFTAssetMigration, classes []model.LikeNFTAssetMigrationClass, nfts []model.LikeNFTAssetMigrationNFT) *LikeNFTAssetMigration {
@@ -32,14 +36,34 @@ func LikeNFTAssetMigrationFromModel(m *model.LikeNFTAssetMigration, classes []mo
 	}
 
 	return &LikeNFTAssetMigration{
-		Id:                     m.Id,
-		CreatedAt:              m.CreatedAt,
-		LikeNFTAssetSnapshotId: m.LikeNFTAssetSnapshotId,
-		CosmosAddress:          m.CosmosAddress,
-		EthAddress:             m.EthAddress,
-		Status:                 m.Status,
-		FailedReason:           m.FailedReason,
-		Classes:                cs,
-		NFTs:                   ns,
+		LikeNFTAssetMigrationBase: LikeNFTAssetMigrationBase{
+			Id:                     m.Id,
+			CreatedAt:              m.CreatedAt,
+			LikeNFTAssetSnapshotId: m.LikeNFTAssetSnapshotId,
+			CosmosAddress:          m.CosmosAddress,
+			EthAddress:             m.EthAddress,
+			Status:                 m.Status,
+			FailedReason:           m.FailedReason,
+		},
+		Classes: cs,
+		NFTs:    ns,
 	}
+}
+
+func LikeNFTAssetMigrationBasesFromModel(m []*model.LikeNFTAssetMigration) []*LikeNFTAssetMigrationBase {
+	migrations := make([]*LikeNFTAssetMigrationBase, 0)
+
+	for _, migration := range m {
+		migrations = append(migrations, &LikeNFTAssetMigrationBase{
+			Id:                     migration.Id,
+			CreatedAt:              migration.CreatedAt,
+			LikeNFTAssetSnapshotId: migration.LikeNFTAssetSnapshotId,
+			CosmosAddress:          migration.CosmosAddress,
+			EthAddress:             migration.EthAddress,
+			Status:                 migration.Status,
+			FailedReason:           migration.FailedReason,
+		})
+	}
+
+	return migrations
 }

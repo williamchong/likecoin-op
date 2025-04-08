@@ -30,5 +30,9 @@ func (h *MigrationRouter) Router() *http.ServeMux {
 		AsynqClient: h.AsynqClient,
 	})
 
+	router.Handle("GET /migration", &ListLikeNFTAssetMigrationHandler{
+		Db: h.Db,
+	})
+
 	return router
 }
