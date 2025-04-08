@@ -111,34 +111,3 @@ erc721metadata: |
       }
     ]
   }
-
----
-
-name: likenft10a02sjpc5443mcvy28f6vhz9gljcteqynl9mpny46a4hs8mhq4dqvxfs5x/writing-081a4384-3f12-4658-bef2-781629596148
-cosmosnft: |
-  {
-    "class_id": "likenft10a02sjpc5443mcvy28f6vhz9gljcteqynl9mpny46a4hs8mhq4dqvxfs5x",
-    "id": "writing-081a4384-3f12-4658-bef2-781629596148",
-    "uri": "https://api.like.co/likernft/metadata?class_id=&nft_id=writing-081a4384-3f12-4658-bef2-781629596148",
-    "uri_hash": "",
-    "data": {
-      "@type": "/likechain.likenft.v1.NFTData",
-      "metadata": {
-        "name": "破解密碼的幻想與現實",
-        "image": "ar://Osr_6f1HssgWLUpxywDoctdJL6aUgprX4V3Febvp8Ls",
-        "message": "除了 2FA 雙因子認證，保障資訊安全的另一「低掛水果」是密碼管理器。"
-      },
-      "class_parent": {
-        "type": "ISCN",
-        "iscn_id_prefix": "iscn://likecoin-chain/2CqPzWsqUWe-DyN_dy5B2dEg8pYIG9Gg0YxyWt_zCvc",
-        "iscn_version_at_mint": "1",
-        "account": ""
-      },
-      "to_be_revealed": false
-    }
-  }
-erc721metadata: |
-  {
-    "image": "ar://Osr_6f1HssgWLUpxywDoctdJL6aUgprX4V3Febvp8Ls",
-    "name": "破解密碼的幻想與現實"
-  }

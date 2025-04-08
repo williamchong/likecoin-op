@@ -3,8 +3,10 @@ package evm_test
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"os"
+	"path"
 	"testing"
 
 	cosmosmodel "github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
@@ -16,131 +18,155 @@ import (
 
 func TestContractLevelMetadataFromCosmosClass(t *testing.T) {
 	Convey("ContractLevelMetadataFromCosmosClass", t, func() {
-		f, err := os.Open("testdata/contract_level_metadata_from_cosmos_class.tests.yaml")
+		rootDir := "testdata/contract_level_metadata_from_cosmos_class/"
+		entries, err := os.ReadDir(rootDir)
 		if err != nil {
-			panic(err)
+			t.Fatal(err)
 		}
-		defer f.Close()
+		for _, e := range entries {
+			fullPath := path.Join(rootDir, e.Name())
+			f, err := os.Open(fullPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer f.Close()
 
-		type TestCase struct {
-			Name                  string `json:"name"`
-			CosmosClassResponse   string `json:"cosmosclassresponse"`
-			ContractLevelMetadata string `json:"contractlevelmetadata"`
-		}
-
-		decoder := goyaml.NewDecoder(f)
-
-		for {
-			var testCase TestCase
-			err := decoder.Decode(&testCase)
-			if errors.Is(err, io.EOF) {
-				break
-			} else if err != nil {
-				panic(err)
+			type TestCase struct {
+				Name                  string `json:"name"`
+				CosmosClassResponse   string `json:"cosmosclassresponse"`
+				ContractLevelMetadata string `json:"contractlevelmetadata"`
 			}
 
-			Convey(testCase.Name, func() {
-				var cosmosClass struct {
-					Class *cosmosmodel.Class `json:"class"`
-				}
-				err := json.Unmarshal([]byte(testCase.CosmosClassResponse), &cosmosClass)
-				if err != nil {
+			decoder := goyaml.NewDecoder(f)
+
+			for {
+				var testCase TestCase
+				err := decoder.Decode(&testCase)
+				if errors.Is(err, io.EOF) {
+					break
+				} else if err != nil {
 					panic(err)
 				}
 
-				contractLevelMetadata := evm.ContractLevelMetadataFromCosmosClass(cosmosClass.Class)
-				contractLevelMetadataStr, err := json.Marshal(contractLevelMetadata)
-				if err != nil {
-					panic(err)
-				}
-				require.JSONEq(t, testCase.ContractLevelMetadata, string(contractLevelMetadataStr))
-			})
+				Convey(fmt.Sprintf("%s/%s", fullPath, testCase.Name), func() {
+					var cosmosClass struct {
+						Class *cosmosmodel.Class `json:"class"`
+					}
+					err := json.Unmarshal([]byte(testCase.CosmosClassResponse), &cosmosClass)
+					if err != nil {
+						panic(err)
+					}
+
+					contractLevelMetadata := evm.ContractLevelMetadataFromCosmosClass(cosmosClass.Class)
+					contractLevelMetadataStr, err := json.Marshal(contractLevelMetadata)
+					if err != nil {
+						panic(err)
+					}
+					require.JSONEq(t, testCase.ContractLevelMetadata, string(contractLevelMetadataStr))
+				})
+			}
 		}
 	})
 }
 
 func TestContractLevelMetadataFromCosmosClassListItem(t *testing.T) {
 	Convey("ContractLevelMetadataFromCosmosClassListItem", t, func() {
-		f, err := os.Open("testdata/contract_level_metadata_from_cosmos_class_list_item.tests.yaml")
+		rootDir := "testdata/contract_level_metadata_from_cosmos_class_list_item/"
+		entries, err := os.ReadDir(rootDir)
 		if err != nil {
-			panic(err)
+			t.Fatal(err)
 		}
-		defer f.Close()
-
-		type TestCase struct {
-			Name                  string `json:"name"`
-			CosmosClass           string `json:"cosmosclass"`
-			ContractLevelMetadata string `json:"contractlevelmetadata"`
-		}
-
-		decoder := goyaml.NewDecoder(f)
-
-		for {
-			var testCase TestCase
-			err := decoder.Decode(&testCase)
-			if errors.Is(err, io.EOF) {
-				break
-			} else if err != nil {
+		for _, e := range entries {
+			fullPath := path.Join(rootDir, e.Name())
+			f, err := os.Open(fullPath)
+			if err != nil {
 				panic(err)
 			}
+			defer f.Close()
 
-			Convey(testCase.Name, func() {
-				var cosmosClass cosmosmodel.ClassListItem
-				err := json.Unmarshal([]byte(testCase.CosmosClass), &cosmosClass)
-				if err != nil {
+			type TestCase struct {
+				Name                  string `json:"name"`
+				CosmosClass           string `json:"cosmosclass"`
+				ContractLevelMetadata string `json:"contractlevelmetadata"`
+			}
+
+			decoder := goyaml.NewDecoder(f)
+
+			for {
+				var testCase TestCase
+				err := decoder.Decode(&testCase)
+				if errors.Is(err, io.EOF) {
+					break
+				} else if err != nil {
 					panic(err)
 				}
 
-				contractLevelMetadata := evm.ContractLevelMetadataFromCosmosClassListItem(&cosmosClass)
-				contractLevelMetadataStr, err := json.Marshal(contractLevelMetadata)
-				if err != nil {
-					panic(err)
-				}
-				require.JSONEq(t, testCase.ContractLevelMetadata, string(contractLevelMetadataStr))
-			})
+				Convey(testCase.Name, func() {
+					var cosmosClass cosmosmodel.ClassListItem
+					err := json.Unmarshal([]byte(testCase.CosmosClass), &cosmosClass)
+					if err != nil {
+						panic(err)
+					}
+
+					contractLevelMetadata := evm.ContractLevelMetadataFromCosmosClassListItem(&cosmosClass)
+					contractLevelMetadataStr, err := json.Marshal(contractLevelMetadata)
+					if err != nil {
+						panic(err)
+					}
+					require.JSONEq(t, testCase.ContractLevelMetadata, string(contractLevelMetadataStr))
+				})
+			}
 		}
 	})
 }
 
 func TestERC721MetadataFromCosmosNFT(t *testing.T) {
 	Convey("ERC721MetadataFromCosmosNFT", t, func() {
-		f, err := os.Open("testdata/erc721_metadata_from_cosmos_nft.tests.yaml")
+		rootDir := "testdata/erc721_metadata_from_cosmos_nft/"
+		entries, err := os.ReadDir(rootDir)
 		if err != nil {
-			panic(err)
+			t.Fatal(err)
 		}
-		defer f.Close()
-
-		type TestCase struct {
-			Name           string `json:"name"`
-			CosmosNFT      string `json:"cosmosnft"`
-			ERC721Metadata string `json:"erc721metadata"`
-		}
-
-		decoder := goyaml.NewDecoder(f)
-
-		for {
-			var testCase TestCase
-			err := decoder.Decode(&testCase)
-			if errors.Is(err, io.EOF) {
-				break
-			} else if err != nil {
+		for _, e := range entries {
+			fullPath := path.Join(rootDir, e.Name())
+			f, err := os.Open(fullPath)
+			if err != nil {
 				panic(err)
 			}
+			defer f.Close()
 
-			Convey(testCase.Name, func() {
-				var cosmosNFT cosmosmodel.NFT
-				err := json.Unmarshal([]byte(testCase.CosmosNFT), &cosmosNFT)
-				if err != nil {
+			type TestCase struct {
+				Name           string `json:"name"`
+				CosmosNFT      string `json:"cosmosnft"`
+				ERC721Metadata string `json:"erc721metadata"`
+			}
+
+			decoder := goyaml.NewDecoder(f)
+
+			for {
+				var testCase TestCase
+				err := decoder.Decode(&testCase)
+				if errors.Is(err, io.EOF) {
+					break
+				} else if err != nil {
 					panic(err)
 				}
 
-				contractLevelMetadata := evm.ERC721MetadataFromCosmosNFT(&cosmosNFT)
-				contractLevelMetadataStr, err := json.Marshal(contractLevelMetadata)
-				if err != nil {
-					panic(err)
-				}
-				require.JSONEq(t, testCase.ERC721Metadata, string(contractLevelMetadataStr))
-			})
+				Convey(testCase.Name, func() {
+					var cosmosNFT cosmosmodel.NFT
+					err := json.Unmarshal([]byte(testCase.CosmosNFT), &cosmosNFT)
+					if err != nil {
+						panic(err)
+					}
+
+					contractLevelMetadata := evm.ERC721MetadataFromCosmosNFT(&cosmosNFT)
+					contractLevelMetadataStr, err := json.Marshal(contractLevelMetadata)
+					if err != nil {
+						panic(err)
+					}
+					require.JSONEq(t, testCase.ERC721Metadata, string(contractLevelMetadataStr))
+				})
+			}
 		}
 	})
 }
