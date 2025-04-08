@@ -1,0 +1,113 @@
+name: likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83/moneyverse-0017
+cosmosnft: |
+  {
+    "class_id": "likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83",
+    "id": "moneyverse-0017",
+    "uri": "https://api.ckxpress.com/book-nft/metadata?book_id=1&class_id=likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83&nft_id=moneyverse-0017",
+    "uri_hash": "",
+    "data": {
+      "@type": "/likechain.likenft.v1.NFTData",
+      "metadata": {
+        "name": "《所謂「我不投資」，就是 all in 在法定貨幣》",
+        "description": "#0017",
+        "image": "ipfs://bafybeihhpejs7u4bpjbd3gwzultmoxap4yuzozblwyhem2x2aazpazvw2q",
+        "external_url": "https://bit.ly/moneyverse-pdf",
+        "fileName": "2-sliver-0092",
+        "ipfs_hash": "ipfs://bafybeihhpejs7u4bpjbd3gwzultmoxap4yuzozblwyhem2x2aazpazvw2q",
+        "attributes": {
+          "background": "Fade Out",
+          "publish_info_layout": "Bottom",
+          "coins_layout": "Random",
+          "coins_color": "Sliver",
+          "coin_1_rotate": {
+            "X": 0.0045,
+            "Z": 0.001
+          },
+          "coin_2_rotate": {
+            "X": 0.0052,
+            "Z": 0.0057
+          },
+          "coin_1_position": {
+            "X": 135,
+            "Y": 21
+          },
+          "coin_2_position": {
+            "X": -160,
+            "Y": 158
+          }
+        }
+      },
+      "class_parent": {
+        "type": "ISCN",
+        "iscn_id_prefix": "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c",
+        "iscn_version_at_mint": "1",
+        "account": ""
+      },
+      "to_be_revealed": false
+    }
+  }
+erc721metadata: |
+  {
+    "image": "ipfs://bafybeihhpejs7u4bpjbd3gwzultmoxap4yuzozblwyhem2x2aazpazvw2q",
+    "external_url": "https://bit.ly/moneyverse-pdf",
+    "description": "#0017",
+    "name": "《所謂「我不投資」，就是 all in 在法定貨幣》",
+    "attributes": [
+      {
+        "trait_type": "background",
+        "value": "Fade Out"
+      },
+      {
+        "display_type": "number",
+        "trait_type": "coin_1_position_X",
+        "value": 135
+      },
+      {
+        "display_type": "number",
+        "trait_type": "coin_1_position_Y",
+        "value": 21
+      },
+      {
+        "display_type": "number",
+        "trait_type": "coin_1_rotate_X",
+        "value": 0.0045
+      },
+      {
+        "display_type": "number",
+        "trait_type": "coin_1_rotate_Z",
+        "value": 0.001
+      },
+      {
+        "display_type": "number",
+        "trait_type": "coin_2_position_X",
+        "value": -160
+      },
+      {
+        "display_type": "number",
+        "trait_type": "coin_2_position_Y",
+        "value": 158
+      },
+      {
+        "display_type": "number",
+        "trait_type": "coin_2_rotate_X",
+        "value": 0.0052
+      },
+      {
+        "display_type": "number",
+        "trait_type": "coin_2_rotate_Z",
+        "value": 0.0057
+      },
+      {
+        "trait_type": "coins_color",
+        "value": "Sliver"
+      },
+      {
+        "trait_type": "coins_layout",
+        "value": "Random"
+      },
+      {
+        "trait_type": "publish_info_layout",
+        "value": "Bottom"
+      }
+    ]
+  }
