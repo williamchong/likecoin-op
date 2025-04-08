@@ -35,3 +35,11 @@ func LikeCoinMigrationFromModel(c *model.LikeCoinMigration) *LikeCoinMigration {
 	}
 
 }
+
+func LikeCoinMigrationsFromModel(cs []*model.LikeCoinMigration) []*LikeCoinMigration {
+	migrations := make([]*LikeCoinMigration, len(cs))
+	for i, c := range cs {
+		migrations[i] = LikeCoinMigrationFromModel(c)
+	}
+	return migrations
+}
