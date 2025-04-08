@@ -11,6 +11,28 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+func TestQueryLikeCoinMigrationById(t *testing.T) {
+	Convey("QueryLikeCoinMigrationById", t, func() {
+		db, done := testutil.GetDB(t)
+		defer done()
+
+		m1, err := appdb.InsertLikeCoinMigration(db, &model.LikeCoinMigration{
+			UserCosmosAddress:    "cosmos123",
+			BurningCosmosAddress: "cosmos123",
+			MintingEthAddress:    "eth123",
+			Status:               model.LikeCoinMigrationStatusPendingCosmosTxHash,
+		})
+		if err != nil {
+			t.Fatalf("failed to insert likecoin migration: %v", err)
+		}
+
+		{
+			m, err := appdb.QueryLikeCoinMigrationById(db, m1.Id)
+			So(err, ShouldBeNil)
+			So(m.Id, ShouldEqual, m1.Id)
+		}
+	})
+}
 func TestQueryPaginatedLikeCoinMigration(t *testing.T) {
 	Convey("QueryPaginatedLikeCoinMigration", t, func() {
 		db, done := testutil.GetDB(t)

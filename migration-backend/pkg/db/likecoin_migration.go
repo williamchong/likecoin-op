@@ -6,6 +6,53 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
+func QueryLikeCoinMigrationById(
+	tx TxLike,
+	id uint64,
+) (*model.LikeCoinMigration, error) {
+	row := tx.QueryRow(`SELECT
+    id,
+    created_at,
+    user_cosmos_address,
+    burning_cosmos_address,
+    minting_eth_address,
+    user_eth_address,
+    amount,
+    evm_signature,
+    evm_signature_message,
+    status,
+    cosmos_tx_hash,
+    evm_tx_hash,
+    failed_reason
+  FROM likecoin_migration
+  WHERE id = $1
+  `, id)
+
+	m := &model.LikeCoinMigration{}
+
+	err := row.Scan(
+		&m.Id,
+		&m.CreatedAt,
+		&m.UserCosmosAddress,
+		&m.BurningCosmosAddress,
+		&m.MintingEthAddress,
+		&m.UserEthAddress,
+		&m.Amount,
+		&m.EvmSignature,
+		&m.EvmSignatureMessage,
+		&m.Status,
+		&m.CosmosTxHash,
+		&m.EvmTxHash,
+		&m.FailedReason,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return m, nil
+}
+
 func QueryNonEndedLikeCoinMigration(
 	tx TxLike,
 	cosmosAddress string,
