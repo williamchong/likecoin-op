@@ -58,8 +58,13 @@ export default {
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
-  modules: ["@nuxtjs/i18n", "@nuxtjs/axios"],
-
+  modules: ["@nuxtjs/i18n", "@nuxtjs/axios", "@nuxtjs/redirect-module"],
+  redirect: [
+    {
+      from: "^/$",
+      to: "/likecoin",
+    },
+  ],
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
     babel: {
