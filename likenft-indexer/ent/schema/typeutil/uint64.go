@@ -1,7 +1,8 @@
 package typeutil
 
 import (
-	"encoding"
+	"database/sql"
+	"database/sql/driver"
 	"fmt"
 	"strconv"
 
@@ -19,25 +20,21 @@ import (
 // pg numeral max: 18446744073709551615
 type Uint64 uint64
 
-var _ encoding.TextMarshaler = Uint64(0)
-var _ encoding.TextUnmarshaler = Uint64(0)
-
-func (s Uint64) MarshalText() (text []byte, err error) {
-	return []byte(strconv.FormatUint(uint64(s), 10)), nil
+var Uint64ValueScanner = field.ValueScannerFunc[Uint64, *sql.NullString]{
+	V: func(s Uint64) (driver.Value, error) {
+		return []byte(strconv.FormatUint(uint64(s), 10)), nil
+	},
+	S: func(ns *sql.NullString) (Uint64, error) {
+		if !ns.Valid {
+			return Uint64(0), nil
+		}
+		_s, err := strconv.ParseUint(string(ns.String), 10, 64)
+		if err != nil {
+			return Uint64(0), err
+		}
+		return Uint64(_s), nil
+	},
 }
-
-func (s Uint64) UnmarshalText(text []byte) error {
-	_s, err := strconv.ParseUint(string(text), 10, 64)
-	if err != nil {
-		return err
-	}
-
-	var sp *Uint64 = (*Uint64)(&s)
-	*sp = Uint64(_s)
-	return nil
-}
-
-var Uint64ValueScanner = &field.TextValueScanner[Uint64]{}
 
 var Uint64SchemaType = map[string]string{
 	dialect.Postgres: "numeric",
