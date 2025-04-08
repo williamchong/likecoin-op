@@ -150,7 +150,6 @@ contractlevelmetadata: |
     "symbol": "BOOK",
     "description": "要牧養青少年，便須要聆聽他們的信仰疑難，培育其理性思考能力，並與他們一同經歷信仰。本書輯錄了多位青少年提出的信仰疑難，並由不同的作者撰寫回應，包括傳道人、教育界人士、年輕神學生及FES同工。全書分為三個部分：福音信仰篇、聖經教義篇和信徒生活篇；嘗試深入淺出，為信仰疑難提供思考方向，引發對話與討論。 \n \n推薦： \n「照單全收的信仰，就是迷信。 \n耶穌說：「我就是道路……」，意味著「信耶穌」就是踏上非一般的生命之旅。我們都在跟隨主的信仰路上跌跌碰碰，問題多多。喜見此書的出現，當中帶出不少信仰實踐，倫理抉擇及神學教義等問題，討論深入淺出及情理兼備，每篇也是信仰的活潑對話。 \n衷心祝福每位用心閱讀此書的朋友，因你用心求問祂，祂必開門接待你。」 \n——黎廣澤 \n「油踐入心」事工召集人 \n \n「你的信仰生命正處於『無方向，無意義，沒內容』嗎？本書提及的問題可能正是你心中的困惑，亦是每一代年青信徒所掙扎的疑問。身處當今動盪鬱悶的環境，青年人是『被時代選中』的一群，激情感性的信仰驅不走無力感，唯有認真地培養信仰反省的基礎，誠實直面內心的問題，才能在洪流衝擊中站穩。本書涵蓋不同信仰生活的範疇，並作出扼要的回應。年青信徒理應不只滿足於書中的答案，誠邀你們繼續思考，尋索屬於你們這個時代的答案。」 \n——謝建邦 \n香港基督徒學生福音團契大專部主任 ",
     "image": "ar://G-K80-6XlDCP-6EtxIK0GWxjk6Zk0wW3HuWtHR6Peug",
-    "external_url": "",
     "nft_meta_collection_id": "nft_book",
     "nft_meta_collection_name": "NFT Book",
     "nft_meta_collection_description": "NFT Book by Liker Land",
@@ -172,7 +171,6 @@ contractlevelmetadata: |
       "https://api.like.co/arweave/v2/link/B6ED63F9E335E0D0A2A75FE43370F8C1FA96788B4AF9F6262A0E2D1D4D818462?name=%E4%BF%A1%E4%BB%B0Q%26Av4.epub"
     ],
     "thumbnailUrl": "ar://G-K80-6XlDCP-6EtxIK0GWxjk6Zk0wW3HuWtHR6Peug",
-    "url": "",
     "usageInfo": "All Rights Reserved",
     "version": 1,
     "contentFingerprints": [
@@ -181,7 +179,6 @@ contractlevelmetadata: |
       "hash://sha256/6f8f4069cc1021bbe4d9ab72e48ad46ed7c4aff6881ff417beaac96de1d53a97",
       "hash://sha256/3b9ef82177d8b37360d3e8fd25e09459ac1888d5ecbbd022d39fe38734e5f080"
     ],
-    "recordNotes": "",
     "dateCreated": "2025-02-26T10:58:40+00:00",
     "attributes": [{
       "trait_type": "Author",
@@ -189,10 +186,6 @@ contractlevelmetadata: |
     }, {
       "trait_type": "Publisher",
       "value": "FES 香港基督徒學生福音團契"
-    }, {
-      "trait_type": "Publish Date",
-      "display_type": "date",
-      "value": 1548460800
     }],
     "likecoin": {
       "iscnIdPrefix": "iscn://likecoin-chain/EgNp14O2nTpHEmZMS4oOKaOImCml65ZSuWQk_NKp8vU",

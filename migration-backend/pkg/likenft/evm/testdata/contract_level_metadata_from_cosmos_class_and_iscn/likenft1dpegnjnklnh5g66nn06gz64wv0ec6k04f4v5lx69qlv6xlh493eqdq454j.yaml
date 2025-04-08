@@ -146,7 +146,6 @@ contractlevelmetadata: |
     "symbol": "BOOK",
     "description": "假如有人 2020 年建議你每日買一百元比特幣，你會不會聽？\n\n比特幣剛升破十萬美元。現在才開始投資比特幣，是否為時已晚？\n\n雖然看好比特幣，但對這神秘高深的投資選項半信半疑，或無從入手？\n\n假如不是假如，高重建早於 2020 年就在《蘋果日報》專欄倡議每日定額定投比特幣。本書收錄作者七年多來討論比特幣的 20 篇文章，目的不是要以「I told you so」奚落當年錯過機會的旁觀者，而是以史為鑑，告訴讀者一切尚早，現時行動未為晚也。\n\n本書除了解釋為什麼「每天買一百元比特幣」是最符合成本效益的投資策略，也深入淺出介紹比特幣的概念，跟傳統貨幣比較，及與社會日常的關係，幫助我們在專注生活與生產的同時妥善分配資產，免被通漲蠶食勞動成果。\n\n鼓勵大家坐言起行，向終極的財富自由邁進。",
     "image": "ar://yY1IjxpTtp_QItTzirhOREYmFZEeW9IjlEmRcp-Cz5w",
-    "external_url": "",
     "nft_meta_collection_id": "nft_book",
     "nft_meta_collection_name": "NFT Book",
     "nft_meta_collection_descrption": "NFT Book by Liker Land",
@@ -156,7 +155,6 @@ contractlevelmetadata: |
       "description": "地球人。人文為體，科技為用。\n\n創業者。LikeCoin、DHK dao 發起人。\n\n創作者。著有《區塊鏈社會學：金錢、媒體與民主的再想像》、《財富自由主義：金錢的多元宇宙》、《Game 以載道》、《好 game 有好報》等。逢週四於 DHK 週報發表文章，內容全面開放，同步收錄於 ckxpress.com。\n\n沒有固定手機號碼，但一封電郵就能輕鬆聯繫上—— kin@ckxpress.com。",
       "name": "高重建"
     },
-    "datePublished": "",
     "exifInfo": [
       {
         "Format": "image/jpeg",
@@ -178,7 +176,6 @@ contractlevelmetadata: |
       "ar://hYtn-ySANq7HBqaZRW8eVPxp0u3j9d_023n03nymz50",
       "ar://IQ97SDTnWJt5VRc_cYWJmhd_kpjDpcu0TtjtCUvyzPc"
     ],
-    "recordNotes": "",
     "dateCreated": "2025-01-28T16:55:45+00:00",
     "attributes": [{
       "trait_type": "Author",

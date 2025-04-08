@@ -119,7 +119,7 @@ contractlevelmetadata: |
     "name": "《天工開物・栩栩如真》",
     "symbol": "BOOK",
     "image": "https://files.ckxpress.com/worksandcreation.jpeg",
-    "external_url": "https://nowherebookstore.io/worksandcreation",
+    "external_link": "https://nowherebookstore.io/worksandcreation",
     "message": "天覆地載，物數號萬。從石器到陶瓷，從日晷到鐘錶，從毛筆到鉛字，從算盤到電腦，從書本到NFT，人和物自古也是一體。我們都是「人物」，而「人物」都有故事。",
     "nft_meta_collection_id": "nowhere_nft_book",
     "nft_meta_collection_name": "飛地出版社",
@@ -139,8 +139,7 @@ contractlevelmetadata: |
       "ipfs://bafybeietirqpjl2zrczs3a65at74rkbst6mg6mvzelogjk3mz23gretgm4",
       "ar://WuffTBbQO8tntjt4jWSlSle-nRmvDP_Lvks7sT_UszQ"
     ],
-    "recordNotes": "",
-    "dateCreated": "2023-04-18T18:38:21+00:00",
+    "dateCreated": "2023-04-22T11:20:35+00:00",
     "attributes": [],
     "likecoin": {
       "iscnIdPrefix": "iscn://likecoin-chain/4UC3ZhKokFv3_rxP1p8QtCuDfHAcxcDZhbe4-rPMBGI",
