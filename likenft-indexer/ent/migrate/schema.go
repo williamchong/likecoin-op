@@ -106,7 +106,7 @@ var (
 	NftsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "contract_address", Type: field.TypeString, Size: 42},
-		{Name: "token_id", Type: field.TypeString},
+		{Name: "token_id", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
 		{Name: "token_uri", Type: field.TypeString, Nullable: true},
 		{Name: "image", Type: field.TypeString, Nullable: true},
 		{Name: "image_data", Type: field.TypeString, Nullable: true},
@@ -253,6 +253,9 @@ func init() {
 	NftsTable.ForeignKeys[1].RefTable = NftClassesTable
 	NftsTable.Annotation = &entsql.Annotation{
 		Table: "nfts",
+	}
+	NftsTable.Annotation.Checks = map[string]string{
+		"uint64_token_id_check": "token_id >= 0",
 	}
 	NftClassesTable.ForeignKeys[0].RefTable = AccountsTable
 	NftClassesTable.Annotation = &entsql.Annotation{}

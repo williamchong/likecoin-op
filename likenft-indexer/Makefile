@@ -36,6 +36,7 @@ tailwind-install:
 generate:
 	@echo "Generating..."
 	go generate ./ent
+	go generate ./openapi
 
 .PHONY: abigen
 abigen: SHELL=/bin/bash
@@ -50,6 +51,10 @@ abigen:
 			--abi=<(cat ../abi/BookNFT.json | jq '.["abi"]') \
 			--pkg=book_nft \
 			--out=internal/evm/book_nft/book_nft.go
+
+.PHONY: start-api
+start-api:
+	go run ./cmd/api
 
 .PHONY: migration
 migration:
@@ -84,6 +89,10 @@ build: tailwind-install templ-install generate
 	templ generate
 	./tailwindcss -i cmd/web/styles/input.css -o cmd/web/assets/css/output.css
 	go build -o main cmd/api/main.go
+
+.PHONY: build-api
+build-api:
+	go build -o likenft-indexer-api ./cmd/api
 
 .PHONY: build-worker-cli
 build-worker-cli:

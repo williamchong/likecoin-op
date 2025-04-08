@@ -7,6 +7,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 RUN apk add --no-cache make
+RUN make build-api
 RUN make build-worker-cli
 
 FROM ubuntu:noble
@@ -22,10 +23,11 @@ RUN update-ca-certificates
 COPY --from=stage1 /src/Makefile /app
 
 # App
+COPY --from=stage1 /src/likenft-indexer-api /usr/local/bin/
 COPY --from=stage1 /src/likenft-indexer-worker-cli /usr/local/bin/
 
 # Migration
 COPY --from=stage1 /usr/local/bin/atlas /usr/local/bin/
 COPY --from=stage1 /src/ent/migrate/migrations /app/ent/migrate/migrations
 
-CMD ["bash"]
+CMD ["likenft-indexer-api"]

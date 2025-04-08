@@ -3,9 +3,8 @@
 package nft
 
 import (
-	"fmt"
 	"likenft-indexer/ent/predicate"
-	"math/big"
+	"likenft-indexer/ent/schema/typeutil"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -63,7 +62,7 @@ func ContractAddress(v string) predicate.NFT {
 }
 
 // TokenID applies equality check predicate on the "token_id" field. It's identical to TokenIDEQ.
-func TokenID(v *big.Int) predicate.NFT {
+func TokenID(v typeutil.Uint64) predicate.NFT {
 	vc, err := ValueScanner.TokenID.Value(v)
 	return predicate.NFTOrErr(sql.FieldEQ(FieldTokenID, vc), err)
 }
@@ -194,19 +193,19 @@ func ContractAddressContainsFold(v string) predicate.NFT {
 }
 
 // TokenIDEQ applies the EQ predicate on the "token_id" field.
-func TokenIDEQ(v *big.Int) predicate.NFT {
+func TokenIDEQ(v typeutil.Uint64) predicate.NFT {
 	vc, err := ValueScanner.TokenID.Value(v)
 	return predicate.NFTOrErr(sql.FieldEQ(FieldTokenID, vc), err)
 }
 
 // TokenIDNEQ applies the NEQ predicate on the "token_id" field.
-func TokenIDNEQ(v *big.Int) predicate.NFT {
+func TokenIDNEQ(v typeutil.Uint64) predicate.NFT {
 	vc, err := ValueScanner.TokenID.Value(v)
 	return predicate.NFTOrErr(sql.FieldNEQ(FieldTokenID, vc), err)
 }
 
 // TokenIDIn applies the In predicate on the "token_id" field.
-func TokenIDIn(vs ...*big.Int) predicate.NFT {
+func TokenIDIn(vs ...typeutil.Uint64) predicate.NFT {
 	var (
 		err error
 		v   = make([]any, len(vs))
@@ -220,7 +219,7 @@ func TokenIDIn(vs ...*big.Int) predicate.NFT {
 }
 
 // TokenIDNotIn applies the NotIn predicate on the "token_id" field.
-func TokenIDNotIn(vs ...*big.Int) predicate.NFT {
+func TokenIDNotIn(vs ...typeutil.Uint64) predicate.NFT {
 	var (
 		err error
 		v   = make([]any, len(vs))
@@ -234,77 +233,27 @@ func TokenIDNotIn(vs ...*big.Int) predicate.NFT {
 }
 
 // TokenIDGT applies the GT predicate on the "token_id" field.
-func TokenIDGT(v *big.Int) predicate.NFT {
+func TokenIDGT(v typeutil.Uint64) predicate.NFT {
 	vc, err := ValueScanner.TokenID.Value(v)
 	return predicate.NFTOrErr(sql.FieldGT(FieldTokenID, vc), err)
 }
 
 // TokenIDGTE applies the GTE predicate on the "token_id" field.
-func TokenIDGTE(v *big.Int) predicate.NFT {
+func TokenIDGTE(v typeutil.Uint64) predicate.NFT {
 	vc, err := ValueScanner.TokenID.Value(v)
 	return predicate.NFTOrErr(sql.FieldGTE(FieldTokenID, vc), err)
 }
 
 // TokenIDLT applies the LT predicate on the "token_id" field.
-func TokenIDLT(v *big.Int) predicate.NFT {
+func TokenIDLT(v typeutil.Uint64) predicate.NFT {
 	vc, err := ValueScanner.TokenID.Value(v)
 	return predicate.NFTOrErr(sql.FieldLT(FieldTokenID, vc), err)
 }
 
 // TokenIDLTE applies the LTE predicate on the "token_id" field.
-func TokenIDLTE(v *big.Int) predicate.NFT {
+func TokenIDLTE(v typeutil.Uint64) predicate.NFT {
 	vc, err := ValueScanner.TokenID.Value(v)
 	return predicate.NFTOrErr(sql.FieldLTE(FieldTokenID, vc), err)
-}
-
-// TokenIDContains applies the Contains predicate on the "token_id" field.
-func TokenIDContains(v *big.Int) predicate.NFT {
-	vc, err := ValueScanner.TokenID.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("token_id value is not a string: %T", vc)
-	}
-	return predicate.NFTOrErr(sql.FieldContains(FieldTokenID, vcs), err)
-}
-
-// TokenIDHasPrefix applies the HasPrefix predicate on the "token_id" field.
-func TokenIDHasPrefix(v *big.Int) predicate.NFT {
-	vc, err := ValueScanner.TokenID.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("token_id value is not a string: %T", vc)
-	}
-	return predicate.NFTOrErr(sql.FieldHasPrefix(FieldTokenID, vcs), err)
-}
-
-// TokenIDHasSuffix applies the HasSuffix predicate on the "token_id" field.
-func TokenIDHasSuffix(v *big.Int) predicate.NFT {
-	vc, err := ValueScanner.TokenID.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("token_id value is not a string: %T", vc)
-	}
-	return predicate.NFTOrErr(sql.FieldHasSuffix(FieldTokenID, vcs), err)
-}
-
-// TokenIDEqualFold applies the EqualFold predicate on the "token_id" field.
-func TokenIDEqualFold(v *big.Int) predicate.NFT {
-	vc, err := ValueScanner.TokenID.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("token_id value is not a string: %T", vc)
-	}
-	return predicate.NFTOrErr(sql.FieldEqualFold(FieldTokenID, vcs), err)
-}
-
-// TokenIDContainsFold applies the ContainsFold predicate on the "token_id" field.
-func TokenIDContainsFold(v *big.Int) predicate.NFT {
-	vc, err := ValueScanner.TokenID.Value(v)
-	vcs, ok := vc.(string)
-	if err == nil && !ok {
-		err = fmt.Errorf("token_id value is not a string: %T", vc)
-	}
-	return predicate.NFTOrErr(sql.FieldContainsFold(FieldTokenID, vcs), err)
 }
 
 // TokenURIEQ applies the EQ predicate on the "token_uri" field.

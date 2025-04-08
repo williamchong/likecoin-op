@@ -1,0 +1,668 @@
+openapi: 3.0.3
+info:
+  title: LikeNFT Indexer API
+  version: 0.1.0
+paths:
+  /account/{evm_address}/booknfts:
+    get:
+      tags:
+        - Account
+      summary: Query booknfts by account
+      description: Query booknfts by account
+      operationId: bookNFTsByAccount
+      parameters:
+        - name: evm_address
+          in: path
+          description: evm_address of the Account
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/PaginationRequestLimit"
+        - $ref: "#/components/parameters/PaginationRequestKey"
+        - $ref: "#/components/parameters/PaginationRequestReverse"
+      responses:
+        "200":
+          description: BookNFT with requested ID was found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/PaginationResponse"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/BookNFT"
+                required:
+                  - pagination
+                  - data
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /account/{evm_address}/tokens:
+    get:
+      tags:
+        - Account
+      summary: Query tokens by account
+      description: Query tokens by account
+      operationId: tokensByAccount
+      parameters:
+        - name: evm_address
+          in: path
+          description: evm_address of the Account
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/PaginationRequestLimit"
+        - $ref: "#/components/parameters/PaginationRequestKey"
+        - $ref: "#/components/parameters/PaginationRequestReverse"
+      responses:
+        "200":
+          description: BookNFT with requested ID was found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/PaginationResponse"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/NFT"
+                required:
+                  - pagination
+                  - data
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /booknfts:
+    get:
+      tags:
+        - BookNFT
+      summary: Query all BookNFTs
+      description: Query all BookNFTs
+      operationId: bookNFTs
+      parameters:
+        - $ref: "#/components/parameters/PaginationRequestLimit"
+        - $ref: "#/components/parameters/PaginationRequestKey"
+        - $ref: "#/components/parameters/PaginationRequestReverse"
+      responses:
+        "200":
+          description: BookNFT with requested ID was found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/PaginationResponse"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/BookNFT"
+                required:
+                  - pagination
+                  - data
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /booknft/{id}:
+    get:
+      tags:
+        - BookNFT
+      summary: Query BookNFT
+      description: Query BookNFT
+      operationId: bookNFT
+      parameters:
+        - name: id
+          in: path
+          description: evm address of the BookNFT
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: BookNFT with requested ID was found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookNFT"
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /booknft/{id}/tokens:
+    get:
+      tags:
+        - BookNFT
+      summary: Query tokens by BookNFT
+      description: Query tokens by BookNFT
+      operationId: tokensByBookNFT
+      parameters:
+        - name: id
+          in: path
+          description: evm address of the BookNFT
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/PaginationRequestLimit"
+        - $ref: "#/components/parameters/PaginationRequestKey"
+        - $ref: "#/components/parameters/PaginationRequestReverse"
+      responses:
+        "200":
+          description: BookNFT with requested ID was found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/PaginationResponse"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/NFT"
+                required:
+                  - pagination
+                  - data
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /booknft/{id}/account:
+    get:
+      tags:
+        - BookNFT
+      summary: Query account by BookNFT
+      description: Query account by BookNFT
+      operationId: accountByBookNFT
+      parameters:
+        - name: id
+          in: path
+          description: evm address of the BookNFT
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: BookNFT with requested ID was found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  account:
+                    $ref: "#/components/schemas/Account"
+                required:
+                  - account
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /token/{booknft_id}/{token_id}:
+    get:
+      tags:
+        - Token
+      summary: Query token
+      description: Query token
+      operationId: token
+      parameters:
+        - name: booknft_id
+          in: path
+          description: evm address of the BookNFT
+          required: true
+          schema:
+            type: string
+        - name: token_id
+          in: path
+          description: token id of the token
+          required: true
+          schema:
+            $ref: "#/components/schemas/Uint64"
+      responses:
+        "200":
+          description: BookNFT with requested ID was found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NFT"
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /events:
+    get:
+      tags:
+        - Event
+      summary: Query events
+      description: Query events
+      operationId: events
+      parameters:
+        - $ref: "#/components/parameters/EventPaginationRequestLimit"
+        - $ref: "#/components/parameters/EventPaginationRequestPage"
+      responses:
+        "200":
+          description: Events found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/EventQueryMetadata"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Event"
+                required:
+                  - meta
+                  - data
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /events/{address}:
+    get:
+      tags:
+        - Event
+      summary: Query events
+      description: Query events
+      operationId: eventsByAddress
+      parameters:
+        - name: address
+          in: path
+          description: contract address
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/EventPaginationRequestLimit"
+        - $ref: "#/components/parameters/EventPaginationRequestPage"
+      responses:
+        "200":
+          description: Events found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/EventQueryMetadata"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Event"
+                required:
+                  - meta
+                  - data
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /events/{address}/{signature}:
+    get:
+      tags:
+        - Event
+      summary: Query events
+      description: Query events
+      operationId: eventsByAddressAndSignature
+      parameters:
+        - name: address
+          in: path
+          description: contract address
+          required: true
+          schema:
+            type: string
+        - name: signature
+          in: path
+          description: event signature
+          required: true
+          example: NewBookNFT(address,(string,string,string,uint64))
+          schema:
+            type: string
+        - $ref: "#/components/parameters/EventPaginationRequestLimit"
+        - $ref: "#/components/parameters/EventPaginationRequestPage"
+      responses:
+        "200":
+          description: Events found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/EventQueryMetadata"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Event"
+                required:
+                  - meta
+                  - data
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  parameters:
+    PaginationRequestKey:
+      name: pagination.key
+      in: query
+      description: pagination.key
+      required: false
+      schema:
+        type: integer
+        default: 0
+    PaginationRequestLimit:
+      name: pagination.limit
+      in: query
+      description: pagination.limit
+      required: false
+      schema:
+        type: integer
+        default: 0
+    PaginationRequestReverse:
+      name: reverse
+      in: query
+      description: reverse
+      required: false
+      schema:
+        type: boolean
+        default: false
+    EventPaginationRequestLimit:
+      name: limit
+      in: query
+      description: limit
+      required: false
+      schema:
+        type: integer
+        default: 20
+    EventPaginationRequestPage:
+      name: page
+      in: query
+      description: page
+      required: false
+      schema:
+        type: integer
+        default: 0
+  schemas:
+    Account:
+      type: object
+      properties:
+        id:
+          type: integer
+        cosmos_address:
+          type: string
+        evm_address:
+          type: string
+        likeid:
+          type: string
+      required:
+        - id
+        - evm_address
+    NFT:
+      type: object
+      properties:
+        id:
+          type: integer
+        contract_address:
+          type: string
+        token_id:
+          $ref: "#/components/schemas/Uint64"
+        token_uri:
+          type: string
+        image:
+          type: string
+        image_data:
+          type: string
+        external_url:
+          type: string
+        description:
+          type: string
+        name:
+          type: string
+        attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Erc721MetadataAttribute"
+        background_color:
+          type: string
+        animation_url:
+          type: string
+        youtube_url:
+          type: string
+        owner_address:
+          type: string
+        minted_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - contract_address
+        - token_id
+        - owner_address
+        - minted_at
+        - updated_at
+    BookNFT:
+      type: object
+      properties:
+        id:
+          type: integer
+        address:
+          type: string
+        name:
+          type: string
+        symbol:
+          type: string
+        owner_address:
+          type: string
+        total_supply:
+          $ref: "#/components/schemas/BigInt"
+        max_supply:
+          $ref: "#/components/schemas/Uint64"
+        metadata:
+          $ref: "#/components/schemas/ContractLevelMetadata"
+        banner_image:
+          type: string
+        featured_image:
+          type: string
+        deployer_address:
+          type: string
+        deployed_block_number:
+          $ref: "#/components/schemas/Uint64"
+        minted_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        owner:
+          $ref: "#/components/schemas/Account"
+      required:
+        - id
+        - address
+        - name
+        - symbol
+        - total_supply
+        - max_supply
+        - banner_image
+        - featured_image
+        - deployer_address
+        - deployed_block_number
+        - minted_at
+        - updated_at
+    EventQueryMetadata:
+      type: object
+      properties:
+        chain_ids:
+          type: array
+          items:
+            type: integer
+        address:
+          type: string
+        signature:
+          type: string
+        page:
+          type: integer
+        limit_per_chain:
+          type: integer
+        total_items:
+          type: integer
+        total_pages:
+          type: integer
+      required:
+        - chain_ids
+        - address
+        - signature
+        - page
+        - limit_per_chain
+        - total_items
+        - total_pages
+    Event:
+      type: object
+      properties:
+        chain_id:
+          type: integer
+        block_number:
+          type: string
+        block_hash:
+          type: string
+        block_timestamp:
+          type: string
+        transaction_hash:
+          type: string
+        transaction_index:
+          type: integer
+        log_index:
+          type: integer
+        address:
+          type: string
+        data:
+          type: string
+        topics:
+          type: array
+          items:
+            type: string
+        decoded:
+          type: object
+          properties:
+            name:
+              type: string
+            signature:
+              type: string
+            indexed_params:
+              type: object
+              properties: {}
+            non_indexed_params:
+              type: object
+              properties: {}
+          required:
+            - name
+            - signature
+            - indexed_params
+            - non_indexed_params
+      required:
+        - chain_id
+        - block_number
+        - block_hash
+        - block_timestamp
+        - transaction_hash
+        - transaction_index
+        - log_index
+        - address
+        - data
+        - topics
+        - decoded
+    PaginationResponse:
+      type: object
+      properties:
+        next_key:
+          type: integer
+        count:
+          type: integer
+      required:
+        - next_key
+        - count
+    BigInt:
+      type: string
+      example: "1"
+    ContractLevelMetadata:
+      type: object
+      properties:
+        name:
+          type: string
+        symbol:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+        banner_image:
+          type: string
+        featured_image:
+          type: string
+        external_link:
+          type: string
+        collaborators:
+          type: array
+          items:
+            type: string
+    Erc721MetadataAttribute:
+      type: object
+      properties:
+        display_type:
+          type: string
+          enum:
+            - number
+            - boost_number
+            - boost_percentage
+        trait_type:
+          type: string
+        value:
+          type: string
+      required:
+        - trait_type
+        - value
+    Uint64:
+      type: string
+      example: "1"
+    Error:
+      description: Represents error object
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+          default: 500
+        message:
+          type: string
+      required:
+        - code
+        - message

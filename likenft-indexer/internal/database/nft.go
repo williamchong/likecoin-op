@@ -7,6 +7,7 @@ import (
 
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/nft"
+	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/evm/model"
 )
 
@@ -75,7 +76,7 @@ func (r *nftRepository) GetOrCreate(
 		n, err := tx.NFT.Query().
 			Where(
 				nft.ContractAddressEqualFold(contractAddress),
-				nft.TokenIDEQ(tokenID)).
+				nft.TokenIDEQ(typeutil.Uint64(tokenID.Uint64()))).
 			Only(ctx)
 
 		if err == nil {
@@ -89,7 +90,7 @@ func (r *nftRepository) GetOrCreate(
 
 		err = tx.NFT.Create().
 			SetContractAddress(contractAddress).
-			SetTokenID(tokenID).
+			SetTokenID(typeutil.Uint64(tokenID.Uint64())).
 			SetTokenURI(tokenURI).
 			SetImage(image).
 			SetNillableImageData(imageData).
@@ -113,7 +114,7 @@ func (r *nftRepository) GetOrCreate(
 		n, err = tx.NFT.Query().
 			Where(
 				nft.ContractAddressEqualFold(contractAddress),
-				nft.TokenIDEQ(tokenID)).
+				nft.TokenIDEQ(typeutil.Uint64(tokenID.Uint64()))).
 			Only(ctx)
 
 		if err != nil {
@@ -142,7 +143,7 @@ func (r *nftRepository) UpdateOwner(
 		_, err := tx.NFT.Query().
 			Where(
 				nft.ContractAddressEqualFold(contractAddress),
-				nft.TokenIDEQ(tokenID),
+				nft.TokenIDEQ(typeutil.Uint64(tokenID.Uint64())),
 			).
 			Only(ctx)
 
@@ -155,7 +156,7 @@ func (r *nftRepository) UpdateOwner(
 			SetOwner(newOwner).
 			Where(
 				nft.ContractAddressEqualFold(contractAddress),
-				nft.TokenIDEQ(tokenID),
+				nft.TokenIDEQ(typeutil.Uint64(tokenID.Uint64())),
 			).Exec(ctx)
 	})
 

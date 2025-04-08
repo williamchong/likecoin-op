@@ -9,8 +9,8 @@ import (
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
+	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/evm/model"
-	"math/big"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -31,8 +31,8 @@ func (nc *NFTCreate) SetContractAddress(s string) *NFTCreate {
 }
 
 // SetTokenID sets the "token_id" field.
-func (nc *NFTCreate) SetTokenID(b *big.Int) *NFTCreate {
-	nc.mutation.SetTokenID(b)
+func (nc *NFTCreate) SetTokenID(t typeutil.Uint64) *NFTCreate {
+	nc.mutation.SetTokenID(t)
 	return nc
 }
 
@@ -321,7 +321,7 @@ func (nc *NFTCreate) createSpec() (*NFT, *sqlgraph.CreateSpec, error) {
 		if err != nil {
 			return nil, nil, err
 		}
-		_spec.SetField(nft.FieldTokenID, field.TypeString, vv)
+		_spec.SetField(nft.FieldTokenID, field.TypeUint64, vv)
 		_node.TokenID = value
 	}
 	if value, ok := nc.mutation.TokenURI(); ok {

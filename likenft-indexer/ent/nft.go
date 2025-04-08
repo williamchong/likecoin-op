@@ -8,8 +8,8 @@ import (
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
+	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/evm/model"
-	"math/big"
 	"strings"
 	"time"
 
@@ -25,7 +25,7 @@ type NFT struct {
 	// ContractAddress holds the value of the "contract_address" field.
 	ContractAddress string `json:"contract_address,omitempty"`
 	// TokenID holds the value of the "token_id" field.
-	TokenID *big.Int `json:"token_id,omitempty"`
+	TokenID typeutil.Uint64 `json:"token_id,omitempty"`
 	// TokenURI holds the value of the "token_uri" field.
 	TokenURI *string `json:"token_uri,omitempty"`
 	// Image holds the value of the "image" field.

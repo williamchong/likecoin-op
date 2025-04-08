@@ -11,7 +11,6 @@ import (
 	"likenft-indexer/cmd/web"
 	"likenft-indexer/internal/api"
 
-	"github.com/a-h/templ"
 	"github.com/coder/websocket"
 )
 
@@ -29,8 +28,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	fileServer := http.FileServer(http.FS(web.Files))
 	mux.Handle("/assets/", fileServer)
-	mux.Handle("/web", templ.Handler(web.HelloForm()))
-	mux.HandleFunc("/hello", web.HelloWebHandler)
 
 	// Wrap the mux with CORS middleware
 	return s.corsMiddleware(mux)

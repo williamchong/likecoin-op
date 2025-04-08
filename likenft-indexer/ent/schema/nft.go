@@ -1,8 +1,9 @@
 package schema
 
 import (
-	"math/big"
+	"slices"
 
+	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/evm/model"
 
 	"entgo.io/ent"
@@ -21,18 +22,22 @@ type NFT struct {
 }
 
 func (NFT) Annotations() []schema.Annotation {
-	return []schema.Annotation{
-		entsql.Annotation{Table: "nfts"},
-	}
+	return slices.Concat(
+		[]schema.Annotation{
+			entsql.Annotation{Table: "nfts"},
+		},
+		typeutil.Uint64Annotations("token_id"),
+	)
 }
 
 // Fields of the NFT.
 func (NFT) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("contract_address").MaxLen(42).NotEmpty(),
-		field.String("token_id").
-			GoType(&big.Int{}).
-			ValueScanner(field.TextValueScanner[*big.Int]{}),
+		field.Uint64("token_id").
+			GoType(typeutil.Uint64(0)).
+			SchemaType(typeutil.Uint64SchemaType).
+			ValueScanner(typeutil.Uint64ValueScanner),
 		field.String("token_uri").Nillable().Optional(),
 		// START Prepopulate field
 		field.String("image").Nillable().Optional(),

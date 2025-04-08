@@ -10,8 +10,8 @@ import (
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/predicate"
+	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/evm/model"
-	"math/big"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -48,8 +48,23 @@ func (nu *NFTUpdate) SetNillableContractAddress(s *string) *NFTUpdate {
 }
 
 // SetTokenID sets the "token_id" field.
-func (nu *NFTUpdate) SetTokenID(b *big.Int) *NFTUpdate {
-	nu.mutation.SetTokenID(b)
+func (nu *NFTUpdate) SetTokenID(t typeutil.Uint64) *NFTUpdate {
+	nu.mutation.ResetTokenID()
+	nu.mutation.SetTokenID(t)
+	return nu
+}
+
+// SetNillableTokenID sets the "token_id" field if the given value is not nil.
+func (nu *NFTUpdate) SetNillableTokenID(t *typeutil.Uint64) *NFTUpdate {
+	if t != nil {
+		nu.SetTokenID(*t)
+	}
+	return nu
+}
+
+// AddTokenID adds t to the "token_id" field.
+func (nu *NFTUpdate) AddTokenID(t typeutil.Uint64) *NFTUpdate {
+	nu.mutation.AddTokenID(t)
 	return nu
 }
 
@@ -410,7 +425,14 @@ func (nu *NFTUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		if err != nil {
 			return 0, err
 		}
-		_spec.SetField(nft.FieldTokenID, field.TypeString, vv)
+		_spec.SetField(nft.FieldTokenID, field.TypeUint64, vv)
+	}
+	if value, ok := nu.mutation.AddedTokenID(); ok {
+		vv, err := nft.ValueScanner.TokenID.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.AddField(nft.FieldTokenID, field.TypeUint64, vv)
 	}
 	if value, ok := nu.mutation.TokenURI(); ok {
 		_spec.SetField(nft.FieldTokenURI, field.TypeString, value)
@@ -579,8 +601,23 @@ func (nuo *NFTUpdateOne) SetNillableContractAddress(s *string) *NFTUpdateOne {
 }
 
 // SetTokenID sets the "token_id" field.
-func (nuo *NFTUpdateOne) SetTokenID(b *big.Int) *NFTUpdateOne {
-	nuo.mutation.SetTokenID(b)
+func (nuo *NFTUpdateOne) SetTokenID(t typeutil.Uint64) *NFTUpdateOne {
+	nuo.mutation.ResetTokenID()
+	nuo.mutation.SetTokenID(t)
+	return nuo
+}
+
+// SetNillableTokenID sets the "token_id" field if the given value is not nil.
+func (nuo *NFTUpdateOne) SetNillableTokenID(t *typeutil.Uint64) *NFTUpdateOne {
+	if t != nil {
+		nuo.SetTokenID(*t)
+	}
+	return nuo
+}
+
+// AddTokenID adds t to the "token_id" field.
+func (nuo *NFTUpdateOne) AddTokenID(t typeutil.Uint64) *NFTUpdateOne {
+	nuo.mutation.AddTokenID(t)
 	return nuo
 }
 
@@ -971,7 +1008,14 @@ func (nuo *NFTUpdateOne) sqlSave(ctx context.Context) (_node *NFT, err error) {
 		if err != nil {
 			return nil, err
 		}
-		_spec.SetField(nft.FieldTokenID, field.TypeString, vv)
+		_spec.SetField(nft.FieldTokenID, field.TypeUint64, vv)
+	}
+	if value, ok := nuo.mutation.AddedTokenID(); ok {
+		vv, err := nft.ValueScanner.TokenID.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.AddField(nft.FieldTokenID, field.TypeUint64, vv)
 	}
 	if value, ok := nuo.mutation.TokenURI(); ok {
 		_spec.SetField(nft.FieldTokenURI, field.TypeString, value)

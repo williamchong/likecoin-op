@@ -3,7 +3,7 @@
 package nft
 
 import (
-	"math/big"
+	"likenft-indexer/ent/schema/typeutil"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -116,7 +116,7 @@ var (
 	OwnerAddressValidator func(string) error
 	// ValueScanner of all NFT fields.
 	ValueScanner struct {
-		TokenID field.TypeValueScanner[*big.Int]
+		TokenID field.TypeValueScanner[typeutil.Uint64]
 	}
 )
 

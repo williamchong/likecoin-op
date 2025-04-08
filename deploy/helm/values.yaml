@@ -82,6 +82,17 @@ likenftIndexer:
     imageRepository: chankiyu22/likenft-indexer
     imagePullPolicy: IfNotPresent
 
+  api:
+    name: likenft-indexer-api
+
+    container:
+      port: 8091
+
+    service:
+      port: 80
+
+    resources: {}
+
   worker:
     name: likenft-indexer-worker
 

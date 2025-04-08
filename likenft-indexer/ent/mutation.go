@@ -2850,7 +2850,8 @@ type NFTMutation struct {
 	typ              string
 	id               *int
 	contract_address *string
-	token_id         **big.Int
+	token_id         *typeutil.Uint64
+	addtoken_id      *typeutil.Uint64
 	token_uri        *string
 	image            *string
 	image_data       *string
@@ -3010,12 +3011,13 @@ func (m *NFTMutation) ResetContractAddress() {
 }
 
 // SetTokenID sets the "token_id" field.
-func (m *NFTMutation) SetTokenID(b *big.Int) {
-	m.token_id = &b
+func (m *NFTMutation) SetTokenID(t typeutil.Uint64) {
+	m.token_id = &t
+	m.addtoken_id = nil
 }
 
 // TokenID returns the value of the "token_id" field in the mutation.
-func (m *NFTMutation) TokenID() (r *big.Int, exists bool) {
+func (m *NFTMutation) TokenID() (r typeutil.Uint64, exists bool) {
 	v := m.token_id
 	if v == nil {
 		return
@@ -3026,7 +3028,7 @@ func (m *NFTMutation) TokenID() (r *big.Int, exists bool) {
 // OldTokenID returns the old "token_id" field's value of the NFT entity.
 // If the NFT object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NFTMutation) OldTokenID(ctx context.Context) (v *big.Int, err error) {
+func (m *NFTMutation) OldTokenID(ctx context.Context) (v typeutil.Uint64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldTokenID is only allowed on UpdateOne operations")
 	}
@@ -3040,9 +3042,28 @@ func (m *NFTMutation) OldTokenID(ctx context.Context) (v *big.Int, err error) {
 	return oldValue.TokenID, nil
 }
 
+// AddTokenID adds t to the "token_id" field.
+func (m *NFTMutation) AddTokenID(t typeutil.Uint64) {
+	if m.addtoken_id != nil {
+		*m.addtoken_id += t
+	} else {
+		m.addtoken_id = &t
+	}
+}
+
+// AddedTokenID returns the value that was added to the "token_id" field in this mutation.
+func (m *NFTMutation) AddedTokenID() (r typeutil.Uint64, exists bool) {
+	v := m.addtoken_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetTokenID resets all changes to the "token_id" field.
 func (m *NFTMutation) ResetTokenID() {
 	m.token_id = nil
+	m.addtoken_id = nil
 }
 
 // SetTokenURI sets the "token_uri" field.
@@ -3911,7 +3932,7 @@ func (m *NFTMutation) SetField(name string, value ent.Value) error {
 		m.SetContractAddress(v)
 		return nil
 	case nft.FieldTokenID:
-		v, ok := value.(*big.Int)
+		v, ok := value.(typeutil.Uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -4015,13 +4036,21 @@ func (m *NFTMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *NFTMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addtoken_id != nil {
+		fields = append(fields, nft.FieldTokenID)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *NFTMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case nft.FieldTokenID:
+		return m.AddedTokenID()
+	}
 	return nil, false
 }
 
@@ -4030,6 +4059,13 @@ func (m *NFTMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *NFTMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case nft.FieldTokenID:
+		v, ok := value.(typeutil.Uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTokenID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown NFT numeric field %s", name)
 }

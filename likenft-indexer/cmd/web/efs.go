@@ -1,6 +1,11 @@
 package web
 
-import "embed"
+import (
+	"embed"
+
+	_ "github.com/a-h/templ"
+	_ "github.com/a-h/templ/runtime"
+)
 
 //go:embed "assets"
 var Files embed.FS
