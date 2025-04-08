@@ -1,6 +1,8 @@
 package db_test
 
 import (
+	"database/sql"
+	"errors"
 	"testing"
 
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
@@ -115,6 +117,44 @@ func TestQueryPaginatedLikeNFTAssetMigration(t *testing.T) {
 			migrations, err := appdb.QueryPaginatedLikeNFTAssetMigration(db, 10, 0, nil, "helloworld")
 			So(err, ShouldBeNil)
 			So(len(migrations), ShouldEqual, 0)
+		}
+	})
+}
+
+func TestRemoveLikeNFTAssetMigration(t *testing.T) {
+	Convey("RemoveLikeNFTAssetMigration", t, func() {
+		db, done := testutil.GetDB(t)
+		defer done()
+
+		s1, err := appdb.InsertLikeNFTAssetSnapshot(db, &model.LikeNFTAssetSnapshot{
+			CosmosAddress: "cosmos123",
+			Status:        model.NFTSnapshotStatusInit,
+		})
+		if err != nil {
+			t.Fatalf("failed insert snapshot: %v", err)
+		}
+		m1, err := appdb.InsertLikeNFTAssetMigration(
+			db, &model.LikeNFTAssetMigration{
+				LikeNFTAssetSnapshotId: s1.Id,
+				CosmosAddress:          "cosmos123",
+				EthAddress:             "eth123",
+				Status:                 model.NFTMigrationStatusInit,
+			},
+		)
+		if err != nil {
+			t.Fatalf("failed insert asset migration: %v", err)
+		}
+
+		{
+			mc, err := appdb.QueryLikeNFTAssetMigrationById(db, m1.Id)
+			So(err, ShouldBeNil)
+			So(mc.Id, ShouldEqual, m1.Id)
+
+			err = appdb.RemoveLikeNFTAssetMigration(db, m1.Id)
+			So(err, ShouldBeNil)
+
+			_, err = appdb.QueryLikeNFTAssetMigrationById(db, m1.Id)
+			So(errors.Is(err, sql.ErrNoRows), ShouldBeTrue)
 		}
 	})
 }
