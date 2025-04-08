@@ -190,3 +190,15 @@ WHERE id = $6;`,
 
 	return err
 }
+
+func RemoveLikeNFTAssetMigration(
+	tx TxLike,
+	id uint64,
+) error {
+	_, err := tx.Exec(
+		`DELETE FROM likenft_asset_migration WHERE id = $1;`,
+		id,
+	)
+
+	return err
+}

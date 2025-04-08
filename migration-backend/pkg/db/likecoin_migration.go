@@ -271,3 +271,21 @@ WHERE id = $12`,
 
 	return nil
 }
+
+func RemoveLikeCoinMigration(tx TxLike, id uint64) error {
+	result, err := tx.Exec(`DELETE FROM likecoin_migration WHERE id = $1`, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}
