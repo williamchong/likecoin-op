@@ -82,7 +82,7 @@ describe("BookNFTToken", () => {
 
     const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
     await likeNFTClassOwnerSigner
-      .mint(this.classOwner, [
+      .mint(this.classOwner, ["_mint1"], [
         JSON.stringify({
           image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
           image_data: "",
@@ -262,7 +262,7 @@ describe("BookNFTToken batch actions", () => {
 
     const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
     await likeNFTClassOwnerSigner
-      .mint(this.classOwner, [
+      .mint(this.classOwner, ["_mint1"], [
         JSON.stringify({
           image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
           image_data: "",
@@ -283,7 +283,7 @@ describe("BookNFTToken batch actions", () => {
       ])
       .then((tx) => tx.wait());
     await likeNFTClassOwnerSigner
-      .mint(this.classOwner, [
+      .mint(this.classOwner, ["_mint2"], [
         JSON.stringify({
           image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
           image_data: "",
@@ -304,7 +304,7 @@ describe("BookNFTToken batch actions", () => {
       ])
       .then((tx) => tx.wait());
     await likeNFTClassOwnerSigner
-      .mint(this.likerLand, [
+      .mint(this.likerLand, ["_mint3"], [
         JSON.stringify({
           image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
           image_data: "",

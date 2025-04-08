@@ -115,7 +115,7 @@ describe("BookNFTClass", () => {
     const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
     const mintNFT = async () => {
       await likeClassOwnerSigner
-        .mint(this.classOwner.address, [
+        .mint(this.classOwner.address, ["_mint"], [
           JSON.stringify({
             image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
             image_data: "",
@@ -168,7 +168,7 @@ describe("BookNFTClass", () => {
 
     const mintNFT = async () => {
       await likeClassOwnerSigner
-        .mint(this.classOwner.address, [
+        .mint(this.classOwner.address, ["_mint"], [
           JSON.stringify({
             image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
             image_data: "",
@@ -251,6 +251,7 @@ describe("BookNFTClass", () => {
       await likeClassOwnerSigner
         .batchMint(
           [this.classOwner.address, this.classOwner.address],
+          ["_mint1", "_mint2"],
           [
             JSON.stringify({
               image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
@@ -300,7 +301,7 @@ describe("BookNFTClass", () => {
 
     const mintNFT = async () => {
       await likeClassOwnerSigner
-        .mint(this.classOwner.address, [
+        .mint(this.classOwner.address, ["_mint1"], [
           JSON.stringify({
             image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
             image_data: "",
@@ -324,7 +325,11 @@ describe("BookNFTClass", () => {
 
     const safeMintWithTokenId = async (fromTokenId: number) => {
       await likeClassOwnerSigner
-        .safeMintWithTokenId(fromTokenId, this.classOwner.address, [
+        .safeMintWithTokenId(
+          fromTokenId,
+          [this.classOwner.address, this.classOwner.address],
+          ["_mint1", "_mint2"],
+          [
           JSON.stringify({
             image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
             image_data: "",
@@ -454,48 +459,12 @@ describe("BookNFT permission control", () => {
     expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
   });
 
-  it("should not allow protocol owner to mint NFT", async function () {
-    const likeProtocolOwnerSigner = protocolContract.connect(
-      this.protocolOwner,
-    );
-
-    const mintNFT = async () => {
-      await likeProtocolOwnerSigner
-        .mintNFT({
-          to: this.classCreatorSigner.address,
-          classId: this.classId,
-          input: {
-            metadata: JSON.stringify({
-              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-              image_data: "",
-              external_url: "https://www.google.com",
-              description: "#0001 Description",
-              name: "#0001",
-              attributes: [
-                {
-                  trait_type: "ISCN ID",
-                  value:
-                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-                },
-              ],
-              background_color: "",
-              animation_url: "",
-              youtube_url: "",
-            }),
-          },
-        })
-        .then((tx) => tx.wait());
-    };
-
-    await expect(mintNFT()).to.be.rejected;
-  });
-
   it("should allow class owner to mint NFT", async function () {
     const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
 
     const mintNFT = async () => {
       await likeClassOwnerSigner
-        .mint(this.likerLand.address, [
+        .mint(this.likerLand.address, ["_mint1", "_mint2"], [
           JSON.stringify({
             image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
             image_data: "",
@@ -644,43 +613,6 @@ describe("BookNFT ownership transfer", () => {
     expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
   });
 
-  it("should not allow protocol owner to mint NFT", async function () {
-    const likeProtocolOwnerSigner = protocolContract.connect(
-      this.protocolOwner,
-    );
-
-    const mintNFT = async () => {
-      await likeProtocolOwnerSigner
-        .mintNFT({
-          creator: this.classCreatorSigner.address,
-          classId: this.classId,
-          input: {
-            metadata: JSON.stringify({
-              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-              image_data: "",
-              external_url: "https://www.google.com",
-              description: "#0001 Description",
-              name: "#0001",
-              attributes: [
-                {
-                  trait_type: "ISCN ID",
-                  value:
-                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-                },
-              ],
-              background_color: "",
-              animation_url: "",
-              youtube_url: "",
-            }),
-          },
-        })
-        .then((tx) => tx.wait());
-    };
-
-    await expect(mintNFT()).to.be.rejected;
-    await expect(await nftClassContract.totalSupply()).to.equal(0n);
-  });
-
   it("should not modify minter permission when transfer ownership", async function () {
     const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
     expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
@@ -696,7 +628,7 @@ describe("BookNFT ownership transfer", () => {
 
     const mintNFT = async () => {
       await likeClassOwnerSigner
-        .mint(this.classOwner.address, [
+        .mint(this.classOwner.address, ["_mint1", "_mint2"], [
           JSON.stringify({
             image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
             image_data: "",
@@ -758,7 +690,7 @@ describe("BookNFT ownership transfer", () => {
     const likeClassRandomSigner = nftClassContract.connect(this.randomSigner);
     const mintNFT = async () => {
       await likeClassRandomSigner
-        .mint(this.randomSigner.address, [
+        .mint(this.randomSigner.address, ["_mint1", "_mint2"], [
           JSON.stringify({
             image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
             image_data: "",

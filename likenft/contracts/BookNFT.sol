@@ -137,13 +137,23 @@ contract BookNFT is
         emit ContractURIUpdated();
     }
 
+    /**
+     * mint function
+     *
+     * mint a new token with metadata, caller should ensure the supply is enough.
+     *
+     * @param to - owner address to hold the new minted token
+     * @param metadataList - list of metadata to supply
+     */
     function mint(
         address to,
+        string[] calldata memos,
         string[] calldata metadataList
     ) external onlyMinter {
+        require(memos.length == metadataList.length, "ErrMemoMetadataLengthMismatch");
         _ensureEnoughSupply(metadataList.length);
         for (uint i = 0; i < metadataList.length; i++) {
-            _mintWithEvent(_msgSender(), to, metadataList[i]);
+            _mintWithEvent(_msgSender(), to, memos[i], metadataList[i]);
         }
     }
 
@@ -153,15 +163,17 @@ contract BookNFT is
      * batch mint with metadata list
      *
      * @param tos - owner address to hold the new minted token
+     * @param memos - list of memo to supply
      * @param metadataList - list of metadata to supply, the length of the list should be the same as the length of the tos. Metadata will fill the corresponding position of the tos.
      */
     function batchMint(
         address[] calldata tos,
+        string[] calldata memos,
         string[] calldata metadataList
     ) external onlyMinter {
         _ensureEnoughSupply(metadataList.length);
         for (uint i = 0; i < tos.length; i++) {
-            _mintWithEvent(_msgSender(), tos[i], metadataList[i]);
+            _mintWithEvent(_msgSender(), tos[i], memos[i], metadataList[i]);
         }
     }
 
@@ -174,12 +186,14 @@ contract BookNFT is
      * Expect caller to check and specify correct start token id
      *
      * @param fromTokenId - the start token id
-     * @param to - owner address to hold the new minted token
+     * @param tos - owner address to hold the new minted token
+     * @param memos - list of memo to supply
      * @param metadataList - list of metadata to supply
      */
     function safeMintWithTokenId(
         uint256 fromTokenId,
-        address to,
+        address[] calldata tos,
+        string[] calldata memos,
         string[] calldata metadataList
     ) external onlyMinter {
         if (totalSupply() != fromTokenId) {
@@ -187,7 +201,7 @@ contract BookNFT is
         }
         _ensureEnoughSupply(metadataList.length);
         for (uint i = 0; i < metadataList.length; i++) {
-            _mintWithEvent(_msgSender(), to, metadataList[i]);
+            _mintWithEvent(_msgSender(), tos[i], memos[i], metadataList[i]);
         }
     }
 
@@ -212,17 +226,19 @@ contract BookNFT is
      *
      * @param from - the address that is transferring the token
      * @param to - owner address to hold the new minted token
+     * @param memo - memo to supply
      * @param metadata - metadata to supply
      */
     function _mintWithEvent(
         address from,
         address to,
+        string calldata memo,
         string calldata metadata
     ) internal {
         BookNFTStorage storage $ = _getClassStorage();
         $.tokenURIMap[$._currentIndex] = metadata;
         _safeMint(to, $._currentIndex);
-        emit TransferWithMemo(from, to, $._currentIndex, "_mint");
+        emit TransferWithMemo(from, to, $._currentIndex, memo);
         $._currentIndex++;
     }
 
