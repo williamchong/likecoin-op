@@ -91,9 +91,6 @@ func main() {
 		CosmosAPI:           cosmosAPI,
 		LikeNFTCosmosClient: likenftCosmosClient,
 		LikecoinAPI:         likecoinAPI,
-
-		InitialNewClassOwner:     envCfg.InitialNewClassOwner,
-		InitialBatchMintNFTOwner: envCfg.InitialBatchMintNFTsOwner,
 	}
 	mainMux.Handle("/likenft/", http.StripPrefix("/likenft", likeNFTRouter.Router()))
 	likeCoinRouter := likecoin.LikeCoinRouter{

@@ -122,47 +122,77 @@
               {{ $t('migrate.preview') }}
             </h2>
           </template>
-          <template v-if="migrationPreview != null" #current>
-            <div :class="['flex', 'flex-row', 'gap-1']">
-              <h2
-                :class="[
-                  'text-base',
-                  'font-semibold',
-                  'leading-[30px]',
-                  'text-likecoin-darkgrey',
-                ]"
-              >
-                {{ $t('migrate.preview') }}
-              </h2>
-              <UTooltip
-                v-if="
-                  migrationPreview.block_time != null &&
-                  migrationPreview.block_height != null
-                "
-                :text="
-                  $t('section.asset-preview.tooltip', {
-                    date: _formatDate(migrationPreview.block_time),
-                    height: _formatNumber(migrationPreview.block_height),
-                  })
-                "
-                :ui="{
-                  base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
-                }"
-                ><FontAwesomeIcon
-                  icon="circle-exclamation"
+          <template v-if="currentStep.step === 4" #current>
+            <template v-if="currentStep.state === 'MigrationPreview'">
+              <div :class="['flex', 'flex-row', 'gap-1']">
+                <h2
                   :class="[
-                    'text-sm',
+                    'text-base',
+                    'font-semibold',
                     'leading-[30px]',
-                    'text-likecoin-votecolor-yes',
+                    'text-likecoin-darkgrey',
                   ]"
-              /></UTooltip>
-            </div>
-            <SectionAssetPreview
-              v-if="migrationPreview != null"
-              :class="['max-w-full', 'mt-2']"
-              :snapshot="migrationPreview"
-              @confirmMigration="handleConfirmMigrate"
-            />
+                >
+                  {{ $t('migrate.preview') }}
+                </h2>
+                <UTooltip
+                  v-if="
+                    currentStep.migrationPreview.block_time != null &&
+                    currentStep.migrationPreview.block_height != null
+                  "
+                  :text="
+                    $t('section.asset-preview.tooltip', {
+                      date: _formatDate(
+                        currentStep.migrationPreview.block_time
+                      ),
+                      height: _formatNumber(
+                        currentStep.migrationPreview.block_height
+                      ),
+                    })
+                  "
+                  :ui="{
+                    base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
+                  }"
+                  ><FontAwesomeIcon
+                    icon="circle-exclamation"
+                    :class="[
+                      'text-sm',
+                      'leading-[30px]',
+                      'text-likecoin-votecolor-yes',
+                    ]"
+                /></UTooltip>
+              </div>
+              <SectionAssetPreview
+                v-if="currentStep.migrationPreview != null"
+                :class="['max-w-full', 'mt-2']"
+                :snapshot="currentStep.migrationPreview"
+                @confirmMigration="handleConfirmMigrate"
+              />
+            </template>
+            <template v-if="currentStep.state === 'MigrationRetryPreview'">
+              <div :class="['flex', 'flex-row', 'gap-1']">
+                <h2
+                  :class="[
+                    'text-base',
+                    'font-semibold',
+                    'leading-[30px]',
+                    'text-likecoin-darkgrey',
+                  ]"
+                >
+                  {{ $t('migrate.preview') }}
+                </h2>
+              </div>
+              <SectionMigrationResult
+                :class="['max-w-full', 'mt-2']"
+                :migration="currentStep.failedMigration"
+                :initial-status="'failed'"
+              />
+              <div :class="['mt-4', 'flex', 'flex-row', 'justify-end']">
+                <AppButton @click="handleConfirmMigrate">
+                  {{ $t('section.asset-preview.confirm-retry') }}
+                </AppButton>
+              </div>
+            </template>
           </template>
           <template #past>
             <h2
@@ -266,7 +296,11 @@
                   }}
                 </p>
               </div>
-              <AppButton :class="['w-[120px]']" @click="handleRetryClick">
+              <AppButton
+                v-if="failedMigrationCount != null && failedMigrationCount > 0"
+                :class="['w-[120px]']"
+                @click="handleRetryClick"
+              >
                 {{ $t('section.migration-result.retry') }}
               </AppButton>
             </div>
@@ -298,9 +332,14 @@ import { makeGetUserProfileAPI } from '~/apis/getUserProfile';
 import { makeMigrateLikerIDAPI } from '~/apis/migrateLikerID';
 import {
   isMigrationCompleted,
+  isMigrationFailed,
   LikeNFTAssetMigration,
 } from '~/apis/models/likenftAssetMigration';
 import { LikeNFTAssetSnapshot } from '~/apis/models/likenftAssetSnapshot';
+import {
+  makeRetryMigrationAPI,
+  RetryMigrationRequest,
+} from '~/apis/retryMigration';
 import {
   initCosmosConnected,
   initEvmConnected,
@@ -309,17 +348,21 @@ import {
   likerIdMigrated,
   likerIdResolved,
   migrationCompleted,
+  migrationFailed,
   migrationPreviewFetched,
   migrationResultFetched,
+  migrationRetried,
   signMessageRequested,
   StepState,
-  StepStateEnd,
+  StepStateCompleted,
+  StepStateFailed,
   StepStateStep2CosmosConnected,
   StepStateStep2LikerIdEvmConnected,
   StepStateStep2LikerIdResolved,
   StepStateStep3Signing,
   StepStateStep4Init,
   StepStateStep4MigrationPreview,
+  StepStateStep4MigrationRetryPreview,
   StepStateStep5MigrationResult,
 } from '~/pageModels';
 
@@ -412,6 +455,11 @@ export default Vue.extend({
         );
       }
       return null;
+    },
+
+    retryMigration() {
+      return (cosmosAddress: string, req: RetryMigrationRequest) =>
+        makeRetryMigrationAPI(cosmosAddress)(this.$apiClient)(req);
     },
   },
 
@@ -547,10 +595,28 @@ export default Vue.extend({
           (s) => this._createMigration(s)
         );
       }
+
+      if (
+        this.currentStep.step === 4 &&
+        this.currentStep.state === 'MigrationRetryPreview'
+      ) {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          (s) => this._retryMigration(s)
+        );
+      }
     },
 
     handleRetryClick() {
-      alert('TODO: retry');
+      if (
+        this.currentStep.step === 99999 &&
+        this.currentStep.state === 'Failed'
+      ) {
+        this.currentStep = migrationRetried(
+          this.currentStep,
+          this.currentStep.migration
+        );
+      }
     },
 
     async _asyncStateTransition<S1 extends StepState, S2 extends StepState>(
@@ -685,15 +751,37 @@ export default Vue.extend({
       return migrationResultFetched(s, migrationResponse.migration);
     },
 
+    async _retryMigration(
+      s: StepStateStep4MigrationRetryPreview
+    ): Promise<StepStateStep5MigrationResult> {
+      const migrationResponse = await this.retryMigration(s.cosmosAddress, {
+        book_nft_collection: s.failedMigration.classes
+          .filter((c) => c.status === 'failed')
+          .map((c) => c.cosmos_class_id),
+        book_nft: s.failedMigration.nfts
+          .filter((n) => n.status === 'failed')
+          .map((n) => ({
+            class_id: n.cosmos_class_id,
+            nft_id: n.cosmos_nft_id,
+          })),
+      });
+      return migrationResultFetched(s, migrationResponse.migration);
+    },
+
     async _refreshMigration(
       s: StepStateStep5MigrationResult
-    ): Promise<StepStateStep5MigrationResult | StepStateEnd> {
+    ): Promise<
+      StepStateStep5MigrationResult | StepStateCompleted | StepStateFailed
+    > {
       const resp = await makeGetMigrationAPI(s.cosmosAddress)(
         this.$apiClient
       )();
       // expect throw on error
       if (isMigrationCompleted(resp.migration)) {
         return migrationCompleted(s, resp.migration);
+      }
+      if (isMigrationFailed(resp.migration)) {
+        return migrationFailed(s, resp.migration);
       }
       return migrationResultFetched(s, resp.migration);
     },
@@ -703,7 +791,8 @@ export default Vue.extend({
     ): Promise<
       | StepStateStep4MigrationPreview
       | StepStateStep5MigrationResult
-      | StepStateEnd
+      | StepStateCompleted
+      | StepStateFailed
     > {
       try {
         const resp = await makeGetMigrationAPI(s.cosmosAddress)(
@@ -711,6 +800,9 @@ export default Vue.extend({
         )();
         if (isMigrationCompleted(resp.migration)) {
           return migrationCompleted(s, resp.migration);
+        }
+        if (isMigrationFailed(resp.migration)) {
+          return migrationFailed(s, resp.migration);
         }
         return migrationResultFetched(s, resp.migration);
       } catch (e) {

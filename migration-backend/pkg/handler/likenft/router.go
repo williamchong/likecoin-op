@@ -19,9 +19,6 @@ type LikeNFTRouter struct {
 	LikeNFTCosmosClient *cosmos.LikeNFTCosmosClient
 	LikecoinAPI         *likecoin_api.LikecoinAPI
 	LikerlandUrlBase    string
-
-	InitialNewClassOwner     string
-	InitialBatchMintNFTOwner string
 }
 
 func (h *LikeNFTRouter) Router() *http.ServeMux {
@@ -48,11 +45,9 @@ func (h *LikeNFTRouter) Router() *http.ServeMux {
 	router.Handle("/migration-preview/", migrationPreviewRouter.Router())
 
 	migrationRouter := &migration.MigrationRouter{
-		Db:                       h.Db,
-		AsynqClient:              h.AsynqClient,
-		LikecoinAPI:              h.LikecoinAPI,
-		InitialNewClassOwner:     h.InitialNewClassOwner,
-		InitialBatchMintNFTOwner: h.InitialBatchMintNFTOwner,
+		Db:          h.Db,
+		AsynqClient: h.AsynqClient,
+		LikecoinAPI: h.LikecoinAPI,
 	}
 
 	// This is for paths without trailing /. e.g. GET / POST

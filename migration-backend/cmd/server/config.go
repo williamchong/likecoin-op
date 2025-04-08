@@ -16,9 +16,6 @@ type EnvConfig struct {
 	RedisDsn                     string `envconfig:"REDIS_DSN" default:"redis://127.0.0.1:6379"`
 	LikecoinAPIUrlBase           string `envconfig:"LIKECOIN_API_URL_BASE"`
 	LikecoinBurningCosmosAddress string `envconfig:"LIKECOIN_BURNING_COSMOS_ADDRESS"`
-
-	InitialNewClassOwner      string `envconfig:"INITIAL_NEW_CLASS_OWNER"`
-	InitialBatchMintNFTsOwner string `envconfig:"INITIAL_BATCH_MINT_NFTS_OWNER"`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {

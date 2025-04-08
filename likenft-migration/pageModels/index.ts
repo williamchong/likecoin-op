@@ -1,5 +1,6 @@
 import {
   CompletedLikeNFTAssetMigration,
+  FailedLikeNFTAssetMigration,
   LikeNFTAssetMigration,
 } from '~/apis/models/likenftAssetMigration';
 import { LikeNFTAssetSnapshot } from '~/apis/models/likenftAssetSnapshot';
@@ -71,6 +72,16 @@ export interface StepStateStep4MigrationPreview {
   migrationPreview: LikeNFTAssetSnapshot;
 }
 
+export interface StepStateStep4MigrationRetryPreview {
+  step: 4;
+  state: 'MigrationRetryPreview';
+  cosmosAddress: string;
+  ethAddress: string;
+  avatar: string | null;
+  likerId: string | null;
+  failedMigration: FailedLikeNFTAssetMigration;
+}
+
 export interface StepStateStep5MigrationResult {
   step: 5;
   cosmosAddress: string;
@@ -80,13 +91,24 @@ export interface StepStateStep5MigrationResult {
   migration: LikeNFTAssetMigration;
 }
 
-export interface StepStateEnd {
+export interface StepStateCompleted {
   step: 99999;
+  state: 'Completed';
   cosmosAddress: string;
   ethAddress: string;
   avatar: string | null;
   likerId: string | null;
   migration: CompletedLikeNFTAssetMigration;
+}
+
+export interface StepStateFailed {
+  step: 99999;
+  state: 'Failed';
+  cosmosAddress: string;
+  ethAddress: string;
+  avatar: string | null;
+  likerId: string | null;
+  migration: FailedLikeNFTAssetMigration;
 }
 
 export type StepState =
@@ -99,8 +121,10 @@ export type StepState =
   | StepStateStep3Signing
   | StepStateStep4Init
   | StepStateStep4MigrationPreview
+  | StepStateStep4MigrationRetryPreview
   | StepStateStep5MigrationResult
-  | StepStateEnd;
+  | StepStateCompleted
+  | StepStateFailed;
 
 export function introductionConfirmed(_: StepStateStep1): StepStateStep2Init {
   return {
@@ -209,6 +233,7 @@ export function migrationResultFetched(
   prev:
     | StepStateStep4Init
     | StepStateStep4MigrationPreview
+    | StepStateStep4MigrationRetryPreview
     | StepStateStep5MigrationResult,
   migration: LikeNFTAssetMigration
 ): StepStateStep5MigrationResult {
@@ -225,13 +250,44 @@ export function migrationResultFetched(
 export function migrationCompleted(
   prev: StepStateStep4Init | StepStateStep5MigrationResult,
   completedMigration: CompletedLikeNFTAssetMigration
-): StepStateEnd {
+): StepStateCompleted {
   return {
     step: 99999,
+    state: 'Completed',
     cosmosAddress: prev.cosmosAddress,
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
     likerId: prev.likerId,
     migration: completedMigration,
+  };
+}
+
+export function migrationFailed(
+  prev: StepStateStep4Init | StepStateStep5MigrationResult,
+  failedMigration: FailedLikeNFTAssetMigration
+): StepStateFailed {
+  return {
+    step: 99999,
+    state: 'Failed',
+    cosmosAddress: prev.cosmosAddress,
+    ethAddress: prev.ethAddress,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    migration: failedMigration,
+  };
+}
+
+export function migrationRetried(
+  prev: StepStateFailed,
+  failedMigration: FailedLikeNFTAssetMigration
+): StepStateStep4MigrationRetryPreview {
+  return {
+    step: 4,
+    state: 'MigrationRetryPreview',
+    cosmosAddress: prev.cosmosAddress,
+    ethAddress: prev.ethAddress,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    failedMigration,
   };
 }
