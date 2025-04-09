@@ -16,11 +16,12 @@ import (
 func MakeMintNFTsRequestBody(
 	contractAddress string,
 	fromTokenId *big.Int,
-	to common.Address,
+	tos []common.Address,
+	memos []string,
 	metadataList []string,
 ) (*signer.CreateEvmTransactionRequestRequestBody, error) {
 	return signer.MakeCreateEvmTransactionRequestRequestBody(
-		book_nft.BookNftMetaData, "safeMintWithTokenId", fromTokenId, to, metadataList,
+		book_nft.BookNftMetaData, "safeMintWithTokenId", fromTokenId, tos, memos, metadataList,
 	)(contractAddress)
 }
 
@@ -30,7 +31,8 @@ func (l *BookNFT) MintNFTs(
 
 	classId common.Address,
 	fromTokenId *big.Int,
-	to common.Address,
+	tos []common.Address,
+	memos []string,
 	metadataList []string,
 ) (*types.Transaction, *types.Receipt, error) {
 	logger.Info("MintNFTs")
@@ -38,7 +40,7 @@ func (l *BookNFT) MintNFTs(
 	mylogger := logger.WithGroup("MintNFTs")
 
 	r, err := MakeMintNFTsRequestBody(
-		classId.Hex(), fromTokenId, to, metadataList,
+		classId.Hex(), fromTokenId, tos, memos, metadataList,
 	)
 	if err != nil {
 		return nil, nil, err

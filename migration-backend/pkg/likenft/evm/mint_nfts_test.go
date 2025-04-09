@@ -12,14 +12,20 @@ import (
 func TestMakeMintNFTsRequestBody(t *testing.T) {
 	Convey("MakeMintNFTsRequestBody", t, func() {
 		fromTokenId := big.NewInt(0)
-		to := common.HexToAddress("0x0")
+		tos := []common.Address{
+			common.HexToAddress("0x0"),
+		}
+		memos := []string{
+			"memo1",
+		}
 		metadataList := []string{
 			"metadata1",
 		}
 		_, err := evm.MakeMintNFTsRequestBody(
 			"0x0",
 			fromTokenId,
-			to,
+			tos,
+			memos,
 			metadataList,
 		)
 		So(err, ShouldBeNil)
