@@ -1,6 +1,11 @@
 {
   "app": {
-    "title": "LikeCoin Migration Admin"
+    "likecoin": {
+      "title": "Liker ID Migration Admin Portal"
+    },
+    "likenft": {
+      "title": "LikeNFT Migration Admin Portal"
+    }
   },
   "common": {
     "loading": "Loading..."
