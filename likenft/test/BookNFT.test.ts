@@ -80,6 +80,24 @@ describe("BookNFTClass", () => {
     );
   });
 
+  it("should not able to re-initialize", async function () {
+    const bookNFTRandomSigner = bookNFTImplementation.connect(this.randomSigner);
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+    const owner = await bookNFTRandomSigner.owner();
+    expect(owner).is.not.equal(this.randomSigner.address);
+    
+    await expect(bookNFTRandomSigner.initialize({
+      creator: this.randomSigner,
+      updaters: [this.randomSigner, this.randomSigner],
+      minters: [this.randomSigner, this.randomSigner],
+      config: bookConfig,
+    })).to.be.rejectedWith(
+      "InvalidInitialization()",
+    );
+  });
+
   it("should have the right roles assigned", async function () {
     const MINTER_ROLE = await nftClassContract.MINTER_ROLE();
     const UPDATER_ROLE = await nftClassContract.UPDATER_ROLE();

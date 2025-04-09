@@ -120,28 +120,17 @@ describe("LikeProtocol", () => {
   it("should be able to create new BookNFT", async function () {
     const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
 
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+
     const newClass = async () => {
       await likeProtocolOwnerSigner
         .newBookNFT({
           creator: this.ownerSigner,
           updaters: [this.ownerSigner],
           minters: [this.ownerSigner],
-          config: {
-            name: "My Book",
-            symbol: "KOOB",
-            metadata: JSON.stringify({
-              name: "Collection Name",
-              symbol: "Collection SYMB",
-              description: "Collection Description",
-              image:
-                "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-              banner_image: "",
-              featured_image: "",
-              external_link: "https://www.example.com",
-              collaborators: [],
-            }),
-            max_supply: 10,
-          },
+          config: bookConfig,
         })
         .then((tx) => tx.wait());
     };
@@ -164,6 +153,51 @@ describe("LikeProtocol", () => {
     const _newNFTClass = await ethers.getContractAt("BookNFT", classId);
     expect(await _newNFTClass.name()).to.equal("My Book");
     expect(await _newNFTClass.symbol()).to.equal("KOOB");
+  });
+
+  it("should mint a already initialized BookNFT which cant be initialized again", async function () {
+    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
+
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+
+    const newClass = async () => {
+      await likeProtocolOwnerSigner
+        .newBookNFT({
+          creator: this.ownerSigner,
+          updaters: [this.ownerSigner],
+          minters: [this.ownerSigner],
+          config: bookConfig,
+        })
+        .then((tx) => tx.wait());
+    };
+
+    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
+      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
+        event.removeListener();
+        resolve({ id });
+      });
+
+      setTimeout(() => {
+        reject(new Error("timeout"));
+      }, 20000);
+    });
+
+    await expect(newClass()).to.be.not.rejected;
+    const newClassEvent = await NewClassEvent;
+    const classId = newClassEvent.id;
+
+    const _newNFTClass = await ethers.getContractAt("BookNFT", classId);
+    const bookNFTRandomSigner = _newNFTClass.connect(this.randomSigner);
+    await expect(bookNFTRandomSigner.initialize({
+      creator: this.randomSigner,
+      updaters: [this.randomSigner, this.randomSigner],
+      minters: [this.randomSigner, this.randomSigner],
+      config: bookConfig,
+    })).to.be.rejectedWith(
+      "InvalidInitialization()",
+    );
   });
 
   it("should not allow to create new BookNFT when paused", async function () {
@@ -514,7 +548,7 @@ describe("LikeProtocol events", () => {
   });
 });
 
-describe("LikeProtocol as BeaconProxy", () => {
+describe("LikeProtocol as Beacon", () => {
   before(async function () {
     this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
     this.LikeProtocolMock = await ethers.getContractFactory("LikeProtocolMock");

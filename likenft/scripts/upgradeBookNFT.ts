@@ -13,7 +13,8 @@ async function main() {
     await likeProtocol.implementation(),
   );
 
-  const bookNFT = await BookNFT.deploy({
+  const bookNFT = await BookNFT.deploy();
+  await bookNFT.initialize({
     creator: process.env.INITIAL_OWNER_ADDRESS!,
     updaters: [],
     minters: [],
@@ -21,7 +22,7 @@ async function main() {
       name: "BookNFT Implementation",
       symbol: "BOOKNFTV0",
       metadata: "{}",
-      max_supply: 10n,
+      max_supply: 1n,
     },
   });
 

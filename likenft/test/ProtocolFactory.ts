@@ -5,7 +5,8 @@ export async function createProtocol(ownerSigner: SignerWithAddress) {
   const BookNFT = await ethers.getContractFactory("BookNFT");
   const LikeProtocol = await ethers.getContractFactory("LikeProtocol");
 
-  const bookNFTDeployment = await BookNFT.deploy(
+  const bookNFTDeployment = await BookNFT.deploy();
+  await bookNFTDeployment.initialize(
     {
       creator: ownerSigner.address,
       updaters: [],
@@ -14,7 +15,7 @@ export async function createProtocol(ownerSigner: SignerWithAddress) {
         name: "BookNFT Implementation",
         symbol: "BOOKNFTV0",
         metadata: "{}",
-        max_supply: 10,
+        max_supply: 1n,
       },
     },
   );
