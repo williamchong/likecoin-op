@@ -11,6 +11,7 @@
     "deploy:sepolia": "DEBUG=@openzeppelin:* hardhat run --network sepolia scripts/deploy.ts",
     "upgrade:sepolia": "DEBUG=@openzeppelin:* hardhat run --network sepolia scripts/upgrade.ts",
     "debug:optimism-sepolia": "hardhat console --network optimism-sepolia",
+    "script:optimism-sepolia": "hardhat run --network optimism-sepolia",
     "deploy:optimism-sepolia": "DEBUG=@openzeppelin:* hardhat run --network optimism-sepolia scripts/deploy.ts",
     "upgrade:optimism-sepolia": "DEBUG=@openzeppelin:* hardhat run --network optimism-sepolia scripts/upgrade.ts",
     "check-format": "prettier -l .",
