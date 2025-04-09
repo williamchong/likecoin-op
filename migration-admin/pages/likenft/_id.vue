@@ -556,6 +556,7 @@ import {
   LikeNFTMigrationDetail,
   LikeNFTMigrationStatus,
 } from "~/apis/models/likenftMigration";
+import { makeRemoveLikeNFTMigrationsAPI } from "~/apis/RemoveLikeNFTMigration";
 import AppButton from "~/components/AppButton.vue";
 import HeroBanner from "~/components/HeroBanner.vue";
 import LoadingIcon from "~/components/LoadingIcon.vue";
@@ -638,9 +639,9 @@ export default Vue.extend({
     async removeMigration() {
       this.deleting = true;
       try {
-        //   const resp = await makeRemoveLikeCoinMigrationsAPI(this.migrationId)(
-        //     this.$apiClient
-        //   )();
+        await makeRemoveLikeNFTMigrationsAPI(this.migrationId)(
+          this.$apiClient
+        )();
         this.$router.push("/likenft");
       } finally {
         this.deleting = false;
@@ -648,7 +649,7 @@ export default Vue.extend({
     },
 
     async promptRemoveMigration() {
-      if (confirm(this.$t("confirm_delete_migration") as string)) {
+      if (confirm(this.$t("migration.confirm_delete_migration") as string)) {
         await this.removeMigration();
       }
     },
