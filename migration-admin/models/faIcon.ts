@@ -8,6 +8,9 @@ const unicodeMapping = {
   "circle-exclamation": "\uF06A",
   "link-simple": "\uE1CD",
   "triangle-exclamation": "\uF071",
+  "arrow-left": "\uF060",
+  "arrow-right": "\uF061",
+  search: "\uF002",
 } as const;
 
 export default unicodeMapping;

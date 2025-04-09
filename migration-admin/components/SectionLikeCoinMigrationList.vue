@@ -159,6 +159,67 @@
           </span>
         </template>
       </UTable>
+
+      <!-- Pagination Controls -->
+      <div
+        :class="[
+          'flex',
+          'items-center',
+          'justify-between',
+          'px-4',
+          'py-3',
+          'border-t',
+          'border-gray-200',
+        ]"
+      >
+        <div :class="['flex', 'items-center', 'gap-2']">
+          <span :class="['text-sm', 'text-gray-700']"
+            >Page {{ currentPage }}</span
+          >
+        </div>
+        <div :class="['flex', 'items-center', 'gap-2']">
+          <button
+            :class="[
+              'p-2',
+              'rounded-md',
+              'border',
+              'border-gray-300',
+              'text-gray-700',
+              'hover:bg-gray-50',
+              'focus:outline-none',
+              'focus:ring-2',
+              'focus:ring-likecoin-votecolor-yes',
+              'focus:border-transparent',
+              'disabled:opacity-50',
+              'disabled:cursor-not-allowed',
+            ]"
+            :disabled="currentPage <= 1 || isLoading"
+            @click="handlePreviousPage"
+          >
+            <FontAwesomeIcon icon="arrow-left" />
+          </button>
+          <button
+            :class="[
+              'p-2',
+              'rounded-md',
+              'border',
+              'border-gray-300',
+              'text-gray-700',
+              'hover:bg-gray-50',
+              'focus:outline-none',
+              'focus:ring-2',
+              'focus:ring-likecoin-votecolor-yes',
+              'focus:border-transparent',
+              'disabled:opacity-50',
+              'disabled:cursor-not-allowed',
+            ]"
+            :disabled="!hasMoreItems || isLoading"
+            @click="handleNextPage"
+          >
+            <FontAwesomeIcon icon="arrow-right" />
+          </button>
+        </div>
+      </div>
     </UCard>
 
     <!-- Loading overlay -->
@@ -216,6 +277,14 @@ export default Vue.extend({
     migrations: {
       type: Array as PropType<LikeCoinMigration[]>,
       default: () => [],
+    },
+    page: {
+      type: Number,
+      default: 1,
+    },
+    limit: {
+      type: Number,
+      default: 20,
     },
   },
   data(): Data {
@@ -388,6 +457,10 @@ export default Vue.extend({
     tableData(): LikeCoinMigration[] {
       return this.migrations;
     },
+    hasMoreItems(): boolean {
+      // If we have fewer items than the limit, there are no more pages
+      return this.migrations.length >= this.limit;
+    },
   },
   methods: {
     formatDate(date: Date): string {
@@ -398,6 +471,14 @@ export default Vue.extend({
       return `${address.substring(0, 6)}...${address.substring(
         address.length - 4
       )}`;
+    },
+    handlePreviousPage() {
+      if (this.page > 1) {
+        this.$emit("page-change", this.page - 1);
+      }
+    },
+    handleNextPage() {
+      this.$emit("page-change", this.page + 1);
     },
   },
 });

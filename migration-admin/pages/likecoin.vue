@@ -38,8 +38,11 @@
       <SectionLikeCoinMigrationList
         :loading="loading"
         :migrations="migrations"
+        :page="page"
+        :limit="limit"
         @status-change="handleStatusChange"
         @search="handleSearch"
+        @page-change="handlePageChange"
       />
     </div>
   </div>
@@ -95,10 +98,16 @@ export default Vue.extend({
   methods: {
     handleSearch(keyword: string) {
       this.keyword = keyword === "" ? null : keyword;
+      this.page = 1; // Reset to first page on new search
       this.fetchMigrations();
     },
     handleStatusChange(status: LikeCoinMigrationStatus | null) {
       this.status = status;
+      this.page = 1; // Reset to first page on status change
+      this.fetchMigrations();
+    },
+    handlePageChange(newPage: number) {
+      this.page = newPage;
       this.fetchMigrations();
     },
 
