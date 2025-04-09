@@ -115,25 +115,29 @@ describe("BookNFTClass", () => {
     const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
     const mintNFT = async () => {
       await likeClassOwnerSigner
-        .mint(this.classOwner.address, ["_mint"], [
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "202412191729 #0001 Description",
-            name: "202412191729 #0001",
-            attributes: [
-              {
-                trait_type: "ISCN ID",
-                value:
-                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-              },
-            ],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-        ])
+        .mint(
+          this.classOwner.address,
+          ["_mint"],
+          [
+            JSON.stringify({
+              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+              image_data: "",
+              external_url: "https://www.google.com",
+              description: "202412191729 #0001 Description",
+              name: "202412191729 #0001",
+              attributes: [
+                {
+                  trait_type: "ISCN ID",
+                  value:
+                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+                },
+              ],
+              background_color: "",
+              animation_url: "",
+              youtube_url: "",
+            }),
+          ],
+        )
         .then((tx) => tx.wait());
     };
 
@@ -168,25 +172,29 @@ describe("BookNFTClass", () => {
 
     const mintNFT = async () => {
       await likeClassOwnerSigner
-        .mint(this.classOwner.address, ["_mint"], [
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "202412191729 #0001 Description",
-            name: "202412191729 #0001",
-            attributes: [
-              {
-                trait_type: "ISCN ID",
-                value:
-                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-              },
-            ],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-        ])
+        .mint(
+          this.classOwner.address,
+          ["_mint"],
+          [
+            JSON.stringify({
+              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+              image_data: "",
+              external_url: "https://www.google.com",
+              description: "202412191729 #0001 Description",
+              name: "202412191729 #0001",
+              attributes: [
+                {
+                  trait_type: "ISCN ID",
+                  value:
+                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+                },
+              ],
+              background_color: "",
+              animation_url: "",
+              youtube_url: "",
+            }),
+          ],
+        )
         .then((tx) => tx.wait());
     };
 
@@ -301,25 +309,29 @@ describe("BookNFTClass", () => {
 
     const mintNFT = async () => {
       await likeClassOwnerSigner
-        .mint(this.classOwner.address, ["_mint1"], [
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "202412191729 #0001 Description",
-            name: "202412191729 #0001",
-            attributes: [
-              {
-                trait_type: "ISCN ID",
-                value:
-                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-              },
-            ],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-        ])
+        .mint(
+          this.classOwner.address,
+          ["_mint1"],
+          [
+            JSON.stringify({
+              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+              image_data: "",
+              external_url: "https://www.google.com",
+              description: "202412191729 #0001 Description",
+              name: "202412191729 #0001",
+              attributes: [
+                {
+                  trait_type: "ISCN ID",
+                  value:
+                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+                },
+              ],
+              background_color: "",
+              animation_url: "",
+              youtube_url: "",
+            }),
+          ],
+        )
         .then((tx) => tx.wait());
     };
 
@@ -330,41 +342,42 @@ describe("BookNFTClass", () => {
           [this.classOwner.address, this.classOwner.address],
           ["_mint1", "_mint2"],
           [
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "202412191729 #0002 Description",
-            name: "202412191729 #0002",
-            attributes: [
-              {
-                trait_type: "ISCN ID",
-                value:
-                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-              },
-            ],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "202412191729 #0003 Description",
-            name: "202412191729 #0003",
-            attributes: [
-              {
-                trait_type: "ISCN ID",
-                value:
-                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-              },
-            ],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-        ])
+            JSON.stringify({
+              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+              image_data: "",
+              external_url: "https://www.google.com",
+              description: "202412191729 #0002 Description",
+              name: "202412191729 #0002",
+              attributes: [
+                {
+                  trait_type: "ISCN ID",
+                  value:
+                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+                },
+              ],
+              background_color: "",
+              animation_url: "",
+              youtube_url: "",
+            }),
+            JSON.stringify({
+              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+              image_data: "",
+              external_url: "https://www.google.com",
+              description: "202412191729 #0003 Description",
+              name: "202412191729 #0003",
+              attributes: [
+                {
+                  trait_type: "ISCN ID",
+                  value:
+                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+                },
+              ],
+              background_color: "",
+              animation_url: "",
+              youtube_url: "",
+            }),
+          ],
+        )
         .then((tx) => tx.wait());
     };
 
@@ -464,42 +477,46 @@ describe("BookNFT permission control", () => {
 
     const mintNFT = async () => {
       await likeClassOwnerSigner
-        .mint(this.likerLand.address, ["_mint1", "_mint2"], [
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "202412191729 #0001 Description",
-            name: "202412191729 #0001",
-            attributes: [
-              {
-                trait_type: "ISCN ID",
-                value:
-                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-              },
-            ],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "202412191729 #0001 Description",
-            name: "202412191729 #0001",
-            attributes: [
-              {
-                trait_type: "ISCN ID",
-                value:
-                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-              },
-            ],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-        ])
+        .mint(
+          this.likerLand.address,
+          ["_mint1", "_mint2"],
+          [
+            JSON.stringify({
+              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+              image_data: "",
+              external_url: "https://www.google.com",
+              description: "202412191729 #0001 Description",
+              name: "202412191729 #0001",
+              attributes: [
+                {
+                  trait_type: "ISCN ID",
+                  value:
+                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+                },
+              ],
+              background_color: "",
+              animation_url: "",
+              youtube_url: "",
+            }),
+            JSON.stringify({
+              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+              image_data: "",
+              external_url: "https://www.google.com",
+              description: "202412191729 #0001 Description",
+              name: "202412191729 #0001",
+              attributes: [
+                {
+                  trait_type: "ISCN ID",
+                  value:
+                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+                },
+              ],
+              background_color: "",
+              animation_url: "",
+              youtube_url: "",
+            }),
+          ],
+        )
         .then((tx) => tx.wait());
     };
 
@@ -628,42 +645,46 @@ describe("BookNFT ownership transfer", () => {
 
     const mintNFT = async () => {
       await likeClassOwnerSigner
-        .mint(this.classOwner.address, ["_mint1", "_mint2"], [
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "202412191729 #0001 Description",
-            name: "202412191729 #0001",
-            attributes: [
-              {
-                trait_type: "ISCN ID",
-                value:
-                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-              },
-            ],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "202412191729 #0001 Description",
-            name: "202412191729 #0001",
-            attributes: [
-              {
-                trait_type: "ISCN ID",
-                value:
-                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-              },
-            ],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-        ])
+        .mint(
+          this.classOwner.address,
+          ["_mint1", "_mint2"],
+          [
+            JSON.stringify({
+              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+              image_data: "",
+              external_url: "https://www.google.com",
+              description: "202412191729 #0001 Description",
+              name: "202412191729 #0001",
+              attributes: [
+                {
+                  trait_type: "ISCN ID",
+                  value:
+                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+                },
+              ],
+              background_color: "",
+              animation_url: "",
+              youtube_url: "",
+            }),
+            JSON.stringify({
+              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+              image_data: "",
+              external_url: "https://www.google.com",
+              description: "202412191729 #0001 Description",
+              name: "202412191729 #0001",
+              attributes: [
+                {
+                  trait_type: "ISCN ID",
+                  value:
+                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+                },
+              ],
+              background_color: "",
+              animation_url: "",
+              youtube_url: "",
+            }),
+          ],
+        )
         .then((tx) => tx.wait());
     };
 
@@ -690,42 +711,46 @@ describe("BookNFT ownership transfer", () => {
     const likeClassRandomSigner = nftClassContract.connect(this.randomSigner);
     const mintNFT = async () => {
       await likeClassRandomSigner
-        .mint(this.randomSigner.address, ["_mint1", "_mint2"], [
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "202412191729 #0001 Description",
-            name: "202412191729 #0001",
-            attributes: [
-              {
-                trait_type: "ISCN ID",
-                value:
-                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-              },
-            ],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "202412191729 #0001 Description",
-            name: "202412191729 #0001",
-            attributes: [
-              {
-                trait_type: "ISCN ID",
-                value:
-                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-              },
-            ],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-        ])
+        .mint(
+          this.randomSigner.address,
+          ["_mint1", "_mint2"],
+          [
+            JSON.stringify({
+              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+              image_data: "",
+              external_url: "https://www.google.com",
+              description: "202412191729 #0001 Description",
+              name: "202412191729 #0001",
+              attributes: [
+                {
+                  trait_type: "ISCN ID",
+                  value:
+                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+                },
+              ],
+              background_color: "",
+              animation_url: "",
+              youtube_url: "",
+            }),
+            JSON.stringify({
+              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+              image_data: "",
+              external_url: "https://www.google.com",
+              description: "202412191729 #0001 Description",
+              name: "202412191729 #0001",
+              attributes: [
+                {
+                  trait_type: "ISCN ID",
+                  value:
+                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+                },
+              ],
+              background_color: "",
+              animation_url: "",
+              youtube_url: "",
+            }),
+          ],
+        )
         .then((tx) => tx.wait());
     };
 
