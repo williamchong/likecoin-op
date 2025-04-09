@@ -11,6 +11,15 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
 
+func MakeTransferClassRequestBody(
+	contractAddress string,
+	newOwner common.Address,
+) (*signer.CreateEvmTransactionRequestRequestBody, error) {
+	return signer.MakeCreateEvmTransactionRequestRequestBody(
+		like_protocol.LikeProtocolMetaData, "transferOwnership", newOwner,
+	)(contractAddress)
+}
+
 func (l *BookNFT) TransferClass(
 	ctx context.Context,
 	logger *slog.Logger,
@@ -22,9 +31,9 @@ func (l *BookNFT) TransferClass(
 
 	mylogger := logger.WithGroup("TransferClass")
 
-	r, err := signer.MakeCreateEvmTransactionRequestRequestBody(
-		like_protocol.LikeProtocolMetaData, "transferOwnership", newOwner,
-	)(evmClassId.Hex())
+	r, err := MakeTransferClassRequestBody(
+		evmClassId.Hex(), newOwner,
+	)
 	if err != nil {
 		return nil, nil, err
 	}

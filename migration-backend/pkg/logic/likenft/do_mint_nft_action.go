@@ -15,6 +15,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
+
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	cosmosmodel "github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
@@ -54,6 +55,7 @@ func DoMintNFTAction(
 	evmClassAddress := common.HexToAddress(a.EvmClassId)
 	toOwner := common.HexToAddress(a.EvmOwner)
 	initialBatchMintOwnerAddress := common.HexToAddress(a.InitialBatchMintOwner)
+	initialMemo := "_mint"
 
 	newClassAction, err := appdb.QueryLikeNFTMigrationActionNewClass(db, appdb.QueryLikeNFTMigrationActionNewClassFilter{
 		EvmClassId: &a.EvmClassId,
@@ -92,7 +94,10 @@ func DoMintNFTAction(
 			mylogger,
 			evmClassAddress,
 			totalSupply,
-			toOwner,
+			[]common.Address{toOwner},
+			[]string{
+				"_mint",
+			},
 			[]string{
 				metadataString,
 			})
@@ -121,7 +126,10 @@ func DoMintNFTAction(
 				mylogger,
 				evmClassAddress,
 				totalSupply,
-				toOwner,
+				[]common.Address{toOwner},
+				[]string{
+					"_mint",
+				},
 				[]string{
 					metadataString,
 				})
@@ -140,6 +148,8 @@ func DoMintNFTAction(
 					return nil, doMintNFTActionFailed(db, a, err)
 				}
 
+				tos := make([]common.Address, 0)
+				memos := make([]string, 0)
 				metadataList := make([]string, 0)
 				for i := big.NewInt(0); i.Cmp(desireBatchMintAmount) == -1; i = i.Add(i, big.NewInt(1)) {
 					cosmosNFTIdx := slices.IndexFunc(cosmosNFTs.NFTs, func(n cosmosmodel.NFT) bool {
@@ -155,6 +165,8 @@ func DoMintNFTAction(
 						}
 						metadataStr = string(metadataBytes)
 					}
+					tos = append(tos, initialBatchMintOwnerAddress)
+					memos = append(memos, initialMemo)
 					metadataList = append(metadataList, metadataStr)
 				}
 				_, _, err = c.MintNFTs(
@@ -162,7 +174,8 @@ func DoMintNFTAction(
 					mylogger,
 					evmClassAddress,
 					totalSupply,
-					initialBatchMintOwnerAddress,
+					tos,
+					memos,
 					metadataList,
 				)
 				if err != nil {

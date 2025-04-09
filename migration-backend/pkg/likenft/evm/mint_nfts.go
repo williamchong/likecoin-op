@@ -7,10 +7,23 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+
 	"github.com/likecoin/like-migration-backend/pkg/ethereum"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/book_nft"
 	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
+
+func MakeMintNFTsRequestBody(
+	contractAddress string,
+	fromTokenId *big.Int,
+	tos []common.Address,
+	memos []string,
+	metadataList []string,
+) (*signer.CreateEvmTransactionRequestRequestBody, error) {
+	return signer.MakeCreateEvmTransactionRequestRequestBody(
+		book_nft.BookNftMetaData, "safeMintWithTokenId", fromTokenId, tos, memos, metadataList,
+	)(contractAddress)
+}
 
 func (l *BookNFT) MintNFTs(
 	ctx context.Context,
@@ -18,16 +31,17 @@ func (l *BookNFT) MintNFTs(
 
 	classId common.Address,
 	fromTokenId *big.Int,
-	to common.Address,
+	tos []common.Address,
+	memos []string,
 	metadataList []string,
 ) (*types.Transaction, *types.Receipt, error) {
 	logger.Info("MintNFTs")
 
 	mylogger := logger.WithGroup("MintNFTs")
 
-	r, err := signer.MakeCreateEvmTransactionRequestRequestBody(
-		book_nft.BookNftMetaData, "safeMintWithTokenId", fromTokenId, to, metadataList,
-	)(classId.Hex())
+	r, err := MakeMintNFTsRequestBody(
+		classId.Hex(), fromTokenId, tos, memos, metadataList,
+	)
 	if err != nil {
 		return nil, nil, err
 	}
