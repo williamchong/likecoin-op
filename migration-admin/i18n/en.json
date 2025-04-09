@@ -50,8 +50,29 @@
     },
     "likenft-migration": {
       "title": "LikeNFT Migration",
+      "detail": {
+        "nft-class": {
+          "title": "NFT Classes",
+          "class-id": "Class ID: {class_id}",
+          "failed-reason": "Failed Reason",
+          "enqueued-time": "Enqueued Time",
+          "finished-time": "Finished Time",
+          "evn-tx-hash": "EVM Tx Hash"
+        },
+        "nft": {
+          "title": "NFTs",
+          "nft-id": "ID: {nft_id}",
+          "class-id": "Class ID: {class_id}",
+          "evn-tx-hash": "EVM Tx Hash: {hash}",
+          "enqueued-time": "Enqueued Time",
+          "finished-time": "Finished Time",
+          "created-at": "Created At",
+          "failed-reason": "Failed Reason"
+        }
+      },
       "table": {
         "header": {
+          "id": "ID",
           "asset-snapshot-id": "Asset Snapshot ID",
           "created-at": "Created At",
           "cosmos-address": "Cosmos Address",
