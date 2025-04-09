@@ -150,7 +150,10 @@ contract BookNFT is
         string[] calldata memos,
         string[] calldata metadataList
     ) external onlyMinter {
-        require(memos.length == metadataList.length, "ErrMemoMetadataLengthMismatch");
+        require(
+            memos.length == metadataList.length,
+            "ErrMemoMetadataLengthMismatch"
+        );
         _ensureEnoughSupply(metadataList.length);
         for (uint i = 0; i < metadataList.length; i++) {
             _mintWithEvent(_msgSender(), to, memos[i], metadataList[i]);
