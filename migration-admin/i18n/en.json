@@ -1,5 +1,43 @@
 {
   "app": {
-    "title": "Liker ID and LikeNFT Migration Admin Portal"
+    "title": "LikeCoin Migration Admin"
+  },
+  "common": {
+    "loading": "Loading..."
+  },
+  "section": {
+    "likecoin-migration": {
+      "table": {
+        "header": {
+          "created-at": "Created At",
+          "cosmos-address": "Cosmos Address",
+          "eth-address": "ETH Address",
+          "amount": "Amount",
+          "cosmos-tx-hash": "Cosmos TX Hash",
+          "evm-tx-hash": "EVM TX Hash",
+          "status": "Status",
+          "failed_reason": "Failed Reason"
+        },
+        "filter": {
+          "all-items": "All Items",
+          "pending_cosmos_tx_hash": "Pending Cosmos TX Hash",
+          "verifying_cosmos_tx": "Verifying Cosmos TX",
+          "evm_minting": "EVM Minting",
+          "evm_verifying": "EVM Verifying",
+          "completed": "Completed",
+          "failed": "Failed"
+        },
+        "data": {
+          "status": {
+            "pending_cosmos_tx_hash": "Pending Cosmos TX Hash",
+            "verifying_cosmos_tx": "Verifying Cosmos TX",
+            "evm_minting": "EVM Minting",
+            "evm_verifying": "EVM Verifying",
+            "completed": "Completed",
+            "failed": "Failed"
+          }
+        }
+      }
+    }
   }
 }
