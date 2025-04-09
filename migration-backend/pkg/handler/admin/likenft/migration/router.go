@@ -16,6 +16,10 @@ func (h *MigrationRouter) Router() *http.ServeMux {
 		Db: h.Db,
 	})
 
+	router.Handle("GET /migration/{migrationId}", &GetLikeNFTAssetMigrationHandler{
+		Db: h.Db,
+	})
+
 	router.Handle("DELETE /migration/{migrationId}", &RemoveLikeNFTAssetMigrationHandler{
 		Db: h.Db,
 	})
