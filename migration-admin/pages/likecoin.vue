@@ -36,9 +36,10 @@
       ]"
     >
       <SectionLikeCoinMigrationList
-        :isLoading="loading"
+        :loading="loading"
         :migrations="migrations"
         @status-change="handleStatusChange"
+        @search="handleSearch"
       />
     </div>
   </div>
@@ -46,6 +47,7 @@
 
 <script lang="ts">
 import Vue from "vue";
+
 import { makeListLikeCoinMigrationsAPI } from "~/apis/ListLikeCoinMigrations";
 import {
   LikeCoinMigration,
@@ -60,6 +62,7 @@ interface Data {
   limit: number;
   loading: boolean;
   status: LikeCoinMigrationStatus | null;
+  keyword: string | null;
 }
 
 export default Vue.extend({
@@ -75,6 +78,7 @@ export default Vue.extend({
       limit: 10,
       loading: false,
       status: null,
+      keyword: null,
     };
   },
 
@@ -89,6 +93,10 @@ export default Vue.extend({
   },
 
   methods: {
+    handleSearch(keyword: string) {
+      this.keyword = keyword === "" ? null : keyword;
+      this.fetchMigrations();
+    },
     handleStatusChange(status: LikeCoinMigrationStatus | null) {
       this.status = status;
       this.fetchMigrations();
@@ -102,7 +110,7 @@ export default Vue.extend({
           offset: this.offset,
           limit: this.limit,
           status: this.status,
-          keyword: null,
+          q: this.keyword,
         });
 
         this.migrations = resp.migrations;

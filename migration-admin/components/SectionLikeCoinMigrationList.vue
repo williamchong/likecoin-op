@@ -23,19 +23,63 @@
           'py-3',
         ]"
       >
-        <USelectMenu
-          v-model="selectedStatus"
-          :options="itemsFilterOptions"
-          :ui="{
-            base: [
-              'relative block w-full disabled:cursor-not-allowed disabled:opacity-75 focus:outline-none border-0',
-              'text-sm',
-              'leading-[20px]',
-            ],
-          }"
-          value-attribute="value"
-          :disabled="loading"
-        />
+        <!-- Search Bar -->
+        <div :class="['flex-1', 'max-w-md']">
+          <div :class="['relative']">
+            <div :class="['flex', 'items-center']">
+              <input
+                type="text"
+                ref="searchInput"
+                v-model="searchKeyword"
+                placeholder="Search..."
+                :class="[
+                  'w-full',
+                  'py-2',
+                  'px-3',
+                  'pr-10',
+                  'border',
+                  'border-gray-300',
+                  'rounded-md',
+                  'text-sm',
+                  'focus:outline-none',
+                  'focus:ring-2',
+                  'focus:ring-likecoin-votecolor-yes',
+                  'focus:border-transparent',
+                  loading ? 'opacity-75' : '',
+                ]"
+              />
+              <div
+                :class="[
+                  'flex',
+                  'items-center',
+                  'justify-center',
+                  'w-10',
+                  'h-full',
+                  '-ml-10',
+                ]"
+              >
+                <FontAwesomeIcon icon="search" :class="['text-gray-400']" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Filter -->
+        <div :class="['w-64']">
+          <USelectMenu
+            v-model="selectedStatus"
+            :options="itemsFilterOptions"
+            :ui="{
+              base: [
+                'relative block w-full disabled:cursor-not-allowed disabled:opacity-75 focus:outline-none border-0',
+                'text-sm',
+                'leading-[20px]',
+              ],
+            }"
+            value-attribute="value"
+            :disabled="loading"
+          />
+        </div>
       </div>
       <UTable
         :class="['w-full', 'flex', 'flex-1', 'flex-col']"
@@ -151,6 +195,9 @@ import FontAwesomeIcon from "~/components/FontAwesomeIcon.vue";
 interface Data {
   selectedStatus: "all-items" | LikeCoinMigrationStatus;
   migrationStatus: typeof LikeCoinMigrationStatus;
+  searchKeyword: string;
+  searchTimeout?: NodeJS.Timeout;
+  wasSearchInputFocused: boolean;
 }
 
 export default Vue.extend({
@@ -175,6 +222,9 @@ export default Vue.extend({
     return {
       selectedStatus: "all-items",
       migrationStatus: LikeCoinMigrationStatus,
+      searchKeyword: "",
+      searchTimeout: undefined,
+      wasSearchInputFocused: false,
     };
   },
   watch: {
@@ -185,6 +235,28 @@ export default Vue.extend({
           ? null
           : this.$data.selectedStatus
       );
+    },
+    searchKeyword() {
+      if (this.searchTimeout != null) {
+        clearTimeout(this.searchTimeout);
+      }
+      // Check if search input is focused before emitting search event
+      this.wasSearchInputFocused =
+        document.activeElement === this.$refs.searchInput;
+      this.searchTimeout = setTimeout(() => {
+        this.$emit("search", this.searchKeyword);
+      }, 500);
+    },
+    loading(newVal, oldVal) {
+      // If loading has finished and search input was focused before, refocus it
+      if (oldVal === true && newVal === false && this.wasSearchInputFocused) {
+        this.$nextTick(() => {
+          const searchInput = this.$refs.searchInput as HTMLInputElement;
+          if (searchInput) {
+            searchInput.focus();
+          }
+        });
+      }
     },
   },
   computed: {
