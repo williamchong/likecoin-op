@@ -11,6 +11,7 @@ const unicodeMapping = {
   "arrow-left": "\uF060",
   "arrow-right": "\uF061",
   search: "\uF002",
+  copy: "\uF0C5",
 } as const;
 
 export default unicodeMapping;

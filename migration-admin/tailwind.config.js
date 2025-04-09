@@ -11,6 +11,7 @@ export default {
         "like-green": "#28646c",
         "like-cyan-light": "#aaf1e7",
         likecoin: {
+          red: "#C72F2F",
           black: "#222222",
           buttonbg: "#AAF1E7",
           buttontext: "#27646E",

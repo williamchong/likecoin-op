@@ -19,7 +19,7 @@
 <script lang="ts">
 import Vue, { PropType } from "vue";
 
-type ButtonType = "primary" | "secondary";
+type ButtonType = "primary" | "secondary" | "warning";
 
 export default Vue.extend({
   props: {
@@ -53,6 +53,20 @@ export default Vue.extend({
             "transition",
             "duration-200",
           ];
+        case "warning":
+          return [
+            "bg-likecoin-red",
+            "text-likecoin-white",
+            "h-44px",
+            "rounded-[10px]",
+            "flex",
+            "box-border",
+            "overflow-hidden",
+            "items-center",
+            "cursor-pointer",
+            "transition",
+            "duration-200",
+          ];
         default:
           return [
             "bg-like-cyan-light",
@@ -72,6 +86,26 @@ export default Vue.extend({
     innerClass() {
       switch (this.variant) {
         case "secondary":
+          return [
+            "flex",
+            "items-center",
+            "justify-center",
+            "text-[16px]",
+            "leading-[1.35]",
+            "h-full",
+            "text-center",
+            "whitespace-nowrap",
+            "hover:bg-white",
+            "hover:bg-opacity-30",
+            "active:bg-opacity-20",
+            "transition duration-200",
+            "active:bg-like-green",
+            "px-[16px]",
+            "py-[10px]",
+            "w-full",
+            "font-semibold",
+          ];
+        case "warning":
           return [
             "flex",
             "items-center",

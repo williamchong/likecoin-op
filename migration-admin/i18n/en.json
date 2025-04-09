@@ -1,19 +1,23 @@
 {
   "app": {
     "likecoin": {
-      "title": "Liker ID Migration Admin Portal"
+      "title": "Liker ID Migration Admin Portal",
+      "transaction_details": "Transaction Details"
     },
     "likenft": {
       "title": "LikeNFT Migration Admin Portal"
     }
   },
   "common": {
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "copied_to_clipboard": "Copied to clipboard!"
   },
   "section": {
     "likecoin-migration": {
+      "title": "LikeCoin Migration",
       "table": {
         "header": {
+          "id": "ID",
           "created-at": "Created At",
           "cosmos-address": "Cosmos Address",
           "eth-address": "ETH Address",
@@ -44,5 +48,13 @@
         }
       }
     }
+  },
+  "migration": {
+    "information": "Migration Information",
+    "hashes": "Transaction Hashes",
+    "error_details": "Error Details",
+    "network": "Network",
+    "delete_migration": "Delete Migration",
+    "error_fetching": "Error fetching transaction details"
   }
 }

@@ -40,14 +40,10 @@ export default Vue.extend({
   },
   computed: {
     isLikeCoinRoute(): boolean {
-      return (
-        this.$route.path === "/likecoin" || this.$route.path === "/likecoin/"
-      );
+      return this.$route.path.includes("/likecoin");
     },
     isLikeNFTRoute(): boolean {
-      return (
-        this.$route.path === "/likenft" || this.$route.path === "/likenft/"
-      );
+      return this.$route.path.includes("/likenft");
     },
   },
 });
