@@ -47,6 +47,34 @@
           }
         }
       }
+    },
+    "likenft-migration": {
+      "title": "LikeNFT Migration",
+      "table": {
+        "header": {
+          "asset-snapshot-id": "Asset Snapshot ID",
+          "created-at": "Created At",
+          "cosmos-address": "Cosmos Address",
+          "eth-address": "ETH Address",
+          "status": "Status",
+          "failed_reason": "Failed Reason"
+        },
+        "filter": {
+          "all-items": "All Items",
+          "init": "Initialized",
+          "in_progress": "In Progress",
+          "completed": "Completed",
+          "failed": "Failed"
+        },
+        "data": {
+          "status": {
+            "init": "Initialized",
+            "in_progress": "In Progress",
+            "completed": "Completed",
+            "failed": "Failed"
+          }
+        }
+      }
     }
   },
   "migration": {
