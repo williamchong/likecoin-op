@@ -1,5 +1,4 @@
 {
   "isTestnet": true,
-  "apiBaseURL": "http://localhost:8091",
-  "likerlandUrlBase": "https://rinkeby.liker.land"
+  "apiBaseURL": "http://localhost:8091"
 }
