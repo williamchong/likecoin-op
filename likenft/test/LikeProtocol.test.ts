@@ -537,10 +537,8 @@ describe("LikeProtocol as BeaconProxy", () => {
       likeProtocolDeployment,
       likeProtocolAddress,
       likeProtocolContract,
-      bookNFT,
       bookNFTDeployment,
       bookNFTAddress,
-      bookNFTContract,
     } = await createProtocol(this.ownerSigner);
 
     deployment = likeProtocolDeployment;

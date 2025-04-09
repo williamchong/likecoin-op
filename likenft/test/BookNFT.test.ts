@@ -20,6 +20,7 @@ describe("BookNFTClass", () => {
   let deployment: BaseContract;
   let contractAddress: string;
   let protocolContract: BaseContract;
+  let bookNFTImplementation: BaseContract;
   let nftClassId: string;
   let nftClassContract: BaseContract;
   beforeEach(async function () {
@@ -28,15 +29,14 @@ describe("BookNFTClass", () => {
       likeProtocolDeployment,
       likeProtocolAddress,
       likeProtocolContract,
-      bookNFT,
       bookNFTDeployment,
       bookNFTAddress,
-      bookNFTContract,
     } = await createProtocol(this.protocolOwner);
 
     deployment = likeProtocolDeployment;
     contractAddress = likeProtocolAddress;
     protocolContract = likeProtocolContract;
+    bookNFTImplementation = bookNFTDeployment;
 
     const likeProtocolOwnerSigner = protocolContract.connect(
       this.protocolOwner,
@@ -417,10 +417,8 @@ describe("BookNFT permission control", () => {
       likeProtocolDeployment,
       likeProtocolAddress,
       likeProtocolContract,
-      bookNFT,
       bookNFTDeployment,
       bookNFTAddress,
-      bookNFTContract,
     } = await createProtocol(this.protocolOwner);
 
     deployment = likeProtocolDeployment;
@@ -551,10 +549,8 @@ describe("BookNFT ownership transfer", () => {
       likeProtocolDeployment,
       likeProtocolAddress,
       likeProtocolContract,
-      bookNFT,
       bookNFTDeployment,
       bookNFTAddress,
-      bookNFTContract,
     } = await createProtocol(this.protocolOwner);
 
     deployment = likeProtocolDeployment;
@@ -785,10 +781,8 @@ describe("BookNFT config validation", () => {
       likeProtocolDeployment,
       likeProtocolAddress,
       likeProtocolContract,
-      bookNFT,
       bookNFTDeployment,
       bookNFTAddress,
-      bookNFTContract,
     } = await createProtocol(this.protocolOwner);
 
     deployment = likeProtocolDeployment;
@@ -951,10 +945,8 @@ describe("BookNFT version", () => {
       likeProtocolDeployment,
       likeProtocolAddress,
       likeProtocolContract,
-      bookNFT,
       bookNFTDeployment,
       bookNFTAddress,
-      bookNFTContract,
     } = await createProtocol(this.protocolOwner);
 
     deployment = likeProtocolDeployment;

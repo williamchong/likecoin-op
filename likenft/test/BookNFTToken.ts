@@ -28,10 +28,8 @@ describe("BookNFTToken", () => {
       likeProtocolDeployment,
       likeProtocolAddress,
       likeProtocolContract,
-      bookNFT,
       bookNFTDeployment,
       bookNFTAddress,
-      bookNFTContract,
     } = await createProtocol(this.protocolOwner);
 
     deployment = likeProtocolDeployment;
@@ -211,10 +209,8 @@ describe("BookNFTToken batch actions", () => {
       likeProtocolDeployment,
       likeProtocolAddress,
       likeProtocolContract,
-      bookNFT,
       bookNFTDeployment,
       bookNFTAddress,
-      bookNFTContract,
     } = await createProtocol(this.protocolOwner);
 
     deployment = likeProtocolDeployment;
