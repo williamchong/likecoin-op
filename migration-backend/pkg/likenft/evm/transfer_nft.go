@@ -12,6 +12,17 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
 
+func MakeTransferNFTRequestBody(
+	contractAddress string,
+	from common.Address,
+	to common.Address,
+	tokenId *big.Int,
+) (*signer.CreateEvmTransactionRequestRequestBody, error) {
+	return signer.MakeCreateEvmTransactionRequestRequestBody(
+		book_nft.BookNftMetaData, "transferFrom", from, to, tokenId,
+	)(contractAddress)
+}
+
 func (l *LikeProtocol) TransferNFT(
 	ctx context.Context,
 	logger *slog.Logger,
@@ -25,9 +36,9 @@ func (l *LikeProtocol) TransferNFT(
 
 	mylogger := logger.WithGroup("TransferNFT")
 
-	r, err := signer.MakeCreateEvmTransactionRequestRequestBody(
-		book_nft.BookNftMetaData, "transferFrom", from, to, tokenId,
-	)(evmClassId.Hex())
+	r, err := MakeTransferNFTRequestBody(
+		evmClassId.Hex(), from, to, tokenId,
+	)
 	if err != nil {
 		return nil, nil, err
 	}

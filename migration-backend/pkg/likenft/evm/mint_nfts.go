@@ -7,10 +7,22 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+
 	"github.com/likecoin/like-migration-backend/pkg/ethereum"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/book_nft"
 	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
+
+func MakeMintNFTsRequestBody(
+	contractAddress string,
+	fromTokenId *big.Int,
+	to common.Address,
+	metadataList []string,
+) (*signer.CreateEvmTransactionRequestRequestBody, error) {
+	return signer.MakeCreateEvmTransactionRequestRequestBody(
+		book_nft.BookNftMetaData, "safeMintWithTokenId", fromTokenId, to, metadataList,
+	)(contractAddress)
+}
 
 func (l *BookNFT) MintNFTs(
 	ctx context.Context,
@@ -25,9 +37,9 @@ func (l *BookNFT) MintNFTs(
 
 	mylogger := logger.WithGroup("MintNFTs")
 
-	r, err := signer.MakeCreateEvmTransactionRequestRequestBody(
-		book_nft.BookNftMetaData, "safeMintWithTokenId", fromTokenId, to, metadataList,
-	)(classId.Hex())
+	r, err := MakeMintNFTsRequestBody(
+		classId.Hex(), fromTokenId, to, metadataList,
+	)
 	if err != nil {
 		return nil, nil, err
 	}
