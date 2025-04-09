@@ -55,6 +55,7 @@
     "error_details": "Error Details",
     "network": "Network",
     "delete_migration": "Delete Migration",
+    "confirm_delete_migration": "Are you sure you want to delete this migration? This cannot be undone.",
     "error_fetching": "Error fetching transaction details"
   }
 }

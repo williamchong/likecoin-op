@@ -9,6 +9,11 @@
       <slot />
     </div>
   </nuxt-link>
+  <button v-else-if="loading" :class="outerClass" v-on="$listeners" disabled>
+    <div :class="[...innerClass, 'w-40']">
+      <LoadingIcon />
+    </div>
+  </button>
   <button v-else :class="outerClass" v-on="$listeners">
     <div :class="innerClass">
       <slot />
@@ -18,6 +23,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from "vue";
+import LoadingIcon from "~/components/LoadingIcon.vue";
 
 type ButtonType = "primary" | "secondary" | "warning";
 
@@ -34,6 +40,10 @@ export default Vue.extend({
     variant: {
       type: String as PropType<ButtonType>,
       default: "primary",
+    },
+    loading: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {

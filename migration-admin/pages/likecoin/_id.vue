@@ -319,7 +319,11 @@
 
         <!-- Action Buttons -->
         <div :class="['flex', 'justify-end', 'gap-4', 'mt-4']">
-          <AppButton variant="warning" @click="handleRetryTransaction">
+          <AppButton
+            variant="warning"
+            :loading="deleting"
+            @click="promptRemoveMigration"
+          >
             {{ $t("migration.delete_migration") }}
           </AppButton>
         </div>
@@ -338,6 +342,7 @@ import {
   LikeCoinMigration,
   LikeCoinMigrationStatus,
 } from "~/apis/models/likecoinMigration";
+import { makeRemoveLikeCoinMigrationsAPI } from "~/apis/RemoveLikeCoinMigration";
 import AppButton from "~/components/AppButton.vue";
 import HeroBanner from "~/components/HeroBanner.vue";
 import { LIKECOIN_CHAIN_DENOM, LIKECOIN_CHAIN_NAME } from "~/constant";
@@ -346,6 +351,7 @@ import UCard from "~/nuxtui/components/UCard.vue";
 interface Data {
   migration: LikeCoinMigration | null;
   loading: boolean;
+  deleting: boolean;
   error: string | null;
 }
 
@@ -360,6 +366,7 @@ export default Vue.extend({
     return {
       migration: null,
       loading: true,
+      deleting: false,
       error: null,
     };
   },
@@ -421,6 +428,24 @@ export default Vue.extend({
           return "section.likecoin-migration.table.data.status.failed";
         default:
           throw new Error("Invalid status");
+      }
+    },
+
+    async removeMigration() {
+      this.deleting = true;
+      try {
+        await makeRemoveLikeCoinMigrationsAPI(this.migrationId)(
+          this.$apiClient
+        )();
+        this.$router.push("/likecoin");
+      } finally {
+        this.deleting = false;
+      }
+    },
+
+    async promptRemoveMigration() {
+      if (confirm(this.$t("migration.confirm_delete_migration") as string)) {
+        await this.removeMigration();
       }
     },
 
