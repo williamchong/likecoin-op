@@ -19,6 +19,7 @@ import (
 
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
+	"github.com/likecoin/like-migration-backend/pkg/handler/admin"
 	"github.com/likecoin/like-migration-backend/pkg/handler/likecoin"
 	"github.com/likecoin/like-migration-backend/pkg/handler/likenft"
 	"github.com/likecoin/like-migration-backend/pkg/handler/user"
@@ -105,6 +106,11 @@ func main() {
 		LikecoinAPI: likecoinAPI,
 	}
 	mainMux.Handle("/user/", http.StripPrefix("/user", userRouter.Router()))
+
+	adminRouter := admin.AdminRouter{
+		Db: db,
+	}
+	mainMux.Handle("/admin/", http.StripPrefix("/admin", adminRouter.Router()))
 
 	routePrefixMux.Handle(fmt.Sprintf("%s/", envCfg.RoutePrefix), http.StripPrefix(envCfg.RoutePrefix, mainMux))
 

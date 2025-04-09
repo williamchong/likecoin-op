@@ -35,18 +35,18 @@ func (h *RemoveLatestLikeCoinMigrationHandler) ServeHTTP(w http.ResponseWriter, 
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			handler.SendJSON(w, http.StatusNotFound, &GetLatestLikeCoinMigrationResponseBody{
+			handler.SendJSON(w, http.StatusNotFound, &RemoveLatestLikeCoinMigrationResponseBody{
 				ErrorDescription: "Not Found",
 			})
 			return
 		}
-		handler.SendJSON(w, http.StatusInternalServerError, &GetLatestLikeCoinMigrationResponseBody{
+		handler.SendJSON(w, http.StatusInternalServerError, &RemoveLatestLikeCoinMigrationResponseBody{
 			ErrorDescription: err.Error(),
 		})
 		return
 	}
 
-	handler.SendJSON(w, http.StatusOK, &GetLatestLikeCoinMigrationResponseBody{
+	handler.SendJSON(w, http.StatusOK, &RemoveLatestLikeCoinMigrationResponseBody{
 		Migration: migration,
 	})
 }
