@@ -86,6 +86,9 @@
         :ui="{
           base: ['table-fixed', 'w-full'].join(' '),
           divide: '',
+          tr: {
+            base: ['hover:bg-gray-50', 'cursor-pointer'].join(' '),
+          },
           th: {
             base: [
               'relative',
@@ -114,6 +117,7 @@
         }"
         :columns="columns"
         :rows="tableData"
+        @row-select="handleRowClick"
       >
         <template #created_at-data="{ row }">
           {{ formatDate(row.created_at) }}
@@ -471,6 +475,9 @@ export default Vue.extend({
       return `${address.substring(0, 6)}...${address.substring(
         address.length - 4
       )}`;
+    },
+    handleRowClick(row: LikeCoinMigration) {
+      this.$emit("row-select", row);
     },
     handlePreviousPage() {
       if (this.page > 1) {

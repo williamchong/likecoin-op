@@ -43,6 +43,7 @@
         @status-change="handleStatusChange"
         @search="handleSearch"
         @page-change="handlePageChange"
+        @row-select="handleRowClick"
       />
     </div>
   </div>
@@ -96,6 +97,9 @@ export default Vue.extend({
   },
 
   methods: {
+    handleRowClick(row: LikeCoinMigration) {
+      this.$router.push(`/likecoin/${row.id}`);
+    },
     handleSearch(keyword: string) {
       this.keyword = keyword === "" ? null : keyword;
       this.page = 1; // Reset to first page on new search

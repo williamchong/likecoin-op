@@ -28,6 +28,7 @@
           v-for="(row, index) in rows"
           :key="index"
           :class="[_ui.tr.base, $attrs.onSelect && _ui.tr.active, row?.class]"
+          @click="handleRowSelect(row, $event)"
         >
           <td
             v-for="(column, subIndex) in columns"
@@ -133,6 +134,9 @@ export default Vue.extend({
   },
 
   methods: {
+    handleRowSelect(row: TableRow, event: Event) {
+      this.$emit("row-select", row, event);
+    },
     getRowData(
       row: TableRow,
       columnKey: string,
