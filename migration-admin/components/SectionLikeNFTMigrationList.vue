@@ -82,6 +82,7 @@
         </div>
       </div>
       <UTable
+        v-if="tableData.length > 0 || isLoading"
         :class="['w-full', 'flex', 'flex-1', 'flex-col']"
         :ui="{
           base: ['table-fixed', 'w-full'].join(' '),
@@ -163,6 +164,16 @@
           </span>
         </template>
       </UTable>
+
+      <div
+        v-else
+        class="flex-1 flex items-center justify-center bg-white bg-opacity-70"
+      >
+        <div class="flex flex-col items-center text-gray-500">
+          <FontAwesomeIcon icon="inbox" class="text-4xl mb-2" />
+          <p class="text-sm">{{ $t("common.empty") }}</p>
+        </div>
+      </div>
 
       <!-- Pagination Controls -->
       <div
