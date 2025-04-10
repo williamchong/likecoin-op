@@ -46,7 +46,7 @@ func main() {
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"HEAD", "GET", "POST", "PUT"},
+		AllowedMethods:   []string{"HEAD", "GET", "POST", "PUT", "DELETE"},
 		AllowCredentials: true,
 	})
 
