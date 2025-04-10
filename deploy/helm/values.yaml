@@ -32,6 +32,10 @@ likenftMigration:
 migrationAdmin:
   name: migration-admin
   
+  initContainer:
+    imageRepository: nginx:alpine
+    imagePullPolicy: IfNotPresent
+    
   container:
     imageRepository: chankiyu22/migration-admin
     imagePullPolicy: IfNotPresent

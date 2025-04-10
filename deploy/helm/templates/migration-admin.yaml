@@ -47,6 +47,22 @@ spec:
         app.kubernetes.io/component: {{ .Values.migrationAdmin.name }}
     spec:
       restartPolicy: Always
+      initContainers:
+      - name: nginx-auth
+        image: {{ Values.migrationAdmin.initContainer.imageRepository }}
+        imagePullPolicy: {{ .Values.migrationAdmin.initContainer.imagePullPolicy}}
+        command:
+          - "/bin/sh"
+          - "-c"
+          - |
+            apk add --no-cache apache2-utils
+            htpasswd -Bbc /etc/nginx/auth/.htpasswd ${ADMIN_USERNAME} ${ADMIN_PASSWORD}
+        envFrom:
+          - secretRef:
+              name: {{ .Values.migrationAdmin.name }}
+        volumeMounts:
+          - name: nginx-auth
+            mountPath: /etc/nginx/auth
       containers:
       - name: {{ .Values.migrationAdmin.name }}
         image: {{ .Values.migrationAdmin.container.imageRepository }}:{{ .Values.appVersion }}
@@ -60,6 +76,8 @@ spec:
           - name: nginx-config
             mountPath: /etc/nginx/nginx.conf
             subPath: nginx.conf
+          - name: nginx-auth
+            mountPath: /etc/nginx/auth
         resources:
           {{- toYaml .Values.migrationAdmin.resources | nindent 12 }}
       volumes:
@@ -69,3 +87,5 @@ spec:
         - name: nginx-config
           configMap:
             name: {{ .Values.migrationAdmin.name }}-nginx-config
+        - name: nginx-auth
+          emptyDir: {}
