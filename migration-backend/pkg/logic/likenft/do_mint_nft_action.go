@@ -20,6 +20,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	cosmosmodel "github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/event"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
@@ -55,7 +56,6 @@ func DoMintNFTAction(
 	evmClassAddress := common.HexToAddress(a.EvmClassId)
 	toOwner := common.HexToAddress(a.EvmOwner)
 	initialBatchMintOwnerAddress := common.HexToAddress(a.InitialBatchMintOwner)
-	initialMemo := "_mint"
 
 	newClassAction, err := appdb.QueryLikeNFTMigrationActionNewClass(db, appdb.QueryLikeNFTMigrationActionNewClassFilter{
 		EvmClassId: &a.EvmClassId,
@@ -88,6 +88,11 @@ func DoMintNFTAction(
 			return nil, doMintNFTActionFailed(db, a, err)
 		}
 
+		events, err := m.QueryAllNFTEvents(m.MakeQueryNFTEventsRequest(newClassAction.CosmosClassId, a.CosmosNFTId))
+		if err != nil {
+			return nil, doMintNFTActionFailed(db, a, err)
+		}
+
 		metadataString := string(metadataBytes)
 		tx, _, err = c.MintNFTs(
 			ctx,
@@ -96,7 +101,7 @@ func DoMintNFTAction(
 			totalSupply,
 			[]common.Address{toOwner},
 			[]string{
-				"_mint",
+				event.MakeMemoFromEvent(events),
 			},
 			[]string{
 				metadataString,
@@ -119,6 +124,10 @@ func DoMintNFTAction(
 			if err != nil {
 				return nil, doMintNFTActionFailed(db, a, err)
 			}
+			events, err := m.QueryAllNFTEvents(m.MakeQueryNFTEventsRequest(newClassAction.CosmosClassId, a.CosmosNFTId))
+			if err != nil {
+				return nil, doMintNFTActionFailed(db, a, err)
+			}
 
 			metadataString := string(metadataBytes)
 			tx, _, err = c.MintNFTs(
@@ -128,7 +137,7 @@ func DoMintNFTAction(
 				totalSupply,
 				[]common.Address{toOwner},
 				[]string{
-					"_mint",
+					event.MakeMemoFromEvent(events),
 				},
 				[]string{
 					metadataString,
@@ -156,6 +165,7 @@ func DoMintNFTAction(
 						return MakeMatchNFTIdRegex(big.NewInt(0).Add(totalSupply, i).String()).MatchString(n.Id)
 					})
 					metadataStr := "{}"
+					memo := ""
 					if cosmosNFTIdx != -1 {
 						cosmosNFT := cosmosNFTs.NFTs[cosmosNFTIdx]
 						metadata := evm.ERC721MetadataFromCosmosNFT(&cosmosNFT)
@@ -164,9 +174,15 @@ func DoMintNFTAction(
 							return nil, doMintNFTActionFailed(db, a, err)
 						}
 						metadataStr = string(metadataBytes)
+
+						events, err := m.QueryAllNFTEvents(m.MakeQueryNFTEventsRequest(cosmosNFT.ClassId, cosmosNFT.Id))
+						if err != nil {
+							return nil, doMintNFTActionFailed(db, a, err)
+						}
+						memo = event.MakeMemoFromEvent(events)
 					}
 					tos = append(tos, initialBatchMintOwnerAddress)
-					memos = append(memos, initialMemo)
+					memos = append(memos, memo)
 					metadataList = append(metadataList, metadataStr)
 				}
 				_, _, err = c.MintNFTs(
