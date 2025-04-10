@@ -81,21 +81,23 @@ describe("BookNFTClass", () => {
   });
 
   it("should not able to re-initialize", async function () {
-    const bookNFTRandomSigner = bookNFTImplementation.connect(this.randomSigner);
+    const bookNFTRandomSigner = bookNFTImplementation.connect(
+      this.randomSigner,
+    );
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
     const owner = await bookNFTRandomSigner.owner();
     expect(owner).is.not.equal(this.randomSigner.address);
-    
-    await expect(bookNFTRandomSigner.initialize({
-      creator: this.randomSigner,
-      updaters: [this.randomSigner, this.randomSigner],
-      minters: [this.randomSigner, this.randomSigner],
-      config: bookConfig,
-    })).to.be.rejectedWith(
-      "InvalidInitialization()",
-    );
+
+    await expect(
+      bookNFTRandomSigner.initialize({
+        creator: this.randomSigner,
+        updaters: [this.randomSigner, this.randomSigner],
+        minters: [this.randomSigner, this.randomSigner],
+        config: bookConfig,
+      }),
+    ).to.be.rejectedWith("InvalidInitialization()");
   });
 
   it("should have the right roles assigned", async function () {
@@ -1007,7 +1009,6 @@ describe("BookNFT version", () => {
     // Deploy V2 but not upgrade
     const bookNFTMockOwnerSigner = this.BookNFTMock.connect(this.protocolOwner);
     v2NFTClassContract = await bookNFTMockOwnerSigner.deploy();
-    
   });
 
   it("should have the correct version on protocol replace implementation", async function () {
@@ -1032,15 +1033,15 @@ describe("BookNFT version", () => {
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
-    await expect(bookNFTOwnerSigner.initialize({
-      creator: this.classOwner,
-      updaters: [this.classOwner, this.likerLand],
-      minters: [this.classOwner, this.likerLand],
-      config: bookConfig,
-    })).to.be.rejectedWith(
-      "InvalidInitialization()",
-    );
-  })
+    await expect(
+      bookNFTOwnerSigner.initialize({
+        creator: this.classOwner,
+        updaters: [this.classOwner, this.likerLand],
+        minters: [this.classOwner, this.likerLand],
+        config: bookConfig,
+      }),
+    ).to.be.rejectedWith("InvalidInitialization()");
+  });
 
   it("should preserve owner on implementation upgrade", async function () {
     const owner = await nftClassContract.owner();

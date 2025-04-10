@@ -190,14 +190,14 @@ describe("LikeProtocol", () => {
 
     const _newNFTClass = await ethers.getContractAt("BookNFT", classId);
     const bookNFTRandomSigner = _newNFTClass.connect(this.randomSigner);
-    await expect(bookNFTRandomSigner.initialize({
-      creator: this.randomSigner,
-      updaters: [this.randomSigner, this.randomSigner],
-      minters: [this.randomSigner, this.randomSigner],
-      config: bookConfig,
-    })).to.be.rejectedWith(
-      "InvalidInitialization()",
-    );
+    await expect(
+      bookNFTRandomSigner.initialize({
+        creator: this.randomSigner,
+        updaters: [this.randomSigner, this.randomSigner],
+        minters: [this.randomSigner, this.randomSigner],
+        config: bookConfig,
+      }),
+    ).to.be.rejectedWith("InvalidInitialization()");
   });
 
   it("should not allow to create new BookNFT when paused", async function () {
