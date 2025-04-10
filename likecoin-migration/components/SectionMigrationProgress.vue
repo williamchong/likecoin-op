@@ -307,6 +307,10 @@ function computeViewState(
 
 export default Vue.extend({
   props: {
+    enableRetry: {
+      type: Boolean,
+      default: true,
+    },
     estimatedBalance: {
       type: Object as PropType<ChainCoin | null>,
       default: null,
@@ -328,7 +332,6 @@ export default Vue.extend({
       default: null,
     },
   },
-
   computed: {
     viewState(): ViewState {
       return computeViewState(
@@ -361,6 +364,7 @@ export default Vue.extend({
 
     completedAndHasEstimatedBalance() {
       return (
+        this.enableRetry &&
         this.migrationStatus === 'completed' &&
         this.estimatedBalance != null &&
         this.estimatedBalance.amount !== '0'
