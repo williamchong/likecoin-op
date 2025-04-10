@@ -10,7 +10,6 @@ import {
   EVM_CHAIN_ID,
   EVM_MAGIC_LINK_API_KEY,
   EVM_RPC_URL,
-  EXTERNAL_HOST,
   LIKECOIN_CHAIN_API,
   LIKECOIN_CHAIN_DENOM,
   LIKECOIN_CHAIN_GECKO_ID,
@@ -21,7 +20,8 @@ import {
 } from '.';
 
 export function LIKECOIN_WALLET_CONNECTOR_CONFIG(
-  isTestnet: boolean
+  isTestnet: boolean,
+  authcoreRedirectUrl: string
 ): LikeCoinWalletConnectorConfig {
   return {
     chainId: LIKECOIN_CHAIN_ID(isTestnet),
@@ -66,9 +66,7 @@ export function LIKECOIN_WALLET_CONNECTOR_CONFIG(
     cosmostationDirectSignEnabled: true,
     authcoreClientId: 'likecoin-app-hidesocial', // 'likecoin-app' if not hide
     authcoreApiHost: AUTHCORE_API_HOST(isTestnet),
-    authcoreRedirectUrl: `${EXTERNAL_HOST(
-      isTestnet
-    )}/auth/redirect?method=liker-id`,
+    authcoreRedirectUrl: `${authcoreRedirectUrl}/auth/redirect?method=liker-id`,
   };
 }
 
