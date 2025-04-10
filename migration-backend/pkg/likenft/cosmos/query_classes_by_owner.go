@@ -5,12 +5,13 @@ import (
 	"fmt"
 
 	"github.com/google/go-querystring/query"
+
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
 )
 
 type QueryNFTClassesByOwnerRequest struct {
 	QueryNFTClassesByOwnerPageRequest
-	Owner string `url:"owner"`
+	ISCNOwner string `url:"iscn_owner"`
 }
 
 type QueryNFTClassesByOwnerPageRequest struct {
@@ -51,7 +52,7 @@ func (c *LikeNFTCosmosClient) QueryNFTClassesByOwner(request QueryNFTClassesByOw
 }
 
 type QueryAllNFTClassesByOwnerRequest struct {
-	Owner string `url:"owner"`
+	ISCNOwner string `url:"iscn_owner"`
 }
 
 type QueryAllNFTClasssesByOwnerResponse struct {
@@ -60,7 +61,7 @@ type QueryAllNFTClasssesByOwnerResponse struct {
 
 func (c *LikeNFTCosmosClient) QueryAllNFTClassesByOwner(request QueryAllNFTClassesByOwnerRequest) (*QueryAllNFTClasssesByOwnerResponse, error) {
 	c1, err := c.QueryNFTClassesByOwner(QueryNFTClassesByOwnerRequest{
-		Owner: request.Owner,
+		ISCNOwner: request.ISCNOwner,
 		QueryNFTClassesByOwnerPageRequest: QueryNFTClassesByOwnerPageRequest{
 			Limit:      1,
 			CountTotal: true,
@@ -72,7 +73,7 @@ func (c *LikeNFTCosmosClient) QueryAllNFTClassesByOwner(request QueryAllNFTClass
 	}
 
 	c2, err := c.QueryNFTClassesByOwner(QueryNFTClassesByOwnerRequest{
-		Owner: request.Owner,
+		ISCNOwner: request.ISCNOwner,
 		QueryNFTClassesByOwnerPageRequest: QueryNFTClassesByOwnerPageRequest{
 			Limit: c1.Pagination.Count,
 		},

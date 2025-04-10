@@ -38,7 +38,7 @@ func (l *SnapshotCosmosStateLogic) Execute(cosmosAddress string) error {
 	}
 
 	cosmosClasses, err := l.LikeNFTCosmosClient.QueryAllNFTClassesByOwner(cosmos.QueryAllNFTClassesByOwnerRequest{
-		Owner: cosmosAddress,
+		ISCNOwner: cosmosAddress,
 	})
 
 	if err != nil {
