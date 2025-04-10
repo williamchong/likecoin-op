@@ -42,10 +42,6 @@ export function AUTHCORE_API_HOST(isTestnet: boolean): string {
     : 'https://authcore.like.co';
 }
 
-export function EXTERNAL_HOST(isTestnet: boolean): string {
-  return isTestnet ? 'https://rinkeby.liker.land' : 'https://liker.land';
-}
-
 export function EVM_CHAIN_ID(isTestnet: boolean): number {
   return isTestnet ? 11155420 : 10;
 }
