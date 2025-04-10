@@ -148,7 +148,7 @@ contractlevelmetadata: |
     "image": "ar://yY1IjxpTtp_QItTzirhOREYmFZEeW9IjlEmRcp-Cz5w",
     "nft_meta_collection_id": "nft_book",
     "nft_meta_collection_name": "NFT Book",
-    "nft_meta_collection_descrption": "NFT Book by Liker Land",
+    "nft_meta_collection_description": "NFT Book by Liker Land",
     "external_link": "https://ckxpress.com/btc-dca",
     "@context": "http://schema.org/",
     "@type": "Book",

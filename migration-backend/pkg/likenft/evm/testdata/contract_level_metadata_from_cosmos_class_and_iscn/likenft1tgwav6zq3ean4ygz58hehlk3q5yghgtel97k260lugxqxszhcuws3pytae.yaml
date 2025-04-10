@@ -173,7 +173,7 @@ contractlevelmetadata: |
     "image": "ar://_a_PCcJRwvwoTTGtX5z7_RseDbeCp4_AAsEtA9P5SBA",
     "nft_meta_collection_id": "nft_book",
     "nft_meta_collection_name": "NFT Book",
-    "nft_meta_collection_descrption": "NFT Book by Liker Land",
+    "nft_meta_collection_description": "NFT Book by Liker Land",
     "@context": "http://schema.org/",
     "@type": "Book",
     "author": "董啟章",
