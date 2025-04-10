@@ -21,6 +21,16 @@ likenftMigration:
       secretName: likenft-migration.pandawork.com
       host: likenft-migration.pandawork.com
 
+migrationAdmin:
+  configFilePath: "dev/admin/frontend/config.json"
+  nginxConfigFilePath: "dev/admin/frontend/nginx/nginx.conf"
+
+  ingress:
+    host: like-migration-admin.pandawork.com
+    tls:
+      secretName: like-migration-admin.pandawork.com
+      host: like-migration-admin.pandawork.com
+
 migrationBackend:
   env:
     COSMOS_NODE_URL: https://node.testnet.like.co

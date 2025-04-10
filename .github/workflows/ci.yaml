@@ -101,3 +101,17 @@ jobs:
       - run: make -C signer-backend vendor
 
       - run: make -C signer-backend ci
+
+  migration-admin:
+    runs-on: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: make -C migration-admin setup
+
+      - run: make -C migration-admin ci
