@@ -186,6 +186,10 @@ contractlevelmetadata: |
     }, {
       "trait_type": "Publisher",
       "value": "FES 香港基督徒學生福音團契"
+    }, {
+      "trait_type": "Publish Date",
+      "display_type": "date",
+      "value": 1738368000,
     }],
     "likecoin": {
       "iscnIdPrefix": "iscn://likecoin-chain/EgNp14O2nTpHEmZMS4oOKaOImCml65ZSuWQk_NKp8vU",
