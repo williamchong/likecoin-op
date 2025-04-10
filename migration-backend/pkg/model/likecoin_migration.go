@@ -1,6 +1,8 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type LikeCoinMigrationStatus string
 
@@ -12,6 +14,19 @@ const (
 	LikeCoinMigrationStatusCompleted           LikeCoinMigrationStatus = "completed"
 	LikeCoinMigrationStatusFailed              LikeCoinMigrationStatus = "failed"
 )
+
+func (s *LikeCoinMigrationStatus) IsValid() bool {
+	switch *s {
+	case LikeCoinMigrationStatusPendingCosmosTxHash,
+		LikeCoinMigrationStatusVerifyingCosmosTx,
+		LikeCoinMigrationStatusEvmMinting,
+		LikeCoinMigrationStatusEvmVerifying,
+		LikeCoinMigrationStatusCompleted,
+		LikeCoinMigrationStatusFailed:
+		return true
+	}
+	return false
+}
 
 type LikeCoinMigration struct {
 	Id                   uint64

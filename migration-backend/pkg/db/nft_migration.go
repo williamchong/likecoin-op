@@ -74,6 +74,68 @@ FROM likenft_asset_migration WHERE cosmos_address = $1`,
 	return migration, nil
 }
 
+func QueryPaginatedLikeNFTAssetMigration(
+	tx TxLike,
+	limit int,
+	offset int,
+	status *model.LikeNFTAssetMigrationStatus,
+	keyword string,
+) ([]*model.LikeNFTAssetMigration, error) {
+	rows, err := tx.Query(
+		`SELECT
+	id,
+	created_at,
+	likenft_asset_snapshot_id,
+	cosmos_address,
+	eth_address,
+	status,
+	failed_reason
+FROM likenft_asset_migration
+WHERE ($3::text IS NULL OR status = $3) AND
+(
+	$4::text = '' OR 
+	failed_reason ILIKE '%' || $4 || '%' OR 
+	cosmos_address ILIKE '%' || $4 || '%' OR 
+	eth_address ILIKE '%' || $4 || '%'
+)
+ORDER BY created_at DESC
+LIMIT $1
+OFFSET $2
+`,
+		limit,
+		offset,
+		status,
+		keyword,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	migrations := []*model.LikeNFTAssetMigration{}
+
+	for rows.Next() {
+		m := &model.LikeNFTAssetMigration{}
+		err := rows.Scan(
+			&m.Id,
+			&m.CreatedAt,
+			&m.LikeNFTAssetSnapshotId,
+			&m.CosmosAddress,
+			&m.EthAddress,
+			&m.Status,
+			&m.FailedReason,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		migrations = append(migrations, m)
+	}
+
+	return migrations, nil
+}
+
 func InsertLikeNFTAssetMigration(
 	tx TxLike,
 	migration *model.LikeNFTAssetMigration,
@@ -124,6 +186,18 @@ WHERE id = $6;`,
 		migration.Status,
 		migration.FailedReason,
 		migration.Id,
+	)
+
+	return err
+}
+
+func RemoveLikeNFTAssetMigration(
+	tx TxLike,
+	id uint64,
+) error {
+	_, err := tx.Exec(
+		`DELETE FROM likenft_asset_migration WHERE id = $1;`,
+		id,
 	)
 
 	return err

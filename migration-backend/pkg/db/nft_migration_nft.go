@@ -244,3 +244,15 @@ WHERE id = $11;`,
 
 	return err
 }
+
+func RemoveLikeNFTAssetMigrationNFTByMigrationId(
+	tx TxLike,
+	migrationId uint64,
+) error {
+	_, err := tx.Exec(
+		`DELETE FROM likenft_asset_migration_nft WHERE likenft_asset_migration_id = $1;`,
+		migrationId,
+	)
+
+	return err
+}

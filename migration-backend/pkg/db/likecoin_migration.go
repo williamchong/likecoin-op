@@ -6,6 +6,53 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
+func QueryLikeCoinMigrationById(
+	tx TxLike,
+	id uint64,
+) (*model.LikeCoinMigration, error) {
+	row := tx.QueryRow(`SELECT
+    id,
+    created_at,
+    user_cosmos_address,
+    burning_cosmos_address,
+    minting_eth_address,
+    user_eth_address,
+    amount,
+    evm_signature,
+    evm_signature_message,
+    status,
+    cosmos_tx_hash,
+    evm_tx_hash,
+    failed_reason
+  FROM likecoin_migration
+  WHERE id = $1
+  `, id)
+
+	m := &model.LikeCoinMigration{}
+
+	err := row.Scan(
+		&m.Id,
+		&m.CreatedAt,
+		&m.UserCosmosAddress,
+		&m.BurningCosmosAddress,
+		&m.MintingEthAddress,
+		&m.UserEthAddress,
+		&m.Amount,
+		&m.EvmSignature,
+		&m.EvmSignatureMessage,
+		&m.Status,
+		&m.CosmosTxHash,
+		&m.EvmTxHash,
+		&m.FailedReason,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return m, nil
+}
+
 func QueryNonEndedLikeCoinMigration(
 	tx TxLike,
 	cosmosAddress string,
@@ -54,6 +101,81 @@ WHERE user_cosmos_address = $1 AND status NOT IN ($2, $3)
 	}
 
 	return m, nil
+}
+
+func QueryPaginatedLikeCoinMigration(
+	tx TxLike,
+	limit int,
+	offset int,
+	status *model.LikeCoinMigrationStatus,
+	keyword string,
+) ([]*model.LikeCoinMigration, error) {
+	rows, err := tx.Query(`SELECT
+    id,
+    created_at,
+    user_cosmos_address,
+    burning_cosmos_address,
+    minting_eth_address,
+    user_eth_address,
+    amount,
+    evm_signature,
+    evm_signature_message,
+    status,
+    cosmos_tx_hash,
+    evm_tx_hash,
+    failed_reason
+FROM likecoin_migration
+WHERE ($3::text IS NULL OR status = $3) AND
+(
+	$4::text = '' OR 
+	failed_reason ILIKE '%' || $4 || '%' OR 
+	user_cosmos_address ILIKE '%' || $4 || '%' OR 
+	burning_cosmos_address ILIKE '%' || $4 || '%' OR 
+	minting_eth_address ILIKE '%' || $4 || '%' OR 
+	user_eth_address ILIKE '%' || $4 || '%' OR
+	evm_signature ILIKE '%' || $4 || '%' OR 
+	evm_signature_message ILIKE '%' || $4 || '%' OR 
+	cosmos_tx_hash ILIKE '%' || $4 || '%' OR 
+	evm_tx_hash ILIKE '%' || $4 || '%'
+)
+ORDER BY created_at DESC
+LIMIT $1
+OFFSET $2
+
+`, limit, offset, status, keyword)
+
+	if err != nil {
+		return nil, err
+	}
+
+	migrations := []*model.LikeCoinMigration{}
+
+	for rows.Next() {
+		m := &model.LikeCoinMigration{}
+		err := rows.Scan(
+			&m.Id,
+			&m.CreatedAt,
+			&m.UserCosmosAddress,
+			&m.BurningCosmosAddress,
+			&m.MintingEthAddress,
+			&m.UserEthAddress,
+			&m.Amount,
+			&m.EvmSignature,
+			&m.EvmSignatureMessage,
+			&m.Status,
+			&m.CosmosTxHash,
+			&m.EvmTxHash,
+			&m.FailedReason,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		migrations = append(migrations, m)
+	}
+
+	return migrations, nil
 }
 
 func QueryLatestLikeCoinMigration(
@@ -181,6 +303,24 @@ WHERE id = $12`,
 		m.Id,
 	)
 
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}
+
+func RemoveLikeCoinMigration(tx TxLike, id uint64) error {
+	result, err := tx.Exec(`DELETE FROM likecoin_migration WHERE id = $1`, id)
 	if err != nil {
 		return err
 	}
