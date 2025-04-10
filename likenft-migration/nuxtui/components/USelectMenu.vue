@@ -12,6 +12,8 @@
         _ui.variant.outline,
         'ring-gray-300',
         _ui.padding.xs,
+        'appearance-none' /* Hide default arrow */,
+        'pr-8' /* Add padding for the custom arrow */,
       ]"
       @input="$emit('input', $event.currentTarget.value)"
     >
@@ -29,6 +31,12 @@
         }}
       </option>
     </select>
+    <span
+      class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none font-[fa]"
+    >
+      <FontAwesomeIcon :class="['text-xs']" icon="chevron-down" />
+      <!-- Font Awesome chevron-down unicode -->
+    </span>
   </div>
 </template>
 
