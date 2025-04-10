@@ -8,13 +8,19 @@ import (
 type LikeNFTCosmosClient struct {
 	HTTPClient *http.Client
 	NodeURL    string
+
+	nftEventsIgnoreToList string
 }
 
-func NewLikeNFTCosmosClient(nodeURL string) *LikeNFTCosmosClient {
+func NewLikeNFTCosmosClient(
+	nodeURL string,
+	nftEventsIgnoreToList string,
+) *LikeNFTCosmosClient {
 	return &LikeNFTCosmosClient{
 		HTTPClient: &http.Client{
 			Timeout: 10 * time.Second,
 		},
-		NodeURL: nodeURL,
+		NodeURL:               nodeURL,
+		nftEventsIgnoreToList: nftEventsIgnoreToList,
 	}
 }

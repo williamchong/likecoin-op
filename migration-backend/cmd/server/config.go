@@ -8,6 +8,7 @@ type EnvConfig struct {
 	ListenAddr                   string `envconfig:"LISTEN_ADDR" default:"0.0.0.0:8091"`
 	RoutePrefix                  string `envconfig:"ROUTE_PREFIX" default:""`
 	CosmosNodeUrl                string `envconfig:"COSMOS_NODE_URL"`
+	CosmosNftEventsIgnoreToList  string `envconfig:"COSMOS_NFT_EVENTS_IGNORE_TO_LIST"`
 	EthNetworkPublicRPCURL       string `envconfig:"ETH_NETWORK_PUBLIC_RPC_URL"`
 	EthSignerBaseUrl             string `envconfig:"ETH_SIGNER_BASE_URL"`
 	EthSignerAPIKey              string `envconfig:"ETH_SIGNER_API_KEY"`

@@ -82,7 +82,7 @@ func main() {
 	)
 
 	cosmosAPI := api.NewCosmosAPI(envCfg.CosmosNodeUrl)
-	likenftCosmosClient := cosmos.NewLikeNFTCosmosClient(envCfg.CosmosNodeUrl)
+	likenftCosmosClient := cosmos.NewLikeNFTCosmosClient(envCfg.CosmosNodeUrl, envCfg.CosmosNftEventsIgnoreToList)
 	likecoinAPI := likecoin_api.NewLikecoinAPI(envCfg.LikecoinAPIUrlBase)
 
 	mainMux.Handle("/healthz", &handler.HealthzHandler{})
