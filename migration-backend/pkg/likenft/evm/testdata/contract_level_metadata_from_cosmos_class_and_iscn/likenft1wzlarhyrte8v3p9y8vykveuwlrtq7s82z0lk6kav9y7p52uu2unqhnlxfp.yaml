@@ -167,9 +167,7 @@ contractlevelmetadata: |
     "isbn": "9789628991877",
     "keywords": "基督教,信仰生活",
     "publisher": "FES 香港基督徒學生福音團契",
-    "sameAs": [
-      "https://api.like.co/arweave/v2/link/B6ED63F9E335E0D0A2A75FE43370F8C1FA96788B4AF9F6262A0E2D1D4D818462?name=%E4%BF%A1%E4%BB%B0Q%26Av4.epub"
-    ],
+    "sameAs": [],
     "thumbnailUrl": "ar://G-K80-6XlDCP-6EtxIK0GWxjk6Zk0wW3HuWtHR6Peug",
     "usageInfo": "All Rights Reserved",
     "version": 1,
@@ -191,6 +189,16 @@ contractlevelmetadata: |
       "display_type": "date",
       "value": 1738368000,
     }],
+    "potentialAction": {
+      "@type": "ReadAction",
+      "target": [{
+        "@type": "EntryPoint",
+        "contentType": "application/epub+zip",
+        "url": "https://api.like.co/arweave/v2/link/B6ED63F9E335E0D0A2A75FE43370F8C1FA96788B4AF9F6262A0E2D1D4D818462",
+        "name": "信仰Q&Av4.epub",
+        "encodingType": "aes256gcm",
+      }],
+    },
     "likecoin": {
       "iscnIdPrefix": "iscn://likecoin-chain/EgNp14O2nTpHEmZMS4oOKaOImCml65ZSuWQk_NKp8vU",
       "classId": "likenft1wzlarhyrte8v3p9y8vykveuwlrtq7s82z0lk6kav9y7p52uu2unqhnlxfp"

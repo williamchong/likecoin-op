@@ -127,11 +127,7 @@ contractlevelmetadata: |
     "@context": "http://schema.org/",
     "@type": "Book",
     "keywords": "novel,hongkong,literature,classic",
-    "sameAs": [
-      "https://files.ckxpress.com/天工開物．栩栩如真.pdf",
-      "https://files.ckxpress.com/天工開物．栩栩如真.epub",
-      "https://arweave.net/WuffTBbQO8tntjt4jWSlSle-nRmvDP_Lvks7sT_UszQ"
-    ],
+    "sameAs": [],
     "url": "https://nowherebookstore.io/worksandcreation",
     "usageInfo": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
     "version": 1,
@@ -141,6 +137,20 @@ contractlevelmetadata: |
     ],
     "dateCreated": "2023-04-22T11:20:35+00:00",
     "attributes": [],
+    "potentialAction": {
+      "@type": "ReadAction",
+      "target": [{
+        "@type": "EntryPoint",
+        "contentType": "application/pdf",
+        "url": "https://files.ckxpress.com/天工開物．栩栩如真.pdf",
+        "name": "天工開物．栩栩如真.pdf"
+      }, {
+        "@type": "EntryPoint",
+        "contentType": "application/epub+zip",
+        "url": "https://files.ckxpress.com/天工開物．栩栩如真.epub",
+        "name": "天工開物．栩栩如真.epub"
+      }]
+    },
     "likecoin": {
       "iscnIdPrefix": "iscn://likecoin-chain/4UC3ZhKokFv3_rxP1p8QtCuDfHAcxcDZhbe4-rPMBGI",
       "classId": "likenft19symzw3xmh42gukzts858wf6rsdkn6e4jtc9wp8jh4kphfmffy5s6acyxg"

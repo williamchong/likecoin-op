@@ -162,9 +162,7 @@ contractlevelmetadata: |
     "isbn": "9786269836208",
     "keywords": "投資,區塊鏈,密碼貨幣,金融,財經",
     "name": "財富自由主義：金錢的多元宇宙",
-    "sameAs": [
-      "https://files.ckxpress.com/moneyverse.pdf"
-    ],
+    "sameAs": [],
     "usageInfo": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
     "version": 1,
     "url": "https://ckxpress.com/moneyverse/",
@@ -176,6 +174,15 @@ contractlevelmetadata: |
       "trait_type": "Author",
       "value": "高重建"
     }],
+    "potentialAction": {
+      "@type": "ReadAction",
+      "target": [{
+        "@type": "EntryPoint",
+        "contentType": "application/pdf",
+        "url": "https://files.ckxpress.com/moneyverse.pdf",
+        "name": "moneyverse.pdf"
+      }]
+    },
     "likecoin": {
       "iscnIdPrefix": "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c",
       "classId": "likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83"
