@@ -123,52 +123,64 @@
             </h2>
           </template>
           <template v-if="currentStep.step === 4" #current>
-            <template v-if="currentStep.state === 'MigrationPreview'">
-              <div :class="['flex', 'flex-row', 'gap-1']">
-                <h2
+            <div :class="['flex', 'flex-row', 'gap-1']">
+              <h2
+                :class="[
+                  'text-base',
+                  'font-semibold',
+                  'leading-[30px]',
+                  'text-likecoin-darkgrey',
+                ]"
+              >
+                {{ $t('migrate.preview') }}
+              </h2>
+              <UTooltip
+                v-if="
+                  currentStep.migrationPreview != null &&
+                  currentStep.migrationPreview.block_time != null &&
+                  currentStep.migrationPreview.block_height != null
+                "
+                :text="
+                  $t('section.asset-preview.tooltip', {
+                    date: _formatDate(currentStep.migrationPreview.block_time),
+                    height: _formatNumber(
+                      currentStep.migrationPreview.block_height
+                    ),
+                  })
+                "
+                :ui="{
+                  base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
+                }"
+                ><FontAwesomeIcon
+                  icon="circle-exclamation"
                   :class="[
-                    'text-base',
-                    'font-semibold',
+                    'text-sm',
                     'leading-[30px]',
-                    'text-likecoin-darkgrey',
+                    'text-likecoin-votecolor-yes',
                   ]"
-                >
-                  {{ $t('migrate.preview') }}
-                </h2>
-                <UTooltip
-                  v-if="
-                    currentStep.migrationPreview.block_time != null &&
-                    currentStep.migrationPreview.block_height != null
-                  "
-                  :text="
-                    $t('section.asset-preview.tooltip', {
-                      date: _formatDate(
-                        currentStep.migrationPreview.block_time
-                      ),
-                      height: _formatNumber(
-                        currentStep.migrationPreview.block_height
-                      ),
-                    })
-                  "
-                  :ui="{
-                    base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
-                  }"
-                  ><FontAwesomeIcon
-                    icon="circle-exclamation"
-                    :class="[
-                      'text-sm',
-                      'leading-[30px]',
-                      'text-likecoin-votecolor-yes',
-                    ]"
-                /></UTooltip>
-              </div>
-              <SectionAssetPreview
-                v-if="currentStep.migrationPreview != null"
-                :class="['max-w-full', 'mt-2']"
-                :snapshot="currentStep.migrationPreview"
-                @confirmMigration="handleConfirmMigrate"
-              />
-            </template>
+              /></UTooltip>
+            </div>
+            <SectionAssetPreview
+              v-if="
+                currentStep.state === 'MigrationPreview' &&
+                currentStep.migrationPreview != null
+              "
+              :class="['max-w-full', 'mt-2']"
+              :snapshot="currentStep.migrationPreview"
+              @confirmMigration="handleConfirmMigrate"
+            />
+            <div
+              v-else
+              :class="[
+                'flex',
+                'flex-row',
+                'items-center',
+                'justify-center',
+                'my-4',
+              ]"
+            >
+              <LoadingIcon />
+            </div>
             <template v-if="currentStep.state === 'MigrationRetryPreview'">
               <div :class="['flex', 'flex-row', 'gap-1']">
                 <h2
