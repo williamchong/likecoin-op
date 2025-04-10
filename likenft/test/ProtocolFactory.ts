@@ -5,31 +5,21 @@ export async function createProtocol(ownerSigner: SignerWithAddress) {
   const BookNFT = await ethers.getContractFactory("BookNFT");
   const LikeProtocol = await ethers.getContractFactory("LikeProtocol");
 
-  const bookNFT = await upgrades.deployProxy(
-    BookNFT,
-    [
-      {
-        creator: ownerSigner.address,
-        updaters: [],
-        minters: [],
-        config: {
-          name: "BookNFT Implementation",
-          symbol: "BOOKNFTV0",
-          metadata: "{}",
-          max_supply: 10,
-        },
-      },
-    ],
+  const bookNFTDeployment = await BookNFT.deploy();
+  await bookNFTDeployment.initialize(
     {
-      initializer: "initialize",
+      creator: ownerSigner.address,
+      updaters: [],
+      minters: [],
+      config: {
+        name: "BookNFT Implementation",
+        symbol: "BOOKNFTV0",
+        metadata: "{}",
+        max_supply: 1n,
+      },
     },
   );
-  const bookNFTDeployment = await bookNFT.waitForDeployment();
   let bookNFTAddress = await bookNFTDeployment.getAddress();
-  const bookNFTContract = await ethers.getContractAt("BookNFT", bookNFTAddress);
-
-  bookNFTAddress =
-    await upgrades.erc1967.getImplementationAddress(bookNFTAddress);
 
   const likeProtocol = await upgrades.deployProxy(
     LikeProtocol,
@@ -50,9 +40,7 @@ export async function createProtocol(ownerSigner: SignerWithAddress) {
     likeProtocolDeployment,
     likeProtocolAddress,
     likeProtocolContract,
-    bookNFT,
     bookNFTDeployment,
     bookNFTAddress,
-    bookNFTContract,
   };
 }

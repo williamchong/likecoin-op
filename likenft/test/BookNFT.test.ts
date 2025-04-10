@@ -20,6 +20,7 @@ describe("BookNFTClass", () => {
   let deployment: BaseContract;
   let contractAddress: string;
   let protocolContract: BaseContract;
+  let bookNFTImplementation: BaseContract;
   let nftClassId: string;
   let nftClassContract: BaseContract;
   beforeEach(async function () {
@@ -28,15 +29,14 @@ describe("BookNFTClass", () => {
       likeProtocolDeployment,
       likeProtocolAddress,
       likeProtocolContract,
-      bookNFT,
       bookNFTDeployment,
       bookNFTAddress,
-      bookNFTContract,
     } = await createProtocol(this.protocolOwner);
 
     deployment = likeProtocolDeployment;
     contractAddress = likeProtocolAddress;
     protocolContract = likeProtocolContract;
+    bookNFTImplementation = bookNFTDeployment;
 
     const likeProtocolOwnerSigner = protocolContract.connect(
       this.protocolOwner,
@@ -77,6 +77,24 @@ describe("BookNFTClass", () => {
     const newBookNFT = await bookNFTMockOwnerSigner.deploy();
     expect(await newBookNFT.bookNFTStorage()).to.equal(
       "0x8303e9d27d04c843c8d4a08966b1e1be0214fc0b3375d79db0a8252068c41f00",
+    );
+  });
+
+  it("should not able to re-initialize", async function () {
+    const bookNFTRandomSigner = bookNFTImplementation.connect(this.randomSigner);
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+    const owner = await bookNFTRandomSigner.owner();
+    expect(owner).is.not.equal(this.randomSigner.address);
+    
+    await expect(bookNFTRandomSigner.initialize({
+      creator: this.randomSigner,
+      updaters: [this.randomSigner, this.randomSigner],
+      minters: [this.randomSigner, this.randomSigner],
+      config: bookConfig,
+    })).to.be.rejectedWith(
+      "InvalidInitialization()",
     );
   });
 
@@ -417,10 +435,8 @@ describe("BookNFT permission control", () => {
       likeProtocolDeployment,
       likeProtocolAddress,
       likeProtocolContract,
-      bookNFT,
       bookNFTDeployment,
       bookNFTAddress,
-      bookNFTContract,
     } = await createProtocol(this.protocolOwner);
 
     deployment = likeProtocolDeployment;
@@ -551,10 +567,8 @@ describe("BookNFT ownership transfer", () => {
       likeProtocolDeployment,
       likeProtocolAddress,
       likeProtocolContract,
-      bookNFT,
       bookNFTDeployment,
       bookNFTAddress,
-      bookNFTContract,
     } = await createProtocol(this.protocolOwner);
 
     deployment = likeProtocolDeployment;
@@ -785,10 +799,8 @@ describe("BookNFT config validation", () => {
       likeProtocolDeployment,
       likeProtocolAddress,
       likeProtocolContract,
-      bookNFT,
       bookNFTDeployment,
       bookNFTAddress,
-      bookNFTContract,
     } = await createProtocol(this.protocolOwner);
 
     deployment = likeProtocolDeployment;
@@ -951,10 +963,8 @@ describe("BookNFT version", () => {
       likeProtocolDeployment,
       likeProtocolAddress,
       likeProtocolContract,
-      bookNFT,
       bookNFTDeployment,
       bookNFTAddress,
-      bookNFTContract,
     } = await createProtocol(this.protocolOwner);
 
     deployment = likeProtocolDeployment;
@@ -997,6 +1007,7 @@ describe("BookNFT version", () => {
     // Deploy V2 but not upgrade
     const bookNFTMockOwnerSigner = this.BookNFTMock.connect(this.protocolOwner);
     v2NFTClassContract = await bookNFTMockOwnerSigner.deploy();
+    
   });
 
   it("should have the correct version on protocol replace implementation", async function () {
@@ -1009,6 +1020,27 @@ describe("BookNFT version", () => {
     const beaconProxy = await v2NFTClassContract.attach(nftClassId);
     expect(await beaconProxy.version()).to.equal(2n);
   });
+
+  it("should not able to initialize v2 NFT class", async function () {
+    const likeProtocolOwnerSigner = protocolContract.connect(
+      this.protocolOwner,
+    );
+    await likeProtocolOwnerSigner.upgradeTo(v2NFTClassContract.getAddress());
+
+    const beaconProxy = await v2NFTClassContract.attach(nftClassId);
+    const bookNFTOwnerSigner = beaconProxy.connect(this.classOwner);
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+    await expect(bookNFTOwnerSigner.initialize({
+      creator: this.classOwner,
+      updaters: [this.classOwner, this.likerLand],
+      minters: [this.classOwner, this.likerLand],
+      config: bookConfig,
+    })).to.be.rejectedWith(
+      "InvalidInitialization()",
+    );
+  })
 
   it("should preserve owner on implementation upgrade", async function () {
     const owner = await nftClassContract.owner();
