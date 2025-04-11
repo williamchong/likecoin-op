@@ -172,8 +172,8 @@ describe("BookNFTClass", () => {
     const updateClass = async () => {
       await likeClassOwnerSigner
         .update({
-          name: "My Book",
-          symbol: "NEWBOOK",
+          name: "My Book updated",
+          symbol: "KOOB",
           metadata: JSON.stringify({
             name: "Collection Name",
             symbol: "Collection SYMB",
@@ -219,11 +219,11 @@ describe("BookNFTClass", () => {
     };
 
     await expect(updateClass()).to.be.not.rejected;
-    await expect(await nftClassContract.symbol()).to.equal("NEWBOOK");
     await expect(await nftClassContract.totalSupply()).to.equal(0n);
     await expect(mintNFT()).to.be.not.rejected;
     await expect(await nftClassContract.totalSupply()).to.equal(1n);
     await expect(updateClass()).to.be.not.rejected;
+    await expect(await nftClassContract.totalSupply()).to.equal(1n);
   });
 
   it("should reject update class with decreasing max supply", async function () {
@@ -867,7 +867,7 @@ describe("BookNFT config validation", () => {
         minters: [this.classOwner],
         config: {
           name: "",
-          symbol: "TEST",
+          symbol: "KOOB",
           metadata: JSON.stringify({
             name: "Test Collection",
             description: "Test Description",
@@ -884,7 +884,7 @@ describe("BookNFT config validation", () => {
     await expect(
       likeClassOwnerSigner.update({
         name: "Valid Name",
-        symbol: "TEST",
+        symbol: "KOOB",
         metadata: JSON.stringify({
           name: "Test Collection",
           description: "Test Description",
@@ -907,7 +907,27 @@ describe("BookNFT config validation", () => {
         }),
         max_supply: 10,
       }),
-    ).to.be.rejectedWith("ErrEmptySymbol()");
+    ).to.be.rejectedWith("ErrInvalidSymbol()");
+  });
+
+  it("should not allow change of symbol in update", async function () {
+    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    const originalSymbol = await nftClassContract.symbol();
+
+    await expect(
+      likeClassOwnerSigner.update({
+        name: "Valid Name",
+        symbol: "NEWSYMBOL", // Different from original symbol
+        metadata: JSON.stringify({
+          name: "Test Collection",
+          description: "Test Description",
+        }),
+        max_supply: 10,
+      }),
+    ).to.be.rejectedWith("ErrInvalidSymbol()");
+
+    // Verify symbol remains unchanged
+    expect(await nftClassContract.symbol()).to.equal(originalSymbol);
   });
 
   it("should not allow zero max supply in update", async function () {
@@ -916,7 +936,7 @@ describe("BookNFT config validation", () => {
     await expect(
       likeClassOwnerSigner.update({
         name: "Valid Name",
-        symbol: "TEST",
+        symbol: "KOOB",
         metadata: JSON.stringify({
           name: "Test Collection",
           description: "Test Description",
@@ -932,7 +952,7 @@ describe("BookNFT config validation", () => {
     await expect(
       likeClassOwnerSigner.update({
         name: "Valid Name",
-        symbol: "TEST",
+        symbol: "KOOB",
         metadata: "invalid json",
         max_supply: 10,
       }),
