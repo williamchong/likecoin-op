@@ -11,6 +11,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
@@ -52,7 +53,18 @@ func DoNewClassAction(
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)
 	}
+
 	cosmosClass := cosmosClassResponse.Class
+
+	iscnDataResponse, err := c.GetISCNRecord(
+		cosmosClass.Data.Parent.IscnIdPrefix,
+		cosmosClass.Data.Parent.IscnVersionAtMint,
+	)
+
+	if err != nil {
+		return nil, doNewClassActionFailed(db, a, err)
+	}
+
 	initialOwnerAddress := common.HexToAddress(a.InitialOwner)
 	initialMinterAddress := common.HexToAddress(a.InitialMinter)
 	initialUpdaterAddress := common.HexToAddress(a.InitialUpdater)
@@ -68,7 +80,7 @@ func DoNewClassAction(
 		}
 	}
 
-	metadataBytes, err := json.Marshal(evm.ContractLevelMetadataFromCosmosClass(cosmosClass))
+	metadataBytes, err := json.Marshal(evm.ContractLevelMetadataFromCosmosClassAndISCN(cosmosClass, iscnDataResponse))
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)
 	}

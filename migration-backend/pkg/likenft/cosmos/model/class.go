@@ -34,7 +34,15 @@ type ClassMetadata struct {
 	ExternalURL                  string `json:"external_url,omitempty"`
 	NFTMetaCollectionID          string `json:"nft_meta_collection_id,omitempty"`
 	NFTMetaCollectionName        string `json:"nft_meta_collection_name,omitempty"`
-	NFTMetaCollectionDescription string `json:"nft_meta_collection_descrption,omitempty"`
+	NFTMetaCollectionDescrption  string `json:"nft_meta_collection_descrption,omitempty"`
+	NFTMetaCollectionDescription string `json:"nft_meta_collection_description,omitempty"`
+}
+
+func (m *ClassMetadata) GetNFTMetaCollectionDescription() string {
+	if m.NFTMetaCollectionDescrption != "" {
+		return m.NFTMetaCollectionDescrption
+	}
+	return m.NFTMetaCollectionDescription
 }
 
 type ClassParent struct {
