@@ -219,8 +219,7 @@ erc721metadata: |
         "@type": "EntryPoint",
         "contentType": "application/epub+zip",
         "url": "https://api.like.co/arweave/v2/link/B6ED63F9E335E0D0A2A75FE43370F8C1FA96788B4AF9F6262A0E2D1D4D818462",
-        "name": "信仰Q&Av4.epub",
-        "encodingType": "aes256gcm"
+        "name": "信仰Q&Av4.epub"
       }]
     },
     "likecoin": {
