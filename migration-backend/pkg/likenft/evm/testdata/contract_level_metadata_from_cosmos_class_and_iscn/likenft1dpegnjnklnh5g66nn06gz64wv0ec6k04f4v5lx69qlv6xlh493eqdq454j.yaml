@@ -166,7 +166,9 @@ contractlevelmetadata: |
     "isbn": "9786269943906",
     "keywords": "理財,投資,科技,Bitcoin,區塊鏈",
     "publisher": "飛地出版",
-    "sameAs": [],
+    "sameAs": [
+      "ar://hYtn-ySANq7HBqaZRW8eVPxp0u3j9d_023n03nymz50?name=每天買一百元比特幣-高重建.epub"
+    ],
     "thumbnailUrl": "ar://yY1IjxpTtp_QItTzirhOREYmFZEeW9IjlEmRcp-Cz5w",
     "url": "https://ckxpress.com/btc-dca",
     "usageInfo": "https://creativecommons.org/licenses/by/4.0/",

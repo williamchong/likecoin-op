@@ -211,7 +211,12 @@ erc721metadata: |
     ],
     "inLanguage": "zh",
     "keywords": "董啟章小說,自然史三部曲,時間繁史啞瓷之光",
-    "sameAs": [],
+    "sameAs": [
+      "ar://nY08lJhSN74MkeM_Ggj6Omd8aNogEZl2D7YNy2aqBBQ?name=時間繁史．啞瓷之光-廣東話版_2024_PDF.pdf",
+      "ar://SlENPw3CA83TWK4avAn3nNJMdxAiqiN0MNsbDe2dR2Y?name=時間繁史．啞瓷之光-書面語版_2024_PDF.pdf",
+      "ar://cjHy9bmtOsCC3kOpaBNwH3I7aDlOJsuWt44bFR8fJnw?name=時間繁史．啞瓷之光 - 書面語版 - 董啟章.epub",
+      "ar://xJaKKuvFqRwSgTfVGqkT2nQ2WYsiuhfn5d7iSvh5mqA?name=時間繁史．啞瓷之光 - 廣東話版 - 董啟章.epub"
+    ],
     "thumbnailUrl": "ar://_a_PCcJRwvwoTTGtX5z7_RseDbeCp4_AAsEtA9P5SBA",
     "usageInfo": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
     "version": "2",

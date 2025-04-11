@@ -167,7 +167,9 @@ contractlevelmetadata: |
     "isbn": "9789628991877",
     "keywords": "基督教,信仰生活",
     "publisher": "FES 香港基督徒學生福音團契",
-    "sameAs": [],
+    "sameAs": [
+      "https://api.like.co/arweave/v2/link/B6ED63F9E335E0D0A2A75FE43370F8C1FA96788B4AF9F6262A0E2D1D4D818462?name=%E4%BF%A1%E4%BB%B0Q%26Av4.epub"
+    ],
     "thumbnailUrl": "ar://G-K80-6XlDCP-6EtxIK0GWxjk6Zk0wW3HuWtHR6Peug",
     "usageInfo": "All Rights Reserved",
     "version": 1,
