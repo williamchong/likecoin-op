@@ -145,6 +145,9 @@
           </span>
           <span v-else>-</span>
         </template>
+        <template #amount-data="{ row }">
+          {{ formatAmount(row.amount) }} {{ currency }}
+        </template>
         <template #status-data="{ row }">
           <span
             :class="[
@@ -256,11 +259,13 @@
 import Vue, { PropType } from "vue";
 import type { TranslateResult } from "vue-i18n";
 import { format } from "date-fns";
+import numeral from "numeral";
 
 import {
   LikeCoinMigration,
   LikeCoinMigrationStatus,
 } from "~/apis/models/likecoinMigration";
+import { LIKECOIN_CHAIN_DENOM, LIKECOIN_CHAIN_NAME } from "~/constant";
 
 import LoadingIcon from "~/components/LoadingIcon.vue";
 import UCard from "../nuxtui/components/UCard.vue";
@@ -365,6 +370,9 @@ export default Vue.extend({
           "section.likecoin-migration.table.data.status.failed"
         ),
       };
+    },
+    currency(): string {
+      return LIKECOIN_CHAIN_DENOM(this.$appConfig.isTestnet);
     },
     itemsFilterOptions(): {}[] {
       return [
@@ -480,6 +488,10 @@ export default Vue.extend({
   methods: {
     formatDate(date: Date): string {
       return format(date, "yyyy-MM-dd HH:mm:ss");
+    },
+    formatAmount(amount: string): string {
+      const am = parseInt(amount || "0") * Math.pow(10, -9);
+      return numeral(am).format("0,0.[0000]");
     },
     truncateAddress(address: string): string {
       if (!address) return "-";

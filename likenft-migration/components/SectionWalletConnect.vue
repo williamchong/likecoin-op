@@ -63,15 +63,24 @@
           <div :class="['text-base', 'text-likecoin-darkgrey']">
             {{ $t('section.wallet-connect.cosmos-address') }}
           </div>
-          <div
-            :class="[
-              'text-base',
-              'text-likecoin-votecolor-yes',
-              'overflow-hidden',
-              'text-ellipsis',
-            ]"
-          >
-            {{ cosmosAddress }}
+          <div :class="['flex', 'flex-row', 'items-center', 'gap-1']">
+            <div
+              :class="[
+                'text-base',
+                'text-likecoin-votecolor-yes',
+                'overflow-hidden',
+                'text-ellipsis',
+              ]"
+            >
+              {{ cosmosAddress }}
+            </div>
+            <button
+              v-if="cosmosAddress != null"
+              type="button"
+              @click="handleCosmosAddressCopyClick(cosmosAddress)"
+            >
+              <FontAwesomeIcon :class="['text-base']" icon="copy" />
+            </button>
           </div>
         </div>
       </div>
@@ -112,15 +121,24 @@
           <div :class="['text-base', 'text-likecoin-darkgrey']">
             {{ $t('section.wallet-connect.eth-address') }}
           </div>
-          <div
-            :class="[
-              'text-base',
-              'text-likecoin-votecolor-yes',
-              'overflow-hidden',
-              'text-ellipsis',
-            ]"
-          >
-            {{ ethAddress }}
+          <div :class="['flex', 'flex-row', 'items-center', 'gap-1']">
+            <div
+              :class="[
+                'text-base',
+                'text-likecoin-votecolor-yes',
+                'overflow-hidden',
+                'text-ellipsis',
+              ]"
+            >
+              {{ ethAddress }}
+            </div>
+            <button
+              v-if="ethAddress != null"
+              type="button"
+              @click="handleEthAddressCopyClick(ethAddress)"
+            >
+              <FontAwesomeIcon :class="['text-base']" icon="copy" />
+            </button>
           </div>
         </div>
       </div>
@@ -185,6 +203,16 @@ export default Vue.extend({
           {}
         );
       this.handleLikeCoinWalletConnection(connection);
+    },
+
+    async handleCosmosAddressCopyClick(address: string) {
+      await window.navigator.clipboard.writeText(address);
+      alert('Cosmos address is copied to clipboard!');
+    },
+
+    async handleEthAddressCopyClick(address: string) {
+      await window.navigator.clipboard.writeText(address);
+      alert('Ethereum address is copied to clipboard!');
     },
 
     handleConnectTargetWalletClick() {

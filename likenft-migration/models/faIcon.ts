@@ -7,7 +7,9 @@ const unicodeMapping = {
   'circle-check': '\uF058',
   'circle-exclamation': '\uF06A',
   'link-simple': '\uE1CD',
+  'chevron-down': '\uF078',
   'triangle-exclamation': '\uF071',
+  copy: '\uF0C5',
 } as const;
 
 export default unicodeMapping;

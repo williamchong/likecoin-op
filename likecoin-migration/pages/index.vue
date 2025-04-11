@@ -132,6 +132,7 @@
           <template #current>
             <SectionMigrationProgress
               v-if="migration != null"
+              :enable-retry="!isMigratedThroughStep"
               :estimated-balance="estimatedBalance"
               :migration-status="migration.status"
               :cosmos-tx-hash="migration.cosmos_tx_hash"
@@ -156,6 +157,7 @@
           <template #past>
             <SectionMigrationProgress
               v-if="migration != null"
+              :enable-retry="!isMigratedThroughStep"
               :estimated-balance="estimatedBalance"
               :migration-status="migration.status"
               :cosmos-tx-hash="migration.cosmos_tx_hash"
@@ -278,6 +280,7 @@ import {
 
 interface Data {
   isTransitioning: boolean;
+  isMigratedThroughStep: boolean;
 
   currentStep: StepState;
 
@@ -288,6 +291,7 @@ export default Vue.extend({
   data(): Data {
     return {
       isTransitioning: false,
+      isMigratedThroughStep: false,
 
       currentStep: { step: 1 },
 
@@ -705,6 +709,7 @@ export default Vue.extend({
         evm_signature: signature,
         evm_signature_message: signatureMessage,
       });
+      this.isMigratedThroughStep = true;
       return this._resolveMigration(prev, migration);
     },
 
