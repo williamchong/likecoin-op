@@ -69,6 +69,20 @@ func DoMintNFTAction(
 		return nil, doMintNFTActionFailed(db, a, err)
 	}
 
+	cosmosClass, err := m.QueryClassByClassId(cosmos.QueryClassByClassIdRequest{
+		ClassId: newClassAction.CosmosClassId,
+	})
+	if err != nil {
+		return nil, doMintNFTActionFailed(db, a, err)
+	}
+	iscnDataResponse, err := m.GetISCNRecord(
+		cosmosClass.Class.Data.Parent.IscnIdPrefix,
+		cosmosClass.Class.Data.Parent.IscnVersionAtMint,
+	)
+	if err != nil {
+		return nil, doMintNFTActionFailed(db, a, err)
+	}
+
 	matches := nftIdRegex.FindStringSubmatch(a.CosmosNFTId)
 
 	var (
@@ -83,7 +97,16 @@ func DoMintNFTAction(
 		if err != nil {
 			return nil, doMintNFTActionFailed(db, a, err)
 		}
-		metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFT(cosmosNFT.NFT))
+		metadataOverride, err := m.QueryNFTExternalMetadata(cosmosNFT.NFT)
+		if err != nil {
+			return nil, doMintNFTActionFailed(db, a, err)
+		}
+		metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFTAndClassAndISCNData(
+			cosmosNFT.NFT,
+			cosmosClass.Class,
+			iscnDataResponse,
+			metadataOverride,
+		))
 		if err != nil {
 			return nil, doMintNFTActionFailed(db, a, err)
 		}
@@ -115,7 +138,16 @@ func DoMintNFTAction(
 			if err != nil {
 				return nil, doMintNFTActionFailed(db, a, err)
 			}
-			metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFT(cosmosNFT.NFT))
+			metadataOverride, err := m.QueryNFTExternalMetadata(cosmosNFT.NFT)
+			if err != nil {
+				return nil, doMintNFTActionFailed(db, a, err)
+			}
+			metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFTAndClassAndISCNData(
+				cosmosNFT.NFT,
+				cosmosClass.Class,
+				iscnDataResponse,
+				metadataOverride,
+			))
 			if err != nil {
 				return nil, doMintNFTActionFailed(db, a, err)
 			}
@@ -158,8 +190,16 @@ func DoMintNFTAction(
 					metadataStr := "{}"
 					if cosmosNFTIdx != -1 {
 						cosmosNFT := cosmosNFTs.NFTs[cosmosNFTIdx]
-						metadata := evm.ERC721MetadataFromCosmosNFT(&cosmosNFT)
-						metadataBytes, err := json.Marshal(metadata)
+						metadataOverride, err := m.QueryNFTExternalMetadata(&cosmosNFT)
+						if err != nil {
+							return nil, doMintNFTActionFailed(db, a, err)
+						}
+						metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFTAndClassAndISCNData(
+							&cosmosNFT,
+							cosmosClass.Class,
+							iscnDataResponse,
+							metadataOverride,
+						))
 						if err != nil {
 							return nil, doMintNFTActionFailed(db, a, err)
 						}
