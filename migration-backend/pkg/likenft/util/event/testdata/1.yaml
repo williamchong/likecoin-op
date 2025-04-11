@@ -1,0 +1,29 @@
+name: 1
+events: |
+  [
+    {
+      "action": "/cosmos.nft.v1beta1.MsgSend",
+      "class_id": "likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83",
+      "nft_id": "moneyverse-0017",
+      "sender": "like13f4glvg80zvfrrs7utft5p68pct4mcq7t5atf6",
+      "receiver": "like1x6hypavcv4anyautde689sas5lcfhv3j8ptal9",
+      "tx_hash": "5A093515B4EEE4242BDD3166BB7A3D222E0592AF80F1F207451024187D5E2D9A",
+      "timestamp": "2022-12-09T05:33:46Z",
+      "memo": "謝謝不問回報訂閱。你幫我回應了「不付費也能看，我為甚麼要訂閱」那條 FAQ。 - 重建. 香港. 2022 冬"
+    },
+    {
+      "action": "new_class",
+      "class_id": "likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83",
+      "nft_id": "",
+      "sender": "like13f4glvg80zvfrrs7utft5p68pct4mcq7t5atf6",
+      "receiver": "",
+      "tx_hash": "A6CF7E723C4D3F10D5F6D4642E9DC1259CF0A8B51D1A7F30171632F50D79A473",
+      "timestamp": "2022-12-05T05:01:15Z",
+      "memo": ""
+    }
+  ]
+expected: |-
+  _migration
+
+  謝謝不問回報訂閱。你幫我回應了「不付費也能看，我為甚麼要訂閱」那條 FAQ。 - 重建. 香港. 2022 冬
+  Tx: 5A093515B4EEE4242BDD3166BB7A3D222E0592AF80F1F207451024187D5E2D9A

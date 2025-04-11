@@ -50,7 +50,7 @@ var migrateClassCmd = &cobra.Command{
 			panic(err)
 		}
 
-		likenftClient := cosmos.NewLikeNFTCosmosClient(envCfg.CosmosNodeUrl)
+		likenftClient := cosmos.NewLikeNFTCosmosClient(envCfg.CosmosNodeUrl, envCfg.CosmosNftEventsIgnoreToList)
 		likecoinAPI := likecoin_api.NewLikecoinAPI(envCfg.LikecoinAPIUrlBase)
 
 		ethClient, err := ethclient.Dial(envCfg.EthNetworkPublicRPCURL)

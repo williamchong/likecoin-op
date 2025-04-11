@@ -28,7 +28,7 @@ var initMigration = &cobra.Command{
 		}
 
 		cosmosAPI := api.NewCosmosAPI(envCfg.CosmosNodeUrl)
-		likenftClient := cosmos.NewLikeNFTCosmosClient(envCfg.CosmosNodeUrl)
+		likenftClient := cosmos.NewLikeNFTCosmosClient(envCfg.CosmosNodeUrl, envCfg.CosmosNftEventsIgnoreToList)
 
 		cosmosAddress := args[0]
 
