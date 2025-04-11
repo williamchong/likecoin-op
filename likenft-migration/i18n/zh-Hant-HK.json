@@ -1,50 +1,50 @@
 {
   "app": {
-    "title": "Liker ID and LikeNFT 轉換 Transfer"
+    "title": "Liker ID 及 LikeNFT 轉移"
   },
   "migrate": {
-    "classes": "",
-    "connect-cosmos-wallet": "",
-    "connect-evm-wallet": "",
-    "cosmos-wallet-address": "",
-    "evm-wallet-address": "",
-    "liker-id": "",
-    "migrate-assets": "",
-    "migrate-likerid": "",
-    "nfts": "",
-    "preview": "",
-    "reload-preview": "",
-    "result": ""
+    "classes": "作品",
+    "connect-cosmos-wallet": "連接 Cosmos 錢包",
+    "connect-evm-wallet": "連接 EVM 錢包",
+    "cosmos-wallet-address": "Cosmos 錢包地址：{cosmosWalletAddress}",
+    "evm-wallet-address": "EVM 錢包地址：{evmWalletAddress}",
+    "liker-id": "Liker ID：{likerID}",
+    "migrate-assets": "轉移資產",
+    "migrate-likerid": "轉移 Liker ID",
+    "nfts": "NFTs",
+    "preview": "轉移預覽",
+    "reload-preview": "重新載入預覽",
+    "result": "轉移結果"
   },
   "section": {
     "asset-preview": {
-      "confirm-migration": "Confirm Migration",
-      "confirm-retry": "Confirm Retry",
+      "confirm-migration": "確認轉移",
+      "confirm-retry": "確認重試",
       "table": {
         "data": {
           "type": {
-            "book": "Books",
-            "class": "Publishing"
+            "book": "作品",
+            "class": "出版"
           }
         },
         "filter": {
-          "all-items": "All Items ({count})",
-          "books": "Books ({count})",
-          "publishing": "Publishing ({count})"
+          "all-items": "所有項目 ({count})",
+          "books": "作品 ({count})",
+          "publishing": "出版 ({count})"
         },
         "header": {
-          "cover": "Cover",
-          "status": "Status",
-          "title": "Book Title",
+          "cover": "封面",
+          "status": "狀態",
+          "title": "作品名稱",
           "tx-hash": "Transaction Hash",
-          "type": "Type"
+          "type": "類別"
         }
       },
-      "tooltip": "This is a snapshot taken on {date} [{height}], if you found there is something missing or misalign with your current NFT wallet, please contact us for more assistant."
+      "tooltip": "此為 {date} [{height}] 的快照，如發現有任何遺漏或與您目前的 NFT 錢包不符，請聯絡我們尋求協助。"
     },
     "confirm-by-signing": {
       "retry": "重試",
-      "title": "確認 & 簽署"
+      "title": "簽署確認"
     },
     "introduction": {
       "confirm": "確認",
@@ -52,47 +52,47 @@
       "title": "簡介"
     },
     "migration-result": {
-      "failed-message": "There are {count} failed migrations, please retry or contact us for more assistant",
-      "in-progress": "(In Progress)",
-      "retry": "Retry",
+      "failed-message": "有 {count} 個轉移失敗，請重試或聯絡我們尋求協助",
+      "in-progress": "(進行中)",
+      "retry": "重試",
       "table": {
         "data": {
           "status": {
-            "completed": "Success",
-            "failed": "Failed",
-            "in-progress": "In Progress",
-            "init": "Pending"
+            "completed": "成功",
+            "failed": "失敗",
+            "in-progress": "進行中",
+            "init": "等待中"
           },
           "type": {
-            "book": "Books",
-            "class": "Publishing"
+            "book": "作品",
+            "class": "出版"
           }
         },
         "filter": {
-          "all-items": "All Items ({count})",
-          "completed": "Completed ({count})",
-          "failed": "Failed ({count})",
-          "in-progress": "In Progress ({count})",
-          "init": "Pending ({count})"
+          "all-items": "所有項目 ({count})",
+          "completed": "已完成 ({count})",
+          "failed": "失敗 ({count})",
+          "in-progress": "進行中 ({count})",
+          "init": "等待中 ({count})"
         },
         "header": {
-          "cover": "Cover",
-          "status": "Status",
-          "title": "Book Title",
+          "cover": "封面",
+          "status": "狀態",
+          "title": "作品名稱",
           "tx-hash": "Transaction Hash",
-          "type": "Type"
+          "type": "類別"
         }
       },
-      "title": "Migration Results"
+      "title": "轉移結果"
     },
     "start-migration": {
-      "title": "Start Migration"
+      "title": "開始轉移"
     },
     "wallet-connect": {
-      "connect-likecoin-wallet": "連接LikeCoin錢包",
+      "connect-likecoin-wallet": "連接 LikeCoin 錢包",
       "connect-migration-wallet": "連接對應錢包",
-      "cosmos-address": "Cosmos Address",
-      "eth-address": "ETH Address",
+      "cosmos-address": "Cosmos 地址",
+      "eth-address": "ETH 地址",
       "likecoin-wallet": "LikeCoin 錢包",
       "liker-id": "Liker ID",
       "migration-wallet": "轉換對應錢包",
