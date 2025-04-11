@@ -186,6 +186,8 @@ iscndataresponse: |
       }
     ]
   }
+metadataoverride: |
+  {"image":"https://nft-static-1.ckxpress.com/2-sliver-0212.webp"}
 erc721metadata: |
   {
     "symbol": "BOOK",
