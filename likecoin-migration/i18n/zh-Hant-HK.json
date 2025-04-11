@@ -1,57 +1,57 @@
 {
   "app": {
-    "title": "LikeCoin chain to Optimism"
+    "title": "LikeCoin 區塊鏈 to Optimism"
   },
   "section": {
     "confirm-by-signing": {
-      "message": "Please review the sign message from your ETH wallet",
-      "retry": "Retry",
-      "title": "Confirm by signing"
+      "message": "請檢查您 ETH 錢包的簽署訊息",
+      "retry": "重試",
+      "title": "確認 & 簽署"
     },
     "connect-wallet": {
-      "title": "Connect Wallet"
+      "title": "連接錢包"
     },
     "introduction": {
-      "confirm": "Confirm",
+      "confirm": "確認",
       "text": "LikeCoin 已經升級 v3，同步遷移至以太坊 OP Mainnet。請盡早升級你於 v2 的 LikeCoin、電子書及 Writing NFT，以免被遺落。",
-      "title": "Introduction"
+      "title": "簡介"
     },
     "migration-completed": {
-      "title": "Migration Completed"
+      "title": "轉換完成"
     },
     "migration-progress": {
-      "balance-remaining-message": "There are still balance left, do you want to restart the migration?",
+      "balance-remaining-message": "尚有餘額，您要重新開始轉換嗎？",
       "minting": {
-        "description": "Transferring equivalent tokens on OP network",
-        "title": "Minting"
+        "description": "在 OP 網絡上轉移等值的代幣",
+        "title": "鑄造中"
       },
       "pending": {
-        "description": "Request received and pending signature",
-        "title": "Pending"
+        "description": "已收到請求，等待簽署",
+        "title": "等待中"
       },
       "receiving": {
-        "description": "Verifying balance at migration contract",
-        "title": "Receiving"
+        "description": "驗證轉換合約中的餘額",
+        "title": "接收中"
       },
-      "restart": "Restart",
-      "retry": "Retry",
-      "status": "Status",
-      "title": "Migration in Progress",
+      "restart": "重新開始",
+      "retry": "重試",
+      "status": "狀態",
+      "title": "轉換進度",
       "verified": {
-        "description": "Migration completed on Optimism chain",
-        "title": "Verified"
+        "description": "已在 Optimism 鏈上完成轉換",
+        "title": "已驗證"
       }
     },
     "wallet-connect": {
-      "connect-likecoin-wallet": "Connect LikeCoin Wallet",
-      "connect-migration-wallet": "Connect Target Wallet",
-      "cosmos-address": "Cosmos Address",
-      "current-balance": "Current Balance",
-      "estimated-balance": "Estimated Balance",
-      "eth-address": "ETH Address",
-      "likecoin-wallet": "LikeCoin Wallet",
+      "connect-likecoin-wallet": "連接 LikeCoin 錢包",
+      "connect-migration-wallet": "連接對應錢包",
+      "cosmos-address": "Cosmos 地址",
+      "current-balance": "目前餘額",
+      "estimated-balance": "預估餘額",
+      "eth-address": "ETH 地址",
+      "likecoin-wallet": "LikeCoin 錢包",
       "liker-id": "Liker ID",
-      "migration-wallet": "Migration Wallet"
+      "migration-wallet": "轉換對應錢包"
     }
   }
 }
