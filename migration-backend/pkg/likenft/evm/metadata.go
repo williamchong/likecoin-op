@@ -2,6 +2,7 @@ package evm
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
@@ -17,6 +18,57 @@ func ContractLevelMetadataFromCosmosClass(c *cosmosmodel.Class) *evmmodel.Contra
 			Description:  c.Description,
 			Image:        c.Data.Metadata.Image,
 			ExternalLink: c.Data.Metadata.ExternalURL,
+		},
+	}
+}
+
+func ContractLevelMetadataFromCosmosClassAndISCN(c *cosmosmodel.Class, iscn *cosmosmodel.ISCN) *evmmodel.ContractLevelMetadata {
+	iscnRecord := iscn.Records[0].Data
+
+	attributes := make([]evmmodel.ContractLevelMetadataAttributes, 0)
+
+	if iscnRecord.ContentMetadata.Author != nil {
+		author := iscnRecord.ContentMetadata.Author.Name()
+		attributes = append(attributes, evmmodel.ContractLevelMetadataAttributes{
+			TraitType: "Author",
+			Value:     author,
+		})
+	}
+
+	if iscnRecord.ContentMetadata.Publisher != "" {
+		attributes = append(attributes, evmmodel.ContractLevelMetadataAttributes{
+			TraitType: "Publisher",
+			Value:     iscnRecord.ContentMetadata.Publisher,
+		})
+	}
+
+	if iscnRecord.ContentMetadata.DatePublished != nil && !iscnRecord.ContentMetadata.DatePublished.IsEmpty() {
+		attributes = append(attributes, evmmodel.ContractLevelMetadataAttributes{
+			TraitType:   "Publish Date",
+			DisplayType: "date",
+			Value:       iscnRecord.ContentMetadata.DatePublished.GetEpochSeconds(),
+		})
+	}
+
+	return &evmmodel.ContractLevelMetadata{
+		ContractLevelMetadataOpenSea: evmmodel.ContractLevelMetadataOpenSea{
+			Name:         iscnRecord.ContentMetadata.Name,
+			Symbol:       c.Symbol,
+			Description:  iscnRecord.ContentMetadata.Description,
+			Image:        c.Data.Metadata.Image,
+			ExternalLink: iscnRecord.ContentMetadata.Url,
+		},
+		MetadataAdditional: evmmodel.MetadataAdditional{
+			Message:                      c.Data.Metadata.Message,
+			NftMetaCollectionId:          c.Data.Metadata.NFTMetaCollectionID,
+			NftMetaCollectionName:        c.Data.Metadata.NFTMetaCollectionName,
+			NftMetaCollectionDescription: c.Data.Metadata.GetNFTMetaCollectionDescription(),
+		},
+		MetadataISCN: evmmodel.MakeMetadataISCNFromCosmosISCN(iscn),
+		Attributes:   attributes,
+		LikeCoin: &evmmodel.ContractLevelMetadataLikeCoin{
+			ISCNIdPrefix: c.Data.Parent.IscnIdPrefix,
+			ClassId:      c.Id,
 		},
 	}
 }
@@ -41,6 +93,64 @@ func ERC721MetadataFromCosmosNFT(c *cosmosmodel.NFT) *evmmodel.ERC721Metadata {
 			Description: c.Data.Metadata.Description,
 			Name:        c.Data.Metadata.Name,
 			Attributes:  sortERC721MetadataAttributes(makeERC721MetadataAttribute("", c.Data.Metadata.Attributes)),
+		},
+	}
+}
+
+func ERC721OpenSeaMetadataFromCosmosNFTMetadata(m *cosmosmodel.NFTMetadata) *evmmodel.ERC721MetadataOpenSea {
+	return &evmmodel.ERC721MetadataOpenSea{
+		Image:       m.Image,
+		ExternalUrl: m.ExternalUrl,
+		Description: m.Description,
+		Name:        m.Name,
+		Attributes:  sortERC721MetadataAttributes(makeERC721MetadataAttribute("", m.Attributes)),
+	}
+}
+
+func ERC721MetadataFromCosmosNFTAndClassAndISCNData(
+	n *cosmosmodel.NFT,
+	c *cosmosmodel.Class,
+	iscn *cosmosmodel.ISCN,
+	cosmosMetadataOverride *cosmosmodel.NFTMetadata,
+) *evmmodel.ERC721Metadata {
+	iscnRecord := iscn.Records[0].Data
+
+	iscnAttributes := makeERC721MetadataAttributeFromISCN(iscn)
+
+	var metadataOverride *evmmodel.ERC721MetadataOpenSea
+	if cosmosMetadataOverride != nil {
+		metadataOverride = ERC721OpenSeaMetadataFromCosmosNFTMetadata(cosmosMetadataOverride)
+	}
+
+	return &evmmodel.ERC721Metadata{
+		ERC721MetadataContractLevel: evmmodel.ERC721MetadataContractLevel{
+			Symbol: c.Symbol,
+		},
+		ERC721MetadataOpenSea: evmmodel.OverrideERC721MetadataOpenSea(
+			evmmodel.ERC721MetadataOpenSea{
+				Image:       c.Data.Metadata.Image,
+				ExternalUrl: iscnRecord.ContentMetadata.Url,
+				Description: iscnRecord.ContentMetadata.Description,
+				Name:        iscnRecord.ContentMetadata.Name,
+				Attributes: sortERC721MetadataAttributes(
+					slices.Concat(
+						makeERC721MetadataAttribute("", n.Data.Metadata.Attributes),
+						iscnAttributes,
+					),
+				),
+				AnimationUrl: n.Data.Metadata.AnimationUrl,
+			}, metadataOverride),
+		MetadataAdditional: evmmodel.MetadataAdditional{
+			Message:                      c.Data.Metadata.Message,
+			NftMetaCollectionId:          c.Data.Metadata.NFTMetaCollectionID,
+			NftMetaCollectionName:        c.Data.Metadata.NFTMetaCollectionName,
+			NftMetaCollectionDescription: c.Data.Metadata.GetNFTMetaCollectionDescription(),
+		},
+		MetadataISCN: evmmodel.MakeMetadataISCNFromCosmosISCN(iscn),
+		LikeCoin: &evmmodel.ERC721MetadataLikeCoin{
+			ISCNIdPrefix: c.Data.Parent.IscnIdPrefix,
+			ClassId:      n.ClassId,
+			NFTId:        n.Id,
 		},
 	}
 }
@@ -79,6 +189,36 @@ func makeERC721MetadataAttribute(prefix string, m map[string]interface{}) []evmm
 	}
 
 	return attrs
+}
+
+func makeERC721MetadataAttributeFromISCN(iscn *cosmosmodel.ISCN) []evmmodel.ERC721MetadataAttribute {
+	iscnRecord := iscn.Records[0].Data
+
+	attributes := make([]evmmodel.ERC721MetadataAttribute, 0)
+
+	if iscnRecord.ContentMetadata.Author != nil {
+		author := iscnRecord.ContentMetadata.Author.Name()
+		attributes = append(attributes, evmmodel.ERC721MetadataAttribute{
+			TraitType: "Author",
+			Value:     author,
+		})
+	}
+
+	if iscnRecord.ContentMetadata.Publisher != "" {
+		attributes = append(attributes, evmmodel.ERC721MetadataAttribute{
+			TraitType: "Publisher",
+			Value:     iscnRecord.ContentMetadata.Publisher,
+		})
+	}
+
+	if iscnRecord.ContentMetadata.DatePublished != nil && !iscnRecord.ContentMetadata.DatePublished.IsEmpty() {
+		attributes = append(attributes, evmmodel.ERC721MetadataAttribute{
+			TraitType:   "Publish Date",
+			DisplayType: &evmmodel.ERC721MetadataAttributeDisplayTypeDate,
+			Value:       iscnRecord.ContentMetadata.DatePublished.GetEpochSeconds(),
+		})
+	}
+	return attributes
 }
 
 func sortERC721MetadataAttributes(attributes []evmmodel.ERC721MetadataAttribute) []evmmodel.ERC721MetadataAttribute {
