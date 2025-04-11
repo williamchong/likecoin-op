@@ -1,0 +1,122 @@
+name: class id = likenft1xmcmnq3j5v342ua2uply7xmvppwgy9z6s9kdlgw4e4rx0mxh9a3qcwy25r
+cosmosclassresponse: |
+  {
+    "id": "likenft1xmcmnq3j5v342ua2uply7xmvppwgy9z6s9kdlgw4e4rx0mxh9a3qcwy25r",
+    "name": "Writing NFT - 回應高重建〈無大台出版實驗的初步構想〉",
+    "description": "討論 Kevin kelly 的成書、原生性正本概念在 NFT 可交換的特性下，如何實踐出版。",
+    "symbol": "WRITING",
+    "uri": "https://api.like.co/likernft/metadata?iscn_id=iscn%3A%2F%2Flikecoin-chain%2F0OefVvJvCmkBWkFM4Z8qyg37nED4ISfB4zYiX7-fh3w%2F1",
+    "uri_hash": "",
+    "config": {
+      "burnable": false,
+      "max_supply": "0",
+      "blind_box_config": null
+    },
+    "metadata": {
+      "image": "ar://V_qaF16YCH8B73APFt0txsZQjgT1w7ZUK5Hj7hrIvE8",
+      "message": "這篇文作為前期思想準備，後共構出高重建先生於2022年的去中心出版實驗。歡迎一同撿拾技術文明的彩霞，吹響屬於創作者的號角。",
+      "external_url": "https://matters.news/@mashbean/303521-回應高重建-無大台出版實驗的初步構想-bafyreifm77yqxz4saq772qmucgkl26l7pm37av5zhwtl4i7jmh7ctgsrtq",
+      "nft_meta_collection_id": "likerland_writing_nft",
+      "nft_meta_collection_name": "Writing NFT",
+      "nft_meta_collection_descrption": "Writing NFT by Liker Land"
+    },
+    "parent": {
+      "type": "ISCN",
+      "iscn_id_prefix": "iscn://likecoin-chain/0OefVvJvCmkBWkFM4Z8qyg37nED4ISfB4zYiX7-fh3w",
+      "account": ""
+    },
+    "created_at": "2022-11-23T05:35:34Z",
+    "latest_price": 1024003200000,
+    "price_updated_at": "2023-07-19T16:07:38Z",
+    "owner": "like1uve0ftw0fp25sd3m5ls956nu02k44afeegvfqe",
+    "nft_owned_count": 1,
+    "nft_last_owned_at": "2023-02-03T07:13:56Z",
+    "last_owned_nft_id": "writing-0c0817b9-4690-4bae-bd88-226a8d97e179"
+  }
+iscndataresponse: |
+  {
+    "owner": "like1uve0ftw0fp25sd3m5ls956nu02k44afeegvfqe",
+    "latest_version": "1",
+    "records": [
+      {
+        "ipld": "baguqeerachi76b4aa7d56olfxoxa2nhalgbjmssgzlt73jfzws6ztwrh55ua",
+        "data": {
+          "@context": {
+            "@vocab": "http://iscn.io/",
+            "contentMetadata": { "@context": null },
+            "recordParentIPLD": { "@container": "@index" },
+            "stakeholders": {
+              "@context": {
+                "@vocab": "http://schema.org/",
+                "contributionType": "http://iscn.io/contributionType",
+                "entity": "http://iscn.io/entity",
+                "footprint": "http://iscn.io/footprint",
+                "rewardProportion": "http://iscn.io/rewardProportion"
+              }
+            }
+          },
+          "@id": "iscn://likecoin-chain/0OefVvJvCmkBWkFM4Z8qyg37nED4ISfB4zYiX7-fh3w/1",
+          "@type": "Record",
+          "contentFingerprints": [
+            "hash://sha256/bafyreifm77yqxz4saq772qmucgkl26l7pm37av5zhwtl4i7jmh7ctgsrtq",
+            "ipfs://QmS3oX3rVq8Ti3agNvVxEjysTua7pjdvQwDUNdsAzSPJz7"
+          ],
+          "contentMetadata": {
+            "@context": "http://schema.org/",
+            "@type": "Article",
+            "description": "討論 Kevin kelly 的成書、原生性正本概念在 NFT 可交換的特性下，如何實踐出版。",
+            "keywords": "閱讀,出版,NFT review",
+            "name": "回應高重建〈無大台出版實驗的初步構想〉",
+            "url": "https://matters.news/@mashbean/303521-回應高重建-無大台出版實驗的初步構想-bafyreifm77yqxz4saq772qmucgkl26l7pm37av5zhwtl4i7jmh7ctgsrtq",
+            "version": 1
+          },
+          "recordNotes": "like1uve0ftw0fp25sd3m5ls956nu02k44afeegvfqe",
+          "recordTimestamp": "2022-11-22T15:32:36+00:00",
+          "recordVersion": 1,
+          "stakeholders": [
+            {
+              "contributionType": "http://schema.org/author",
+              "entity": {
+                "@id": "did:cosmos:cosmos1uve0ftw0fp25sd3m5ls956nu02k44afe25strz",
+                "name": "豆泥 (@mashbean)"
+              },
+              "rewardProportion": 100
+            },
+            {
+              "contributionType": "http://schema.org/publisher",
+              "entity": { "name": "Matters.News" },
+              "rewardProportion": 0
+            }
+          ]
+        }
+      }
+    ]
+  }
+contractlevelmetadata: |
+  {
+    "@context": "http://schema.org/",
+    "@type": "Article",
+    "attributes": [],
+    "contentFingerprints": [
+      "hash://sha256/bafyreifm77yqxz4saq772qmucgkl26l7pm37av5zhwtl4i7jmh7ctgsrtq",
+      "ipfs://QmS3oX3rVq8Ti3agNvVxEjysTua7pjdvQwDUNdsAzSPJz7"
+    ],
+    "dateCreated": "2022-11-22T15:32:36+00:00",
+    "description": "討論 Kevin kelly 的成書、原生性正本概念在 NFT 可交換的特性下，如何實踐出版。",
+    "external_link":"https://matters.news/@mashbean/303521-回應高重建-無大台出版實驗的初步構想-bafyreifm77yqxz4saq772qmucgkl26l7pm37av5zhwtl4i7jmh7ctgsrtq",
+    "image":"ar://V_qaF16YCH8B73APFt0txsZQjgT1w7ZUK5Hj7hrIvE8",
+    "keywords": "閱讀,出版,NFT review",
+    "likecoin": {
+      "classId": "likenft1xmcmnq3j5v342ua2uply7xmvppwgy9z6s9kdlgw4e4rx0mxh9a3qcwy25r",
+      "iscnIdPrefix": "iscn://likecoin-chain/0OefVvJvCmkBWkFM4Z8qyg37nED4ISfB4zYiX7-fh3w"
+    },
+    "message": "這篇文作為前期思想準備，後共構出高重建先生於2022年的去中心出版實驗。歡迎一同撿拾技術文明的彩霞，吹響屬於創作者的號角。",
+    "name": "Writing NFT - 回應高重建〈無大台出版實驗的初步構想〉",
+    "nft_meta_collection_descrption": "Writing NFT by Liker Land",
+    "nft_meta_collection_id": "likerland_writing_nft",
+    "nft_meta_collection_name": "Writing NFT",
+    "symbol": "WRITING",
+    "recordNotes": "like1uve0ftw0fp25sd3m5ls956nu02k44afeegvfqe",
+    "url": "https://matters.news/@mashbean/303521-回應高重建-無大台出版實驗的初步構想-bafyreifm77yqxz4saq772qmucgkl26l7pm37av5zhwtl4i7jmh7ctgsrtq",
+    "version": 1
+  }
