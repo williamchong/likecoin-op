@@ -29,7 +29,10 @@ var getISCNRecordCmd = &cobra.Command{
 		ctx := cmd.Context()
 		envCfg := ctx.Value(config.ContextKey).(*config.EnvConfig)
 
-		likenftClient := cosmos.NewLikeNFTCosmosClient(envCfg.CosmosNodeUrl)
+		likenftClient := cosmos.NewLikeNFTCosmosClient(
+			envCfg.CosmosNodeUrl,
+			envCfg.CosmosNftEventsIgnoreToList,
+		)
 
 		iscnRecord, err := likenftClient.GetISCNRecord(iscnIDPrefix, version)
 
