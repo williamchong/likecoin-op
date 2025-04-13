@@ -140,6 +140,22 @@ iscndataresponse: |
       }
     ]
   }
+royaltyconfig: |
+  {
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like13f4glvg80zvfrrs7utft5p68pct4mcq7t5atf6",
+          "weight": "975000"
+        },
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "25000"
+        }
+      ]
+    }
+  }
 contractlevelmetadata: |
   {
     "name": "每天買一百元比特幣：我的定額定投四年戰績實錄",
@@ -197,5 +213,18 @@ contractlevelmetadata: |
     "likecoin": {
       "iscnIdPrefix": "iscn://likecoin-chain/Cb-mL2bZeCffDeEmiZlaalJrYqGwOILYCT_WJ3kDmDg",
       "classId": "likenft1dpegnjnklnh5g66nn06gz64wv0ec6k04f4v5lx69qlv6xlh493eqdq454j"
+    },
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like13f4glvg80zvfrrs7utft5p68pct4mcq7t5atf6",
+          "weight": "975000"
+        },
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "25000"
+        }
+      ]
     }
   }

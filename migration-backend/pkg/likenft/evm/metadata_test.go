@@ -36,6 +36,7 @@ func TestContractLevelMetadataFromCosmosClassAndISCN(t *testing.T) {
 				Name                  string `json:"name"`
 				CosmosClassResponse   string `json:"cosmosclassresponse"`
 				ISCNDataResponse      string `json:"iscndataresponse"`
+				RoyaltyConfig         string `json:"royaltyconfig"`
 				ContractLevelMetadata string `json:"contractlevelmetadata"`
 			}
 
@@ -55,6 +56,9 @@ func TestContractLevelMetadataFromCosmosClassAndISCN(t *testing.T) {
 						Class *cosmosmodel.Class `json:"class"`
 					}
 					var iscn = cosmosmodel.ISCN{}
+					var royaltyConfig struct {
+						RoyaltyConfig *cosmosmodel.RoyaltyConfig `json:"royalty_config"`
+					}
 					err := json.Unmarshal([]byte(testCase.CosmosClassResponse), &cosmosClass)
 					if err != nil {
 						panic(err)
@@ -63,8 +67,16 @@ func TestContractLevelMetadataFromCosmosClassAndISCN(t *testing.T) {
 					if err != nil {
 						panic(err)
 					}
+					err = json.Unmarshal([]byte(testCase.RoyaltyConfig), &royaltyConfig)
+					if err != nil {
+						panic(err)
+					}
 
-					contractLevelMetadata := evm.ContractLevelMetadataFromCosmosClassAndISCN(cosmosClass.Class, &iscn)
+					contractLevelMetadata := evm.ContractLevelMetadataFromCosmosClassAndISCN(
+						cosmosClass.Class,
+						&iscn,
+						royaltyConfig.RoyaltyConfig,
+					)
 					contractLevelMetadataStr, err := json.Marshal(contractLevelMetadata)
 					if err != nil {
 						panic(err)
