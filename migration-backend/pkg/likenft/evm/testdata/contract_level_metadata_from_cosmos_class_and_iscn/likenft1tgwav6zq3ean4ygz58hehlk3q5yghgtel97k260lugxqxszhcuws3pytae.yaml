@@ -165,6 +165,26 @@ iscndataresponse: |
       }
     ]
   }
+royaltyconfig: |
+  {
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "47560"
+        },
+        {
+          "account": "like19fqws220rwcmacn5dgt0dtwts8c05ty58mcr3a",
+          "weight": "927439"
+        },
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "25000"
+        }
+      ]
+    }
+  }
 contractlevelmetadata: |
   {
     "name": "時間繁史．啞瓷之光",
@@ -247,5 +267,22 @@ contractlevelmetadata: |
     "likecoin": {
       "iscnIdPrefix": "iscn://likecoin-chain/o91-umWGStNh5Hxdyc-1MsG5__kEhr7VutmJ7u0ZVwY",
       "classId": "likenft1tgwav6zq3ean4ygz58hehlk3q5yghgtel97k260lugxqxszhcuws3pytae"
+    },
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "47560"
+        },
+        {
+          "account": "like19fqws220rwcmacn5dgt0dtwts8c05ty58mcr3a",
+          "weight": "927439"
+        },
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "25000"
+        }
+      ]
     }
   }

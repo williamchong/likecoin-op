@@ -65,6 +65,14 @@ func DoNewClassAction(
 		return nil, doNewClassActionFailed(db, a, err)
 	}
 
+	royaltyConfigs, err := c.QueryRoyaltyConfigsByClassId(cosmos.QueryRoyaltyConfigsByClassIdRequest{
+		ClassId: cosmosClass.Id,
+	})
+
+	if err != nil {
+		return nil, doNewClassActionFailed(db, a, err)
+	}
+
 	initialOwnerAddress := common.HexToAddress(a.InitialOwner)
 	initialMinterAddress := common.HexToAddress(a.InitialMinter)
 	initialUpdaterAddress := common.HexToAddress(a.InitialUpdater)
@@ -80,7 +88,12 @@ func DoNewClassAction(
 		}
 	}
 
-	metadataBytes, err := json.Marshal(evm.ContractLevelMetadataFromCosmosClassAndISCN(cosmosClass, iscnDataResponse))
+	metadataBytes, err := json.Marshal(
+		evm.ContractLevelMetadataFromCosmosClassAndISCN(
+			cosmosClass,
+			iscnDataResponse,
+			&royaltyConfigs.RoyaltyConfig,
+		))
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)
 	}

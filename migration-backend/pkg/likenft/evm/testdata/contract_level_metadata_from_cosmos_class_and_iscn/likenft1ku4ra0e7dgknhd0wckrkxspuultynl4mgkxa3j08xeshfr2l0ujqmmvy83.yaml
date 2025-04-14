@@ -146,6 +146,22 @@ iscndataresponse: |
       }
     ]
   }
+royaltyconfig: |
+  {
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like13f4glvg80zvfrrs7utft5p68pct4mcq7t5atf6",
+          "weight": "975000"
+        },
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "25000"
+        }
+      ]
+    }
+  }
 contractlevelmetadata: |
   {
     "symbol": "BOOK",
@@ -188,5 +204,18 @@ contractlevelmetadata: |
     "likecoin": {
       "iscnIdPrefix": "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c",
       "classId": "likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83"
+    },
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like13f4glvg80zvfrrs7utft5p68pct4mcq7t5atf6",
+          "weight": "975000"
+        },
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "25000"
+        }
+      ]
     }
   }

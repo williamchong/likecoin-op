@@ -1,11 +1,16 @@
 package model
 
+import (
+	cosmosmodel "github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
+)
+
 type ContractLevelMetadata struct {
 	ContractLevelMetadataOpenSea
 	MetadataAdditional
 	MetadataISCN
-	Attributes []ContractLevelMetadataAttributes `json:"attributes"`
-	LikeCoin   *ContractLevelMetadataLikeCoin    `json:"likecoin,omitempty"`
+	Attributes    []ContractLevelMetadataAttributes `json:"attributes"`
+	LikeCoin      *ContractLevelMetadataLikeCoin    `json:"likecoin,omitempty"`
+	RoyaltyConfig *cosmosmodel.RoyaltyConfig        `json:"royalty_config,omitempty"`
 }
 
 // https://eips.ethereum.org/EIPS/eip-7572

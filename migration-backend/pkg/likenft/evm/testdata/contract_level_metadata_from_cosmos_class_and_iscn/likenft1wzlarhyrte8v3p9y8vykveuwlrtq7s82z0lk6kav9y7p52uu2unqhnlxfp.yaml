@@ -144,6 +144,22 @@ iscndataresponse: |
       }
     ]
   }
+royaltyconfig: |
+  {
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like1q9zce0g6cc9zsx6y6e2pnszlmtta7zgkj498gj",
+          "weight": "975000"
+        },
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "25000"
+        }
+      ]
+    }
+  }
 contractlevelmetadata: |
   {
     "name": "信仰Q&A ——青少年信仰疑難問答手冊",
@@ -203,5 +219,18 @@ contractlevelmetadata: |
     "likecoin": {
       "iscnIdPrefix": "iscn://likecoin-chain/EgNp14O2nTpHEmZMS4oOKaOImCml65ZSuWQk_NKp8vU",
       "classId": "likenft1wzlarhyrte8v3p9y8vykveuwlrtq7s82z0lk6kav9y7p52uu2unqhnlxfp"
+    },
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like1q9zce0g6cc9zsx6y6e2pnszlmtta7zgkj498gj",
+          "weight": "975000"
+        },
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "25000"
+        }
+      ]
     }
   }

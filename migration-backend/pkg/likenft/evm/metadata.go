@@ -10,7 +10,11 @@ import (
 	evmmodel "github.com/likecoin/like-migration-backend/pkg/likenft/evm/model"
 )
 
-func ContractLevelMetadataFromCosmosClassAndISCN(c *cosmosmodel.Class, iscn *cosmosmodel.ISCN) *evmmodel.ContractLevelMetadata {
+func ContractLevelMetadataFromCosmosClassAndISCN(
+	c *cosmosmodel.Class,
+	iscn *cosmosmodel.ISCN,
+	royaltyConfig *cosmosmodel.RoyaltyConfig,
+) *evmmodel.ContractLevelMetadata {
 	iscnRecord := iscn.Records[0].Data
 
 	attributes := make([]evmmodel.ContractLevelMetadataAttributes, 0)
@@ -58,6 +62,7 @@ func ContractLevelMetadataFromCosmosClassAndISCN(c *cosmosmodel.Class, iscn *cos
 			ISCNIdPrefix: c.Data.Parent.IscnIdPrefix,
 			ClassId:      c.Id,
 		},
+		RoyaltyConfig: royaltyConfig,
 	}
 }
 
