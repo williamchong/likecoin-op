@@ -134,7 +134,7 @@ export function introductionConfirmed(_: StepStateStep1): StepStateStep2Init {
 }
 
 export function initCosmosConnected(
-  _: Exclude<StepState, StepStateStep1>,
+  _: StepState,
   cosmosAddress: string
 ): StepStateStep2CosmosConnected {
   return {
