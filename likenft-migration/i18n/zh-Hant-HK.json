@@ -20,6 +20,7 @@
     "asset-preview": {
       "confirm-migration": "確認轉移",
       "confirm-retry": "確認重試",
+      "no-data": "沒有資料",
       "table": {
         "data": {
           "type": {

@@ -66,9 +66,46 @@
             padding: ['py-3.5', 'px-4'].join(' '),
           },
         }"
+        :loading="loading"
         :columns="columns"
         :rows="tableData"
       >
+        <template #loading>
+          <div
+            :class="[
+              'absolute',
+              'top-0',
+              'left-0',
+              'w-full',
+              'h-full',
+              'flex',
+              'flex-row',
+              'justify-center',
+              'items-center',
+            ]"
+          >
+            <LoadingIcon />
+          </div>
+        </template>
+        <template #empty>
+          <div
+            :class="[
+              'absolute',
+              'top-0',
+              'left-0',
+              'w-full',
+              'h-full',
+              'flex',
+              'flex-row',
+              'justify-center',
+              'items-center',
+              'bg-white/70',
+              'text-likecoin-darkgrey',
+            ]"
+          >
+            {{ $t('section.asset-preview.no-data') }}
+          </div>
+        </template>
         <template #image-data="{ row }">
           <div :class="['w-full', 'flex', 'flex-row', 'justify-center']">
             <img :src="row.image" :class="['w-6', 'h-6', 'object-cover']" />
@@ -165,6 +202,11 @@ export default Vue.extend({
     UTable,
   },
   props: {
+    loading: {
+      type: Object as PropType<boolean | undefined>,
+      required: false,
+      default: undefined,
+    },
     snapshot: {
       type: Object as PropType<LikeNFTAssetSnapshot>,
       required: true,
