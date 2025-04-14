@@ -37,6 +37,7 @@ docker-images:
 	DOCKER_BUILD_ARGS=--push make -C likenft-indexer docker-image
 	DOCKER_BUILD_ARGS=--push make -C likenft-migration docker-image
 	DOCKER_BUILD_ARGS=--push make -C likecoin-migration docker-image
+	DOCKER_BUILD_ARGS=--push make -C migration-admin docker-image
 
 .PHONY: deploy
 deploy: decrypt-everything
