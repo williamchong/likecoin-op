@@ -69,11 +69,11 @@ ci: check-tidy lint test
 
 .PHONY: create-migration
 create-migration:
-	sql-migrate new $(args)
+	go run github.com/rubenv/sql-migrate/...@latest new $(args)
 
 .PHONY: run-migration
 run-migration:
-	sql-migrate up
+	go run github.com/rubenv/sql-migrate/...@latest up
 
 .PHONY: abigen
 abigen: SHELL=/bin/bash
