@@ -30,6 +30,22 @@ abigen:
 	make -C likenft-indexer abigen
 	make -C migration-backend abigen
 
+.PHONY: start
+start:
+	docker compose up -d
+	docker compose logs -f
+
+.PHONY: stop
+stop:
+	docker compose stop
+	docker compose rm -f
+
+.PHONY: clean-docker-volumes
+clean-docker-volumes:
+	docker compose down
+	docker compose rm -f
+	docker volume ls | grep 'likecoin-30' | awk '{ print $$2 }' | xargs docker volume rm
+
 .PHONY: docker-images
 docker-images:
 	DOCKER_BUILD_ARGS=--push make -C migration-backend docker-image
