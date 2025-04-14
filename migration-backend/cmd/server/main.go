@@ -81,9 +81,19 @@ func main() {
 		envCfg.EthSignerAPIKey,
 	)
 
-	cosmosAPI := api.NewCosmosAPI(envCfg.CosmosNodeUrl)
-	likenftCosmosClient := cosmos.NewLikeNFTCosmosClient(envCfg.CosmosNodeUrl, envCfg.CosmosNftEventsIgnoreToList)
-	likecoinAPI := likecoin_api.NewLikecoinAPI(envCfg.LikecoinAPIUrlBase)
+	cosmosAPI := api.NewCosmosAPI(
+		envCfg.CosmosNodeUrl,
+		time.Duration(envCfg.CosmosNodeHTTPTimeoutSeconds),
+	)
+	likenftCosmosClient := cosmos.NewLikeNFTCosmosClient(
+		envCfg.CosmosNodeUrl,
+		time.Duration(envCfg.CosmosNodeHTTPTimeoutSeconds),
+		envCfg.CosmosNftEventsIgnoreToList,
+	)
+	likecoinAPI := likecoin_api.NewLikecoinAPI(
+		envCfg.LikecoinAPIUrlBase,
+		time.Duration(envCfg.LikecoinAPIHTTPTimeoutSeconds),
+	)
 
 	mainMux.Handle("/healthz", &handler.HealthzHandler{})
 	likeNFTRouter := likenft.LikeNFTRouter{

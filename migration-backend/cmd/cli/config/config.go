@@ -10,6 +10,7 @@ var ContextKey = &contextKey{}
 
 type EnvConfig struct {
 	CosmosNodeUrl                   string `envconfig:"COSMOS_NODE_URL"`
+	CosmosNodeHTTPTimeoutSeconds    int    `envconfig:"COSMOS_NODE_HTTP_TIMEOUT_SECONDS" default:"10"`
 	CosmosNftEventsIgnoreToList     string `envconfig:"COSMOS_NFT_EVENTS_IGNORE_TO_LIST"`
 	CosmosLikeCoinNetworkConfigPath string `envconfig:"COSMOS_LIKECOIN_NETWORK_CONFIG_PATH"`
 	EthSignerBaseUrl                string `envconfig:"ETH_SIGNER_BASE_URL"`
@@ -19,7 +20,7 @@ type EnvConfig struct {
 	EthLikeNFTContractAddress       string `envconfig:"ETH_LIKENFT_CONTRACT_ADDRESS"`
 	DbConnectionStr                 string `envconfig:"DB_CONNECTION_STR"`
 	LikecoinAPIUrlBase              string `envconfig:"LIKECOIN_API_URL_BASE"`
-	LikerlandUrlBase                string `envconfig:"LIKERLAND_URL_BASE"`
+	LikecoinAPIHTTPTimeoutSeconds   int    `envconfig:"LIKECOIN_API_HTTP_TIMEOUT_SECONDS" default:"10"`
 
 	InitialNewClassOwner      string `envconfig:"INITIAL_NEW_CLASS_OWNER"`
 	InitialNewClassMinter     string `envconfig:"INITIAL_NEW_CLASS_MINTER"`

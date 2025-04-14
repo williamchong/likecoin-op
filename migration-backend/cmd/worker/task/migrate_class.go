@@ -44,7 +44,10 @@ func HandleMigrateClassTask(ctx context.Context, t *asynq.Task) error {
 		NodeURL: envCfg.CosmosNodeUrl,
 	}
 
-	likecoinAPI := likecoin_api.NewLikecoinAPI(envCfg.LikecoinAPIUrlBase)
+	likecoinAPI := likecoin_api.NewLikecoinAPI(
+		envCfg.LikecoinAPIUrlBase,
+		time.Duration(envCfg.LikecoinAPIHTTPTimeoutSeconds),
+	)
 
 	ethClient, err := ethclient.Dial(envCfg.EthNetworkPublicRPCURL)
 	if err != nil {

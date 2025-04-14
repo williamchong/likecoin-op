@@ -10,10 +10,13 @@ type CosmosAPI struct {
 	NodeURL    string
 }
 
-func NewCosmosAPI(nodeURL string) *CosmosAPI {
+func NewCosmosAPI(
+	nodeURL string,
+	httpTimeoutSecond time.Duration,
+) *CosmosAPI {
 	return &CosmosAPI{
 		HTTPClient: &http.Client{
-			Timeout: 5 * time.Second,
+			Timeout: httpTimeoutSecond * time.Second,
 		},
 		NodeURL: nodeURL,
 	}

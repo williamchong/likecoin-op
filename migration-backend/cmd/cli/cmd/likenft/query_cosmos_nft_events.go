@@ -3,6 +3,7 @@ package likenft
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -28,6 +29,7 @@ var queryCosmosNFTEventsCmd = &cobra.Command{
 
 		likenftClient := cosmos.NewLikeNFTCosmosClient(
 			envCfg.CosmosNodeUrl,
+			time.Duration(envCfg.CosmosNodeHTTPTimeoutSeconds),
 			envCfg.CosmosNftEventsIgnoreToList,
 		)
 

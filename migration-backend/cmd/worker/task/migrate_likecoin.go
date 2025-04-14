@@ -43,7 +43,10 @@ func HandleMigrateLikeCoinTask(ctx context.Context, t *asynq.Task) error {
 		return err
 	}
 
-	cosmosAPI := api.NewCosmosAPI(envCfg.CosmosNodeUrl)
+	cosmosAPI := api.NewCosmosAPI(
+		envCfg.CosmosNodeUrl,
+		time.Duration(envCfg.CosmosNodeHTTPTimeoutSeconds),
+	)
 
 	cosmosLikeCoinNetworkConfigData, err := os.ReadFile(
 		envCfg.CosmosLikeCoinNetworkConfigPath,
