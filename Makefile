@@ -46,6 +46,11 @@ clean-docker-volumes:
 	docker compose rm -f
 	docker volume ls | grep 'likecoin-30' | awk '{ print $$2 }' | xargs docker volume rm
 
+.PHONY: run-migrations
+run-migrations:
+	docker compose run --rm migration-backend make run-migration
+	docker compose run --rm signer-backend make run-migration
+
 .PHONY: docker-images
 docker-images:
 	DOCKER_BUILD_ARGS=--push make -C migration-backend docker-image
