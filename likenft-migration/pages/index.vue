@@ -330,6 +330,7 @@
 
 <script lang="ts">
 import { StdSignature } from '@keplr-wallet/types';
+import { LikeCoinWalletConnectorMethodType } from '@likecoin/wallet-connector';
 import { isAxiosError } from 'axios';
 import { format as formatDate } from 'date-fns/format';
 import numeral from 'numeral';
@@ -524,6 +525,11 @@ export default Vue.extend({
       }
     },
   },
+
+  async mounted() {
+    await this.handleMaybeLikeCoinWalletConnectedFromRedirect();
+  },
+
   methods: {
     handleIntroductionSectionConfirmClick() {
       if (this.currentStep.step !== 1) {
@@ -532,11 +538,26 @@ export default Vue.extend({
       this.currentStep = introductionConfirmed(this.currentStep);
     },
 
-    async handleLikeCoinWalletConnected(cosmosAddress: string) {
-      if (this.currentStep.step === 1) {
-        return;
+    async handleMaybeLikeCoinWalletConnectedFromRedirect() {
+      const { code, method, ...query } = this.$route.query;
+      if (method && code) {
+        this.$router.replace({ query });
+        const connection = await this.$likeCoinWalletConnector.handleRedirect(
+          method as LikeCoinWalletConnectorMethodType,
+          { code }
+        );
+        if (connection != null) {
+          if ('method' in connection) {
+            const {
+              accounts: [account],
+            } = connection;
+            await this.handleLikeCoinWalletConnected(account.address);
+          }
+        }
       }
+    },
 
+    async handleLikeCoinWalletConnected(cosmosAddress: string) {
       this.currentStep = initCosmosConnected(this.currentStep, cosmosAddress);
       this.currentStep = await this._asyncStateTransition(
         this.currentStep,
