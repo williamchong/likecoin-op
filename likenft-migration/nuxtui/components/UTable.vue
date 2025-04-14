@@ -24,32 +24,46 @@
         </tr>
       </thead>
       <tbody :class="_ui.tbody">
-        <tr
-          v-for="(row, index) in rows"
-          :key="index"
-          :class="[_ui.tr.base, $attrs.onSelect && _ui.tr.active, row?.class]"
-        >
-          <td
-            v-for="(column, subIndex) in columns"
-            :key="subIndex"
-            :class="[
-              _ui.td.base,
-              _ui.td.padding,
-              _ui.td.color,
-              _ui.td.font,
-              _ui.td.size,
-              column?.rowClass,
-              row[column.key]?.class,
-              column.key === 'select' && _ui.checkbox.padding,
-            ]"
+        <template v-if="rows?.length">
+          <tr
+            v-for="(row, index) in rows"
+            :key="index"
+            :class="[_ui.tr.base, $attrs.onSelect && _ui.tr.active, row?.class]"
           >
-            <slot
-              :name="`${column.key}-data`"
-              :column="column"
-              :row="row"
-              :index="index"
+            <td
+              v-for="(column, subIndex) in columns"
+              :key="subIndex"
+              :class="[
+                _ui.td.base,
+                _ui.td.padding,
+                _ui.td.color,
+                _ui.td.font,
+                _ui.td.size,
+                column?.rowClass,
+                row[column.key]?.class,
+                column.key === 'select' && _ui.checkbox.padding,
+              ]"
             >
-              {{ getRowData(row, column.key) }}
+              <slot
+                :name="`${column.key}-data`"
+                :column="column"
+                :row="row"
+                :index="index"
+              >
+                {{ getRowData(row, column.key) }}
+              </slot>
+            </td>
+          </tr>
+        </template>
+        <tr v-else-if="loading && !!$slots['loading']">
+          <td :colspan="columns?.length" :class="[]">
+            <slot name="loading" />
+          </td>
+        </tr>
+        <tr v-else>
+          <td :colspan="columns?.length" :class="[]">
+            <slot name="empty">
+              {{ empty || $t('table.noData') }}
             </slot>
           </td>
         </tr>
@@ -88,6 +102,16 @@ export default Vue.extend({
     columnAttribute: {
       type: String,
       default: 'label',
+    },
+    loading: {
+      type: Object as PropType<boolean | undefined>,
+      required: false,
+      default: undefined,
+    },
+    empty: {
+      type: Object as PropType<string | undefined>,
+      required: false,
+      default: undefined,
     },
     ui: {
       type: Object,

@@ -98,5 +98,8 @@
       "migration-wallet": "轉換對應錢包",
       "title": "連接錢包"
     }
+  },
+  "table": {
+    "noData": "沒有資料"
   }
 }

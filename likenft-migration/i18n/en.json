@@ -98,5 +98,8 @@
       "migration-wallet": "Migration Wallet",
       "title": "Connect Wallet"
     }
+  },
+  "table": {
+    "noData": "No Data"
   }
 }
