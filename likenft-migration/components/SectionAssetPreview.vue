@@ -134,7 +134,10 @@
       </UTable>
     </UCard>
     <div :class="['mt-4', 'flex', 'flex-row', 'justify-end']">
-      <AppButton @click="handleConfirmMigrationClick">
+      <AppButton
+        v-if="allTableRows.length > 0"
+        @click="handleConfirmMigrationClick"
+      >
         {{ $t('section.asset-preview.confirm-migration') }}
       </AppButton>
     </div>
