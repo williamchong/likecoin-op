@@ -90,7 +90,10 @@ func main() {
 		time.Duration(envCfg.CosmosNodeHTTPTimeoutSeconds),
 		envCfg.CosmosNftEventsIgnoreToList,
 	)
-	likecoinAPI := likecoin_api.NewLikecoinAPI(envCfg.LikecoinAPIUrlBase)
+	likecoinAPI := likecoin_api.NewLikecoinAPI(
+		envCfg.LikecoinAPIUrlBase,
+		time.Duration(envCfg.LikecoinAPIHTTPTimeoutSeconds),
+	)
 
 	mainMux.Handle("/healthz", &handler.HealthzHandler{})
 	likeNFTRouter := likenft.LikeNFTRouter{

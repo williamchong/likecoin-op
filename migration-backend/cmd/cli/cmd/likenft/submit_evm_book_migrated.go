@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -40,7 +41,10 @@ var submitEvmBookMigrated = &cobra.Command{
 			With("likeClassId", likeClassId).
 			With("evmClassId", evmClassId)
 
-		likecoinAPI := likecoin_api.NewLikecoinAPI(envCfg.LikecoinAPIUrlBase)
+		likecoinAPI := likecoin_api.NewLikecoinAPI(
+			envCfg.LikecoinAPIUrlBase,
+			time.Duration(envCfg.LikecoinAPIHTTPTimeoutSeconds),
+		)
 
 		response, err := likenft.SubmitEvmBookMigrated(ctx, logger, db, likecoinAPI, likeClassId, evmClassId)
 		if err != nil {

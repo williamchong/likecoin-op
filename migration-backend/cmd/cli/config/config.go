@@ -20,6 +20,7 @@ type EnvConfig struct {
 	EthLikeNFTContractAddress       string `envconfig:"ETH_LIKENFT_CONTRACT_ADDRESS"`
 	DbConnectionStr                 string `envconfig:"DB_CONNECTION_STR"`
 	LikecoinAPIUrlBase              string `envconfig:"LIKECOIN_API_URL_BASE"`
+	LikecoinAPIHTTPTimeoutSeconds   int    `envconfig:"LIKECOIN_API_HTTP_TIMEOUT_SECONDS" default:"10"`
 	LikerlandUrlBase                string `envconfig:"LIKERLAND_URL_BASE"`
 
 	InitialNewClassOwner      string `envconfig:"INITIAL_NEW_CLASS_OWNER"`

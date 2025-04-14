@@ -2,6 +2,7 @@ package likecoinapi
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -24,7 +25,10 @@ var GetUserEVMMigrateCmd = &cobra.Command{
 
 		cosmosAddress := args[0]
 
-		likecoinAPI := likecoin_api.NewLikecoinAPI(envCfg.LikecoinAPIUrlBase)
+		likecoinAPI := likecoin_api.NewLikecoinAPI(
+			envCfg.LikecoinAPIUrlBase,
+			time.Duration(envCfg.LikecoinAPIHTTPTimeoutSeconds),
+		)
 		response, err := likecoinAPI.GetUserEVMMigrate(cosmosAddress)
 		if err != nil {
 			panic(err)

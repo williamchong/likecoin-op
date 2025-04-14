@@ -10,9 +10,14 @@ type LikecoinAPI struct {
 	LikecoinAPIUrlBase string
 }
 
-func NewLikecoinAPI(likecoinAPIUrlBase string) *LikecoinAPI {
+func NewLikecoinAPI(
+	likecoinAPIUrlBase string,
+	httpTimeoutSecond time.Duration,
+) *LikecoinAPI {
 	return &LikecoinAPI{
-		HTTPClient:         &http.Client{Timeout: 5 * time.Second},
+		HTTPClient: &http.Client{
+			Timeout: httpTimeoutSecond * time.Second,
+		},
 		LikecoinAPIUrlBase: likecoinAPIUrlBase,
 	}
 }
