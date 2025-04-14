@@ -211,7 +211,7 @@ export default Vue.extend({
       default: undefined,
     },
     snapshot: {
-      type: Object as PropType<LikeNFTAssetSnapshot>,
+      type: Object as PropType<LikeNFTAssetSnapshot | null>,
       required: true,
     },
   },
@@ -287,7 +287,13 @@ export default Vue.extend({
       ];
     },
     allTableRows(): TableData[] {
-      return makeTableDataRows(this.$appConfig.likerlandUrlBase, this.snapshot);
+      if (this.snapshot != null) {
+        return makeTableDataRows(
+          this.$appConfig.likerlandUrlBase,
+          this.snapshot
+        );
+      }
+      return [];
     },
     publishingTableRows(): TableData[] {
       return this.allTableRows.filter((r) => r.type === 'class');
