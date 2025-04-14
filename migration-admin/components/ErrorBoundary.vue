@@ -5,8 +5,8 @@
 </template>
 
 <script lang="ts">
-import { isAxiosError } from 'axios';
-import Vue from 'vue';
+import { isAxiosError } from "axios";
+import Vue from "vue";
 
 export default Vue.extend({
   errorCaptured(err): boolean {
@@ -14,7 +14,7 @@ export default Vue.extend({
     if (propagate) {
       // eslint-disable-next-line no-console
       console.warn(
-        'Error is not handled. Will be propagated to outer components.',
+        "Error is not handled. Will be propagated to outer components.",
         err
       );
     }
@@ -24,7 +24,7 @@ export default Vue.extend({
   methods: {
     handleAxiosError(err: Error): boolean {
       if (isAxiosError(err)) {
-        if (err.status === 500 || err.message === 'Network Error') {
+        if (err.status === 500 || err.message === "Network Error") {
           alert(err.message);
           return false;
         }
