@@ -14,11 +14,12 @@ type LikeNFTCosmosClient struct {
 
 func NewLikeNFTCosmosClient(
 	nodeURL string,
+	httpTimeoutSecond time.Duration,
 	nftEventsIgnoreToList string,
 ) *LikeNFTCosmosClient {
 	return &LikeNFTCosmosClient{
 		HTTPClient: &http.Client{
-			Timeout: 10 * time.Second,
+			Timeout: httpTimeoutSecond * time.Second,
 		},
 		NodeURL:               nodeURL,
 		nftEventsIgnoreToList: nftEventsIgnoreToList,

@@ -10,6 +10,7 @@ var ContextKey = &contextKey{}
 
 type EnvConfig struct {
 	CosmosNodeUrl                   string `envconfig:"COSMOS_NODE_URL"`
+	CosmosNodeHTTPTimeoutSeconds    int    `envconfig:"COSMOS_NODE_HTTP_TIMEOUT_SECONDS" default:"10"`
 	CosmosNftEventsIgnoreToList     string `envconfig:"COSMOS_NFT_EVENTS_IGNORE_TO_LIST"`
 	CosmosLikeCoinNetworkConfigPath string `envconfig:"COSMOS_LIKECOIN_NETWORK_CONFIG_PATH"`
 	EthSignerBaseUrl                string `envconfig:"ETH_SIGNER_BASE_URL"`

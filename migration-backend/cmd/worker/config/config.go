@@ -9,6 +9,7 @@ type EnvConfig struct {
 	RedisDsn                        string `envconfig:"REDIS_DSN" default:"redis://127.0.0.1:6379"`
 	Concurrency                     int    `envconfig:"WORKER_CONCURRENCY" default:"1"`
 	CosmosNodeUrl                   string `envconfig:"COSMOS_NODE_URL"`
+	CosmosNodeHTTPTimeoutSeconds    int    `envconfig:"COSMOS_NODE_HTTP_TIMEOUT_SECONDS" default:"10"`
 	CosmosLikeCoinNetworkConfigPath string `envconfig:"COSMOS_LIKECOIN_NETWORK_CONFIG_PATH"`
 	EthSignerBaseUrl                string `envconfig:"ETH_SIGNER_BASE_URL"`
 	EthSignerAPIKey                 string `envconfig:"ETH_SIGNER_API_KEY"`

@@ -2,6 +2,7 @@ package likenft
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -27,8 +28,15 @@ var initMigration = &cobra.Command{
 			panic(err)
 		}
 
-		cosmosAPI := api.NewCosmosAPI(envCfg.CosmosNodeUrl)
-		likenftClient := cosmos.NewLikeNFTCosmosClient(envCfg.CosmosNodeUrl, envCfg.CosmosNftEventsIgnoreToList)
+		cosmosAPI := api.NewCosmosAPI(
+			envCfg.CosmosNodeUrl,
+			time.Duration(envCfg.CosmosNodeHTTPTimeoutSeconds),
+		)
+		likenftClient := cosmos.NewLikeNFTCosmosClient(
+			envCfg.CosmosNodeUrl,
+			time.Duration(envCfg.CosmosNodeHTTPTimeoutSeconds),
+			envCfg.CosmosNftEventsIgnoreToList,
+		)
 
 		cosmosAddress := args[0]
 
