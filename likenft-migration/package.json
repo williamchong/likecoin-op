@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "nuxt",
-    "extract-translations": "vue-i18n-extract report --vueFiles './@(components|layouts|pages)/**/*.?(js|vue)' --languageFiles './i18n/*.?(json|yml|yaml|js)' --add --remove",
+    "extract-translations": "vue-i18n-extract report --vueFiles './@(components|layouts|pages|nuxtui)/**/*.?(js|vue)' --languageFiles './i18n/*.?(json|yml|yaml|js)' --add --remove",
     "postextract-translations": "find ./i18n -name '*.json' -exec npx sort-json {} \\;",
-    "check-translations": "vue-i18n-extract report --vueFiles './@(components|layouts|pages)/**/*.?(js|vue)' --languageFiles './i18n/*.?(json|yml|yaml|js)' --ci",
+    "check-translations": "vue-i18n-extract report --vueFiles './@(components|layouts|pages|nuxtui)/**/*.?(js|vue)' --languageFiles './i18n/*.?(json|yml|yaml|js)' --ci",
     "build": "nuxt build",
     "lint": "eslint .",
     "check-format": "prettier -l .",
