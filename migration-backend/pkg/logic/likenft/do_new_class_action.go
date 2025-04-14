@@ -92,7 +92,7 @@ func DoNewClassAction(
 		evm.ContractLevelMetadataFromCosmosClassAndISCN(
 			cosmosClass,
 			iscnDataResponse,
-			&royaltyConfigs.RoyaltyConfig,
+			royaltyConfigs.RoyaltyConfig,
 		))
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)

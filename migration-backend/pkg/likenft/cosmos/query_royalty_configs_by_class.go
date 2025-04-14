@@ -13,7 +13,7 @@ type QueryRoyaltyConfigsByClassIdRequest struct {
 }
 
 type QueryRoyaltyConfigsByClassIdResponse struct {
-	RoyaltyConfig model.RoyaltyConfig `json:"royalty_config,omitempty"`
+	RoyaltyConfig *model.RoyaltyConfig `json:"royalty_config,omitempty"`
 }
 
 // e.g. 'https://node.testnet.like.co/likechain/likenft/v1/royalty_configs/likenft1trdzjmnnyr73jqh4mmkgp0kj8zxh6m598duwtvum820zzday4muquqme0r
