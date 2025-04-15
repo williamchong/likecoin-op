@@ -36,6 +36,11 @@ type EVMQueryClient interface {
 		contractAddress common.Address,
 		startBlock uint64,
 	) ([]types.Log, error)
+	QueryTransfer(
+		ctx context.Context,
+		contractAddress common.Address,
+		startBlock uint64,
+	) ([]types.Log, error)
 }
 
 type evmQueryClient struct {
