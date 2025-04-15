@@ -103,7 +103,26 @@
               'text-likecoin-darkgrey',
             ]"
           >
-            {{ $t('section.asset-preview.no-data') }}
+            <template v-if="snapshot?.status === 'completed'">
+              <div :class="['flex', 'flex-col', 'items-center']">
+                <h3 :class="['text-likecoin-darkgrey']">
+                  {{ $t('section.asset-preview.no-data') }}
+                </h3>
+                <AppButton :class="['mt-2']" @click="handleRetryClick">
+                  {{ $t('section.asset-preview.retry') }}
+                </AppButton>
+              </div>
+            </template>
+            <template v-else-if="snapshot?.status === 'failed'">
+              <div :class="['flex', 'flex-col', 'items-center']">
+                <h3 :class="['text-likecoin-darkgrey']">
+                  {{ $t('section.asset-preview.something-went-wrong') }}
+                </h3>
+                <AppButton :class="['mt-2']" @click="handleRetryClick">
+                  {{ $t('section.asset-preview.retry') }}
+                </AppButton>
+              </div>
+            </template>
           </div>
         </template>
         <template #image-data="{ row }">
@@ -317,6 +336,10 @@ export default Vue.extend({
   methods: {
     handleConfirmMigrationClick() {
       this.$emit('confirmMigration');
+    },
+
+    handleRetryClick() {
+      this.$emit('retryPreview');
     },
   },
 });
