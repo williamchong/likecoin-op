@@ -276,14 +276,14 @@ export default Vue.extend({
         {
           key: 'image',
           label: this.$t('section.asset-preview.table.header.cover'),
-          class: 'w-[7.994757536%] px-0 text-center',
+          class: 'w-[7.994757536%] pl-0 pr-0 text-center',
           rowClass: 'w-[7.994757536%]',
         },
         {
           key: 'name',
           label: this.$t('section.asset-preview.table.header.title'),
           class: 'w-[35.7798165138%]',
-          rowClass: 'w-[35.7798165138%] pl-0',
+          rowClass: 'w-[35.7798165138%]',
         },
         {
           key: 'txHash',
