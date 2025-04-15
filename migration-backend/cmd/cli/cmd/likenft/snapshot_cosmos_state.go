@@ -21,7 +21,8 @@ var initMigration = &cobra.Command{
 			return
 		}
 
-		envCfg := cmd.Context().Value(config.ContextKey).(*config.EnvConfig)
+		ctx := cmd.Context()
+		envCfg := ctx.Value(config.ContextKey).(*config.EnvConfig)
 
 		db, err := sql.Open("postgres", envCfg.DbConnectionStr)
 		if err != nil {
@@ -45,7 +46,7 @@ var initMigration = &cobra.Command{
 			CosmosAPI:           cosmosAPI,
 			LikeNFTCosmosClient: likenftClient,
 		}
-		err = snapshotCosmosState.Execute(cosmosAddress)
+		err = snapshotCosmosState.Execute(ctx, cosmosAddress)
 
 		if err != nil {
 			panic(err)
