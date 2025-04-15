@@ -79,6 +79,7 @@ export interface StepStateStep4MigrationRetryPreview {
   ethAddress: string;
   avatar: string | null;
   likerId: string | null;
+  migrationPreview: LikeNFTAssetSnapshot;
   failedMigration: FailedLikeNFTAssetMigration;
 }
 
@@ -88,6 +89,7 @@ export interface StepStateStep5MigrationResult {
   ethAddress: string;
   avatar: string | null;
   likerId: string | null;
+  migrationPreview: LikeNFTAssetSnapshot;
   migration: LikeNFTAssetMigration;
 }
 
@@ -98,6 +100,7 @@ export interface StepStateCompleted {
   ethAddress: string;
   avatar: string | null;
   likerId: string | null;
+  migrationPreview: LikeNFTAssetSnapshot;
   migration: CompletedLikeNFTAssetMigration;
 }
 
@@ -108,6 +111,7 @@ export interface StepStateFailed {
   ethAddress: string;
   avatar: string | null;
   likerId: string | null;
+  migrationPreview: LikeNFTAssetSnapshot;
   migration: FailedLikeNFTAssetMigration;
 }
 
@@ -235,6 +239,7 @@ export function migrationResultFetched(
     | StepStateStep4MigrationPreview
     | StepStateStep4MigrationRetryPreview
     | StepStateStep5MigrationResult,
+  snapshot: LikeNFTAssetSnapshot,
   migration: LikeNFTAssetMigration
 ): StepStateStep5MigrationResult {
   return {
@@ -243,12 +248,14 @@ export function migrationResultFetched(
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
     likerId: prev.likerId,
+    migrationPreview: snapshot,
     migration,
   };
 }
 
 export function migrationCompleted(
   prev: StepStateStep4Init | StepStateStep5MigrationResult,
+  snapshot: LikeNFTAssetSnapshot,
   completedMigration: CompletedLikeNFTAssetMigration
 ): StepStateCompleted {
   return {
@@ -258,12 +265,14 @@ export function migrationCompleted(
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
     likerId: prev.likerId,
+    migrationPreview: snapshot,
     migration: completedMigration,
   };
 }
 
 export function migrationFailed(
   prev: StepStateStep4Init | StepStateStep5MigrationResult,
+  snapshot: LikeNFTAssetSnapshot,
   failedMigration: FailedLikeNFTAssetMigration
 ): StepStateFailed {
   return {
@@ -273,6 +282,7 @@ export function migrationFailed(
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
     likerId: prev.likerId,
+    migrationPreview: snapshot,
     migration: failedMigration,
   };
 }
@@ -288,6 +298,7 @@ export function migrationRetried(
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
     likerId: prev.likerId,
+    migrationPreview: prev.migrationPreview,
     failedMigration,
   };
 }

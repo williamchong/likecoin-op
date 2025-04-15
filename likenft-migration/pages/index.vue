@@ -207,16 +207,46 @@
             </template>
           </template>
           <template #past>
-            <h2
-              :class="[
-                'text-base',
-                'font-semibold',
-                'leading-[30px]',
-                'text-likecoin-darkgrey',
-              ]"
-            >
-              {{ $t('migrate.preview') }}
-            </h2>
+            <div :class="['flex', 'flex-row', 'gap-1']">
+              <h2
+                :class="[
+                  'text-base',
+                  'font-semibold',
+                  'leading-[30px]',
+                  'text-likecoin-darkgrey',
+                ]"
+              >
+                {{ $t('migrate.preview') }}
+              </h2>
+              <UTooltip
+                v-if="
+                  'migrationPreview' in currentStep &&
+                  currentStep.migrationPreview != null &&
+                  currentStep.migrationPreview.block_time != null &&
+                  currentStep.migrationPreview.block_height != null
+                "
+                :text="
+                  $t('section.asset-preview.tooltip', {
+                    date: _formatDate(currentStep.migrationPreview.block_time),
+                    height: _formatNumber(
+                      currentStep.migrationPreview.block_height
+                    ),
+                  })
+                "
+                :ui="{
+                  base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
+                }"
+              >
+                <FontAwesomeIcon
+                  icon="circle-exclamation"
+                  :class="[
+                    'text-sm',
+                    'leading-[30px]',
+                    'text-likecoin-votecolor-yes',
+                  ]"
+                />
+              </UTooltip>
+            </div>
           </template>
         </StepSection>
         <StepSection :step="5" :current-step="currentStep.step">
@@ -760,7 +790,11 @@ export default Vue.extend({
         cosmos_address: s.cosmosAddress,
         eth_address: s.ethAddress,
       });
-      return migrationResultFetched(s, migrationResponse.migration);
+      return migrationResultFetched(
+        s,
+        s.migrationPreview,
+        migrationResponse.migration
+      );
     },
 
     async _retryMigration(
@@ -777,7 +811,11 @@ export default Vue.extend({
             nft_id: n.cosmos_nft_id,
           })),
       });
-      return migrationResultFetched(s, migrationResponse.migration);
+      return migrationResultFetched(
+        s,
+        s.migrationPreview,
+        migrationResponse.migration
+      );
     },
 
     async _refreshMigration(
@@ -790,12 +828,12 @@ export default Vue.extend({
       )();
       // expect throw on error
       if (isMigrationCompleted(resp.migration)) {
-        return migrationCompleted(s, resp.migration);
+        return migrationCompleted(s, s.migrationPreview, resp.migration);
       }
       if (isMigrationFailed(resp.migration)) {
-        return migrationFailed(s, resp.migration);
+        return migrationFailed(s, s.migrationPreview, resp.migration);
       }
-      return migrationResultFetched(s, resp.migration);
+      return migrationResultFetched(s, s.migrationPreview, resp.migration);
     },
 
     async _checkMigration(
@@ -811,12 +849,12 @@ export default Vue.extend({
           this.$apiClient
         )();
         if (isMigrationCompleted(resp.migration)) {
-          return migrationCompleted(s, resp.migration);
+          return migrationCompleted(s, resp.snapshot, resp.migration);
         }
         if (isMigrationFailed(resp.migration)) {
-          return migrationFailed(s, resp.migration);
+          return migrationFailed(s, resp.snapshot, resp.migration);
         }
-        return migrationResultFetched(s, resp.migration);
+        return migrationResultFetched(s, resp.snapshot, resp.migration);
       } catch (e) {
         if (isAxiosError(e)) {
           if (e.status === 404) {
