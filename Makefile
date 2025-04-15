@@ -12,12 +12,11 @@ remove-operator-key-link:
 	rm -f likecoin/.env
 	rm -f likenft/.env
 
-.PHONY: local-node
-local-node:
+.PHONY: local-contracts
+local-contracts:
 	(sleep 1 && make -C operation init-local-state) &
 	(sleep 2 && make -C likecoin deploy-local) &
-	(sleep 3 && make -C likenft deploy-local) &
-	make -C operation local-node
+	(sleep 3 && make -C likenft deploy-local)
 
 .PHONY: abigen
 abigen:
@@ -29,6 +28,12 @@ abigen:
 	cp likecoin/artifacts/contracts/EkilCoin.sol/EkilCoin.json abi/
 	make -C likenft-indexer abigen
 	make -C migration-backend abigen
+
+.PHONY: setup
+setup:
+	make -C signer-backend secret
+	make -C migration-backend secret
+	make -C likenft-indexer secret
 
 .PHONY: start
 start:
