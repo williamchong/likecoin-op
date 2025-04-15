@@ -218,6 +218,19 @@ export function likerIdMigrated(
   };
 }
 
+export function emptySnapshotRetried(
+  prev: StepStateStep4EmptyMigrationPreview
+): StepStateStep4Init {
+  return {
+    step: 4,
+    state: 'Init',
+    cosmosAddress: prev.cosmosAddress,
+    ethAddress: prev.ethAddress,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+  };
+}
+
 export function signMessageRequested(
   prev: StepStateStep2LikerIdEvmConnected,
   signMessage: string

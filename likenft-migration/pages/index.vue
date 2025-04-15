@@ -189,6 +189,7 @@
                   currentStep.migrationPreview.status === 'in_progress'
                 "
                 :snapshot="currentStep.migrationPreview"
+                @retryPreview="handleRetryPreview(currentStep)"
               />
             </template>
             <template
@@ -477,6 +478,7 @@ import {
 } from '~/apis/retryMigration';
 import {
   emptyMigrationPreviewFetched,
+  emptySnapshotRetried,
   initCosmosConnected,
   initEvmConnected,
   introductionConfirmed,
@@ -722,6 +724,14 @@ export default Vue.extend({
       }
     },
 
+    async handleRetryPreview(s: StepStateStep4EmptyMigrationPreview) {
+      this.currentStep = emptySnapshotRetried(s);
+      this.currentStep = await this._asyncStateTransition(
+        this.currentStep,
+        (s) => this._recreateMigrationPreview(s)
+      );
+    },
+
     async handleConfirmMigrate() {
       if (
         this.currentStep.step === 4 &&
@@ -853,6 +863,21 @@ export default Vue.extend({
       } else {
         return nonEmptyMigrationPreviewFetched(s, migrationPreview);
       }
+    },
+
+    async _recreateMigrationPreview(
+      s: StepStateStep4Init
+    ): Promise<
+      | StepStateStep4EmptyMigrationPreview
+      | StepStateStep4NonEmptyMigrationPreview
+    > {
+      const newMigrationPreview = await this._createMigrationPreview(
+        s.cosmosAddress
+      );
+      if (isEmptyLikeNFTAssetSnapshot(newMigrationPreview)) {
+        return emptyMigrationPreviewFetched(s, newMigrationPreview);
+      }
+      return nonEmptyMigrationPreviewFetched(s, newMigrationPreview);
     },
 
     async _fetchMigrationPreview(cosmosWalletAddress: string) {
