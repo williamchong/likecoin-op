@@ -56,6 +56,11 @@ var AcquireAllBookNFTEvmEvents = &cobra.Command{
 				logger.Error("error acquiring TransferWithMemo event", "err", err)
 			}
 
+			err = acquirer.Acquire(ctx, logger, n.Address, evmeventprocessedblockheight.EventTransfer)
+			if err != nil {
+				logger.Error("error acquiring TransferWithMemo event", "err", err)
+			}
+
 			err = acquirer.Acquire(ctx, logger, n.Address, evmeventprocessedblockheight.EventContractURIUpdated)
 			if err != nil {
 				logger.Error("error acquiring ContractURIUpdated event", "err", err)
