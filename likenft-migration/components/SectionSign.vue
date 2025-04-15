@@ -75,7 +75,8 @@ export default Vue.extend({
         }
 
         const { chainId, coinMinimalDenom } = LIKECOIN_WALLET_CONNECTOR_CONFIG(
-          this.$appConfig.isTestnet
+          this.$appConfig.isTestnet,
+          this.$appConfig.authcoreRedirectUrl
         );
 
         const signingPayload = {

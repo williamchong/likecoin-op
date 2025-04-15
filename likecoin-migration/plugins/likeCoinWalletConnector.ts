@@ -5,7 +5,10 @@ import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network';
 
 export default function (app: NuxtApp, inject: Inject) {
   const likeCoinWalletConnector = new LikeCoinWalletConnector(
-    LIKECOIN_WALLET_CONNECTOR_CONFIG(app.$appConfig.isTestnet)
+    LIKECOIN_WALLET_CONNECTOR_CONFIG(
+      app.$appConfig.isTestnet,
+      app.$appConfig.authcoreRedirectUrl
+    )
   );
   inject('likeCoinWalletConnector', likeCoinWalletConnector);
 }

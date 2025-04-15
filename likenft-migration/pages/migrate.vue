@@ -222,7 +222,10 @@ export default Vue.extend({
   computed: {
     connector() {
       return new LikeCoinWalletConnector(
-        LIKECOIN_WALLET_CONNECTOR_CONFIG(this.$appConfig.isTestnet)
+        LIKECOIN_WALLET_CONNECTOR_CONFIG(
+          this.$appConfig.isTestnet,
+          this.$appConfig.authcoreRedirectUrl
+        )
       );
     },
     getSignMessage() {

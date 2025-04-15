@@ -209,7 +209,10 @@ import {
   parseCoins,
   SigningStargateClient,
 } from '@cosmjs/stargate';
-import { LikeCoinWalletConnectorConnectionResult } from '@likecoin/wallet-connector';
+import {
+  LikeCoinWalletConnectorConnectionResult,
+  LikeCoinWalletConnectorMethodType,
+} from '@likecoin/wallet-connector';
 import { isAxiosError } from 'axios';
 import { Decimal } from 'decimal.js';
 import Vue from 'vue';
@@ -415,6 +418,10 @@ export default Vue.extend({
     },
   },
 
+  async mounted() {
+    await this.handleMaybeLikeCoinWalletConnectedFromRedirect();
+  },
+
   methods: {
     handleIntroductionSectionConfirmClick() {
       if (this.currentStep.step !== 1) {
@@ -423,14 +430,32 @@ export default Vue.extend({
       this.currentStep = introductionConfirmed(this.currentStep);
     },
 
+    async handleMaybeLikeCoinWalletConnectedFromRedirect() {
+      const { code, method, ...query } = this.$route.query;
+      if (method && code) {
+        this.$router.replace({ query });
+        const connection = await this.$likeCoinWalletConnector.handleRedirect(
+          method as LikeCoinWalletConnectorMethodType,
+          { code }
+        );
+        if (connection != null) {
+          if ('method' in connection) {
+            const {
+              accounts: [account],
+            } = connection;
+            await this.handleLikeCoinWalletConnected(
+              account.address,
+              connection
+            );
+          }
+        }
+      }
+    },
+
     async handleLikeCoinWalletConnected(
       cosmosAddress: string,
       connection: LikeCoinWalletConnectorConnectionResult
     ) {
-      if (this.currentStep.step === 1) {
-        return;
-      }
-
       this.currentStep = initCosmosConnected(
         this.currentStep,
         cosmosAddress,

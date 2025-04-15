@@ -215,7 +215,7 @@ export function evmConnected<S extends { step: 2 }>(
 }
 
 export function initCosmosConnected(
-  prev: Exclude<StepState, StepStateStep1>,
+  prev: StepState,
   cosmosAddress: string,
   connection: LikeCoinWalletConnectorConnectionResult
 ): EitherEthConnected<StepStateStep2CosmosConnected> {
