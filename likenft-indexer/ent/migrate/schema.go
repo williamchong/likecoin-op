@@ -86,7 +86,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "contract_type", Type: field.TypeEnum, Enums: []string{"book_nft", "like_protocol"}},
 		{Name: "contract_address", Type: field.TypeString},
-		{Name: "event", Type: field.TypeEnum, Enums: []string{"ContractURIUpdated", "NewBookNFT", "OwnershipTransferred", "TransferWithMemo"}},
+		{Name: "event", Type: field.TypeEnum, Enums: []string{"ContractURIUpdated", "NewBookNFT", "OwnershipTransferred", "TransferWithMemo", "Transfer"}},
 		{Name: "block_height", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
 	}
 	// EvmEventProcessedBlockHeightsTable holds the schema information for the "evm_event_processed_block_heights" table.

@@ -29,6 +29,7 @@ func (EVMEventProcessedBlockHeight) Fields() []ent.Field {
 			"NewBookNFT",
 			"OwnershipTransferred",
 			"TransferWithMemo",
+			"Transfer",
 		),
 		field.Uint64("block_height").GoType(typeutil.Uint64(0)).
 			SchemaType(typeutil.Uint64SchemaType).
