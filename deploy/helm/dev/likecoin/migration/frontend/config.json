@@ -4,5 +4,6 @@
   "cosmosLikeCoinNetworkConfigPath": "/cosmos-network-config.json",
   "cosmosDepositAddress": "like155s3xuruk2vnynda9gq6x9e7uzvut74654mc4d",
   "cosmosExplorerBaseURL": "https://node.testnet.like.co/",
-  "evmExplorerBaseURL": "https://sepolia-optimism.etherscan.io/"
+  "evmExplorerBaseURL": "https://sepolia-optimism.etherscan.io/",
+  "authcoreRedirectUrl": "https://likecoin-migration.pandawork.com"
 }
