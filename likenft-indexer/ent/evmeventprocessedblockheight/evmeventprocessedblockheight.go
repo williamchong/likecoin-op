@@ -87,6 +87,7 @@ const (
 	EventNewBookNFT           Event = "NewBookNFT"
 	EventOwnershipTransferred Event = "OwnershipTransferred"
 	EventTransferWithMemo     Event = "TransferWithMemo"
+	EventTransfer             Event = "Transfer"
 )
 
 func (e Event) String() string {
@@ -96,7 +97,7 @@ func (e Event) String() string {
 // EventValidator is a validator for the "event" field enum values. It is called by the builders before save.
 func EventValidator(e Event) error {
 	switch e {
-	case EventContractURIUpdated, EventNewBookNFT, EventOwnershipTransferred, EventTransferWithMemo:
+	case EventContractURIUpdated, EventNewBookNFT, EventOwnershipTransferred, EventTransferWithMemo, EventTransfer:
 		return nil
 	default:
 		return fmt.Errorf("evmeventprocessedblockheight: invalid enum value for event field: %q", e)
