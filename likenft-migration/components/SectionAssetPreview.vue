@@ -66,9 +66,65 @@
             padding: ['py-3.5', 'px-4'].join(' '),
           },
         }"
+        :loading="loading"
         :columns="columns"
         :rows="tableData"
       >
+        <template #loading>
+          <div
+            :class="[
+              'absolute',
+              'top-0',
+              'left-0',
+              'w-full',
+              'h-full',
+              'flex',
+              'flex-row',
+              'justify-center',
+              'items-center',
+            ]"
+          >
+            <LoadingIcon />
+          </div>
+        </template>
+        <template #empty>
+          <div
+            :class="[
+              'absolute',
+              'top-0',
+              'left-0',
+              'w-full',
+              'h-full',
+              'flex',
+              'flex-row',
+              'justify-center',
+              'items-center',
+              'bg-white/70',
+              'text-likecoin-darkgrey',
+            ]"
+          >
+            <template v-if="snapshot?.status === 'completed'">
+              <div :class="['flex', 'flex-col', 'items-center']">
+                <h3 :class="['text-likecoin-darkgrey']">
+                  {{ $t('section.asset-preview.no-data') }}
+                </h3>
+                <AppButton :class="['mt-2']" @click="handleRetryClick">
+                  {{ $t('section.asset-preview.retry') }}
+                </AppButton>
+              </div>
+            </template>
+            <template v-else-if="snapshot?.status === 'failed'">
+              <div :class="['flex', 'flex-col', 'items-center']">
+                <h3 :class="['text-likecoin-darkgrey']">
+                  {{ $t('section.asset-preview.something-went-wrong') }}
+                </h3>
+                <AppButton :class="['mt-2']" @click="handleRetryClick">
+                  {{ $t('section.asset-preview.retry') }}
+                </AppButton>
+              </div>
+            </template>
+          </div>
+        </template>
         <template #image-data="{ row }">
           <div :class="['w-full', 'flex', 'flex-row', 'justify-center']">
             <img :src="row.image" :class="['w-6', 'h-6', 'object-cover']" />
@@ -97,7 +153,10 @@
       </UTable>
     </UCard>
     <div :class="['mt-4', 'flex', 'flex-row', 'justify-end']">
-      <AppButton @click="handleConfirmMigrationClick">
+      <AppButton
+        v-if="allTableRows.length > 0"
+        @click="handleConfirmMigrationClick"
+      >
         {{ $t('section.asset-preview.confirm-migration') }}
       </AppButton>
     </div>
@@ -165,8 +224,13 @@ export default Vue.extend({
     UTable,
   },
   props: {
+    loading: {
+      type: Object as PropType<boolean | undefined>,
+      required: false,
+      default: undefined,
+    },
     snapshot: {
-      type: Object as PropType<LikeNFTAssetSnapshot>,
+      type: Object as PropType<LikeNFTAssetSnapshot | null>,
       required: true,
     },
   },
@@ -212,14 +276,14 @@ export default Vue.extend({
         {
           key: 'image',
           label: this.$t('section.asset-preview.table.header.cover'),
-          class: 'w-[7.994757536%] px-0 text-center',
+          class: 'w-[7.994757536%] pl-0 pr-0 text-center',
           rowClass: 'w-[7.994757536%]',
         },
         {
           key: 'name',
           label: this.$t('section.asset-preview.table.header.title'),
           class: 'w-[35.7798165138%]',
-          rowClass: 'w-[35.7798165138%] pl-0',
+          rowClass: 'w-[35.7798165138%]',
         },
         {
           key: 'txHash',
@@ -242,7 +306,13 @@ export default Vue.extend({
       ];
     },
     allTableRows(): TableData[] {
-      return makeTableDataRows(this.$appConfig.likerlandUrlBase, this.snapshot);
+      if (this.snapshot != null) {
+        return makeTableDataRows(
+          this.$appConfig.likerlandUrlBase,
+          this.snapshot
+        );
+      }
+      return [];
     },
     publishingTableRows(): TableData[] {
       return this.allTableRows.filter((r) => r.type === 'class');
@@ -266,6 +336,10 @@ export default Vue.extend({
   methods: {
     handleConfirmMigrationClick() {
       this.$emit('confirmMigration');
+    },
+
+    handleRetryClick() {
+      this.$emit('retryPreview');
     },
   },
 });

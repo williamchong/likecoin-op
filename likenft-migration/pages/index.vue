@@ -123,65 +123,7 @@
             </h2>
           </template>
           <template v-if="currentStep.step === 4" #current>
-            <div :class="['flex', 'flex-row', 'gap-1']">
-              <h2
-                :class="[
-                  'text-base',
-                  'font-semibold',
-                  'leading-[30px]',
-                  'text-likecoin-darkgrey',
-                ]"
-              >
-                {{ $t('migrate.preview') }}
-              </h2>
-              <UTooltip
-                v-if="
-                  currentStep.migrationPreview != null &&
-                  currentStep.migrationPreview.block_time != null &&
-                  currentStep.migrationPreview.block_height != null
-                "
-                :text="
-                  $t('section.asset-preview.tooltip', {
-                    date: _formatDate(currentStep.migrationPreview.block_time),
-                    height: _formatNumber(
-                      currentStep.migrationPreview.block_height
-                    ),
-                  })
-                "
-                :ui="{
-                  base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
-                }"
-                ><FontAwesomeIcon
-                  icon="circle-exclamation"
-                  :class="[
-                    'text-sm',
-                    'leading-[30px]',
-                    'text-likecoin-votecolor-yes',
-                  ]"
-              /></UTooltip>
-            </div>
-            <SectionAssetPreview
-              v-if="
-                currentStep.state === 'MigrationPreview' &&
-                currentStep.migrationPreview != null
-              "
-              :class="['max-w-full', 'mt-2']"
-              :snapshot="currentStep.migrationPreview"
-              @confirmMigration="handleConfirmMigrate"
-            />
-            <div
-              v-else
-              :class="[
-                'flex',
-                'flex-row',
-                'items-center',
-                'justify-center',
-                'my-4',
-              ]"
-            >
-              <LoadingIcon />
-            </div>
-            <template v-if="currentStep.state === 'MigrationRetryPreview'">
+            <template v-if="currentStep.state === 'Init'">
               <div :class="['flex', 'flex-row', 'gap-1']">
                 <h2
                   :class="[
@@ -193,6 +135,156 @@
                 >
                   {{ $t('migrate.preview') }}
                 </h2>
+                <SectionAssetPreview
+                  :class="['max-w-full', 'mt-2']"
+                  :loading="true"
+                />
+              </div>
+            </template>
+            <template v-else-if="currentStep.state === 'EmptyMigrationPreview'">
+              <div :class="['flex', 'flex-row', 'gap-1']">
+                <h2
+                  :class="[
+                    'text-base',
+                    'font-semibold',
+                    'leading-[30px]',
+                    'text-likecoin-darkgrey',
+                  ]"
+                >
+                  {{ $t('migrate.preview') }}
+                </h2>
+                <UTooltip
+                  v-if="
+                    currentStep.migrationPreview.block_time != null &&
+                    currentStep.migrationPreview.block_height != null
+                  "
+                  :text="
+                    $t('section.asset-preview.tooltip', {
+                      date: _formatDate(
+                        currentStep.migrationPreview.block_time
+                      ),
+                      height: _formatNumber(
+                        currentStep.migrationPreview.block_height
+                      ),
+                    })
+                  "
+                  :ui="{
+                    base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
+                  }"
+                >
+                  <FontAwesomeIcon
+                    icon="circle-exclamation"
+                    :class="[
+                      'text-sm',
+                      'leading-[30px]',
+                      'text-likecoin-votecolor-yes',
+                    ]"
+                  />
+                </UTooltip>
+              </div>
+              <SectionAssetPreview
+                :class="['max-w-full', 'mt-2']"
+                :loading="
+                  currentStep.migrationPreview.status === 'init' ||
+                  currentStep.migrationPreview.status === 'in_progress'
+                "
+                :snapshot="currentStep.migrationPreview"
+                @retryPreview="handleRetryPreview(currentStep)"
+              />
+            </template>
+            <template
+              v-else-if="currentStep.state === 'NonEmptyMigrationPreview'"
+            >
+              <div :class="['flex', 'flex-row', 'gap-1']">
+                <h2
+                  :class="[
+                    'text-base',
+                    'font-semibold',
+                    'leading-[30px]',
+                    'text-likecoin-darkgrey',
+                  ]"
+                >
+                  {{ $t('migrate.preview') }}
+                </h2>
+                <UTooltip
+                  v-if="
+                    currentStep.migrationPreview.block_time != null &&
+                    currentStep.migrationPreview.block_height != null
+                  "
+                  :text="
+                    $t('section.asset-preview.tooltip', {
+                      date: _formatDate(
+                        currentStep.migrationPreview.block_time
+                      ),
+                      height: _formatNumber(
+                        currentStep.migrationPreview.block_height
+                      ),
+                    })
+                  "
+                  :ui="{
+                    base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
+                  }"
+                >
+                  <FontAwesomeIcon
+                    icon="circle-exclamation"
+                    :class="[
+                      'text-sm',
+                      'leading-[30px]',
+                      'text-likecoin-votecolor-yes',
+                    ]"
+                  />
+                </UTooltip>
+              </div>
+              <SectionAssetPreview
+                :class="['max-w-full', 'mt-2']"
+                :loading="
+                  currentStep.migrationPreview.status === 'init' ||
+                  currentStep.migrationPreview.status === 'in_progress'
+                "
+                :snapshot="currentStep.migrationPreview"
+                @confirmMigration="handleConfirmMigrate"
+              />
+            </template>
+            <template v-else-if="currentStep.state === 'MigrationRetryPreview'">
+              <div :class="['flex', 'flex-row', 'gap-1']">
+                <h2
+                  :class="[
+                    'text-base',
+                    'font-semibold',
+                    'leading-[30px]',
+                    'text-likecoin-darkgrey',
+                  ]"
+                >
+                  {{ $t('migrate.preview') }}
+                </h2>
+                <UTooltip
+                  v-if="
+                    currentStep.migrationPreview.block_time != null &&
+                    currentStep.migrationPreview.block_height != null
+                  "
+                  :text="
+                    $t('section.asset-preview.tooltip', {
+                      date: _formatDate(
+                        currentStep.migrationPreview.block_time
+                      ),
+                      height: _formatNumber(
+                        currentStep.migrationPreview.block_height
+                      ),
+                    })
+                  "
+                  :ui="{
+                    base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
+                  }"
+                >
+                  <FontAwesomeIcon
+                    icon="circle-exclamation"
+                    :class="[
+                      'text-sm',
+                      'leading-[30px]',
+                      'text-likecoin-votecolor-yes',
+                    ]"
+                  />
+                </UTooltip>
               </div>
               <SectionMigrationResult
                 :class="['max-w-full', 'mt-2']"
@@ -207,16 +299,45 @@
             </template>
           </template>
           <template #past>
-            <h2
-              :class="[
-                'text-base',
-                'font-semibold',
-                'leading-[30px]',
-                'text-likecoin-darkgrey',
-              ]"
-            >
-              {{ $t('migrate.preview') }}
-            </h2>
+            <div :class="['flex', 'flex-row', 'gap-1']">
+              <h2
+                :class="[
+                  'text-base',
+                  'font-semibold',
+                  'leading-[30px]',
+                  'text-likecoin-darkgrey',
+                ]"
+              >
+                {{ $t('migrate.preview') }}
+              </h2>
+              <UTooltip
+                v-if="
+                  'migrationPreview' in currentStep &&
+                  currentStep.migrationPreview.block_time != null &&
+                  currentStep.migrationPreview.block_height != null
+                "
+                :text="
+                  $t('section.asset-preview.tooltip', {
+                    date: _formatDate(currentStep.migrationPreview.block_time),
+                    height: _formatNumber(
+                      currentStep.migrationPreview.block_height
+                    ),
+                  })
+                "
+                :ui="{
+                  base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
+                }"
+              >
+                <FontAwesomeIcon
+                  icon="circle-exclamation"
+                  :class="[
+                    'text-sm',
+                    'leading-[30px]',
+                    'text-likecoin-votecolor-yes',
+                  ]"
+                />
+              </UTooltip>
+            </div>
           </template>
         </StepSection>
         <StepSection :step="5" :current-step="currentStep.step">
@@ -348,12 +469,17 @@ import {
   isMigrationFailed,
   LikeNFTAssetMigration,
 } from '~/apis/models/likenftAssetMigration';
-import { LikeNFTAssetSnapshot } from '~/apis/models/likenftAssetSnapshot';
+import {
+  isEmptyLikeNFTAssetSnapshot,
+  LikeNFTAssetSnapshot,
+} from '~/apis/models/likenftAssetSnapshot';
 import {
   makeRetryMigrationAPI,
   RetryMigrationRequest,
 } from '~/apis/retryMigration';
 import {
+  emptyMigrationPreviewFetched,
+  emptySnapshotRetried,
   initCosmosConnected,
   initEvmConnected,
   introductionConfirmed,
@@ -362,9 +488,9 @@ import {
   likerIdResolved,
   migrationCompleted,
   migrationFailed,
-  migrationPreviewFetched,
   migrationResultFetched,
   migrationRetried,
+  nonEmptyMigrationPreviewFetched,
   signMessageRequested,
   StepState,
   StepStateCompleted,
@@ -373,9 +499,10 @@ import {
   StepStateStep2LikerIdEvmConnected,
   StepStateStep2LikerIdResolved,
   StepStateStep3Signing,
+  StepStateStep4EmptyMigrationPreview,
   StepStateStep4Init,
-  StepStateStep4MigrationPreview,
   StepStateStep4MigrationRetryPreview,
+  StepStateStep4NonEmptyMigrationPreview,
   StepStateStep5MigrationResult,
 } from '~/pageModels';
 
@@ -487,7 +614,7 @@ export default Vue.extend({
       }
       if (
         this.currentStep.step !== 4 ||
-        this.currentStep.state !== 'MigrationPreview'
+        this.currentStep.state !== 'EmptyMigrationPreview'
       ) {
         return;
       }
@@ -618,10 +745,18 @@ export default Vue.extend({
       }
     },
 
+    async handleRetryPreview(s: StepStateStep4EmptyMigrationPreview) {
+      this.currentStep = emptySnapshotRetried(s);
+      this.currentStep = await this._asyncStateTransition(
+        this.currentStep,
+        (s) => this._recreateMigrationPreview(s)
+      );
+    },
+
     async handleConfirmMigrate() {
       if (
         this.currentStep.step === 4 &&
-        this.currentStep.state === 'MigrationPreview'
+        this.currentStep.state === 'NonEmptyMigrationPreview'
       ) {
         this.currentStep = await this._asyncStateTransition(
           this.currentStep,
@@ -734,20 +869,36 @@ export default Vue.extend({
     },
 
     async _getOrCreateMigrationPreview(
-      s: StepStateStep4Init | StepStateStep4MigrationPreview
-    ): Promise<StepStateStep4MigrationPreview> {
-      const migrationPreview = await this._fetchMigrationPreview(
-        s.cosmosAddress
-      );
+      s: StepStateStep4Init | StepStateStep4EmptyMigrationPreview
+    ): Promise<
+      | StepStateStep4EmptyMigrationPreview
+      | StepStateStep4NonEmptyMigrationPreview
+    > {
+      let migrationPreview = await this._fetchMigrationPreview(s.cosmosAddress);
 
       if (migrationPreview == null) {
-        const newMigrationPreview = await this._createMigrationPreview(
-          s.cosmosAddress
-        );
-        return migrationPreviewFetched(s, newMigrationPreview);
-      } else {
-        return migrationPreviewFetched(s, migrationPreview);
+        migrationPreview = await this._createMigrationPreview(s.cosmosAddress);
       }
+      if (isEmptyLikeNFTAssetSnapshot(migrationPreview)) {
+        return emptyMigrationPreviewFetched(s, migrationPreview);
+      } else {
+        return nonEmptyMigrationPreviewFetched(s, migrationPreview);
+      }
+    },
+
+    async _recreateMigrationPreview(
+      s: StepStateStep4Init
+    ): Promise<
+      | StepStateStep4EmptyMigrationPreview
+      | StepStateStep4NonEmptyMigrationPreview
+    > {
+      const newMigrationPreview = await this._createMigrationPreview(
+        s.cosmosAddress
+      );
+      if (isEmptyLikeNFTAssetSnapshot(newMigrationPreview)) {
+        return emptyMigrationPreviewFetched(s, newMigrationPreview);
+      }
+      return nonEmptyMigrationPreviewFetched(s, newMigrationPreview);
     },
 
     async _fetchMigrationPreview(cosmosWalletAddress: string) {
@@ -774,14 +925,18 @@ export default Vue.extend({
     },
 
     async _createMigration(
-      s: StepStateStep4MigrationPreview
+      s: StepStateStep4NonEmptyMigrationPreview
     ): Promise<StepStateStep5MigrationResult> {
       const migrationResponse = await makeCreateMigrationAPI(this.$apiClient)({
         asset_snapshot_id: s.migrationPreview.id,
         cosmos_address: s.cosmosAddress,
         eth_address: s.ethAddress,
       });
-      return migrationResultFetched(s, migrationResponse.migration);
+      return migrationResultFetched(
+        s,
+        s.migrationPreview,
+        migrationResponse.migration
+      );
     },
 
     async _retryMigration(
@@ -798,7 +953,11 @@ export default Vue.extend({
             nft_id: n.cosmos_nft_id,
           })),
       });
-      return migrationResultFetched(s, migrationResponse.migration);
+      return migrationResultFetched(
+        s,
+        s.migrationPreview,
+        migrationResponse.migration
+      );
     },
 
     async _refreshMigration(
@@ -811,18 +970,19 @@ export default Vue.extend({
       )();
       // expect throw on error
       if (isMigrationCompleted(resp.migration)) {
-        return migrationCompleted(s, resp.migration);
+        return migrationCompleted(s, s.migrationPreview, resp.migration);
       }
       if (isMigrationFailed(resp.migration)) {
-        return migrationFailed(s, resp.migration);
+        return migrationFailed(s, s.migrationPreview, resp.migration);
       }
-      return migrationResultFetched(s, resp.migration);
+      return migrationResultFetched(s, s.migrationPreview, resp.migration);
     },
 
     async _checkMigration(
       s: StepStateStep4Init
     ): Promise<
-      | StepStateStep4MigrationPreview
+      | StepStateStep4EmptyMigrationPreview
+      | StepStateStep4NonEmptyMigrationPreview
       | StepStateStep5MigrationResult
       | StepStateCompleted
       | StepStateFailed
@@ -832,12 +992,12 @@ export default Vue.extend({
           this.$apiClient
         )();
         if (isMigrationCompleted(resp.migration)) {
-          return migrationCompleted(s, resp.migration);
+          return migrationCompleted(s, resp.snapshot, resp.migration);
         }
         if (isMigrationFailed(resp.migration)) {
-          return migrationFailed(s, resp.migration);
+          return migrationFailed(s, resp.snapshot, resp.migration);
         }
-        return migrationResultFetched(s, resp.migration);
+        return migrationResultFetched(s, resp.snapshot, resp.migration);
       } catch (e) {
         if (isAxiosError(e)) {
           if (e.status === 404) {

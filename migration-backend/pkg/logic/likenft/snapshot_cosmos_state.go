@@ -1,7 +1,9 @@
 package likenft
 
 import (
+	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
@@ -16,7 +18,7 @@ type SnapshotCosmosStateLogic struct {
 	LikeNFTCosmosClient *cosmos.LikeNFTCosmosClient
 }
 
-func (l *SnapshotCosmosStateLogic) Execute(cosmosAddress string) error {
+func (l *SnapshotCosmosStateLogic) Execute(ctx context.Context, cosmosAddress string) error {
 	latestSnapshot, err := appdb.QueryLatestLikeNFTAssetSnapshotByCosmosAddress(l.DB, cosmosAddress)
 	if err != nil {
 		return fmt.Errorf("error querying latest nft snapshot: %v", err)
@@ -34,7 +36,7 @@ func (l *SnapshotCosmosStateLogic) Execute(cosmosAddress string) error {
 	block, err := l.CosmosAPI.QueryLatestBlock()
 
 	if err != nil {
-		return l.failed(l.DB, latestSnapshot, fmt.Errorf("failed getting latest block: %v", err))
+		return l.failed(ctx, l.DB, latestSnapshot, fmt.Errorf("failed getting latest block: %v", err))
 	}
 
 	cosmosClasses, err := l.LikeNFTCosmosClient.QueryAllNFTClassesByOwner(cosmos.QueryAllNFTClassesByOwnerRequest{
@@ -42,7 +44,7 @@ func (l *SnapshotCosmosStateLogic) Execute(cosmosAddress string) error {
 	})
 
 	if err != nil {
-		return l.failed(l.DB, latestSnapshot, fmt.Errorf("failed getting classes by owner: %v", err))
+		return l.failed(ctx, l.DB, latestSnapshot, fmt.Errorf("failed getting classes by owner: %v", err))
 	}
 
 	cosmosNFTs, err := l.LikeNFTCosmosClient.QueryAllNFTsByOwner(cosmos.QueryAllNFTsByOwnerRequest{
@@ -50,7 +52,7 @@ func (l *SnapshotCosmosStateLogic) Execute(cosmosAddress string) error {
 	})
 
 	if err != nil {
-		return l.failed(l.DB, latestSnapshot, fmt.Errorf("failed getting nfts by owner: %v", err))
+		return l.failed(ctx, l.DB, latestSnapshot, fmt.Errorf("failed getting nfts by owner: %v", err))
 	}
 
 	snapshotClasses := make([]model.LikeNFTAssetSnapshotClass, 0, len(cosmosClasses.Classes))
@@ -80,36 +82,41 @@ func (l *SnapshotCosmosStateLogic) Execute(cosmosAddress string) error {
 	latestSnapshot.BlockTime = &block.Header.Time
 	latestSnapshot.Status = model.NFTSnapshotStatusCompleted
 
-	tx, err := l.DB.Begin()
+	err = appdb.WithTx(ctx, l.DB, func(tx *sql.Tx) error {
+		err := appdb.UpdateLikeNFTAssetSnapshot(tx, latestSnapshot)
+		if err != nil {
+			return err
+		}
+		err = appdb.InsertLikeNFTAssetSnapshotClasses(tx, snapshotClasses)
+		if err != nil {
+			return err
+		}
+		err = appdb.InsertLikeNFTAssetSnapshotNFTs(tx, snapshotNFTs)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
-		return l.failed(l.DB, latestSnapshot, fmt.Errorf("failed begin tx: %v", err))
-	}
-	defer tx.Commit()
-	err = appdb.UpdateLikeNFTAssetSnapshot(tx, latestSnapshot)
-	if err != nil {
-		tx.Rollback()
-		return l.failed(l.DB, latestSnapshot, fmt.Errorf("failed update nft snapshot: %v", err))
-	}
-	err = appdb.InsertLikeNFTAssetSnapshotClasses(tx, snapshotClasses)
-	if err != nil {
-		tx.Rollback()
-		return l.failed(l.DB, latestSnapshot, fmt.Errorf("failed insert nft snapshot classes: %v", err))
-	}
-	err = appdb.InsertLikeNFTAssetSnapshotNFTs(tx, snapshotNFTs)
-	if err != nil {
-		tx.Rollback()
-		return l.failed(l.DB, latestSnapshot, fmt.Errorf("failed insert nft snapshot nfts: %v", err))
+		return l.failed(ctx, l.DB, latestSnapshot, err)
 	}
 	return nil
 }
 
-func (l *SnapshotCosmosStateLogic) failed(db *sql.DB, snapshot *model.LikeNFTAssetSnapshot, err error) error {
+func (l *SnapshotCosmosStateLogic) failed(
+	ctx context.Context,
+	db *sql.DB,
+	snapshot *model.LikeNFTAssetSnapshot,
+	err error,
+) error {
 	errStr := err.Error()
-	snapshot.FailedReason = &errStr
-	snapshot.Status = model.NFTSnapshotStatusFailed
-	updateErr := appdb.UpdateLikeNFTAssetSnapshot(db, snapshot)
-	if updateErr != nil {
-		return updateErr
-	}
-	return err
+	return appdb.WithTx(ctx, db, func(tx *sql.Tx) error {
+		s, err := appdb.QueryLikeNFTAssetSnapshotById(tx, snapshot.Id)
+		if err != nil {
+			return err
+		}
+		s.FailedReason = &errStr
+		s.Status = model.NFTSnapshotStatusFailed
+		return errors.Join(err, appdb.UpdateLikeNFTAssetSnapshot(db, s))
+	})
 }

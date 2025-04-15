@@ -1,6 +1,7 @@
 package migration_preview
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -67,7 +68,7 @@ func (h *CreateMigrationPreviewHandler) ServeHTTP(w http.ResponseWriter, r *http
 			CosmosAPI:           h.CosmosAPI,
 			LikeNFTCosmosClient: h.LikeNFTCosmosClient,
 		}
-		err := logic.Execute(snapshot.CosmosAddress)
+		err := logic.Execute(context.Background(), snapshot.CosmosAddress)
 		if err != nil {
 			fmt.Printf("error executing logic SnapshotCosmosStateLogic: %v", err)
 		}

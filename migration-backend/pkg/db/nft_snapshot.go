@@ -2,6 +2,42 @@ package db
 
 import "github.com/likecoin/like-migration-backend/pkg/model"
 
+func QueryLikeNFTAssetSnapshotById(
+	tx TxLike,
+	id uint64,
+) (*model.LikeNFTAssetSnapshot, error) {
+	row := tx.QueryRow(
+		`SELECT
+	id,
+	created_at,
+	cosmos_address,
+	block_height,
+	block_time,
+	status,
+	failed_reason
+FROM likenft_asset_snapshot WHERE id = $1 ORDER BY created_at DESC`,
+		id,
+	)
+
+	snapshot := &model.LikeNFTAssetSnapshot{}
+
+	err := row.Scan(
+		&snapshot.Id,
+		&snapshot.CreatedAt,
+		&snapshot.CosmosAddress,
+		&snapshot.BlockHeight,
+		&snapshot.BlockTime,
+		&snapshot.Status,
+		&snapshot.FailedReason,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return snapshot, nil
+}
+
 func QueryLatestLikeNFTAssetSnapshotByCosmosAddress(
 	tx TxLike,
 	cosmosAddress string,

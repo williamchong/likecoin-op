@@ -20,6 +20,9 @@
     "asset-preview": {
       "confirm-migration": "確認轉移",
       "confirm-retry": "確認重試",
+      "no-data": "沒有資料",
+      "retry": "重試",
+      "something-went-wrong": "哎呀！出了點問題。請重試",
       "table": {
         "data": {
           "type": {
@@ -98,5 +101,8 @@
       "migration-wallet": "轉換對應錢包",
       "title": "連接錢包"
     }
+  },
+  "table": {
+    "noData": "沒有資料"
   }
 }

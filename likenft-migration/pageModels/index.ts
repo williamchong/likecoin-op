@@ -3,7 +3,11 @@ import {
   FailedLikeNFTAssetMigration,
   LikeNFTAssetMigration,
 } from '~/apis/models/likenftAssetMigration';
-import { LikeNFTAssetSnapshot } from '~/apis/models/likenftAssetSnapshot';
+import {
+  EmptyLikeNFTAssetSnapshot,
+  LikeNFTAssetSnapshot,
+  NonEmptyLikeNFTAssetSnapshot,
+} from '~/apis/models/likenftAssetSnapshot';
 
 export interface StepStateStep1 {
   step: 1;
@@ -62,14 +66,24 @@ export interface StepStateStep4Init {
   likerId: string | null;
 }
 
-export interface StepStateStep4MigrationPreview {
+export interface StepStateStep4EmptyMigrationPreview {
   step: 4;
-  state: 'MigrationPreview';
+  state: 'EmptyMigrationPreview';
   cosmosAddress: string;
   ethAddress: string;
   avatar: string | null;
   likerId: string | null;
-  migrationPreview: LikeNFTAssetSnapshot;
+  migrationPreview: EmptyLikeNFTAssetSnapshot;
+}
+
+export interface StepStateStep4NonEmptyMigrationPreview {
+  step: 4;
+  state: 'NonEmptyMigrationPreview';
+  cosmosAddress: string;
+  ethAddress: string;
+  avatar: string | null;
+  likerId: string | null;
+  migrationPreview: NonEmptyLikeNFTAssetSnapshot;
 }
 
 export interface StepStateStep4MigrationRetryPreview {
@@ -79,6 +93,7 @@ export interface StepStateStep4MigrationRetryPreview {
   ethAddress: string;
   avatar: string | null;
   likerId: string | null;
+  migrationPreview: LikeNFTAssetSnapshot;
   failedMigration: FailedLikeNFTAssetMigration;
 }
 
@@ -88,6 +103,7 @@ export interface StepStateStep5MigrationResult {
   ethAddress: string;
   avatar: string | null;
   likerId: string | null;
+  migrationPreview: LikeNFTAssetSnapshot;
   migration: LikeNFTAssetMigration;
 }
 
@@ -98,6 +114,7 @@ export interface StepStateCompleted {
   ethAddress: string;
   avatar: string | null;
   likerId: string | null;
+  migrationPreview: LikeNFTAssetSnapshot;
   migration: CompletedLikeNFTAssetMigration;
 }
 
@@ -108,6 +125,7 @@ export interface StepStateFailed {
   ethAddress: string;
   avatar: string | null;
   likerId: string | null;
+  migrationPreview: LikeNFTAssetSnapshot;
   migration: FailedLikeNFTAssetMigration;
 }
 
@@ -120,7 +138,8 @@ export type StepState =
   | StepStateStep2EthConnected
   | StepStateStep3Signing
   | StepStateStep4Init
-  | StepStateStep4MigrationPreview
+  | StepStateStep4EmptyMigrationPreview
+  | StepStateStep4NonEmptyMigrationPreview
   | StepStateStep4MigrationRetryPreview
   | StepStateStep5MigrationResult
   | StepStateCompleted
@@ -199,6 +218,19 @@ export function likerIdMigrated(
   };
 }
 
+export function emptySnapshotRetried(
+  prev: StepStateStep4EmptyMigrationPreview
+): StepStateStep4Init {
+  return {
+    step: 4,
+    state: 'Init',
+    cosmosAddress: prev.cosmosAddress,
+    ethAddress: prev.ethAddress,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+  };
+}
+
 export function signMessageRequested(
   prev: StepStateStep2LikerIdEvmConnected,
   signMessage: string
@@ -214,13 +246,28 @@ export function signMessageRequested(
   };
 }
 
-export function migrationPreviewFetched(
-  prev: StepStateStep4Init | StepStateStep4MigrationPreview,
-  snapshot: LikeNFTAssetSnapshot
-): StepStateStep4MigrationPreview {
+export function emptyMigrationPreviewFetched(
+  prev: StepStateStep4Init | StepStateStep4EmptyMigrationPreview,
+  snapshot: EmptyLikeNFTAssetSnapshot
+): StepStateStep4EmptyMigrationPreview {
   return {
     step: 4,
-    state: 'MigrationPreview',
+    state: 'EmptyMigrationPreview',
+    cosmosAddress: prev.cosmosAddress,
+    ethAddress: prev.ethAddress,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    migrationPreview: snapshot,
+  };
+}
+
+export function nonEmptyMigrationPreviewFetched(
+  prev: StepStateStep4Init | StepStateStep4EmptyMigrationPreview,
+  snapshot: NonEmptyLikeNFTAssetSnapshot
+): StepStateStep4NonEmptyMigrationPreview {
+  return {
+    step: 4,
+    state: 'NonEmptyMigrationPreview',
     cosmosAddress: prev.cosmosAddress,
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
@@ -232,9 +279,10 @@ export function migrationPreviewFetched(
 export function migrationResultFetched(
   prev:
     | StepStateStep4Init
-    | StepStateStep4MigrationPreview
+    | StepStateStep4NonEmptyMigrationPreview
     | StepStateStep4MigrationRetryPreview
     | StepStateStep5MigrationResult,
+  snapshot: LikeNFTAssetSnapshot,
   migration: LikeNFTAssetMigration
 ): StepStateStep5MigrationResult {
   return {
@@ -243,12 +291,14 @@ export function migrationResultFetched(
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
     likerId: prev.likerId,
+    migrationPreview: snapshot,
     migration,
   };
 }
 
 export function migrationCompleted(
   prev: StepStateStep4Init | StepStateStep5MigrationResult,
+  snapshot: LikeNFTAssetSnapshot,
   completedMigration: CompletedLikeNFTAssetMigration
 ): StepStateCompleted {
   return {
@@ -258,12 +308,14 @@ export function migrationCompleted(
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
     likerId: prev.likerId,
+    migrationPreview: snapshot,
     migration: completedMigration,
   };
 }
 
 export function migrationFailed(
   prev: StepStateStep4Init | StepStateStep5MigrationResult,
+  snapshot: LikeNFTAssetSnapshot,
   failedMigration: FailedLikeNFTAssetMigration
 ): StepStateFailed {
   return {
@@ -273,6 +325,7 @@ export function migrationFailed(
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
     likerId: prev.likerId,
+    migrationPreview: snapshot,
     migration: failedMigration,
   };
 }
@@ -288,6 +341,7 @@ export function migrationRetried(
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
     likerId: prev.likerId,
+    migrationPreview: prev.migrationPreview,
     failedMigration,
   };
 }

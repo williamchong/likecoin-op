@@ -20,6 +20,9 @@
     "asset-preview": {
       "confirm-migration": "Confirm Migration",
       "confirm-retry": "Confirm Retry",
+      "no-data": "No Data",
+      "retry": "Retry",
+      "something-went-wrong": "Oops! Something went wrong. Please try again",
       "table": {
         "data": {
           "type": {
@@ -98,5 +101,8 @@
       "migration-wallet": "Migration Wallet",
       "title": "Connect Wallet"
     }
+  },
+  "table": {
+    "noData": "No Data"
   }
 }
