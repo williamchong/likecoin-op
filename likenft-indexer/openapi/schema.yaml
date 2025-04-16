@@ -634,6 +634,7 @@ components:
           type: array
           items:
             type: string
+      additionalProperties: true
     Erc721MetadataAttribute:
       type: object
       properties:
