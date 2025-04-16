@@ -9,6 +9,7 @@ services:
     working_dir: /src
     volumes:
       - ./migration-backend:/src
+      - go-build-cache:/root/.cache
       - go-mod-migration-backend:/go/pkg/mod
     env_file: ./migration-backend/.env
     ports:
@@ -30,6 +31,7 @@ services:
     working_dir: /src
     volumes:
       - ./migration-backend:/src
+      - go-build-cache:/root/.cache
       - go-mod-migration-backend:/go/pkg/mod
     env_file: ./migration-backend/.env
     command: go run ./cmd/worker worker
@@ -41,6 +43,7 @@ services:
     working_dir: /src
     volumes:
       - ./migration-backend:/src
+      - go-build-cache:/root/.cache
       - go-mod-migration-backend:/go/pkg/mod
     env_file: ./migration-backend/.env
     command: go run ./cmd/worker scheduler
@@ -54,6 +57,7 @@ services:
     working_dir: /src
     volumes:
       - ./signer-backend:/src
+      - go-build-cache:/root/.cache
       - go-mod-signer-backend:/go/pkg/mod
     env_file: ./signer-backend/.env
     ports:
@@ -118,6 +122,8 @@ services:
       - data:/data
 
 volumes:
+  go-build-cache:
+    driver: local
   go-mod-migration-backend:
     driver: local
   go-mod-signer-backend:
