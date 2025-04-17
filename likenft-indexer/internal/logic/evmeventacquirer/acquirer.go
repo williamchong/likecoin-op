@@ -8,6 +8,7 @@ import (
 
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
+	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/evm"
 	"likenft-indexer/internal/evm/util/logconverter"
@@ -82,6 +83,12 @@ func (a *evmEventsAcquirer) acquire(
 		With("contractType", contractType).
 		With("event", event)
 
+	chainId, err := a.deps.evmClient.GetChainID(ctx)
+
+	if err != nil {
+		return err
+	}
+
 	dbProcessedBlockHeight, err := a.evmEventProcessedBlockHeightRepository.GetEVMEventProcessedBlockHeight(
 		ctx,
 		contractType,
@@ -118,6 +125,7 @@ func (a *evmEventsAcquirer) acquire(
 
 	for _, log := range logs {
 		evmEvent, err := logConverter.ConvertLogToEvmEvent(log)
+		evmEvent.ChainID = typeutil.Uint64(chainId.Uint64())
 
 		if err != nil {
 			mylogger.Error("logConverter.ConvertLogToEvmEvent", "err", err)
