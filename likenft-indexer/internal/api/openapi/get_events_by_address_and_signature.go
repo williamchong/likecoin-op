@@ -15,7 +15,7 @@ func (h *OpenAPIHandler) EventsByAddressAndSignature(ctx context.Context, params
 	signatureHash := crypto.Keccak256Hash([]byte(params.Signature))
 
 	eventsQ := h.db.EVMEvent.Query().Where(
-		evmevent.Topic0HexEqualFold(signatureHash.Hex()),
+		evmevent.SignatureEQ(params.Signature),
 		evmevent.AddressEqualFold(params.Address),
 	)
 
