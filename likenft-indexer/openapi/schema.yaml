@@ -579,10 +579,10 @@ components:
               type: string
             indexed_params:
               type: object
-              properties: {}
+              additionalProperties: true
             non_indexed_params:
               type: object
-              properties: {}
+              additionalProperties: true
           required:
             - name
             - signature
