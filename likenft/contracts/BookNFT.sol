@@ -12,7 +12,7 @@ import {MsgNewBookNFT} from "../types/msgs/MsgNewBookNFT.sol";
 
 error ErrUnauthorized();
 error ErrEmptyName();
-error ErrEmptySymbol();
+error ErrInvalidSymbol();
 error ErrInvalidMetadata();
 error ErrMaxSupplyZero();
 error ErrNftNoSupply();
@@ -118,7 +118,7 @@ contract BookNFT is
             revert ErrEmptyName();
         }
         if (bytes(config.symbol).length == 0) {
-            revert ErrEmptySymbol();
+            revert ErrInvalidSymbol();
         }
         if (config.max_supply == 0) {
             revert ErrMaxSupplyZero();
@@ -129,6 +129,10 @@ contract BookNFT is
         _validateBookConfig(config);
         BookNFTStorage storage $ = _getClassStorage();
         require(config.max_supply >= $.max_supply, "ErrSupplyDecrease");
+        require(
+            keccak256(bytes(config.symbol)) == keccak256(bytes($.symbol)),
+            ErrInvalidSymbol()
+        );
 
         $.name = config.name;
         $.symbol = config.symbol;
