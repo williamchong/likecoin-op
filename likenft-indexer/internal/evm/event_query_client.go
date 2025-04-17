@@ -2,6 +2,7 @@ package evm
 
 import (
 	"context"
+	"math/big"
 
 	"likenft-indexer/internal/evm/book_nft"
 	"likenft-indexer/internal/evm/like_protocol"
@@ -15,6 +16,10 @@ import (
 type EVMQueryClient interface {
 	GetLikeProtocolABI() *abi.ABI
 	GetBookNFTABI() *abi.ABI
+
+	GetChainID(
+		ctx context.Context,
+	) (*big.Int, error)
 
 	QueryBookNFTOwnershipTransferred(
 		ctx context.Context,
@@ -47,6 +52,8 @@ type evmQueryClient struct {
 	client          *ethclient.Client
 	LikeProtocolABI *abi.ABI
 	BookNFTABI      *abi.ABI
+
+	chainId *big.Int
 }
 
 func NewEvmQueryClient(url string) (EVMQueryClient, error) {
@@ -79,4 +86,16 @@ func (c *evmQueryClient) GetLikeProtocolABI() *abi.ABI {
 func (c *evmQueryClient) GetBookNFTABI() *abi.ABI {
 	return c.BookNFTABI
 
+}
+
+func (c *evmQueryClient) GetChainID(ctx context.Context) (*big.Int, error) {
+	if c.chainId != nil {
+		return c.chainId, nil
+	}
+	chainId, err := c.client.ChainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	c.chainId = chainId
+	return chainId, nil
 }
