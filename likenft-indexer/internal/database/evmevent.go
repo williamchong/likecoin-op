@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"errors"
+	"math"
 	"slices"
 
 	"likenft-indexer/ent"
@@ -10,6 +11,8 @@ import (
 )
 
 type EVMEventRepository interface {
+	GetAllEvmEventsAndProcess(ctx context.Context, processor func(e *ent.EVMEvent) error) error
+
 	GetEvmEventById(ctx context.Context, id int) (*ent.EVMEvent, error)
 
 	GetEVMEventsByStatus(ctx context.Context, status evmevent.Status) ([]*ent.EVMEvent, error)
@@ -19,6 +22,11 @@ type EVMEventRepository interface {
 
 		evmEvents []*ent.EVMEvent,
 	) ([]*ent.EVMEvent, error)
+
+	UpdateEvmEvent(
+		ctx context.Context,
+		evmEvent *ent.EVMEvent,
+	) error
 
 	UpdateEvmEventStatus(
 		ctx context.Context,
@@ -48,6 +56,33 @@ func MakeEVMEventRepository(
 	return &evmEventRepository{
 		dbService: dbService,
 	}
+}
+
+func (s *evmEventRepository) GetAllEvmEventsAndProcess(
+	ctx context.Context,
+	processor func(e *ent.EVMEvent) error,
+) error {
+	count, err := s.dbService.Client().EVMEvent.Query().Count(ctx)
+	if err != nil {
+		return err
+	}
+
+	itemsPerPage := 100
+	expectedNumPages := int(math.Ceil(float64(count) / float64(100)))
+
+	for n := range expectedNumPages {
+		items, err := s.dbService.Client().EVMEvent.Query().Limit(itemsPerPage).Offset(n * itemsPerPage).All(ctx)
+		if err != nil {
+			return err
+		}
+		for _, i := range items {
+			err = processor(i)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (s *evmEventRepository) GetEvmEventById(ctx context.Context, id int) (*ent.EVMEvent, error) {
@@ -153,6 +188,65 @@ func (s *evmEventRepository) InsertEvmEventsIfNeeded(
 	}
 	results := <-resChan
 	return results, nil
+}
+
+func (s *evmEventRepository) UpdateEvmEvent(
+	ctx context.Context,
+	evmEvent *ent.EVMEvent,
+) error {
+	err := WithTx(ctx, s.dbService.Client(), func(tx *ent.Tx) error {
+		e, err := tx.EVMEvent.Get(ctx, evmEvent.ID)
+		if err != nil {
+			return err
+		}
+		updateBuilder := e.Update().
+			SetAddress(evmEvent.Address).
+			SetBlockHash(evmEvent.BlockHash).
+			SetBlockNumber(evmEvent.BlockNumber).
+			SetChainID(evmEvent.ChainID).
+			SetIndexedParams(evmEvent.IndexedParams).
+			SetLogIndex(evmEvent.LogIndex).
+			SetName(evmEvent.Name).
+			SetNonIndexedParams(evmEvent.NonIndexedParams).
+			SetRemoved(evmEvent.Removed).
+			SetSignature(evmEvent.Signature).
+			SetStatus(evmEvent.Status).
+			SetTimestamp(evmEvent.Timestamp).
+			SetTopic0(evmEvent.Topic0).
+			SetTopic0Hex(evmEvent.Topic0Hex).
+			SetTransactionHash(evmEvent.TransactionHash).
+			SetTransactionIndex(evmEvent.TransactionIndex)
+		if evmEvent.Data != nil {
+			updateBuilder = updateBuilder.SetData(*evmEvent.Data)
+		}
+		if evmEvent.DataHex != nil {
+			updateBuilder = updateBuilder.SetDataHex(*evmEvent.DataHex)
+		}
+		if evmEvent.Topic1 != nil {
+			updateBuilder = updateBuilder.SetTopic1(*evmEvent.Topic1)
+		}
+		if evmEvent.Topic1Hex != nil {
+			updateBuilder = updateBuilder.SetTopic1Hex(*evmEvent.Topic1Hex)
+		}
+		if evmEvent.Topic2 != nil {
+			updateBuilder = updateBuilder.SetTopic2(*evmEvent.Topic2)
+		}
+		if evmEvent.Topic2Hex != nil {
+			updateBuilder = updateBuilder.SetTopic2Hex(*evmEvent.Topic2Hex)
+		}
+		if evmEvent.Topic3 != nil {
+			updateBuilder = updateBuilder.SetTopic3(*evmEvent.Topic3)
+		}
+		if evmEvent.Topic3Hex != nil {
+			updateBuilder = updateBuilder.SetTopic3Hex(*evmEvent.Topic3Hex)
+		}
+		return updateBuilder.Exec(ctx)
+	})
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *evmEventRepository) UpdateEvmEventStatus(
