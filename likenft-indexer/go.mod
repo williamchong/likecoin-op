@@ -16,6 +16,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.10.9
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/ogen-go/ogen v1.10.1
 	github.com/smartystreets/goconvey v1.8.1
 	github.com/spf13/cobra v1.8.1

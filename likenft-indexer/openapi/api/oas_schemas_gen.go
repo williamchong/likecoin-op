@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-faster/errors"
+	"github.com/go-faster/jx"
 )
 
 func (s *ErrorStatusCode) Error() string {
@@ -298,14 +299,15 @@ func (s *BookNFTsOK) SetData(val []BookNFT) {
 
 // Ref: #/components/schemas/ContractLevelMetadata
 type ContractLevelMetadata struct {
-	Name          OptString `json:"name"`
-	Symbol        OptString `json:"symbol"`
-	Description   OptString `json:"description"`
-	Image         OptString `json:"image"`
-	BannerImage   OptString `json:"banner_image"`
-	FeaturedImage OptString `json:"featured_image"`
-	ExternalLink  OptString `json:"external_link"`
-	Collaborators []string  `json:"collaborators"`
+	Name            OptString `json:"name"`
+	Symbol          OptString `json:"symbol"`
+	Description     OptString `json:"description"`
+	Image           OptString `json:"image"`
+	BannerImage     OptString `json:"banner_image"`
+	FeaturedImage   OptString `json:"featured_image"`
+	ExternalLink    OptString `json:"external_link"`
+	Collaborators   []string  `json:"collaborators"`
+	AdditionalProps ContractLevelMetadataAdditional
 }
 
 // GetName returns the value of Name.
@@ -348,6 +350,11 @@ func (s *ContractLevelMetadata) GetCollaborators() []string {
 	return s.Collaborators
 }
 
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *ContractLevelMetadata) GetAdditionalProps() ContractLevelMetadataAdditional {
+	return s.AdditionalProps
+}
+
 // SetName sets the value of Name.
 func (s *ContractLevelMetadata) SetName(val OptString) {
 	s.Name = val
@@ -386,6 +393,22 @@ func (s *ContractLevelMetadata) SetExternalLink(val OptString) {
 // SetCollaborators sets the value of Collaborators.
 func (s *ContractLevelMetadata) SetCollaborators(val []string) {
 	s.Collaborators = val
+}
+
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *ContractLevelMetadata) SetAdditionalProps(val ContractLevelMetadataAdditional) {
+	s.AdditionalProps = val
+}
+
+type ContractLevelMetadataAdditional map[string]jx.Raw
+
+func (s *ContractLevelMetadataAdditional) init() ContractLevelMetadataAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // Ref: #/components/schemas/Erc721MetadataAttribute

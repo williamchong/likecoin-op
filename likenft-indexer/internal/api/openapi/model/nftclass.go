@@ -2,10 +2,15 @@ package model
 
 import (
 	"likenft-indexer/ent"
+	"likenft-indexer/internal/evm/model"
 	"likenft-indexer/openapi/api"
 )
 
-func MakeNFTClass(e *ent.NFTClass) api.BookNFT {
+func MakeNFTClass(e *ent.NFTClass, metadataAdditionalProps APIAdditionalProps) api.BookNFT {
+	var opensea *model.ContractLevelMetadataOpenSea
+	if e.Metadata != nil {
+		opensea = &e.Metadata.ContractLevelMetadataOpenSea
+	}
 	return api.BookNFT{
 		ID:                  e.ID,
 		Address:             e.Address,
@@ -14,7 +19,7 @@ func MakeNFTClass(e *ent.NFTClass) api.BookNFT {
 		OwnerAddress:        MakeOptString(e.OwnerAddress),
 		TotalSupply:         MakeBigInt(e.TotalSupply),
 		MaxSupply:           MakeUint64(uint64(e.MaxSupply)),
-		Metadata:            MakeOptContractLevelMetadata(e.Metadata),
+		Metadata:            MakeOptContractLevelMetadata(opensea, metadataAdditionalProps),
 		BannerImage:         e.BannerImage,
 		FeaturedImage:       e.FeaturedImage,
 		DeployerAddress:     e.DeployerAddress,
