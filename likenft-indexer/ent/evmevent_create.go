@@ -33,6 +33,12 @@ func (eec *EVMEventCreate) SetTransactionIndex(u uint) *EVMEventCreate {
 	return eec
 }
 
+// SetChainID sets the "chain_id" field.
+func (eec *EVMEventCreate) SetChainID(t typeutil.Uint64) *EVMEventCreate {
+	eec.mutation.SetChainID(t)
+	return eec
+}
+
 // SetBlockHash sets the "block_hash" field.
 func (eec *EVMEventCreate) SetBlockHash(s string) *EVMEventCreate {
 	eec.mutation.SetBlockHash(s)
@@ -193,6 +199,30 @@ func (eec *EVMEventCreate) SetStatus(e evmevent.Status) *EVMEventCreate {
 	return eec
 }
 
+// SetName sets the "name" field.
+func (eec *EVMEventCreate) SetName(s string) *EVMEventCreate {
+	eec.mutation.SetName(s)
+	return eec
+}
+
+// SetSignature sets the "signature" field.
+func (eec *EVMEventCreate) SetSignature(s string) *EVMEventCreate {
+	eec.mutation.SetSignature(s)
+	return eec
+}
+
+// SetIndexedParams sets the "indexed_params" field.
+func (eec *EVMEventCreate) SetIndexedParams(m map[string]interface{}) *EVMEventCreate {
+	eec.mutation.SetIndexedParams(m)
+	return eec
+}
+
+// SetNonIndexedParams sets the "non_indexed_params" field.
+func (eec *EVMEventCreate) SetNonIndexedParams(m map[string]interface{}) *EVMEventCreate {
+	eec.mutation.SetNonIndexedParams(m)
+	return eec
+}
+
 // SetFailedReason sets the "failed_reason" field.
 func (eec *EVMEventCreate) SetFailedReason(s string) *EVMEventCreate {
 	eec.mutation.SetFailedReason(s)
@@ -258,6 +288,9 @@ func (eec *EVMEventCreate) check() error {
 	if _, ok := eec.mutation.TransactionIndex(); !ok {
 		return &ValidationError{Name: "transaction_index", err: errors.New(`ent: missing required field "EVMEvent.transaction_index"`)}
 	}
+	if _, ok := eec.mutation.ChainID(); !ok {
+		return &ValidationError{Name: "chain_id", err: errors.New(`ent: missing required field "EVMEvent.chain_id"`)}
+	}
 	if _, ok := eec.mutation.BlockHash(); !ok {
 		return &ValidationError{Name: "block_hash", err: errors.New(`ent: missing required field "EVMEvent.block_hash"`)}
 	}
@@ -307,6 +340,18 @@ func (eec *EVMEventCreate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "EVMEvent.status": %w`, err)}
 		}
 	}
+	if _, ok := eec.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "EVMEvent.name"`)}
+	}
+	if _, ok := eec.mutation.Signature(); !ok {
+		return &ValidationError{Name: "signature", err: errors.New(`ent: missing required field "EVMEvent.signature"`)}
+	}
+	if _, ok := eec.mutation.IndexedParams(); !ok {
+		return &ValidationError{Name: "indexed_params", err: errors.New(`ent: missing required field "EVMEvent.indexed_params"`)}
+	}
+	if _, ok := eec.mutation.NonIndexedParams(); !ok {
+		return &ValidationError{Name: "non_indexed_params", err: errors.New(`ent: missing required field "EVMEvent.non_indexed_params"`)}
+	}
 	if _, ok := eec.mutation.Timestamp(); !ok {
 		return &ValidationError{Name: "timestamp", err: errors.New(`ent: missing required field "EVMEvent.timestamp"`)}
 	}
@@ -346,6 +391,14 @@ func (eec *EVMEventCreate) createSpec() (*EVMEvent, *sqlgraph.CreateSpec, error)
 	if value, ok := eec.mutation.TransactionIndex(); ok {
 		_spec.SetField(evmevent.FieldTransactionIndex, field.TypeUint, value)
 		_node.TransactionIndex = value
+	}
+	if value, ok := eec.mutation.ChainID(); ok {
+		vv, err := evmevent.ValueScanner.ChainID.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(evmevent.FieldChainID, field.TypeUint64, vv)
+		_node.ChainID = value
 	}
 	if value, ok := eec.mutation.BlockHash(); ok {
 		_spec.SetField(evmevent.FieldBlockHash, field.TypeString, value)
@@ -414,6 +467,22 @@ func (eec *EVMEventCreate) createSpec() (*EVMEvent, *sqlgraph.CreateSpec, error)
 	if value, ok := eec.mutation.Status(); ok {
 		_spec.SetField(evmevent.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
+	}
+	if value, ok := eec.mutation.Name(); ok {
+		_spec.SetField(evmevent.FieldName, field.TypeString, value)
+		_node.Name = value
+	}
+	if value, ok := eec.mutation.Signature(); ok {
+		_spec.SetField(evmevent.FieldSignature, field.TypeString, value)
+		_node.Signature = value
+	}
+	if value, ok := eec.mutation.IndexedParams(); ok {
+		_spec.SetField(evmevent.FieldIndexedParams, field.TypeJSON, value)
+		_node.IndexedParams = value
+	}
+	if value, ok := eec.mutation.NonIndexedParams(); ok {
+		_spec.SetField(evmevent.FieldNonIndexedParams, field.TypeJSON, value)
+		_node.NonIndexedParams = value
 	}
 	if value, ok := eec.mutation.FailedReason(); ok {
 		_spec.SetField(evmevent.FieldFailedReason, field.TypeString, value)

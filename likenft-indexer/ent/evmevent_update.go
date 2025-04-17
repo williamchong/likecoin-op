@@ -64,6 +64,27 @@ func (eeu *EVMEventUpdate) AddTransactionIndex(u int) *EVMEventUpdate {
 	return eeu
 }
 
+// SetChainID sets the "chain_id" field.
+func (eeu *EVMEventUpdate) SetChainID(t typeutil.Uint64) *EVMEventUpdate {
+	eeu.mutation.ResetChainID()
+	eeu.mutation.SetChainID(t)
+	return eeu
+}
+
+// SetNillableChainID sets the "chain_id" field if the given value is not nil.
+func (eeu *EVMEventUpdate) SetNillableChainID(t *typeutil.Uint64) *EVMEventUpdate {
+	if t != nil {
+		eeu.SetChainID(*t)
+	}
+	return eeu
+}
+
+// AddChainID adds t to the "chain_id" field.
+func (eeu *EVMEventUpdate) AddChainID(t typeutil.Uint64) *EVMEventUpdate {
+	eeu.mutation.AddChainID(t)
+	return eeu
+}
+
 // SetBlockHash sets the "block_hash" field.
 func (eeu *EVMEventUpdate) SetBlockHash(s string) *EVMEventUpdate {
 	eeu.mutation.SetBlockHash(s)
@@ -350,6 +371,46 @@ func (eeu *EVMEventUpdate) SetNillableStatus(e *evmevent.Status) *EVMEventUpdate
 	return eeu
 }
 
+// SetName sets the "name" field.
+func (eeu *EVMEventUpdate) SetName(s string) *EVMEventUpdate {
+	eeu.mutation.SetName(s)
+	return eeu
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (eeu *EVMEventUpdate) SetNillableName(s *string) *EVMEventUpdate {
+	if s != nil {
+		eeu.SetName(*s)
+	}
+	return eeu
+}
+
+// SetSignature sets the "signature" field.
+func (eeu *EVMEventUpdate) SetSignature(s string) *EVMEventUpdate {
+	eeu.mutation.SetSignature(s)
+	return eeu
+}
+
+// SetNillableSignature sets the "signature" field if the given value is not nil.
+func (eeu *EVMEventUpdate) SetNillableSignature(s *string) *EVMEventUpdate {
+	if s != nil {
+		eeu.SetSignature(*s)
+	}
+	return eeu
+}
+
+// SetIndexedParams sets the "indexed_params" field.
+func (eeu *EVMEventUpdate) SetIndexedParams(m map[string]interface{}) *EVMEventUpdate {
+	eeu.mutation.SetIndexedParams(m)
+	return eeu
+}
+
+// SetNonIndexedParams sets the "non_indexed_params" field.
+func (eeu *EVMEventUpdate) SetNonIndexedParams(m map[string]interface{}) *EVMEventUpdate {
+	eeu.mutation.SetNonIndexedParams(m)
+	return eeu
+}
+
 // SetFailedReason sets the "failed_reason" field.
 func (eeu *EVMEventUpdate) SetFailedReason(s string) *EVMEventUpdate {
 	eeu.mutation.SetFailedReason(s)
@@ -472,6 +533,20 @@ func (eeu *EVMEventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := eeu.mutation.AddedTransactionIndex(); ok {
 		_spec.AddField(evmevent.FieldTransactionIndex, field.TypeUint, value)
 	}
+	if value, ok := eeu.mutation.ChainID(); ok {
+		vv, err := evmevent.ValueScanner.ChainID.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(evmevent.FieldChainID, field.TypeUint64, vv)
+	}
+	if value, ok := eeu.mutation.AddedChainID(); ok {
+		vv, err := evmevent.ValueScanner.ChainID.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.AddField(evmevent.FieldChainID, field.TypeUint64, vv)
+	}
 	if value, ok := eeu.mutation.BlockHash(); ok {
 		_spec.SetField(evmevent.FieldBlockHash, field.TypeString, value)
 	}
@@ -558,6 +633,18 @@ func (eeu *EVMEventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := eeu.mutation.Status(); ok {
 		_spec.SetField(evmevent.FieldStatus, field.TypeEnum, value)
 	}
+	if value, ok := eeu.mutation.Name(); ok {
+		_spec.SetField(evmevent.FieldName, field.TypeString, value)
+	}
+	if value, ok := eeu.mutation.Signature(); ok {
+		_spec.SetField(evmevent.FieldSignature, field.TypeString, value)
+	}
+	if value, ok := eeu.mutation.IndexedParams(); ok {
+		_spec.SetField(evmevent.FieldIndexedParams, field.TypeJSON, value)
+	}
+	if value, ok := eeu.mutation.NonIndexedParams(); ok {
+		_spec.SetField(evmevent.FieldNonIndexedParams, field.TypeJSON, value)
+	}
 	if value, ok := eeu.mutation.FailedReason(); ok {
 		_spec.SetField(evmevent.FieldFailedReason, field.TypeString, value)
 	}
@@ -619,6 +706,27 @@ func (eeuo *EVMEventUpdateOne) SetNillableTransactionIndex(u *uint) *EVMEventUpd
 // AddTransactionIndex adds u to the "transaction_index" field.
 func (eeuo *EVMEventUpdateOne) AddTransactionIndex(u int) *EVMEventUpdateOne {
 	eeuo.mutation.AddTransactionIndex(u)
+	return eeuo
+}
+
+// SetChainID sets the "chain_id" field.
+func (eeuo *EVMEventUpdateOne) SetChainID(t typeutil.Uint64) *EVMEventUpdateOne {
+	eeuo.mutation.ResetChainID()
+	eeuo.mutation.SetChainID(t)
+	return eeuo
+}
+
+// SetNillableChainID sets the "chain_id" field if the given value is not nil.
+func (eeuo *EVMEventUpdateOne) SetNillableChainID(t *typeutil.Uint64) *EVMEventUpdateOne {
+	if t != nil {
+		eeuo.SetChainID(*t)
+	}
+	return eeuo
+}
+
+// AddChainID adds t to the "chain_id" field.
+func (eeuo *EVMEventUpdateOne) AddChainID(t typeutil.Uint64) *EVMEventUpdateOne {
+	eeuo.mutation.AddChainID(t)
 	return eeuo
 }
 
@@ -908,6 +1016,46 @@ func (eeuo *EVMEventUpdateOne) SetNillableStatus(e *evmevent.Status) *EVMEventUp
 	return eeuo
 }
 
+// SetName sets the "name" field.
+func (eeuo *EVMEventUpdateOne) SetName(s string) *EVMEventUpdateOne {
+	eeuo.mutation.SetName(s)
+	return eeuo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (eeuo *EVMEventUpdateOne) SetNillableName(s *string) *EVMEventUpdateOne {
+	if s != nil {
+		eeuo.SetName(*s)
+	}
+	return eeuo
+}
+
+// SetSignature sets the "signature" field.
+func (eeuo *EVMEventUpdateOne) SetSignature(s string) *EVMEventUpdateOne {
+	eeuo.mutation.SetSignature(s)
+	return eeuo
+}
+
+// SetNillableSignature sets the "signature" field if the given value is not nil.
+func (eeuo *EVMEventUpdateOne) SetNillableSignature(s *string) *EVMEventUpdateOne {
+	if s != nil {
+		eeuo.SetSignature(*s)
+	}
+	return eeuo
+}
+
+// SetIndexedParams sets the "indexed_params" field.
+func (eeuo *EVMEventUpdateOne) SetIndexedParams(m map[string]interface{}) *EVMEventUpdateOne {
+	eeuo.mutation.SetIndexedParams(m)
+	return eeuo
+}
+
+// SetNonIndexedParams sets the "non_indexed_params" field.
+func (eeuo *EVMEventUpdateOne) SetNonIndexedParams(m map[string]interface{}) *EVMEventUpdateOne {
+	eeuo.mutation.SetNonIndexedParams(m)
+	return eeuo
+}
+
 // SetFailedReason sets the "failed_reason" field.
 func (eeuo *EVMEventUpdateOne) SetFailedReason(s string) *EVMEventUpdateOne {
 	eeuo.mutation.SetFailedReason(s)
@@ -1060,6 +1208,20 @@ func (eeuo *EVMEventUpdateOne) sqlSave(ctx context.Context) (_node *EVMEvent, er
 	if value, ok := eeuo.mutation.AddedTransactionIndex(); ok {
 		_spec.AddField(evmevent.FieldTransactionIndex, field.TypeUint, value)
 	}
+	if value, ok := eeuo.mutation.ChainID(); ok {
+		vv, err := evmevent.ValueScanner.ChainID.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(evmevent.FieldChainID, field.TypeUint64, vv)
+	}
+	if value, ok := eeuo.mutation.AddedChainID(); ok {
+		vv, err := evmevent.ValueScanner.ChainID.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.AddField(evmevent.FieldChainID, field.TypeUint64, vv)
+	}
 	if value, ok := eeuo.mutation.BlockHash(); ok {
 		_spec.SetField(evmevent.FieldBlockHash, field.TypeString, value)
 	}
@@ -1145,6 +1307,18 @@ func (eeuo *EVMEventUpdateOne) sqlSave(ctx context.Context) (_node *EVMEvent, er
 	}
 	if value, ok := eeuo.mutation.Status(); ok {
 		_spec.SetField(evmevent.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := eeuo.mutation.Name(); ok {
+		_spec.SetField(evmevent.FieldName, field.TypeString, value)
+	}
+	if value, ok := eeuo.mutation.Signature(); ok {
+		_spec.SetField(evmevent.FieldSignature, field.TypeString, value)
+	}
+	if value, ok := eeuo.mutation.IndexedParams(); ok {
+		_spec.SetField(evmevent.FieldIndexedParams, field.TypeJSON, value)
+	}
+	if value, ok := eeuo.mutation.NonIndexedParams(); ok {
+		_spec.SetField(evmevent.FieldNonIndexedParams, field.TypeJSON, value)
 	}
 	if value, ok := eeuo.mutation.FailedReason(); ok {
 		_spec.SetField(evmevent.FieldFailedReason, field.TypeString, value)
