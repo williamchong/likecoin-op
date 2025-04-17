@@ -36,6 +36,9 @@ func (c *LogConverter) ConvertLogToEvmEvent(log types.Log) (*ent.EVMEvent, error
 		return nil, err
 	}
 
+	name := event.RawName
+	signature := event.Sig
+
 	var out = make(map[string]any)
 
 	err = c.UnpackLogIntoMap(log, out)
@@ -56,6 +59,9 @@ func (c *LogConverter) ConvertLogToEvmEvent(log types.Log) (*ent.EVMEvent, error
 
 	args := event.Inputs
 
+	indexedParams := make(map[string]any)
+	nonIndexedParams := make(map[string]any)
+
 	indexedIndex := -1
 	dataArgs := make([]string, 0)
 	for _, arg := range args {
@@ -65,9 +71,11 @@ func (c *LogConverter) ConvertLogToEvmEvent(log types.Log) (*ent.EVMEvent, error
 			topicN[indexedIndex] = &tn
 			tnHex := log.Topics[indexedIndex+1].Hex()
 			topicNHex[indexedIndex] = &tnHex
+			indexedParams[arg.Name] = out[arg.Name]
 		} else {
 			dataArg := fmt.Sprintf("%s:%v", arg.Name, out[arg.Name])
 			dataArgs = append(dataArgs, dataArg)
+			nonIndexedParams[arg.Name] = out[arg.Name]
 		}
 	}
 
@@ -100,6 +108,10 @@ func (c *LogConverter) ConvertLogToEvmEvent(log types.Log) (*ent.EVMEvent, error
 		DataHex:          dataHex,
 		Removed:          log.Removed,
 		Status:           evmevent.StatusReceived,
+		Name:             name,
+		Signature:        signature,
+		IndexedParams:    indexedParams,
+		NonIndexedParams: nonIndexedParams,
 	}, nil
 }
 
