@@ -89,8 +89,13 @@ func (s *evmEventRepository) InsertEvmEventsIfNeeded(
 					SetAddress(e.Address).
 					SetBlockHash(e.BlockHash).
 					SetBlockNumber(e.BlockNumber).
+					SetChainID(e.ChainID).
+					SetIndexedParams(e.IndexedParams).
 					SetLogIndex(e.LogIndex).
+					SetName(e.Name).
+					SetNonIndexedParams(e.NonIndexedParams).
 					SetRemoved(e.Removed).
+					SetSignature(e.Signature).
 					SetStatus(e.Status).
 					SetTimestamp(e.Timestamp).
 					SetTopic0(e.Topic0).

@@ -700,6 +700,8 @@ type EVMEventMutation struct {
 	transaction_hash     *string
 	transaction_index    *uint
 	addtransaction_index *int
+	chain_id             *typeutil.Uint64
+	addchain_id          *typeutil.Uint64
 	block_hash           *string
 	block_number         *typeutil.Uint64
 	addblock_number      *typeutil.Uint64
@@ -718,6 +720,10 @@ type EVMEventMutation struct {
 	data_hex             *string
 	removed              *bool
 	status               *evmevent.Status
+	name                 *string
+	signature            *string
+	indexed_params       *map[string]interface{}
+	non_indexed_params   *map[string]interface{}
 	failed_reason        *string
 	timestamp            *time.Time
 	clearedFields        map[string]struct{}
@@ -914,6 +920,62 @@ func (m *EVMEventMutation) AddedTransactionIndex() (r int, exists bool) {
 func (m *EVMEventMutation) ResetTransactionIndex() {
 	m.transaction_index = nil
 	m.addtransaction_index = nil
+}
+
+// SetChainID sets the "chain_id" field.
+func (m *EVMEventMutation) SetChainID(t typeutil.Uint64) {
+	m.chain_id = &t
+	m.addchain_id = nil
+}
+
+// ChainID returns the value of the "chain_id" field in the mutation.
+func (m *EVMEventMutation) ChainID() (r typeutil.Uint64, exists bool) {
+	v := m.chain_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChainID returns the old "chain_id" field's value of the EVMEvent entity.
+// If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventMutation) OldChainID(ctx context.Context) (v typeutil.Uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChainID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChainID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChainID: %w", err)
+	}
+	return oldValue.ChainID, nil
+}
+
+// AddChainID adds t to the "chain_id" field.
+func (m *EVMEventMutation) AddChainID(t typeutil.Uint64) {
+	if m.addchain_id != nil {
+		*m.addchain_id += t
+	} else {
+		m.addchain_id = &t
+	}
+}
+
+// AddedChainID returns the value that was added to the "chain_id" field in this mutation.
+func (m *EVMEventMutation) AddedChainID() (r typeutil.Uint64, exists bool) {
+	v := m.addchain_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetChainID resets all changes to the "chain_id" field.
+func (m *EVMEventMutation) ResetChainID() {
+	m.chain_id = nil
+	m.addchain_id = nil
 }
 
 // SetBlockHash sets the "block_hash" field.
@@ -1636,6 +1698,150 @@ func (m *EVMEventMutation) ResetStatus() {
 	m.status = nil
 }
 
+// SetName sets the "name" field.
+func (m *EVMEventMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *EVMEventMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the EVMEvent entity.
+// If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *EVMEventMutation) ResetName() {
+	m.name = nil
+}
+
+// SetSignature sets the "signature" field.
+func (m *EVMEventMutation) SetSignature(s string) {
+	m.signature = &s
+}
+
+// Signature returns the value of the "signature" field in the mutation.
+func (m *EVMEventMutation) Signature() (r string, exists bool) {
+	v := m.signature
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSignature returns the old "signature" field's value of the EVMEvent entity.
+// If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventMutation) OldSignature(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSignature is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSignature requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSignature: %w", err)
+	}
+	return oldValue.Signature, nil
+}
+
+// ResetSignature resets all changes to the "signature" field.
+func (m *EVMEventMutation) ResetSignature() {
+	m.signature = nil
+}
+
+// SetIndexedParams sets the "indexed_params" field.
+func (m *EVMEventMutation) SetIndexedParams(value map[string]interface{}) {
+	m.indexed_params = &value
+}
+
+// IndexedParams returns the value of the "indexed_params" field in the mutation.
+func (m *EVMEventMutation) IndexedParams() (r map[string]interface{}, exists bool) {
+	v := m.indexed_params
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIndexedParams returns the old "indexed_params" field's value of the EVMEvent entity.
+// If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventMutation) OldIndexedParams(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIndexedParams is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIndexedParams requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIndexedParams: %w", err)
+	}
+	return oldValue.IndexedParams, nil
+}
+
+// ResetIndexedParams resets all changes to the "indexed_params" field.
+func (m *EVMEventMutation) ResetIndexedParams() {
+	m.indexed_params = nil
+}
+
+// SetNonIndexedParams sets the "non_indexed_params" field.
+func (m *EVMEventMutation) SetNonIndexedParams(value map[string]interface{}) {
+	m.non_indexed_params = &value
+}
+
+// NonIndexedParams returns the value of the "non_indexed_params" field in the mutation.
+func (m *EVMEventMutation) NonIndexedParams() (r map[string]interface{}, exists bool) {
+	v := m.non_indexed_params
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNonIndexedParams returns the old "non_indexed_params" field's value of the EVMEvent entity.
+// If the EVMEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EVMEventMutation) OldNonIndexedParams(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNonIndexedParams is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNonIndexedParams requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNonIndexedParams: %w", err)
+	}
+	return oldValue.NonIndexedParams, nil
+}
+
+// ResetNonIndexedParams resets all changes to the "non_indexed_params" field.
+func (m *EVMEventMutation) ResetNonIndexedParams() {
+	m.non_indexed_params = nil
+}
+
 // SetFailedReason sets the "failed_reason" field.
 func (m *EVMEventMutation) SetFailedReason(s string) {
 	m.failed_reason = &s
@@ -1755,12 +1961,15 @@ func (m *EVMEventMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EVMEventMutation) Fields() []string {
-	fields := make([]string, 0, 20)
+	fields := make([]string, 0, 25)
 	if m.transaction_hash != nil {
 		fields = append(fields, evmevent.FieldTransactionHash)
 	}
 	if m.transaction_index != nil {
 		fields = append(fields, evmevent.FieldTransactionIndex)
+	}
+	if m.chain_id != nil {
+		fields = append(fields, evmevent.FieldChainID)
 	}
 	if m.block_hash != nil {
 		fields = append(fields, evmevent.FieldBlockHash)
@@ -1810,6 +2019,18 @@ func (m *EVMEventMutation) Fields() []string {
 	if m.status != nil {
 		fields = append(fields, evmevent.FieldStatus)
 	}
+	if m.name != nil {
+		fields = append(fields, evmevent.FieldName)
+	}
+	if m.signature != nil {
+		fields = append(fields, evmevent.FieldSignature)
+	}
+	if m.indexed_params != nil {
+		fields = append(fields, evmevent.FieldIndexedParams)
+	}
+	if m.non_indexed_params != nil {
+		fields = append(fields, evmevent.FieldNonIndexedParams)
+	}
 	if m.failed_reason != nil {
 		fields = append(fields, evmevent.FieldFailedReason)
 	}
@@ -1828,6 +2049,8 @@ func (m *EVMEventMutation) Field(name string) (ent.Value, bool) {
 		return m.TransactionHash()
 	case evmevent.FieldTransactionIndex:
 		return m.TransactionIndex()
+	case evmevent.FieldChainID:
+		return m.ChainID()
 	case evmevent.FieldBlockHash:
 		return m.BlockHash()
 	case evmevent.FieldBlockNumber:
@@ -1860,6 +2083,14 @@ func (m *EVMEventMutation) Field(name string) (ent.Value, bool) {
 		return m.Removed()
 	case evmevent.FieldStatus:
 		return m.Status()
+	case evmevent.FieldName:
+		return m.Name()
+	case evmevent.FieldSignature:
+		return m.Signature()
+	case evmevent.FieldIndexedParams:
+		return m.IndexedParams()
+	case evmevent.FieldNonIndexedParams:
+		return m.NonIndexedParams()
 	case evmevent.FieldFailedReason:
 		return m.FailedReason()
 	case evmevent.FieldTimestamp:
@@ -1877,6 +2108,8 @@ func (m *EVMEventMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldTransactionHash(ctx)
 	case evmevent.FieldTransactionIndex:
 		return m.OldTransactionIndex(ctx)
+	case evmevent.FieldChainID:
+		return m.OldChainID(ctx)
 	case evmevent.FieldBlockHash:
 		return m.OldBlockHash(ctx)
 	case evmevent.FieldBlockNumber:
@@ -1909,6 +2142,14 @@ func (m *EVMEventMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldRemoved(ctx)
 	case evmevent.FieldStatus:
 		return m.OldStatus(ctx)
+	case evmevent.FieldName:
+		return m.OldName(ctx)
+	case evmevent.FieldSignature:
+		return m.OldSignature(ctx)
+	case evmevent.FieldIndexedParams:
+		return m.OldIndexedParams(ctx)
+	case evmevent.FieldNonIndexedParams:
+		return m.OldNonIndexedParams(ctx)
 	case evmevent.FieldFailedReason:
 		return m.OldFailedReason(ctx)
 	case evmevent.FieldTimestamp:
@@ -1935,6 +2176,13 @@ func (m *EVMEventMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTransactionIndex(v)
+		return nil
+	case evmevent.FieldChainID:
+		v, ok := value.(typeutil.Uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChainID(v)
 		return nil
 	case evmevent.FieldBlockHash:
 		v, ok := value.(string)
@@ -2048,6 +2296,34 @@ func (m *EVMEventMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
+	case evmevent.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case evmevent.FieldSignature:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSignature(v)
+		return nil
+	case evmevent.FieldIndexedParams:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIndexedParams(v)
+		return nil
+	case evmevent.FieldNonIndexedParams:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNonIndexedParams(v)
+		return nil
 	case evmevent.FieldFailedReason:
 		v, ok := value.(string)
 		if !ok {
@@ -2073,6 +2349,9 @@ func (m *EVMEventMutation) AddedFields() []string {
 	if m.addtransaction_index != nil {
 		fields = append(fields, evmevent.FieldTransactionIndex)
 	}
+	if m.addchain_id != nil {
+		fields = append(fields, evmevent.FieldChainID)
+	}
 	if m.addblock_number != nil {
 		fields = append(fields, evmevent.FieldBlockNumber)
 	}
@@ -2089,6 +2368,8 @@ func (m *EVMEventMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case evmevent.FieldTransactionIndex:
 		return m.AddedTransactionIndex()
+	case evmevent.FieldChainID:
+		return m.AddedChainID()
 	case evmevent.FieldBlockNumber:
 		return m.AddedBlockNumber()
 	case evmevent.FieldLogIndex:
@@ -2108,6 +2389,13 @@ func (m *EVMEventMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddTransactionIndex(v)
+		return nil
+	case evmevent.FieldChainID:
+		v, ok := value.(typeutil.Uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddChainID(v)
 		return nil
 	case evmevent.FieldBlockNumber:
 		v, ok := value.(typeutil.Uint64)
@@ -2213,6 +2501,9 @@ func (m *EVMEventMutation) ResetField(name string) error {
 	case evmevent.FieldTransactionIndex:
 		m.ResetTransactionIndex()
 		return nil
+	case evmevent.FieldChainID:
+		m.ResetChainID()
+		return nil
 	case evmevent.FieldBlockHash:
 		m.ResetBlockHash()
 		return nil
@@ -2260,6 +2551,18 @@ func (m *EVMEventMutation) ResetField(name string) error {
 		return nil
 	case evmevent.FieldStatus:
 		m.ResetStatus()
+		return nil
+	case evmevent.FieldName:
+		m.ResetName()
+		return nil
+	case evmevent.FieldSignature:
+		m.ResetSignature()
+		return nil
+	case evmevent.FieldIndexedParams:
+		m.ResetIndexedParams()
+		return nil
+	case evmevent.FieldNonIndexedParams:
+		m.ResetNonIndexedParams()
 		return nil
 	case evmevent.FieldFailedReason:
 		m.ResetFailedReason()

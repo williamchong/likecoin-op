@@ -1844,29 +1844,43 @@ func (s *EventDecoded) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *EventDecodedIndexedParams) Encode(e *jx.Encoder) {
+func (s EventDecodedIndexedParams) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields encodes fields.
-func (s *EventDecodedIndexedParams) encodeFields(e *jx.Encoder) {
-}
+// encodeFields implements json.Marshaler.
+func (s EventDecodedIndexedParams) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
 
-var jsonFieldsNameOfEventDecodedIndexedParams = [0]string{}
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
 
 // Decode decodes EventDecodedIndexedParams from json.
 func (s *EventDecodedIndexedParams) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode EventDecodedIndexedParams to nil")
 	}
-
+	m := s.init()
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		default:
-			return d.Skip()
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
 		}
+		m[string(k)] = elem
+		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode EventDecodedIndexedParams")
 	}
@@ -1875,7 +1889,7 @@ func (s *EventDecodedIndexedParams) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *EventDecodedIndexedParams) MarshalJSON() ([]byte, error) {
+func (s EventDecodedIndexedParams) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -1888,29 +1902,43 @@ func (s *EventDecodedIndexedParams) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *EventDecodedNonIndexedParams) Encode(e *jx.Encoder) {
+func (s EventDecodedNonIndexedParams) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields encodes fields.
-func (s *EventDecodedNonIndexedParams) encodeFields(e *jx.Encoder) {
-}
+// encodeFields implements json.Marshaler.
+func (s EventDecodedNonIndexedParams) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
 
-var jsonFieldsNameOfEventDecodedNonIndexedParams = [0]string{}
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
 
 // Decode decodes EventDecodedNonIndexedParams from json.
 func (s *EventDecodedNonIndexedParams) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode EventDecodedNonIndexedParams to nil")
 	}
-
+	m := s.init()
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		default:
-			return d.Skip()
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
 		}
+		m[string(k)] = elem
+		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode EventDecodedNonIndexedParams")
 	}
@@ -1919,7 +1947,7 @@ func (s *EventDecodedNonIndexedParams) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *EventDecodedNonIndexedParams) MarshalJSON() ([]byte, error) {
+func (s EventDecodedNonIndexedParams) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil

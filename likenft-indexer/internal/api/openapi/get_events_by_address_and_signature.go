@@ -15,7 +15,7 @@ func (h *OpenAPIHandler) EventsByAddressAndSignature(ctx context.Context, params
 	signatureHash := crypto.Keccak256Hash([]byte(params.Signature))
 
 	eventsQ := h.db.EVMEvent.Query().Where(
-		evmevent.Topic0HexEqualFold(signatureHash.Hex()),
+		evmevent.SignatureEQ(params.Signature),
 		evmevent.AddressEqualFold(params.Address),
 	)
 
@@ -38,7 +38,11 @@ func (h *OpenAPIHandler) EventsByAddressAndSignature(ctx context.Context, params
 	apiEvents := make([]api.Event, len(events))
 
 	for i, n := range events {
-		apiEvents[i] = model.MakeEvent(n)
+		apiEvent, err := model.MakeEvent(n)
+		if err != nil {
+			return nil, err
+		}
+		apiEvents[i] = apiEvent
 	}
 
 	return &api.EventsByAddressAndSignatureOK{

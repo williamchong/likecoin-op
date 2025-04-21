@@ -65,6 +65,12 @@ func TransactionIndex(v uint) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEQ(FieldTransactionIndex, v))
 }
 
+// ChainID applies equality check predicate on the "chain_id" field. It's identical to ChainIDEQ.
+func ChainID(v typeutil.Uint64) predicate.EVMEvent {
+	vc, err := ValueScanner.ChainID.Value(v)
+	return predicate.EVMEventOrErr(sql.FieldEQ(FieldChainID, vc), err)
+}
+
 // BlockHash applies equality check predicate on the "block_hash" field. It's identical to BlockHashEQ.
 func BlockHash(v string) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEQ(FieldBlockHash, v))
@@ -139,6 +145,16 @@ func DataHex(v string) predicate.EVMEvent {
 // Removed applies equality check predicate on the "removed" field. It's identical to RemovedEQ.
 func Removed(v bool) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldEQ(FieldRemoved, v))
+}
+
+// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
+func Name(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldName, v))
+}
+
+// Signature applies equality check predicate on the "signature" field. It's identical to SignatureEQ.
+func Signature(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldSignature, v))
 }
 
 // FailedReason applies equality check predicate on the "failed_reason" field. It's identical to FailedReasonEQ.
@@ -254,6 +270,70 @@ func TransactionIndexLT(v uint) predicate.EVMEvent {
 // TransactionIndexLTE applies the LTE predicate on the "transaction_index" field.
 func TransactionIndexLTE(v uint) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldLTE(FieldTransactionIndex, v))
+}
+
+// ChainIDEQ applies the EQ predicate on the "chain_id" field.
+func ChainIDEQ(v typeutil.Uint64) predicate.EVMEvent {
+	vc, err := ValueScanner.ChainID.Value(v)
+	return predicate.EVMEventOrErr(sql.FieldEQ(FieldChainID, vc), err)
+}
+
+// ChainIDNEQ applies the NEQ predicate on the "chain_id" field.
+func ChainIDNEQ(v typeutil.Uint64) predicate.EVMEvent {
+	vc, err := ValueScanner.ChainID.Value(v)
+	return predicate.EVMEventOrErr(sql.FieldNEQ(FieldChainID, vc), err)
+}
+
+// ChainIDIn applies the In predicate on the "chain_id" field.
+func ChainIDIn(vs ...typeutil.Uint64) predicate.EVMEvent {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.ChainID.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.EVMEventOrErr(sql.FieldIn(FieldChainID, v...), err)
+}
+
+// ChainIDNotIn applies the NotIn predicate on the "chain_id" field.
+func ChainIDNotIn(vs ...typeutil.Uint64) predicate.EVMEvent {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.ChainID.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.EVMEventOrErr(sql.FieldNotIn(FieldChainID, v...), err)
+}
+
+// ChainIDGT applies the GT predicate on the "chain_id" field.
+func ChainIDGT(v typeutil.Uint64) predicate.EVMEvent {
+	vc, err := ValueScanner.ChainID.Value(v)
+	return predicate.EVMEventOrErr(sql.FieldGT(FieldChainID, vc), err)
+}
+
+// ChainIDGTE applies the GTE predicate on the "chain_id" field.
+func ChainIDGTE(v typeutil.Uint64) predicate.EVMEvent {
+	vc, err := ValueScanner.ChainID.Value(v)
+	return predicate.EVMEventOrErr(sql.FieldGTE(FieldChainID, vc), err)
+}
+
+// ChainIDLT applies the LT predicate on the "chain_id" field.
+func ChainIDLT(v typeutil.Uint64) predicate.EVMEvent {
+	vc, err := ValueScanner.ChainID.Value(v)
+	return predicate.EVMEventOrErr(sql.FieldLT(FieldChainID, vc), err)
+}
+
+// ChainIDLTE applies the LTE predicate on the "chain_id" field.
+func ChainIDLTE(v typeutil.Uint64) predicate.EVMEvent {
+	vc, err := ValueScanner.ChainID.Value(v)
+	return predicate.EVMEventOrErr(sql.FieldLTE(FieldChainID, vc), err)
 }
 
 // BlockHashEQ applies the EQ predicate on the "block_hash" field.
@@ -1248,6 +1328,136 @@ func StatusIn(vs ...Status) predicate.EVMEvent {
 // StatusNotIn applies the NotIn predicate on the "status" field.
 func StatusNotIn(vs ...Status) predicate.EVMEvent {
 	return predicate.EVMEvent(sql.FieldNotIn(FieldStatus, vs...))
+}
+
+// NameEQ applies the EQ predicate on the "name" field.
+func NameEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldName, v))
+}
+
+// NameNEQ applies the NEQ predicate on the "name" field.
+func NameNEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNEQ(FieldName, v))
+}
+
+// NameIn applies the In predicate on the "name" field.
+func NameIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIn(FieldName, vs...))
+}
+
+// NameNotIn applies the NotIn predicate on the "name" field.
+func NameNotIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotIn(FieldName, vs...))
+}
+
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGT(FieldName, v))
+}
+
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGTE(FieldName, v))
+}
+
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLT(FieldName, v))
+}
+
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLTE(FieldName, v))
+}
+
+// NameContains applies the Contains predicate on the "name" field.
+func NameContains(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContains(FieldName, v))
+}
+
+// NameHasPrefix applies the HasPrefix predicate on the "name" field.
+func NameHasPrefix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasPrefix(FieldName, v))
+}
+
+// NameHasSuffix applies the HasSuffix predicate on the "name" field.
+func NameHasSuffix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasSuffix(FieldName, v))
+}
+
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEqualFold(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContainsFold(FieldName, v))
+}
+
+// SignatureEQ applies the EQ predicate on the "signature" field.
+func SignatureEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEQ(FieldSignature, v))
+}
+
+// SignatureNEQ applies the NEQ predicate on the "signature" field.
+func SignatureNEQ(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNEQ(FieldSignature, v))
+}
+
+// SignatureIn applies the In predicate on the "signature" field.
+func SignatureIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldIn(FieldSignature, vs...))
+}
+
+// SignatureNotIn applies the NotIn predicate on the "signature" field.
+func SignatureNotIn(vs ...string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldNotIn(FieldSignature, vs...))
+}
+
+// SignatureGT applies the GT predicate on the "signature" field.
+func SignatureGT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGT(FieldSignature, v))
+}
+
+// SignatureGTE applies the GTE predicate on the "signature" field.
+func SignatureGTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldGTE(FieldSignature, v))
+}
+
+// SignatureLT applies the LT predicate on the "signature" field.
+func SignatureLT(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLT(FieldSignature, v))
+}
+
+// SignatureLTE applies the LTE predicate on the "signature" field.
+func SignatureLTE(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldLTE(FieldSignature, v))
+}
+
+// SignatureContains applies the Contains predicate on the "signature" field.
+func SignatureContains(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContains(FieldSignature, v))
+}
+
+// SignatureHasPrefix applies the HasPrefix predicate on the "signature" field.
+func SignatureHasPrefix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasPrefix(FieldSignature, v))
+}
+
+// SignatureHasSuffix applies the HasSuffix predicate on the "signature" field.
+func SignatureHasSuffix(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldHasSuffix(FieldSignature, v))
+}
+
+// SignatureEqualFold applies the EqualFold predicate on the "signature" field.
+func SignatureEqualFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldEqualFold(FieldSignature, v))
+}
+
+// SignatureContainsFold applies the ContainsFold predicate on the "signature" field.
+func SignatureContainsFold(v string) predicate.EVMEvent {
+	return predicate.EVMEvent(sql.FieldContainsFold(FieldSignature, v))
 }
 
 // FailedReasonEQ applies the EQ predicate on the "failed_reason" field.

@@ -721,9 +721,27 @@ func (s *EventDecoded) SetNonIndexedParams(val EventDecodedNonIndexedParams) {
 	s.NonIndexedParams = val
 }
 
-type EventDecodedIndexedParams struct{}
+type EventDecodedIndexedParams map[string]jx.Raw
 
-type EventDecodedNonIndexedParams struct{}
+func (s *EventDecodedIndexedParams) init() EventDecodedIndexedParams {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type EventDecodedNonIndexedParams map[string]jx.Raw
+
+func (s *EventDecodedNonIndexedParams) init() EventDecodedNonIndexedParams {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
 
 // Ref: #/components/schemas/EventQueryMetadata
 type EventQueryMetadata struct {

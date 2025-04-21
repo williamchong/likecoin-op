@@ -25,23 +25,26 @@ func init() {
 	evmeventDescTransactionHash := evmeventFields[0].Descriptor()
 	// evmevent.TransactionHashValidator is a validator for the "transaction_hash" field. It is called by the builders before save.
 	evmevent.TransactionHashValidator = evmeventDescTransactionHash.Validators[0].(func(string) error)
+	// evmeventDescChainID is the schema descriptor for chain_id field.
+	evmeventDescChainID := evmeventFields[2].Descriptor()
+	evmevent.ValueScanner.ChainID = evmeventDescChainID.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
 	// evmeventDescBlockHash is the schema descriptor for block_hash field.
-	evmeventDescBlockHash := evmeventFields[2].Descriptor()
+	evmeventDescBlockHash := evmeventFields[3].Descriptor()
 	// evmevent.BlockHashValidator is a validator for the "block_hash" field. It is called by the builders before save.
 	evmevent.BlockHashValidator = evmeventDescBlockHash.Validators[0].(func(string) error)
 	// evmeventDescBlockNumber is the schema descriptor for block_number field.
-	evmeventDescBlockNumber := evmeventFields[3].Descriptor()
+	evmeventDescBlockNumber := evmeventFields[4].Descriptor()
 	evmevent.ValueScanner.BlockNumber = evmeventDescBlockNumber.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
 	// evmeventDescAddress is the schema descriptor for address field.
-	evmeventDescAddress := evmeventFields[5].Descriptor()
+	evmeventDescAddress := evmeventFields[6].Descriptor()
 	// evmevent.AddressValidator is a validator for the "address" field. It is called by the builders before save.
 	evmevent.AddressValidator = evmeventDescAddress.Validators[0].(func(string) error)
 	// evmeventDescTopic0 is the schema descriptor for topic0 field.
-	evmeventDescTopic0 := evmeventFields[6].Descriptor()
+	evmeventDescTopic0 := evmeventFields[7].Descriptor()
 	// evmevent.Topic0Validator is a validator for the "topic0" field. It is called by the builders before save.
 	evmevent.Topic0Validator = evmeventDescTopic0.Validators[0].(func(string) error)
 	// evmeventDescTopic0Hex is the schema descriptor for topic0_hex field.
-	evmeventDescTopic0Hex := evmeventFields[7].Descriptor()
+	evmeventDescTopic0Hex := evmeventFields[8].Descriptor()
 	// evmevent.Topic0HexValidator is a validator for the "topic0_hex" field. It is called by the builders before save.
 	evmevent.Topic0HexValidator = evmeventDescTopic0Hex.Validators[0].(func(string) error)
 	evmeventprocessedblockheightFields := schema.EVMEventProcessedBlockHeight{}.Fields()

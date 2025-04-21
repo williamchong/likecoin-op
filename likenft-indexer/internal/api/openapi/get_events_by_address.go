@@ -34,7 +34,11 @@ func (h *OpenAPIHandler) EventsByAddress(ctx context.Context, params api.EventsB
 	apiEvents := make([]api.Event, len(events))
 
 	for i, n := range events {
-		apiEvents[i] = model.MakeEvent(n)
+		apiEvent, err := model.MakeEvent(n)
+		if err != nil {
+			return nil, err
+		}
+		apiEvents[i] = apiEvent
 	}
 
 	return &api.EventsByAddressOK{
