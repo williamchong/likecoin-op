@@ -2,6 +2,8 @@ import { expect } from "chai";
 import { EventLog } from "ethers";
 import { ethers, upgrades } from "hardhat";
 import { BaseContract } from "ethers";
+
+import { BookConfigLoader } from "./BookConfigLoader";
 import { createProtocol } from "./ProtocolFactory";
 
 describe("BookNFTToken", () => {
@@ -50,27 +52,16 @@ describe("BookNFTToken", () => {
       }, 20000);
     });
 
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+
     likeProtocolOwnerSigner
       .newBookNFT({
         creator: this.classOwner,
         updaters: [this.classOwner, this.likerLand],
         minters: [this.classOwner, this.likerLand],
-        config: {
-          name: "My Book",
-          symbol: "KOOB",
-          metadata: JSON.stringify({
-            name: "Collection Name",
-            symbol: "Collection SYMB",
-            description: "Collection Description",
-            image:
-              "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-            banner_image: "",
-            featured_image: "",
-            external_link: "https://www.example.com",
-            collaborators: [],
-          }),
-          max_supply: 10,
-        },
+        config: bookConfig,
       })
       .then((tx) => tx.wait());
 
@@ -232,27 +223,16 @@ describe("BookNFTToken batch actions", () => {
       }, 20000);
     });
 
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+
     likeProtocolOwnerSigner
       .newBookNFT({
         creator: this.classOwner,
         updaters: [this.classOwner, this.likerLand],
         minters: [this.classOwner, this.likerLand],
-        config: {
-          name: "My Book",
-          symbol: "KOOB",
-          metadata: JSON.stringify({
-            name: "Collection Name",
-            symbol: "Collection SYMB",
-            description: "Collection Description",
-            image:
-              "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-            banner_image: "",
-            featured_image: "",
-            external_link: "https://www.example.com",
-            collaborators: [],
-          }),
-          max_supply: 10,
-        },
+        config: bookConfig,
       })
       .then((tx) => tx.wait());
 
@@ -419,5 +399,129 @@ describe("BookNFTToken batch actions", () => {
     expect(await likeNFTClassOwnerSigner.ownerOf(2)).to.equal(
       this.likerLand.address,
     );
+  });
+});
+
+describe("BookNFTToken Burnable", () => {
+  before(async function () {
+    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
+    const [protocolOwner, classOwner, likerLand, randomSigner, randomSigner2] =
+      await ethers.getSigners();
+
+    this.protocolOwner = protocolOwner;
+    this.classOwner = classOwner;
+    this.likerLand = likerLand;
+    this.randomSigner = randomSigner;
+    this.randomSigner2 = randomSigner2;
+  });
+
+  let deployment: BaseContract;
+  let contractAddress: string;
+  let protocolContract: BaseContract;
+  let nftClassId: string;
+  let nftClassContract: BaseContract;
+  beforeEach(async function () {
+    const {
+      likeProtocol,
+      likeProtocolDeployment,
+      likeProtocolAddress,
+      likeProtocolContract,
+      bookNFTDeployment,
+      bookNFTAddress,
+    } = await createProtocol(this.protocolOwner);
+
+    deployment = likeProtocolDeployment;
+    contractAddress = likeProtocolAddress;
+    protocolContract = likeProtocolContract;
+    const likeProtocolOwnerSigner = protocolContract.connect(
+      this.protocolOwner,
+    );
+
+    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
+      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
+        event.removeListener();
+        resolve({ id });
+      });
+
+      setTimeout(() => {
+        reject(new Error("timeout"));
+      }, 20000);
+    });
+
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+
+    likeProtocolOwnerSigner
+      .newBookNFT({
+        creator: this.classOwner,
+        updaters: [this.classOwner, this.likerLand],
+        minters: [this.classOwner, this.likerLand],
+        config: bookConfig,
+      })
+      .then((tx) => tx.wait());
+
+    const newClassEvent = await NewClassEvent;
+    nftClassId = newClassEvent.id;
+    nftClassContract = await ethers.getContractAt("BookNFT", nftClassId);
+
+    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    await likeNFTClassOwnerSigner
+      .mint(
+        this.classOwner,
+        ["_mint1"],
+        [
+          JSON.stringify({
+            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+            image_data: "",
+            external_url: "https://www.google.com",
+            description: "#0001 Description",
+            name: "#0001",
+            attributes: [
+              {
+                trait_type: "ISCN ID",
+                value:
+                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+              },
+            ],
+            background_color: "",
+            animation_url: "",
+            youtube_url: "",
+          }),
+        ],
+      )
+      .then((tx) => tx.wait());
+  });
+
+  it("owner should be able to burn NFT", async function () {
+    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    expect(await likeNFTClassOwnerSigner.ownerOf(0)).to.equal(
+      this.classOwner.address,
+    );
+    await expect(likeNFTClassOwnerSigner.burn(0).then((tx) => tx.wait())).to.be
+      .not.rejected;
+    await expect(likeNFTClassOwnerSigner.ownerOf(0)).to.be.rejectedWith(
+      /ERC721NonexistentToken/,
+    );
+  });
+
+  it("should not able to burn NFT owned by other", async function () {
+    const likeNFTClassRandomSigner = nftClassContract.connect(
+      this.randomSigner,
+    );
+    await expect(
+      likeNFTClassRandomSigner.burn(0).then((tx) => tx.wait()),
+    ).to.be.rejectedWith(/ERC721InsufficientApproval/);
+
+    expect(await likeNFTClassRandomSigner.ownerOf(0)).to.equal(
+      this.classOwner.address,
+    );
+  });
+
+  it("should count the total supply correctly after burn", async function () {
+    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    expect(await likeNFTClassOwnerSigner.totalSupply()).to.equal(1n);
+    await likeNFTClassOwnerSigner.burn(0);
+    expect(await likeNFTClassOwnerSigner.totalSupply()).to.equal(0n);
   });
 });

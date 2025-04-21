@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {ERC721EnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import {ERC721BurnableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -21,6 +22,7 @@ error ErrTokenIdMintFails(uint256 nextTokenId);
 contract BookNFT is
     Initializable,
     ERC721EnumerableUpgradeable,
+    ERC721BurnableUpgradeable,
     OwnableUpgradeable,
     AccessControlUpgradeable
 {
@@ -80,6 +82,7 @@ contract BookNFT is
     function initialize(MsgNewBookNFT memory msgNewBookNFT) public initializer {
         __ERC721_init(msgNewBookNFT.config.name, msgNewBookNFT.config.symbol);
         __ERC721Enumerable_init();
+        __ERC721Burnable_init();
         __Ownable_init(msgNewBookNFT.creator);
         __AccessControl_init();
 
@@ -101,17 +104,42 @@ contract BookNFT is
         }
     }
 
+    // Start of inheritence resolve
     function supportsInterface(
         bytes4 interfaceId
     )
         public
         view
         virtual
-        override(ERC721EnumerableUpgradeable, AccessControlUpgradeable)
+        override(
+            ERC721Upgradeable,
+            ERC721EnumerableUpgradeable,
+            AccessControlUpgradeable
+        )
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
     }
+
+    function _increaseBalance(
+        address account,
+        uint128 amount
+    ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
+        super._increaseBalance(account, amount);
+    }
+
+    function _update(
+        address to,
+        uint256 tokenId,
+        address auth
+    )
+        internal
+        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
+        returns (address)
+    {
+        return super._update(to, tokenId, auth);
+    }
+    // End of inheritence resolve
 
     function _validateBookConfig(BookConfig memory config) internal pure {
         if (bytes(config.name).length == 0) {
