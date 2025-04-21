@@ -1,6 +1,7 @@
 GIT_SHORT_HASH ?= $(shell git rev-parse --short=8 HEAD)
 TAG ?= $(GIT_SHORT_HASH)
-DEPLOY_DEV_DOCKER_IMAGE_NAME ?= chankiyu22/likenft-indexer
+DOCKER_REGISTRY ?= likecoin
+DEPLOY_DEV_DOCKER_IMAGE_NAME ?= $(DOCKER_REGISTRY)/likenft-indexer
 DOCKER_BUILD_ARGS ?=
 
 -include .env
