@@ -5,7 +5,7 @@ likecoinMigration:
   name: likecoin-migration
 
   container:
-    imageRepository: oursky/likecoin-migration
+    imageRepository: likecoin/likecoin-migration
     imagePullPolicy: IfNotPresent
     port: 80
     restartPolicy: Always
@@ -19,7 +19,7 @@ likenftMigration:
   name: likenft-migration
 
   container:
-    imageRepository: oursky/likenft-migration
+    imageRepository: likecoin/likenft-migration
     imagePullPolicy: IfNotPresent
     port: 80
     restartPolicy: Always
@@ -37,7 +37,7 @@ migrationAdmin:
     imagePullPolicy: IfNotPresent
     
   container:
-    imageRepository: oursky/migration-admin
+    imageRepository: likecoin/migration-admin
     imagePullPolicy: IfNotPresent
     port: 80
     restartPolicy: Always
@@ -51,7 +51,7 @@ migrationBackend:
   name: migration-backend
 
   container:
-    imageRepository: oursky/like-migration-backend
+    imageRepository: likecoin/like-migration-backend
     imagePullPolicy: IfNotPresent
     port: 8091
 
@@ -74,7 +74,7 @@ signerBackend:
   name: signer-backend
 
   container:
-    imageRepository: oursky/like-signer-backend
+    imageRepository: likecoin/like-signer-backend
     imagePullPolicy: IfNotPresent
     port: 8091
 
@@ -97,7 +97,7 @@ likenftIndexer:
   name: likenft-indexer
 
   container:
-    imageRepository: oursky/likenft-indexer
+    imageRepository: likecoin/likenft-indexer
     imagePullPolicy: IfNotPresent
 
   api:
