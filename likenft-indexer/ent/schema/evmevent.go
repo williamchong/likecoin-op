@@ -23,6 +23,9 @@ func (EVMEvent) Fields() []ent.Field {
 		// E.g. mint multiple
 		field.String("transaction_hash").NotEmpty(),
 		field.Uint("transaction_index"),
+		field.Uint64("chain_id").GoType(typeutil.Uint64(0)).
+			SchemaType(typeutil.Uint64SchemaType).
+			ValueScanner(typeutil.Uint64ValueScanner),
 		field.String("block_hash").NotEmpty(),
 		field.Uint64("block_number").GoType(typeutil.Uint64(0)).
 			SchemaType(typeutil.Uint64SchemaType).
@@ -47,6 +50,10 @@ func (EVMEvent) Fields() []ent.Field {
 			"processed",
 			"failed",
 		),
+		field.String("name"),
+		field.String("signature"),
+		field.JSON("indexed_params", map[string]any{}),
+		field.JSON("non_indexed_params", map[string]any{}),
 		field.String("failed_reason").Nillable().Optional(),
 		field.Time("timestamp"),
 	}
@@ -68,6 +75,7 @@ func (EVMEvent) Indexes() []ent.Index {
 		index.Fields("block_number"),
 		index.Fields("log_index"),
 		index.Fields("address"),
+		index.Fields("signature"),
 	}
 }
 

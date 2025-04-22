@@ -34,6 +34,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "transaction_hash", Type: field.TypeString},
 		{Name: "transaction_index", Type: field.TypeUint},
+		{Name: "chain_id", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
 		{Name: "block_hash", Type: field.TypeString},
 		{Name: "block_number", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
 		{Name: "log_index", Type: field.TypeUint},
@@ -50,6 +51,10 @@ var (
 		{Name: "data_hex", Type: field.TypeString, Nullable: true},
 		{Name: "removed", Type: field.TypeBool},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"received", "enqueued", "processing", "processed", "failed"}},
+		{Name: "name", Type: field.TypeString},
+		{Name: "signature", Type: field.TypeString},
+		{Name: "indexed_params", Type: field.TypeJSON},
+		{Name: "non_indexed_params", Type: field.TypeJSON},
 		{Name: "failed_reason", Type: field.TypeString, Nullable: true},
 		{Name: "timestamp", Type: field.TypeTime},
 	}
@@ -62,22 +67,27 @@ var (
 			{
 				Name:    "evmevent_transaction_hash_transaction_index_block_number_log_index",
 				Unique:  true,
-				Columns: []*schema.Column{EvmEventsColumns[1], EvmEventsColumns[2], EvmEventsColumns[4], EvmEventsColumns[5]},
+				Columns: []*schema.Column{EvmEventsColumns[1], EvmEventsColumns[2], EvmEventsColumns[5], EvmEventsColumns[6]},
 			},
 			{
 				Name:    "evmevent_block_number",
 				Unique:  false,
-				Columns: []*schema.Column{EvmEventsColumns[4]},
+				Columns: []*schema.Column{EvmEventsColumns[5]},
 			},
 			{
 				Name:    "evmevent_log_index",
 				Unique:  false,
-				Columns: []*schema.Column{EvmEventsColumns[5]},
+				Columns: []*schema.Column{EvmEventsColumns[6]},
 			},
 			{
 				Name:    "evmevent_address",
 				Unique:  false,
-				Columns: []*schema.Column{EvmEventsColumns[6]},
+				Columns: []*schema.Column{EvmEventsColumns[7]},
+			},
+			{
+				Name:    "evmevent_signature",
+				Unique:  false,
+				Columns: []*schema.Column{EvmEventsColumns[21]},
 			},
 		},
 	}

@@ -1,7 +1,8 @@
 
 GIT_SHORT_HASH ?= $(shell git rev-parse --short=8 HEAD)
 TAG ?= $(GIT_SHORT_HASH)
-DEPLOY_DEV_DOCKER_IMAGE_NAME ?= chankiyu22/like-migration-backend
+DOCKER_REGISTRY ?= likecoin
+DEPLOY_DEV_DOCKER_IMAGE_NAME ?= $(DOCKER_REGISTRY)/like-migration-backend
 DOCKER_BUILD_ARGS ?=
 
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))

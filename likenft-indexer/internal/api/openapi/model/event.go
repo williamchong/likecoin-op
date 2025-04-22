@@ -7,7 +7,7 @@ import (
 	"likenft-indexer/openapi/api"
 )
 
-func MakeEvent(e *ent.EVMEvent) api.Event {
+func MakeEvent(e *ent.EVMEvent) (api.Event, error) {
 	data := ""
 
 	if e.Data != nil {
@@ -27,8 +27,18 @@ func MakeEvent(e *ent.EVMEvent) api.Event {
 		}
 	}
 
+	indexedParams, err := MakeAPIAdditionalProps(e.IndexedParams)
+	if err != nil {
+		return api.Event{}, err
+	}
+
+	nonIndexedParams, err := MakeAPIAdditionalProps(e.NonIndexedParams)
+	if err != nil {
+		return api.Event{}, err
+	}
+
 	return api.Event{
-		ChainID:          0,
+		ChainID:          int(e.ChainID),
 		BlockNumber:      strconv.FormatUint(uint64(e.BlockNumber), 10),
 		BlockHash:        e.BlockHash,
 		BlockTimestamp:   strconv.FormatInt(e.Timestamp.Unix(), 10),
@@ -39,10 +49,10 @@ func MakeEvent(e *ent.EVMEvent) api.Event {
 		Data:             data,
 		Topics:           topics,
 		Decoded: api.EventDecoded{
-			Name:             e.Topic0,
-			Signature:        "",
-			IndexedParams:    api.EventDecodedIndexedParams{},
-			NonIndexedParams: api.EventDecodedNonIndexedParams{},
+			Name:             e.Name,
+			Signature:        e.Signature,
+			IndexedParams:    api.EventDecodedIndexedParams(indexedParams),
+			NonIndexedParams: api.EventDecodedNonIndexedParams(nonIndexedParams),
 		},
-	}
+	}, nil
 }

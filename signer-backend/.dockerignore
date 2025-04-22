@@ -1,0 +1,8 @@
+.env*
+vendor/
+
+.dockerignore
+.git
+*Dockerfile*
+*docker-compose*
+.gitignore

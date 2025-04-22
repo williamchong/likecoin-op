@@ -31,7 +31,11 @@ func (h *OpenAPIHandler) Events(ctx context.Context, params api.EventsParams) (*
 	apiEvents := make([]api.Event, len(events))
 
 	for i, n := range events {
-		apiEvents[i] = model.MakeEvent(n)
+		apiEvent, err := model.MakeEvent(n)
+		if err != nil {
+			return nil, err
+		}
+		apiEvents[i] = apiEvent
 	}
 
 	return &api.EventsOK{

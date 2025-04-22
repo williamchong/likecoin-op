@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/ent/schema/typeutil"
@@ -22,6 +23,8 @@ type EVMEvent struct {
 	TransactionHash string `json:"transaction_hash,omitempty"`
 	// TransactionIndex holds the value of the "transaction_index" field.
 	TransactionIndex uint `json:"transaction_index,omitempty"`
+	// ChainID holds the value of the "chain_id" field.
+	ChainID typeutil.Uint64 `json:"chain_id,omitempty"`
 	// BlockHash holds the value of the "block_hash" field.
 	BlockHash string `json:"block_hash,omitempty"`
 	// BlockNumber holds the value of the "block_number" field.
@@ -54,6 +57,14 @@ type EVMEvent struct {
 	Removed bool `json:"removed,omitempty"`
 	// Status holds the value of the "status" field.
 	Status evmevent.Status `json:"status,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
+	// Signature holds the value of the "signature" field.
+	Signature string `json:"signature,omitempty"`
+	// IndexedParams holds the value of the "indexed_params" field.
+	IndexedParams map[string]interface{} `json:"indexed_params,omitempty"`
+	// NonIndexedParams holds the value of the "non_indexed_params" field.
+	NonIndexedParams map[string]interface{} `json:"non_indexed_params,omitempty"`
 	// FailedReason holds the value of the "failed_reason" field.
 	FailedReason *string `json:"failed_reason,omitempty"`
 	// Timestamp holds the value of the "timestamp" field.
@@ -66,14 +77,18 @@ func (*EVMEvent) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case evmevent.FieldIndexedParams, evmevent.FieldNonIndexedParams:
+			values[i] = new([]byte)
 		case evmevent.FieldRemoved:
 			values[i] = new(sql.NullBool)
 		case evmevent.FieldID, evmevent.FieldTransactionIndex, evmevent.FieldLogIndex:
 			values[i] = new(sql.NullInt64)
-		case evmevent.FieldTransactionHash, evmevent.FieldBlockHash, evmevent.FieldAddress, evmevent.FieldTopic0, evmevent.FieldTopic0Hex, evmevent.FieldTopic1, evmevent.FieldTopic1Hex, evmevent.FieldTopic2, evmevent.FieldTopic2Hex, evmevent.FieldTopic3, evmevent.FieldTopic3Hex, evmevent.FieldData, evmevent.FieldDataHex, evmevent.FieldStatus, evmevent.FieldFailedReason:
+		case evmevent.FieldTransactionHash, evmevent.FieldBlockHash, evmevent.FieldAddress, evmevent.FieldTopic0, evmevent.FieldTopic0Hex, evmevent.FieldTopic1, evmevent.FieldTopic1Hex, evmevent.FieldTopic2, evmevent.FieldTopic2Hex, evmevent.FieldTopic3, evmevent.FieldTopic3Hex, evmevent.FieldData, evmevent.FieldDataHex, evmevent.FieldStatus, evmevent.FieldName, evmevent.FieldSignature, evmevent.FieldFailedReason:
 			values[i] = new(sql.NullString)
 		case evmevent.FieldTimestamp:
 			values[i] = new(sql.NullTime)
+		case evmevent.FieldChainID:
+			values[i] = evmevent.ValueScanner.ChainID.ScanValue()
 		case evmevent.FieldBlockNumber:
 			values[i] = evmevent.ValueScanner.BlockNumber.ScanValue()
 		default:
@@ -108,6 +123,12 @@ func (ee *EVMEvent) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field transaction_index", values[i])
 			} else if value.Valid {
 				ee.TransactionIndex = uint(value.Int64)
+			}
+		case evmevent.FieldChainID:
+			if value, err := evmevent.ValueScanner.ChainID.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				ee.ChainID = value
 			}
 		case evmevent.FieldBlockHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -213,6 +234,34 @@ func (ee *EVMEvent) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ee.Status = evmevent.Status(value.String)
 			}
+		case evmevent.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				ee.Name = value.String
+			}
+		case evmevent.FieldSignature:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field signature", values[i])
+			} else if value.Valid {
+				ee.Signature = value.String
+			}
+		case evmevent.FieldIndexedParams:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field indexed_params", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &ee.IndexedParams); err != nil {
+					return fmt.Errorf("unmarshal field indexed_params: %w", err)
+				}
+			}
+		case evmevent.FieldNonIndexedParams:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field non_indexed_params", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &ee.NonIndexedParams); err != nil {
+					return fmt.Errorf("unmarshal field non_indexed_params: %w", err)
+				}
+			}
 		case evmevent.FieldFailedReason:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field failed_reason", values[i])
@@ -267,6 +316,9 @@ func (ee *EVMEvent) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("transaction_index=")
 	builder.WriteString(fmt.Sprintf("%v", ee.TransactionIndex))
+	builder.WriteString(", ")
+	builder.WriteString("chain_id=")
+	builder.WriteString(fmt.Sprintf("%v", ee.ChainID))
 	builder.WriteString(", ")
 	builder.WriteString("block_hash=")
 	builder.WriteString(ee.BlockHash)
@@ -331,6 +383,18 @@ func (ee *EVMEvent) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", ee.Status))
+	builder.WriteString(", ")
+	builder.WriteString("name=")
+	builder.WriteString(ee.Name)
+	builder.WriteString(", ")
+	builder.WriteString("signature=")
+	builder.WriteString(ee.Signature)
+	builder.WriteString(", ")
+	builder.WriteString("indexed_params=")
+	builder.WriteString(fmt.Sprintf("%v", ee.IndexedParams))
+	builder.WriteString(", ")
+	builder.WriteString("non_indexed_params=")
+	builder.WriteString(fmt.Sprintf("%v", ee.NonIndexedParams))
 	builder.WriteString(", ")
 	if v := ee.FailedReason; v != nil {
 		builder.WriteString("failed_reason=")

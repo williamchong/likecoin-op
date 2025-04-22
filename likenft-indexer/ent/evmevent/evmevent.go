@@ -19,6 +19,8 @@ const (
 	FieldTransactionHash = "transaction_hash"
 	// FieldTransactionIndex holds the string denoting the transaction_index field in the database.
 	FieldTransactionIndex = "transaction_index"
+	// FieldChainID holds the string denoting the chain_id field in the database.
+	FieldChainID = "chain_id"
 	// FieldBlockHash holds the string denoting the block_hash field in the database.
 	FieldBlockHash = "block_hash"
 	// FieldBlockNumber holds the string denoting the block_number field in the database.
@@ -51,6 +53,14 @@ const (
 	FieldRemoved = "removed"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldSignature holds the string denoting the signature field in the database.
+	FieldSignature = "signature"
+	// FieldIndexedParams holds the string denoting the indexed_params field in the database.
+	FieldIndexedParams = "indexed_params"
+	// FieldNonIndexedParams holds the string denoting the non_indexed_params field in the database.
+	FieldNonIndexedParams = "non_indexed_params"
 	// FieldFailedReason holds the string denoting the failed_reason field in the database.
 	FieldFailedReason = "failed_reason"
 	// FieldTimestamp holds the string denoting the timestamp field in the database.
@@ -64,6 +74,7 @@ var Columns = []string{
 	FieldID,
 	FieldTransactionHash,
 	FieldTransactionIndex,
+	FieldChainID,
 	FieldBlockHash,
 	FieldBlockNumber,
 	FieldLogIndex,
@@ -80,6 +91,10 @@ var Columns = []string{
 	FieldDataHex,
 	FieldRemoved,
 	FieldStatus,
+	FieldName,
+	FieldSignature,
+	FieldIndexedParams,
+	FieldNonIndexedParams,
 	FieldFailedReason,
 	FieldTimestamp,
 }
@@ -107,6 +122,7 @@ var (
 	Topic0HexValidator func(string) error
 	// ValueScanner of all EVMEvent fields.
 	ValueScanner struct {
+		ChainID     field.TypeValueScanner[typeutil.Uint64]
 		BlockNumber field.TypeValueScanner[typeutil.Uint64]
 	}
 )
@@ -153,6 +169,11 @@ func ByTransactionHash(opts ...sql.OrderTermOption) OrderOption {
 // ByTransactionIndex orders the results by the transaction_index field.
 func ByTransactionIndex(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTransactionIndex, opts...).ToFunc()
+}
+
+// ByChainID orders the results by the chain_id field.
+func ByChainID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldChainID, opts...).ToFunc()
 }
 
 // ByBlockHash orders the results by the block_hash field.
@@ -233,6 +254,16 @@ func ByRemoved(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// BySignature orders the results by the signature field.
+func BySignature(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSignature, opts...).ToFunc()
 }
 
 // ByFailedReason orders the results by the failed_reason field.
