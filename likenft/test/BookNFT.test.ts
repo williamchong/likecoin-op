@@ -4,6 +4,7 @@ import { ethers, upgrades } from "hardhat";
 
 import { BookConfigLoader } from "./BookConfigLoader";
 import { createProtocol } from "./ProtocolFactory";
+
 describe("BookNFTClass", () => {
   before(async function () {
     this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
