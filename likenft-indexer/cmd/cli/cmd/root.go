@@ -37,4 +37,5 @@ func init() {
 	rootCmd.AddCommand(AcquireAllBookNFTEvmEvents)
 	rootCmd.AddCommand(ProcessAllEVMEventCmd)
 	rootCmd.AddCommand(ProcessEVMEventCmd)
+	rootCmd.AddCommand(RecalculateEvmEventsDecodedParamsCmd)
 }
