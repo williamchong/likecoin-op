@@ -634,7 +634,6 @@ export default Vue.extend({
       const { offlineSigner } = s.connection;
       const client = await SigningStargateClient.connectWithSigner(
         this.$likeCoinWalletConnector.options.rpcURL,
-        // @ts-expect-error
         offlineSigner
       );
 
