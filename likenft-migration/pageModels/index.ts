@@ -18,6 +18,13 @@ export interface StepStateStep2Init {
   state: 'Init';
 }
 
+export interface StepStateStep2AuthcoreRedirected {
+  step: 2;
+  state: 'AuthcoreRedirected';
+  method: string | (string | null)[];
+  code: string | (string | null)[];
+}
+
 export interface StepStateStep2CosmosConnected {
   step: 2;
   state: 'CosmosConnected';
@@ -132,6 +139,7 @@ export interface StepStateFailed {
 export type StepState =
   | StepStateStep1
   | StepStateStep2Init
+  | StepStateStep2AuthcoreRedirected
   | StepStateStep2CosmosConnected
   | StepStateStep2LikerIdResolved
   | StepStateStep2LikerIdEvmConnected
@@ -146,6 +154,28 @@ export type StepState =
   | StepStateFailed;
 
 export function introductionConfirmed(_: StepStateStep1): StepStateStep2Init {
+  return {
+    step: 2,
+    state: 'Init',
+  };
+}
+
+export function authcoreRedirected(
+  _: StepState,
+  method: string | (string | null)[],
+  code: string | (string | null)[]
+): StepStateStep2AuthcoreRedirected {
+  return {
+    step: 2,
+    state: 'AuthcoreRedirected',
+    method,
+    code,
+  };
+}
+
+export function authcoreRedirectionFailed(
+  _: StepStateStep2AuthcoreRedirected
+): StepStateStep2Init {
   return {
     step: 2,
     state: 'Init',
