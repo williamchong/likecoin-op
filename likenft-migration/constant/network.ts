@@ -23,6 +23,10 @@ export function LIKECOIN_WALLET_CONNECTOR_CONFIG(
   isTestnet: boolean,
   authcoreRedirectUrl: string
 ): LikeCoinWalletConnectorConfig {
+  // Retain params when redirect
+  const searchParams = new URL(document.location.toString()).searchParams;
+  searchParams.set('method', LikeCoinWalletConnectorMethodType.LikerId);
+
   return {
     chainId: LIKECOIN_CHAIN_ID(isTestnet),
     chainName: LIKECOIN_CHAIN_NAME(isTestnet),
@@ -66,7 +70,7 @@ export function LIKECOIN_WALLET_CONNECTOR_CONFIG(
     cosmostationDirectSignEnabled: true,
     authcoreClientId: 'likecoin-app-hidesocial', // 'likecoin-app' if not hide
     authcoreApiHost: AUTHCORE_API_HOST(isTestnet),
-    authcoreRedirectUrl: `${authcoreRedirectUrl}/auth/redirect?method=${LikeCoinWalletConnectorMethodType.LikerId}`,
+    authcoreRedirectUrl: `${authcoreRedirectUrl}/auth/redirect?${searchParams.toString()}`,
   };
 }
 
