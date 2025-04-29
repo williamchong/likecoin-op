@@ -200,6 +200,7 @@
         </StepSection>
       </div>
     </div>
+    <DelayedFullScreenLoading :is-loading="isTransitioning" />
   </div>
 </template>
 
