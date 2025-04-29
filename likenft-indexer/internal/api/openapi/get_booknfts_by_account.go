@@ -48,13 +48,13 @@ func (h *OpenAPIHandler) BookNFTsByAccount(
 	apiBookNFTs := make([]api.BookNFT, len(bookNFTs))
 
 	for i, n := range bookNFTs {
-		metadataAdditionalProps, err := model.MakeAPIAdditionalProps(n.Metadata.AdditionalProps)
+		apin, err := model.MakeNFTClass(n)
 
 		if err != nil {
 			return nil, err
 		}
 
-		apiBookNFTs[i] = model.MakeNFTClass(n, metadataAdditionalProps)
+		apiBookNFTs[i] = *apin
 	}
 
 	return &api.BookNFTsByAccountOK{

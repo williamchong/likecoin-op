@@ -4,14 +4,24 @@ import (
 	"likenft-indexer/ent"
 	"likenft-indexer/internal/evm/model"
 	"likenft-indexer/openapi/api"
+
+	"github.com/go-faster/jx"
 )
 
-func MakeNFTClass(e *ent.NFTClass, metadataAdditionalProps APIAdditionalProps) api.BookNFT {
-	var opensea *model.ContractLevelMetadataOpenSea
+func MakeNFTClass(e *ent.NFTClass) (*api.BookNFT, error) {
+	var (
+		opensea                 *model.ContractLevelMetadataOpenSea
+		metadataAdditionalProps = make(map[string]jx.Raw)
+		err                     error
+	)
 	if e.Metadata != nil {
 		opensea = &e.Metadata.ContractLevelMetadataOpenSea
+		metadataAdditionalProps, err = MakeAPIAdditionalProps(e.Metadata.AdditionalProps)
 	}
-	return api.BookNFT{
+	if err != nil {
+		return nil, err
+	}
+	return &api.BookNFT{
 		ID:                  e.ID,
 		Address:             e.Address,
 		Name:                e.Name,
@@ -27,5 +37,5 @@ func MakeNFTClass(e *ent.NFTClass, metadataAdditionalProps APIAdditionalProps) a
 		MintedAt:            e.MintedAt,
 		UpdatedAt:           e.UpdatedAt,
 		Owner:               MakeOptAccount(e.Edges.Owner),
-	}
+	}, nil
 }

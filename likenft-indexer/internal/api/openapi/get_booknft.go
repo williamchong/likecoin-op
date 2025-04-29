@@ -15,12 +15,11 @@ func (h *OpenAPIHandler) BookNFT(ctx context.Context, params api.BookNFTParams) 
 		return nil, err
 	}
 
-	metadataAdditionalProps, err := model.MakeAPIAdditionalProps(nftclass.Metadata.AdditionalProps)
+	apiNftClass, err := model.MakeNFTClass(nftclass)
 
 	if err != nil {
 		return nil, err
 	}
 
-	apiNftClass := model.MakeNFTClass(nftclass, metadataAdditionalProps)
-	return &apiNftClass, nil
+	return apiNftClass, nil
 }
