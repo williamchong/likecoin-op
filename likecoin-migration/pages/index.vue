@@ -200,6 +200,7 @@
         </StepSection>
       </div>
     </div>
+    <DelayedFullScreenLoading :is-loading="isTransitioning" />
   </div>
 </template>
 
@@ -252,6 +253,8 @@ import {
   isViewCoin,
 } from '~/models/cosmosNetworkConfig';
 import {
+  authcoreRedirected,
+  authcoreRedirectionFailed,
   completedMigrationResolved,
   EitherEthConnected,
   EthConnected,
@@ -270,8 +273,10 @@ import {
   pollingMigrationResolved,
   restart,
   StepState,
+  StepStateStep2AuthcoreRedirected,
   StepStateStep2CosmosConnected,
   StepStateStep2GasEstimated,
+  StepStateStep2Init,
   StepStateStep2LikerIdResolved,
   StepStateStep3AwaitSignature,
   StepStateStep4Failed,
@@ -434,21 +439,57 @@ export default Vue.extend({
       const { code, method, ...query } = this.$route.query;
       if (method && code) {
         this.$router.replace({ query });
-        const connection = await this.$likeCoinWalletConnector.handleRedirect(
-          method as LikeCoinWalletConnectorMethodType,
-          { code }
+        await this.handleLikeCoinWalletAuthcoreRedirected(method, code);
+      }
+    },
+
+    async handleLikeCoinWalletAuthcoreRedirected(
+      method: string | (string | null)[],
+      code: string | (string | null)[]
+    ) {
+      this.currentStep = authcoreRedirected(this.currentStep, method, code);
+      this.currentStep = await this._asyncStateTransition(
+        this.currentStep,
+        (s) => this._handleAuthcoreRedirect(s)
+      );
+
+      if (this.currentStep.state === 'CosmosConnected') {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          this._resolveLikerId
         );
-        if (connection != null) {
-          if ('method' in connection) {
-            const {
-              accounts: [account],
-            } = connection;
-            await this.handleLikeCoinWalletConnected(
-              account.address,
-              connection
-            );
-          }
-        }
+      }
+
+      if (this.currentStep.state === 'LikerIdResolved') {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          this._estimateBalance
+        );
+      }
+
+      if (this.currentStep.state === 'GasEstimated') {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          this._getLatestMigration
+        );
+      }
+
+      if (
+        this.currentStep.step === 2 &&
+        this.currentStep.state === 'GasEstimated' &&
+        isEthConnected(this.currentStep)
+      ) {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          this._resolveEvmSigningMessage
+        );
+      }
+
+      if (this.currentStep.step === 4 && this.currentStep.state === 'Pending') {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          this._sendCosmosToken
+        );
       }
     },
 
@@ -615,6 +656,28 @@ export default Vue.extend({
       } finally {
         this.isTransitioning = false;
       }
+    },
+
+    async _handleAuthcoreRedirect(
+      currentStep: EitherEthConnected<StepStateStep2AuthcoreRedirected>
+    ): Promise<
+      | EitherEthConnected<StepStateStep2CosmosConnected>
+      | EitherEthConnected<StepStateStep2Init>
+    > {
+      const { method, code } = currentStep;
+      const connection = await this.$likeCoinWalletConnector.handleRedirect(
+        method as LikeCoinWalletConnectorMethodType,
+        { code }
+      );
+      if (connection != null) {
+        if ('method' in connection) {
+          const {
+            accounts: [account],
+          } = connection;
+          return initCosmosConnected(currentStep, account.address, connection);
+        }
+      }
+      return authcoreRedirectionFailed(currentStep);
     },
 
     async _resolveLikerId(

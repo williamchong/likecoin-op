@@ -225,13 +225,14 @@ export default Vue.extend({
   },
   props: {
     loading: {
-      type: Object as PropType<boolean | undefined>,
+      type: Boolean as PropType<boolean | undefined>,
       required: false,
       default: undefined,
     },
     snapshot: {
       type: Object as PropType<LikeNFTAssetSnapshot | null>,
-      required: true,
+      required: false,
+      default: null,
     },
   },
   data(): Data {
