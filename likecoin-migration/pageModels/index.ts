@@ -56,6 +56,13 @@ export interface StepStateStep2Init {
   state: 'Init';
 }
 
+export interface StepStateStep2AuthcoreRedirected {
+  step: 2;
+  state: 'AuthcoreRedirected';
+  method: string | (string | null)[];
+  code: string | (string | null)[];
+}
+
 export interface StepStateStep2CosmosConnected {
   step: 2;
   state: 'CosmosConnected';
@@ -184,6 +191,7 @@ export interface StepStateStepEnd {
 export type StepState =
   | StepStateStep1
   | EitherEthConnected<StepStateStep2Init>
+  | EitherEthConnected<StepStateStep2AuthcoreRedirected>
   | EitherEthConnected<StepStateStep2CosmosConnected>
   | EitherEthConnected<StepStateStep2LikerIdResolved>
   | EitherEthConnected<StepStateStep2GasEstimated>
@@ -211,6 +219,30 @@ export function evmConnected<S extends { step: 2 }>(
   return {
     ...s,
     ethAddress,
+  };
+}
+
+export function authcoreRedirected(
+  _: StepState,
+  method: string | (string | null)[],
+  code: string | (string | null)[]
+): EitherEthConnected<StepStateStep2AuthcoreRedirected> {
+  return {
+    step: 2,
+    state: 'AuthcoreRedirected',
+    method,
+    code,
+    ethAddress: null,
+  };
+}
+
+export function authcoreRedirectionFailed(
+  _: StepStateStep2AuthcoreRedirected
+): EitherEthConnected<StepStateStep2Init> {
+  return {
+    step: 2,
+    state: 'Init',
+    ethAddress: null,
   };
 }
 
