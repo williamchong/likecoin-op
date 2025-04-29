@@ -104,12 +104,12 @@ export default Vue.extend({
       default: 'label',
     },
     loading: {
-      type: Object as PropType<boolean | undefined>,
+      type: Boolean as PropType<boolean | undefined>,
       required: false,
       default: undefined,
     },
     empty: {
-      type: Object as PropType<string | undefined>,
+      type: String as PropType<string | undefined>,
       required: false,
       default: undefined,
     },
