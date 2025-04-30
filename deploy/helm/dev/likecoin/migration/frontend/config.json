@@ -1,5 +1,5 @@
 {
-  "transitionLoadingScreenDelayMs": 1000,
+  "transitionLoadingScreenDelayMs": 2000,
   "isTestnet": true,
   "apiBaseURL": "https://like-migration-api.pandawork.com",
   "cosmosLikeCoinNetworkConfigPath": "/cosmos-network-config.json",
