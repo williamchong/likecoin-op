@@ -16,7 +16,13 @@
       "@/*": ["./*"]
     },
     "resolveJsonModule": true,
-    "types": ["@nuxt/types", "@types/node", "@nuxtjs/i18n", "@nuxtjs/axios"]
+    "types": [
+      "@nuxt/types",
+      "@types/node",
+      "@nuxtjs/i18n",
+      "@nuxtjs/axios",
+      "jest"
+    ]
   },
   "exclude": ["node_modules", ".nuxt", "dist"]
 }

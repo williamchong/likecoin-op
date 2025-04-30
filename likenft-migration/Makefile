@@ -20,11 +20,16 @@ build:
 lint:
 	npm run lint
 
+.PHONY: test
+test:
+	npm run test
+
 .PHONY: ci
 ci:
 	npm run check-format
 	npm run lint
 	npm run check-translations
+	npm run test
 
 .PHONY: docker-image
 docker-image:
