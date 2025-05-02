@@ -9,7 +9,7 @@ metadata:
     helm.sh/hook: pre-install,pre-upgrade
 type: Opaque
 stringData:
-  DB_CONNECTION_STR: {{ .Values.signerBackend.env.DATABASE_URL | quote }}
+  DB_CONNECTION_STR: {{ .Values.signerBackend.env.DB_CONNECTION_STR | quote }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -27,10 +27,11 @@ spec:
       - name: {{ .Values.signerBackend.name }}
         image: {{ .Values.signerBackend.container.imageRepository }}:{{ .Values.appVersion }}
         imagePullPolicy: {{ .Values.signerBackend.container.imagePullPolicy}}
-        command: ['go', 'run', 'github.com/rubenv/sql-migrate/...@latest', 'up']
+        command: ['sql-migrate', 'up']
         envFrom:
           - secretRef:
               name: {{ .Values.signerBackend.name }}-migrate
         resources:
           {{- toYaml .Values.signerBackend.resources | nindent 12 }}
+      restartPolicy: "{{ .Values.signerBackend.migrate.restartPolicy | default "Never" }}"
   backoffLimit: {{ .Values.signerBackend.migrate.backoffLimit | default 1 }}
