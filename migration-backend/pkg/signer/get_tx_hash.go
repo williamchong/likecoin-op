@@ -2,6 +2,7 @@ package signer
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -44,6 +45,9 @@ func (l *SignerClient) GetTransactionHash(evmTxRequestId uint64) (*GetTransactio
 	err = json.Unmarshal(bodyBytes, &respBody)
 	if err != nil {
 		return nil, err
+	}
+	if respBody.ErrorDescription != "" {
+		return nil, errors.New(respBody.ErrorDescription)
 	}
 	return &respBody, nil
 }
