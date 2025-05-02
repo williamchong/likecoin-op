@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/component: {{ .Values.signerBackend.name }}
+  name: {{ .Values.signerBackend.name }}-migrate
+  namespace: {{ .Values.namespace }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+type: Opaque
+stringData:
+  DB_CONNECTION_STR: {{ .Values.signerBackend.env.DATABASE_URL | quote }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/component: {{ .Values.signerBackend.name }}
+  name: {{ .Values.signerBackend.name }}-migrate
+  namespace: {{ .Values.namespace }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{ .Values.signerBackend.name }}
+        image: {{ .Values.signerBackend.container.imageRepository }}:{{ .Values.appVersion }}
+        imagePullPolicy: {{ .Values.signerBackend.container.imagePullPolicy}}
+        command: ['go', 'run', 'github.com/rubenv/sql-migrate/...@latest', 'up']
+        envFrom:
+          - secretRef:
+              name: {{ .Values.signerBackend.name }}-migrate
+        resources:
+          {{- toYaml .Values.signerBackend.resources | nindent 12 }}
+  backoffLimit: {{ .Values.signerBackend.migrate.backoffLimit | default 1 }}

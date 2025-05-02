@@ -73,6 +73,9 @@ migrationBackend:
 signerBackend:
   name: signer-backend
 
+  migrate:
+    backoffLimit: {}
+
   container:
     imageRepository: likecoin/like-signer-backend
     imagePullPolicy: IfNotPresent
