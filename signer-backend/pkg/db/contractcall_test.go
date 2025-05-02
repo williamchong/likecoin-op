@@ -25,7 +25,7 @@ func TestContractCall(t *testing.T) {
 		})
 		So(err, ShouldBeNil)
 
-		Convey("Inserting large payload should result in index error", func() {
+		Convey("Inserting large payload should not result in constraint error", func() {
 			b, err := os.ReadFile("testdata/contractcall/params_hex_large.bin")
 			if err != nil {
 				t.Fatal(err)
@@ -39,7 +39,7 @@ func TestContractCall(t *testing.T) {
 				ParamsHex:               paramsHexLargeStr,
 				EvmTransactionRequestId: evmTxRequest.Id,
 			})
-			So(err.Error(), ShouldEqual, "pq: index row requires 20008 bytes, maximum size is 8191")
+			So(err, ShouldBeNil)
 		})
 
 		_, err = appdb.InsertContractCall(db, &model.ContractCall{
@@ -58,7 +58,7 @@ func TestContractCall(t *testing.T) {
 				EvmTransactionRequestId: evmTxRequest.Id,
 			})
 			So(err, ShouldNotBeNil)
-			So(err.Error(), ShouldEqual, `pq: duplicate key value violates unique constraint "contract_call_contract_address_method_params_hex_key"`)
+			So(err.Error(), ShouldEqual, `pq: conflicting key value violates exclusion constraint "contract_call_contract_address_method_params_hex_key"`)
 		})
 	})
 }
