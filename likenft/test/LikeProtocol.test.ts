@@ -153,6 +153,52 @@ describe("LikeProtocol", () => {
     const _newNFTClass = await ethers.getContractAt("BookNFT", classId);
     expect(await _newNFTClass.name()).to.equal("My Book");
     expect(await _newNFTClass.symbol()).to.equal("KOOB");
+    expect(await _newNFTClass.getProtocolBeacon()).to.equal(contractAddress);
+    const [receiver, royaltyAmount] = await _newNFTClass.royaltyInfo(0, 1000);
+    expect(receiver).to.equal(classId);
+    expect(royaltyAmount).to.equal(0n);
+  });
+
+  it("should be able to create new BookNFT with royalty", async function () {
+    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
+
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+    const newClass = async () => {
+      await likeProtocolOwnerSigner
+        .newBookNFTWithRoyalty(
+          {
+            creator: this.ownerSigner,
+            updaters: [this.ownerSigner],
+            minters: [this.ownerSigner],
+            config: bookConfig,
+          },
+          100,
+        )
+        .then((tx) => tx.wait());
+    };
+
+    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
+      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
+        event.removeListener();
+        resolve({ id });
+      });
+
+      setTimeout(() => {
+        reject(new Error("timeout"));
+      }, 20000);
+    });
+
+    await expect(newClass()).to.be.not.rejected;
+    const newClassEvent = await NewClassEvent;
+    const classId = newClassEvent.id;
+
+    expect(classId).to.not.equal(bookNFTContractAddress);
+    const _newNFTClass = await ethers.getContractAt("BookNFT", classId);
+    const [receiver, royaltyAmount] = await _newNFTClass.royaltyInfo(0, 1000);
+    expect(receiver).to.equal(classId);
+    expect(royaltyAmount).to.equal(10n);
   });
 
   it("should mint a already initialized BookNFT which cant be initialized again", async function () {

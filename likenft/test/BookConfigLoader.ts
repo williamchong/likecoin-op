@@ -9,3 +9,12 @@ export const BookConfigLoader = {
     return bookConfigJson;
   },
 };
+
+export const BookTokenConfigLoader = {
+  load: (path: string) => {
+    const bookTokenConfig = fs.readFileSync(path, "utf8");
+    const bookTokenConfigJson = JSON.parse(bookTokenConfig);
+    const tokenString = JSON.stringify(bookTokenConfigJson);
+    return tokenString;
+  },
+};

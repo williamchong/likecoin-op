@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { EventLog, BaseContract } from "ethers";
 import { ethers, upgrades } from "hardhat";
 
-import { BookConfigLoader } from "./BookConfigLoader";
+import { BookConfigLoader, BookTokenConfigLoader } from "./BookConfigLoader";
 import { createProtocol } from "./ProtocolFactory";
 
 describe("BookNFTClass", () => {
@@ -461,27 +461,16 @@ describe("BookNFT permission control", () => {
       }, 60000);
     });
 
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+
     likeProtocolOwnerSigner
       .newBookNFT({
         creator: this.classOwner,
         updaters: [this.classOwner, this.likerLand],
         minters: [this.classOwner, this.likerLand],
-        config: {
-          name: "My Book",
-          symbol: "KOOB",
-          metadata: JSON.stringify({
-            name: "Collection Name",
-            symbol: "Collection SYMB",
-            description: "Collection Description",
-            image:
-              "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-            banner_image: "",
-            featured_image: "",
-            external_link: "https://www.example.com",
-            collaborators: [],
-          }),
-          max_supply: 10,
-        },
+        config: bookConfig,
       })
       .then((tx) => tx.wait());
 
@@ -494,47 +483,18 @@ describe("BookNFT permission control", () => {
   it("should allow class owner to mint NFT", async function () {
     const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
 
+    const tokenConfig0 = BookTokenConfigLoader.load(
+      "./test/fixtures/TokenConfig0.json",
+    );
+    const tokenConfig1 = BookTokenConfigLoader.load(
+      "./test/fixtures/TokenConfig1.json",
+    );
     const mintNFT = async () => {
       await likeClassOwnerSigner
         .mint(
           this.likerLand.address,
           ["_mint1", "_mint2"],
-          [
-            JSON.stringify({
-              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-              image_data: "",
-              external_url: "https://www.google.com",
-              description: "202412191729 #0001 Description",
-              name: "202412191729 #0001",
-              attributes: [
-                {
-                  trait_type: "ISCN ID",
-                  value:
-                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-                },
-              ],
-              background_color: "",
-              animation_url: "",
-              youtube_url: "",
-            }),
-            JSON.stringify({
-              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-              image_data: "",
-              external_url: "https://www.google.com",
-              description: "202412191729 #0001 Description",
-              name: "202412191729 #0001",
-              attributes: [
-                {
-                  trait_type: "ISCN ID",
-                  value:
-                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-                },
-              ],
-              background_color: "",
-              animation_url: "",
-              youtube_url: "",
-            }),
-          ],
+          [tokenConfig0, tokenConfig1],
         )
         .then((tx) => tx.wait());
     };
@@ -544,6 +504,32 @@ describe("BookNFT permission control", () => {
     await expect(
       await nftClassContract.balanceOf(this.likerLand.address),
     ).to.equal(2n);
+  });
+
+  it("should not allow random address to mint NFT", async function () {
+    const likeClassRandomSigner = nftClassContract.connect(this.randomSigner);
+
+    const tokenConfig0 = BookTokenConfigLoader.load(
+      "./test/fixtures/TokenConfig0.json",
+    );
+    const tokenConfig1 = BookTokenConfigLoader.load(
+      "./test/fixtures/TokenConfig1.json",
+    );
+    const mintNFT = async () => {
+      await likeClassRandomSigner
+        .mint(
+          this.likerLand.address,
+          ["_mint1", "_mint2"],
+          [tokenConfig0, tokenConfig1],
+        )
+        .then((tx) => tx.wait());
+    };
+
+    await expect(mintNFT()).to.be.rejectedWith("ErrUnauthorized()");
+    await expect(await nftClassContract.totalSupply()).to.equal(0n);
+    await expect(
+      await nftClassContract.balanceOf(this.likerLand.address),
+    ).to.equal(0n);
   });
 });
 
@@ -958,6 +944,118 @@ describe("BookNFT config validation", () => {
         max_supply: 10,
       }),
     ).to.be.not.rejected;
+  });
+});
+
+describe("BookNFT royalty", () => {
+  before(async function () {
+    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
+    this.BookNFTMock = await ethers.getContractFactory("BookNFTMock");
+    const [protocolOwner, classOwner, likerLand, randomSigner] =
+      await ethers.getSigners();
+
+    this.protocolOwner = protocolOwner;
+    this.classOwner = classOwner;
+    this.likerLand = likerLand;
+    this.randomSigner = randomSigner;
+  });
+
+  let deployment: BaseContract;
+  let contractAddress: string;
+  let protocolContract: BaseContract;
+  let bookNFTImplementation: BaseContract;
+  let nftClassId: string;
+  let nftClassContract: BaseContract;
+  beforeEach(async function () {
+    const {
+      likeProtocol,
+      likeProtocolDeployment,
+      likeProtocolAddress,
+      likeProtocolContract,
+      bookNFTDeployment,
+      bookNFTAddress,
+    } = await createProtocol(this.protocolOwner);
+
+    deployment = likeProtocolDeployment;
+    contractAddress = likeProtocolAddress;
+    protocolContract = likeProtocolContract;
+    bookNFTImplementation = bookNFTDeployment;
+
+    const likeProtocolOwnerSigner = protocolContract.connect(
+      this.protocolOwner,
+    );
+
+    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
+      likeProtocolOwnerSigner.on(
+        "NewBookNFT",
+        (id: string, params: any, event: any) => {
+          event.removeListener();
+          resolve({ id });
+        },
+      );
+      setTimeout(() => {
+        reject(new Error("timeout"));
+      }, 20000);
+    });
+
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+
+    await likeProtocolOwnerSigner.newBookNFTWithRoyalty(
+      {
+        creator: this.classOwner,
+        updaters: [this.classOwner, this.likerLand],
+        minters: [this.classOwner, this.likerLand],
+        config: bookConfig,
+      },
+      1000,
+    );
+
+    const newClassEvent = await NewClassEvent;
+    nftClassId = newClassEvent.id;
+    nftClassContract = await ethers.getContractAt("BookNFT", nftClassId);
+    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
+    expect(await nftClassContract.getProtocolBeacon()).to.equal(
+      contractAddress,
+    );
+    const [receiver, royaltyAmount] = await nftClassContract.royaltyInfo(
+      0,
+      100,
+    );
+    expect(receiver).to.equal(nftClassId);
+    expect(royaltyAmount).to.equal(10n);
+  });
+
+  it("should not allow owner to set royalty fraction", async function () {
+    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    await expect(
+      likeClassOwnerSigner.setRoyaltyFraction(1000),
+    ).to.be.rejectedWith("ErrUnauthorized()");
+  });
+
+  it("should not allow updater to set royalty fraction", async function () {
+    const likeClassUpdaterSigner = nftClassContract.connect(this.likerLand);
+    await expect(
+      likeClassUpdaterSigner.setRoyaltyFraction(500),
+    ).to.be.rejectedWith("ErrUnauthorized()");
+  });
+
+  it("should not allow non-owner to set royalty fraction", async function () {
+    const likeClassRandomSigner = nftClassContract.connect(this.randomSigner);
+    await expect(
+      likeClassRandomSigner.setRoyaltyFraction(1000),
+    ).to.be.rejectedWith("ErrUnauthorized()");
+  });
+
+  it("should not allow non-protocol beacon to set royalty fraction", async function () {
+    const likeClassProtocolOwnerSigner = nftClassContract.connect(
+      this.protocolOwner,
+    );
+
+    await expect(
+      likeClassProtocolOwnerSigner.setRoyaltyFraction(1000),
+    ).to.be.rejectedWith("ErrUnauthorized()");
   });
 });
 

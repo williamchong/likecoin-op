@@ -78,16 +78,32 @@ contract LikeProtocol is
 
     function newBookNFT(
         MsgNewBookNFT memory msgNewBookNFT
-    ) public whenNotPaused {
+    ) public whenNotPaused returns (address bookAddress) {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
         bytes memory initData = abi.encodeWithSelector(
             BookNFTInterface.initialize.selector,
             msgNewBookNFT
         );
         BeaconProxy proxy = new BeaconProxy(address(this), initData);
-        address id = address(proxy);
-        $.classIdClassMapping[id] = BookNFT(id);
-        emit NewBookNFT(id, msgNewBookNFT.config);
+        bookAddress = address(proxy);
+        $.classIdClassMapping[bookAddress] = BookNFT(bookAddress);
+        emit NewBookNFT(bookAddress, msgNewBookNFT.config);
+    }
+
+    /**
+     * newBookNFTWithRoyalty
+     *
+     * Proxy call to create a BookNFT with a royalty fraction
+     *
+     * @param msgNewBookNFT - the message to create the BookNFT
+     * @param royaltyFraction - the royalty fraction to set
+     */
+    function newBookNFTWithRoyalty(
+        MsgNewBookNFT memory msgNewBookNFT,
+        uint96 royaltyFraction
+    ) public whenNotPaused returns (address bookAddress) {
+        bookAddress = newBookNFT(msgNewBookNFT);
+        BookNFT(bookAddress).setRoyaltyFraction(royaltyFraction);
     }
 
     /**

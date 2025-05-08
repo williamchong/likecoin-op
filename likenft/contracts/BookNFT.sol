@@ -7,6 +7,8 @@ import {ERC721BurnableUpgradeable} from "@openzeppelin/contracts-upgradeable/tok
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 import {BookConfig} from "../types/BookConfig.sol";
 import {MsgNewBookNFT} from "../types/msgs/MsgNewBookNFT.sol";
@@ -24,7 +26,8 @@ contract BookNFT is
     ERC721EnumerableUpgradeable,
     ERC721BurnableUpgradeable,
     OwnableUpgradeable,
-    AccessControlUpgradeable
+    AccessControlUpgradeable,
+    IERC2981
 {
     struct BookNFTStorage {
         string name;
@@ -33,6 +36,8 @@ contract BookNFT is
         uint64 max_supply;
         uint256 _currentIndex;
         mapping(uint256 => string) tokenURIMap;
+        uint96 royaltyFraction;
+        address protocolBeacon;
     }
 
     // keccak256(abi.encode(uint256(keccak256("likeprotocol.booknft.storage")) - 1)) & ~bytes32(uint256(0xff))
@@ -79,6 +84,14 @@ contract BookNFT is
         _;
     }
 
+    modifier onlyProtocol() {
+        BookNFTStorage storage $ = _getClassStorage();
+        if (_msgSender() != $.protocolBeacon) {
+            revert ErrUnauthorized();
+        }
+        _;
+    }
+
     function initialize(MsgNewBookNFT memory msgNewBookNFT) public initializer {
         __ERC721_init(msgNewBookNFT.config.name, msgNewBookNFT.config.symbol);
         __ERC721Enumerable_init();
@@ -95,6 +108,7 @@ contract BookNFT is
         $.metadata = msgNewBookNFT.config.metadata;
 
         $._currentIndex = 0;
+        $.protocolBeacon = _msgSender();
 
         for (uint i = 0; i < msgNewBookNFT.minters.length; i++) {
             _grantRole(MINTER_ROLE, msgNewBookNFT.minters[i]);
@@ -114,11 +128,14 @@ contract BookNFT is
         override(
             ERC721Upgradeable,
             ERC721EnumerableUpgradeable,
-            AccessControlUpgradeable
+            AccessControlUpgradeable,
+            IERC165
         )
         returns (bool)
     {
-        return super.supportsInterface(interfaceId);
+        return
+            interfaceId == type(IERC2981).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     function _increaseBalance(
@@ -313,6 +330,42 @@ contract BookNFT is
         }
     }
 
+    /**
+     * setRoyaltyFraction
+     *
+     * set the royalty fraction for the book nft.
+     * The feeDenominator is 10000.
+     * Intended to only support BookNFTs based royalty, not per token based royalty.
+     *
+     * @param royaltyFraction - the royalty fraction to set
+     */
+    function setRoyaltyFraction(uint96 royaltyFraction) external onlyProtocol {
+        BookNFTStorage storage $ = _getClassStorage();
+        $.royaltyFraction = royaltyFraction;
+    }
+
+    /**
+     * royaltyInfo
+     *
+     * getting the royalty info for a token sale.
+     * In phase 1 of likeprotocol, all royalties will be sent to the BookNFT address as vested.
+     * In later phase, the royalties withdrwal logic will be implemented.
+     * The royalty is designed to be tied with the LikeProtocol contract.
+     *
+     * @param - To confronyt the token ID to get royalty info for
+     * @param salePrice - the sale price of the token
+     * @return receiver - the address that should receive the royalty payment
+     * @return royaltyAmount - the amount of royalty to be paid
+     */
+    function royaltyInfo(
+        uint256,
+        uint256 salePrice
+    ) external view override returns (address receiver, uint256 royaltyAmount) {
+        BookNFTStorage storage $ = _getClassStorage();
+        royaltyAmount = (salePrice * $.royaltyFraction) / 10000;
+        receiver = address(this);
+    }
+
     // Start Querying functions
     /**
      * getBookConfig
@@ -374,6 +427,11 @@ contract BookNFT is
                 "data:application/json;utf8,",
                 $.tokenURIMap[_tokenId]
             );
+    }
+
+    function getProtocolBeacon() public view returns (address) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return $.protocolBeacon;
     }
     // End Querying functions
 }
