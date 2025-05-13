@@ -27,7 +27,7 @@ contract LikeProtocol is
     IBeacon
 {
     struct LikeNFTStorage {
-        mapping(address classId => BookNFT) classIdClassMapping;
+        mapping(address classId => bool isBookNFT) classIdMapping;
         address bookNFTImplementation;
     }
     // keccak256(abi.encode(uint256(keccak256("likeprotocol.storage")) - 1)) & ~bytes32(uint256(0xff))
@@ -73,7 +73,7 @@ contract LikeProtocol is
 
     function isBookNFT(address classId) public view returns (bool) {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
-        return address($.classIdClassMapping[classId]) != address(0);
+        return $.classIdMapping[classId];
     }
 
     function newBookNFT(
@@ -86,7 +86,7 @@ contract LikeProtocol is
         );
         BeaconProxy proxy = new BeaconProxy(address(this), initData);
         bookAddress = address(proxy);
-        $.classIdClassMapping[bookAddress] = BookNFT(bookAddress);
+        $.classIdMapping[bookAddress] = true;
         emit NewBookNFT(bookAddress, msgNewBookNFT.config);
     }
 
