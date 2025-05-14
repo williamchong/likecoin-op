@@ -60,6 +60,23 @@ async function main() {
     "New BookNFT implementation is deployed to:",
     newBookNFTImplementationAddress,
   );
+  try {
+    await hardhat.run("verify:verify", {
+      address: newBookNFTImplementationAddress,
+    });
+  } catch (e) {
+    if (e instanceof ContractAlreadyVerifiedError) {
+      // There may be the same implementation contract verified due to code revert
+      console.log(
+        "BookNFT new implementation is already verified:",
+        newBookNFTImplementationAddress,
+      );
+    } else {
+      if (hardhat.network.name !== "localhost") {
+        throw e;
+      }
+    }
+  }
 
   const upgradeToFunctionValues = [newBookNFTImplementationAddress];
   const upgradeToFunctionFragment = LikeProtocol.interface.getFunction(
