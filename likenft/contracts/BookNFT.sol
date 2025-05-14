@@ -299,7 +299,7 @@ contract BookNFT is
         address to,
         uint256 _tokenId,
         string calldata memo
-    ) external payable {
+    ) external {
         safeTransferFrom(from, to, _tokenId);
 
         emit TransferWithMemo(from, to, _tokenId, memo);
@@ -323,7 +323,7 @@ contract BookNFT is
         address[] calldata tos,
         uint256[] calldata tokenIds,
         string[] calldata memos
-    ) external payable {
+    ) external {
         for (uint i = 0; i < tokenIds.length; i++) {
             safeTransferFrom(from, tos[i], tokenIds[i]);
             emit TransferWithMemo(from, tos[i], tokenIds[i], memos[i]);
