@@ -178,6 +178,15 @@ export function introductionConfirmed(_: StepStateStep1): StepStateStep2Init {
   };
 }
 
+export function restarted(
+  _: Exclude<StepState, { step: 1 }>
+): StepStateStep2Init {
+  return {
+    step: 2,
+    state: 'Init',
+  };
+}
+
 export function authcoreRedirected(
   _: StepState,
   method: string | (string | null)[],
@@ -291,6 +300,22 @@ export function signMessageRequested(
     avatar: prev.avatar,
     likerId: prev.likerId,
     signMessage,
+  };
+}
+
+export function likerIdMigrationFailed(
+  prev: StepStateStep3Signing,
+  reason: StepStateStep3SigningFailedReason
+): StepStateStep3SigningFailed {
+  return {
+    step: 3,
+    state: 'SigningFailed',
+    cosmosAddress: prev.cosmosAddress,
+    ethAddress: prev.ethAddress,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    signMessage: prev.signMessage,
+    failedReason: reason,
   };
 }
 
