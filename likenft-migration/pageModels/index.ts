@@ -8,6 +8,7 @@ import {
   LikeNFTAssetSnapshot,
   NonEmptyLikeNFTAssetSnapshot,
 } from '~/apis/models/likenftAssetSnapshot';
+import { LikerIDMigrationError } from '~/apis/models/likerIDMigration';
 
 export interface StepStateStep1 {
   step: 1;
@@ -62,6 +63,22 @@ export interface StepStateStep3Signing {
   avatar: string | null;
   likerId: string | null;
   signMessage: string;
+}
+
+export type StepStateStep3SigningFailedReason = {
+  type: 'likerIDMigration';
+  error: LikerIDMigrationError;
+};
+
+export interface StepStateStep3SigningFailed {
+  step: 3;
+  state: 'SigningFailed';
+  cosmosAddress: string;
+  ethAddress: string;
+  avatar: string | null;
+  likerId: string | null;
+  signMessage: string;
+  failedReason: StepStateStep3SigningFailedReason;
 }
 
 export interface StepStateStep4Init {
@@ -145,6 +162,7 @@ export type StepState =
   | StepStateStep2LikerIdEvmConnected
   | StepStateStep2EthConnected
   | StepStateStep3Signing
+  | StepStateStep3SigningFailed
   | StepStateStep4Init
   | StepStateStep4EmptyMigrationPreview
   | StepStateStep4NonEmptyMigrationPreview
