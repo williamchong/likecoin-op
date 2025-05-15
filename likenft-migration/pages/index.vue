@@ -80,6 +80,13 @@
           <template v-if="currentStep.step === 3" #current>
             <SectionSign
               :signing-message="currentStep.signMessage"
+              :external-failed-reason="
+                currentStep.state === 'SigningFailed'
+                  ? currentStep.failedReason
+                  : null
+              "
+              @reconnect-evm-wallet="handleReconnectEvmWallet"
+              @restart="handleRestartLikerIDMigration"
               @signed="handleSigned"
             >
               <template #title>
@@ -474,6 +481,7 @@ import {
   isEmptyLikeNFTAssetSnapshot,
   LikeNFTAssetSnapshot,
 } from '~/apis/models/likenftAssetSnapshot';
+import { LikerIDMigrationErrorSchema } from '~/apis/models/likerIDMigration';
 import {
   makeRetryMigrationAPI,
   RetryMigrationRequest,
@@ -488,12 +496,14 @@ import {
   introductionConfirmed,
   likerIdEvmConnected,
   likerIdMigrated,
+  likerIdMigrationFailed,
   likerIdResolved,
   migrationCompleted,
   migrationFailed,
   migrationResultFetched,
   migrationRetried,
   nonEmptyMigrationPreviewFetched,
+  restarted,
   signMessageRequested,
   StepState,
   StepStateCompleted,
@@ -504,6 +514,7 @@ import {
   StepStateStep2LikerIdEvmConnected,
   StepStateStep2LikerIdResolved,
   StepStateStep3Signing,
+  StepStateStep3SigningFailed,
   StepStateStep4EmptyMigrationPreview,
   StepStateStep4Init,
   StepStateStep4MigrationRetryPreview,
@@ -763,6 +774,18 @@ export default Vue.extend({
       }
     },
 
+    handleReconnectEvmWallet() {
+      if (this.currentStep.step === 3) {
+        this.handleLikeCoinWalletConnected(this.currentStep.cosmosAddress);
+      }
+    },
+
+    handleRestartLikerIDMigration() {
+      if (this.currentStep.step === 3) {
+        this.currentStep = restarted(this.currentStep);
+      }
+    },
+
     async handleRetryPreview(s: StepStateStep4EmptyMigrationPreview) {
       this.currentStep = emptySnapshotRetried(s);
       this.currentStep = await this._asyncStateTransition(
@@ -879,8 +902,8 @@ export default Vue.extend({
       cosmosSigningMessage: string,
       cosmosSignature: StdSignature,
       ethSignature: string
-    ): Promise<StepStateStep3Signing | StepStateStep4Init> {
-      await this.migrateLikerID({
+    ): Promise<StepStateStep3SigningFailed | StepStateStep4Init> {
+      const migrationResult = await this.migrateLikerID({
         cosmos_address: currentStep.cosmosAddress,
         cosmos_pub_key: cosmosSignature.pub_key.value,
         cosmos_signature: cosmosSignature.signature,
@@ -902,7 +925,10 @@ export default Vue.extend({
           remoteEthAddress
         );
       }
-      return currentStep;
+      return likerIdMigrationFailed(currentStep, {
+        type: 'likerIDMigration',
+        error: LikerIDMigrationErrorSchema.parse(migrationResult.response),
+      });
     },
 
     async _getOrCreateMigrationPreview(

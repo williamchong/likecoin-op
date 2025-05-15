@@ -2,6 +2,14 @@
   "app": {
     "title": "Liker ID and LikeNFT 轉換 Transfer"
   },
+  "errors": {
+    "liker-id-migration": {
+      "book-user-error": {
+        "evm-walletused-by-other-user": "Evm wallet has already used by other user"
+      }
+    },
+    "unknown": "Unknown error"
+  },
   "migrate": {
     "classes": "Books",
     "connect-cosmos-wallet": "Connect cosmos wallet",
@@ -46,6 +54,16 @@
       "tooltip": "This is a snapshot taken on {date} [{height}], if you found there is something missing or misalign with your current NFT wallet, please contact us for more assistant."
     },
     "confirm-by-signing": {
+      "error-type": {
+        "liker-id-migration": "Liker ID Migration",
+        "signing": "Signing",
+        "unknown": "Unknown"
+      },
+      "failed-reason": "{message} ({type})",
+      "restart-message": {
+        "reconnect-evm-wallet": "Reconnect EVM Wallet",
+        "restart": "Restart"
+      },
       "retry": "Retry",
       "title": "Confirm by Signing"
     },
