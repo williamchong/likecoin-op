@@ -2,6 +2,14 @@
   "app": {
     "title": "Liker ID 及 LikeNFT 轉移"
   },
+  "errors": {
+    "liker-id-migration": {
+      "book-user-error": {
+        "evm-walletused-by-other-user": "ETH 地址已被使用"
+      }
+    },
+    "unknown": "未知的錯誤"
+  },
   "migrate": {
     "classes": "作品",
     "connect-cosmos-wallet": "連接 Cosmos 錢包",
@@ -46,6 +54,16 @@
       "tooltip": "此為 {date} [{height}] 的快照，如發現有任何遺漏或與您目前的 NFT 錢包不符，請聯絡我們尋求協助。"
     },
     "confirm-by-signing": {
+      "error-type": {
+        "liker-id-migration": "Liker ID 遷移",
+        "signing": "簽署",
+        "unknown": "未知"
+      },
+      "failed-reason": "{message} （{type}）",
+      "restart-message": {
+        "reconnect-evm-wallet": "重新連接 ETH 地址",
+        "restart": "重來"
+      },
       "retry": "重試",
       "title": "簽署確認"
     },

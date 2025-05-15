@@ -80,6 +80,11 @@
           <template v-if="currentStep.step === 3" #current>
             <SectionSign
               :signing-message="currentStep.signMessage"
+              :external-failed-reason="
+                currentStep.state === 'SigningFailed'
+                  ? currentStep.failedReason
+                  : null
+              "
               @signed="handleSigned"
             >
               <template #title>

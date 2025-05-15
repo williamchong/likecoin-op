@@ -6,15 +6,15 @@
         v-if="failedReason != null"
         :class="['text-likecoin-votecolor-no', 'text-xs', 'mt-1']"
       >
-        {{ failedReason }}
+        {{ $t('section.confirm-by-signing.failed-reason', failedReason) }}
       </p>
     </div>
     <div v-if="isLoading">
       <LoadingIcon />
     </div>
     <div v-else-if="failedReason != null">
-      <AppButton @click="handleRetryClick">{{
-        $t('section.confirm-by-signing.retry')
+      <AppButton @click="failedReason.retryAction">{{
+        failedReason.buttonText
       }}</AppButton>
     </div>
   </div>
@@ -24,13 +24,15 @@
 import { sortedJsonStringify } from '@cosmjs/amino/build/signdoc';
 import { OfflineAminoSigner } from '@keplr-wallet/types';
 import Vue, { PropType } from 'vue';
+import VueI18n from 'vue-i18n';
 
 import { isEthersError } from '@/utils/ethersError';
 import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network';
+import { StepStateStep3SigningFailedReason } from '~/pageModels';
 
 interface Data {
   isLoading: boolean;
-  failedReason: string | null;
+  signFailedReason: string | null;
 }
 
 export default Vue.extend({
@@ -40,26 +42,99 @@ export default Vue.extend({
       type: String as PropType<string>,
       required: true,
     },
+    externalFailedReason: {
+      type: Object as PropType<StepStateStep3SigningFailedReason | null>,
+      required: false,
+      default: null,
+    },
   },
+
   data(): Data {
     return {
       isLoading: false,
-      failedReason: null,
+      signFailedReason: null,
     };
   },
+
+  computed: {
+    failedReason(): {
+      type: VueI18n.TranslateResult;
+      message: VueI18n.TranslateResult;
+      buttonText: VueI18n.TranslateResult;
+      retryAction: () => void;
+    } | null {
+      if (this.signFailedReason) {
+        return {
+          type: this.$t('section.confirm-by-signing.error-type.signing'),
+          message: this.signFailedReason,
+          buttonText: this.$t('section.confirm-by-signing.retry'),
+          retryAction: this.initSign,
+        };
+      }
+      if (this.externalFailedReason) {
+        switch (this.externalFailedReason.type) {
+          case 'likerIDMigration':
+            if (this.externalFailedReason.error.isEnum) {
+              switch (this.externalFailedReason.error.value) {
+                case 'EVM_WALLET_USED_BY_OTHER_USER':
+                  return {
+                    type: this.$t(
+                      'section.confirm-by-signing.error-type.liker-id-migration'
+                    ),
+                    message: this.$t(
+                      'errors.liker-id-migration.book-user-error.evm-walletused-by-other-user'
+                    ),
+                    buttonText: this.$t(
+                      'section.confirm-by-signing.restart-message.reconnect-evm-wallet'
+                    ),
+                    retryAction: () => {
+                      return this.emit('reconnect-evm-wallet');
+                    },
+                  };
+              }
+            }
+            return {
+              type: this.$t(
+                'section.confirm-by-signing.error-type.liker-id-migration'
+              ),
+              message: this.externalFailedReason.error.value,
+              buttonText: this.$t(
+                'section.confirm-by-signing.restart-message.restart'
+              ),
+              retryAction: () => {
+                return this.emit('restart');
+              },
+            };
+        }
+        return {
+          type: this.$t('section.confirm-by-signing.error-type.unknown'),
+          message: this.$t('errors.unknown'),
+          buttonText: this.$t(
+            'section.confirm-by-signing.restart-message.restart'
+          ),
+          retryAction: () => {
+            return this.emit('restart');
+          },
+        };
+      }
+      return null;
+    },
+  },
+
   mounted() {
     this.initSign();
   },
+
   methods: {
     async initSign() {
       this.isLoading = true;
-      this.failedReason = null;
+      this.signFailedReason = null;
 
       try {
         const connection =
           await this.$likeCoinWalletConnector.initIfNecessary();
         if (connection == null) {
-          this.failedReason = 'cannot get wallet connector connection';
+          this.signFailedReason = 'cannot get wallet connector connection';
           return;
         }
         const {
@@ -70,7 +145,7 @@ export default Vue.extend({
         const offlineSigner: OfflineAminoSigner =
           connection.offlineSigner as OfflineAminoSigner;
         if (!offlineSigner.signAmino) {
-          this.failedReason = 'cannot sign message';
+          this.signFailedReason = 'cannot sign message';
           return;
         }
 
@@ -124,13 +199,14 @@ export default Vue.extend({
         } else {
           message = `${e}`;
         }
-        this.failedReason = message;
+        this.signFailedReason = message;
       } finally {
         this.isLoading = false;
       }
     },
-    handleRetryClick() {
-      this.initSign();
+
+    emit(event: 'reconnect-evm-wallet' | 'restart', ...args: any[]) {
+      this.$emit(event, ...args);
     },
   },
 });
