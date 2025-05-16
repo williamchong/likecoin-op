@@ -1,7 +1,7 @@
 import { Listener } from "ethers";
 import { ethers } from "hardhat";
 
-async function newClass() {
+async function newBookNFT() {
   const signer = await ethers.provider.getSigner();
 
   const LikeProtocol = await ethers.getContractAt(
@@ -13,15 +13,15 @@ async function newClass() {
 
   const handleNewClass: Listener = (id, parameters, event) => {
     event.removeListener();
-    console.log("newClassEventPayload", id, parameters);
+    console.log("NewBookNFTPayload", id, parameters);
   };
-  await likeProtocol.on("NewClass", handleNewClass);
+  await likeProtocol.on("NewBookNFT", handleNewClass);
 
-  const tx = await likeProtocol.newClass({
+  const tx = await likeProtocol.newBookNFT({
     creator: signer.address,
     updaters: [signer.address],
     minters: [signer.address],
-    input: {
+    config: {
       name: "《所謂「我不投資」，就是 all in 在法定貨幣》",
       symbol: "BOOK",
       metadata: JSON.stringify({
@@ -36,15 +36,13 @@ async function newClass() {
         external_link: "https://bit.ly/moneyverse-pdf",
         collaborators: [],
       }),
-      config: {
-        max_supply: 0,
-      },
+      max_supply: 10,
     },
   });
   console.log(await tx.wait());
 }
 
-newClass().catch((error) => {
+newBookNFT().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

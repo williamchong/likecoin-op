@@ -12,7 +12,7 @@ export interface TransactionMemo {
 type AttachedContract = ReturnType<ContractFactory<any[], Contract>["attach"]>;
 
 async function _queryTransactionMemos() {
-  const classId = "0xAf0f5e9a70349947961691DB04f642c480200315";
+  const classId = "0x1D146390C1D4E03C74b87D896b254a5468EDF804";
   const tokenId = 0;
 
   const signer = await ethers.provider.getSigner();

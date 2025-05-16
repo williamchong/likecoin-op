@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 
 async function transferClassOwnership() {
-  const classId = "0x84ce8AaB5aceCaE283083761498440539a5DD8dE";
+  const classId = "0x1D146390C1D4E03C74b87D896b254a5468EDF804";
   const newOwner = "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199";
   const signer = await ethers.provider.getSigner();
 

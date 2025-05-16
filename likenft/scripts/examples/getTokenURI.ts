@@ -1,8 +1,8 @@
 import { ethers } from "hardhat";
 
 async function getTokenURI() {
-  // Extract and update the class id from newClass's NewClass event
-  const classId = "0x84ce8AaB5aceCaE283083761498440539a5DD8dE";
+  // Extract and update the class id from newBookNFT's NewBookNFT event
+  const classId = "0x1D146390C1D4E03C74b87D896b254a5468EDF804";
   const signer = await ethers.provider.getSigner();
 
   const LikeNFTClass = await ethers.getContractAt("BookNFT", classId);
