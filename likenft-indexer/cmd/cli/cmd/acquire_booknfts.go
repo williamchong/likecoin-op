@@ -6,7 +6,6 @@ import (
 	"likenft-indexer/cmd/cli/context"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
 	"likenft-indexer/internal/database"
-	"likenft-indexer/internal/evm"
 	"likenft-indexer/internal/logic/evmeventacquirer"
 
 	"github.com/spf13/cobra"
@@ -21,6 +20,7 @@ var AcquireBookNFTs = &cobra.Command{
 		ctx := cmd.Context()
 		cfg := context.ConfigFromContext(ctx)
 		logger := context.LoggerFromContext(ctx)
+		evmClient := context.EvmQueryClientFromContext(ctx)
 
 		likeprotocolContractAddress := cfg.EthLikeProtocolContractAddress
 		if len(args) > 0 {
@@ -31,11 +31,6 @@ var AcquireBookNFTs = &cobra.Command{
 		time.Sleep(2 * time.Second)
 
 		dbService := database.New()
-		evmClient, err := evm.NewEvmQueryClient(cfg.EthNetworkEventRPCURL)
-
-		if err != nil {
-			panic(err)
-		}
 
 		EVMEventProcessedBlockHeightRepository := database.MakeEVMEventProcessedBlockHeightRepository(dbService)
 		EVMEventRepository := database.MakeEVMEventRepository(dbService)
@@ -46,7 +41,7 @@ var AcquireBookNFTs = &cobra.Command{
 			evmClient,
 		)
 
-		err = acquirer.Acquire(ctx, logger, likeprotocolContractAddress, evmeventprocessedblockheight.EventNewBookNFT)
+		err := acquirer.Acquire(ctx, logger, likeprotocolContractAddress, evmeventprocessedblockheight.EventNewBookNFT)
 
 		if err != nil {
 			panic(err)

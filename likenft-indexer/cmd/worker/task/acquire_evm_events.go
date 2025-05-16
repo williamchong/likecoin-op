@@ -8,7 +8,6 @@ import (
 	appcontext "likenft-indexer/cmd/worker/context"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
 	"likenft-indexer/internal/database"
-	"likenft-indexer/internal/evm"
 	"likenft-indexer/internal/logic/evmeventacquirer"
 
 	"github.com/hibiken/asynq"
@@ -33,8 +32,8 @@ func NewAcquireEVMEventsTask(contractAddress string, event evmeventprocessedbloc
 }
 
 func HandleAcquireEVMEventsTask(ctx context.Context, t *asynq.Task) error {
-	cfg := appcontext.ConfigFromContext(ctx)
 	logger := appcontext.LoggerFromContext(ctx)
+	evmQueryClient := appcontext.EvmQueryClientFromContext(ctx)
 
 	mylogger := logger.WithGroup("HandleAcquireNewBookNFTTask")
 
@@ -48,12 +47,6 @@ func HandleAcquireEVMEventsTask(ctx context.Context, t *asynq.Task) error {
 	}
 
 	dbService := database.New()
-	evmClient, err := evm.NewEvmQueryClient(cfg.EthNetworkEventRPCURL)
-
-	if err != nil {
-		mylogger.Error("evm.NewEvmClient", "err", err)
-		return err
-	}
 
 	evmEventProcessedBlockHeightRepository := database.MakeEVMEventProcessedBlockHeightRepository(dbService)
 	evmEventRepository := database.MakeEVMEventRepository(dbService)
@@ -61,10 +54,10 @@ func HandleAcquireEVMEventsTask(ctx context.Context, t *asynq.Task) error {
 	acquirer := evmeventacquirer.MakeEvmEventsAcquirer(
 		evmEventProcessedBlockHeightRepository,
 		evmEventRepository,
-		evmClient,
+		evmQueryClient,
 	)
 
-	err = acquirer.Acquire(
+	err := acquirer.Acquire(
 		ctx,
 		mylogger,
 		p.ContractAddress,
