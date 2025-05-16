@@ -4,7 +4,7 @@ import hardhat, { ethers, upgrades } from "hardhat";
 
 async function main() {
   // We get the contract to deploy
-  const newOwner = "0xC71fe89e4C0e5458a793fc6548EF6B392417A7Fb";
+  const newOwner = process.env.PROTOCOL_OWNER_ADDRESS!;
   const LikeProtocol = await ethers.getContractFactory("LikeProtocol");
   const [operator] = await ethers.getSigners();
   console.log("Operator:", operator.address);

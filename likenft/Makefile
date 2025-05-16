@@ -27,4 +27,6 @@ ci: build
 
 .PHONY: deploy-local
 deploy-local:
-	npm run deploy:local
+	npm run script:local scripts/deploy.ts
+	sleep 2
+	npm run script:local scripts/transferOwner.ts

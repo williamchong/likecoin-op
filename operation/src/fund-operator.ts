@@ -12,10 +12,14 @@ async function fundOperator() {
 
   const signer = await ethers.provider.getSigner();
 
-  console.log("Funding operator address", signer.address);
+  const operatorAddress = process.env.OPERATOR_ADDRESS || signer.address;
+  if (!operatorAddress) {
+    throw new Error("OPERATOR_ADDRESS is not set");
+  }
+  console.log("Funding operator address", operatorAddress);
   const payload = {
-    to: signer.address,
-    value: ethers.parseEther("1.0"), // Sending 1 ETH
+    to: operatorAddress,
+    value: ethers.parseEther("12.0"), // Sending 1 ETH
   };
   const tx = await wallet.sendTransaction(payload);
   console.log("Transaction hash", tx.hash);

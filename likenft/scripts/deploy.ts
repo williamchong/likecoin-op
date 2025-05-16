@@ -2,11 +2,12 @@ import "@openzeppelin/hardhat-upgrades";
 import hardhat, { ethers, upgrades } from "hardhat";
 
 async function main() {
-  // We get the contract to deploy
-  const BookNFT = await ethers.getContractFactory("BookNFT");
-  const LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-
   console.log("Deploying LikeProtocol... Network:", hardhat.network.name);
+  const deployer = await ethers.getSigner(process.env.INITIAL_OWNER_ADDRESS);
+  console.log("Deploying contracts with:", await deployer.getAddress());
+  const BookNFT = await ethers.getContractFactory("BookNFT", deployer);
+  const LikeProtocol = await ethers.getContractFactory("LikeProtocol", deployer);
+
   console.log("Owner:", process.env.INITIAL_OWNER_ADDRESS);
   console.log("Expecting Proxy Address:", process.env.ERC721_PROXY_ADDRESS);
 
