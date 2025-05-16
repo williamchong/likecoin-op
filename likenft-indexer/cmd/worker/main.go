@@ -9,6 +9,7 @@ import (
 	"likenft-indexer/cmd/worker/cmd"
 	"likenft-indexer/cmd/worker/config"
 	appcontext "likenft-indexer/cmd/worker/context"
+	"likenft-indexer/internal/evm"
 
 	"github.com/go-redis/redis"
 	"github.com/hibiken/asynq"
@@ -58,10 +59,13 @@ func main() {
 	)
 	asynqScheduler := asynq.NewScheduler(redisClientOpt, nil)
 
+	evmQueryClient, err := evm.NewEvmQueryClient(envCfg.EthNetworkEventRPCURL)
+
 	ctx = appcontext.WithConfigContext(ctx, envCfg)
 	ctx = appcontext.WithAsynqClientContext(ctx, asynqClient)
 	ctx = appcontext.WithAsynqServerContext(ctx, asynqServer)
 	ctx = appcontext.WithAsynqSchedulerContext(ctx, asynqScheduler)
 	ctx = appcontext.WithLoggerContext(ctx, logger)
+	ctx = appcontext.WithEvmQueryClient(ctx, evmQueryClient)
 	cmd.Execute(ctx)
 }
