@@ -19,6 +19,7 @@ var workerCmd = &cobra.Command{
 		srv := context.AsynqServerFromContext(cmd.Context())
 		logger := context.LoggerFromContext(cmd.Context())
 		asynqClient := context.AsynqClientFromContext(cmd.Context())
+		evmQueryClient := context.EvmQueryClientFromContext(cmd.Context())
 
 		// mux maps a type to a handler
 		mux := asynq.NewServeMux()
@@ -32,6 +33,7 @@ var workerCmd = &cobra.Command{
 		mux.Use(context.AsynqMiddlewareWithConfigContext(envCfg))
 		mux.Use(context.AsynqMiddlewareWithLoggerContext(logger))
 		mux.Use(context.AsynqMiddlewareWithAsynqClientContext(asynqClient))
+		mux.Use(context.AsynqMiddlewareWithEvmQueryClientContext(evmQueryClient))
 
 		if err := srv.Run(mux); err != nil {
 			log.Fatalf("could not run server: %v", err)

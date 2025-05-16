@@ -8,6 +8,7 @@ import (
 
 	"likenft-indexer/cmd/cli/config"
 	appcontext "likenft-indexer/cmd/cli/context"
+	"likenft-indexer/internal/evm"
 
 	"github.com/spf13/cobra"
 )
@@ -21,10 +22,12 @@ var rootCmd = &cobra.Command{
 func Execute(
 	cfg *config.EnvConfig,
 	logger *slog.Logger,
+	evmQueryClient evm.EVMQueryClient,
 ) {
 	ctx := context.Background()
 	ctx = appcontext.WithConfigContext(ctx, cfg)
 	ctx = appcontext.WithLoggerContext(ctx, logger)
+	ctx = appcontext.WithEvmQueryClient(ctx, evmQueryClient)
 	err := rootCmd.ExecuteContext(ctx)
 	if err != nil {
 		os.Exit(1)

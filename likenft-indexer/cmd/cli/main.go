@@ -7,6 +7,7 @@ import (
 
 	"likenft-indexer/cmd/cli/cmd"
 	"likenft-indexer/cmd/cli/config"
+	"likenft-indexer/internal/evm"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -24,5 +25,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	cmd.Execute(envCfg, logger)
+	evmClient, err := evm.NewEvmQueryClient(envCfg.EthNetworkEventRPCURL)
+	cmd.Execute(envCfg, logger, evmClient)
 }
