@@ -21,6 +21,12 @@ type EVMQueryClient interface {
 		ctx context.Context,
 	) (*big.Int, error)
 
+	QueryEvents(
+		ctx context.Context,
+		contractAddresses []common.Address,
+		startBlock uint64,
+		endBlock uint64,
+	) ([]types.Log, error)
 	QueryBookNFTOwnershipTransferred(
 		ctx context.Context,
 		contractAddress common.Address,
