@@ -2,6 +2,7 @@ package evmeventprocessor
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -10,6 +11,8 @@ import (
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/evm"
 )
+
+var UnknownEvent error = errors.New("unknown event")
 
 type eventProcessorDeps struct {
 	httpClient                *http.Client
@@ -62,7 +65,7 @@ func registerEventProcessor(event string, creator eventProcessorCreator) {
 func getEventProcessor(event string) (eventProcessorCreator, error) {
 	eventProcessCreator, ok := eventProcessorMap[event]
 	if !ok {
-		return nil, fmt.Errorf("unknown event %s", event)
+		return nil, errors.Join(UnknownEvent, fmt.Errorf("%s", event))
 	}
 	return eventProcessCreator, nil
 }
