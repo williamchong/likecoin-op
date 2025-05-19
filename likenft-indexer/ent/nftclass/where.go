@@ -3,9 +3,10 @@
 package nftclass
 
 import (
+	"time"
+
 	"likenft-indexer/ent/predicate"
 	"likenft-indexer/ent/schema/typeutil"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -101,6 +102,12 @@ func DeployerAddress(v string) predicate.NFTClass {
 func DeployedBlockNumber(v typeutil.Uint64) predicate.NFTClass {
 	vc, err := ValueScanner.DeployedBlockNumber.Value(v)
 	return predicate.NFTClassOrErr(sql.FieldEQ(FieldDeployedBlockNumber, vc), err)
+}
+
+// LatestEventBlockNumber applies equality check predicate on the "latest_event_block_number" field. It's identical to LatestEventBlockNumberEQ.
+func LatestEventBlockNumber(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.LatestEventBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldEQ(FieldLatestEventBlockNumber, vc), err)
 }
 
 // MintedAt applies equality check predicate on the "minted_at" field. It's identical to MintedAtEQ.
@@ -724,6 +731,70 @@ func DeployedBlockNumberLT(v typeutil.Uint64) predicate.NFTClass {
 func DeployedBlockNumberLTE(v typeutil.Uint64) predicate.NFTClass {
 	vc, err := ValueScanner.DeployedBlockNumber.Value(v)
 	return predicate.NFTClassOrErr(sql.FieldLTE(FieldDeployedBlockNumber, vc), err)
+}
+
+// LatestEventBlockNumberEQ applies the EQ predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberEQ(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.LatestEventBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldEQ(FieldLatestEventBlockNumber, vc), err)
+}
+
+// LatestEventBlockNumberNEQ applies the NEQ predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberNEQ(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.LatestEventBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldNEQ(FieldLatestEventBlockNumber, vc), err)
+}
+
+// LatestEventBlockNumberIn applies the In predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberIn(vs ...typeutil.Uint64) predicate.NFTClass {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.LatestEventBlockNumber.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.NFTClassOrErr(sql.FieldIn(FieldLatestEventBlockNumber, v...), err)
+}
+
+// LatestEventBlockNumberNotIn applies the NotIn predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberNotIn(vs ...typeutil.Uint64) predicate.NFTClass {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.LatestEventBlockNumber.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.NFTClassOrErr(sql.FieldNotIn(FieldLatestEventBlockNumber, v...), err)
+}
+
+// LatestEventBlockNumberGT applies the GT predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberGT(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.LatestEventBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldGT(FieldLatestEventBlockNumber, vc), err)
+}
+
+// LatestEventBlockNumberGTE applies the GTE predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberGTE(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.LatestEventBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldGTE(FieldLatestEventBlockNumber, vc), err)
+}
+
+// LatestEventBlockNumberLT applies the LT predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberLT(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.LatestEventBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldLT(FieldLatestEventBlockNumber, vc), err)
+}
+
+// LatestEventBlockNumberLTE applies the LTE predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberLTE(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.LatestEventBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldLTE(FieldLatestEventBlockNumber, vc), err)
 }
 
 // MintedAtEQ applies the EQ predicate on the "minted_at" field.

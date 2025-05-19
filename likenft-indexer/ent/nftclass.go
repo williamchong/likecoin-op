@@ -5,13 +5,14 @@ package ent
 import (
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"strings"
+	"time"
+
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/evm/model"
-	"math/big"
-	"strings"
-	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -46,6 +47,8 @@ type NFTClass struct {
 	DeployerAddress string `json:"deployer_address,omitempty"`
 	// DeployedBlockNumber holds the value of the "deployed_block_number" field.
 	DeployedBlockNumber typeutil.Uint64 `json:"deployed_block_number,omitempty"`
+	// LatestEventBlockNumber holds the value of the "latest_event_block_number" field.
+	LatestEventBlockNumber typeutil.Uint64 `json:"latest_event_block_number,omitempty"`
 	// MintedAt holds the value of the "minted_at" field.
 	MintedAt time.Time `json:"minted_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -107,6 +110,8 @@ func (*NFTClass) scanValues(columns []string) ([]any, error) {
 			values[i] = nftclass.ValueScanner.MaxSupply.ScanValue()
 		case nftclass.FieldDeployedBlockNumber:
 			values[i] = nftclass.ValueScanner.DeployedBlockNumber.ScanValue()
+		case nftclass.FieldLatestEventBlockNumber:
+			values[i] = nftclass.ValueScanner.LatestEventBlockNumber.ScanValue()
 		case nftclass.ForeignKeys[0]: // account_nft_classes
 			values[i] = new(sql.NullInt64)
 		default:
@@ -206,6 +211,12 @@ func (nc *NFTClass) assignValues(columns []string, values []any) error {
 				return err
 			} else {
 				nc.DeployedBlockNumber = value
+			}
+		case nftclass.FieldLatestEventBlockNumber:
+			if value, err := nftclass.ValueScanner.LatestEventBlockNumber.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				nc.LatestEventBlockNumber = value
 			}
 		case nftclass.FieldMintedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -309,6 +320,9 @@ func (nc *NFTClass) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("deployed_block_number=")
 	builder.WriteString(fmt.Sprintf("%v", nc.DeployedBlockNumber))
+	builder.WriteString(", ")
+	builder.WriteString("latest_event_block_number=")
+	builder.WriteString(fmt.Sprintf("%v", nc.LatestEventBlockNumber))
 	builder.WriteString(", ")
 	builder.WriteString("minted_at=")
 	builder.WriteString(nc.MintedAt.Format(time.ANSIC))

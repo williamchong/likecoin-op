@@ -6,6 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
+	"sync"
+	"time"
+
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
@@ -15,9 +19,6 @@ import (
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/ent/transactionmemo"
 	"likenft-indexer/internal/evm/model"
-	"math/big"
-	"sync"
-	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -4603,35 +4604,37 @@ func (m *NFTMutation) ResetEdge(name string) error {
 // NFTClassMutation represents an operation that mutates the NFTClass nodes in the graph.
 type NFTClassMutation struct {
 	config
-	op                       Op
-	typ                      string
-	id                       *int
-	address                  *string
-	name                     *string
-	symbol                   *string
-	owner_address            *string
-	minter_addresses         *[]string
-	appendminter_addresses   []string
-	total_supply             **big.Int
-	max_supply               *typeutil.Uint64
-	addmax_supply            *typeutil.Uint64
-	metadata                 **model.ContractLevelMetadata
-	banner_image             *string
-	featured_image           *string
-	deployer_address         *string
-	deployed_block_number    *typeutil.Uint64
-	adddeployed_block_number *typeutil.Uint64
-	minted_at                *time.Time
-	updated_at               *time.Time
-	clearedFields            map[string]struct{}
-	nfts                     map[int]struct{}
-	removednfts              map[int]struct{}
-	clearednfts              bool
-	owner                    *int
-	clearedowner             bool
-	done                     bool
-	oldValue                 func(context.Context) (*NFTClass, error)
-	predicates               []predicate.NFTClass
+	op                           Op
+	typ                          string
+	id                           *int
+	address                      *string
+	name                         *string
+	symbol                       *string
+	owner_address                *string
+	minter_addresses             *[]string
+	appendminter_addresses       []string
+	total_supply                 **big.Int
+	max_supply                   *typeutil.Uint64
+	addmax_supply                *typeutil.Uint64
+	metadata                     **model.ContractLevelMetadata
+	banner_image                 *string
+	featured_image               *string
+	deployer_address             *string
+	deployed_block_number        *typeutil.Uint64
+	adddeployed_block_number     *typeutil.Uint64
+	latest_event_block_number    *typeutil.Uint64
+	addlatest_event_block_number *typeutil.Uint64
+	minted_at                    *time.Time
+	updated_at                   *time.Time
+	clearedFields                map[string]struct{}
+	nfts                         map[int]struct{}
+	removednfts                  map[int]struct{}
+	clearednfts                  bool
+	owner                        *int
+	clearedowner                 bool
+	done                         bool
+	oldValue                     func(context.Context) (*NFTClass, error)
+	predicates                   []predicate.NFTClass
 }
 
 var _ ent.Mutation = (*NFTClassMutation)(nil)
@@ -5259,6 +5262,62 @@ func (m *NFTClassMutation) ResetDeployedBlockNumber() {
 	m.adddeployed_block_number = nil
 }
 
+// SetLatestEventBlockNumber sets the "latest_event_block_number" field.
+func (m *NFTClassMutation) SetLatestEventBlockNumber(t typeutil.Uint64) {
+	m.latest_event_block_number = &t
+	m.addlatest_event_block_number = nil
+}
+
+// LatestEventBlockNumber returns the value of the "latest_event_block_number" field in the mutation.
+func (m *NFTClassMutation) LatestEventBlockNumber() (r typeutil.Uint64, exists bool) {
+	v := m.latest_event_block_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLatestEventBlockNumber returns the old "latest_event_block_number" field's value of the NFTClass entity.
+// If the NFTClass object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NFTClassMutation) OldLatestEventBlockNumber(ctx context.Context) (v typeutil.Uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLatestEventBlockNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLatestEventBlockNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLatestEventBlockNumber: %w", err)
+	}
+	return oldValue.LatestEventBlockNumber, nil
+}
+
+// AddLatestEventBlockNumber adds t to the "latest_event_block_number" field.
+func (m *NFTClassMutation) AddLatestEventBlockNumber(t typeutil.Uint64) {
+	if m.addlatest_event_block_number != nil {
+		*m.addlatest_event_block_number += t
+	} else {
+		m.addlatest_event_block_number = &t
+	}
+}
+
+// AddedLatestEventBlockNumber returns the value that was added to the "latest_event_block_number" field in this mutation.
+func (m *NFTClassMutation) AddedLatestEventBlockNumber() (r typeutil.Uint64, exists bool) {
+	v := m.addlatest_event_block_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetLatestEventBlockNumber resets all changes to the "latest_event_block_number" field.
+func (m *NFTClassMutation) ResetLatestEventBlockNumber() {
+	m.latest_event_block_number = nil
+	m.addlatest_event_block_number = nil
+}
+
 // SetMintedAt sets the "minted_at" field.
 func (m *NFTClassMutation) SetMintedAt(t time.Time) {
 	m.minted_at = &t
@@ -5458,7 +5517,7 @@ func (m *NFTClassMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *NFTClassMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 15)
 	if m.address != nil {
 		fields = append(fields, nftclass.FieldAddress)
 	}
@@ -5494,6 +5553,9 @@ func (m *NFTClassMutation) Fields() []string {
 	}
 	if m.deployed_block_number != nil {
 		fields = append(fields, nftclass.FieldDeployedBlockNumber)
+	}
+	if m.latest_event_block_number != nil {
+		fields = append(fields, nftclass.FieldLatestEventBlockNumber)
 	}
 	if m.minted_at != nil {
 		fields = append(fields, nftclass.FieldMintedAt)
@@ -5533,6 +5595,8 @@ func (m *NFTClassMutation) Field(name string) (ent.Value, bool) {
 		return m.DeployerAddress()
 	case nftclass.FieldDeployedBlockNumber:
 		return m.DeployedBlockNumber()
+	case nftclass.FieldLatestEventBlockNumber:
+		return m.LatestEventBlockNumber()
 	case nftclass.FieldMintedAt:
 		return m.MintedAt()
 	case nftclass.FieldUpdatedAt:
@@ -5570,6 +5634,8 @@ func (m *NFTClassMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldDeployerAddress(ctx)
 	case nftclass.FieldDeployedBlockNumber:
 		return m.OldDeployedBlockNumber(ctx)
+	case nftclass.FieldLatestEventBlockNumber:
+		return m.OldLatestEventBlockNumber(ctx)
 	case nftclass.FieldMintedAt:
 		return m.OldMintedAt(ctx)
 	case nftclass.FieldUpdatedAt:
@@ -5667,6 +5733,13 @@ func (m *NFTClassMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDeployedBlockNumber(v)
 		return nil
+	case nftclass.FieldLatestEventBlockNumber:
+		v, ok := value.(typeutil.Uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLatestEventBlockNumber(v)
+		return nil
 	case nftclass.FieldMintedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -5695,6 +5768,9 @@ func (m *NFTClassMutation) AddedFields() []string {
 	if m.adddeployed_block_number != nil {
 		fields = append(fields, nftclass.FieldDeployedBlockNumber)
 	}
+	if m.addlatest_event_block_number != nil {
+		fields = append(fields, nftclass.FieldLatestEventBlockNumber)
+	}
 	return fields
 }
 
@@ -5707,6 +5783,8 @@ func (m *NFTClassMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedMaxSupply()
 	case nftclass.FieldDeployedBlockNumber:
 		return m.AddedDeployedBlockNumber()
+	case nftclass.FieldLatestEventBlockNumber:
+		return m.AddedLatestEventBlockNumber()
 	}
 	return nil, false
 }
@@ -5729,6 +5807,13 @@ func (m *NFTClassMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddDeployedBlockNumber(v)
+		return nil
+	case nftclass.FieldLatestEventBlockNumber:
+		v, ok := value.(typeutil.Uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLatestEventBlockNumber(v)
 		return nil
 	}
 	return fmt.Errorf("unknown NFTClass numeric field %s", name)
@@ -5813,6 +5898,9 @@ func (m *NFTClassMutation) ResetField(name string) error {
 		return nil
 	case nftclass.FieldDeployedBlockNumber:
 		m.ResetDeployedBlockNumber()
+		return nil
+	case nftclass.FieldLatestEventBlockNumber:
+		m.ResetLatestEventBlockNumber()
 		return nil
 	case nftclass.FieldMintedAt:
 		m.ResetMintedAt()

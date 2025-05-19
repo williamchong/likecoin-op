@@ -3,8 +3,9 @@
 package nftclass
 
 import (
-	"likenft-indexer/ent/schema/typeutil"
 	"math/big"
+
+	"likenft-indexer/ent/schema/typeutil"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -40,6 +41,8 @@ const (
 	FieldDeployerAddress = "deployer_address"
 	// FieldDeployedBlockNumber holds the string denoting the deployed_block_number field in the database.
 	FieldDeployedBlockNumber = "deployed_block_number"
+	// FieldLatestEventBlockNumber holds the string denoting the latest_event_block_number field in the database.
+	FieldLatestEventBlockNumber = "latest_event_block_number"
 	// FieldMintedAt holds the string denoting the minted_at field in the database.
 	FieldMintedAt = "minted_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -81,6 +84,7 @@ var Columns = []string{
 	FieldFeaturedImage,
 	FieldDeployerAddress,
 	FieldDeployedBlockNumber,
+	FieldLatestEventBlockNumber,
 	FieldMintedAt,
 	FieldUpdatedAt,
 }
@@ -115,9 +119,10 @@ var (
 	DeployerAddressValidator func(string) error
 	// ValueScanner of all NFTClass fields.
 	ValueScanner struct {
-		TotalSupply         field.TypeValueScanner[*big.Int]
-		MaxSupply           field.TypeValueScanner[typeutil.Uint64]
-		DeployedBlockNumber field.TypeValueScanner[typeutil.Uint64]
+		TotalSupply            field.TypeValueScanner[*big.Int]
+		MaxSupply              field.TypeValueScanner[typeutil.Uint64]
+		DeployedBlockNumber    field.TypeValueScanner[typeutil.Uint64]
+		LatestEventBlockNumber field.TypeValueScanner[typeutil.Uint64]
 	}
 )
 
@@ -177,6 +182,11 @@ func ByDeployerAddress(opts ...sql.OrderTermOption) OrderOption {
 // ByDeployedBlockNumber orders the results by the deployed_block_number field.
 func ByDeployedBlockNumber(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeployedBlockNumber, opts...).ToFunc()
+}
+
+// ByLatestEventBlockNumber orders the results by the latest_event_block_number field.
+func ByLatestEventBlockNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLatestEventBlockNumber, opts...).ToFunc()
 }
 
 // ByMintedAt orders the results by the minted_at field.

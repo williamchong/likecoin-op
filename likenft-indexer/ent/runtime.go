@@ -3,6 +3,8 @@
 package ent
 
 import (
+	"math/big"
+
 	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
 	"likenft-indexer/ent/nft"
@@ -10,7 +12,6 @@ import (
 	"likenft-indexer/ent/schema"
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/ent/transactionmemo"
-	"math/big"
 
 	"entgo.io/ent/schema/field"
 )
@@ -120,6 +121,9 @@ func init() {
 	// nftclassDescDeployedBlockNumber is the schema descriptor for deployed_block_number field.
 	nftclassDescDeployedBlockNumber := nftclassFields[11].Descriptor()
 	nftclass.ValueScanner.DeployedBlockNumber = nftclassDescDeployedBlockNumber.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
+	// nftclassDescLatestEventBlockNumber is the schema descriptor for latest_event_block_number field.
+	nftclassDescLatestEventBlockNumber := nftclassFields[12].Descriptor()
+	nftclass.ValueScanner.LatestEventBlockNumber = nftclassDescLatestEventBlockNumber.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
 	transactionmemoFields := schema.TransactionMemo{}.Fields()
 	_ = transactionmemoFields
 	// transactionmemoDescTransactionHash is the schema descriptor for transaction_hash field.

@@ -6,13 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
+	"time"
+
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/evm/model"
-	"math/big"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -102,6 +103,12 @@ func (ncc *NFTClassCreate) SetDeployerAddress(s string) *NFTClassCreate {
 // SetDeployedBlockNumber sets the "deployed_block_number" field.
 func (ncc *NFTClassCreate) SetDeployedBlockNumber(t typeutil.Uint64) *NFTClassCreate {
 	ncc.mutation.SetDeployedBlockNumber(t)
+	return ncc
+}
+
+// SetLatestEventBlockNumber sets the "latest_event_block_number" field.
+func (ncc *NFTClassCreate) SetLatestEventBlockNumber(t typeutil.Uint64) *NFTClassCreate {
+	ncc.mutation.SetLatestEventBlockNumber(t)
 	return ncc
 }
 
@@ -227,6 +234,9 @@ func (ncc *NFTClassCreate) check() error {
 	if _, ok := ncc.mutation.DeployedBlockNumber(); !ok {
 		return &ValidationError{Name: "deployed_block_number", err: errors.New(`ent: missing required field "NFTClass.deployed_block_number"`)}
 	}
+	if _, ok := ncc.mutation.LatestEventBlockNumber(); !ok {
+		return &ValidationError{Name: "latest_event_block_number", err: errors.New(`ent: missing required field "NFTClass.latest_event_block_number"`)}
+	}
 	if _, ok := ncc.mutation.MintedAt(); !ok {
 		return &ValidationError{Name: "minted_at", err: errors.New(`ent: missing required field "NFTClass.minted_at"`)}
 	}
@@ -321,6 +331,14 @@ func (ncc *NFTClassCreate) createSpec() (*NFTClass, *sqlgraph.CreateSpec, error)
 		}
 		_spec.SetField(nftclass.FieldDeployedBlockNumber, field.TypeUint64, vv)
 		_node.DeployedBlockNumber = value
+	}
+	if value, ok := ncc.mutation.LatestEventBlockNumber(); ok {
+		vv, err := nftclass.ValueScanner.LatestEventBlockNumber.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(nftclass.FieldLatestEventBlockNumber, field.TypeUint64, vv)
+		_node.LatestEventBlockNumber = value
 	}
 	if value, ok := ncc.mutation.MintedAt(); ok {
 		_spec.SetField(nftclass.FieldMintedAt, field.TypeTime, value)

@@ -6,14 +6,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
+	"time"
+
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/predicate"
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/evm/model"
-	"math/big"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -213,6 +214,27 @@ func (ncu *NFTClassUpdate) SetNillableDeployedBlockNumber(t *typeutil.Uint64) *N
 // AddDeployedBlockNumber adds t to the "deployed_block_number" field.
 func (ncu *NFTClassUpdate) AddDeployedBlockNumber(t typeutil.Uint64) *NFTClassUpdate {
 	ncu.mutation.AddDeployedBlockNumber(t)
+	return ncu
+}
+
+// SetLatestEventBlockNumber sets the "latest_event_block_number" field.
+func (ncu *NFTClassUpdate) SetLatestEventBlockNumber(t typeutil.Uint64) *NFTClassUpdate {
+	ncu.mutation.ResetLatestEventBlockNumber()
+	ncu.mutation.SetLatestEventBlockNumber(t)
+	return ncu
+}
+
+// SetNillableLatestEventBlockNumber sets the "latest_event_block_number" field if the given value is not nil.
+func (ncu *NFTClassUpdate) SetNillableLatestEventBlockNumber(t *typeutil.Uint64) *NFTClassUpdate {
+	if t != nil {
+		ncu.SetLatestEventBlockNumber(*t)
+	}
+	return ncu
+}
+
+// AddLatestEventBlockNumber adds t to the "latest_event_block_number" field.
+func (ncu *NFTClassUpdate) AddLatestEventBlockNumber(t typeutil.Uint64) *NFTClassUpdate {
+	ncu.mutation.AddLatestEventBlockNumber(t)
 	return ncu
 }
 
@@ -444,6 +466,20 @@ func (ncu *NFTClassUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			return 0, err
 		}
 		_spec.AddField(nftclass.FieldDeployedBlockNumber, field.TypeUint64, vv)
+	}
+	if value, ok := ncu.mutation.LatestEventBlockNumber(); ok {
+		vv, err := nftclass.ValueScanner.LatestEventBlockNumber.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(nftclass.FieldLatestEventBlockNumber, field.TypeUint64, vv)
+	}
+	if value, ok := ncu.mutation.AddedLatestEventBlockNumber(); ok {
+		vv, err := nftclass.ValueScanner.LatestEventBlockNumber.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.AddField(nftclass.FieldLatestEventBlockNumber, field.TypeUint64, vv)
 	}
 	if value, ok := ncu.mutation.MintedAt(); ok {
 		_spec.SetField(nftclass.FieldMintedAt, field.TypeTime, value)
@@ -727,6 +763,27 @@ func (ncuo *NFTClassUpdateOne) AddDeployedBlockNumber(t typeutil.Uint64) *NFTCla
 	return ncuo
 }
 
+// SetLatestEventBlockNumber sets the "latest_event_block_number" field.
+func (ncuo *NFTClassUpdateOne) SetLatestEventBlockNumber(t typeutil.Uint64) *NFTClassUpdateOne {
+	ncuo.mutation.ResetLatestEventBlockNumber()
+	ncuo.mutation.SetLatestEventBlockNumber(t)
+	return ncuo
+}
+
+// SetNillableLatestEventBlockNumber sets the "latest_event_block_number" field if the given value is not nil.
+func (ncuo *NFTClassUpdateOne) SetNillableLatestEventBlockNumber(t *typeutil.Uint64) *NFTClassUpdateOne {
+	if t != nil {
+		ncuo.SetLatestEventBlockNumber(*t)
+	}
+	return ncuo
+}
+
+// AddLatestEventBlockNumber adds t to the "latest_event_block_number" field.
+func (ncuo *NFTClassUpdateOne) AddLatestEventBlockNumber(t typeutil.Uint64) *NFTClassUpdateOne {
+	ncuo.mutation.AddLatestEventBlockNumber(t)
+	return ncuo
+}
+
 // SetMintedAt sets the "minted_at" field.
 func (ncuo *NFTClassUpdateOne) SetMintedAt(t time.Time) *NFTClassUpdateOne {
 	ncuo.mutation.SetMintedAt(t)
@@ -985,6 +1042,20 @@ func (ncuo *NFTClassUpdateOne) sqlSave(ctx context.Context) (_node *NFTClass, er
 			return nil, err
 		}
 		_spec.AddField(nftclass.FieldDeployedBlockNumber, field.TypeUint64, vv)
+	}
+	if value, ok := ncuo.mutation.LatestEventBlockNumber(); ok {
+		vv, err := nftclass.ValueScanner.LatestEventBlockNumber.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(nftclass.FieldLatestEventBlockNumber, field.TypeUint64, vv)
+	}
+	if value, ok := ncuo.mutation.AddedLatestEventBlockNumber(); ok {
+		vv, err := nftclass.ValueScanner.LatestEventBlockNumber.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.AddField(nftclass.FieldLatestEventBlockNumber, field.TypeUint64, vv)
 	}
 	if value, ok := ncuo.mutation.MintedAt(); ok {
 		_spec.SetField(nftclass.FieldMintedAt, field.TypeTime, value)
