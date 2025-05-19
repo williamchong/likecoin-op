@@ -6,7 +6,6 @@ import (
 
 	"likenft-indexer/cmd/cli/context"
 	"likenft-indexer/internal/database"
-	"likenft-indexer/internal/evm"
 	"likenft-indexer/internal/logic/evmeventprocessor"
 
 	"github.com/spf13/cobra"
@@ -30,16 +29,11 @@ var ProcessEVMEventCmd = &cobra.Command{
 		}
 
 		ctx := cmd.Context()
-		cfg := context.ConfigFromContext(ctx)
 		logger := context.LoggerFromContext(ctx)
 
 		httpClient := &http.Client{}
 		dbService := database.New()
-		evmClient, err := evm.NewEvmClient(cfg.EthNetworkPublicRPCURL)
-
-		if err != nil {
-			panic(err)
-		}
+		evmClient := context.EvmClientFromContext(ctx)
 
 		nftRepository := database.MakeNFTRepository(dbService)
 		nftClassRepository := database.MakeNFTClassRepository(dbService)

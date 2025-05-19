@@ -8,7 +8,6 @@ import (
 
 	appcontext "likenft-indexer/cmd/worker/context"
 	"likenft-indexer/internal/database"
-	"likenft-indexer/internal/evm"
 	"likenft-indexer/internal/logic/evmeventprocessor"
 
 	"github.com/hibiken/asynq"
@@ -31,8 +30,8 @@ func NewProcessEVMEvent(evmEventId int) (*asynq.Task, error) {
 }
 
 func HandleProcessEVMEvent(ctx context.Context, t *asynq.Task) error {
-	cfg := appcontext.ConfigFromContext(ctx)
 	logger := appcontext.LoggerFromContext(ctx)
+	evmClient := appcontext.EvmClientFromContext(ctx)
 
 	mylogger := logger.WithGroup("HandleProcessEVMEvent")
 
@@ -47,12 +46,6 @@ func HandleProcessEVMEvent(ctx context.Context, t *asynq.Task) error {
 
 	httpClient := &http.Client{}
 	dbService := database.New()
-	evmClient, err := evm.NewEvmClient(cfg.EthNetworkPublicRPCURL)
-
-	if err != nil {
-		mylogger.Error("evm.NewEvmClient", "err", err)
-		return err
-	}
 
 	nftClassRepository := database.MakeNFTClassRepository(dbService)
 	nftRepository := database.MakeNFTRepository(dbService)

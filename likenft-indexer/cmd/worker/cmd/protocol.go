@@ -2,11 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"likenft-indexer/cmd/worker/context"
 	"log"
 
 	"github.com/spf13/cobra"
-
-	"likenft-indexer/internal/evm"
 )
 
 var protocolCmd = &cobra.Command{
@@ -18,14 +17,7 @@ var ownerCmd = &cobra.Command{
 	Use:   "owner",
 	Short: "Get protocol owner",
 	Run: func(cmd *cobra.Command, args []string) {
-		rpcFlag, err := rootCmd.PersistentFlags().GetString("rpc")
-		if err != nil {
-			log.Fatal(err)
-		}
-		evmClient, err := evm.NewEvmClient(rpcFlag)
-		if err != nil {
-			log.Fatal(err)
-		}
+		evmClient := context.EvmClientFromContext(cmd.Context())
 		owner, err := evmClient.GetLikeProtocolOwner()
 		if err != nil {
 			log.Fatal(err)

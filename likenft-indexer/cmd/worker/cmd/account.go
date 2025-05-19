@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"likenft-indexer/cmd/worker/context"
 	"log"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
-
-	"likenft-indexer/internal/evm"
 )
 
 var accountCmd = &cobra.Command{
@@ -25,14 +24,7 @@ var nonceCmd = &cobra.Command{
 		addressArg := args[0]
 		address := common.HexToAddress(addressArg)
 
-		rpcFlag, err := rootCmd.PersistentFlags().GetString("rpc")
-		if err != nil {
-			log.Fatal(err)
-		}
-		evmClient, err := evm.NewEvmClient(rpcFlag)
-		if err != nil {
-			log.Fatal(err)
-		}
+		evmClient := context.EvmClientFromContext(cmd.Context())
 
 		nonce, err := evmClient.GetNonce(address)
 		if err != nil {
