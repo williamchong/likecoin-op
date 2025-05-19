@@ -6,14 +6,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
+	"sync"
+
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
+	"likenft-indexer/ent/likeprotocol"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/transactionmemo"
-	"reflect"
-	"sync"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -81,6 +83,7 @@ func checkColumn(table, column string) error {
 			account.Table:                      account.ValidColumn,
 			evmevent.Table:                     evmevent.ValidColumn,
 			evmeventprocessedblockheight.Table: evmeventprocessedblockheight.ValidColumn,
+			likeprotocol.Table:                 likeprotocol.ValidColumn,
 			nft.Table:                          nft.ValidColumn,
 			nftclass.Table:                     nftclass.ValidColumn,
 			transactionmemo.Table:              transactionmemo.ValidColumn,

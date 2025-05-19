@@ -7,6 +7,7 @@ import (
 
 	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
+	"likenft-indexer/ent/likeprotocol"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/schema"
@@ -57,6 +58,11 @@ func init() {
 	// evmeventprocessedblockheightDescBlockHeight is the schema descriptor for block_height field.
 	evmeventprocessedblockheightDescBlockHeight := evmeventprocessedblockheightFields[3].Descriptor()
 	evmeventprocessedblockheight.ValueScanner.BlockHeight = evmeventprocessedblockheightDescBlockHeight.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
+	likeprotocolFields := schema.LikeProtocol{}.Fields()
+	_ = likeprotocolFields
+	// likeprotocolDescLatestEventBlockNumber is the schema descriptor for latest_event_block_number field.
+	likeprotocolDescLatestEventBlockNumber := likeprotocolFields[1].Descriptor()
+	likeprotocol.ValueScanner.LatestEventBlockNumber = likeprotocolDescLatestEventBlockNumber.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
 	nftFields := schema.NFT{}.Fields()
 	_ = nftFields
 	// nftDescContractAddress is the schema descriptor for contract_address field.

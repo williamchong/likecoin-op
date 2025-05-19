@@ -37,6 +37,20 @@ func EVMEventProcessedBlockHeightOrErr(p EVMEventProcessedBlockHeight, err error
 	}
 }
 
+// LikeProtocol is the predicate function for likeprotocol builders.
+type LikeProtocol func(*sql.Selector)
+
+// LikeProtocolOrErr calls the predicate only if the error is not nit.
+func LikeProtocolOrErr(p LikeProtocol, err error) LikeProtocol {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
+
 // NFT is the predicate function for nft builders.
 type NFT func(*sql.Selector)
 

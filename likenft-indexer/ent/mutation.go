@@ -13,6 +13,7 @@ import (
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
+	"likenft-indexer/ent/likeprotocol"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/predicate"
@@ -36,6 +37,7 @@ const (
 	TypeAccount                      = "Account"
 	TypeEVMEvent                     = "EVMEvent"
 	TypeEVMEventProcessedBlockHeight = "EVMEventProcessedBlockHeight"
+	TypeLikeProtocol                 = "LikeProtocol"
 	TypeNFT                          = "NFT"
 	TypeNFTClass                     = "NFTClass"
 	TypeTransactionMemo              = "TransactionMemo"
@@ -3145,6 +3147,422 @@ func (m *EVMEventProcessedBlockHeightMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *EVMEventProcessedBlockHeightMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown EVMEventProcessedBlockHeight edge %s", name)
+}
+
+// LikeProtocolMutation represents an operation that mutates the LikeProtocol nodes in the graph.
+type LikeProtocolMutation struct {
+	config
+	op                           Op
+	typ                          string
+	id                           *int
+	address                      *string
+	latest_event_block_number    *typeutil.Uint64
+	addlatest_event_block_number *typeutil.Uint64
+	clearedFields                map[string]struct{}
+	done                         bool
+	oldValue                     func(context.Context) (*LikeProtocol, error)
+	predicates                   []predicate.LikeProtocol
+}
+
+var _ ent.Mutation = (*LikeProtocolMutation)(nil)
+
+// likeprotocolOption allows management of the mutation configuration using functional options.
+type likeprotocolOption func(*LikeProtocolMutation)
+
+// newLikeProtocolMutation creates new mutation for the LikeProtocol entity.
+func newLikeProtocolMutation(c config, op Op, opts ...likeprotocolOption) *LikeProtocolMutation {
+	m := &LikeProtocolMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLikeProtocol,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLikeProtocolID sets the ID field of the mutation.
+func withLikeProtocolID(id int) likeprotocolOption {
+	return func(m *LikeProtocolMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LikeProtocol
+		)
+		m.oldValue = func(ctx context.Context) (*LikeProtocol, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LikeProtocol.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLikeProtocol sets the old LikeProtocol of the mutation.
+func withLikeProtocol(node *LikeProtocol) likeprotocolOption {
+	return func(m *LikeProtocolMutation) {
+		m.oldValue = func(context.Context) (*LikeProtocol, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LikeProtocolMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LikeProtocolMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LikeProtocolMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LikeProtocolMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LikeProtocol.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetAddress sets the "address" field.
+func (m *LikeProtocolMutation) SetAddress(s string) {
+	m.address = &s
+}
+
+// Address returns the value of the "address" field in the mutation.
+func (m *LikeProtocolMutation) Address() (r string, exists bool) {
+	v := m.address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAddress returns the old "address" field's value of the LikeProtocol entity.
+// If the LikeProtocol object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LikeProtocolMutation) OldAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAddress: %w", err)
+	}
+	return oldValue.Address, nil
+}
+
+// ResetAddress resets all changes to the "address" field.
+func (m *LikeProtocolMutation) ResetAddress() {
+	m.address = nil
+}
+
+// SetLatestEventBlockNumber sets the "latest_event_block_number" field.
+func (m *LikeProtocolMutation) SetLatestEventBlockNumber(t typeutil.Uint64) {
+	m.latest_event_block_number = &t
+	m.addlatest_event_block_number = nil
+}
+
+// LatestEventBlockNumber returns the value of the "latest_event_block_number" field in the mutation.
+func (m *LikeProtocolMutation) LatestEventBlockNumber() (r typeutil.Uint64, exists bool) {
+	v := m.latest_event_block_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLatestEventBlockNumber returns the old "latest_event_block_number" field's value of the LikeProtocol entity.
+// If the LikeProtocol object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LikeProtocolMutation) OldLatestEventBlockNumber(ctx context.Context) (v typeutil.Uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLatestEventBlockNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLatestEventBlockNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLatestEventBlockNumber: %w", err)
+	}
+	return oldValue.LatestEventBlockNumber, nil
+}
+
+// AddLatestEventBlockNumber adds t to the "latest_event_block_number" field.
+func (m *LikeProtocolMutation) AddLatestEventBlockNumber(t typeutil.Uint64) {
+	if m.addlatest_event_block_number != nil {
+		*m.addlatest_event_block_number += t
+	} else {
+		m.addlatest_event_block_number = &t
+	}
+}
+
+// AddedLatestEventBlockNumber returns the value that was added to the "latest_event_block_number" field in this mutation.
+func (m *LikeProtocolMutation) AddedLatestEventBlockNumber() (r typeutil.Uint64, exists bool) {
+	v := m.addlatest_event_block_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetLatestEventBlockNumber resets all changes to the "latest_event_block_number" field.
+func (m *LikeProtocolMutation) ResetLatestEventBlockNumber() {
+	m.latest_event_block_number = nil
+	m.addlatest_event_block_number = nil
+}
+
+// Where appends a list predicates to the LikeProtocolMutation builder.
+func (m *LikeProtocolMutation) Where(ps ...predicate.LikeProtocol) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LikeProtocolMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LikeProtocolMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LikeProtocol, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LikeProtocolMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LikeProtocolMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LikeProtocol).
+func (m *LikeProtocolMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LikeProtocolMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.address != nil {
+		fields = append(fields, likeprotocol.FieldAddress)
+	}
+	if m.latest_event_block_number != nil {
+		fields = append(fields, likeprotocol.FieldLatestEventBlockNumber)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LikeProtocolMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case likeprotocol.FieldAddress:
+		return m.Address()
+	case likeprotocol.FieldLatestEventBlockNumber:
+		return m.LatestEventBlockNumber()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LikeProtocolMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case likeprotocol.FieldAddress:
+		return m.OldAddress(ctx)
+	case likeprotocol.FieldLatestEventBlockNumber:
+		return m.OldLatestEventBlockNumber(ctx)
+	}
+	return nil, fmt.Errorf("unknown LikeProtocol field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LikeProtocolMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case likeprotocol.FieldAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAddress(v)
+		return nil
+	case likeprotocol.FieldLatestEventBlockNumber:
+		v, ok := value.(typeutil.Uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLatestEventBlockNumber(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LikeProtocol field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LikeProtocolMutation) AddedFields() []string {
+	var fields []string
+	if m.addlatest_event_block_number != nil {
+		fields = append(fields, likeprotocol.FieldLatestEventBlockNumber)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LikeProtocolMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case likeprotocol.FieldLatestEventBlockNumber:
+		return m.AddedLatestEventBlockNumber()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LikeProtocolMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case likeprotocol.FieldLatestEventBlockNumber:
+		v, ok := value.(typeutil.Uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLatestEventBlockNumber(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LikeProtocol numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LikeProtocolMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LikeProtocolMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LikeProtocolMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown LikeProtocol nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LikeProtocolMutation) ResetField(name string) error {
+	switch name {
+	case likeprotocol.FieldAddress:
+		m.ResetAddress()
+		return nil
+	case likeprotocol.FieldLatestEventBlockNumber:
+		m.ResetLatestEventBlockNumber()
+		return nil
+	}
+	return fmt.Errorf("unknown LikeProtocol field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LikeProtocolMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LikeProtocolMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LikeProtocolMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LikeProtocolMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LikeProtocolMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LikeProtocolMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LikeProtocolMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown LikeProtocol unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LikeProtocolMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown LikeProtocol edge %s", name)
 }
 
 // NFTMutation represents an operation that mutates the NFT nodes in the graph.

@@ -112,6 +112,18 @@ var (
 			},
 		},
 	}
+	// LikeProtocolsColumns holds the columns for the "like_protocols" table.
+	LikeProtocolsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "address", Type: field.TypeString, Unique: true},
+		{Name: "latest_event_block_number", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
+	}
+	// LikeProtocolsTable holds the schema information for the "like_protocols" table.
+	LikeProtocolsTable = &schema.Table{
+		Name:       "like_protocols",
+		Columns:    LikeProtocolsColumns,
+		PrimaryKey: []*schema.Column{LikeProtocolsColumns[0]},
+	}
 	// NftsColumns holds the columns for the "nfts" table.
 	NftsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -245,6 +257,7 @@ var (
 		AccountsTable,
 		EvmEventsTable,
 		EvmEventProcessedBlockHeightsTable,
+		LikeProtocolsTable,
 		NftsTable,
 		NftClassesTable,
 		TransactionMemosTable,
@@ -260,6 +273,10 @@ func init() {
 	EvmEventProcessedBlockHeightsTable.Annotation.Checks = map[string]string{
 		"uint64_block_height_check": "block_height >= 0",
 	}
+	LikeProtocolsTable.Annotation = &entsql.Annotation{}
+	LikeProtocolsTable.Annotation.Checks = map[string]string{
+		"uint64_latest_event_block_number_check": "latest_event_block_number >= 0",
+	}
 	NftsTable.ForeignKeys[0].RefTable = AccountsTable
 	NftsTable.ForeignKeys[1].RefTable = NftClassesTable
 	NftsTable.Annotation = &entsql.Annotation{
@@ -271,9 +288,10 @@ func init() {
 	NftClassesTable.ForeignKeys[0].RefTable = AccountsTable
 	NftClassesTable.Annotation = &entsql.Annotation{}
 	NftClassesTable.Annotation.Checks = map[string]string{
-		"uint64_deployed_block_number_check": "deployed_block_number >= 0",
-		"uint64_max_supply_check":            "max_supply >= 0",
-		"uint64_total_supply_check":          "total_supply >= 0",
+		"uint64_deployed_block_number_check":     "deployed_block_number >= 0",
+		"uint64_latest_event_block_number_check": "latest_event_block_number >= 0",
+		"uint64_max_supply_check":                "max_supply >= 0",
+		"uint64_total_supply_check":              "total_supply >= 0",
 	}
 	TransactionMemosTable.Annotation = &entsql.Annotation{}
 	TransactionMemosTable.Annotation.Checks = map[string]string{

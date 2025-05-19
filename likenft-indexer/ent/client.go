@@ -14,6 +14,7 @@ import (
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
+	"likenft-indexer/ent/likeprotocol"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/transactionmemo"
@@ -35,6 +36,8 @@ type Client struct {
 	EVMEvent *EVMEventClient
 	// EVMEventProcessedBlockHeight is the client for interacting with the EVMEventProcessedBlockHeight builders.
 	EVMEventProcessedBlockHeight *EVMEventProcessedBlockHeightClient
+	// LikeProtocol is the client for interacting with the LikeProtocol builders.
+	LikeProtocol *LikeProtocolClient
 	// NFT is the client for interacting with the NFT builders.
 	NFT *NFTClient
 	// NFTClass is the client for interacting with the NFTClass builders.
@@ -55,6 +58,7 @@ func (c *Client) init() {
 	c.Account = NewAccountClient(c.config)
 	c.EVMEvent = NewEVMEventClient(c.config)
 	c.EVMEventProcessedBlockHeight = NewEVMEventProcessedBlockHeightClient(c.config)
+	c.LikeProtocol = NewLikeProtocolClient(c.config)
 	c.NFT = NewNFTClient(c.config)
 	c.NFTClass = NewNFTClassClient(c.config)
 	c.TransactionMemo = NewTransactionMemoClient(c.config)
@@ -153,6 +157,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Account:                      NewAccountClient(cfg),
 		EVMEvent:                     NewEVMEventClient(cfg),
 		EVMEventProcessedBlockHeight: NewEVMEventProcessedBlockHeightClient(cfg),
+		LikeProtocol:                 NewLikeProtocolClient(cfg),
 		NFT:                          NewNFTClient(cfg),
 		NFTClass:                     NewNFTClassClient(cfg),
 		TransactionMemo:              NewTransactionMemoClient(cfg),
@@ -178,6 +183,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Account:                      NewAccountClient(cfg),
 		EVMEvent:                     NewEVMEventClient(cfg),
 		EVMEventProcessedBlockHeight: NewEVMEventProcessedBlockHeightClient(cfg),
+		LikeProtocol:                 NewLikeProtocolClient(cfg),
 		NFT:                          NewNFTClient(cfg),
 		NFTClass:                     NewNFTClassClient(cfg),
 		TransactionMemo:              NewTransactionMemoClient(cfg),
@@ -210,8 +216,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Account, c.EVMEvent, c.EVMEventProcessedBlockHeight, c.NFT, c.NFTClass,
-		c.TransactionMemo,
+		c.Account, c.EVMEvent, c.EVMEventProcessedBlockHeight, c.LikeProtocol, c.NFT,
+		c.NFTClass, c.TransactionMemo,
 	} {
 		n.Use(hooks...)
 	}
@@ -221,8 +227,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Account, c.EVMEvent, c.EVMEventProcessedBlockHeight, c.NFT, c.NFTClass,
-		c.TransactionMemo,
+		c.Account, c.EVMEvent, c.EVMEventProcessedBlockHeight, c.LikeProtocol, c.NFT,
+		c.NFTClass, c.TransactionMemo,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -237,6 +243,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.EVMEvent.mutate(ctx, m)
 	case *EVMEventProcessedBlockHeightMutation:
 		return c.EVMEventProcessedBlockHeight.mutate(ctx, m)
+	case *LikeProtocolMutation:
+		return c.LikeProtocol.mutate(ctx, m)
 	case *NFTMutation:
 		return c.NFT.mutate(ctx, m)
 	case *NFTClassMutation:
@@ -676,6 +684,139 @@ func (c *EVMEventProcessedBlockHeightClient) mutate(ctx context.Context, m *EVME
 		return (&EVMEventProcessedBlockHeightDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown EVMEventProcessedBlockHeight mutation op: %q", m.Op())
+	}
+}
+
+// LikeProtocolClient is a client for the LikeProtocol schema.
+type LikeProtocolClient struct {
+	config
+}
+
+// NewLikeProtocolClient returns a client for the LikeProtocol from the given config.
+func NewLikeProtocolClient(c config) *LikeProtocolClient {
+	return &LikeProtocolClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `likeprotocol.Hooks(f(g(h())))`.
+func (c *LikeProtocolClient) Use(hooks ...Hook) {
+	c.hooks.LikeProtocol = append(c.hooks.LikeProtocol, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `likeprotocol.Intercept(f(g(h())))`.
+func (c *LikeProtocolClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LikeProtocol = append(c.inters.LikeProtocol, interceptors...)
+}
+
+// Create returns a builder for creating a LikeProtocol entity.
+func (c *LikeProtocolClient) Create() *LikeProtocolCreate {
+	mutation := newLikeProtocolMutation(c.config, OpCreate)
+	return &LikeProtocolCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LikeProtocol entities.
+func (c *LikeProtocolClient) CreateBulk(builders ...*LikeProtocolCreate) *LikeProtocolCreateBulk {
+	return &LikeProtocolCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LikeProtocolClient) MapCreateBulk(slice any, setFunc func(*LikeProtocolCreate, int)) *LikeProtocolCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LikeProtocolCreateBulk{err: fmt.Errorf("calling to LikeProtocolClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LikeProtocolCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LikeProtocolCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LikeProtocol.
+func (c *LikeProtocolClient) Update() *LikeProtocolUpdate {
+	mutation := newLikeProtocolMutation(c.config, OpUpdate)
+	return &LikeProtocolUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LikeProtocolClient) UpdateOne(lp *LikeProtocol) *LikeProtocolUpdateOne {
+	mutation := newLikeProtocolMutation(c.config, OpUpdateOne, withLikeProtocol(lp))
+	return &LikeProtocolUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LikeProtocolClient) UpdateOneID(id int) *LikeProtocolUpdateOne {
+	mutation := newLikeProtocolMutation(c.config, OpUpdateOne, withLikeProtocolID(id))
+	return &LikeProtocolUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LikeProtocol.
+func (c *LikeProtocolClient) Delete() *LikeProtocolDelete {
+	mutation := newLikeProtocolMutation(c.config, OpDelete)
+	return &LikeProtocolDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LikeProtocolClient) DeleteOne(lp *LikeProtocol) *LikeProtocolDeleteOne {
+	return c.DeleteOneID(lp.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LikeProtocolClient) DeleteOneID(id int) *LikeProtocolDeleteOne {
+	builder := c.Delete().Where(likeprotocol.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LikeProtocolDeleteOne{builder}
+}
+
+// Query returns a query builder for LikeProtocol.
+func (c *LikeProtocolClient) Query() *LikeProtocolQuery {
+	return &LikeProtocolQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLikeProtocol},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LikeProtocol entity by its id.
+func (c *LikeProtocolClient) Get(ctx context.Context, id int) (*LikeProtocol, error) {
+	return c.Query().Where(likeprotocol.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LikeProtocolClient) GetX(ctx context.Context, id int) *LikeProtocol {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LikeProtocolClient) Hooks() []Hook {
+	return c.hooks.LikeProtocol
+}
+
+// Interceptors returns the client interceptors.
+func (c *LikeProtocolClient) Interceptors() []Interceptor {
+	return c.inters.LikeProtocol
+}
+
+func (c *LikeProtocolClient) mutate(ctx context.Context, m *LikeProtocolMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LikeProtocolCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LikeProtocolUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LikeProtocolUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LikeProtocolDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LikeProtocol mutation op: %q", m.Op())
 	}
 }
 
@@ -1145,11 +1286,11 @@ func (c *TransactionMemoClient) mutate(ctx context.Context, m *TransactionMemoMu
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Account, EVMEvent, EVMEventProcessedBlockHeight, NFT, NFTClass,
+		Account, EVMEvent, EVMEventProcessedBlockHeight, LikeProtocol, NFT, NFTClass,
 		TransactionMemo []ent.Hook
 	}
 	inters struct {
-		Account, EVMEvent, EVMEventProcessedBlockHeight, NFT, NFTClass,
+		Account, EVMEvent, EVMEventProcessedBlockHeight, LikeProtocol, NFT, NFTClass,
 		TransactionMemo []ent.Interceptor
 	}
 )
