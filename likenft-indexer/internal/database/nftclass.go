@@ -14,6 +14,10 @@ import (
 type NFTClassRepository interface {
 	QueryAllNFTClasses(ctx context.Context) ([]*ent.NFTClass, error)
 	QueryNFTClassByAddress(ctx context.Context, address string) (*ent.NFTClass, error)
+	QueryNFTClassesByAddressesExact(
+		ctx context.Context,
+		addresses []string,
+	) ([]*ent.NFTClass, error)
 	InsertNFTClass(
 		ctx context.Context,
 		address string,
@@ -57,6 +61,28 @@ func (r *nftClassRepository) QueryNFTClassByAddress(ctx context.Context, address
 	return r.dbService.Client().NFTClass.Query().
 		Where(nftclass.AddressEqualFold(address)).
 		Only(ctx)
+}
+
+func (r *nftClassRepository) QueryNFTClassesByAddressesExact(
+	ctx context.Context,
+	addresses []string,
+) ([]*ent.NFTClass, error) {
+	res, err := r.dbService.Client().NFTClass.Query().
+		Where(nftclass.AddressIn(addresses...)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, address := range addresses {
+		if !slices.ContainsFunc(res, func(nftClass *ent.NFTClass) bool {
+			return nftClass.Address == address
+		}) {
+			return nil, &ent.NotFoundError{}
+		}
+	}
+
+	return res, nil
 }
 
 func (r *nftClassRepository) InsertNFTClass(
