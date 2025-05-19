@@ -16,7 +16,10 @@ import (
 
 type NFTClassRepository interface {
 	QueryAllNFTClasses(ctx context.Context) ([]*ent.NFTClass, error)
-	QueryAllNFTClassesOfLowestEventBlockHeight(ctx context.Context) ([]*ent.NFTClass, error)
+	QueryAllNFTClassesOfLowestEventBlockHeight(
+		ctx context.Context,
+		filterDisabledForIndexing bool,
+	) ([]*ent.NFTClass, error)
 	QueryNFTClassByAddress(ctx context.Context, address string) (*ent.NFTClass, error)
 	QueryNFTClassesByAddressesExact(
 		ctx context.Context,
@@ -48,6 +51,11 @@ type NFTClassRepository interface {
 		addresses []string,
 		latestEventBlockNumber typeutil.Uint64,
 	) error
+	DisableForIndexing(
+		ctx context.Context,
+		address string,
+		reason string,
+	) error
 }
 
 type nftClassRepository struct {
@@ -66,8 +74,17 @@ func (r *nftClassRepository) QueryAllNFTClasses(ctx context.Context) ([]*ent.NFT
 	return r.dbService.Client().NFTClass.Query().All(ctx)
 }
 
-func (r *nftClassRepository) QueryAllNFTClassesOfLowestEventBlockHeight(ctx context.Context) ([]*ent.NFTClass, error) {
-	return r.dbService.Client().NFTClass.Query().
+func (r *nftClassRepository) QueryAllNFTClassesOfLowestEventBlockHeight(
+	ctx context.Context,
+	filterDisabledForIndexing bool,
+) ([]*ent.NFTClass, error) {
+	q := r.dbService.Client().NFTClass.Query()
+
+	if filterDisabledForIndexing {
+		q = q.Where(nftclass.DisabledForIndexingEQ(false))
+	}
+
+	return q.
 		Order(nftclass.ByLatestEventBlockNumber(sql.OrderAsc())).
 		All(ctx)
 }

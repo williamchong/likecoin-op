@@ -45,7 +45,7 @@ func HandleCheckBookNFTs(ctx context.Context, t *asynq.Task) error {
 
 	nftClassRepository := database.MakeNFTClassRepository(dbService)
 
-	nftClasses, err := nftClassRepository.QueryAllNFTClassesOfLowestEventBlockHeight(ctx)
+	nftClasses, err := nftClassRepository.QueryAllNFTClassesOfLowestEventBlockHeight(ctx, true)
 
 	if err != nil {
 		mylogger.Error("nftClassRepository.QueryAllNFTClasses", "err", err)
