@@ -28,6 +28,7 @@ type NFTClassRepository interface {
 		featuredImage string,
 		deployerAddress string,
 		deployedBlockNumber typeutil.Uint64,
+		latestEventBlockNumber typeutil.Uint64,
 		mintedAt time.Time,
 		owner *ent.Account,
 	) error
@@ -72,6 +73,7 @@ func (r *nftClassRepository) InsertNFTClass(
 	featuredImage string,
 	deployerAddress string,
 	deployedBlockNumber typeutil.Uint64,
+	latestEventBlockNumber typeutil.Uint64,
 	mintedAt time.Time,
 	owner *ent.Account,
 ) error {
@@ -89,6 +91,7 @@ func (r *nftClassRepository) InsertNFTClass(
 			SetFeaturedImage(featuredImage).
 			SetDeployerAddress(deployerAddress).
 			SetDeployedBlockNumber(deployedBlockNumber).
+			SetLatestEventBlockNumber(latestEventBlockNumber).
 			SetMintedAt(mintedAt).
 			SetOwner(owner).
 			SetUpdatedAt(time.Now())

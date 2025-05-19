@@ -110,6 +110,7 @@ func (e *newBookNFTProcessor) Process(
 		"",
 		common.BytesToAddress([]byte{}).Hex(),
 		evmEvent.BlockNumber,
+		evmEvent.BlockNumber,
 		time.Now(),
 		account,
 	)
