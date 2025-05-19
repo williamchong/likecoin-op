@@ -1,3 +1,4 @@
 deploy/env.operator
 deploy/helm/dev/values.secret.yaml
+likenft/.env.optimism
 migration-backend/.env.dev

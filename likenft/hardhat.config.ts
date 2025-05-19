@@ -30,7 +30,7 @@ const config: HardhatUserConfig = {
       "optimism-sepolia":
         "Is not required by blockscout. Can be any non-empty string",
       sepolia: "Is not required by blockscout. Can be any non-empty string",
-      optimism: "d1e693b9-8f5f-42b3-bbe4-3c191cb26c06", // From rickmak.eth account
+      optimism: `${process.env.OPTIMISM_BLOCKSCOUT_KEY}`, // From rickmak.eth account
     },
     customChains: [
       {
@@ -62,10 +62,10 @@ const config: HardhatUserConfig = {
   networks: {
     localhost: {
       url: "http://127.0.0.1:8545",
-      accounts: [`0x${process.env.DEPLOY_WALLET_PRIVATE_KEY}`],
+      ledgerAccounts: ["0xB0318A8f049b625dA5DdD184FfFF668Aa6E96261"],
     },
     optimism: {
-      url: "https://optimism.drpc.org",
+      url: `0x${process.env.OPTIMISM_BLOCKSCOUT_URL}`,
       chainId: 10,
       ledgerAccounts: ["0xB0318A8f049b625dA5DdD184FfFF668Aa6E96261"],
     },
