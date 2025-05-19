@@ -29,6 +29,7 @@ export interface StepStateStep2AuthcoreRedirected {
 export interface StepStateStep2CosmosConnected {
   step: 2;
   state: 'CosmosConnected';
+  method: string | (string | null)[];
   cosmosAddress: string;
   email: string | null;
 }
@@ -212,12 +213,14 @@ export function authcoreRedirectionFailed(
 
 export function initCosmosConnected(
   _: StepState,
+  method: string | (string | null)[] = [],
   cosmosAddress: string,
   email: string | null = null
 ): StepStateStep2CosmosConnected {
   return {
     step: 2,
     state: 'CosmosConnected',
+    method,
     cosmosAddress,
     email,
   };
