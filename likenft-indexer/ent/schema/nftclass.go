@@ -47,6 +47,8 @@ func (NFTClass) Fields() []ent.Field {
 		field.Uint64("latest_event_block_number").GoType(typeutil.Uint64(0)).
 			SchemaType(typeutil.Uint64SchemaType).
 			ValueScanner(typeutil.Uint64ValueScanner),
+		field.Bool("disabled_for_indexing").Default(false),
+		field.String("disabled_for_indexing_reason").Optional(),
 		field.Time("minted_at"),
 		field.Time("updated_at"),
 	}
