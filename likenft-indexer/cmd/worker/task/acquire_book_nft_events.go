@@ -3,6 +3,7 @@ package task
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	appcontext "likenft-indexer/cmd/worker/context"
@@ -94,6 +95,13 @@ func HandleAcquireBookNFTEventsTask(ctx context.Context, t *asynq.Task) error {
 
 		if err != nil {
 			mylogger.Error("acquirer.Acquire", "err", err)
+			var errCannotConvertLog *contractevmeventacquirer.ErrCannotConvertLog
+			if errors.As(err, &errCannotConvertLog) {
+				return errors.Join(
+					err,
+					nftClassRepository.DisableForIndexing(ctx, errCannotConvertLog.Log.Address.Hex(), err.Error()),
+				)
+			}
 			return err
 		}
 
