@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"math/big"
+	"slices"
 	"time"
 
 	"likenft-indexer/ent"
@@ -39,6 +40,11 @@ type NFTClassRepository interface {
 	UpdateMetadata(ctx context.Context, address string, metadata *model.ContractLevelMetadata) error
 	UpdateOwner(ctx context.Context, address string, newOwner *ent.Account) error
 	UpdateTotalSupply(ctx context.Context, address string, newTotalSupply *big.Int) error
+	UpdateNFTClassesLatestEventBlockNumber(
+		ctx context.Context,
+		addresses []string,
+		latestEventBlockNumber typeutil.Uint64,
+	) error
 }
 
 type nftClassRepository struct {
@@ -180,5 +186,18 @@ func (r *nftClassRepository) UpdateTotalSupply(
 			SetTotalSupply(newTotalSupply).
 			Where(nftclass.AddressEqualFold(address)).
 			Exec(ctx)
+	})
+}
+
+func (r *nftClassRepository) UpdateNFTClassesLatestEventBlockNumber(
+	ctx context.Context,
+	addresses []string,
+	latestEventBlockNumber typeutil.Uint64,
+) error {
+	return WithTx(ctx, r.dbService.Client(), func(tx *ent.Tx) error {
+		return tx.NFTClass.
+			Update().
+			Where(nftclass.AddressIn(addresses...)).
+			SetLatestEventBlockNumber(latestEventBlockNumber).Exec(ctx)
 	})
 }
