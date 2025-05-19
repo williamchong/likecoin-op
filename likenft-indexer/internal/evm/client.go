@@ -3,6 +3,7 @@ package evm
 import (
 	"context"
 	"fmt"
+	"math/big"
 
 	"likenft-indexer/internal/evm/book_nft"
 	"likenft-indexer/internal/evm/like_protocol"
@@ -11,15 +12,23 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/jellydator/ttlcache/v3"
 )
 
 type EvmClient struct {
 	client          *ethclient.Client
 	LikeProtocolABI *abi.ABI
 	BookNFTABI      *abi.ABI
+
+	chainIdCache     *ttlcache.Cache[string, *big.Int]
+	blockNumberCache *ttlcache.Cache[string, uint64]
 }
 
-func NewEvmClient(url string) (*EvmClient, error) {
+func NewEvmClient(
+	url string,
+	chainIdCache *ttlcache.Cache[string, *big.Int],
+	blockNumberCache *ttlcache.Cache[string, uint64],
+) (*EvmClient, error) {
 	client, err := ethclient.Dial(url)
 	if err != nil {
 		return nil, err
@@ -36,9 +45,11 @@ func NewEvmClient(url string) (*EvmClient, error) {
 	}
 
 	return &EvmClient{
-		client:          client,
-		LikeProtocolABI: likeprotocolABI,
-		BookNFTABI:      booknftABI,
+		client:           client,
+		LikeProtocolABI:  likeprotocolABI,
+		BookNFTABI:       booknftABI,
+		chainIdCache:     chainIdCache,
+		blockNumberCache: blockNumberCache,
 	}, nil
 }
 
@@ -76,4 +87,30 @@ func (c *EvmClient) GetLikeProtocolOwner() (ownerAddress common.Address, err err
 	}
 
 	return ownerAddress, nil
+}
+
+func (c *EvmClient) ChainID(ctx context.Context) (*big.Int, error) {
+	item := c.chainIdCache.Get("chainId")
+	if item != nil {
+		return item.Value(), nil
+	}
+	chainId, err := c.client.ChainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	c.chainIdCache.Set("chainId", chainId, ttlcache.DefaultTTL)
+	return chainId, nil
+}
+
+func (c *EvmClient) BlockNumber(ctx context.Context) (uint64, error) {
+	item := c.blockNumberCache.Get("blockNumber")
+	if item != nil {
+		return item.Value(), nil
+	}
+	blockNumber, err := c.client.BlockNumber(ctx)
+	if err != nil {
+		return 0, err
+	}
+	c.blockNumberCache.Set("blockNumber", blockNumber, ttlcache.DefaultTTL)
+	return blockNumber, nil
 }
