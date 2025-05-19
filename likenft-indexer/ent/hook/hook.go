@@ -44,6 +44,18 @@ func (f EVMEventProcessedBlockHeightFunc) Mutate(ctx context.Context, m ent.Muta
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EVMEventProcessedBlockHeightMutation", m)
 }
 
+// The LikeProtocolFunc type is an adapter to allow the use of ordinary
+// function as LikeProtocol mutator.
+type LikeProtocolFunc func(context.Context, *ent.LikeProtocolMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LikeProtocolFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LikeProtocolMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LikeProtocolMutation", m)
+}
+
 // The NFTFunc type is an adapter to allow the use of ordinary
 // function as NFT mutator.
 type NFTFunc func(context.Context, *ent.NFTMutation) (ent.Value, error)

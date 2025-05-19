@@ -7,7 +7,6 @@ import (
 	"log/slog"
 
 	appcontext "likenft-indexer/cmd/worker/context"
-	"likenft-indexer/ent/evmeventprocessedblockheight"
 
 	"github.com/hibiken/asynq"
 )
@@ -40,26 +39,30 @@ func HandleCheckLikeProtocol(ctx context.Context, t *asynq.Task) error {
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	err := handleCheckLikeProtocol_enqueueAcquireNewBookNFTEVMEvent(mylogger, asynqClient, p.ContractAddress)
+	err := handleCheckLikeProtocol_enqueueAcquireLikeProtocolEventsTask(
+		mylogger,
+		asynqClient,
+		p.ContractAddress,
+	)
 
 	if err != nil {
-		mylogger.Error("enqueueAcquireNewBookNFTEVMEvent", "err", err)
+		mylogger.Error("enqueueAcquireLikeProtocolEventsTask", "err", err)
 		return err
 	}
 
 	return nil
 }
 
-func handleCheckLikeProtocol_enqueueAcquireNewBookNFTEVMEvent(
+func handleCheckLikeProtocol_enqueueAcquireLikeProtocolEventsTask(
 	logger *slog.Logger,
 	asynqClient *asynq.Client,
 
 	contractAddress string,
 ) error {
-	mylogger := logger.WithGroup("enqueueAcquireNewBookNFTEVMEvent")
+	mylogger := logger.WithGroup("enqueueAcquireLikeProtocolEventsTask")
 
-	mylogger.Info("Enqueueing AcquireNewBookNFTEVMEvent task...")
-	t, err := NewAcquireEVMEventsTask(contractAddress, evmeventprocessedblockheight.EventNewBookNFT)
+	mylogger.Info("Enqueueing AcquireLikeProtocolEventsTask task...")
+	t, err := NewAcquireLikeProtocolEventsTask(contractAddress)
 	if err != nil {
 		mylogger.Error("Cannot create task", "err", err)
 	}

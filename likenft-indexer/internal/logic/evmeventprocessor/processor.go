@@ -65,6 +65,9 @@ func (e *evmEventProcessor) Process(
 		With("evmEventId", evmEvent.ID)
 
 	switch evmEvent.Status {
+	case evmevent.StatusSkipped:
+		mylogger.Warn("The event has already skipped")
+		return nil
 	case evmevent.StatusProcessing:
 		mylogger.Warn("The event has already processing")
 		return ErrAlreadyProcessing
@@ -97,6 +100,10 @@ func (e *evmEventProcessor) Process(
 
 	processorCreator, err := e.getProcessorCreator(evmEvent)
 	if err != nil {
+		if errors.Is(err, UnknownEvent) {
+			evmEvent, err = e.evmEventRepository.UpdateEvmEventStatus(ctx, evmEvent, evmevent.StatusSkipped, nil)
+			return nil
+		}
 		mylogger.Error("e.getProcessorCreator", "err", err)
 		return err
 	}

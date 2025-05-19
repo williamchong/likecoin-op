@@ -103,6 +103,22 @@ func DeployedBlockNumber(v typeutil.Uint64) predicate.NFTClass {
 	return predicate.NFTClassOrErr(sql.FieldEQ(FieldDeployedBlockNumber, vc), err)
 }
 
+// LatestEventBlockNumber applies equality check predicate on the "latest_event_block_number" field. It's identical to LatestEventBlockNumberEQ.
+func LatestEventBlockNumber(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.LatestEventBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldEQ(FieldLatestEventBlockNumber, vc), err)
+}
+
+// DisabledForIndexing applies equality check predicate on the "disabled_for_indexing" field. It's identical to DisabledForIndexingEQ.
+func DisabledForIndexing(v bool) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldEQ(FieldDisabledForIndexing, v))
+}
+
+// DisabledForIndexingReason applies equality check predicate on the "disabled_for_indexing_reason" field. It's identical to DisabledForIndexingReasonEQ.
+func DisabledForIndexingReason(v string) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldEQ(FieldDisabledForIndexingReason, v))
+}
+
 // MintedAt applies equality check predicate on the "minted_at" field. It's identical to MintedAtEQ.
 func MintedAt(v time.Time) predicate.NFTClass {
 	return predicate.NFTClass(sql.FieldEQ(FieldMintedAt, v))
@@ -724,6 +740,155 @@ func DeployedBlockNumberLT(v typeutil.Uint64) predicate.NFTClass {
 func DeployedBlockNumberLTE(v typeutil.Uint64) predicate.NFTClass {
 	vc, err := ValueScanner.DeployedBlockNumber.Value(v)
 	return predicate.NFTClassOrErr(sql.FieldLTE(FieldDeployedBlockNumber, vc), err)
+}
+
+// LatestEventBlockNumberEQ applies the EQ predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberEQ(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.LatestEventBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldEQ(FieldLatestEventBlockNumber, vc), err)
+}
+
+// LatestEventBlockNumberNEQ applies the NEQ predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberNEQ(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.LatestEventBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldNEQ(FieldLatestEventBlockNumber, vc), err)
+}
+
+// LatestEventBlockNumberIn applies the In predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberIn(vs ...typeutil.Uint64) predicate.NFTClass {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.LatestEventBlockNumber.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.NFTClassOrErr(sql.FieldIn(FieldLatestEventBlockNumber, v...), err)
+}
+
+// LatestEventBlockNumberNotIn applies the NotIn predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberNotIn(vs ...typeutil.Uint64) predicate.NFTClass {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.LatestEventBlockNumber.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.NFTClassOrErr(sql.FieldNotIn(FieldLatestEventBlockNumber, v...), err)
+}
+
+// LatestEventBlockNumberGT applies the GT predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberGT(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.LatestEventBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldGT(FieldLatestEventBlockNumber, vc), err)
+}
+
+// LatestEventBlockNumberGTE applies the GTE predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberGTE(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.LatestEventBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldGTE(FieldLatestEventBlockNumber, vc), err)
+}
+
+// LatestEventBlockNumberLT applies the LT predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberLT(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.LatestEventBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldLT(FieldLatestEventBlockNumber, vc), err)
+}
+
+// LatestEventBlockNumberLTE applies the LTE predicate on the "latest_event_block_number" field.
+func LatestEventBlockNumberLTE(v typeutil.Uint64) predicate.NFTClass {
+	vc, err := ValueScanner.LatestEventBlockNumber.Value(v)
+	return predicate.NFTClassOrErr(sql.FieldLTE(FieldLatestEventBlockNumber, vc), err)
+}
+
+// DisabledForIndexingEQ applies the EQ predicate on the "disabled_for_indexing" field.
+func DisabledForIndexingEQ(v bool) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldEQ(FieldDisabledForIndexing, v))
+}
+
+// DisabledForIndexingNEQ applies the NEQ predicate on the "disabled_for_indexing" field.
+func DisabledForIndexingNEQ(v bool) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldNEQ(FieldDisabledForIndexing, v))
+}
+
+// DisabledForIndexingReasonEQ applies the EQ predicate on the "disabled_for_indexing_reason" field.
+func DisabledForIndexingReasonEQ(v string) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldEQ(FieldDisabledForIndexingReason, v))
+}
+
+// DisabledForIndexingReasonNEQ applies the NEQ predicate on the "disabled_for_indexing_reason" field.
+func DisabledForIndexingReasonNEQ(v string) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldNEQ(FieldDisabledForIndexingReason, v))
+}
+
+// DisabledForIndexingReasonIn applies the In predicate on the "disabled_for_indexing_reason" field.
+func DisabledForIndexingReasonIn(vs ...string) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldIn(FieldDisabledForIndexingReason, vs...))
+}
+
+// DisabledForIndexingReasonNotIn applies the NotIn predicate on the "disabled_for_indexing_reason" field.
+func DisabledForIndexingReasonNotIn(vs ...string) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldNotIn(FieldDisabledForIndexingReason, vs...))
+}
+
+// DisabledForIndexingReasonGT applies the GT predicate on the "disabled_for_indexing_reason" field.
+func DisabledForIndexingReasonGT(v string) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldGT(FieldDisabledForIndexingReason, v))
+}
+
+// DisabledForIndexingReasonGTE applies the GTE predicate on the "disabled_for_indexing_reason" field.
+func DisabledForIndexingReasonGTE(v string) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldGTE(FieldDisabledForIndexingReason, v))
+}
+
+// DisabledForIndexingReasonLT applies the LT predicate on the "disabled_for_indexing_reason" field.
+func DisabledForIndexingReasonLT(v string) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldLT(FieldDisabledForIndexingReason, v))
+}
+
+// DisabledForIndexingReasonLTE applies the LTE predicate on the "disabled_for_indexing_reason" field.
+func DisabledForIndexingReasonLTE(v string) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldLTE(FieldDisabledForIndexingReason, v))
+}
+
+// DisabledForIndexingReasonContains applies the Contains predicate on the "disabled_for_indexing_reason" field.
+func DisabledForIndexingReasonContains(v string) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldContains(FieldDisabledForIndexingReason, v))
+}
+
+// DisabledForIndexingReasonHasPrefix applies the HasPrefix predicate on the "disabled_for_indexing_reason" field.
+func DisabledForIndexingReasonHasPrefix(v string) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldHasPrefix(FieldDisabledForIndexingReason, v))
+}
+
+// DisabledForIndexingReasonHasSuffix applies the HasSuffix predicate on the "disabled_for_indexing_reason" field.
+func DisabledForIndexingReasonHasSuffix(v string) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldHasSuffix(FieldDisabledForIndexingReason, v))
+}
+
+// DisabledForIndexingReasonIsNil applies the IsNil predicate on the "disabled_for_indexing_reason" field.
+func DisabledForIndexingReasonIsNil() predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldIsNull(FieldDisabledForIndexingReason))
+}
+
+// DisabledForIndexingReasonNotNil applies the NotNil predicate on the "disabled_for_indexing_reason" field.
+func DisabledForIndexingReasonNotNil() predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldNotNull(FieldDisabledForIndexingReason))
+}
+
+// DisabledForIndexingReasonEqualFold applies the EqualFold predicate on the "disabled_for_indexing_reason" field.
+func DisabledForIndexingReasonEqualFold(v string) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldEqualFold(FieldDisabledForIndexingReason, v))
+}
+
+// DisabledForIndexingReasonContainsFold applies the ContainsFold predicate on the "disabled_for_indexing_reason" field.
+func DisabledForIndexingReasonContainsFold(v string) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldContainsFold(FieldDisabledForIndexingReason, v))
 }
 
 // MintedAtEQ applies the EQ predicate on the "minted_at" field.

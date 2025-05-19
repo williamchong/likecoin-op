@@ -46,6 +46,12 @@ type NFTClass struct {
 	DeployerAddress string `json:"deployer_address,omitempty"`
 	// DeployedBlockNumber holds the value of the "deployed_block_number" field.
 	DeployedBlockNumber typeutil.Uint64 `json:"deployed_block_number,omitempty"`
+	// LatestEventBlockNumber holds the value of the "latest_event_block_number" field.
+	LatestEventBlockNumber typeutil.Uint64 `json:"latest_event_block_number,omitempty"`
+	// DisabledForIndexing holds the value of the "disabled_for_indexing" field.
+	DisabledForIndexing bool `json:"disabled_for_indexing,omitempty"`
+	// DisabledForIndexingReason holds the value of the "disabled_for_indexing_reason" field.
+	DisabledForIndexingReason string `json:"disabled_for_indexing_reason,omitempty"`
 	// MintedAt holds the value of the "minted_at" field.
 	MintedAt time.Time `json:"minted_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -95,9 +101,11 @@ func (*NFTClass) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case nftclass.FieldMinterAddresses, nftclass.FieldMetadata:
 			values[i] = new([]byte)
+		case nftclass.FieldDisabledForIndexing:
+			values[i] = new(sql.NullBool)
 		case nftclass.FieldID:
 			values[i] = new(sql.NullInt64)
-		case nftclass.FieldAddress, nftclass.FieldName, nftclass.FieldSymbol, nftclass.FieldOwnerAddress, nftclass.FieldBannerImage, nftclass.FieldFeaturedImage, nftclass.FieldDeployerAddress:
+		case nftclass.FieldAddress, nftclass.FieldName, nftclass.FieldSymbol, nftclass.FieldOwnerAddress, nftclass.FieldBannerImage, nftclass.FieldFeaturedImage, nftclass.FieldDeployerAddress, nftclass.FieldDisabledForIndexingReason:
 			values[i] = new(sql.NullString)
 		case nftclass.FieldMintedAt, nftclass.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -107,6 +115,8 @@ func (*NFTClass) scanValues(columns []string) ([]any, error) {
 			values[i] = nftclass.ValueScanner.MaxSupply.ScanValue()
 		case nftclass.FieldDeployedBlockNumber:
 			values[i] = nftclass.ValueScanner.DeployedBlockNumber.ScanValue()
+		case nftclass.FieldLatestEventBlockNumber:
+			values[i] = nftclass.ValueScanner.LatestEventBlockNumber.ScanValue()
 		case nftclass.ForeignKeys[0]: // account_nft_classes
 			values[i] = new(sql.NullInt64)
 		default:
@@ -206,6 +216,24 @@ func (nc *NFTClass) assignValues(columns []string, values []any) error {
 				return err
 			} else {
 				nc.DeployedBlockNumber = value
+			}
+		case nftclass.FieldLatestEventBlockNumber:
+			if value, err := nftclass.ValueScanner.LatestEventBlockNumber.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				nc.LatestEventBlockNumber = value
+			}
+		case nftclass.FieldDisabledForIndexing:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field disabled_for_indexing", values[i])
+			} else if value.Valid {
+				nc.DisabledForIndexing = value.Bool
+			}
+		case nftclass.FieldDisabledForIndexingReason:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field disabled_for_indexing_reason", values[i])
+			} else if value.Valid {
+				nc.DisabledForIndexingReason = value.String
 			}
 		case nftclass.FieldMintedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -309,6 +337,15 @@ func (nc *NFTClass) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("deployed_block_number=")
 	builder.WriteString(fmt.Sprintf("%v", nc.DeployedBlockNumber))
+	builder.WriteString(", ")
+	builder.WriteString("latest_event_block_number=")
+	builder.WriteString(fmt.Sprintf("%v", nc.LatestEventBlockNumber))
+	builder.WriteString(", ")
+	builder.WriteString("disabled_for_indexing=")
+	builder.WriteString(fmt.Sprintf("%v", nc.DisabledForIndexing))
+	builder.WriteString(", ")
+	builder.WriteString("disabled_for_indexing_reason=")
+	builder.WriteString(nc.DisabledForIndexingReason)
 	builder.WriteString(", ")
 	builder.WriteString("minted_at=")
 	builder.WriteString(nc.MintedAt.Format(time.ANSIC))

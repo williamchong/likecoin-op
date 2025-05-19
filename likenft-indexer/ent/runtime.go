@@ -5,6 +5,7 @@ package ent
 import (
 	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
+	"likenft-indexer/ent/likeprotocol"
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/schema"
@@ -56,6 +57,11 @@ func init() {
 	// evmeventprocessedblockheightDescBlockHeight is the schema descriptor for block_height field.
 	evmeventprocessedblockheightDescBlockHeight := evmeventprocessedblockheightFields[3].Descriptor()
 	evmeventprocessedblockheight.ValueScanner.BlockHeight = evmeventprocessedblockheightDescBlockHeight.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
+	likeprotocolFields := schema.LikeProtocol{}.Fields()
+	_ = likeprotocolFields
+	// likeprotocolDescLatestEventBlockNumber is the schema descriptor for latest_event_block_number field.
+	likeprotocolDescLatestEventBlockNumber := likeprotocolFields[1].Descriptor()
+	likeprotocol.ValueScanner.LatestEventBlockNumber = likeprotocolDescLatestEventBlockNumber.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
 	nftFields := schema.NFT{}.Fields()
 	_ = nftFields
 	// nftDescContractAddress is the schema descriptor for contract_address field.
@@ -120,6 +126,13 @@ func init() {
 	// nftclassDescDeployedBlockNumber is the schema descriptor for deployed_block_number field.
 	nftclassDescDeployedBlockNumber := nftclassFields[11].Descriptor()
 	nftclass.ValueScanner.DeployedBlockNumber = nftclassDescDeployedBlockNumber.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
+	// nftclassDescLatestEventBlockNumber is the schema descriptor for latest_event_block_number field.
+	nftclassDescLatestEventBlockNumber := nftclassFields[12].Descriptor()
+	nftclass.ValueScanner.LatestEventBlockNumber = nftclassDescLatestEventBlockNumber.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
+	// nftclassDescDisabledForIndexing is the schema descriptor for disabled_for_indexing field.
+	nftclassDescDisabledForIndexing := nftclassFields[13].Descriptor()
+	// nftclass.DefaultDisabledForIndexing holds the default value on creation for the disabled_for_indexing field.
+	nftclass.DefaultDisabledForIndexing = nftclassDescDisabledForIndexing.Default.(bool)
 	transactionmemoFields := schema.TransactionMemo{}.Fields()
 	_ = transactionmemoFields
 	// transactionmemoDescTransactionHash is the schema descriptor for transaction_hash field.

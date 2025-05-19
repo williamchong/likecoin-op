@@ -3,17 +3,28 @@ package database
 import (
 	"context"
 	"math/big"
+	"slices"
 	"time"
 
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/evm/model"
+
+	"entgo.io/ent/dialect/sql"
 )
 
 type NFTClassRepository interface {
 	QueryAllNFTClasses(ctx context.Context) ([]*ent.NFTClass, error)
+	QueryAllNFTClassesOfLowestEventBlockHeight(
+		ctx context.Context,
+		filterDisabledForIndexing bool,
+	) ([]*ent.NFTClass, error)
 	QueryNFTClassByAddress(ctx context.Context, address string) (*ent.NFTClass, error)
+	QueryNFTClassesByAddressesExact(
+		ctx context.Context,
+		addresses []string,
+	) ([]*ent.NFTClass, error)
 	InsertNFTClass(
 		ctx context.Context,
 		address string,
@@ -28,12 +39,23 @@ type NFTClassRepository interface {
 		featuredImage string,
 		deployerAddress string,
 		deployedBlockNumber typeutil.Uint64,
+		latestEventBlockNumber typeutil.Uint64,
 		mintedAt time.Time,
 		owner *ent.Account,
 	) error
 	UpdateMetadata(ctx context.Context, address string, metadata *model.ContractLevelMetadata) error
 	UpdateOwner(ctx context.Context, address string, newOwner *ent.Account) error
 	UpdateTotalSupply(ctx context.Context, address string, newTotalSupply *big.Int) error
+	UpdateNFTClassesLatestEventBlockNumber(
+		ctx context.Context,
+		addresses []string,
+		latestEventBlockNumber typeutil.Uint64,
+	) error
+	DisableForIndexing(
+		ctx context.Context,
+		address string,
+		reason string,
+	) error
 }
 
 type nftClassRepository struct {
@@ -52,10 +74,47 @@ func (r *nftClassRepository) QueryAllNFTClasses(ctx context.Context) ([]*ent.NFT
 	return r.dbService.Client().NFTClass.Query().All(ctx)
 }
 
+func (r *nftClassRepository) QueryAllNFTClassesOfLowestEventBlockHeight(
+	ctx context.Context,
+	filterDisabledForIndexing bool,
+) ([]*ent.NFTClass, error) {
+	q := r.dbService.Client().NFTClass.Query()
+
+	if filterDisabledForIndexing {
+		q = q.Where(nftclass.DisabledForIndexingEQ(false))
+	}
+
+	return q.
+		Order(nftclass.ByLatestEventBlockNumber(sql.OrderAsc())).
+		All(ctx)
+}
+
 func (r *nftClassRepository) QueryNFTClassByAddress(ctx context.Context, address string) (*ent.NFTClass, error) {
 	return r.dbService.Client().NFTClass.Query().
 		Where(nftclass.AddressEqualFold(address)).
 		Only(ctx)
+}
+
+func (r *nftClassRepository) QueryNFTClassesByAddressesExact(
+	ctx context.Context,
+	addresses []string,
+) ([]*ent.NFTClass, error) {
+	res, err := r.dbService.Client().NFTClass.Query().
+		Where(nftclass.AddressIn(addresses...)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, address := range addresses {
+		if !slices.ContainsFunc(res, func(nftClass *ent.NFTClass) bool {
+			return nftClass.Address == address
+		}) {
+			return nil, &ent.NotFoundError{}
+		}
+	}
+
+	return res, nil
 }
 
 func (r *nftClassRepository) InsertNFTClass(
@@ -72,6 +131,7 @@ func (r *nftClassRepository) InsertNFTClass(
 	featuredImage string,
 	deployerAddress string,
 	deployedBlockNumber typeutil.Uint64,
+	latestEventBlockNumber typeutil.Uint64,
 	mintedAt time.Time,
 	owner *ent.Account,
 ) error {
@@ -89,6 +149,7 @@ func (r *nftClassRepository) InsertNFTClass(
 			SetFeaturedImage(featuredImage).
 			SetDeployerAddress(deployerAddress).
 			SetDeployedBlockNumber(deployedBlockNumber).
+			SetLatestEventBlockNumber(latestEventBlockNumber).
 			SetMintedAt(mintedAt).
 			SetOwner(owner).
 			SetUpdatedAt(time.Now())
@@ -150,6 +211,33 @@ func (r *nftClassRepository) UpdateTotalSupply(
 		return r.dbService.Client().NFTClass.Update().
 			SetTotalSupply(newTotalSupply).
 			Where(nftclass.AddressEqualFold(address)).
+			Exec(ctx)
+	})
+}
+
+func (r *nftClassRepository) UpdateNFTClassesLatestEventBlockNumber(
+	ctx context.Context,
+	addresses []string,
+	latestEventBlockNumber typeutil.Uint64,
+) error {
+	return WithTx(ctx, r.dbService.Client(), func(tx *ent.Tx) error {
+		return tx.NFTClass.
+			Update().
+			Where(nftclass.AddressIn(addresses...)).
+			SetLatestEventBlockNumber(latestEventBlockNumber).Exec(ctx)
+	})
+}
+
+func (r *nftClassRepository) DisableForIndexing(
+	ctx context.Context,
+	address string,
+	reason string,
+) error {
+	return WithTx(ctx, r.dbService.Client(), func(tx *ent.Tx) error {
+		return tx.NFTClass.Update().
+			Where(nftclass.AddressEqualFold(address)).
+			SetDisabledForIndexing(true).
+			SetDisabledForIndexingReason(reason).
 			Exec(ctx)
 	})
 }

@@ -20,10 +20,12 @@ var workerCmd = &cobra.Command{
 		logger := context.LoggerFromContext(cmd.Context())
 		asynqClient := context.AsynqClientFromContext(cmd.Context())
 		evmQueryClient := context.EvmQueryClientFromContext(cmd.Context())
+		evmClient := context.EvmClientFromContext(cmd.Context())
 
 		// mux maps a type to a handler
 		mux := asynq.NewServeMux()
-		mux.HandleFunc(task.TypeAcquireEVMEventsTaskPayload, task.HandleAcquireEVMEventsTask)
+		mux.HandleFunc(task.TypeAcquireBookNFTEventsTaskPayload, task.HandleAcquireBookNFTEventsTask)
+		mux.HandleFunc(task.TypeAcquireLikeProtocolEventsTaskPayload, task.HandleAcquireLikeProtocolEventsTask)
 		mux.HandleFunc(task.TypeCheckBookNFTsPayload, task.HandleCheckBookNFTs)
 		mux.HandleFunc(task.TypeCheckLikeProtocolPayload, task.HandleCheckLikeProtocol)
 		mux.HandleFunc(task.TypeCheckReceivedEVMEventsPayload, task.HandleCheckReceivedEVMEvents)
@@ -34,6 +36,7 @@ var workerCmd = &cobra.Command{
 		mux.Use(context.AsynqMiddlewareWithLoggerContext(logger))
 		mux.Use(context.AsynqMiddlewareWithAsynqClientContext(asynqClient))
 		mux.Use(context.AsynqMiddlewareWithEvmQueryClientContext(evmQueryClient))
+		mux.Use(context.AsynqMiddlewareWithEvmClientContext(evmClient))
 
 		if err := srv.Run(mux); err != nil {
 			log.Fatalf("could not run server: %v", err)

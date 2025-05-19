@@ -23,11 +23,13 @@ func Execute(
 	cfg *config.EnvConfig,
 	logger *slog.Logger,
 	evmQueryClient evm.EVMQueryClient,
+	evmClient *evm.EvmClient,
 ) {
 	ctx := context.Background()
 	ctx = appcontext.WithConfigContext(ctx, cfg)
 	ctx = appcontext.WithLoggerContext(ctx, logger)
 	ctx = appcontext.WithEvmQueryClient(ctx, evmQueryClient)
+	ctx = appcontext.WithEvmClient(ctx, evmClient)
 	err := rootCmd.ExecuteContext(ctx)
 	if err != nil {
 		os.Exit(1)
@@ -35,9 +37,7 @@ func Execute(
 }
 
 func init() {
-	rootCmd.AddCommand(AcquireBookNFTs)
-	rootCmd.AddCommand(AcquireNewEVMEvents)
-	rootCmd.AddCommand(AcquireAllBookNFTEvmEvents)
+	rootCmd.AddCommand(AcquireContractEvents)
 	rootCmd.AddCommand(ProcessAllEVMEventCmd)
 	rootCmd.AddCommand(ProcessEVMEventCmd)
 	rootCmd.AddCommand(RecalculateEvmEventsDecodedParamsCmd)

@@ -18,6 +18,8 @@ type Tx struct {
 	EVMEvent *EVMEventClient
 	// EVMEventProcessedBlockHeight is the client for interacting with the EVMEventProcessedBlockHeight builders.
 	EVMEventProcessedBlockHeight *EVMEventProcessedBlockHeightClient
+	// LikeProtocol is the client for interacting with the LikeProtocol builders.
+	LikeProtocol *LikeProtocolClient
 	// NFT is the client for interacting with the NFT builders.
 	NFT *NFTClient
 	// NFTClass is the client for interacting with the NFTClass builders.
@@ -158,6 +160,7 @@ func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
 	tx.EVMEvent = NewEVMEventClient(tx.config)
 	tx.EVMEventProcessedBlockHeight = NewEVMEventProcessedBlockHeightClient(tx.config)
+	tx.LikeProtocol = NewLikeProtocolClient(tx.config)
 	tx.NFT = NewNFTClient(tx.config)
 	tx.NFTClass = NewNFTClassClient(tx.config)
 	tx.TransactionMemo = NewTransactionMemoClient(tx.config)
