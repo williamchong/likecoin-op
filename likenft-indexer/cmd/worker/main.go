@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"math/big"
 	"os"
+	"time"
 
 	"likenft-indexer/cmd/worker/cmd"
 	"likenft-indexer/cmd/worker/config"
@@ -13,6 +15,7 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/hibiken/asynq"
+	"github.com/jellydator/ttlcache/v3"
 	"github.com/joho/godotenv"
 )
 
@@ -61,11 +64,22 @@ func main() {
 
 	evmQueryClient, err := evm.NewEvmQueryClient(envCfg.EthNetworkEventRPCURL)
 
+	chainIdCache := ttlcache.New(
+		ttlcache.WithTTL[string, *big.Int](ttlcache.NoTTL),
+	)
+	go chainIdCache.Start()
+	blockNumberCache := ttlcache.New(
+		ttlcache.WithTTL[string, uint64](40 * time.Second),
+	)
+	go blockNumberCache.Start()
+	evmClient, err := evm.NewEvmClient(envCfg.EthNetworkPublicRPCURL, chainIdCache, blockNumberCache)
+
 	ctx = appcontext.WithConfigContext(ctx, envCfg)
 	ctx = appcontext.WithAsynqClientContext(ctx, asynqClient)
 	ctx = appcontext.WithAsynqServerContext(ctx, asynqServer)
 	ctx = appcontext.WithAsynqSchedulerContext(ctx, asynqScheduler)
 	ctx = appcontext.WithLoggerContext(ctx, logger)
 	ctx = appcontext.WithEvmQueryClient(ctx, evmQueryClient)
+	ctx = appcontext.WithEvmClient(ctx, evmClient)
 	cmd.Execute(ctx)
 }
