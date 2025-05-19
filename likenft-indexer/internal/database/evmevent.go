@@ -5,9 +5,11 @@ import (
 	"errors"
 	"math"
 	"slices"
+	"strings"
 
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/evmevent"
+	"likenft-indexer/ent/predicate"
 )
 
 type EVMEventRepository interface {
@@ -101,25 +103,29 @@ func (s *evmEventRepository) InsertEvmEventsIfNeeded(
 	resChan := make(chan []*ent.EVMEvent, 1)
 
 	err := WithTx(ctx, s.dbService.Client(), func(tx *ent.Tx) error {
-		var txHashes []string
-		for _, e := range evmEvents {
-			txHashes = append(txHashes, e.TransactionHash)
+		var txPredicates = make([]predicate.EVMEvent, len(evmEvents))
+		for i, e := range evmEvents {
+			txPredicates[i] = evmevent.And(
+				evmevent.TransactionHashEqualFold(e.TransactionHash),
+				evmevent.TransactionIndexEQ(e.TransactionIndex),
+				evmevent.LogIndexEQ(e.LogIndex),
+			)
 		}
-		dbEvmEvents, err := tx.EVMEvent.Query().Where(evmevent.TransactionHashIn(txHashes...)).All(ctx)
+
+		dbEvmEvents, err := tx.EVMEvent.Query().Where(evmevent.Or(txPredicates...)).All(ctx)
 
 		if err != nil {
 			return err
 		}
 
-		var dbTxHashes []string
-		for _, e := range dbEvmEvents {
-			dbTxHashes = append(dbTxHashes, e.TransactionHash)
-		}
-
 		var eventsToBeInserted []*ent.EVMEventCreate
 
 		for _, e := range evmEvents {
-			if slices.Index(dbTxHashes, e.TransactionHash) == -1 {
+			if !slices.ContainsFunc(dbEvmEvents, func(dbEvmEvent *ent.EVMEvent) bool {
+				return strings.EqualFold(dbEvmEvent.TransactionHash, e.TransactionHash) &&
+					dbEvmEvent.TransactionIndex == e.TransactionIndex &&
+					dbEvmEvent.LogIndex == e.LogIndex
+			}) {
 				createBuilder := tx.EVMEvent.Create().
 					SetAddress(e.Address).
 					SetBlockHash(e.BlockHash).
@@ -170,7 +176,7 @@ func (s *evmEventRepository) InsertEvmEventsIfNeeded(
 			return err
 		}
 
-		dbEvmEvents, err = tx.EVMEvent.Query().Where(evmevent.TransactionHashIn(txHashes...)).All(ctx)
+		dbEvmEvents, err = tx.EVMEvent.Query().Where(evmevent.Or(txPredicates...)).All(ctx)
 		if err != nil {
 			return err
 		}
