@@ -210,3 +210,17 @@ func (r *nftClassRepository) UpdateNFTClassesLatestEventBlockNumber(
 			SetLatestEventBlockNumber(latestEventBlockNumber).Exec(ctx)
 	})
 }
+
+func (r *nftClassRepository) DisableForIndexing(
+	ctx context.Context,
+	address string,
+	reason string,
+) error {
+	return WithTx(ctx, r.dbService.Client(), func(tx *ent.Tx) error {
+		return tx.NFTClass.Update().
+			Where(nftclass.AddressEqualFold(address)).
+			SetDisabledForIndexing(true).
+			SetDisabledForIndexingReason(reason).
+			Exec(ctx)
+	})
+}
