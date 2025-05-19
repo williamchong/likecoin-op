@@ -37,10 +37,7 @@ func Execute(
 }
 
 func init() {
-	rootCmd.AddCommand(AcquireBookNFTs)
 	rootCmd.AddCommand(AcquireContractEvents)
-	rootCmd.AddCommand(AcquireNewEVMEvents)
-	rootCmd.AddCommand(AcquireAllBookNFTEvmEvents)
 	rootCmd.AddCommand(ProcessAllEVMEventCmd)
 	rootCmd.AddCommand(ProcessEVMEventCmd)
 	rootCmd.AddCommand(RecalculateEvmEventsDecodedParamsCmd)
