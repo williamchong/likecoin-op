@@ -44,6 +44,9 @@ func (NFTClass) Fields() []ent.Field {
 		field.Uint64("deployed_block_number").GoType(typeutil.Uint64(0)).
 			SchemaType(typeutil.Uint64SchemaType).
 			ValueScanner(typeutil.Uint64ValueScanner),
+		field.Uint64("latest_event_block_number").GoType(typeutil.Uint64(0)).
+			SchemaType(typeutil.Uint64SchemaType).
+			ValueScanner(typeutil.Uint64ValueScanner),
 		field.Time("minted_at"),
 		field.Time("updated_at"),
 	}
@@ -71,5 +74,6 @@ func (NFTClass) Annotations() []schema.Annotation {
 		typeutil.Uint64Annotations("total_supply"),
 		typeutil.Uint64Annotations("max_supply"),
 		typeutil.Uint64Annotations("deployed_block_number"),
+		typeutil.Uint64Annotations("latest_event_block_number"),
 	)
 }
