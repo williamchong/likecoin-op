@@ -40,12 +40,45 @@ func HandleCheckLikeProtocol(ctx context.Context, t *asynq.Task) error {
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	err := handleCheckLikeProtocol_enqueueAcquireNewBookNFTEVMEvent(mylogger, asynqClient, p.ContractAddress)
+	err := handleCheckLikeProtocol_enqueueAcquireLikeProtocolEventsTask(
+		mylogger,
+		asynqClient,
+		p.ContractAddress,
+	)
+
+	if err != nil {
+		mylogger.Error("enqueueAcquireLikeProtocolEventsTask", "err", err)
+		return err
+	}
+
+	err = handleCheckLikeProtocol_enqueueAcquireNewBookNFTEVMEvent(mylogger, asynqClient, p.ContractAddress)
 
 	if err != nil {
 		mylogger.Error("enqueueAcquireNewBookNFTEVMEvent", "err", err)
 		return err
 	}
+
+	return nil
+}
+
+func handleCheckLikeProtocol_enqueueAcquireLikeProtocolEventsTask(
+	logger *slog.Logger,
+	asynqClient *asynq.Client,
+
+	contractAddress string,
+) error {
+	mylogger := logger.WithGroup("enqueueAcquireLikeProtocolEventsTask")
+
+	mylogger.Info("Enqueueing AcquireLikeProtocolEventsTask task...")
+	t, err := NewAcquireLikeProtocolEventsTask(contractAddress)
+	if err != nil {
+		mylogger.Error("Cannot create task", "err", err)
+	}
+	taskInfo, err := asynqClient.Enqueue(t, asynq.MaxRetry(0))
+	if err != nil {
+		mylogger.Error("Cannot enqueue task", "err", err)
+	}
+	mylogger.Info("task enqueued", "taskId", taskInfo.ID)
 
 	return nil
 }
