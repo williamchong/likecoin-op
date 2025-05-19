@@ -6,9 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"reflect"
-	"sync"
-
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
@@ -16,6 +13,8 @@ import (
 	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/transactionmemo"
+	"reflect"
+	"sync"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

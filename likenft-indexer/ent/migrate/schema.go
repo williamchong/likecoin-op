@@ -50,7 +50,7 @@ var (
 		{Name: "data", Type: field.TypeString, Nullable: true},
 		{Name: "data_hex", Type: field.TypeString, Nullable: true},
 		{Name: "removed", Type: field.TypeBool},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"received", "enqueued", "processing", "processed", "failed"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"received", "skipped", "enqueued", "processing", "processed", "failed"}},
 		{Name: "name", Type: field.TypeString},
 		{Name: "signature", Type: field.TypeString},
 		{Name: "indexed_params", Type: field.TypeJSON},

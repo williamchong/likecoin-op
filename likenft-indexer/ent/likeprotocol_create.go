@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"likenft-indexer/ent/likeprotocol"
 	"likenft-indexer/ent/schema/typeutil"
 

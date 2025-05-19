@@ -3,8 +3,6 @@
 package ent
 
 import (
-	"math/big"
-
 	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
 	"likenft-indexer/ent/likeprotocol"
@@ -13,6 +11,7 @@ import (
 	"likenft-indexer/ent/schema"
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/ent/transactionmemo"
+	"math/big"
 
 	"entgo.io/ent/schema/field"
 )

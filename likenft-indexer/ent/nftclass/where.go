@@ -3,10 +3,9 @@
 package nftclass
 
 import (
-	"time"
-
 	"likenft-indexer/ent/predicate"
 	"likenft-indexer/ent/schema/typeutil"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

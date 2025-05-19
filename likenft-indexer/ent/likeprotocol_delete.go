@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-
 	"likenft-indexer/ent/likeprotocol"
 	"likenft-indexer/ent/predicate"
 

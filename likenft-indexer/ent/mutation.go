@@ -6,10 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/big"
-	"sync"
-	"time"
-
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/ent/evmeventprocessedblockheight"
@@ -20,6 +16,9 @@ import (
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/ent/transactionmemo"
 	"likenft-indexer/internal/evm/model"
+	"math/big"
+	"sync"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

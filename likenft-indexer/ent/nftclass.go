@@ -5,14 +5,13 @@ package ent
 import (
 	"encoding/json"
 	"fmt"
-	"math/big"
-	"strings"
-	"time"
-
 	"likenft-indexer/ent/account"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/evm/model"
+	"math/big"
+	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

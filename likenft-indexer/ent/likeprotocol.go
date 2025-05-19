@@ -4,10 +4,9 @@ package ent
 
 import (
 	"fmt"
-	"strings"
-
 	"likenft-indexer/ent/likeprotocol"
 	"likenft-indexer/ent/schema/typeutil"
+	"strings"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

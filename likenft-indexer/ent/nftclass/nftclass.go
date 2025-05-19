@@ -3,9 +3,8 @@
 package nftclass
 
 import (
-	"math/big"
-
 	"likenft-indexer/ent/schema/typeutil"
+	"math/big"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

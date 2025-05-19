@@ -5,10 +5,9 @@ package ent
 import (
 	"context"
 	"fmt"
-	"math"
-
 	"likenft-indexer/ent/likeprotocol"
 	"likenft-indexer/ent/predicate"
+	"math"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

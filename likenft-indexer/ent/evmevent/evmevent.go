@@ -133,6 +133,7 @@ type Status string
 // Status values.
 const (
 	StatusReceived   Status = "received"
+	StatusSkipped    Status = "skipped"
 	StatusEnqueued   Status = "enqueued"
 	StatusProcessing Status = "processing"
 	StatusProcessed  Status = "processed"
@@ -146,7 +147,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusReceived, StatusEnqueued, StatusProcessing, StatusProcessed, StatusFailed:
+	case StatusReceived, StatusSkipped, StatusEnqueued, StatusProcessing, StatusProcessed, StatusFailed:
 		return nil
 	default:
 		return fmt.Errorf("evmevent: invalid enum value for status field: %q", s)
