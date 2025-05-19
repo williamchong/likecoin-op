@@ -10,10 +10,13 @@ import (
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/evm/model"
+
+	"entgo.io/ent/dialect/sql"
 )
 
 type NFTClassRepository interface {
 	QueryAllNFTClasses(ctx context.Context) ([]*ent.NFTClass, error)
+	QueryAllNFTClassesOfLowestEventBlockHeight(ctx context.Context) ([]*ent.NFTClass, error)
 	QueryNFTClassByAddress(ctx context.Context, address string) (*ent.NFTClass, error)
 	QueryNFTClassesByAddressesExact(
 		ctx context.Context,
@@ -61,6 +64,12 @@ func MakeNFTClassRepository(
 
 func (r *nftClassRepository) QueryAllNFTClasses(ctx context.Context) ([]*ent.NFTClass, error) {
 	return r.dbService.Client().NFTClass.Query().All(ctx)
+}
+
+func (r *nftClassRepository) QueryAllNFTClassesOfLowestEventBlockHeight(ctx context.Context) ([]*ent.NFTClass, error) {
+	return r.dbService.Client().NFTClass.Query().
+		Order(nftclass.ByLatestEventBlockNumber(sql.OrderAsc())).
+		All(ctx)
 }
 
 func (r *nftClassRepository) QueryNFTClassByAddress(ctx context.Context, address string) (*ent.NFTClass, error) {
