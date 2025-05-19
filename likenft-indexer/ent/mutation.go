@@ -5041,6 +5041,8 @@ type NFTClassMutation struct {
 	adddeployed_block_number     *typeutil.Uint64
 	latest_event_block_number    *typeutil.Uint64
 	addlatest_event_block_number *typeutil.Uint64
+	disabled_for_indexing        *bool
+	disabled_for_indexing_reason *string
 	minted_at                    *time.Time
 	updated_at                   *time.Time
 	clearedFields                map[string]struct{}
@@ -5735,6 +5737,91 @@ func (m *NFTClassMutation) ResetLatestEventBlockNumber() {
 	m.addlatest_event_block_number = nil
 }
 
+// SetDisabledForIndexing sets the "disabled_for_indexing" field.
+func (m *NFTClassMutation) SetDisabledForIndexing(b bool) {
+	m.disabled_for_indexing = &b
+}
+
+// DisabledForIndexing returns the value of the "disabled_for_indexing" field in the mutation.
+func (m *NFTClassMutation) DisabledForIndexing() (r bool, exists bool) {
+	v := m.disabled_for_indexing
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisabledForIndexing returns the old "disabled_for_indexing" field's value of the NFTClass entity.
+// If the NFTClass object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NFTClassMutation) OldDisabledForIndexing(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDisabledForIndexing is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDisabledForIndexing requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisabledForIndexing: %w", err)
+	}
+	return oldValue.DisabledForIndexing, nil
+}
+
+// ResetDisabledForIndexing resets all changes to the "disabled_for_indexing" field.
+func (m *NFTClassMutation) ResetDisabledForIndexing() {
+	m.disabled_for_indexing = nil
+}
+
+// SetDisabledForIndexingReason sets the "disabled_for_indexing_reason" field.
+func (m *NFTClassMutation) SetDisabledForIndexingReason(s string) {
+	m.disabled_for_indexing_reason = &s
+}
+
+// DisabledForIndexingReason returns the value of the "disabled_for_indexing_reason" field in the mutation.
+func (m *NFTClassMutation) DisabledForIndexingReason() (r string, exists bool) {
+	v := m.disabled_for_indexing_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisabledForIndexingReason returns the old "disabled_for_indexing_reason" field's value of the NFTClass entity.
+// If the NFTClass object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NFTClassMutation) OldDisabledForIndexingReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDisabledForIndexingReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDisabledForIndexingReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisabledForIndexingReason: %w", err)
+	}
+	return oldValue.DisabledForIndexingReason, nil
+}
+
+// ClearDisabledForIndexingReason clears the value of the "disabled_for_indexing_reason" field.
+func (m *NFTClassMutation) ClearDisabledForIndexingReason() {
+	m.disabled_for_indexing_reason = nil
+	m.clearedFields[nftclass.FieldDisabledForIndexingReason] = struct{}{}
+}
+
+// DisabledForIndexingReasonCleared returns if the "disabled_for_indexing_reason" field was cleared in this mutation.
+func (m *NFTClassMutation) DisabledForIndexingReasonCleared() bool {
+	_, ok := m.clearedFields[nftclass.FieldDisabledForIndexingReason]
+	return ok
+}
+
+// ResetDisabledForIndexingReason resets all changes to the "disabled_for_indexing_reason" field.
+func (m *NFTClassMutation) ResetDisabledForIndexingReason() {
+	m.disabled_for_indexing_reason = nil
+	delete(m.clearedFields, nftclass.FieldDisabledForIndexingReason)
+}
+
 // SetMintedAt sets the "minted_at" field.
 func (m *NFTClassMutation) SetMintedAt(t time.Time) {
 	m.minted_at = &t
@@ -5934,7 +6021,7 @@ func (m *NFTClassMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *NFTClassMutation) Fields() []string {
-	fields := make([]string, 0, 15)
+	fields := make([]string, 0, 17)
 	if m.address != nil {
 		fields = append(fields, nftclass.FieldAddress)
 	}
@@ -5973,6 +6060,12 @@ func (m *NFTClassMutation) Fields() []string {
 	}
 	if m.latest_event_block_number != nil {
 		fields = append(fields, nftclass.FieldLatestEventBlockNumber)
+	}
+	if m.disabled_for_indexing != nil {
+		fields = append(fields, nftclass.FieldDisabledForIndexing)
+	}
+	if m.disabled_for_indexing_reason != nil {
+		fields = append(fields, nftclass.FieldDisabledForIndexingReason)
 	}
 	if m.minted_at != nil {
 		fields = append(fields, nftclass.FieldMintedAt)
@@ -6014,6 +6107,10 @@ func (m *NFTClassMutation) Field(name string) (ent.Value, bool) {
 		return m.DeployedBlockNumber()
 	case nftclass.FieldLatestEventBlockNumber:
 		return m.LatestEventBlockNumber()
+	case nftclass.FieldDisabledForIndexing:
+		return m.DisabledForIndexing()
+	case nftclass.FieldDisabledForIndexingReason:
+		return m.DisabledForIndexingReason()
 	case nftclass.FieldMintedAt:
 		return m.MintedAt()
 	case nftclass.FieldUpdatedAt:
@@ -6053,6 +6150,10 @@ func (m *NFTClassMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldDeployedBlockNumber(ctx)
 	case nftclass.FieldLatestEventBlockNumber:
 		return m.OldLatestEventBlockNumber(ctx)
+	case nftclass.FieldDisabledForIndexing:
+		return m.OldDisabledForIndexing(ctx)
+	case nftclass.FieldDisabledForIndexingReason:
+		return m.OldDisabledForIndexingReason(ctx)
 	case nftclass.FieldMintedAt:
 		return m.OldMintedAt(ctx)
 	case nftclass.FieldUpdatedAt:
@@ -6157,6 +6258,20 @@ func (m *NFTClassMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetLatestEventBlockNumber(v)
 		return nil
+	case nftclass.FieldDisabledForIndexing:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisabledForIndexing(v)
+		return nil
+	case nftclass.FieldDisabledForIndexingReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisabledForIndexingReason(v)
+		return nil
 	case nftclass.FieldMintedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -6249,6 +6364,9 @@ func (m *NFTClassMutation) ClearedFields() []string {
 	if m.FieldCleared(nftclass.FieldMetadata) {
 		fields = append(fields, nftclass.FieldMetadata)
 	}
+	if m.FieldCleared(nftclass.FieldDisabledForIndexingReason) {
+		fields = append(fields, nftclass.FieldDisabledForIndexingReason)
+	}
 	return fields
 }
 
@@ -6271,6 +6389,9 @@ func (m *NFTClassMutation) ClearField(name string) error {
 		return nil
 	case nftclass.FieldMetadata:
 		m.ClearMetadata()
+		return nil
+	case nftclass.FieldDisabledForIndexingReason:
+		m.ClearDisabledForIndexingReason()
 		return nil
 	}
 	return fmt.Errorf("unknown NFTClass nullable field %s", name)
@@ -6318,6 +6439,12 @@ func (m *NFTClassMutation) ResetField(name string) error {
 		return nil
 	case nftclass.FieldLatestEventBlockNumber:
 		m.ResetLatestEventBlockNumber()
+		return nil
+	case nftclass.FieldDisabledForIndexing:
+		m.ResetDisabledForIndexing()
+		return nil
+	case nftclass.FieldDisabledForIndexingReason:
+		m.ResetDisabledForIndexingReason()
 		return nil
 	case nftclass.FieldMintedAt:
 		m.ResetMintedAt()

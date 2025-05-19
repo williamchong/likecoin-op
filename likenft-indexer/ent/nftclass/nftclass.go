@@ -42,6 +42,10 @@ const (
 	FieldDeployedBlockNumber = "deployed_block_number"
 	// FieldLatestEventBlockNumber holds the string denoting the latest_event_block_number field in the database.
 	FieldLatestEventBlockNumber = "latest_event_block_number"
+	// FieldDisabledForIndexing holds the string denoting the disabled_for_indexing field in the database.
+	FieldDisabledForIndexing = "disabled_for_indexing"
+	// FieldDisabledForIndexingReason holds the string denoting the disabled_for_indexing_reason field in the database.
+	FieldDisabledForIndexingReason = "disabled_for_indexing_reason"
 	// FieldMintedAt holds the string denoting the minted_at field in the database.
 	FieldMintedAt = "minted_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -84,6 +88,8 @@ var Columns = []string{
 	FieldDeployerAddress,
 	FieldDeployedBlockNumber,
 	FieldLatestEventBlockNumber,
+	FieldDisabledForIndexing,
+	FieldDisabledForIndexingReason,
 	FieldMintedAt,
 	FieldUpdatedAt,
 }
@@ -116,6 +122,8 @@ var (
 	SymbolValidator func(string) error
 	// DeployerAddressValidator is a validator for the "deployer_address" field. It is called by the builders before save.
 	DeployerAddressValidator func(string) error
+	// DefaultDisabledForIndexing holds the default value on creation for the "disabled_for_indexing" field.
+	DefaultDisabledForIndexing bool
 	// ValueScanner of all NFTClass fields.
 	ValueScanner struct {
 		TotalSupply            field.TypeValueScanner[*big.Int]
@@ -186,6 +194,16 @@ func ByDeployedBlockNumber(opts ...sql.OrderTermOption) OrderOption {
 // ByLatestEventBlockNumber orders the results by the latest_event_block_number field.
 func ByLatestEventBlockNumber(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLatestEventBlockNumber, opts...).ToFunc()
+}
+
+// ByDisabledForIndexing orders the results by the disabled_for_indexing field.
+func ByDisabledForIndexing(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisabledForIndexing, opts...).ToFunc()
+}
+
+// ByDisabledForIndexingReason orders the results by the disabled_for_indexing_reason field.
+func ByDisabledForIndexingReason(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisabledForIndexingReason, opts...).ToFunc()
 }
 
 // ByMintedAt orders the results by the minted_at field.

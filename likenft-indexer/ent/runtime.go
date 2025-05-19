@@ -129,6 +129,10 @@ func init() {
 	// nftclassDescLatestEventBlockNumber is the schema descriptor for latest_event_block_number field.
 	nftclassDescLatestEventBlockNumber := nftclassFields[12].Descriptor()
 	nftclass.ValueScanner.LatestEventBlockNumber = nftclassDescLatestEventBlockNumber.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
+	// nftclassDescDisabledForIndexing is the schema descriptor for disabled_for_indexing field.
+	nftclassDescDisabledForIndexing := nftclassFields[13].Descriptor()
+	// nftclass.DefaultDisabledForIndexing holds the default value on creation for the disabled_for_indexing field.
+	nftclass.DefaultDisabledForIndexing = nftclassDescDisabledForIndexing.Default.(bool)
 	transactionmemoFields := schema.TransactionMemo{}.Fields()
 	_ = transactionmemoFields
 	// transactionmemoDescTransactionHash is the schema descriptor for transaction_hash field.

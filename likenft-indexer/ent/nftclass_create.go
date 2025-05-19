@@ -111,6 +111,34 @@ func (ncc *NFTClassCreate) SetLatestEventBlockNumber(t typeutil.Uint64) *NFTClas
 	return ncc
 }
 
+// SetDisabledForIndexing sets the "disabled_for_indexing" field.
+func (ncc *NFTClassCreate) SetDisabledForIndexing(b bool) *NFTClassCreate {
+	ncc.mutation.SetDisabledForIndexing(b)
+	return ncc
+}
+
+// SetNillableDisabledForIndexing sets the "disabled_for_indexing" field if the given value is not nil.
+func (ncc *NFTClassCreate) SetNillableDisabledForIndexing(b *bool) *NFTClassCreate {
+	if b != nil {
+		ncc.SetDisabledForIndexing(*b)
+	}
+	return ncc
+}
+
+// SetDisabledForIndexingReason sets the "disabled_for_indexing_reason" field.
+func (ncc *NFTClassCreate) SetDisabledForIndexingReason(s string) *NFTClassCreate {
+	ncc.mutation.SetDisabledForIndexingReason(s)
+	return ncc
+}
+
+// SetNillableDisabledForIndexingReason sets the "disabled_for_indexing_reason" field if the given value is not nil.
+func (ncc *NFTClassCreate) SetNillableDisabledForIndexingReason(s *string) *NFTClassCreate {
+	if s != nil {
+		ncc.SetDisabledForIndexingReason(*s)
+	}
+	return ncc
+}
+
 // SetMintedAt sets the "minted_at" field.
 func (ncc *NFTClassCreate) SetMintedAt(t time.Time) *NFTClassCreate {
 	ncc.mutation.SetMintedAt(t)
@@ -164,6 +192,7 @@ func (ncc *NFTClassCreate) Mutation() *NFTClassMutation {
 
 // Save creates the NFTClass in the database.
 func (ncc *NFTClassCreate) Save(ctx context.Context) (*NFTClass, error) {
+	ncc.defaults()
 	return withHooks(ctx, ncc.sqlSave, ncc.mutation, ncc.hooks)
 }
 
@@ -186,6 +215,14 @@ func (ncc *NFTClassCreate) Exec(ctx context.Context) error {
 func (ncc *NFTClassCreate) ExecX(ctx context.Context) {
 	if err := ncc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (ncc *NFTClassCreate) defaults() {
+	if _, ok := ncc.mutation.DisabledForIndexing(); !ok {
+		v := nftclass.DefaultDisabledForIndexing
+		ncc.mutation.SetDisabledForIndexing(v)
 	}
 }
 
@@ -235,6 +272,9 @@ func (ncc *NFTClassCreate) check() error {
 	}
 	if _, ok := ncc.mutation.LatestEventBlockNumber(); !ok {
 		return &ValidationError{Name: "latest_event_block_number", err: errors.New(`ent: missing required field "NFTClass.latest_event_block_number"`)}
+	}
+	if _, ok := ncc.mutation.DisabledForIndexing(); !ok {
+		return &ValidationError{Name: "disabled_for_indexing", err: errors.New(`ent: missing required field "NFTClass.disabled_for_indexing"`)}
 	}
 	if _, ok := ncc.mutation.MintedAt(); !ok {
 		return &ValidationError{Name: "minted_at", err: errors.New(`ent: missing required field "NFTClass.minted_at"`)}
@@ -339,6 +379,14 @@ func (ncc *NFTClassCreate) createSpec() (*NFTClass, *sqlgraph.CreateSpec, error)
 		_spec.SetField(nftclass.FieldLatestEventBlockNumber, field.TypeUint64, vv)
 		_node.LatestEventBlockNumber = value
 	}
+	if value, ok := ncc.mutation.DisabledForIndexing(); ok {
+		_spec.SetField(nftclass.FieldDisabledForIndexing, field.TypeBool, value)
+		_node.DisabledForIndexing = value
+	}
+	if value, ok := ncc.mutation.DisabledForIndexingReason(); ok {
+		_spec.SetField(nftclass.FieldDisabledForIndexingReason, field.TypeString, value)
+		_node.DisabledForIndexingReason = value
+	}
 	if value, ok := ncc.mutation.MintedAt(); ok {
 		_spec.SetField(nftclass.FieldMintedAt, field.TypeTime, value)
 		_node.MintedAt = value
@@ -401,6 +449,7 @@ func (nccb *NFTClassCreateBulk) Save(ctx context.Context) ([]*NFTClass, error) {
 	for i := range nccb.builders {
 		func(i int, root context.Context) {
 			builder := nccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*NFTClassMutation)
 				if !ok {

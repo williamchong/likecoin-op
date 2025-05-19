@@ -193,6 +193,8 @@ var (
 		{Name: "deployer_address", Type: field.TypeString},
 		{Name: "deployed_block_number", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
 		{Name: "latest_event_block_number", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "disabled_for_indexing", Type: field.TypeBool, Default: false},
+		{Name: "disabled_for_indexing_reason", Type: field.TypeString, Nullable: true},
 		{Name: "minted_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "account_nft_classes", Type: field.TypeInt, Nullable: true},
@@ -205,7 +207,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "nft_classes_accounts_nft_classes",
-				Columns:    []*schema.Column{NftClassesColumns[16]},
+				Columns:    []*schema.Column{NftClassesColumns[18]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

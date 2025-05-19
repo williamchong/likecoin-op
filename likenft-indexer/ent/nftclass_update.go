@@ -237,6 +237,40 @@ func (ncu *NFTClassUpdate) AddLatestEventBlockNumber(t typeutil.Uint64) *NFTClas
 	return ncu
 }
 
+// SetDisabledForIndexing sets the "disabled_for_indexing" field.
+func (ncu *NFTClassUpdate) SetDisabledForIndexing(b bool) *NFTClassUpdate {
+	ncu.mutation.SetDisabledForIndexing(b)
+	return ncu
+}
+
+// SetNillableDisabledForIndexing sets the "disabled_for_indexing" field if the given value is not nil.
+func (ncu *NFTClassUpdate) SetNillableDisabledForIndexing(b *bool) *NFTClassUpdate {
+	if b != nil {
+		ncu.SetDisabledForIndexing(*b)
+	}
+	return ncu
+}
+
+// SetDisabledForIndexingReason sets the "disabled_for_indexing_reason" field.
+func (ncu *NFTClassUpdate) SetDisabledForIndexingReason(s string) *NFTClassUpdate {
+	ncu.mutation.SetDisabledForIndexingReason(s)
+	return ncu
+}
+
+// SetNillableDisabledForIndexingReason sets the "disabled_for_indexing_reason" field if the given value is not nil.
+func (ncu *NFTClassUpdate) SetNillableDisabledForIndexingReason(s *string) *NFTClassUpdate {
+	if s != nil {
+		ncu.SetDisabledForIndexingReason(*s)
+	}
+	return ncu
+}
+
+// ClearDisabledForIndexingReason clears the value of the "disabled_for_indexing_reason" field.
+func (ncu *NFTClassUpdate) ClearDisabledForIndexingReason() *NFTClassUpdate {
+	ncu.mutation.ClearDisabledForIndexingReason()
+	return ncu
+}
+
 // SetMintedAt sets the "minted_at" field.
 func (ncu *NFTClassUpdate) SetMintedAt(t time.Time) *NFTClassUpdate {
 	ncu.mutation.SetMintedAt(t)
@@ -479,6 +513,15 @@ func (ncu *NFTClassUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			return 0, err
 		}
 		_spec.AddField(nftclass.FieldLatestEventBlockNumber, field.TypeUint64, vv)
+	}
+	if value, ok := ncu.mutation.DisabledForIndexing(); ok {
+		_spec.SetField(nftclass.FieldDisabledForIndexing, field.TypeBool, value)
+	}
+	if value, ok := ncu.mutation.DisabledForIndexingReason(); ok {
+		_spec.SetField(nftclass.FieldDisabledForIndexingReason, field.TypeString, value)
+	}
+	if ncu.mutation.DisabledForIndexingReasonCleared() {
+		_spec.ClearField(nftclass.FieldDisabledForIndexingReason, field.TypeString)
 	}
 	if value, ok := ncu.mutation.MintedAt(); ok {
 		_spec.SetField(nftclass.FieldMintedAt, field.TypeTime, value)
@@ -783,6 +826,40 @@ func (ncuo *NFTClassUpdateOne) AddLatestEventBlockNumber(t typeutil.Uint64) *NFT
 	return ncuo
 }
 
+// SetDisabledForIndexing sets the "disabled_for_indexing" field.
+func (ncuo *NFTClassUpdateOne) SetDisabledForIndexing(b bool) *NFTClassUpdateOne {
+	ncuo.mutation.SetDisabledForIndexing(b)
+	return ncuo
+}
+
+// SetNillableDisabledForIndexing sets the "disabled_for_indexing" field if the given value is not nil.
+func (ncuo *NFTClassUpdateOne) SetNillableDisabledForIndexing(b *bool) *NFTClassUpdateOne {
+	if b != nil {
+		ncuo.SetDisabledForIndexing(*b)
+	}
+	return ncuo
+}
+
+// SetDisabledForIndexingReason sets the "disabled_for_indexing_reason" field.
+func (ncuo *NFTClassUpdateOne) SetDisabledForIndexingReason(s string) *NFTClassUpdateOne {
+	ncuo.mutation.SetDisabledForIndexingReason(s)
+	return ncuo
+}
+
+// SetNillableDisabledForIndexingReason sets the "disabled_for_indexing_reason" field if the given value is not nil.
+func (ncuo *NFTClassUpdateOne) SetNillableDisabledForIndexingReason(s *string) *NFTClassUpdateOne {
+	if s != nil {
+		ncuo.SetDisabledForIndexingReason(*s)
+	}
+	return ncuo
+}
+
+// ClearDisabledForIndexingReason clears the value of the "disabled_for_indexing_reason" field.
+func (ncuo *NFTClassUpdateOne) ClearDisabledForIndexingReason() *NFTClassUpdateOne {
+	ncuo.mutation.ClearDisabledForIndexingReason()
+	return ncuo
+}
+
 // SetMintedAt sets the "minted_at" field.
 func (ncuo *NFTClassUpdateOne) SetMintedAt(t time.Time) *NFTClassUpdateOne {
 	ncuo.mutation.SetMintedAt(t)
@@ -1055,6 +1132,15 @@ func (ncuo *NFTClassUpdateOne) sqlSave(ctx context.Context) (_node *NFTClass, er
 			return nil, err
 		}
 		_spec.AddField(nftclass.FieldLatestEventBlockNumber, field.TypeUint64, vv)
+	}
+	if value, ok := ncuo.mutation.DisabledForIndexing(); ok {
+		_spec.SetField(nftclass.FieldDisabledForIndexing, field.TypeBool, value)
+	}
+	if value, ok := ncuo.mutation.DisabledForIndexingReason(); ok {
+		_spec.SetField(nftclass.FieldDisabledForIndexingReason, field.TypeString, value)
+	}
+	if ncuo.mutation.DisabledForIndexingReasonCleared() {
+		_spec.ClearField(nftclass.FieldDisabledForIndexingReason, field.TypeString)
 	}
 	if value, ok := ncuo.mutation.MintedAt(); ok {
 		_spec.SetField(nftclass.FieldMintedAt, field.TypeTime, value)
