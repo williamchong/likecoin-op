@@ -30,6 +30,7 @@ export interface StepStateStep2CosmosConnected {
   step: 2;
   state: 'CosmosConnected';
   cosmosAddress: string;
+  email: string | null;
 }
 
 export interface StepStateStep2LikerIdResolved {
@@ -211,12 +212,14 @@ export function authcoreRedirectionFailed(
 
 export function initCosmosConnected(
   _: StepState,
-  cosmosAddress: string
+  cosmosAddress: string,
+  email: string | null = null
 ): StepStateStep2CosmosConnected {
   return {
     step: 2,
     state: 'CosmosConnected',
     cosmosAddress,
+    email,
   };
 }
 

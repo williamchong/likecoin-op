@@ -45,6 +45,7 @@
                 :liker-id="likerId"
                 :avatar="avatar"
                 :cosmos-address="cosmosAddress"
+                :email="email"
                 :eth-address="ethAddress"
                 @likeCoinWalletConnected="handleLikeCoinWalletConnected"
                 @likeCoinEVMWalletConnected="handleLikeCoinEVMWalletConnected"
@@ -57,6 +58,7 @@
                 :liker-id="likerId"
                 :avatar="avatar"
                 :cosmos-address="cosmosAddress"
+                :email="email"
                 :eth-address="ethAddress"
                 @likeCoinWalletConnected="handleLikeCoinWalletConnected"
                 @likeCoinEVMWalletConnected="handleLikeCoinEVMWalletConnected"
@@ -579,6 +581,14 @@ export default Vue.extend({
       return null;
     },
 
+    email(): string | null {
+      let email: string | null = null;
+      if ('email' in this.currentStep) {
+        email = this.currentStep.email;
+      }
+      return email;
+    },
+
     ethAddress(): string | null {
       if ('ethAddress' in this.currentStep) {
         return this.currentStep.ethAddress;
@@ -855,8 +865,9 @@ export default Vue.extend({
         if ('method' in connection) {
           const {
             accounts: [account],
+            user: { primary_email: email },
           } = connection;
-          return initCosmosConnected(currentStep, account.address);
+          return initCosmosConnected(currentStep, account.address, email);
         }
       }
       return authcoreRedirectionFailed(currentStep);

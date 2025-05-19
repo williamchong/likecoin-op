@@ -171,6 +171,10 @@ export default Vue.extend({
       type: String as PropType<string | null>,
       default: null,
     },
+    email: {
+      type: String as PropType<string | null>,
+      default: null,
+    },
   },
 
   mounted() {
@@ -216,7 +220,9 @@ export default Vue.extend({
     },
 
     handleConnectTargetWalletClick() {
-      this.$likeCoinEVMWalletConnector.connector.showConnectPortal();
+      this.$likeCoinEVMWalletConnector.connector.showConnectPortal({
+        email: this.email || undefined,
+      });
     },
 
     handleLikeCoinWalletConnection(
