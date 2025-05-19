@@ -45,6 +45,7 @@ func (EVMEvent) Fields() []ent.Field {
 		field.Bool("removed"),
 		field.Enum("status").Values(
 			"received",
+			"skipped",
 			"enqueued",
 			"processing",
 			"processed",
