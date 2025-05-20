@@ -55,6 +55,8 @@ migrationBackend:
     imagePullPolicy: IfNotPresent
     port: 8091
 
+  migrate: {}
+
   service:
     port: 80
 
