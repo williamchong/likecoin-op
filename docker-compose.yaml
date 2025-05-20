@@ -70,7 +70,7 @@ services:
     command: go run ./cmd/server
 
   eth-node:
-    image: node:23-alpine
+    image: node:24-bookworm
     working_dir: /src
     volumes:
       - node-modules-eth-node:/src/node_modules

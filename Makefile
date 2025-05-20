@@ -15,8 +15,8 @@ remove-operator-key-link:
 .PHONY: local-contracts
 local-contracts:
 	(sleep 1 && make -C operation init-local-state) &
-	(sleep 2 && make -C likecoin deploy-local) &
-	(sleep 3 && make -C likenft deploy-local)
+	(sleep 2 && make -C likenft deploy-local) &
+	(sleep 7 && make -C likecoin deploy-local)
 
 .PHONY: abigen
 abigen:

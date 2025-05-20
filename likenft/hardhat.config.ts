@@ -4,8 +4,10 @@ import type { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-verify";
 import "@openzeppelin/hardhat-upgrades";
+import "@nomicfoundation/hardhat-ledger";
+
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: process.env.DOTENV_CONFIG_PATH });
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -28,8 +30,17 @@ const config: HardhatUserConfig = {
       "optimism-sepolia":
         "Is not required by blockscout. Can be any non-empty string",
       sepolia: "Is not required by blockscout. Can be any non-empty string",
+      optimism: `${process.env.OPTIMISM_BLOCKSCOUT_KEY}`, // From rickmak.eth account
     },
     customChains: [
+      {
+        network: "optimism",
+        chainId: 10,
+        urls: {
+          apiURL: "https://optimism.blockscout.com/api",
+          browserURL: "https://optimism.blockscout.com/",
+        },
+      },
       {
         network: "sepolia",
         chainId: 11155111,
@@ -51,7 +62,12 @@ const config: HardhatUserConfig = {
   networks: {
     localhost: {
       url: "http://127.0.0.1:8545",
-      accounts: [`0x${process.env.DEPLOY_WALLET_PRIVATE_KEY}`],
+      ledgerAccounts: ["0xB0318A8f049b625dA5DdD184FfFF668Aa6E96261"],
+    },
+    optimism: {
+      url: `0x${process.env.OPTIMISM_BLOCKSCOUT_URL}`,
+      chainId: 10,
+      ledgerAccounts: ["0xB0318A8f049b625dA5DdD184FfFF668Aa6E96261"],
     },
     "optimism-sepolia": {
       url: "https://sepolia.optimism.io",
