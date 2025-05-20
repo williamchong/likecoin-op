@@ -103,6 +103,8 @@ likenftIndexer:
     imageRepository: likecoin/likenft-indexer
     imagePullPolicy: IfNotPresent
 
+  migrate: {}
+
   api:
     name: likenft-indexer-api
 
