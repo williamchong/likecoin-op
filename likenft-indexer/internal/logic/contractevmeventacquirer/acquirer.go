@@ -129,6 +129,18 @@ func (a *contractEvmEventsAcquirer) Acquire(
 		return fromBlock, err
 	}
 
+	blockNumbers := make([]uint64, len(logs))
+
+	for i, log := range logs {
+		blockNumbers[i] = log.BlockNumber
+	}
+
+	headerMap, err := a.evmClient.GetHeaderMapByBlockNumbers(ctx, blockNumbers)
+	if err != nil {
+		myLogger.Error("a.evmClient.GetHeaderMapByBlockNumbers", "err", err)
+		return fromBlock, err
+	}
+
 	if len(logs) > 0 {
 		// Convert logs to EVMEvents
 		logConverter := logconverter.NewLogConverter(abi)
@@ -139,7 +151,7 @@ func (a *contractEvmEventsAcquirer) Acquire(
 				With("txHash", log.TxHash).
 				With("txIndex", log.TxIndex).
 				With("logIndex", log.Index)
-			evmEvent, err := logConverter.ConvertLogToEvmEvent(log)
+			evmEvent, err := logConverter.ConvertLogToEvmEvent(log, headerMap[log.BlockNumber])
 			if err != nil {
 				mylogger.Error("failed to convert log", "error", err)
 				return fromBlock, errors.Join(&ErrCannotConvertLog{
