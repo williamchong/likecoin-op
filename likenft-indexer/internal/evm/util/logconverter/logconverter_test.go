@@ -1,6 +1,7 @@
 package logconverter_test
 
 import (
+	"math/big"
 	"testing"
 	"time"
 
@@ -36,6 +37,11 @@ func TestLogConverter(t *testing.T) {
 			Removed:     false,
 		}
 
+		header := &types.Header{
+			Time:   1469021581,
+			Number: big.NewInt(6),
+		}
+
 		abi, err := book_nft.BookNftMetaData.GetAbi()
 
 		if err != nil {
@@ -43,7 +49,7 @@ func TestLogConverter(t *testing.T) {
 		}
 
 		logConverter := logconverter.NewLogConverter(abi)
-		evmEvent, err := logConverter.ConvertLogToEvmEvent(log)
+		evmEvent, err := logConverter.ConvertLogToEvmEvent(log, header)
 
 		if err != nil {
 			t.Error(err)
@@ -58,6 +64,7 @@ func TestLogConverter(t *testing.T) {
 		So(evmEvent.LogIndex, ShouldEqual, 1)
 		So(evmEvent.Removed, ShouldEqual, false)
 		So(evmEvent.Status, ShouldEqual, evmevent.StatusReceived)
+		So(evmEvent.Timestamp, ShouldEqual, time.Date(2016, 7, 20, 13, 33, 01, 0, time.UTC))
 		So(evmEvent.Topic0, ShouldEqual, "TransferWithMemo")
 		So(evmEvent.Topic0Hex, ShouldEqual, "0xbd5c95affecf80a51b513bb4eddd42724421b80ef31b07cee1b5b25d8ce5a05b")
 		So(*evmEvent.Topic1, ShouldEqual, "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199")
@@ -87,6 +94,11 @@ func TestLogConverter(t *testing.T) {
 			Removed:     false,
 		}
 
+		header := &types.Header{
+			Time:   1469021581,
+			Number: big.NewInt(6),
+		}
+
 		abi, err := book_nft.BookNftMetaData.GetAbi()
 
 		if err != nil {
@@ -94,7 +106,7 @@ func TestLogConverter(t *testing.T) {
 		}
 
 		logConverter := logconverter.NewLogConverter(abi)
-		evmEvent, err := logConverter.ConvertLogToEvmEvent(log)
+		evmEvent, err := logConverter.ConvertLogToEvmEvent(log, header)
 
 		if err != nil {
 			t.Error(err)
@@ -109,6 +121,7 @@ func TestLogConverter(t *testing.T) {
 		So(evmEvent.LogIndex, ShouldEqual, 1)
 		So(evmEvent.Removed, ShouldEqual, false)
 		So(evmEvent.Status, ShouldEqual, evmevent.StatusReceived)
+		So(evmEvent.Timestamp, ShouldEqual, time.Date(2016, 7, 20, 13, 33, 01, 0, time.UTC))
 		So(evmEvent.Topic0, ShouldEqual, "OwnershipTransferred")
 		So(evmEvent.Topic0Hex, ShouldEqual, "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0")
 		So(*evmEvent.Topic1, ShouldEqual, "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199")

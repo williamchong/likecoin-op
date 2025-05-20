@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/evmevent"
@@ -17,7 +18,7 @@ import (
 )
 
 var (
-	ErrNoEventSignature = errors.New("no event signature")
+	ErrLogNotBelongsToBlock = errors.New("log not belongs to block")
 )
 
 type LogConverter struct {
@@ -30,7 +31,14 @@ func NewLogConverter(abi *abi.ABI) *LogConverter {
 	}
 }
 
-func (c *LogConverter) ConvertLogToEvmEvent(log types.Log) (*ent.EVMEvent, error) {
+func (c *LogConverter) ConvertLogToEvmEvent(
+	log types.Log,
+	header *types.Header,
+) (*ent.EVMEvent, error) {
+	if log.BlockNumber != header.Number.Uint64() {
+		return nil, ErrLogNotBelongsToBlock
+	}
+
 	event, err := c.abi.EventByID(log.Topics[0])
 	if err != nil {
 		return nil, err
@@ -112,6 +120,7 @@ func (c *LogConverter) ConvertLogToEvmEvent(log types.Log) (*ent.EVMEvent, error
 		Signature:        signature,
 		IndexedParams:    indexedParams,
 		NonIndexedParams: nonIndexedParams,
+		Timestamp:        time.Unix(int64(header.Time), 0),
 	}, nil
 }
 
