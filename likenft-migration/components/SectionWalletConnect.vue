@@ -171,6 +171,14 @@ export default Vue.extend({
       type: String as PropType<string | null>,
       default: null,
     },
+    email: {
+      type: String as PropType<string | null>,
+      default: null,
+    },
+    preferredEvmProviderId: {
+      type: String as PropType<string | null>,
+      default: null,
+    },
   },
 
   mounted() {
@@ -216,7 +224,10 @@ export default Vue.extend({
     },
 
     handleConnectTargetWalletClick() {
-      this.$likeCoinEVMWalletConnector.connector.showConnectPortal();
+      this.$likeCoinEVMWalletConnector.connector.showConnectPortal({
+        preferredProviderId: this.preferredEvmProviderId || undefined,
+        email: this.email || undefined,
+      });
     },
 
     handleLikeCoinWalletConnection(
@@ -225,10 +236,14 @@ export default Vue.extend({
       if (!connection) return;
 
       const {
+        method,
         accounts: [account],
       } = connection;
 
-      this.$emit('likeCoinWalletConnected', account.address);
+      this.$emit('likeCoinWalletConnected', {
+        method,
+        cosmosAddress: account.address,
+      });
     },
 
     async handleLikeCoinWalletAccountChange(

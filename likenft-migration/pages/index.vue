@@ -45,6 +45,8 @@
                 :liker-id="likerId"
                 :avatar="avatar"
                 :cosmos-address="cosmosAddress"
+                :email="email"
+                :preferred-evm-provider-id="preferredEvmProviderId"
                 :eth-address="ethAddress"
                 @likeCoinWalletConnected="handleLikeCoinWalletConnected"
                 @likeCoinEVMWalletConnected="handleLikeCoinEVMWalletConnected"
@@ -57,6 +59,8 @@
                 :liker-id="likerId"
                 :avatar="avatar"
                 :cosmos-address="cosmosAddress"
+                :email="email"
+                :preferred-evm-provider-id="preferredEvmProviderId"
                 :eth-address="ethAddress"
                 @likeCoinWalletConnected="handleLikeCoinWalletConnected"
                 @likeCoinEVMWalletConnected="handleLikeCoinEVMWalletConnected"
@@ -579,6 +583,43 @@ export default Vue.extend({
       return null;
     },
 
+    email(): string | null {
+      let email: string | null = null;
+      if ('email' in this.currentStep) {
+        email = this.currentStep.email;
+      }
+      return email;
+    },
+
+    preferredEvmProviderId(): string | null {
+      if ('method' in this.currentStep) {
+        const { method } = this.currentStep;
+        switch (method) {
+          case 'liker-id':
+          case 'likerland-app':
+            return 'email';
+
+          case 'keplr':
+          case 'keplr-mobile':
+            return 'app.keplr';
+
+          case 'cosmostation':
+          case 'cosmostation-mobile':
+            return 'io.cosmostation';
+
+          case 'leap':
+            return 'io.leapwallet.LeapWallet';
+
+          case 'metamask-leap':
+            return 'io.metamask';
+
+          default:
+            break;
+        }
+      }
+      return null;
+    },
+
     ethAddress(): string | null {
       if ('ethAddress' in this.currentStep) {
         return this.currentStep.ethAddress;
@@ -713,8 +754,18 @@ export default Vue.extend({
       }
     },
 
-    async handleLikeCoinWalletConnected(cosmosAddress: string) {
-      this.currentStep = initCosmosConnected(this.currentStep, cosmosAddress);
+    async handleLikeCoinWalletConnected({
+      method,
+      cosmosAddress,
+    }: {
+      method?: LikeCoinWalletConnectorMethodType;
+      cosmosAddress: string;
+    }) {
+      this.currentStep = initCosmosConnected(
+        this.currentStep,
+        method,
+        cosmosAddress
+      );
       this.currentStep = await this._asyncStateTransition(
         this.currentStep,
         (s) => this._checkLikerID(s, cosmosAddress)
@@ -776,7 +827,9 @@ export default Vue.extend({
 
     handleReconnectEvmWallet() {
       if (this.currentStep.step === 3) {
-        this.handleLikeCoinWalletConnected(this.currentStep.cosmosAddress);
+        this.handleLikeCoinWalletConnected({
+          cosmosAddress: this.currentStep.cosmosAddress,
+        });
       }
     },
 
@@ -855,8 +908,14 @@ export default Vue.extend({
         if ('method' in connection) {
           const {
             accounts: [account],
+            user: { primary_email: email },
           } = connection;
-          return initCosmosConnected(currentStep, account.address);
+          return initCosmosConnected(
+            currentStep,
+            method,
+            account.address,
+            email
+          );
         }
       }
       return authcoreRedirectionFailed(currentStep);
