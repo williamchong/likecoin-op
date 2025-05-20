@@ -8,6 +8,7 @@ RUN go mod download
 COPY . .
 RUN apk add --no-cache make
 RUN make build-api
+RUN make build-cli
 RUN make build-worker-cli
 
 FROM ubuntu:noble
@@ -24,6 +25,7 @@ COPY --from=stage1 /src/Makefile /app
 
 # App
 COPY --from=stage1 /src/likenft-indexer-api /usr/local/bin/
+COPY --from=stage1 /src/likenft-indexer-cli /usr/local/bin/
 COPY --from=stage1 /src/likenft-indexer-worker-cli /usr/local/bin/
 
 # Migration

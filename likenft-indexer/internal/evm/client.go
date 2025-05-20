@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/jellydator/ttlcache/v3"
 )
@@ -87,6 +88,35 @@ func (c *EvmClient) GetLikeProtocolOwner() (ownerAddress common.Address, err err
 	}
 
 	return ownerAddress, nil
+}
+
+func (c *EvmClient) GetHeaderByBlockNumber(
+	ctx context.Context,
+	blockNumber uint64,
+) (*types.Header, error) {
+	return c.client.HeaderByNumber(ctx, new(big.Int).SetUint64(blockNumber))
+}
+
+func (c *EvmClient) GetHeaderMapByBlockNumbers(
+	ctx context.Context,
+	blockNumbers []uint64,
+) (map[uint64]*types.Header, error) {
+	headerMap := make(map[uint64]*types.Header)
+
+	for _, blockNumber := range blockNumbers {
+		header, ok := headerMap[blockNumber]
+		if ok {
+			continue
+		}
+
+		header, err := c.GetHeaderByBlockNumber(ctx, blockNumber)
+		if err != nil {
+			return nil, err
+		}
+		headerMap[header.Number.Uint64()] = header
+	}
+
+	return headerMap, nil
 }
 
 func (c *EvmClient) ChainID(ctx context.Context) (*big.Int, error) {

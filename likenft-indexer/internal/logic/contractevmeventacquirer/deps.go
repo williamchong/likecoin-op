@@ -24,6 +24,10 @@ type EvmEventQueryClient interface {
 }
 
 type EvmClient interface {
+	GetHeaderMapByBlockNumbers(
+		ctx context.Context,
+		blockNumbers []uint64,
+	) (map[uint64]*types.Header, error)
 	BlockNumber(
 		ctx context.Context,
 	) (uint64, error)

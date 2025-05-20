@@ -40,5 +40,5 @@ func init() {
 	rootCmd.AddCommand(AcquireContractEvents)
 	rootCmd.AddCommand(ProcessAllEVMEventCmd)
 	rootCmd.AddCommand(ProcessEVMEventCmd)
-	rootCmd.AddCommand(RecalculateEvmEventsDecodedParamsCmd)
+	rootCmd.AddCommand(RecalculateEvmEventsCmd)
 }
