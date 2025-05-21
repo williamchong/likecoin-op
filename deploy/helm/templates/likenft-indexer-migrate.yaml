@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/component: {{ .Values.likenftIndexer.name }}
+  name: {{ .Values.likenftIndexer.name }}-migrate
+  namespace: {{ .Values.namespace }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+type: Opaque
+stringData:
+  DB_DATABASE: {{ .Values.likenftIndexer.env.DB_DATABASE | quote }}
+  DB_PASSWORD: {{ .Values.likenftIndexer.env.DB_PASSWORD | quote }}
+  DB_USERNAME: {{ .Values.likenftIndexer.env.DB_USERNAME | quote }}
+  DB_PORT: {{ .Values.likenftIndexer.env.DB_PORT | quote }}
+  DB_HOST: {{ .Values.likenftIndexer.env.DB_HOST | quote }}
+  DB_SCHEMA: {{ .Values.likenftIndexer.env.DB_SCHEMA | quote }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/component: {{ .Values.likenftIndexer.name }}
+  name: {{ .Values.likenftIndexer.name }}-migrate
+  namespace: {{ .Values.namespace }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{ .Values.likenftIndexer.name }}
+        image: {{ .Values.likenftIndexer.container.imageRepository }}:{{ .Values.appVersion }}
+        imagePullPolicy: {{ .Values.likenftIndexer.container.imagePullPolicy}}
+        command: ['make', 'migrate-up']
+        envFrom:
+          - secretRef:
+              name: {{ .Values.likenftIndexer.name }}-migrate
+        resources:
+          {{- toYaml .Values.likenftIndexer.resources | nindent 12 }}
+      restartPolicy: "{{ .Values.likenftIndexer.migrate.restartPolicy | default "Never" }}"
+  backoffLimit: {{ .Values.likenftIndexer.migrate.backoffLimit | default 1 }}

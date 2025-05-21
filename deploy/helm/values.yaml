@@ -55,6 +55,8 @@ migrationBackend:
     imagePullPolicy: IfNotPresent
     port: 8091
 
+  migrate: {}
+
   service:
     port: 80
 
@@ -102,6 +104,8 @@ likenftIndexer:
   container:
     imageRepository: likecoin/likenft-indexer
     imagePullPolicy: IfNotPresent
+
+  migrate: {}
 
   api:
     name: likenft-indexer-api
