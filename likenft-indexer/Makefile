@@ -95,6 +95,10 @@ build: tailwind-install templ-install generate
 build-api:
 	go build -o likenft-indexer-api ./cmd/api
 
+.PHONY: build-cli
+build-cli:
+	go build -o likenft-indexer-cli ./cmd/cli
+
 .PHONY: build-worker-cli
 build-worker-cli:
 	go build -o likenft-indexer-worker-cli ./cmd/worker
