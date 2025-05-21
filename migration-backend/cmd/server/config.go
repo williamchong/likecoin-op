@@ -5,6 +5,9 @@ import (
 )
 
 type EnvConfig struct {
+	SentryDsn   string `envconfig:"SENTRY_DSN" default:""`
+	SentryDebug bool   `envconfig:"SENTRY_DEBUG" default:"false"`
+
 	ListenAddr                    string `envconfig:"LISTEN_ADDR" default:"0.0.0.0:8091"`
 	RoutePrefix                   string `envconfig:"ROUTE_PREFIX" default:""`
 	CosmosNodeUrl                 string `envconfig:"COSMOS_NODE_URL"`
