@@ -12,6 +12,7 @@ import (
 	"github.com/likecoin/like-migration-backend/cmd/worker/context"
 	"github.com/likecoin/like-migration-backend/cmd/worker/task"
 	apptask "github.com/likecoin/like-migration-backend/pkg/task"
+	"github.com/likecoin/like-migration-backend/pkg/util/sentry"
 )
 
 var WorkerCmd = &cobra.Command{
@@ -52,6 +53,12 @@ var WorkerCmd = &cobra.Command{
 			},
 		)
 
+		hub, err := sentry.NewHub(envCfg.SentryDsn, envCfg.SentryDebug)
+
+		if err != nil {
+			panic(err)
+		}
+
 		// mux maps a type to a handler
 		mux := asynq.NewServeMux()
 		mux.HandleFunc(apptask.TypeMigrateClass, task.HandleMigrateClassTask)
@@ -65,6 +72,7 @@ var WorkerCmd = &cobra.Command{
 		mux.Use(context.AsynqMiddlewareWithDBContext(db))
 		mux.Use(context.AsynqMiddlewareWithAsynqClientContext(client))
 		mux.Use(context.AsynqMiddlewareWithLoggerContext(logger))
+		mux.Use(context.AsynqMiddlewareWithSentryHubContext(hub))
 
 		if err := srv.Run(mux); err != nil {
 			log.Fatalf("could not run server: %v", err)
