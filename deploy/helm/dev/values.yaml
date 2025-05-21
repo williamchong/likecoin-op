@@ -4,8 +4,8 @@ cosmosLikeCoinNetworkConfig:
 likecoinMigration:
   container:
     imageRepository: oursky/likecoin-migration
-  configFilePath: "dev/likecoin/migration/frontend/config.json"
-  nginxConfigFilePath: "dev/likecoin/migration/frontend/nginx/nginx.conf"
+  configFilePath: "dev/likecoin-migration-config.json"
+  nginxConfigFilePath: "dev/likecoin-migration-nginx.conf"
 
   ingress:
     host: likecoin-migration.pandawork.com
@@ -16,8 +16,8 @@ likecoinMigration:
 likenftMigration:
   container:
     imageRepository: oursky/likenft-migration
-  configFilePath: "dev/likenft/migration/frontend/config.json"
-  nginxConfigFilePath: "dev/likenft/migration/frontend/nginx/nginx.conf"
+  configFilePath: "dev/likenft-migration-config.json"
+  nginxConfigFilePath: "dev/likenft-migration-nginx.conf"
 
   ingress:
     host: likenft-migration.pandawork.com
@@ -28,8 +28,8 @@ likenftMigration:
 migrationAdmin:
   container:
     imageRepository: oursky/migration-admin
-  configFilePath: "dev/admin/frontend/config.json"
-  nginxConfigFilePath: "dev/admin/frontend/nginx/nginx.conf"
+  configFilePath: "dev/migration-admin-config.json"
+  nginxConfigFilePath: "dev/migration-admin-nginx.conf"
 
   ingress:
     host: like-migration-admin.pandawork.com
