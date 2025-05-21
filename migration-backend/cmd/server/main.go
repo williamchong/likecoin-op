@@ -25,7 +25,9 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/handler/user"
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
+	"github.com/likecoin/like-migration-backend/pkg/middleware"
 	"github.com/likecoin/like-migration-backend/pkg/signer"
+	"github.com/likecoin/like-migration-backend/pkg/util/sentry"
 )
 
 func main() {
@@ -37,6 +39,12 @@ func main() {
 		panic(err)
 	}
 	envCfg, err := LoadEnvConfigFromEnv()
+	if err != nil {
+		panic(err)
+	}
+
+	hub, err := sentry.NewHub(envCfg.SentryDsn, envCfg.SentryDebug)
+
 	if err != nil {
 		panic(err)
 	}
@@ -124,10 +132,17 @@ func main() {
 
 	routePrefixMux.Handle(fmt.Sprintf("%s/", envCfg.RoutePrefix), http.StripPrefix(envCfg.RoutePrefix, mainMux))
 
+	sentryMiddleware := middleware.MakeSentryMiddleware(hub)
+
+	applyMiddlewares := middleware.MakeApplyMiddlewares(
+		c.Handler,
+		sentryMiddleware,
+	)
+
 	server := &http.Server{
 		Addr:              envCfg.ListenAddr,
 		ReadHeaderTimeout: 3 * time.Second,
-		Handler:           c.Handler(routePrefixMux),
+		Handler:           applyMiddlewares(routePrefixMux),
 	}
 
 	logger.Info("listening",
