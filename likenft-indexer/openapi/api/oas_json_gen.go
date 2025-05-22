@@ -1326,11 +1326,18 @@ func (s *Error) encodeFields(e *jx.Encoder) {
 		e.FieldStart("message")
 		e.Str(s.Message)
 	}
+	{
+		if s.SentryErrorID.Set {
+			e.FieldStart("sentry_error_id")
+			s.SentryErrorID.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfError = [2]string{
+var jsonFieldsNameOfError = [3]string{
 	0: "code",
 	1: "message",
+	2: "sentry_error_id",
 }
 
 // Decode decodes Error from json.
@@ -1366,6 +1373,16 @@ func (s *Error) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"message\"")
+			}
+		case "sentry_error_id":
+			if err := func() error {
+				s.SentryErrorID.Reset()
+				if err := s.SentryErrorID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sentry_error_id\"")
 			}
 		default:
 			return d.Skip()
