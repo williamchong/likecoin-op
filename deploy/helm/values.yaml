@@ -12,6 +12,10 @@ likecoinMigration:
 
   service:
     port: 80
+  ingress:
+    prefix: /
+    tls:
+      secretName: tls-likecoin-migration
 
   resources: {}
 
@@ -26,6 +30,10 @@ likenftMigration:
 
   service:
     port: 80
+  ingress:
+    prefix: /
+    tls:
+      secretName: tls-likenft-migration
 
   resources: {}
 
@@ -44,6 +52,10 @@ migrationAdmin:
 
   service:
     port: 80
+  ingress:
+    prefix: /
+    tls:
+      secretName: tls-migration-admin
 
   resources: {}
 
@@ -59,6 +71,10 @@ migrationBackend:
 
   service:
     port: 80
+  ingress:
+    prefix: /
+    tls:
+      secretName: tls-migration-backend
 
   resources: {}
 
@@ -115,6 +131,10 @@ likenftIndexer:
 
     service:
       port: 80
+    ingress:
+      prefix: /
+      tls:
+        secretName: tls-likenft-indexer
 
     resources: {}
 

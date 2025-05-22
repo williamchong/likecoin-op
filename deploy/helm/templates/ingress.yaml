@@ -15,7 +15,7 @@ spec:
     - host: {{ .Values.likecoinMigration.ingress.host }}
       http:
         paths:
-          - path: /
+          - path: {{ .Values.likecoinMigration.ingress.prefix }}
             pathType: Prefix
             backend:
               service:
@@ -25,7 +25,7 @@ spec:
     - host: {{ .Values.likenftMigration.ingress.host }}
       http:
         paths:
-          - path: /
+          - path: {{ .Values.likenftMigration.ingress.prefix }}
             pathType: Prefix
             backend:
               service:
@@ -35,7 +35,7 @@ spec:
     - host: {{ .Values.migrationAdmin.ingress.host }}
       http:
         paths:
-          - path: /
+          - path: {{ .Values.migrationAdmin.ingress.prefix }}
             pathType: Prefix
             backend:
               service:
@@ -45,7 +45,7 @@ spec:
     - host: {{ .Values.migrationBackend.ingress.host }}
       http:
         paths:
-          - path: /
+          - path: {{ .Values.migrationBackend.ingress.prefix }}
             pathType: Prefix
             backend:
               service:
@@ -55,7 +55,7 @@ spec:
     - host: {{ .Values.likenftIndexer.api.ingress.host }}
       http:
         paths:
-          - path: /
+          - path: {{ .Values.likenftIndexer.api.ingress.prefix }}
             pathType: Prefix
             backend:
               service:

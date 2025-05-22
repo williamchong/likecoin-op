@@ -1,0 +1,4 @@
+{
+  "isTestnet": true,
+  "apiBaseURL": "https://api.v3.like.co/migrate"
+}

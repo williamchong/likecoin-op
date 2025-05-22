@@ -1,0 +1,8 @@
+{
+  "transitionLoadingScreenDelayMs": 2000,
+  "isTestnet": true,
+  "apiBaseURL": "https://api.v3.like.co/migrate",
+  "likerlandUrlBase": "https://liker.land",
+  "crispWebsiteId": "5c009125-5863-4059-ba65-43f177ca33f7",
+  "authcoreRedirectUrl": "https://v3-token-migration.like.co"
+}
