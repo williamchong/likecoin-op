@@ -664,6 +664,8 @@ components:
           default: 500
         message:
           type: string
+        sentry_error_id:
+          type: string
       required:
         - code
         - message
