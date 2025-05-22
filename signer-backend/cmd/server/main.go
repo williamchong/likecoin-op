@@ -17,6 +17,7 @@ import (
 	"github.com/rs/cors"
 
 	"github.com/likecoin/like-signer-backend/pkg/evm"
+	"github.com/likecoin/like-signer-backend/pkg/util/sentry"
 
 	appcontext "github.com/likecoin/like-signer-backend/pkg/context"
 
@@ -35,6 +36,12 @@ func main() {
 		panic(err)
 	}
 	envCfg, err := LoadEnvConfigFromEnv()
+	if err != nil {
+		panic(err)
+	}
+
+	hub, err := sentry.NewHub(envCfg.SentryDsn, envCfg.SentryDebug)
+
 	if err != nil {
 		panic(err)
 	}
@@ -68,6 +75,7 @@ func main() {
 		middleware.MakeRoutePrefixMiddle(envCfg.RoutePrefix),
 		middleware.MakeLoggerMiddleware(logger),
 		middleware.MakeAPIKeyMiddleware(envCfg.ApiKey),
+		middleware.MakeSentryMiddleware(hub),
 	)
 
 	ctx := context.Background()
