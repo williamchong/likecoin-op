@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	"github.com/likecoin/like-migration-backend/pkg/handler/model"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likecoin"
@@ -20,8 +21,7 @@ type CreateLikeCoinMigrationRequestBody struct {
 }
 
 type CreateLikeCoinMigrationResponseBody struct {
-	Migration        *model.LikeCoinMigration `json:"migration,omitempty"`
-	ErrorDescription string                   `json:"error_description,omitempty"`
+	Migration *model.LikeCoinMigration `json:"migration,omitempty"`
 }
 
 type CreateLikeCoinMigrationHandler struct {
@@ -31,21 +31,23 @@ type CreateLikeCoinMigrationHandler struct {
 }
 
 func (p *CreateLikeCoinMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hub := sentry.GetHubFromContext(r.Context())
+
 	decoder := json.NewDecoder(r.Body)
 	var data CreateLikeCoinMigrationRequestBody
 	err := decoder.Decode(&data)
 	if err != nil {
-		handler.SendJSON(w, http.StatusBadRequest, &CreateLikeCoinMigrationResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusBadRequest, handler.MakeErrorResponseBody(err))
 		return
 	}
 
 	migration, err := p.handle(&data)
 	if err != nil {
-		handler.SendJSON(w, http.StatusInternalServerError, &CreateLikeCoinMigrationResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)).
+				AsError(handler.ErrSomethingWentWrong),
+		)
 		return
 	}
 

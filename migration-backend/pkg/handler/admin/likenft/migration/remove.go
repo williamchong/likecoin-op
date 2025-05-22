@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	api_model "github.com/likecoin/like-migration-backend/pkg/handler/model"
@@ -17,8 +18,7 @@ type RemoveLikeNFTAssetMigrationRequestBody struct {
 }
 
 type RemoveLikeNFTAssetMigrationResponseBody struct {
-	Migration        *api_model.LikeNFTAssetMigration `json:"migration,omitempty"`
-	ErrorDescription string                           `json:"error_description,omitempty"`
+	Migration *api_model.LikeNFTAssetMigration `json:"migration,omitempty"`
 }
 
 type RemoveLikeNFTAssetMigrationHandler struct {
@@ -26,13 +26,13 @@ type RemoveLikeNFTAssetMigrationHandler struct {
 }
 
 func (h *RemoveLikeNFTAssetMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hub := sentry.GetHubFromContext(r.Context())
+
 	migrationIdStr := r.URL.Path[strings.LastIndex(r.URL.Path, "/")+1:]
 
 	migrationId, err := strconv.ParseUint(migrationIdStr, 10, 64)
 	if err != nil {
-		handler.SendJSON(w, http.StatusBadRequest, &RemoveLikeNFTAssetMigrationResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusBadRequest, handler.MakeErrorResponseBody(err))
 		return
 	}
 
@@ -40,14 +40,14 @@ func (h *RemoveLikeNFTAssetMigrationHandler) ServeHTTP(w http.ResponseWriter, r 
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			handler.SendJSON(w, http.StatusNotFound, &RemoveLikeNFTAssetMigrationResponseBody{
-				ErrorDescription: "Not Found",
-			})
+			handler.SendJSON(w, http.StatusNotFound, handler.MakeErrorResponseBody(err).
+				AsError(handler.ErrNotFound))
 			return
 		}
-		handler.SendJSON(w, http.StatusInternalServerError, &RemoveLikeNFTAssetMigrationResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)).
+				AsError(handler.ErrSomethingWentWrong))
 		return
 	}
 

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
 	"github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
@@ -22,8 +23,7 @@ type CreateMigrationPreviewRequestBody struct {
 }
 
 type CreateMigrationPreviewResponseBody struct {
-	Preview          *api_model.LikeNFTAssetSnapshot `json:"preview,omitempty"`
-	ErrorDescription string                          `json:"error_description,omitempty"`
+	Preview *api_model.LikeNFTAssetSnapshot `json:"preview,omitempty"`
 }
 
 type CreateMigrationPreviewHandler struct {
@@ -36,23 +36,26 @@ type CreateMigrationPreviewHandler struct {
 var ErrLatestSnapshotInProgress = fmt.Errorf("error latest snapshot in progress")
 
 func (h *CreateMigrationPreviewHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hub := sentry.GetHubFromContext(r.Context())
+
 	decoder := json.NewDecoder(r.Body)
 	var data CreateMigrationPreviewRequestBody
 	err := decoder.Decode(&data)
 
 	if err != nil {
-		handler.SendJSON(w, http.StatusBadRequest, &CreateMigrationPreviewResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusBadRequest,
+			handler.MakeErrorResponseBody(err))
 		return
 	}
 
 	snapshot, err := h.handle(data)
 
 	if err != nil {
-		handler.SendJSON(w, http.StatusInternalServerError, &CreateMigrationPreviewResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)).
+				AsError(handler.ErrSomethingWentWrong),
+		)
 		return
 	}
 
