@@ -5,6 +5,8 @@ import (
 
 	"likenft-indexer/cmd/worker/context"
 	"likenft-indexer/cmd/worker/task"
+	"likenft-indexer/internal/util/sentry"
+	"likenft-indexer/internal/worker/middleware"
 
 	"github.com/hibiken/asynq"
 	_ "github.com/lib/pq"
@@ -22,6 +24,12 @@ var workerCmd = &cobra.Command{
 		evmQueryClient := context.EvmQueryClientFromContext(cmd.Context())
 		evmClient := context.EvmClientFromContext(cmd.Context())
 
+		hub, err := sentry.NewHub(envCfg.SentryDsn, envCfg.SentryDebug)
+
+		if err != nil {
+			panic(err)
+		}
+
 		// mux maps a type to a handler
 		mux := asynq.NewServeMux()
 		mux.HandleFunc(task.TypeAcquireBookNFTEventsTaskPayload, task.HandleAcquireBookNFTEventsTask)
@@ -37,6 +45,7 @@ var workerCmd = &cobra.Command{
 		mux.Use(context.AsynqMiddlewareWithAsynqClientContext(asynqClient))
 		mux.Use(context.AsynqMiddlewareWithEvmQueryClientContext(evmQueryClient))
 		mux.Use(context.AsynqMiddlewareWithEvmClientContext(evmClient))
+		mux.Use(middleware.MakeSentryMiddleware(hub).Handle)
 
 		if err := srv.Run(mux); err != nil {
 			log.Fatalf("could not run server: %v", err)
