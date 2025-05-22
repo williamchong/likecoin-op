@@ -10,6 +10,8 @@ import (
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/ent/predicate"
+
+	"entgo.io/ent/dialect/sql"
 )
 
 type EVMEventRepository interface {
@@ -92,7 +94,11 @@ func (s *evmEventRepository) GetEvmEventById(ctx context.Context, id int) (*ent.
 }
 
 func (s *evmEventRepository) GetEVMEventsByStatus(ctx context.Context, status evmevent.Status) ([]*ent.EVMEvent, error) {
-	return s.dbService.Client().EVMEvent.Query().Where(evmevent.StatusEQ(status)).All(ctx)
+	return s.dbService.Client().EVMEvent.Query().Where(evmevent.StatusEQ(status)).Order(
+		evmevent.ByBlockNumber(sql.OrderAsc()),
+		evmevent.ByTransactionIndex(sql.OrderAsc()),
+		evmevent.ByLogIndex(sql.OrderAsc()),
+	).All(ctx)
 }
 
 func (s *evmEventRepository) InsertEvmEventsIfNeeded(
