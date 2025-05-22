@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/getsentry/sentry-go"
 	appcontext "github.com/likecoin/like-signer-backend/pkg/context"
 	"github.com/likecoin/like-signer-backend/pkg/evm"
 	"github.com/likecoin/like-signer-backend/pkg/handler"
@@ -22,8 +23,7 @@ type CreateRequestBody struct {
 }
 
 type CreateResponseBody struct {
-	TransactionId    *uint64 `json:"transaction_id,omitempty"`
-	ErrorDescription string  `json:"error_description,omitempty"`
+	TransactionId *uint64 `json:"transaction_id,omitempty"`
 }
 
 type CreateHandler struct {
@@ -47,14 +47,13 @@ func MakeCreatePattern() string {
 
 func (h *CreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	logger := appcontext.LoggerFromContext(r.Context())
+	hub := sentry.GetHubFromContext(r.Context())
 
 	var body CreateRequestBody
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		logger.Error("failed to decode request body", "error", err)
-		handler.SendJSON(w, http.StatusBadRequest, CreateResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusBadRequest, handler.MakeErrorResponseBody(err))
 		return
 	}
 	contractAddress := common.HexToAddress(body.ContractAddress)
@@ -62,18 +61,17 @@ func (h *CreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	data, err := hex.DecodeString(body.DataHex)
 	if err != nil {
 		logger.Error("failed to decode data hex", "error", err)
-		handler.SendJSON(w, http.StatusBadRequest, CreateResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusBadRequest, handler.MakeErrorResponseBody(err))
 		return
 	}
 
 	fromAddress, err := h.evmClient.SignerAddress()
 	if err != nil {
 		logger.Error("failed to get signer address", "error", err)
-		handler.SendJSON(w, http.StatusInternalServerError, CreateResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)),
+		)
 		return
 	}
 
@@ -89,9 +87,10 @@ func (h *CreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		logger.Error("failed to get or create transaction request", "error", err)
-		handler.SendJSON(w, http.StatusInternalServerError, CreateResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)),
+		)
 		return
 	}
 

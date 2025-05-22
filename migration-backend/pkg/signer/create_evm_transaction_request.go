@@ -49,8 +49,8 @@ func MakeCreateEvmTransactionRequestRequestBody(
 }
 
 type CreateEvmTransactionRequestResponseBody struct {
-	TransactionId    *uint64 `json:"transaction_id,omitempty"`
-	ErrorDescription string  `json:"error_description,omitempty"`
+	TransactionId *uint64 `json:"transaction_id,omitempty"`
+	ErrorResponseBody
 }
 
 func (l *SignerClient) CreateEvmTransactionRequest(reqBody *CreateEvmTransactionRequestRequestBody) (*CreateEvmTransactionRequestResponseBody, error) {

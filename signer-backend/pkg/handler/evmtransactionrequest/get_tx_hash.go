@@ -6,16 +6,16 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/getsentry/sentry-go"
 	appdb "github.com/likecoin/like-signer-backend/pkg/db"
 	"github.com/likecoin/like-signer-backend/pkg/handler"
 	"github.com/likecoin/like-signer-backend/pkg/model"
 )
 
 type GetTxHashResponseBody struct {
-	TxHash           *string                            `json:"tx_hash"`
-	Status           *model.EvmTransactionRequestStatus `json:"status"`
-	FailedReason     *string                            `json:"failed_reason"`
-	ErrorDescription string                             `json:"error_description,omitempty"`
+	TxHash       *string                            `json:"tx_hash"`
+	Status       *model.EvmTransactionRequestStatus `json:"status"`
+	FailedReason *string                            `json:"failed_reason"`
 }
 
 type GetTxHashHandler struct {
@@ -41,11 +41,11 @@ func GetTxHashFromPath(path string) (uint64, error) {
 }
 
 func (h *GetTxHashHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hub := sentry.GetHubFromContext(r.Context())
+
 	transactionId, err := GetTxHashFromPath(r.URL.Path)
 	if err != nil {
-		handler.SendJSON(w, http.StatusBadRequest, GetTxHashResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusBadRequest, handler.MakeErrorResponseBody(err))
 		return
 	}
 
@@ -53,9 +53,10 @@ func (h *GetTxHashHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Id: &transactionId,
 	})
 	if err != nil {
-		handler.SendJSON(w, http.StatusInternalServerError, GetTxHashResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)),
+		)
 		return
 	}
 

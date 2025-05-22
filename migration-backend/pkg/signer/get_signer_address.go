@@ -10,7 +10,7 @@ import (
 
 type GetSignerAddressResponseBody struct {
 	SignerAddress string `json:"signer_address,omitempty"`
-	FailedReason  string `json:"failed_reason,omitempty"`
+	ErrorResponseBody
 }
 
 func (l *SignerClient) GetSignerAddress() (*string, error) {
@@ -34,8 +34,8 @@ func (l *SignerClient) GetSignerAddress() (*string, error) {
 	if err != nil {
 		return nil, err
 	}
-	if respBody.FailedReason != "" {
-		return nil, errors.New(respBody.FailedReason)
+	if respBody.ErrorDescription != "" {
+		return nil, errors.New(respBody.ErrorDescription)
 	}
 	return &respBody.SignerAddress, nil
 }

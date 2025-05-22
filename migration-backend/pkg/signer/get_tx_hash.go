@@ -19,10 +19,10 @@ var (
 )
 
 type GetTransactionHashResponseBody struct {
-	TxHash           *string                      `json:"tx_hash"`
-	Status           *EvmTransactionRequestStatus `json:"status"`
-	FailedReason     *string                      `json:"failed_reason"`
-	ErrorDescription string                       `json:"error_description,omitempty"`
+	TxHash       *string                      `json:"tx_hash"`
+	Status       *EvmTransactionRequestStatus `json:"status"`
+	FailedReason *string                      `json:"failed_reason"`
+	ErrorResponseBody
 }
 
 func (l *SignerClient) GetTransactionHash(evmTxRequestId uint64) (*GetTransactionHashResponseBody, error) {

@@ -3,12 +3,12 @@ package handler
 import (
 	"net/http"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/likecoin/like-signer-backend/pkg/evm"
 )
 
 type SignerAddressResponseBody struct {
 	SignerAddress string `json:"signer_address,omitempty"`
-	FailedReason  string `json:"failed_reason,omitempty"`
 }
 
 type SignerAddressHandler struct {
@@ -20,11 +20,13 @@ func NewSignerAddressHandler(evmClient *evm.Client) *SignerAddressHandler {
 }
 
 func (h *SignerAddressHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hub := sentry.GetHubFromContext(r.Context())
+
 	signerAddress, err := h.evmClient.SignerAddress()
 	if err != nil {
-		SendJSON(w, http.StatusInternalServerError, SignerAddressResponseBody{
-			FailedReason: err.Error(),
-		})
+		SendJSON(w, http.StatusInternalServerError, MakeErrorResponseBody(err).
+			WithSentryReported(hub.CaptureException(err)),
+		)
 		return
 	}
 	SendJSON(w, http.StatusOK, SignerAddressResponseBody{
