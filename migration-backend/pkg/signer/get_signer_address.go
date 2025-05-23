@@ -2,7 +2,6 @@ package signer
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,7 +9,7 @@ import (
 
 type GetSignerAddressResponseBody struct {
 	SignerAddress string `json:"signer_address,omitempty"`
-	ErrorResponseBody
+	*ErrorResponseBody
 }
 
 func (l *SignerClient) GetSignerAddress() (*string, error) {
@@ -34,8 +33,8 @@ func (l *SignerClient) GetSignerAddress() (*string, error) {
 	if err != nil {
 		return nil, err
 	}
-	if respBody.ErrorDescription != "" {
-		return nil, errors.New(respBody.ErrorDescription)
+	if respBody.ErrorResponseBody != nil {
+		return nil, respBody.ErrorResponseBody
 	}
 	return &respBody.SignerAddress, nil
 }

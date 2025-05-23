@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -50,7 +49,7 @@ func MakeCreateEvmTransactionRequestRequestBody(
 
 type CreateEvmTransactionRequestResponseBody struct {
 	TransactionId *uint64 `json:"transaction_id,omitempty"`
-	ErrorResponseBody
+	*ErrorResponseBody
 }
 
 func (l *SignerClient) CreateEvmTransactionRequest(reqBody *CreateEvmTransactionRequestRequestBody) (*CreateEvmTransactionRequestResponseBody, error) {
@@ -78,8 +77,8 @@ func (l *SignerClient) CreateEvmTransactionRequest(reqBody *CreateEvmTransaction
 	if err != nil {
 		return nil, err
 	}
-	if respBody.ErrorDescription != "" {
-		return nil, errors.New(respBody.ErrorDescription)
+	if respBody.ErrorResponseBody != nil {
+		return nil, respBody.ErrorResponseBody
 	}
 	return &respBody, nil
 }
