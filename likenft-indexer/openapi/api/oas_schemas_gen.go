@@ -899,6 +899,56 @@ func (s *EventsOK) SetData(val []Event) {
 	s.Data = val
 }
 
+type IndexActionBookNftBooknftIDPostOK struct {
+	Message string    `json:"message"`
+	TaskID  OptString `json:"task_id"`
+}
+
+// GetMessage returns the value of Message.
+func (s *IndexActionBookNftBooknftIDPostOK) GetMessage() string {
+	return s.Message
+}
+
+// GetTaskID returns the value of TaskID.
+func (s *IndexActionBookNftBooknftIDPostOK) GetTaskID() OptString {
+	return s.TaskID
+}
+
+// SetMessage sets the value of Message.
+func (s *IndexActionBookNftBooknftIDPostOK) SetMessage(val string) {
+	s.Message = val
+}
+
+// SetTaskID sets the value of TaskID.
+func (s *IndexActionBookNftBooknftIDPostOK) SetTaskID(val OptString) {
+	s.TaskID = val
+}
+
+type IndexActionLikeProtocolPostOK struct {
+	Message string    `json:"message"`
+	TaskID  OptString `json:"task_id"`
+}
+
+// GetMessage returns the value of Message.
+func (s *IndexActionLikeProtocolPostOK) GetMessage() string {
+	return s.Message
+}
+
+// GetTaskID returns the value of TaskID.
+func (s *IndexActionLikeProtocolPostOK) GetTaskID() OptString {
+	return s.TaskID
+}
+
+// SetMessage sets the value of Message.
+func (s *IndexActionLikeProtocolPostOK) SetMessage(val string) {
+	s.Message = val
+}
+
+// SetTaskID sets the value of TaskID.
+func (s *IndexActionLikeProtocolPostOK) SetTaskID(val OptString) {
+	s.TaskID = val
+}
+
 // Ref: #/components/schemas/NFT
 type NFT struct {
 	ID              int                       `json:"id"`

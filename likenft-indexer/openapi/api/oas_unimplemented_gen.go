@@ -76,6 +76,20 @@ func (UnimplementedHandler) EventsByAddressAndSignature(ctx context.Context, par
 	return r, ht.ErrNotImplemented
 }
 
+// IndexActionBookNftBooknftIDPost implements POST /index-action/book-nft/{booknft_id} operation.
+//
+// POST /index-action/book-nft/{booknft_id}
+func (UnimplementedHandler) IndexActionBookNftBooknftIDPost(ctx context.Context, params IndexActionBookNftBooknftIDPostParams) (r *IndexActionBookNftBooknftIDPostOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexActionLikeProtocolPost implements POST /index-action/like-protocol operation.
+//
+// POST /index-action/like-protocol
+func (UnimplementedHandler) IndexActionLikeProtocolPost(ctx context.Context, params IndexActionLikeProtocolPostParams) (r *IndexActionLikeProtocolPostOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // Token implements token operation.
 //
 // Query token.

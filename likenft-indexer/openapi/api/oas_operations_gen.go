@@ -6,14 +6,16 @@ package api
 type OperationName = string
 
 const (
-	AccountByBookNFTOperation            OperationName = "AccountByBookNFT"
-	BookNFTOperation                     OperationName = "BookNFT"
-	BookNFTsOperation                    OperationName = "BookNFTs"
-	BookNFTsByAccountOperation           OperationName = "BookNFTsByAccount"
-	EventsOperation                      OperationName = "Events"
-	EventsByAddressOperation             OperationName = "EventsByAddress"
-	EventsByAddressAndSignatureOperation OperationName = "EventsByAddressAndSignature"
-	TokenOperation                       OperationName = "Token"
-	TokensByAccountOperation             OperationName = "TokensByAccount"
-	TokensByBookNFTOperation             OperationName = "TokensByBookNFT"
+	AccountByBookNFTOperation                OperationName = "AccountByBookNFT"
+	BookNFTOperation                         OperationName = "BookNFT"
+	BookNFTsOperation                        OperationName = "BookNFTs"
+	BookNFTsByAccountOperation               OperationName = "BookNFTsByAccount"
+	EventsOperation                          OperationName = "Events"
+	EventsByAddressOperation                 OperationName = "EventsByAddress"
+	EventsByAddressAndSignatureOperation     OperationName = "EventsByAddressAndSignature"
+	IndexActionBookNftBooknftIDPostOperation OperationName = "IndexActionBookNftBooknftIDPost"
+	IndexActionLikeProtocolPostOperation     OperationName = "IndexActionLikeProtocolPost"
+	TokenOperation                           OperationName = "Token"
+	TokensByAccountOperation                 OperationName = "TokensByAccount"
+	TokensByBookNFTOperation                 OperationName = "TokensByBookNFT"
 )

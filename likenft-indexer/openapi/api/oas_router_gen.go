@@ -351,6 +351,71 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 				}
 
+			case 'i': // Prefix: "index-action/"
+
+				if l := len("index-action/"); len(elem) >= l && elem[0:l] == "index-action/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'b': // Prefix: "book-nft/"
+
+					if l := len("book-nft/"); len(elem) >= l && elem[0:l] == "book-nft/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "booknft_id"
+					// Leaf parameter, slashes are prohibited
+					idx := strings.IndexByte(elem, '/')
+					if idx >= 0 {
+						break
+					}
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleIndexActionBookNftBooknftIDPostRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+				case 'l': // Prefix: "like-protocol"
+
+					if l := len("like-protocol"); len(elem) >= l && elem[0:l] == "like-protocol" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleIndexActionLikeProtocolPostRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+				}
+
 			case 't': // Prefix: "token/"
 
 				if l := len("token/"); len(elem) >= l && elem[0:l] == "token/" {
@@ -807,6 +872,77 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							}
 						}
 
+					}
+
+				}
+
+			case 'i': // Prefix: "index-action/"
+
+				if l := len("index-action/"); len(elem) >= l && elem[0:l] == "index-action/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'b': // Prefix: "book-nft/"
+
+					if l := len("book-nft/"); len(elem) >= l && elem[0:l] == "book-nft/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "booknft_id"
+					// Leaf parameter, slashes are prohibited
+					idx := strings.IndexByte(elem, '/')
+					if idx >= 0 {
+						break
+					}
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = IndexActionBookNftBooknftIDPostOperation
+							r.summary = ""
+							r.operationID = ""
+							r.pathPattern = "/index-action/book-nft/{booknft_id}"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
+					}
+
+				case 'l': // Prefix: "like-protocol"
+
+					if l := len("like-protocol"); len(elem) >= l && elem[0:l] == "like-protocol" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = IndexActionLikeProtocolPostOperation
+							r.summary = ""
+							r.operationID = ""
+							r.pathPattern = "/index-action/like-protocol"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
 					}
 
 				}

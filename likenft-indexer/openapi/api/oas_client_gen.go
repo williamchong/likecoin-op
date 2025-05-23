@@ -70,6 +70,14 @@ type Invoker interface {
 	//
 	// GET /events/{address}/{signature}
 	EventsByAddressAndSignature(ctx context.Context, params EventsByAddressAndSignatureParams) (*EventsByAddressAndSignatureOK, error)
+	// IndexActionBookNftBooknftIDPost invokes POST /index-action/book-nft/{booknft_id} operation.
+	//
+	// POST /index-action/book-nft/{booknft_id}
+	IndexActionBookNftBooknftIDPost(ctx context.Context, params IndexActionBookNftBooknftIDPostParams) (*IndexActionBookNftBooknftIDPostOK, error)
+	// IndexActionLikeProtocolPost invokes POST /index-action/like-protocol operation.
+	//
+	// POST /index-action/like-protocol
+	IndexActionLikeProtocolPost(ctx context.Context, params IndexActionLikeProtocolPostParams) (*IndexActionLikeProtocolPostOK, error)
 	// Token invokes token operation.
 	//
 	// Query token.
@@ -969,6 +977,190 @@ func (c *Client) sendEventsByAddressAndSignature(ctx context.Context, params Eve
 
 	stage = "DecodeResponse"
 	result, err := decodeEventsByAddressAndSignatureResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// IndexActionBookNftBooknftIDPost invokes POST /index-action/book-nft/{booknft_id} operation.
+//
+// POST /index-action/book-nft/{booknft_id}
+func (c *Client) IndexActionBookNftBooknftIDPost(ctx context.Context, params IndexActionBookNftBooknftIDPostParams) (*IndexActionBookNftBooknftIDPostOK, error) {
+	res, err := c.sendIndexActionBookNftBooknftIDPost(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendIndexActionBookNftBooknftIDPost(ctx context.Context, params IndexActionBookNftBooknftIDPostParams) (res *IndexActionBookNftBooknftIDPostOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/index-action/book-nft/{booknft_id}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, IndexActionBookNftBooknftIDPostOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/index-action/book-nft/"
+	{
+		// Encode "booknft_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "booknft_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BooknftID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "EncodeHeaderParams"
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "X-Index-Action-Api-Key",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.XIndexActionAPIKey))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header")
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeIndexActionBookNftBooknftIDPostResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// IndexActionLikeProtocolPost invokes POST /index-action/like-protocol operation.
+//
+// POST /index-action/like-protocol
+func (c *Client) IndexActionLikeProtocolPost(ctx context.Context, params IndexActionLikeProtocolPostParams) (*IndexActionLikeProtocolPostOK, error) {
+	res, err := c.sendIndexActionLikeProtocolPost(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendIndexActionLikeProtocolPost(ctx context.Context, params IndexActionLikeProtocolPostParams) (res *IndexActionLikeProtocolPostOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/index-action/like-protocol"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, IndexActionLikeProtocolPostOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/index-action/like-protocol"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "EncodeHeaderParams"
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "X-Index-Action-Api-Key",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.XIndexActionAPIKey))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header")
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeIndexActionLikeProtocolPostResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
