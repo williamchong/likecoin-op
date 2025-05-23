@@ -30,6 +30,8 @@ var workerCmd = &cobra.Command{
 		mux.HandleFunc(task.TypeCheckLikeProtocolPayload, task.HandleCheckLikeProtocol)
 		mux.HandleFunc(task.TypeCheckReceivedEVMEventsPayload, task.HandleCheckReceivedEVMEvents)
 		mux.HandleFunc(task.TypeProcessEVMEventPayload, task.HandleProcessEVMEvent)
+		mux.HandleFunc(task.TypeCheckLikeProtocolToLatestBlockNumberPayload, task.HandleCheckLikeProtocolToLatestBlockNumber)
+		mux.HandleFunc(task.TypeCheckBookNFTToLatestBlockNumberPayload, task.HandleCheckBookNFTToLatestBlockNumber)
 
 		// ...register other handlers...
 		mux.Use(context.AsynqMiddlewareWithConfigContext(envCfg))
