@@ -62,6 +62,14 @@ func MakeEVMEventRepository(
 	}
 }
 
+func (s *evmEventRepository) BaseQuery(q *ent.EVMEventQuery) *ent.EVMEventQuery {
+	return q.Order(
+		evmevent.ByBlockNumber(sql.OrderAsc()),
+		evmevent.ByTransactionIndex(sql.OrderAsc()),
+		evmevent.ByLogIndex(sql.OrderAsc()),
+	)
+}
+
 func (s *evmEventRepository) GetAllEvmEventsAndProcess(
 	ctx context.Context,
 	processor func(e *ent.EVMEvent) error,
@@ -75,7 +83,9 @@ func (s *evmEventRepository) GetAllEvmEventsAndProcess(
 	expectedNumPages := int(math.Ceil(float64(count) / float64(100)))
 
 	for n := range expectedNumPages {
-		items, err := s.dbService.Client().EVMEvent.Query().Limit(itemsPerPage).Offset(n * itemsPerPage).All(ctx)
+		items, err := s.BaseQuery(s.dbService.Client().EVMEvent.Query()).
+			Limit(itemsPerPage).
+			Offset(n * itemsPerPage).All(ctx)
 		if err != nil {
 			return err
 		}
@@ -94,11 +104,8 @@ func (s *evmEventRepository) GetEvmEventById(ctx context.Context, id int) (*ent.
 }
 
 func (s *evmEventRepository) GetEVMEventsByStatus(ctx context.Context, status evmevent.Status) ([]*ent.EVMEvent, error) {
-	return s.dbService.Client().EVMEvent.Query().Where(evmevent.StatusEQ(status)).Order(
-		evmevent.ByBlockNumber(sql.OrderAsc()),
-		evmevent.ByTransactionIndex(sql.OrderAsc()),
-		evmevent.ByLogIndex(sql.OrderAsc()),
-	).All(ctx)
+	return s.BaseQuery(s.dbService.Client().EVMEvent.Query()).
+		Where(evmevent.StatusEQ(status)).All(ctx)
 }
 
 func (s *evmEventRepository) InsertEvmEventsIfNeeded(
@@ -118,7 +125,8 @@ func (s *evmEventRepository) InsertEvmEventsIfNeeded(
 			)
 		}
 
-		dbEvmEvents, err := tx.EVMEvent.Query().Where(evmevent.Or(txPredicates...)).All(ctx)
+		dbEvmEvents, err := s.BaseQuery(tx.EVMEvent.Query()).
+			Where(evmevent.Or(txPredicates...)).All(ctx)
 
 		if err != nil {
 			return err
@@ -182,7 +190,8 @@ func (s *evmEventRepository) InsertEvmEventsIfNeeded(
 			return err
 		}
 
-		dbEvmEvents, err = tx.EVMEvent.Query().Where(evmevent.Or(txPredicates...)).All(ctx)
+		dbEvmEvents, err = s.BaseQuery(tx.EVMEvent.Query()).
+			Where(evmevent.Or(txPredicates...)).All(ctx)
 		if err != nil {
 			return err
 		}
