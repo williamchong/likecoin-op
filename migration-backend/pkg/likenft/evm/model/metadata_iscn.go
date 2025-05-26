@@ -26,15 +26,15 @@ type MetadataISCN struct {
 	Version             *json.RawMessage             `json:"version,omitempty"`
 	ContentFingerprints *json.RawMessage             `json:"contentFingerprints,omitempty"`
 	DateCreated         *json.RawMessage             `json:"dateCreated,omitempty"`
-	DatePublished       string                       `json:"datePublished,omitempty"`
+	DatePublished       *json.RawMessage             `json:"datePublished,omitempty"`
 	PotentialAction     *MetadataISCNPotentialAction `json:"potentialAction,omitempty"`
 }
 
 func MakeMetadataISCNFromCosmosISCN(cosmosISCN *cosmosmodel.ISCN) MetadataISCN {
 	iscnRecord := cosmosISCN.Records[0].Data
-	datePublished := ""
+	var datePublished *json.RawMessage
 	if iscnRecord.ContentMetadata.DatePublished != nil {
-		datePublished = iscnRecord.ContentMetadata.DatePublished.ToString()
+		datePublished = iscnRecord.ContentMetadata.DatePublished.ToRawMessage()
 	}
 	return MetadataISCN{
 		Context:             iscnRecord.ContentMetadata.Context,

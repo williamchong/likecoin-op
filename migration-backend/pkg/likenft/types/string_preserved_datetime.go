@@ -9,34 +9,31 @@ import (
 )
 
 type StringPreservedDateTime struct {
-	str string
-	dt  time.Time
+	rawMessage *json.RawMessage
+	dt         time.Time
 }
 
 func (t *StringPreservedDateTime) UnmarshalJSON(data []byte) error {
 	if bytes.Equal(data, []byte(`""`)) {
-		t.str = ``
+		t.rawMessage = nil
 		return nil
 	}
 	dt, err := timeutil.TimeLayouts.Parse(string(bytes.Trim(data, "\"")))
 	if err != nil {
 		return err
 	}
-	var str string
-	err = json.Unmarshal(data, &str)
-	if err != nil {
-		return err
-	}
-	t.str = str
+
+	rawMessage := json.RawMessage(data)
+	t.rawMessage = &rawMessage
 	t.dt = dt
 	return nil
 }
 
 func (t *StringPreservedDateTime) MarshalJSON() ([]byte, error) {
-	if t.IsEmpty() {
+	if t.rawMessage == nil {
 		return []byte(`""`), nil
 	}
-	return []byte(t.str), nil
+	return []byte(*t.rawMessage), nil
 }
 
 func (t *StringPreservedDateTime) GetEpochSeconds() int64 {
@@ -44,9 +41,9 @@ func (t *StringPreservedDateTime) GetEpochSeconds() int64 {
 }
 
 func (t *StringPreservedDateTime) IsEmpty() bool {
-	return t.str == ""
+	return t.rawMessage == nil
 }
 
-func (t *StringPreservedDateTime) ToString() string {
-	return t.str
+func (t *StringPreservedDateTime) ToRawMessage() *json.RawMessage {
+	return t.rawMessage
 }
