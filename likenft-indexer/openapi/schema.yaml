@@ -367,6 +367,62 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /index-action/like-protocol:
+    post:
+      tags:
+        - Index Action
+      parameters:
+        - $ref: "#/components/parameters/IndexActionAPIKeyHeader"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  task_id:
+                    type: string
+                required:
+                  - message
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /index-action/book-nft/{booknft_id}:
+    post:
+      tags:
+        - Index Action
+      parameters:
+        - name: booknft_id
+          in: path
+          description: evm address of the BookNFT
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/IndexActionAPIKeyHeader"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  task_id:
+                    type: string
+                required:
+                  - message
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   parameters:
     PaginationRequestKey:
@@ -409,6 +465,13 @@ components:
       schema:
         type: integer
         default: 0
+    IndexActionAPIKeyHeader:
+      name: X-Index-Action-Api-Key
+      in: header
+      description: api key
+      required: true
+      schema:
+        type: string
   schemas:
     Account:
       type: object

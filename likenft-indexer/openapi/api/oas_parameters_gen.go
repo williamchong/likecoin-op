@@ -1112,6 +1112,172 @@ func decodeEventsByAddressAndSignatureParams(args [2]string, argsEscaped bool, r
 	return params, nil
 }
 
+// IndexActionBookNftBooknftIDPostParams is parameters of POST /index-action/book-nft/{booknft_id} operation.
+type IndexActionBookNftBooknftIDPostParams struct {
+	// Evm address of the BookNFT.
+	BooknftID string
+	// Api key.
+	XIndexActionAPIKey string
+}
+
+func unpackIndexActionBookNftBooknftIDPostParams(packed middleware.Parameters) (params IndexActionBookNftBooknftIDPostParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "booknft_id",
+			In:   "path",
+		}
+		params.BooknftID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "X-Index-Action-Api-Key",
+			In:   "header",
+		}
+		params.XIndexActionAPIKey = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexActionBookNftBooknftIDPostParams(args [1]string, argsEscaped bool, r *http.Request) (params IndexActionBookNftBooknftIDPostParams, _ error) {
+	h := uri.NewHeaderDecoder(r.Header)
+	// Decode path: booknft_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "booknft_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BooknftID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "booknft_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode header: X-Index-Action-Api-Key.
+	if err := func() error {
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "X-Index-Action-Api-Key",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.XIndexActionAPIKey = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "X-Index-Action-Api-Key",
+			In:   "header",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexActionLikeProtocolPostParams is parameters of POST /index-action/like-protocol operation.
+type IndexActionLikeProtocolPostParams struct {
+	// Api key.
+	XIndexActionAPIKey string
+}
+
+func unpackIndexActionLikeProtocolPostParams(packed middleware.Parameters) (params IndexActionLikeProtocolPostParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "X-Index-Action-Api-Key",
+			In:   "header",
+		}
+		params.XIndexActionAPIKey = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexActionLikeProtocolPostParams(args [0]string, argsEscaped bool, r *http.Request) (params IndexActionLikeProtocolPostParams, _ error) {
+	h := uri.NewHeaderDecoder(r.Header)
+	// Decode header: X-Index-Action-Api-Key.
+	if err := func() error {
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "X-Index-Action-Api-Key",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.XIndexActionAPIKey = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "X-Index-Action-Api-Key",
+			In:   "header",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // TokenParams is parameters of token operation.
 type TokenParams struct {
 	// Evm address of the BookNFT.

@@ -9,6 +9,8 @@ import (
 	"time"
 
 	getsentry "github.com/getsentry/sentry-go"
+	"github.com/go-redis/redis"
+	"github.com/hibiken/asynq"
 	_ "github.com/joho/godotenv/autoload"
 
 	"likenft-indexer/internal/database"
@@ -20,12 +22,22 @@ var (
 	sentryDebug = os.Getenv("SENTRY_DEBUG") == "true"
 )
 
+var (
+	redisDsn                       = os.Getenv("REDIS_DSN")
+	indexActionApiKey              = os.Getenv("INDEX_ACTION_API_KEY")
+	ethLikeProtocolContractAddress = os.Getenv("ETH_LIKE_PROTOCOL_CONTRACT_ADDRESS")
+)
+
 type Server struct {
 	port int
 
+	indexActionApiKey   string
+	likeProtocolAddress string
+
 	db database.Service
 
-	sentryHub *getsentry.Hub
+	sentryHub   *getsentry.Hub
+	asynqClient *asynq.Client
 }
 
 func NewServer() *http.Server {
@@ -36,8 +48,31 @@ func NewServer() *http.Server {
 	if err != nil {
 		panic(err)
 	}
+	opt, err := redis.ParseURL(redisDsn)
+	if err != nil {
+		panic(err)
+	}
+
+	redisClientOpt := asynq.RedisClientOpt{
+		Network:      opt.Network,
+		Addr:         opt.Addr,
+		Password:     opt.Password,
+		DB:           opt.DB,
+		DialTimeout:  opt.DialTimeout,
+		ReadTimeout:  opt.ReadTimeout,
+		WriteTimeout: opt.WriteTimeout,
+		PoolSize:     opt.PoolSize,
+		TLSConfig:    opt.TLSConfig,
+	}
+
+	asynqClient := asynq.NewClient(redisClientOpt)
+
 	NewServer := &Server{
 		port: port,
+
+		indexActionApiKey:   indexActionApiKey,
+		likeProtocolAddress: ethLikeProtocolContractAddress,
+		asynqClient:         asynqClient,
 
 		db: database.New(),
 

@@ -20,7 +20,38 @@ spec:
       - name: {{ .Values.likenftIndexer.worker.name }}
         image: {{ .Values.likenftIndexer.container.imageRepository }}:{{ .Values.appVersion }}
         imagePullPolicy: {{ .Values.likenftIndexer.container.imagePullPolicy}}
-        command: ["likenft-indexer-worker-cli", "worker"]
+        command: ["likenft-indexer-worker-cli", "worker", "default"]
+        envFrom:
+          - secretRef:
+              name: {{ .Values.likenftIndexer.name }}
+        resources:
+          {{- toYaml .Values.likenftIndexer.worker.resources | nindent 12 }}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: {{ .Values.likenftIndexer.worker.name }}-index-action
+  name: {{ .Values.likenftIndexer.worker.name }}-index-action
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: {{ .Values.likenftIndexer.worker.name }}-index-action
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: {{ .Values.likenftIndexer.worker.name }}-index-action
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: {{ .Values.likenftIndexer.worker.name }}-index-action
+        image: {{ .Values.likenftIndexer.container.imageRepository }}:{{ .Values.appVersion }}
+        imagePullPolicy: {{ .Values.likenftIndexer.container.imagePullPolicy}}
+        command: ["likenft-indexer-worker-cli", "worker", "index-action"]
         envFrom:
           - secretRef:
               name: {{ .Values.likenftIndexer.name }}

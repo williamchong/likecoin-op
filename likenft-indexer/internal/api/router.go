@@ -5,13 +5,29 @@ import (
 	"log"
 	"net/http"
 
-	"likenft-indexer/ent"
 	"likenft-indexer/internal/api/openapi"
+	"likenft-indexer/internal/database"
+
+	"github.com/hibiken/asynq"
 )
 
-func SetupRoutes(r *http.ServeMux, db *ent.Client) {
+func SetupRoutes(
+	r *http.ServeMux,
+
+	indexActionApiKey string,
+	likeProtocolAddress string,
+
+	db database.Service,
+
+	asynqClient *asynq.Client,
+) {
 	// Initialize handlers
-	openapiHandler := openapi.NewOpenAPIHandler(db)
+	openapiHandler := openapi.NewOpenAPIHandler(
+		indexActionApiKey,
+		likeProtocolAddress,
+		db,
+		asynqClient,
+	)
 
 	r.Handle("/api/", http.StripPrefix("/api", openapiHandler))
 }

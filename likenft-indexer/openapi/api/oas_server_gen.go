@@ -50,6 +50,14 @@ type Handler interface {
 	//
 	// GET /events/{address}/{signature}
 	EventsByAddressAndSignature(ctx context.Context, params EventsByAddressAndSignatureParams) (*EventsByAddressAndSignatureOK, error)
+	// IndexActionBookNftBooknftIDPost implements POST /index-action/book-nft/{booknft_id} operation.
+	//
+	// POST /index-action/book-nft/{booknft_id}
+	IndexActionBookNftBooknftIDPost(ctx context.Context, params IndexActionBookNftBooknftIDPostParams) (*IndexActionBookNftBooknftIDPostOK, error)
+	// IndexActionLikeProtocolPost implements POST /index-action/like-protocol operation.
+	//
+	// POST /index-action/like-protocol
+	IndexActionLikeProtocolPost(ctx context.Context, params IndexActionLikeProtocolPostParams) (*IndexActionLikeProtocolPostOK, error)
 	// Token implements token operation.
 	//
 	// Query token.

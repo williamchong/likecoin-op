@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"slices"
 
 	appcontext "likenft-indexer/cmd/worker/context"
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/internal/database"
+	"likenft-indexer/internal/model"
 
 	"github.com/hibiken/asynq"
 )
@@ -53,9 +55,11 @@ func HandleCheckReceivedEVMEvents(ctx context.Context, t *asynq.Task) error {
 	}
 	mylogger.Info(fmt.Sprintf("%d events found", len(receivedEvents)))
 
-	receivedEventIds := make([]int, 0, len(receivedEvents))
+	receivedEventIdsInProcessingOrder := slices.Clone(receivedEvents)
+	slices.SortFunc(receivedEventIdsInProcessingOrder, model.EvmEventsProcessingComparator)
+	receivedEventIds := make([]int, 0, len(receivedEventIdsInProcessingOrder))
 
-	for _, evmEvent := range receivedEvents {
+	for _, evmEvent := range receivedEventIdsInProcessingOrder {
 		err := handleCheckReceivedEVMEvents_enqueueProcessEVMEvent(
 			mylogger,
 			asynqClient,

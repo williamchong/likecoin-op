@@ -21,7 +21,13 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// Register routes
 	mux.HandleFunc("/", s.HelloWorldHandler)
 	// All of /api/*
-	api.SetupRoutes(mux, s.db.Client())
+	api.SetupRoutes(
+		mux,
+		s.indexActionApiKey,
+		s.likeProtocolAddress,
+		s.db,
+		s.asynqClient,
+	)
 
 	mux.HandleFunc("/health", s.healthHandler)
 

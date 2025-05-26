@@ -50,16 +50,6 @@ func main() {
 	}
 
 	asynqClient := asynq.NewClient(redisClientOpt)
-	asynqServer := asynq.NewServer(
-		redisClientOpt,
-		asynq.Config{
-			// Specify how many concurrent workers to use
-			Concurrency: envCfg.Concurrency,
-			// Optionally specify multiple queues with different priority.
-			Queues: map[string]int{},
-			// See the godoc for other configuration options
-		},
-	)
 	asynqScheduler := asynq.NewScheduler(redisClientOpt, nil)
 
 	evmQueryClient, err := evm.NewEvmQueryClient(envCfg.EthNetworkEventRPCURL)
@@ -76,7 +66,6 @@ func main() {
 
 	ctx = appcontext.WithConfigContext(ctx, envCfg)
 	ctx = appcontext.WithAsynqClientContext(ctx, asynqClient)
-	ctx = appcontext.WithAsynqServerContext(ctx, asynqServer)
 	ctx = appcontext.WithAsynqSchedulerContext(ctx, asynqScheduler)
 	ctx = appcontext.WithLoggerContext(ctx, logger)
 	ctx = appcontext.WithEvmQueryClient(ctx, evmQueryClient)
