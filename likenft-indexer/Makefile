@@ -57,6 +57,25 @@ abigen:
 start-api:
 	go run ./cmd/api
 
+.PHONY: start-worker-scheduler
+start-worker-scheduler:
+	go run ./cmd/worker scheduler
+
+DEFAULT_QUEUE ?= default
+INDEX_ACTION_QUEUE ?= index-action
+
+.PHONY: start-worker-all
+start-worker-all:
+	go run ./cmd/worker worker $(DEFAULT_QUEUE) $(INDEX_ACTION_QUEUE)
+
+.PHONY: start-worker-default
+start-worker-default:
+	go run ./cmd/worker worker $(DEFAULT_QUEUE)
+
+.PHONY: start-worker-index-action
+start-worker-index-action:
+	go run ./cmd/worker worker $(INDEX_ACTION_QUEUE)
+
 .PHONY: migration
 migration:
 	atlas migrate diff "${MIGRATION_NAME}" \
