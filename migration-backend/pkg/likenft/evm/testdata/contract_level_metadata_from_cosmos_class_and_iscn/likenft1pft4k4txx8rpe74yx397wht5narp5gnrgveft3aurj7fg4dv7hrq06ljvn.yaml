@@ -1,0 +1,207 @@
+name: class id = likenft1pft4k4txx8rpe74yx397wht5narp5gnrgveft3aurj7fg4dv7hrq06ljvn
+cosmosclassresponse: |
+  {
+    "class": {
+      "id": "likenft1pft4k4txx8rpe74yx397wht5narp5gnrgveft3aurj7fg4dv7hrq06ljvn",
+      "name": "The call of the wild",
+      "symbol": "BOOK",
+      "description": "The Call of the Wild is a short adventure novel by Jack London, published in 1903 and set in Yukon, Canada, during the 1890s Klondike Gold Rush, when strong sled dogs were in high demand. The central character of the novel is a dog named Buck. The story opens at a ranch in Santa Clara Valley, California, when Buck is stolen from his home and sold into service as a sled dog in Alaska. He becomes progressively more primitive and wild in the harsh environment, where he is forced to fight to survive and dominate other dogs. By the end, he sheds the veneer of civilization, and relies on primordial instinct and learned experience to emerge as a leader in the wild.",
+      "uri": "",
+      "uri_hash": "",
+      "data": {
+        "@type": "/likechain.likenft.v1.ClassData",
+        "metadata": {
+          "name": "The call of the wild",
+          "image": "ar://2VP3czhnSFdXTrXG17tFocAsmYZbGmecp2vxnnHikpAA",
+          "external_url": "",
+          "nft_meta_collection_id": "nft_book",
+          "nft_meta_collection_name": "NFT Book",
+          "nft_meta_collection_description": "NFT Book by Liker Land"
+        },
+        "parent": {
+          "type": "ISCN",
+          "iscn_id_prefix": "iscn://likecoin-chain/3oIarrM1pPmtmnaj279rrAolGzmePCpGC6-O_yhz6vw",
+          "iscn_version_at_mint": "1",
+          "account": ""
+        },
+        "config": {
+          "burnable": true,
+          "max_supply": "0",
+          "blind_box_config": null
+        },
+        "blind_box_state": {
+          "content_count": "0",
+          "to_be_revealed": false
+        }
+      }
+    }
+  }
+
+iscndataresponse: |
+  {
+    "owner": "like1snk3zzg4yp9ytez4zlxjpkzr5kr5npx8fl9htl",
+    "latest_version": "1",
+    "records": [
+      {
+        "ipld": "baguqeerapollx2pant5nqy6wces3s4qoqnhmbr2vtp72n7qsfvfuhqkabngq",
+        "data": {
+          "@context": {
+            "@vocab": "http://iscn.io/",
+            "contentMetadata": { "@context": null },
+            "recordParentIPLD": { "@container": "@index" },
+            "stakeholders": {
+              "@context": {
+                "@vocab": "http://schema.org/",
+                "contributionType": "http://iscn.io/contributionType",
+                "entity": "http://iscn.io/entity",
+                "footprint": "http://iscn.io/footprint",
+                "rewardProportion": "http://iscn.io/rewardProportion"
+              }
+            }
+          },
+          "@id": "iscn://likecoin-chain/3oIarrM1pPmtmnaj279rrAolGzmePCpGC6-O_yhz6vw/1",
+          "@type": "Record",
+          "contentFingerprints": [
+            "https://api.rinkeby.like.co/arweave/v2/link/A893E8B654D7FC63EC2D8469CE21AAD00E3F566D789D7F948E4DBD137DEFE810",
+            "ar://2VP3czhnSFdXTrXG17tFocAsmYZbGmecp2vxnnHikpAA"
+          ],
+          "contentMetadata": {
+            "@context": "http://schema.org/",
+            "@type": "Book",
+            "author": "Jack London",
+            "coverUrl": "ar://2VP3czhnSFdXTrXG17tFocAsmYZbGmecp2vxnnHikpAA",
+            "datePublished": "2025-05-05",
+            "description": "The Call of the Wild is a short adventure novel by Jack London, published in 1903 and set in Yukon, Canada, during the 1890s Klondike Gold Rush, when strong sled dogs were in high demand. The central character of the novel is a dog named Buck. The story opens at a ranch in Santa Clara Valley, California, when Buck is stolen from his home and sold into service as a sled dog in Alaska. He becomes progressively more primitive and wild in the harsh environment, where he is forced to fight to survive and dominate other dogs. By the end, he sheds the veneer of civilization, and relies on primordial instinct and learned experience to emerge as a leader in the wild.",
+            "downloadableUrls": [
+              {
+                "fileName": "call of the wild, The - Jack London.epub",
+                "type": "epub",
+                "url": "https://api.rinkeby.like.co/arweave/v2/link/A893E8B654D7FC63EC2D8469CE21AAD00E3F566D789D7F948E4DBD137DEFE810"
+              }
+            ],
+            "inLanguage": "en",
+            "isbn": "",
+            "keywords": "Dogs -- Fiction, Adventure stories, Nature stories, Klondike River Valley (Yukon) -- Fiction, Sled dogs -- Fiction, Pet theft -- Fiction, Feral dogs -- Fiction, Animal welfare -- Fiction",
+            "language": "en",
+            "name": "The call of the wild",
+            "publicationDate": "2025-05-05",
+            "publisher": "",
+            "sameAs": [
+              "https://api.rinkeby.like.co/arweave/v2/link/A893E8B654D7FC63EC2D8469CE21AAD00E3F566D789D7F948E4DBD137DEFE810?name=call of the wild, The - Jack London.epub.epub"
+            ],
+            "tags": [
+              "Dogs -- Fiction",
+              "Adventure stories",
+              "Nature stories",
+              "Klondike River Valley (Yukon) -- Fiction",
+              "Sled dogs -- Fiction",
+              "Pet theft -- Fiction",
+              "Feral dogs -- Fiction",
+              "Animal welfare -- Fiction"
+            ],
+            "thumbnailUrl": "ar://2VP3czhnSFdXTrXG17tFocAsmYZbGmecp2vxnnHikpAA",
+            "title": "The call of the wild",
+            "usageInfo": "All Rights Reserved",
+            "version": 1
+          },
+          "recordNotes": "",
+          "recordTimestamp": "2025-05-05T10:37:37+00:00",
+          "recordVersion": 1,
+          "stakeholders": []
+        }
+      }
+    ]
+  }
+
+royaltyconfig: |
+  {
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "47560"
+        },
+        {
+          "account": "like19fqws220rwcmacn5dgt0dtwts8c05ty58mcr3a",
+          "weight": "927439"
+        },
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "25000"
+        }
+      ]
+    }
+  }
+
+contractlevelmetadata: |
+  {
+    "name": "The call of the wild",
+    "symbol": "BOOK",
+    "description": "The Call of the Wild\u00a0is a short adventure novel by\u00a0Jack London, published in 1903 and set in\u00a0Yukon,\u00a0Canada, during the 1890s\u00a0Klondike Gold Rush, when strong\u00a0sled dogs\u00a0were in high demand. The central character of the novel is a dog named Buck. The story opens at a ranch in\u00a0Santa Clara Valley,\u00a0California, when Buck is stolen from his home and sold into service as a sled dog in\u00a0Alaska. He becomes progressively more primitive and wild in the harsh environment, where he is forced to fight to survive and dominate other dogs. By the end, he sheds the veneer of civilization, and relies on primordial instinct and learned experience to emerge as a leader in the wild.",
+    "image": "ar://2VP3czhnSFdXTrXG17tFocAsmYZbGmecp2vxnnHikpAA",
+    "nft_meta_collection_id": "nft_book",
+    "nft_meta_collection_name": "NFT Book",
+    "nft_meta_collection_description": "NFT Book by Liker Land",
+    "@context": "http://schema.org/",
+    "@type": "Book",
+    "author": "Jack London",
+    "datePublished": "2025-05-05",
+    "inLanguage": "en",
+    "isbn": "",
+    "keywords": "Dogs -- Fiction, Adventure stories, Nature stories, Klondike River Valley (Yukon) -- Fiction, Sled dogs -- Fiction, Pet theft -- Fiction, Feral dogs -- Fiction, Animal welfare -- Fiction",
+    "sameAs": [
+      "https://api.rinkeby.like.co/arweave/v2/link/A893E8B654D7FC63EC2D8469CE21AAD00E3F566D789D7F948E4DBD137DEFE810?name=call of the wild, The - Jack London.epub.epub"
+    ],
+    "thumbnailUrl": "ar://2VP3czhnSFdXTrXG17tFocAsmYZbGmecp2vxnnHikpAA",
+    "usageInfo": "All Rights Reserved",
+    "version": 1,
+    "contentFingerprints": [
+      "https://api.rinkeby.like.co/arweave/v2/link/A893E8B654D7FC63EC2D8469CE21AAD00E3F566D789D7F948E4DBD137DEFE810",
+      "ar://2VP3czhnSFdXTrXG17tFocAsmYZbGmecp2vxnnHikpAA"
+    ],
+    "dateCreated": "2025-05-05T10:37:37+00:00",
+    "attributes": [
+      {
+        "trait_type": "Author",
+        "value": "Jack London"
+      },
+      {
+        "display_type": "date",
+        "trait_type": "Publish Date",
+        "value": 1746403200
+      }
+    ],
+    "potentialAction": {
+      "@type": "ReadAction",
+      "target": [
+        {
+          "@type": "EntryPoint",
+          "contentType": "application/epub+zip",
+          "name": "call of the wild, The - Jack London.epub.epub",
+          "url": "https://api.rinkeby.like.co/arweave/v2/link/A893E8B654D7FC63EC2D8469CE21AAD00E3F566D789D7F948E4DBD137DEFE810"
+        }
+      ]
+    },
+    "likecoin": {
+      "iscnIdPrefix": "iscn://likecoin-chain/3oIarrM1pPmtmnaj279rrAolGzmePCpGC6-O_yhz6vw",
+      "classId": "likenft1pft4k4txx8rpe74yx397wht5narp5gnrgveft3aurj7fg4dv7hrq06ljvn"
+    },
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "47560"
+        },
+        {
+          "account": "like19fqws220rwcmacn5dgt0dtwts8c05ty58mcr3a",
+          "weight": "927439"
+        },
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "25000"
+        }
+      ]
+    }
+  }
