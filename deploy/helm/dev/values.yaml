@@ -42,6 +42,8 @@ migrationBackend:
   container:
     imageRepository: oursky/like-migration-backend
   env:
+    SENTRY_DSN: https://42c026a5b18a5546d1eff10d29ec01f9@o21224.ingest.us.sentry.io/4509349416534016
+    SENTRY_DEBUG: "true"
     COSMOS_NODE_URL: https://node.testnet.like.co
     COSMOS_NODE_HTTP_TIMEOUT_SECONDS: "60"
     ROUTE_PREFIX: ""
@@ -68,6 +70,8 @@ signerBackend:
   container:
     imageRepository: oursky/like-signer-backend
   env:
+    SENTRY_DSN: https://09eb616dbe039a14c95a24f84003493a@o21224.ingest.us.sentry.io/4509349425905664
+    SENTRY_DEBUG: "true"
     ROUTE_PREFIX: ""
     ETH_NETWORK_PUBLIC_RPC_URL: https://sepolia.optimism.io
 
@@ -75,6 +79,8 @@ likenftIndexer:
   container:
     imageRepository: oursky/likenft-indexer
   env:
+    SENTRY_DSN: https://77cbd727e7667e05e0d1942037a06de6@o21224.ingest.us.sentry.io/4509349428199424
+    SENTRY_DEBUG: "true"
     ETH_NETWORK_PUBLIC_RPC_URL: https://sepolia.optimism.io
     ETH_LIKE_PROTOCOL_CONTRACT_ADDRESS: "0x67BCd74981c33E95E5e306085754DD0A721183F1"
     EVM_EVENT_LIKE_PROTOCOL_INITIAL_BLOCK_HEIGHT: "25837814"

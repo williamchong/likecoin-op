@@ -11,6 +11,9 @@ var ContextKey = &contextKey{}
 type EnvConfig struct {
 	RedisDsn string `envconfig:"REDIS_DSN" default:"redis://127.0.0.1:6379"`
 
+	SentryDsn   string `envconfig:"SENTRY_DSN" default:""`
+	SentryDebug bool   `envconfig:"SENTRY_DEBUG" default:"false"`
+
 	// Worker config
 	Concurrency int `envconfig:"WORKER_CONCURRENCY" default:"1"`
 

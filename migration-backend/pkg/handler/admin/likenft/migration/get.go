@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
-	"strings"
 	"strconv"
+	"strings"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	api_model "github.com/likecoin/like-migration-backend/pkg/handler/model"
@@ -22,28 +23,30 @@ type GetLikeNFTAssetMigrationHandler struct {
 }
 
 func (h *GetLikeNFTAssetMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hub := sentry.GetHubFromContext(r.Context())
+
 	migrationIdStr := r.URL.Path[strings.LastIndex(r.URL.Path, "/")+1:]
 
 	migrationId, err := strconv.ParseUint(migrationIdStr, 10, 64)
 	if err != nil {
-		handler.SendJSON(w, http.StatusBadRequest, &GetLikeNFTAssetMigrationResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusBadRequest, handler.MakeErrorResponseBody(err))
 		return
-	}	
+	}
 
 	migration, err := h.handle(migrationId)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			handler.SendJSON(w, http.StatusNotFound, &GetLikeNFTAssetMigrationResponseBody{
-				ErrorDescription: "Not Found",
-			})
+			handler.SendJSON(w, http.StatusNotFound,
+				handler.MakeErrorResponseBody(err).
+					AsError(handler.ErrNotFound))
 			return
 		}
-		handler.SendJSON(w, http.StatusInternalServerError, &GetLikeNFTAssetMigrationResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)).
+				AsError(handler.ErrSomethingWentWrong),
+		)
 		return
 	}
 

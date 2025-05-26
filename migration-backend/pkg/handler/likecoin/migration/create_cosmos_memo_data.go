@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/cosmos/cosmos-sdk/types"
+	"github.com/getsentry/sentry-go"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likecoin"
 )
@@ -16,30 +17,31 @@ type CreateCosmosMemoDataRequestBody struct {
 }
 
 type CreateCosmosMemoDataResponseBody struct {
-	MemoData         string `json:"memo_data,omitempty"`
-	ErrorDescription string `json:"error_description,omitempty"`
+	MemoData string `json:"memo_data,omitempty"`
 }
 
 type CreateCosmosMemoDataHandler struct {
 }
 
 func (h *CreateCosmosMemoDataHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hub := sentry.GetHubFromContext(r.Context())
+
 	decoder := json.NewDecoder(r.Body)
 	var data CreateCosmosMemoDataRequestBody
 	err := decoder.Decode(&data)
 	if err != nil {
-		handler.SendJSON(w, http.StatusBadRequest, &CreateSigningMessageResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusBadRequest, handler.MakeErrorResponseBody(err))
 		return
 	}
 
 	m, err := h.handle(&data)
 
 	if err != nil {
-		handler.SendJSON(w, http.StatusInternalServerError, &CreateCosmosMemoDataResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)).
+				AsError(handler.ErrSomethingWentWrong),
+		)
 		return
 	}
 

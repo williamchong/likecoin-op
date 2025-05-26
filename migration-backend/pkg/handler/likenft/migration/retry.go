@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/hibiken/asynq"
 	"github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
@@ -69,8 +70,7 @@ func (r *RetryMigrationRequestBody) CheckAssets(cs []model.LikeNFTAssetMigration
 }
 
 type RetryMigrationResponseBody struct {
-	Migration        *api_model.LikeNFTAssetMigration `json:"migration,omitempty"`
-	ErrorDescription string                           `json:"error_description,omitempty"`
+	Migration *api_model.LikeNFTAssetMigration `json:"migration,omitempty"`
 }
 
 type RetryMigrationHandler struct {
@@ -79,24 +79,25 @@ type RetryMigrationHandler struct {
 }
 
 func (h *RetryMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hub := sentry.GetHubFromContext(r.Context())
+
 	cosmosAddress := r.URL.Path[strings.LastIndex(r.URL.Path, "/")+1:]
 
 	decoder := json.NewDecoder(r.Body)
 	var req RetryMigrationRequestBody
 	err := decoder.Decode(&req)
 	if err != nil {
-		handler.SendJSON(w, http.StatusBadRequest, &RetryMigrationResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusBadRequest, handler.MakeErrorResponseBody(err))
 		return
 	}
 
 	migration, err := h.handle(cosmosAddress, &req)
 
 	if err != nil {
-		handler.SendJSON(w, http.StatusInternalServerError, &RetryMigrationResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)).
+				AsError(handler.ErrSomethingWentWrong))
 		return
 	}
 

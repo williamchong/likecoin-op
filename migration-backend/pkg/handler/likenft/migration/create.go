@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/hibiken/asynq"
 	"github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
@@ -24,8 +25,7 @@ type CreateMigrationRequestBody struct {
 }
 
 type CreateMigrationResponseBody struct {
-	Migration        *api_model.LikeNFTAssetMigration `json:"migration,omitempty"`
-	ErrorDescription string                           `json:"error_description,omitempty"`
+	Migration *api_model.LikeNFTAssetMigration `json:"migration,omitempty"`
 }
 
 type CreateMigrationHandler struct {
@@ -38,23 +38,24 @@ var ErrMigrationExists = fmt.Errorf("error migration exists")
 var ErrSignedEthAddressNotMatch = fmt.Errorf("error signed eth address not match")
 
 func (h *CreateMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hub := sentry.GetHubFromContext(r.Context())
+
 	decoder := json.NewDecoder(r.Body)
 	var data CreateMigrationRequestBody
 	err := decoder.Decode(&data)
 
 	if err != nil {
-		handler.SendJSON(w, http.StatusBadRequest, &CreateMigrationResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusBadRequest, handler.MakeErrorResponseBody(err))
 		return
 	}
 
 	migration, err := h.handle(data)
 
 	if err != nil {
-		handler.SendJSON(w, http.StatusInternalServerError, &CreateMigrationResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)).
+				AsError(handler.ErrSomethingWentWrong))
 		return
 	}
 

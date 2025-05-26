@@ -4,17 +4,17 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
-	"strings"
 	"strconv"
+	"strings"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	api_model "github.com/likecoin/like-migration-backend/pkg/handler/model"
 )
 
 type GetLikeCoinMigrationResponseBody struct {
-	Migration        *api_model.LikeCoinMigration `json:"migration,omitempty"`
-	ErrorDescription string                       `json:"error_description,omitempty"`
+	Migration *api_model.LikeCoinMigration `json:"migration,omitempty"`
 }
 
 type GetLikeCoinMigrationHandler struct {
@@ -22,13 +22,12 @@ type GetLikeCoinMigrationHandler struct {
 }
 
 func (h *GetLikeCoinMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hub := sentry.GetHubFromContext(r.Context())
 	migrationIdStr := r.URL.Path[strings.LastIndex(r.URL.Path, "/")+1:]
-	
+
 	migrationId, err := strconv.ParseUint(migrationIdStr, 10, 64)
 	if err != nil {
-		handler.SendJSON(w, http.StatusBadRequest, &GetLikeCoinMigrationResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusBadRequest, handler.MakeErrorResponseBody(err))
 		return
 	}
 
@@ -36,14 +35,17 @@ func (h *GetLikeCoinMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.R
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			handler.SendJSON(w, http.StatusNotFound, &GetLikeCoinMigrationResponseBody{
-				ErrorDescription: "Not Found",
-			})
+			handler.SendJSON(w, http.StatusNotFound,
+				handler.MakeErrorResponseBody(err).
+					AsError(handler.ErrNotFound),
+			)
 			return
 		}
-		handler.SendJSON(w, http.StatusInternalServerError, &GetLikeCoinMigrationResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)).
+				AsError(handler.ErrSomethingWentWrong),
+		)
 		return
 	}
 

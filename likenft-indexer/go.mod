@@ -9,6 +9,7 @@ require (
 	github.com/a-h/templ v0.3.857
 	github.com/coder/websocket v1.8.12
 	github.com/ethereum/go-ethereum v1.15.0
+	github.com/getsentry/sentry-go v0.27.0
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.1.0
 	github.com/go-redis/redis v6.15.9+incompatible

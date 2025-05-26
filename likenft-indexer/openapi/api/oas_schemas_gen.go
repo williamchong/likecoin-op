@@ -499,8 +499,9 @@ func (s *Erc721MetadataAttributeDisplayType) UnmarshalText(data []byte) error {
 // Represents error object.
 // Ref: #/components/schemas/Error
 type Error struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
+	Code          int64     `json:"code"`
+	Message       string    `json:"message"`
+	SentryErrorID OptString `json:"sentry_error_id"`
 }
 
 // GetCode returns the value of Code.
@@ -513,6 +514,11 @@ func (s *Error) GetMessage() string {
 	return s.Message
 }
 
+// GetSentryErrorID returns the value of SentryErrorID.
+func (s *Error) GetSentryErrorID() OptString {
+	return s.SentryErrorID
+}
+
 // SetCode sets the value of Code.
 func (s *Error) SetCode(val int64) {
 	s.Code = val
@@ -521,6 +527,11 @@ func (s *Error) SetCode(val int64) {
 // SetMessage sets the value of Message.
 func (s *Error) SetMessage(val string) {
 	s.Message = val
+}
+
+// SetSentryErrorID sets the value of SentryErrorID.
+func (s *Error) SetSentryErrorID(val OptString) {
+	s.SentryErrorID = val
 }
 
 // ErrorStatusCode wraps Error with StatusCode.

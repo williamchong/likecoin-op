@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/likecoin/like-migration-backend/pkg/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/ethereum"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
@@ -23,8 +24,7 @@ type LikerIDMigrationRequestBody struct {
 }
 
 type LikerIDMigrationResponseBody struct {
-	Response         *likecoin_api.MigrateUserEVMWalletResponse `json:"response,omitempty"`
-	ErrorDescription string                                     `json:"error_description,omitempty"`
+	Response *likecoin_api.MigrateUserEVMWalletResponse `json:"response,omitempty"`
 }
 
 type LikerIDMigrationHandler struct {
@@ -32,23 +32,26 @@ type LikerIDMigrationHandler struct {
 }
 
 func (p *LikerIDMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hub := sentry.GetHubFromContext(r.Context())
+
 	decoder := json.NewDecoder(r.Body)
 	var data LikerIDMigrationRequestBody
 	err := decoder.Decode(&data)
 
 	if err != nil {
-		handler.SendJSON(w, http.StatusBadRequest, &LikerIDMigrationResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusBadRequest,
+			handler.MakeErrorResponseBody(err))
 		return
 	}
 
 	response, err := p.handle(&data)
 
 	if err != nil {
-		handler.SendJSON(w, http.StatusInternalServerError, &LikerIDMigrationResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)).
+				AsError(handler.ErrSomethingWentWrong),
+		)
 		return
 	}
 

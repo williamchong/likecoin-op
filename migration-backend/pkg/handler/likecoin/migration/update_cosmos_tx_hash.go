@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/hibiken/asynq"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	"github.com/likecoin/like-migration-backend/pkg/handler/model"
@@ -18,8 +19,7 @@ type UpdateLikeCoinMigrationCosmosHandlerRequestBody struct {
 }
 
 type UpdateLikeCoinMigrationCosmosHandlerResponseBody struct {
-	Migration        *model.LikeCoinMigration `json:"migration,omitempty"`
-	ErrorDescription string                   `json:"error_description,omitempty"`
+	Migration *model.LikeCoinMigration `json:"migration,omitempty"`
 }
 
 type UpdateLikeCoinMigrationCosmosHandler struct {
@@ -28,6 +28,8 @@ type UpdateLikeCoinMigrationCosmosHandler struct {
 }
 
 func (p *UpdateLikeCoinMigrationCosmosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hub := sentry.GetHubFromContext(r.Context())
+
 	paths := strings.Split(r.URL.Path, "/")
 	cosmosAddress := paths[len(paths)-2]
 
@@ -35,18 +37,17 @@ func (p *UpdateLikeCoinMigrationCosmosHandler) ServeHTTP(w http.ResponseWriter, 
 	var req UpdateLikeCoinMigrationCosmosHandlerRequestBody
 	err := decoder.Decode(&req)
 	if err != nil {
-		handler.SendJSON(w, http.StatusBadRequest, &UpdateLikeCoinMigrationCosmosHandlerResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusBadRequest, handler.MakeErrorResponseBody(err))
 		return
 	}
 
 	m, err := p.handle(cosmosAddress, &req)
 
 	if err != nil {
-		handler.SendJSON(w, http.StatusInternalServerError, &UpdateLikeCoinMigrationCosmosHandlerResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)).
+				AsError(handler.ErrSomethingWentWrong))
 		return
 	}
 

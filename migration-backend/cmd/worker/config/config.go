@@ -5,6 +5,9 @@ import (
 )
 
 type EnvConfig struct {
+	SentryDsn   string `envconfig:"SENTRY_DSN" default:""`
+	SentryDebug bool   `envconfig:"SENTRY_DEBUG" default:"false"`
+
 	DbConnectionStr                 string `envconfig:"DB_CONNECTION_STR"`
 	RedisDsn                        string `envconfig:"REDIS_DSN" default:"redis://127.0.0.1:6379"`
 	Concurrency                     int    `envconfig:"WORKER_CONCURRENCY" default:"1"`

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	api_model "github.com/likecoin/like-migration-backend/pkg/handler/model"
@@ -13,8 +14,7 @@ import (
 )
 
 type GetMigrationPreviewResponseBody struct {
-	Preview          *api_model.LikeNFTAssetSnapshot `json:"preview,omitempty"`
-	ErrorDescription string                          `json:"error_description,omitempty"`
+	Preview *api_model.LikeNFTAssetSnapshot `json:"preview,omitempty"`
 }
 
 type GetMigrationPreviewHandler struct {
@@ -22,20 +22,23 @@ type GetMigrationPreviewHandler struct {
 }
 
 func (h *GetMigrationPreviewHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hub := sentry.GetHubFromContext(r.Context())
+
 	cosmosAddress := r.URL.Path[strings.LastIndex(r.URL.Path, "/")+1:]
 
 	snapshot, err := h.handle(cosmosAddress)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			handler.SendJSON(w, http.StatusNotFound, &GetMigrationPreviewResponseBody{
-				ErrorDescription: "Not Found",
-			})
+			handler.SendJSON(w, http.StatusNotFound,
+				handler.MakeErrorResponseBody(err).AsError(handler.ErrNotFound))
 			return
 		}
-		handler.SendJSON(w, http.StatusInternalServerError, &GetMigrationPreviewResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)).
+				AsError(handler.ErrSomethingWentWrong),
+		)
 		return
 	}
 

@@ -7,6 +7,7 @@ require (
 	cosmossdk.io/x/nft v0.1.1
 	github.com/cosmos/cosmos-sdk v0.50.11
 	github.com/ethereum/go-ethereum v1.14.12
+	github.com/getsentry/sentry-go v0.27.0
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/google/go-querystring v1.1.0
@@ -77,7 +78,6 @@ require (
 	github.com/ethereum/c-kzg-4844 v1.0.0 // indirect
 	github.com/ethereum/go-verkle v0.1.1-0.20240829091221-dffa7562dbe9 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/getsentry/sentry-go v0.27.0 // indirect
 	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
 	github.com/go-kit/kit v0.12.0 // indirect
 	github.com/go-kit/log v0.2.1 // indirect

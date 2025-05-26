@@ -4,14 +4,14 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	api_model "github.com/likecoin/like-migration-backend/pkg/handler/user/model"
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 )
 
 type GetUserEVMMigrateResponseBody struct {
-	UserProfile      *api_model.UserProfile `json:"user_profile,omitempty"`
-	ErrorDescription string                 `json:"error_description,omitempty"`
+	UserProfile *api_model.UserProfile `json:"user_profile,omitempty"`
 }
 
 type GetUserEVMMigrateHandler struct {
@@ -19,14 +19,18 @@ type GetUserEVMMigrateHandler struct {
 }
 
 func (h *GetUserEVMMigrateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hub := sentry.GetHubFromContext(r.Context())
+
 	cosmosWalletAddress := r.URL.Path[strings.LastIndex(r.URL.Path, "/")+1:]
 
 	userProfile, err := h.handle(cosmosWalletAddress)
 
 	if err != nil {
-		handler.SendJSON(w, http.StatusInternalServerError, &GetUserEVMMigrateResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)).
+				AsError(handler.ErrSomethingWentWrong),
+		)
 		return
 	}
 

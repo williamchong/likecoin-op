@@ -2,7 +2,6 @@ package signer
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -19,10 +18,10 @@ var (
 )
 
 type GetTransactionHashResponseBody struct {
-	TxHash           *string                      `json:"tx_hash"`
-	Status           *EvmTransactionRequestStatus `json:"status"`
-	FailedReason     *string                      `json:"failed_reason"`
-	ErrorDescription string                       `json:"error_description,omitempty"`
+	TxHash       *string                      `json:"tx_hash"`
+	Status       *EvmTransactionRequestStatus `json:"status"`
+	FailedReason *string                      `json:"failed_reason"`
+	*ErrorResponseBody
 }
 
 func (l *SignerClient) GetTransactionHash(evmTxRequestId uint64) (*GetTransactionHashResponseBody, error) {
@@ -46,8 +45,8 @@ func (l *SignerClient) GetTransactionHash(evmTxRequestId uint64) (*GetTransactio
 	if err != nil {
 		return nil, err
 	}
-	if respBody.ErrorDescription != "" {
-		return nil, errors.New(respBody.ErrorDescription)
+	if respBody.ErrorResponseBody != nil {
+		return nil, respBody.ErrorResponseBody
 	}
 	return &respBody, nil
 }

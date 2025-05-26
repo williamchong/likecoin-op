@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	likecoin_api_model "github.com/likecoin/like-migration-backend/pkg/likecoin/api/model"
@@ -20,8 +21,7 @@ type CreateSigningMessageRequestBody struct {
 }
 
 type CreateSigningMessageResponseBody struct {
-	Message          string `json:"message,omitempty"`
-	ErrorDescription string `json:"error_description,omitempty"`
+	Message string `json:"message,omitempty"`
 }
 
 type CreateSigningMessageHandler struct {
@@ -29,23 +29,26 @@ type CreateSigningMessageHandler struct {
 }
 
 func (p *CreateSigningMessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hub := sentry.GetHubFromContext(r.Context())
+
 	decoder := json.NewDecoder(r.Body)
 	var data CreateSigningMessageRequestBody
 	err := decoder.Decode(&data)
 
 	if err != nil {
-		handler.SendJSON(w, http.StatusBadRequest, &CreateSigningMessageResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusBadRequest,
+			handler.MakeErrorResponseBody(err))
 		return
 	}
 
 	m, err := p.handle(p.Db, data.CosmosAddress, data.LikerID, data.EthAddress)
 
 	if err != nil {
-		handler.SendJSON(w, http.StatusInternalServerError, &CreateSigningMessageResponseBody{
-			ErrorDescription: err.Error(),
-		})
+		handler.SendJSON(w, http.StatusInternalServerError,
+			handler.MakeErrorResponseBody(err).
+				WithSentryReported(hub.CaptureException(err)).
+				AsError(handler.ErrSomethingWentWrong),
+		)
 		return
 	}
 

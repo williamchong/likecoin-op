@@ -10,6 +10,7 @@ import (
 
 	"likenft-indexer/cmd/web"
 	"likenft-indexer/internal/api"
+	"likenft-indexer/internal/server/middleware"
 
 	"github.com/coder/websocket"
 )
@@ -29,8 +30,12 @@ func (s *Server) RegisterRoutes() http.Handler {
 	fileServer := http.FileServer(http.FS(web.Files))
 	mux.Handle("/assets/", fileServer)
 
-	// Wrap the mux with CORS middleware
-	return s.corsMiddleware(mux)
+	applyMiddlewares := middleware.MakeApplyMiddlewares(
+		s.corsMiddleware,
+		middleware.MakeSentryMiddleware(s.sentryHub),
+	)
+
+	return applyMiddlewares(mux)
 }
 
 func (s *Server) corsMiddleware(next http.Handler) http.Handler {

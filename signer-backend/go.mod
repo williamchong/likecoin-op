@@ -6,6 +6,7 @@ toolchain go1.23.7
 
 require (
 	github.com/ethereum/go-ethereum v1.15.5
+	github.com/getsentry/sentry-go v0.33.0
 	github.com/joho/godotenv v1.5.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.10.9
@@ -55,8 +56,9 @@ require (
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	golang.org/x/crypto v0.37.0 // indirect
 	golang.org/x/net v0.35.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
+	golang.org/x/sync v0.13.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
+	golang.org/x/text v0.24.0 // indirect
 	gotest.tools v2.2.0+incompatible // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
