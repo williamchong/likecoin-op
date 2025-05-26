@@ -19,9 +19,9 @@ likenftMigration:
   nginxConfigFilePath: "likeco/likenft-migration-nginx.conf"
 
   ingress:
-    host: v3-token-migration.like.co
+    host: v3-book-migration.like.co
     tls:
-      host: v3-token-migration.like.co
+      host: v3-book-migration.like.co
 
 migrationAdmin:
   container:
@@ -43,7 +43,7 @@ migrationBackend:
   env:
     COSMOS_NODE_URL: https://mainnet-node.like.co
     COSMOS_NODE_HTTP_TIMEOUT_SECONDS: "60"
-    ROUTE_PREFIX: ""
+    ROUTE_PREFIX: "migrate"
     ETH_NETWORK_PUBLIC_RPC_URL: https://mainnet.optimism.io
     ETH_SIGNER_BASE_URL: http://signer-backend
     ETH_TOKEN_ADDRESS: ""
@@ -83,7 +83,8 @@ likenftIndexer:
 
   api:
     ingress:
-      host: likenft-indexer.pandawork.com
+      host: api.v3.like.co
+      prefix: /indexer
       tls:
-        secretName: likenft-indexer.pandawork.com
-        host: likenft-indexer.pandawork.com
+        secretName: tls-api.v3.like.co
+        host: api.v3.like.co
