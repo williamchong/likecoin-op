@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"time"
+
+	timeutil "github.com/likecoin/like-migration-backend/pkg/likenft/util/time"
 )
 
 type StringPreservedDateTime struct {
@@ -16,8 +18,7 @@ func (t *StringPreservedDateTime) UnmarshalJSON(data []byte) error {
 		t.str = ``
 		return nil
 	}
-	var dt time.Time
-	err := dt.UnmarshalJSON(data)
+	dt, err := timeutil.TimeLayouts.Parse(string(bytes.Trim(data, "\"")))
 	if err != nil {
 		return err
 	}
