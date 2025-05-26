@@ -7,28 +7,6 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/types"
 )
 
-type BookContentMetadata struct {
-	Context     string   `json:"context"`
-	Description string   `json:"description"`
-	Keywords    []string `json:"keywords"`
-	Name        string   `json:"name"`
-	Type        string   `json:"type"`
-	Url         string   `json:"url"`
-	UsageInfo   string   `json:"usageInfo"`
-	Version     uint64   `json:"version"`
-}
-
-type BookStakeholderEntity struct {
-	Id   string `json:"@id"`
-	Name string `json:"name"`
-}
-
-type BookStakeholder struct {
-	ContributionType string                 `json:"contributionType"`
-	Entity           *BookStakeholderEntity `json:"entity"`
-	RewardProportion any                    `json:"rewardProportion"`
-}
-
 type AuthorString string
 
 type AuthorWithDescription struct {
@@ -77,58 +55,37 @@ func (a *Author) Name() string {
 	return string(a.str)
 }
 
-type BookExifInfo []any
-
 type Book struct {
-	Context         string                         `json:"@context"`
-	Type            string                         `json:"@type"`
+	Context         *json.RawMessage               `json:"@context"`
+	Type            *json.RawMessage               `json:"@type"`
 	Author          *Author                        `json:"author"`
-	ContentMetadata *BookContentMetadata           `json:"contentMetadata"`
+	ContentMetadata *json.RawMessage               `json:"contentMetadata"`
 	DatePublished   *types.StringPreservedDateTime `json:"datePublished"`
-	ExifInfo        BookExifInfo                   `json:"exifInfo"`
+	ExifInfo        *json.RawMessage               `json:"exifInfo"`
 	Description     string                         `json:"description"`
-	InLanguage      string                         `json:"inLanguage"`
-	ISBN            string                         `json:"isbn"`
-	Keywords        string                         `json:"keywords"`
+	InLanguage      *json.RawMessage               `json:"inLanguage"`
+	ISBN            *json.RawMessage               `json:"isbn"`
+	Keywords        *json.RawMessage               `json:"keywords"`
 	Name            string                         `json:"name"`
 	Publisher       string                         `json:"publisher"`
-	ThumbnailUrl    string                         `json:"thumbnailUrl"`
+	ThumbnailUrl    *json.RawMessage               `json:"thumbnailUrl"`
 	SameAs          []string                       `json:"sameAs"`
 	Url             string                         `json:"url"`
-	UsageInfo       string                         `json:"usageInfo"`
-	Version         any                            `json:"version"`
-}
-
-type RecordContextStackholderContext struct {
-	Vocab            string `json:"@vocab"`
-	ContributionType string `json:"contributionType"`
-	Entity           string `json:"entity"`
-	Footprint        string `json:"footprint"`
-	RewardProportion string `json:"rewardProportion"`
-}
-
-type RecordContextStackholder struct {
-	Context *RecordContextStackholderContext `json:"@context"`
-}
-
-type RecordContext struct {
-	Vocab            string                    `json:"@vocab"`
-	ContentMetadata  any                       `json:"contentMetadata"`
-	RecordParentIPLD any                       `json:"recordParentIPLD"`
-	Stakeholders     *RecordContextStackholder `json:"stakeholders"`
+	UsageInfo       *json.RawMessage               `json:"usageInfo"`
+	Version         *json.RawMessage               `json:"version"`
 }
 
 type Record struct {
-	Context             *RecordContext    `json:"@context"`
-	Id                  string            `json:"@id"`
-	Type                string            `json:"@type"`
-	ContentFingerprints []string          `json:"contentFingerprints"`
-	ContentMetadata     *Book             `json:"contentMetadata"`
-	RecordNotes         string            `json:"recordNotes"`
-	RecordParentIPLD    any               `json:"recordParentIPLD"`
-	RecordTimestamp     string            `json:"recordTimestamp"`
-	RecordVersion       uint64            `json:"recordVersion"`
-	Stakeholders        []BookStakeholder `json:"stakeholders"`
+	Context             *json.RawMessage `json:"@context"`
+	Id                  *json.RawMessage `json:"@id"`
+	Type                *json.RawMessage `json:"@type"`
+	ContentFingerprints *json.RawMessage `json:"contentFingerprints"`
+	ContentMetadata     *Book            `json:"contentMetadata"`
+	RecordNotes         *json.RawMessage `json:"recordNotes"`
+	RecordParentIPLD    *json.RawMessage `json:"recordParentIPLD"`
+	RecordTimestamp     *json.RawMessage `json:"recordTimestamp"`
+	RecordVersion       *json.RawMessage `json:"recordVersion"`
+	Stakeholders        *json.RawMessage `json:"stakeholders"`
 }
 
 type ISCNDataItem struct {

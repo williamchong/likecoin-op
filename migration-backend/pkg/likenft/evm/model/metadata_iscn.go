@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"fmt"
 	"mime"
 	"net/url"
@@ -10,21 +11,21 @@ import (
 )
 
 type MetadataISCN struct {
-	Context             string                       `json:"@context,omitempty"`
-	Type                string                       `json:"@type,omitempty"`
+	Context             *json.RawMessage             `json:"@context,omitempty"`
+	Type                *json.RawMessage             `json:"@type,omitempty"`
 	Author              *cosmosmodel.Author          `json:"author,omitempty"`
-	ExifInfo            cosmosmodel.BookExifInfo     `json:"exifInfo,omitempty"`
-	InLanguage          string                       `json:"inLanguage,omitempty"`
-	ISBN                string                       `json:"isbn,omitempty"`
-	Keywords            string                       `json:"keywords,omitempty"`
+	ExifInfo            *json.RawMessage             `json:"exifInfo,omitempty"`
+	InLanguage          *json.RawMessage             `json:"inLanguage,omitempty"`
+	ISBN                *json.RawMessage             `json:"isbn,omitempty"`
+	Keywords            *json.RawMessage             `json:"keywords,omitempty"`
 	Publisher           string                       `json:"publisher,omitempty"`
 	SameAs              []string                     `json:"sameAs,omitempty"`
-	ThumbnailUrl        string                       `json:"thumbnailUrl,omitempty"`
+	ThumbnailUrl        *json.RawMessage             `json:"thumbnailUrl,omitempty"`
 	Url                 string                       `json:"url,omitempty"`
-	UsageInfo           string                       `json:"usageInfo,omitempty"`
-	Version             any                          `json:"version,omitempty"`
-	ContentFingerprints []string                     `json:"contentFingerprints,omitempty"`
-	DateCreated         string                       `json:"dateCreated,omitempty"`
+	UsageInfo           *json.RawMessage             `json:"usageInfo,omitempty"`
+	Version             *json.RawMessage             `json:"version,omitempty"`
+	ContentFingerprints *json.RawMessage             `json:"contentFingerprints,omitempty"`
+	DateCreated         *json.RawMessage             `json:"dateCreated,omitempty"`
 	DatePublished       string                       `json:"datePublished,omitempty"`
 	PotentialAction     *MetadataISCNPotentialAction `json:"potentialAction,omitempty"`
 }
