@@ -1,0 +1,175 @@
+name: class id = likenft1qehd8pcp33ds3myxpmpanag2aqz4ygzmrukgtn8a69qyhswa5uqs952yjn
+cosmosclassresponse: |
+  {
+    "class": {
+      "id": "likenft1qehd8pcp33ds3myxpmpanag2aqz4ygzmrukgtn8a69qyhswa5uqs952yjn",
+      "name": "Writing NFT - Oscar Piastri insists ‘I will not be driving for Alpine next year’ after team announce him as Alonso’s replacement | Formula 1®",
+      "symbol": "WRITING",
+      "description": "Oscar Piastri has taken to his social media channels to say that he \"will not be driving for Alpine next year\", hours after the team announced they would be promoting him to a full time race seat in 2...",
+      "uri": "https://api.rinkeby.like.co/likernft/metadata?iscn_id=iscn%3A%2F%2Flikecoin-chain%2FCcsaEyo-6hcmdhTeDKEy1Oy7sd6Y75nFbMgIIPvlId8%2F1",
+      "uri_hash": "",
+      "data": {
+        "@type": "/likechain.likenft.v1.ClassData",
+        "metadata": {
+          "@context": "http://schema.org/",
+          "@type": "CreativeWork",
+          "description": "Oscar Piastri has taken to his social media channels to say that he \"will not be driving for Alpine next year\", hours after the team announced they would be promoting him to a full time race seat in 2...",
+          "exifInfo": {},
+          "keywords": "",
+          "name": "Oscar Piastri insists ‘I will not be driving for Alpine next year’ after team announce him as Alonso’s replacement | Formula 1®",
+          "url": "https://www.formula1.com/en/latest/article.oscar-piastri-insists-i-will-not-be-driving-for-alpine-next-year-after-team.2IzNJp1wi79WZzmphZKSsB.html",
+          "usageInfo": "",
+          "version": 1,
+          "nft_meta_collection_id": "likerland_writing_nft",
+          "nft_meta_collection_name": "Writing NFT",
+          "nft_meta_collection_descrption": "Writing NFT by Liker Land",
+          "image": ""
+        },
+        "parent": {
+          "type": "ISCN",
+          "iscn_id_prefix": "iscn://likecoin-chain/CcsaEyo-6hcmdhTeDKEy1Oy7sd6Y75nFbMgIIPvlId8",
+          "iscn_version_at_mint": "1",
+          "account": ""
+        },
+        "config": {
+          "burnable": false,
+          "max_supply": "0",
+          "blind_box_config": null
+        },
+        "blind_box_state": {
+          "content_count": "0",
+          "to_be_revealed": false
+        }
+      }
+    }
+  }
+
+iscndataresponse: |
+  {
+    "owner": "like1vvxaklu364sejxe9tdwkg87aanejf8v6gj37y3",
+    "latest_version": "1",
+    "records": [
+      {
+        "ipld": "baguqeera2xfh2b5zjn6g2w2ifw7syfiscrxnie3ron4nx3awj2rfbjyqdpwa",
+        "data": {
+          "@context": {
+            "@vocab": "http://iscn.io/",
+            "contentMetadata": { "@context": null },
+            "recordParentIPLD": { "@container": "@index" },
+            "stakeholders": {
+              "@context": {
+                "@vocab": "http://schema.org/",
+                "contributionType": "http://iscn.io/contributionType",
+                "entity": "http://iscn.io/entity",
+                "footprint": "http://iscn.io/footprint",
+                "rewardProportion": "http://iscn.io/rewardProportion"
+              }
+            }
+          },
+          "@id": "iscn://likecoin-chain/CcsaEyo-6hcmdhTeDKEy1Oy7sd6Y75nFbMgIIPvlId8/1",
+          "@type": "Record",
+          "contentFingerprints": [
+            "ipfs://QmevbA9wvSiSyyzCRK8h3FG6LkiZcjZsfn3gKAzez96z6o"
+          ],
+          "contentMetadata": {
+            "@context": "http://schema.org/",
+            "@type": "CreativeWork",
+            "description": "Oscar Piastri has taken to his social media channels to say that he \"will not be driving for Alpine next year\", hours after the team announced they would be promoting him to a full time race seat in 2...",
+            "exifInfo": {},
+            "keywords": "",
+            "name": "Oscar Piastri insists ‘I will not be driving for Alpine next year’ after team announce him as Alonso’s replacement | Formula 1®",
+            "url": "https://www.formula1.com/en/latest/article.oscar-piastri-insists-i-will-not-be-driving-for-alpine-next-year-after-team.2IzNJp1wi79WZzmphZKSsB.html",
+            "usageInfo": "",
+            "version": 1
+          },
+          "recordNotes": "",
+          "recordTimestamp": "2022-08-03T09:43:28+00:00",
+          "recordVersion": 1,
+          "stakeholders": [
+            {
+              "contributionType": "http://schema.org/author",
+              "entity": {
+                "@id": "did:like:1vvxaklu364sejxe9tdwkg87aanejf8v6gj37y3",
+                "description": "Oscar Piastri has taken to his social media channels to say that he \"will not be driving for Alpine next year\", hours after the team announced they would be promoting him to a full time race seat in 2...",
+                "identifier": [
+                  {
+                    "@type": "PropertyValue",
+                    "value": "did:like:1vvxaklu364sejxe9tdwkg87aanejf8v6gj37y3"
+                  }
+                ],
+                "name": "",
+                "sameAs": [],
+                "url": ""
+              },
+              "rewardProportion": 1
+            }
+          ]
+        }
+      }
+    ]
+  }
+
+royaltyconfig: |
+  {
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "47560"
+        },
+        {
+          "account": "like19fqws220rwcmacn5dgt0dtwts8c05ty58mcr3a",
+          "weight": "927439"
+        },
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "25000"
+        }
+      ]
+    }
+  }
+
+contractlevelmetadata: |
+  {
+    "name": "Oscar Piastri insists ‘I will not be driving for Alpine next year’ after team announce him as Alonso’s replacement | Formula 1®",
+    "symbol": "WRITING",
+    "description": "Oscar Piastri has taken to his social media channels to say that he \"will not be driving for Alpine next year\", hours after the team announced they would be promoting him to a full time race seat in 2...",
+    "nft_meta_collection_id": "likerland_writing_nft",
+    "nft_meta_collection_name": "Writing NFT",
+    "nft_meta_collection_description": "Writing NFT by Liker Land",
+    "external_link": "https://www.formula1.com/en/latest/article.oscar-piastri-insists-i-will-not-be-driving-for-alpine-next-year-after-team.2IzNJp1wi79WZzmphZKSsB.html",
+    "@context": "http://schema.org/",
+    "@type": "CreativeWork",
+    "exifInfo": {},
+    "keywords": "",
+    "url": "https://www.formula1.com/en/latest/article.oscar-piastri-insists-i-will-not-be-driving-for-alpine-next-year-after-team.2IzNJp1wi79WZzmphZKSsB.html",
+    "usageInfo": "",
+    "version": 1,
+    "contentFingerprints": [
+      "ipfs://QmevbA9wvSiSyyzCRK8h3FG6LkiZcjZsfn3gKAzez96z6o"
+    ],
+    "dateCreated": "2022-08-03T09:43:28+00:00",
+    "attributes": [],
+    "likecoin": {
+      "iscnIdPrefix": "iscn://likecoin-chain/CcsaEyo-6hcmdhTeDKEy1Oy7sd6Y75nFbMgIIPvlId8",
+      "classId": "likenft1qehd8pcp33ds3myxpmpanag2aqz4ygzmrukgtn8a69qyhswa5uqs952yjn"
+    },
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "47560"
+        },
+        {
+          "account": "like19fqws220rwcmacn5dgt0dtwts8c05ty58mcr3a",
+          "weight": "927439"
+        },
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "25000"
+        }
+      ]
+    }
+  }
