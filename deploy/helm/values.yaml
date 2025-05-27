@@ -12,6 +12,10 @@ likecoinMigration:
 
   service:
     port: 80
+  ingress:
+    prefix: /
+    tls:
+      secretName: tls-likecoin-migration
 
   resources: {}
 
@@ -26,6 +30,10 @@ likenftMigration:
 
   service:
     port: 80
+  ingress:
+    prefix: /
+    tls:
+      secretName: tls-likenft-migration
 
   resources: {}
 
@@ -44,6 +52,11 @@ migrationAdmin:
 
   service:
     port: 80
+  ingress:
+    prefix: /
+    adminPrefix: /admin
+    tls:
+      secretName: tls-migration-admin
 
   resources: {}
 
@@ -59,6 +72,11 @@ migrationBackend:
 
   service:
     port: 80
+  ingress:
+    prefix: /
+    adminPrefix: /admin
+    tls:
+      secretName: tls-migration-backend
 
   resources: {}
 
@@ -115,6 +133,10 @@ likenftIndexer:
 
     service:
       port: 80
+    ingress:
+      prefix: /
+      tls:
+        secretName: tls-likenft-indexer
 
     resources: {}
 
@@ -158,6 +180,5 @@ ingress:
   className: "nginx"
 
   annotations:
-    kubernetes.io/tls-acme: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     nginx.ingress.kubernetes.io/use-regex: "true"

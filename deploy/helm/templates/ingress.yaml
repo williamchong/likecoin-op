@@ -1,12 +1,16 @@
 kind: Ingress
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: {{ .Values.ingress.name }}
+  name: {{ .Values.ingress.name }}-coin-migrate
   labels:
     app.kubernetes.io/name: {{ .Values.ingress.name }}
   namespace: {{ .Values.namespace }}
-  {{- with .Values.ingress.annotations }}
   annotations:
+    kubernetes.io/tls-acme: "true"
+  {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.likecoinMigration.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
@@ -15,66 +19,166 @@ spec:
     - host: {{ .Values.likecoinMigration.ingress.host }}
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          - path: {{ .Values.likecoinMigration.ingress.prefix }}
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.likecoinMigration.name }}
                 port:
                   number: {{ .Values.likecoinMigration.service.port }}
+  tls:
+    - hosts:
+        - {{ .Values.likecoinMigration.ingress.tls.host }}
+      secretName: {{ .Values.likecoinMigration.ingress.tls.secretName }}
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ .Values.ingress.name }}-nft-migrate
+  labels:
+    app.kubernetes.io/name: {{ .Values.ingress.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    kubernetes.io/tls-acme: "true"
+  {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.likenftMigration.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
     - host: {{ .Values.likenftMigration.ingress.host }}
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          - path: {{ .Values.likenftMigration.ingress.prefix }}
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.likenftMigration.name }}
                 port:
                   number: {{ .Values.likenftMigration.service.port }}
+  tls:
+    - hosts:
+        - {{ .Values.likenftMigration.ingress.tls.host }}
+      secretName: {{ .Values.likenftMigration.ingress.tls.secretName }}
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ .Values.ingress.name }}-admin
+  labels:
+    app.kubernetes.io/name: {{ .Values.ingress.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    kubernetes.io/tls-acme: "true"
+  {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.migrationAdmin.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
     - host: {{ .Values.migrationAdmin.ingress.host }}
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          - path: {{ .Values.migrationAdmin.ingress.prefix }}
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.migrationAdmin.name }}
                 port:
                   number: {{ .Values.migrationAdmin.service.port }}
-    - host: {{ .Values.migrationBackend.ingress.host }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
+          - path: {{ .Values.migrationAdmin.ingress.adminPrefix }}
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.migrationBackend.name }}
                 port:
                   number: {{ .Values.migrationBackend.service.port }}
-    - host: {{ .Values.likenftIndexer.api.ingress.host }}
+    - host: {{ .Values.migrationBackend.ingress.host }}
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          - path: {{ .Values.migrationBackend.ingress.adminPrefix }}
+            pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ .Values.likenftIndexer.api.name }}
+                name: {{ .Values.migrationBackend.name }}
                 port:
-                  number: {{ .Values.likenftIndexer.api.service.port }}
+                  number: {{ .Values.migrationBackend.service.port }}
   tls:
-    - hosts:
-        - {{ .Values.likecoinMigration.ingress.tls.host }}
-      secretName: {{ .Values.likecoinMigration.ingress.tls.secretName }}
-    - hosts:
-        - {{ .Values.likenftMigration.ingress.tls.host }}
-      secretName: {{ .Values.likenftMigration.ingress.tls.secretName }}
     - hosts:
         - {{ .Values.migrationAdmin.ingress.tls.host }}
       secretName: {{ .Values.migrationAdmin.ingress.tls.secretName }}
     - hosts:
         - {{ .Values.migrationBackend.ingress.tls.host }}
       secretName: {{ .Values.migrationBackend.ingress.tls.secretName }}
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ .Values.ingress.name }}-backend
+  labels:
+    app.kubernetes.io/name: {{ .Values.ingress.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    kubernetes.io/tls-acme: "true"
+  {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.migrationBackend.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    - host: {{ .Values.migrationBackend.ingress.host }}
+      http:
+        paths:
+          - path: {{ .Values.migrationBackend.ingress.prefix }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.migrationBackend.name }}
+                port:
+                  number: {{ .Values.migrationBackend.service.port }}
+  tls:
+    - hosts:
+        - {{ .Values.migrationBackend.ingress.tls.host }}
+      secretName: {{ .Values.migrationBackend.ingress.tls.secretName }}
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ .Values.ingress.name }}-indexer
+  labels:
+    app.kubernetes.io/name: {{ .Values.ingress.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    kubernetes.io/tls-acme: "true"
+  {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.likenftIndexer.api.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    - host: {{ .Values.likenftIndexer.api.ingress.host }}
+      http:
+        paths:
+          - path: {{ .Values.likenftIndexer.api.ingress.prefix }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.likenftIndexer.api.name }}
+                port:
+                  number: {{ .Values.likenftIndexer.api.service.port }}
+  tls:
     - hosts:
         - {{ .Values.likenftIndexer.api.ingress.tls.host }}
       secretName: {{ .Values.likenftIndexer.api.ingress.tls.secretName }}

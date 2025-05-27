@@ -1,0 +1,105 @@
+cosmosLikeCoinNetworkConfig:
+  path: "likeco/cosmos-likecoin-network.json"
+
+likecoinMigration:
+  container:
+    imageRepository: likecoin/likecoin-migration
+  configFilePath: "likeco/likecoin-migration-config.json"
+  nginxConfigFilePath: "likeco/nginx.conf"
+
+  ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/auth-type: basic
+      nginx.ingress.kubernetes.io/auth-secret: basic-auth
+      nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - LikeProtocol'
+    host: v3-token-migration.like.co
+    tls:
+      host: v3-token-migration.like.co
+
+likenftMigration:
+  container:
+    imageRepository: likecoin/likenft-migration
+  configFilePath: "likeco/likenft-migration-config.json"
+  nginxConfigFilePath: "likeco/nginx.conf"
+
+  ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/auth-type: basic
+      nginx.ingress.kubernetes.io/auth-secret: basic-auth
+      nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - LikeProtocol'
+    host: v3-book-migration.like.co
+    tls:
+      host: v3-book-migration.like.co
+
+migrationAdmin:
+  container:
+    imageRepository: likecoin/migration-admin
+  configFilePath: "likeco/migration-admin-config.json"
+  nginxConfigFilePath: "likeco/nginx.conf"
+
+  ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/auth-type: basic
+      nginx.ingress.kubernetes.io/auth-secret: basic-auth
+      nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - LikeProtocol'
+    host: admin.api.v3.like.co
+    tls:
+      secretName: tls-admin.api.v3.like.co
+      host: admin.api.v3.like.co
+
+migrationBackend:
+  container:
+    imageRepository: likecoin/like-migration-backend
+  env:
+    COSMOS_NODE_URL: https://mainnet-node.like.co
+    COSMOS_NODE_HTTP_TIMEOUT_SECONDS: "60"
+    ROUTE_PREFIX: ""
+    ETH_NETWORK_PUBLIC_RPC_URL: https://mainnet.optimism.io
+    ETH_SIGNER_BASE_URL: http://signer-backend
+    ETH_TOKEN_ADDRESS: ""
+    ETH_LIKENFT_CONTRACT_ADDRESS: "0x526237a676444A67bc79E9009756df128Ca9a619"
+    LIKECOIN_API_URL_BASE: https://api.like.co
+    LIKECOIN_API_HTTP_TIMEOUT_SECONDS: "60"
+    WORKER_CONCURRENCY: "1"
+    INITIAL_NEW_CLASS_OWNER: "0xA515ffD6A6889f2CCCb576cEcA2a33f60129eBFD"
+    INITIAL_NEW_CLASS_MINTER: "0xA515ffD6A6889f2CCCb576cEcA2a33f60129eBFD"
+    INITIAL_NEW_CLASS_UPDATER: "0xA515ffD6A6889f2CCCb576cEcA2a33f60129eBFD"
+    INITIAL_BATCH_MINT_NFTS_OWNER: "0xA515ffD6A6889f2CCCb576cEcA2a33f60129eBFD"
+    LIKECOIN_BURNING_COSMOS_ADDRESS: "like1vme35swrp4t04q90406070y8zy54awyl7nag3v"
+
+  ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    prefix: /migrate(/|$)(.*)
+    adminPrefix: /migrate/admin(/|$)(.*)
+    host: api.v3.like.co
+    tls:
+      secretName: tls-api.v3.like.co
+      host: api.v3.like.co
+
+signerBackend:
+  container:
+    imageRepository: likecoin/like-signer-backend
+  env:
+    ROUTE_PREFIX: ""
+    ETH_NETWORK_PUBLIC_RPC_URL: https://mainnet.optimism.io
+
+likenftIndexer:
+  container:
+    imageRepository: likecoin/likenft-indexer
+  env:
+    ETH_NETWORK_PUBLIC_RPC_URL: https://mainnet.optimism.io
+    ETH_LIKE_PROTOCOL_CONTRACT_ADDRESS: "0x526237a676444A67bc79E9009756df128Ca9a619"
+    EVM_EVENT_LIKE_PROTOCOL_INITIAL_BLOCK_HEIGHT: "135910187"
+    EVM_EVENT_QUERY_NUMBER_OF_BLOCKS_LIMIT: "500"
+    PORT: "8091"
+
+  api:
+    ingress:
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /$2
+      prefix: /indexer(/|$)(.*)
+      host: api.v3.like.co
+      tls:
+        secretName: tls-api.v3.like.co
+        host: api.v3.like.co

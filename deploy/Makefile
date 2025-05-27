@@ -3,7 +3,7 @@ APP_VERSION ?= $(GIT_SHORT_HASH)
 
 ENV ?= dev
 
-K8S_NAMESPACE := likecoin-op
+K8S_NAMESPACE ?= likecoin-op
 
 VALUE_FILES := -f helm/values.yaml \
 	-f helm/$(ENV)/values.yaml \

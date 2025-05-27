@@ -1,0 +1,10 @@
+{
+  "transitionLoadingScreenDelayMs": 2000,
+  "isTestnet": false,
+  "apiBaseURL": "https://api.v3.like.co/api",
+  "cosmosLikeCoinNetworkConfigPath": "/cosmos-network-config.json",
+  "cosmosDepositAddress": "like1vme35swrp4t04q90406070y8zy54awyl7nag3v",
+  "cosmosExplorerBaseURL": "https://mainnet-node.like.co/",
+  "evmExplorerBaseURL": "https://optimistic.etherscan.io",
+  "authcoreRedirectUrl": "https://v3-token-migration.like.co"
+}
