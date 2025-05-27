@@ -38,6 +38,8 @@ spec:
         envFrom:
           - secretRef:
               name: {{ .Values.signerBackend.name }}
+          - secretRef:
+              name: signer-private-key
         ports:
         - containerPort: {{ .Values.signerBackend.container.port }}
         resources:

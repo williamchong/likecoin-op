@@ -41,7 +41,6 @@ migrationAdmin:
       secretName: like-migration-admin.pandawork.com
       host: like-migration-admin.pandawork.com
 
-
 migrationBackend:
   container:
     imageRepository: oursky/like-migration-backend
