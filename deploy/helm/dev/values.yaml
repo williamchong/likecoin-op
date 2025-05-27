@@ -5,7 +5,7 @@ likecoinMigration:
   container:
     imageRepository: oursky/likecoin-migration
   configFilePath: "dev/likecoin-migration-config.json"
-  nginxConfigFilePath: "dev/likecoin-migration-nginx.conf"
+  nginxConfigFilePath: "dev/nginx.conf"
 
   ingress:
     host: likecoin-migration.pandawork.com
@@ -17,7 +17,7 @@ likenftMigration:
   container:
     imageRepository: oursky/likenft-migration
   configFilePath: "dev/likenft-migration-config.json"
-  nginxConfigFilePath: "dev/likenft-migration-nginx.conf"
+  nginxConfigFilePath: "dev/nginx.conf"
 
   ingress:
     host: likenft-migration.pandawork.com
@@ -29,9 +29,13 @@ migrationAdmin:
   container:
     imageRepository: oursky/migration-admin
   configFilePath: "dev/migration-admin-config.json"
-  nginxConfigFilePath: "dev/migration-admin-nginx.conf"
+  nginxConfigFilePath: "dev/nginx.conf"
 
   ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/auth-type: basic
+      nginx.ingress.kubernetes.io/auth-secret: basic-auth
+      nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - LikeProtocol'
     host: like-migration-admin.pandawork.com
     tls:
       secretName: like-migration-admin.pandawork.com

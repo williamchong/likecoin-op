@@ -5,7 +5,7 @@ likecoinMigration:
   container:
     imageRepository: likecoin/likecoin-migration
   configFilePath: "likeco/likecoin-migration-config.json"
-  nginxConfigFilePath: "likeco/likecoin-migration-nginx.conf"
+  nginxConfigFilePath: "likeco/nginx.conf"
 
   ingress:
     annotations:
@@ -20,7 +20,7 @@ likenftMigration:
   container:
     imageRepository: likecoin/likenft-migration
   configFilePath: "likeco/likenft-migration-config.json"
-  nginxConfigFilePath: "likeco/likenft-migration-nginx.conf"
+  nginxConfigFilePath: "likeco/nginx.conf"
 
   ingress:
     annotations:
@@ -35,7 +35,7 @@ migrationAdmin:
   container:
     imageRepository: likecoin/migration-admin
   configFilePath: "likeco/migration-admin-config.json"
-  nginxConfigFilePath: "likeco/migration-admin-nginx.conf"
+  nginxConfigFilePath: "likeco/nginx.conf"
 
   ingress:
     host: admin.api.v3.like.co
