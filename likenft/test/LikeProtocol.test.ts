@@ -155,7 +155,7 @@ describe("LikeProtocol", () => {
     expect(await _newNFTClass.symbol()).to.equal("KOOB");
     expect(await _newNFTClass.getProtocolBeacon()).to.equal(contractAddress);
     const [receiver, royaltyAmount] = await _newNFTClass.royaltyInfo(0, 1000);
-    expect(receiver).to.equal(classId);
+    expect(receiver).to.equal(this.ownerSigner.address);
     expect(royaltyAmount).to.equal(0n);
   });
 
@@ -197,8 +197,30 @@ describe("LikeProtocol", () => {
     expect(classId).to.not.equal(bookNFTContractAddress);
     const _newNFTClass = await ethers.getContractAt("BookNFT", classId);
     const [receiver, royaltyAmount] = await _newNFTClass.royaltyInfo(0, 1000);
-    expect(receiver).to.equal(classId);
+    expect(receiver).to.equal(this.ownerSigner.address);
     expect(royaltyAmount).to.equal(10n);
+  });
+
+  it("should set the right royalty receiver on initialization", async function () {
+    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
+    expect(await likeProtocolOwnerSigner.getRoyaltyReceiver()).to.equal(
+      this.ownerSigner.address,
+    );
+  });
+
+  it("should allow owner to set the royalty receiver", async function () {
+    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
+    await likeProtocolOwnerSigner.setRoyaltyReceiver(this.randomSigner.address);
+    expect(await likeProtocolOwnerSigner.getRoyaltyReceiver()).to.equal(
+      this.randomSigner.address,
+    );
+  });
+
+  it("should not allow random address to set the royalty receiver", async function () {
+    const likeProtocolRandomSigner = contract.connect(this.randomSigner);
+    await expect(
+      likeProtocolRandomSigner.setRoyaltyReceiver(this.randomSigner.address),
+    ).to.be.rejected;
   });
 
   it("should mint a already initialized BookNFT which cant be initialized again", async function () {

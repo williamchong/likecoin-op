@@ -1023,7 +1023,7 @@ describe("BookNFT royalty", () => {
       0,
       100,
     );
-    expect(receiver).to.equal(nftClassId);
+    expect(receiver).to.equal(this.protocolOwner.address);
     expect(royaltyAmount).to.equal(10n);
   });
 
