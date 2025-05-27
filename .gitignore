@@ -6,3 +6,4 @@
 /migration-backend/.env.dev
 /likenft/.env.optimism
 /deploy/helm/dev/signer-private-key.env
+/deploy/helm/dev/auth
