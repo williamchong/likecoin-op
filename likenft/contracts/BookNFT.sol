@@ -412,7 +412,7 @@ contract BookNFT is
 
     function contractURI() public view returns (string memory) {
         BookNFTStorage storage $ = _getClassStorage();
-        return string.concat("data:application/json;utf8,", $.metadata);
+        return string.concat("data:application/json; charset=utf-8,", $.metadata);
     }
 
     function maxSupply() public view returns (uint64) {
@@ -426,7 +426,7 @@ contract BookNFT is
         BookNFTStorage storage $ = _getClassStorage();
         return
             string.concat(
-                "data:application/json;utf8,",
+                "data:application/json; charset=utf-8,",
                 $.tokenURIMap[_tokenId]
             );
     }
