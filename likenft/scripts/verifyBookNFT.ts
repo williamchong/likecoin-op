@@ -7,7 +7,10 @@ async function main() {
     "Trying to verify BookNFT implementation at:",
     process.env.BOOKNFT_ADDRESS!,
   );
-  const bookNFT = await ethers.getContractAt("BookNFT", process.env.BOOKNFT_ADDRESS!);
+  const bookNFT = await ethers.getContractAt(
+    "BookNFT",
+    process.env.BOOKNFT_ADDRESS!,
+  );
   const bookNFTAddress = await bookNFT.getAddress();
 
   try {

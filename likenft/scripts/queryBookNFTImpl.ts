@@ -9,10 +9,13 @@ async function getTokenURI() {
 
   const owner = await likeProtocol.owner();
   console.log("Protocol owner:", owner);
-  
+
   const protocolImplementationAddress =
     await upgrades.erc1967.getImplementationAddress(proxyAddress);
-  console.log("LikeProtocol Implementation address:", protocolImplementationAddress);
+  console.log(
+    "LikeProtocol Implementation address:",
+    protocolImplementationAddress,
+  );
 
   const implementation = await likeProtocol.implementation();
   console.log("BookNFT Implementation address:", implementation);

@@ -3,7 +3,10 @@ import { ContractAlreadyVerifiedError } from "@nomicfoundation/hardhat-verify/in
 import hardhat, { ethers } from "hardhat";
 
 async function main() {
-  const bookNFT = await ethers.getContractAt("BookNFT", process.env.BOOKNFT_ADDRESS!);
+  const bookNFT = await ethers.getContractAt(
+    "BookNFT",
+    process.env.BOOKNFT_ADDRESS!,
+  );
   const LikeProtocol = await ethers.getContractFactory("LikeProtocol");
   const likeProtocol = LikeProtocol.attach(process.env.ERC721_PROXY_ADDRESS!);
 
