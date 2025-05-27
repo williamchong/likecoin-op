@@ -125,7 +125,7 @@ import {
   LikeNFTAssetMigration,
   LikeNFTAssetMigrationClass,
 } from '~/apis/models/likenftAssetMigration';
-import { makeImageUrl } from '~/utils/imageUrl';
+import { ImageURLConfig, makeImageUrl } from '~/utils/imageUrl';
 import { cosmosClassUrl, cosmosNFTUrl } from '~/utils/nft';
 
 import UCard from '../nuxtui/components/UCard.vue';
@@ -146,6 +146,7 @@ interface Data {
 }
 
 function makeTableDataRows(
+  imageURLConfig: ImageURLConfig,
   assetUrlBase: string,
   migration: LikeNFTAssetMigration
 ): TableData[] {
@@ -153,7 +154,7 @@ function makeTableDataRows(
   for (const c of migration.classes) {
     res.push({
       type: 'class',
-      image: makeImageUrl(c.image),
+      image: makeImageUrl(imageURLConfig, c.image),
       name: c.name,
       status: c.status,
       txHash: c.evm_tx_hash || '-',
@@ -163,7 +164,7 @@ function makeTableDataRows(
   for (const n of migration.nfts) {
     res.push({
       type: 'book',
-      image: makeImageUrl(n.image),
+      image: makeImageUrl(imageURLConfig, n.image),
       name: n.name,
       status: n.status,
       txHash: n.evm_tx_hash || '-',
@@ -288,6 +289,7 @@ export default Vue.extend({
     },
     allTableRows(): TableData[] {
       return makeTableDataRows(
+        this.$appConfig,
         this.$appConfig.likerlandUrlBase,
         this.migration
       );
