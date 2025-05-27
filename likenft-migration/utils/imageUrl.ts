@@ -1,16 +1,23 @@
+import { ImageURLConfig } from '~/models/config';
+
 const IPFS_REGEX = /^ipfs:\/\/(.+)/;
 const AR_REGEX = /^ar:\/\/(.+)/;
 
-export function makeImageUrl(u: string): string {
+export function makeImageUrl(
+  imageURLConfig: ImageURLConfig,
+  u: string
+): string {
   const ipfsMatched = IPFS_REGEX.exec(u);
   if (ipfsMatched != null) {
-    return `https://ipfs.io/ipfs/${ipfsMatched[1]}`;
+    return `${imageURLConfig.ipfsHTTPBaseURL}/${ipfsMatched[1]}`;
   }
 
   const arMatched = AR_REGEX.exec(u);
   if (arMatched != null) {
-    return `https://arweave.net/${arMatched[1]}`;
+    return `${imageURLConfig.arHTTPBaseURL}/${arMatched[1]}`;
   }
 
   return u;
 }
+
+export { ImageURLConfig };
