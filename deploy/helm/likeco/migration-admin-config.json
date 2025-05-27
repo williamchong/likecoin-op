@@ -1,4 +1,4 @@
 {
   "isTestnet": false,
-  "apiBaseURL": "https://api.v3.like.co/migrate"
+  "apiBaseURL": "https://admin.api.v3.like.co/"
 }

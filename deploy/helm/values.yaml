@@ -54,6 +54,7 @@ migrationAdmin:
     port: 80
   ingress:
     prefix: /
+    adminPrefix: /admin
     tls:
       secretName: tls-migration-admin
 
@@ -73,6 +74,7 @@ migrationBackend:
     port: 80
   ingress:
     prefix: /
+    adminPrefix: /admin
     tls:
       secretName: tls-migration-backend
 

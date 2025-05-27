@@ -92,10 +92,30 @@ spec:
                 name: {{ .Values.migrationAdmin.name }}
                 port:
                   number: {{ .Values.migrationAdmin.service.port }}
+          - path: {{ .Values.migrationAdmin.ingress.adminPrefix }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.migrationBackend.name }}
+                port:
+                  number: {{ .Values.migrationBackend.service.port }}
+    - host: {{ .Values.migrationBackend.ingress.host }}
+      http:
+        paths:
+          - path: {{ .Values.migrationBackend.ingress.adminPrefix }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.migrationBackend.name }}
+                port:
+                  number: {{ .Values.migrationBackend.service.port }}
   tls:
     - hosts:
         - {{ .Values.migrationAdmin.ingress.tls.host }}
       secretName: {{ .Values.migrationAdmin.ingress.tls.secretName }}
+    - hosts:
+        - {{ .Values.migrationBackend.ingress.tls.host }}
+      secretName: {{ .Values.migrationBackend.ingress.tls.secretName }}
 ---
 kind: Ingress
 apiVersion: networking.k8s.io/v1
