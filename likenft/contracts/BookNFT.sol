@@ -22,6 +22,10 @@ error ErrMaxSupplyZero();
 error ErrNftNoSupply();
 error ErrTokenIdMintFails(uint256 nextTokenId);
 
+interface LikeProtocolInterface {
+    function getRoyaltyReceiver() external view returns (address);
+}
+
 contract BookNFT is
     Initializable,
     ERC721EnumerableUpgradeable,
@@ -350,7 +354,8 @@ contract BookNFT is
      * royaltyInfo
      *
      * getting the royalty info for a token sale.
-     * In phase 1 of likeprotocol, all royalties will be sent to the BookNFT address as vested.
+     * In phase 1 of likeprotocol, all royalties will be sent to the MultiSig
+     * address specified in LikeProtocol.
      * In later phase, the royalties withdrwal logic will be implemented.
      * The royalty is designed to be tied with the LikeProtocol contract.
      *
@@ -365,7 +370,10 @@ contract BookNFT is
     ) external view override returns (address receiver, uint256 royaltyAmount) {
         BookNFTStorage storage $ = _getClassStorage();
         royaltyAmount = (salePrice * $.royaltyFraction) / 10000;
-        receiver = address(this);
+        LikeProtocolInterface likeProtocol = LikeProtocolInterface(
+            getProtocolBeacon()
+        );
+        receiver = likeProtocol.getRoyaltyReceiver();
     }
 
     // Start Querying functions
@@ -412,7 +420,8 @@ contract BookNFT is
 
     function contractURI() public view returns (string memory) {
         BookNFTStorage storage $ = _getClassStorage();
-        return string.concat("data:application/json;utf8,", $.metadata);
+        return
+            string.concat("data:application/json; charset=utf-8,", $.metadata);
     }
 
     function maxSupply() public view returns (uint64) {
@@ -426,7 +435,7 @@ contract BookNFT is
         BookNFTStorage storage $ = _getClassStorage();
         return
             string.concat(
-                "data:application/json;utf8,",
+                "data:application/json; charset=utf-8,",
                 $.tokenURIMap[_tokenId]
             );
     }

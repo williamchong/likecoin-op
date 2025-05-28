@@ -29,6 +29,7 @@ contract LikeProtocol is
     struct LikeNFTStorage {
         mapping(address classId => bool isBookNFT) classIdMapping;
         address bookNFTImplementation;
+        address royaltyReceiver;
     }
     // keccak256(abi.encode(uint256(keccak256("likeprotocol.storage")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant DATA_STORAGE =
@@ -61,6 +62,7 @@ contract LikeProtocol is
             revert BookNFTInvalidImplementation(bookNFTImplementation);
         }
         $.bookNFTImplementation = bookNFTImplementation;
+        $.royaltyReceiver = initialOwner;
     }
 
     function pause() public onlyOwner {
@@ -146,4 +148,14 @@ contract LikeProtocol is
         emit BookNFTImplementationUpgraded(newImplementation);
     }
     // End of Beacon implementation
+
+    // Royalty
+    function getRoyaltyReceiver() external view returns (address) {
+        return _getLikeNFTStorage().royaltyReceiver;
+    }
+
+    function setRoyaltyReceiver(address royaltyReceiver) external onlyOwner {
+        _getLikeNFTStorage().royaltyReceiver = royaltyReceiver;
+    }
+    // End of Royalty
 }

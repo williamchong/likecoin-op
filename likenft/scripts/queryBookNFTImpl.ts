@@ -7,8 +7,18 @@ async function getTokenURI() {
   const LikeProtocol = await ethers.getContractAt("LikeProtocol", proxyAddress);
   const likeProtocol = LikeProtocol.connect(signer);
 
+  const owner = await likeProtocol.owner();
+  console.log("Protocol owner:", owner);
+
+  const protocolImplementationAddress =
+    await upgrades.erc1967.getImplementationAddress(proxyAddress);
+  console.log(
+    "LikeProtocol Implementation address:",
+    protocolImplementationAddress,
+  );
+
   const implementation = await likeProtocol.implementation();
-  console.log("Implementation address:", implementation);
+  console.log("BookNFT Implementation address:", implementation);
 }
 
 getTokenURI().catch((error) => {
