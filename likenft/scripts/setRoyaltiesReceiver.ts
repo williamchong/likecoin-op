@@ -3,13 +3,10 @@ import { ContractAlreadyVerifiedError } from "@nomicfoundation/hardhat-verify/in
 import hardhat, { ethers, upgrades } from "hardhat";
 
 async function main() {
-  const newOwner = process.env.PROTOCOL_OWNER_ADDRESS!
-  console.log("TransferOwnership to", newOwner);
-
-  const proxyAddress = process.env.ERC721_PROXY_ADDRESS!;
   const [operator] = await ethers.getSigners();
   console.log("Operator:", operator.address);
 
+  const proxyAddress = process.env.ERC721_PROXY_ADDRESS!;
   const LikeProtocol = await ethers.getContractAt("LikeProtocol", proxyAddress);
   console.log(
     "Operating on LikeProtocol at:",
@@ -17,9 +14,9 @@ async function main() {
   );
   const likeProtocol = LikeProtocol.connect(operator);
 
-  console.log("On chain current owner:", await likeProtocol.owner());
-  await likeProtocol.transferOwnership(newOwner);
-  console.log("New on chain owner:", await likeProtocol.owner());
+  console.log("On chain royalty receiver:", await likeProtocol.getRoyaltyReceiver());
+  await likeProtocol.setRoyaltyReceiver(process.env.RECEIVER);
+  console.log("New royalty receiver:", await likeProtocol.getRoyaltyReceiver());
 }
 
 main()

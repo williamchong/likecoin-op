@@ -1,11 +1,16 @@
 import { ethers, upgrades } from "hardhat";
 
 async function getTokenURI() {
+  const [operator] = await ethers.getSigners();
+  console.log("Operator:", operator.address);
+  
   const proxyAddress = process.env.ERC721_PROXY_ADDRESS!;
-  const signer = await ethers.provider.getSigner();
-
   const LikeProtocol = await ethers.getContractAt("LikeProtocol", proxyAddress);
-  const likeProtocol = LikeProtocol.connect(signer);
+  console.log(
+    "Operating on LikeProtocol at:",
+    proxyAddress,
+  );
+  const likeProtocol = LikeProtocol.connect(operator);
 
   const owner = await likeProtocol.owner();
   console.log("Protocol owner:", owner);

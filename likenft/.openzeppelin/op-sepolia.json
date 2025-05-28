@@ -108,7 +108,11 @@
             }
           ]
         }
-      }
+      },
+      "allAddresses": [
+        "0x5EB03e8226A6de4fDAD7d1eDeec461F2d4978E18",
+        "0xaD25882fda02134e40F27DDAE9402513249D7c9a"
+      ]
     }
   }
 }

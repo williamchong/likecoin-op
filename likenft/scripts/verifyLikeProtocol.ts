@@ -3,29 +3,30 @@ import { ContractAlreadyVerifiedError } from "@nomicfoundation/hardhat-verify/in
 import hardhat, { ethers } from "hardhat";
 
 async function main() {
-  if (hardhat.network.name !== "localhost") {
-    throw e;
+  if (hardhat.network.name == "localhost") {
+    throw "No verification at local network";
   }
   console.log(
-    "Trying to verify BookNFT implementation at:",
-    process.env.BOOKNFT_ADDRESS!,
+    "Trying to verify LikeProtocol implementation at:",
+    process.env.NEW_LIKEPROTOCOL!,
   );
-  const bookNFT = await ethers.getContractAt(
-    "BookNFT",
-    process.env.BOOKNFT_ADDRESS!,
+  const likeProtocol = await ethers.getContractAt(
+    "LikeProtocol",
+    process.env.NEW_LIKEPROTOCOL!,
   );
-  const bookNFTAddress = await bookNFT.getAddress();
+  // Verify it already on chain
+  const protcolAddress = await likeProtocol.getAddress();
 
   try {
     await hardhat.run("verify:verify", {
-      address: bookNFTAddress,
+      address: protcolAddress,
     });
   } catch (e) {
     if (e instanceof ContractAlreadyVerifiedError) {
       // There may be the same implementation contract verified due to code revert
       console.log(
-        "BookNFT new implementation is already verified:",
-        bookNFTAddress,
+        "LikeProtocol new implementation is already verified:",
+        protcolAddress,
       );
     }
   }

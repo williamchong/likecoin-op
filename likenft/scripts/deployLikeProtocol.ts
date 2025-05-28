@@ -4,20 +4,22 @@ import hardhat, { ethers } from "hardhat";
 
 async function main() {
   const LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-  const [owner] = await ethers.getSigners();
-  console.log("Deployer:", owner.address);
+  const [deployer] = await ethers.getSigners();
+  console.log("Deployer:", deployer.address);
+  const proxyAddress = process.env.ERC721_PROXY_ADDRESS!
   console.log(
     "Preparing Upgrade of LikeProtocol...",
-    process.env.ERC721_PROXY_ADDRESS!,
+    proxyAddress,
   );
 
   const newImplementationAddress = await upgrades.prepareUpgrade(
-    process.env.ERC721_PROXY_ADDRESS!,
+    proxyAddress,
     LikeProtocol,
     {
       timeout: 0,
       verifySourceCode: true,
       kind: "uups",
+      redeployImplementation: "always"
     },
   );
   console.log(
@@ -25,23 +27,11 @@ async function main() {
     newImplementationAddress,
   );
 
-  try {
-    await hardhat.run("verify:verify", {
-      address: newImplementationAddress,
-    });
-  } catch (e) {
-    if (e instanceof ContractAlreadyVerifiedError) {
-      // There may be the same implementation contract verified due to code revert
-      console.log(
-        "LikeProtocol new implementation is already verified:",
-        newImplementationAddress,
-      );
-    } else {
-      if (hardhat.network.name !== "localhost") {
-        throw e;
-      }
-    }
-  }
+  // Too many time the block-explorer not yet catch the contract, not calling here.
+  console.log("Run following to verify after block-explorer catch the deployment")
+  console.log(`
+NEW_LIKEPROTOCOL=${newImplementationAddress} \\\n\
+    npm run script:${hardhat.network.name} scripts/verifyLikeProtocol.ts`)
 }
 
 main()
