@@ -42,7 +42,22 @@ func TestJSONDataUri(t *testing.T) {
 		err := s.Resolve(nil, &out)
 		So(err, ShouldBeNil)
 		So(out["name"], ShouldEqual, "Data URI Json")
+	})
 
+	Convey("Test Datauri", t, func() {
+		s := jsondatauri.JSONDataUri("data:application/json; charset=utf-8,{\"name\": \"Data URI Json\"}")
+		out := make(map[string]any)
+		err := s.Resolve(nil, &out)
+		So(err, ShouldBeNil)
+		So(out["name"], ShouldEqual, "Data URI Json")
+	})
+
+	Convey("Test Datauri", t, func() {
+		s := jsondatauri.JSONDataUri("data:application/json; charset=utf-7,{\"name\": \"Data URI Json\"}")
+		out := make(map[string]any)
+		err := s.Resolve(nil, &out)
+		So(err, ShouldNotBeNil)
+		So(err.Error(), ShouldContainSubstring, "unknwon string format")
 	})
 
 	Convey("Test url", t, func() {

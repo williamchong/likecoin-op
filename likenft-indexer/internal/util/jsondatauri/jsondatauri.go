@@ -21,8 +21,19 @@ func (s JSONDataUri) HttpPrefix() string {
 	return "http"
 }
 
-func (s JSONDataUri) IsDataURIJson() bool {
-	return strings.HasPrefix(string(s), s.DataURIPrefix())
+func (s JSONDataUri) IsDataURIJson() (string, bool) {
+	// Backward compatability for v0.1.0 and v0.2.0 which rewrites the metadata
+	// from "data:application/json;utf8," to "data:application/json; charset=utf-8,"
+	// for better block explorer compatability
+	if strings.HasPrefix(string(s), "data:application/json;utf8,") {
+		r, _ := strings.CutPrefix(string(s), "data:application/json;utf8,")
+		return r, true
+	}
+	if strings.HasPrefix(string(s), "data:application/json; charset=utf-8,") {
+		r, _ := strings.CutPrefix(string(s), "data:application/json; charset=utf-8,")
+		return r, true
+	}
+	return "", false
 }
 
 func (s JSONDataUri) IsHttpJson() bool {
@@ -56,8 +67,8 @@ func (s JSONDataUri) Resolve(httpClient HTTPClient, out any) error {
 		return nil
 	}
 
-	if s.IsDataURIJson() {
-		r, _ := strings.CutPrefix(string(s), s.DataURIPrefix())
+	r, yes := s.IsDataURIJson()
+	if yes {
 		return json.Unmarshal([]byte(r), &out)
 	}
 
