@@ -14,9 +14,9 @@ Production
 LikeProtocol proxy: `0x526237a676444A67bc79E9009756df128Ca9a619`
 LikeCoin proxy: `pending`
 
-Testnet
+Optimism-sepolia
 LikeProtocol proxy: `0xfF79df388742f248c61A633938710559c61faEF1`
-EkilCoin proxy: `0x557aa8609C1827007635F15458736599520DE2Ac`
+EkilCoin proxy: `pending`
 
 Once the initial deployment is done, we should updated the expected proxy address in the `env.operator` file for reference. On new L2 chain launch, we should operate the following steps to obtain same proxy address.
 

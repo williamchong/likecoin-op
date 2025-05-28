@@ -65,7 +65,7 @@ const config: HardhatUserConfig = {
       ledgerAccounts: ["0xB0318A8f049b625dA5DdD184FfFF668Aa6E96261"],
     },
     optimism: {
-      url: `0x${process.env.OPTIMISM_BLOCKSCOUT_URL}`,
+      url: `${process.env.OPTIMISM_BLOCKSCOUT_URL}`,
       chainId: 10,
       ledgerAccounts: ["0xB0318A8f049b625dA5DdD184FfFF668Aa6E96261"],
     },
