@@ -575,6 +575,28 @@ type EventsParams struct {
 	Limit OptInt
 	// Page.
 	Page OptInt
+	// Sort_by.
+	SortBy OptEventSortRequestSortBy
+	// Sort_order.
+	SortOrder OptEventSortRequestSortOrder
+	// Filter_block_timestamp.
+	FilterBlockTimestamp OptString
+	// Filter_block_timestamp_gte.
+	FilterBlockTimestampGte OptString
+	// Filter_block_timestamp_gt.
+	FilterBlockTimestampGt OptString
+	// Filter_block_timestamp_lte.
+	FilterBlockTimestampLte OptString
+	// Filter_block_timestamp_lt.
+	FilterBlockTimestampLt OptString
+	// Filter_topic_1.
+	FilterTopic1 OptString
+	// Filter_topic_2.
+	FilterTopic2 OptString
+	// Filter_topic_3.
+	FilterTopic3 OptString
+	// Filter_topic_0.
+	FilterTopic0 OptString
 }
 
 func unpackEventsParams(packed middleware.Parameters) (params EventsParams) {
@@ -594,6 +616,105 @@ func unpackEventsParams(packed middleware.Parameters) (params EventsParams) {
 		}
 		if v, ok := packed[key]; ok {
 			params.Page = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "sort_by",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.SortBy = v.(OptEventSortRequestSortBy)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "sort_order",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.SortOrder = v.(OptEventSortRequestSortOrder)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_block_timestamp",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterBlockTimestamp = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_block_timestamp_gte",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterBlockTimestampGte = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_block_timestamp_gt",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterBlockTimestampGt = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_block_timestamp_lte",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterBlockTimestampLte = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_block_timestamp_lt",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterBlockTimestampLt = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_topic_1",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterTopic1 = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_topic_2",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterTopic2 = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_topic_3",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterTopic3 = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_topic_0",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterTopic0 = v.(OptString)
 		}
 	}
 	return params
@@ -693,6 +814,497 @@ func decodeEventsParams(args [0]string, argsEscaped bool, r *http.Request) (para
 			Err:  err,
 		}
 	}
+	// Set default value for query: sort_by.
+	{
+		val := EventSortRequestSortBy("block_number")
+		params.SortBy.SetTo(val)
+	}
+	// Decode query: sort_by.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "sort_by",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSortByVal EventSortRequestSortBy
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSortByVal = EventSortRequestSortBy(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.SortBy.SetTo(paramsDotSortByVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.SortBy.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "sort_by",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: sort_order.
+	{
+		val := EventSortRequestSortOrder("asc")
+		params.SortOrder.SetTo(val)
+	}
+	// Decode query: sort_order.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "sort_order",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSortOrderVal EventSortRequestSortOrder
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSortOrderVal = EventSortRequestSortOrder(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.SortOrder.SetTo(paramsDotSortOrderVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.SortOrder.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "sort_order",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_block_timestamp.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_block_timestamp",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterBlockTimestampVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterBlockTimestampVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterBlockTimestamp.SetTo(paramsDotFilterBlockTimestampVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_block_timestamp",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_block_timestamp_gte.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_block_timestamp_gte",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterBlockTimestampGteVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterBlockTimestampGteVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterBlockTimestampGte.SetTo(paramsDotFilterBlockTimestampGteVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_block_timestamp_gte",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_block_timestamp_gt.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_block_timestamp_gt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterBlockTimestampGtVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterBlockTimestampGtVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterBlockTimestampGt.SetTo(paramsDotFilterBlockTimestampGtVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_block_timestamp_gt",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_block_timestamp_lte.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_block_timestamp_lte",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterBlockTimestampLteVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterBlockTimestampLteVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterBlockTimestampLte.SetTo(paramsDotFilterBlockTimestampLteVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_block_timestamp_lte",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_block_timestamp_lt.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_block_timestamp_lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterBlockTimestampLtVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterBlockTimestampLtVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterBlockTimestampLt.SetTo(paramsDotFilterBlockTimestampLtVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_block_timestamp_lt",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_topic_1.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_topic_1",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterTopic1Val string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterTopic1Val = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterTopic1.SetTo(paramsDotFilterTopic1Val)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_topic_1",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_topic_2.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_topic_2",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterTopic2Val string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterTopic2Val = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterTopic2.SetTo(paramsDotFilterTopic2Val)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_topic_2",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_topic_3.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_topic_3",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterTopic3Val string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterTopic3Val = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterTopic3.SetTo(paramsDotFilterTopic3Val)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_topic_3",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_topic_0.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_topic_0",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterTopic0Val string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterTopic0Val = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterTopic0.SetTo(paramsDotFilterTopic0Val)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_topic_0",
+			In:   "query",
+			Err:  err,
+		}
+	}
 	return params, nil
 }
 
@@ -704,6 +1316,28 @@ type EventsByAddressParams struct {
 	Limit OptInt
 	// Page.
 	Page OptInt
+	// Sort_by.
+	SortBy OptEventSortRequestSortBy
+	// Sort_order.
+	SortOrder OptEventSortRequestSortOrder
+	// Filter_block_timestamp.
+	FilterBlockTimestamp OptString
+	// Filter_block_timestamp_gte.
+	FilterBlockTimestampGte OptString
+	// Filter_block_timestamp_gt.
+	FilterBlockTimestampGt OptString
+	// Filter_block_timestamp_lte.
+	FilterBlockTimestampLte OptString
+	// Filter_block_timestamp_lt.
+	FilterBlockTimestampLt OptString
+	// Filter_topic_1.
+	FilterTopic1 OptString
+	// Filter_topic_2.
+	FilterTopic2 OptString
+	// Filter_topic_3.
+	FilterTopic3 OptString
+	// Filter_topic_0.
+	FilterTopic0 OptString
 }
 
 func unpackEventsByAddressParams(packed middleware.Parameters) (params EventsByAddressParams) {
@@ -730,6 +1364,105 @@ func unpackEventsByAddressParams(packed middleware.Parameters) (params EventsByA
 		}
 		if v, ok := packed[key]; ok {
 			params.Page = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "sort_by",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.SortBy = v.(OptEventSortRequestSortBy)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "sort_order",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.SortOrder = v.(OptEventSortRequestSortOrder)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_block_timestamp",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterBlockTimestamp = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_block_timestamp_gte",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterBlockTimestampGte = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_block_timestamp_gt",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterBlockTimestampGt = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_block_timestamp_lte",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterBlockTimestampLte = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_block_timestamp_lt",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterBlockTimestampLt = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_topic_1",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterTopic1 = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_topic_2",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterTopic2 = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_topic_3",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterTopic3 = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_topic_0",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterTopic0 = v.(OptString)
 		}
 	}
 	return params
@@ -874,6 +1607,497 @@ func decodeEventsByAddressParams(args [1]string, argsEscaped bool, r *http.Reque
 			Err:  err,
 		}
 	}
+	// Set default value for query: sort_by.
+	{
+		val := EventSortRequestSortBy("block_number")
+		params.SortBy.SetTo(val)
+	}
+	// Decode query: sort_by.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "sort_by",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSortByVal EventSortRequestSortBy
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSortByVal = EventSortRequestSortBy(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.SortBy.SetTo(paramsDotSortByVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.SortBy.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "sort_by",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: sort_order.
+	{
+		val := EventSortRequestSortOrder("asc")
+		params.SortOrder.SetTo(val)
+	}
+	// Decode query: sort_order.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "sort_order",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSortOrderVal EventSortRequestSortOrder
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSortOrderVal = EventSortRequestSortOrder(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.SortOrder.SetTo(paramsDotSortOrderVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.SortOrder.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "sort_order",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_block_timestamp.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_block_timestamp",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterBlockTimestampVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterBlockTimestampVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterBlockTimestamp.SetTo(paramsDotFilterBlockTimestampVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_block_timestamp",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_block_timestamp_gte.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_block_timestamp_gte",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterBlockTimestampGteVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterBlockTimestampGteVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterBlockTimestampGte.SetTo(paramsDotFilterBlockTimestampGteVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_block_timestamp_gte",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_block_timestamp_gt.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_block_timestamp_gt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterBlockTimestampGtVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterBlockTimestampGtVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterBlockTimestampGt.SetTo(paramsDotFilterBlockTimestampGtVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_block_timestamp_gt",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_block_timestamp_lte.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_block_timestamp_lte",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterBlockTimestampLteVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterBlockTimestampLteVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterBlockTimestampLte.SetTo(paramsDotFilterBlockTimestampLteVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_block_timestamp_lte",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_block_timestamp_lt.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_block_timestamp_lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterBlockTimestampLtVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterBlockTimestampLtVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterBlockTimestampLt.SetTo(paramsDotFilterBlockTimestampLtVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_block_timestamp_lt",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_topic_1.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_topic_1",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterTopic1Val string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterTopic1Val = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterTopic1.SetTo(paramsDotFilterTopic1Val)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_topic_1",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_topic_2.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_topic_2",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterTopic2Val string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterTopic2Val = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterTopic2.SetTo(paramsDotFilterTopic2Val)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_topic_2",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_topic_3.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_topic_3",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterTopic3Val string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterTopic3Val = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterTopic3.SetTo(paramsDotFilterTopic3Val)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_topic_3",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_topic_0.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_topic_0",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterTopic0Val string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterTopic0Val = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterTopic0.SetTo(paramsDotFilterTopic0Val)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_topic_0",
+			In:   "query",
+			Err:  err,
+		}
+	}
 	return params, nil
 }
 
@@ -887,6 +2111,28 @@ type EventsByAddressAndSignatureParams struct {
 	Limit OptInt
 	// Page.
 	Page OptInt
+	// Sort_by.
+	SortBy OptEventSortRequestSortBy
+	// Sort_order.
+	SortOrder OptEventSortRequestSortOrder
+	// Filter_block_timestamp.
+	FilterBlockTimestamp OptString
+	// Filter_block_timestamp_gte.
+	FilterBlockTimestampGte OptString
+	// Filter_block_timestamp_gt.
+	FilterBlockTimestampGt OptString
+	// Filter_block_timestamp_lte.
+	FilterBlockTimestampLte OptString
+	// Filter_block_timestamp_lt.
+	FilterBlockTimestampLt OptString
+	// Filter_topic_1.
+	FilterTopic1 OptString
+	// Filter_topic_2.
+	FilterTopic2 OptString
+	// Filter_topic_3.
+	FilterTopic3 OptString
+	// Filter_topic_0.
+	FilterTopic0 OptString
 }
 
 func unpackEventsByAddressAndSignatureParams(packed middleware.Parameters) (params EventsByAddressAndSignatureParams) {
@@ -920,6 +2166,105 @@ func unpackEventsByAddressAndSignatureParams(packed middleware.Parameters) (para
 		}
 		if v, ok := packed[key]; ok {
 			params.Page = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "sort_by",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.SortBy = v.(OptEventSortRequestSortBy)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "sort_order",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.SortOrder = v.(OptEventSortRequestSortOrder)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_block_timestamp",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterBlockTimestamp = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_block_timestamp_gte",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterBlockTimestampGte = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_block_timestamp_gt",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterBlockTimestampGt = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_block_timestamp_lte",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterBlockTimestampLte = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_block_timestamp_lt",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterBlockTimestampLt = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_topic_1",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterTopic1 = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_topic_2",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterTopic2 = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_topic_3",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterTopic3 = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "filter_topic_0",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.FilterTopic0 = v.(OptString)
 		}
 	}
 	return params
@@ -1105,6 +2450,497 @@ func decodeEventsByAddressAndSignatureParams(args [2]string, argsEscaped bool, r
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "page",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: sort_by.
+	{
+		val := EventSortRequestSortBy("block_number")
+		params.SortBy.SetTo(val)
+	}
+	// Decode query: sort_by.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "sort_by",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSortByVal EventSortRequestSortBy
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSortByVal = EventSortRequestSortBy(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.SortBy.SetTo(paramsDotSortByVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.SortBy.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "sort_by",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: sort_order.
+	{
+		val := EventSortRequestSortOrder("asc")
+		params.SortOrder.SetTo(val)
+	}
+	// Decode query: sort_order.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "sort_order",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSortOrderVal EventSortRequestSortOrder
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSortOrderVal = EventSortRequestSortOrder(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.SortOrder.SetTo(paramsDotSortOrderVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.SortOrder.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "sort_order",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_block_timestamp.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_block_timestamp",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterBlockTimestampVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterBlockTimestampVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterBlockTimestamp.SetTo(paramsDotFilterBlockTimestampVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_block_timestamp",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_block_timestamp_gte.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_block_timestamp_gte",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterBlockTimestampGteVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterBlockTimestampGteVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterBlockTimestampGte.SetTo(paramsDotFilterBlockTimestampGteVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_block_timestamp_gte",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_block_timestamp_gt.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_block_timestamp_gt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterBlockTimestampGtVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterBlockTimestampGtVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterBlockTimestampGt.SetTo(paramsDotFilterBlockTimestampGtVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_block_timestamp_gt",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_block_timestamp_lte.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_block_timestamp_lte",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterBlockTimestampLteVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterBlockTimestampLteVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterBlockTimestampLte.SetTo(paramsDotFilterBlockTimestampLteVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_block_timestamp_lte",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_block_timestamp_lt.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_block_timestamp_lt",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterBlockTimestampLtVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterBlockTimestampLtVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterBlockTimestampLt.SetTo(paramsDotFilterBlockTimestampLtVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_block_timestamp_lt",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_topic_1.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_topic_1",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterTopic1Val string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterTopic1Val = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterTopic1.SetTo(paramsDotFilterTopic1Val)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_topic_1",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_topic_2.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_topic_2",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterTopic2Val string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterTopic2Val = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterTopic2.SetTo(paramsDotFilterTopic2Val)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_topic_2",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_topic_3.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_topic_3",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterTopic3Val string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterTopic3Val = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterTopic3.SetTo(paramsDotFilterTopic3Val)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_topic_3",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: filter_topic_0.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "filter_topic_0",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotFilterTopic0Val string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotFilterTopic0Val = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.FilterTopic0.SetTo(paramsDotFilterTopic0Val)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "filter_topic_0",
 			In:   "query",
 			Err:  err,
 		}

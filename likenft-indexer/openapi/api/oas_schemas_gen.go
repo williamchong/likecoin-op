@@ -835,6 +835,88 @@ func (s *EventQueryMetadata) SetTotalPages(val int) {
 	s.TotalPages = val
 }
 
+type EventSortRequestSortBy string
+
+const (
+	EventSortRequestSortByBlockNumber    EventSortRequestSortBy = "block_number"
+	EventSortRequestSortByBlockTimestamp EventSortRequestSortBy = "block_timestamp"
+)
+
+// AllValues returns all EventSortRequestSortBy values.
+func (EventSortRequestSortBy) AllValues() []EventSortRequestSortBy {
+	return []EventSortRequestSortBy{
+		EventSortRequestSortByBlockNumber,
+		EventSortRequestSortByBlockTimestamp,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s EventSortRequestSortBy) MarshalText() ([]byte, error) {
+	switch s {
+	case EventSortRequestSortByBlockNumber:
+		return []byte(s), nil
+	case EventSortRequestSortByBlockTimestamp:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *EventSortRequestSortBy) UnmarshalText(data []byte) error {
+	switch EventSortRequestSortBy(data) {
+	case EventSortRequestSortByBlockNumber:
+		*s = EventSortRequestSortByBlockNumber
+		return nil
+	case EventSortRequestSortByBlockTimestamp:
+		*s = EventSortRequestSortByBlockTimestamp
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type EventSortRequestSortOrder string
+
+const (
+	EventSortRequestSortOrderAsc  EventSortRequestSortOrder = "asc"
+	EventSortRequestSortOrderDesc EventSortRequestSortOrder = "desc"
+)
+
+// AllValues returns all EventSortRequestSortOrder values.
+func (EventSortRequestSortOrder) AllValues() []EventSortRequestSortOrder {
+	return []EventSortRequestSortOrder{
+		EventSortRequestSortOrderAsc,
+		EventSortRequestSortOrderDesc,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s EventSortRequestSortOrder) MarshalText() ([]byte, error) {
+	switch s {
+	case EventSortRequestSortOrderAsc:
+		return []byte(s), nil
+	case EventSortRequestSortOrderDesc:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *EventSortRequestSortOrder) UnmarshalText(data []byte) error {
+	switch EventSortRequestSortOrder(data) {
+	case EventSortRequestSortOrderAsc:
+		*s = EventSortRequestSortOrderAsc
+		return nil
+	case EventSortRequestSortOrderDesc:
+		*s = EventSortRequestSortOrderDesc
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type EventsByAddressAndSignatureOK struct {
 	Meta EventQueryMetadata `json:"meta"`
 	Data []Event            `json:"data"`
@@ -1318,6 +1400,98 @@ func (o OptErc721MetadataAttributeDisplayType) Get() (v Erc721MetadataAttributeD
 
 // Or returns value if set, or given parameter if does not.
 func (o OptErc721MetadataAttributeDisplayType) Or(d Erc721MetadataAttributeDisplayType) Erc721MetadataAttributeDisplayType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptEventSortRequestSortBy returns new OptEventSortRequestSortBy with value set to v.
+func NewOptEventSortRequestSortBy(v EventSortRequestSortBy) OptEventSortRequestSortBy {
+	return OptEventSortRequestSortBy{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptEventSortRequestSortBy is optional EventSortRequestSortBy.
+type OptEventSortRequestSortBy struct {
+	Value EventSortRequestSortBy
+	Set   bool
+}
+
+// IsSet returns true if OptEventSortRequestSortBy was set.
+func (o OptEventSortRequestSortBy) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptEventSortRequestSortBy) Reset() {
+	var v EventSortRequestSortBy
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptEventSortRequestSortBy) SetTo(v EventSortRequestSortBy) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptEventSortRequestSortBy) Get() (v EventSortRequestSortBy, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptEventSortRequestSortBy) Or(d EventSortRequestSortBy) EventSortRequestSortBy {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptEventSortRequestSortOrder returns new OptEventSortRequestSortOrder with value set to v.
+func NewOptEventSortRequestSortOrder(v EventSortRequestSortOrder) OptEventSortRequestSortOrder {
+	return OptEventSortRequestSortOrder{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptEventSortRequestSortOrder is optional EventSortRequestSortOrder.
+type OptEventSortRequestSortOrder struct {
+	Value EventSortRequestSortOrder
+	Set   bool
+}
+
+// IsSet returns true if OptEventSortRequestSortOrder was set.
+func (o OptEventSortRequestSortOrder) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptEventSortRequestSortOrder) Reset() {
+	var v EventSortRequestSortOrder
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptEventSortRequestSortOrder) SetTo(v EventSortRequestSortOrder) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptEventSortRequestSortOrder) Get() (v EventSortRequestSortOrder, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptEventSortRequestSortOrder) Or(d EventSortRequestSortOrder) EventSortRequestSortOrder {
 	if v, ok := o.Get(); ok {
 		return v
 	}
