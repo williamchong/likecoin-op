@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math"
 	"math/big"
 	"regexp"
 	"slices"
@@ -64,10 +65,11 @@ func DoMintNFTAction(
 		return nil, doMintNFTActionFailed(db, a, err)
 	}
 
-	totalSupply, err := c.TotalSupply(evmClassAddress)
+	totalSupplyBigInt, err := c.TotalSupply(evmClassAddress)
 	if err != nil {
 		return nil, doMintNFTActionFailed(db, a, err)
 	}
+	totalSupply := totalSupplyBigInt.Uint64()
 
 	cosmosClass, err := m.QueryClassByClassId(cosmos.QueryClassByClassIdRequest{
 		ClassId: newClassAction.CosmosClassId,
@@ -121,7 +123,7 @@ func DoMintNFTAction(
 			ctx,
 			mylogger,
 			evmClassAddress,
-			totalSupply,
+			totalSupplyBigInt,
 			[]common.Address{toOwner},
 			[]string{
 				event.MakeMemoFromEvent(events),
@@ -166,7 +168,7 @@ func DoMintNFTAction(
 				ctx,
 				mylogger,
 				evmClassAddress,
-				totalSupply,
+				totalSupplyBigInt,
 				[]common.Address{toOwner},
 				[]string{
 					event.MakeMemoFromEvent(events),
@@ -179,8 +181,10 @@ func DoMintNFTAction(
 			}
 		} else {
 			// batch mint
-			desireBatchMintAmount := GetDesireBatchMintAmount(totalSupply, nftId)
-			if desireBatchMintAmount.Cmp(big.NewInt(0)) == 1 {
+			// totalSupply = 10, nftId = 10, contract nftids = [0..9] should mint 1 to [0..10]
+			desireSupply := nftId + 1
+			desireBatchMintAmount := uint64(math.Max(float64(desireSupply)-float64(totalSupply), 0))
+			if desireBatchMintAmount > 0 {
 				cosmosNFTs, err := m.QueryAllNFTsByClassId(cosmos.QueryAllNFTsByClassIdRequest{
 					ClassId: newClassAction.CosmosClassId,
 				})
@@ -192,9 +196,9 @@ func DoMintNFTAction(
 				tos := make([]common.Address, 0)
 				memos := make([]string, 0)
 				metadataList := make([]string, 0)
-				for i := big.NewInt(0); i.Cmp(desireBatchMintAmount) == -1; i = i.Add(i, big.NewInt(1)) {
+				for i := totalSupply; i < desireSupply; i = i + 1 {
 					cosmosNFTIdx := slices.IndexFunc(cosmosNFTs.NFTs, func(n cosmosmodel.NFT) bool {
-						return MakeMatchNFTIdRegex(big.NewInt(0).Add(totalSupply, i).String()).MatchString(n.Id)
+						return MakeMatchNFTIdRegex(strconv.FormatUint(i, 10)).MatchString(n.Id)
 					})
 					metadataStr := "{}"
 					memo := ""
@@ -229,7 +233,7 @@ func DoMintNFTAction(
 					ctx,
 					mylogger,
 					evmClassAddress,
-					totalSupply,
+					totalSupplyBigInt,
 					tos,
 					memos,
 					metadataList,
@@ -259,24 +263,6 @@ func DoMintNFTAction(
 		return nil, doMintNFTActionFailed(db, a, err)
 	}
 	return a, nil
-}
-
-// evm token id is 0 based
-// so class/token-0001 will be mapped to 1 in evm
-// which requires offset 1 from 0
-func GetDesireBatchMintAmount(
-	totalSupply *big.Int,
-	desireAmount uint64,
-) *big.Int {
-	switch totalSupply.Cmp(big.NewInt(int64(desireAmount))) {
-	case 0:
-		return big.NewInt(1)
-	case 1:
-		return big.NewInt(0)
-	case -1:
-		return big.NewInt(0).Sub(big.NewInt(int64(desireAmount+1)), totalSupply)
-	}
-	panic("unhandled switch")
 }
 
 func doMintNFTActionFailed(db *sql.DB, a *model.LikeNFTMigrationActionMintNFT, err error) error {
