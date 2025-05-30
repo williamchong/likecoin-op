@@ -64,6 +64,12 @@ type Handler interface {
 	//
 	// GET /token/{booknft_id}/{token_id}
 	Token(ctx context.Context, params TokenParams) (*NFT, error)
+	// TokenAccountsByBookNFT implements tokenAccountsByBookNFT operation.
+	//
+	// Query token accounts by BookNFT.
+	//
+	// GET /booknft/{id}/tokens/account
+	TokenAccountsByBookNFT(ctx context.Context, params TokenAccountsByBookNFTParams) (*TokenAccountsByBookNFTOK, error)
 	// TokensByAccount implements tokensByAccount operation.
 	//
 	// Query tokens by account.

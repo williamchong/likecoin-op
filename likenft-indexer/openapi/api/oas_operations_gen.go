@@ -16,6 +16,7 @@ const (
 	IndexActionBookNftBooknftIDPostOperation OperationName = "IndexActionBookNftBooknftIDPost"
 	IndexActionLikeProtocolPostOperation     OperationName = "IndexActionLikeProtocolPost"
 	TokenOperation                           OperationName = "Token"
+	TokenAccountsByBookNFTOperation          OperationName = "TokenAccountsByBookNFT"
 	TokensByAccountOperation                 OperationName = "TokensByAccount"
 	TokensByBookNFTOperation                 OperationName = "TokensByBookNFT"
 )
