@@ -86,6 +86,7 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 		envCfg.InitialNewClassMinter,
 		envCfg.InitialNewClassUpdater,
 		envCfg.InitialBatchMintNFTsOwner,
+		envCfg.BatchMintItemPerPage,
 		p.LikenftAssetMigrationNFTId,
 	)
 

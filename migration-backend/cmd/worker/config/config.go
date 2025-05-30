@@ -26,6 +26,7 @@ type EnvConfig struct {
 	InitialNewClassMinter     string `envconfig:"INITIAL_NEW_CLASS_MINTER"`
 	InitialNewClassUpdater    string `envconfig:"INITIAL_NEW_CLASS_UPDATER"`
 	InitialBatchMintNFTsOwner string `envconfig:"INITIAL_BATCH_MINT_NFTS_OWNER"`
+	BatchMintItemPerPage      uint64 `envconfig:"BATCH_MINT_ITEM_PER_PAGE"`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {
