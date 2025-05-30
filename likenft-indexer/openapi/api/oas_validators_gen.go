@@ -145,6 +145,28 @@ func (s *EventQueryMetadata) Validate() error {
 	return nil
 }
 
+func (s EventSortRequestSortBy) Validate() error {
+	switch s {
+	case "block_number":
+		return nil
+	case "block_timestamp":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s EventSortRequestSortOrder) Validate() error {
+	switch s {
+	case "asc":
+		return nil
+	case "desc":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *EventsByAddressAndSignatureOK) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer

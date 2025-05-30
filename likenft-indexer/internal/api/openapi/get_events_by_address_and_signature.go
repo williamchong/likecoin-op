@@ -4,7 +4,6 @@ import (
 	"context"
 	"math"
 
-	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/internal/api/openapi/model"
 	"likenft-indexer/openapi/api"
 
@@ -14,23 +13,29 @@ import (
 func (h *OpenAPIHandler) EventsByAddressAndSignature(ctx context.Context, params api.EventsByAddressAndSignatureParams) (*api.EventsByAddressAndSignatureOK, error) {
 	signatureHash := crypto.Keccak256Hash([]byte(params.Signature))
 
-	eventsQ := h.db.EVMEvent.Query().Where(
-		evmevent.SignatureEQ(params.Signature),
-		evmevent.AddressEqualFold(params.Address),
-	)
-
-	count, err := eventsQ.Count(ctx)
-
+	ps := model.OpenAPIEventParameters{
+		Address:                 &params.Address,
+		Signature:               &params.Signature,
+		Limit:                   params.Limit,
+		Page:                    params.Page,
+		SortBy:                  params.SortBy,
+		SortOrder:               params.SortOrder,
+		FilterBlockTimestamp:    params.FilterBlockTimestamp,
+		FilterBlockTimestampGte: params.FilterBlockTimestampGte,
+		FilterBlockTimestampGt:  params.FilterBlockTimestampGt,
+		FilterBlockTimestampLte: params.FilterBlockTimestampLte,
+		FilterBlockTimestampLt:  params.FilterBlockTimestampLt,
+		FilterTopic1:            params.FilterTopic1,
+		FilterTopic2:            params.FilterTopic2,
+		FilterTopic3:            params.FilterTopic3,
+		FilterTopic0:            params.FilterTopic0,
+	}
+	entFilter, err := ps.ToEntFilter()
 	if err != nil {
 		return nil, err
 	}
 
-	paginatedEventsQ := h.handleEventPagination(
-		eventsQ, params.Limit, params.Page,
-	)
-
-	events, err := paginatedEventsQ.All(ctx)
-
+	events, count, err := h.evmEventRepository.GetEvmEvents(ctx, entFilter)
 	if err != nil {
 		return nil, err
 	}

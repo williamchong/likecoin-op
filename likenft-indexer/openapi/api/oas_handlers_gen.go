@@ -748,6 +748,50 @@ func (s *Server) handleEventsRequest(args [0]string, argsEscaped bool, w http.Re
 					Name: "page",
 					In:   "query",
 				}: params.Page,
+				{
+					Name: "sort_by",
+					In:   "query",
+				}: params.SortBy,
+				{
+					Name: "sort_order",
+					In:   "query",
+				}: params.SortOrder,
+				{
+					Name: "filter_block_timestamp",
+					In:   "query",
+				}: params.FilterBlockTimestamp,
+				{
+					Name: "filter_block_timestamp_gte",
+					In:   "query",
+				}: params.FilterBlockTimestampGte,
+				{
+					Name: "filter_block_timestamp_gt",
+					In:   "query",
+				}: params.FilterBlockTimestampGt,
+				{
+					Name: "filter_block_timestamp_lte",
+					In:   "query",
+				}: params.FilterBlockTimestampLte,
+				{
+					Name: "filter_block_timestamp_lt",
+					In:   "query",
+				}: params.FilterBlockTimestampLt,
+				{
+					Name: "filter_topic_1",
+					In:   "query",
+				}: params.FilterTopic1,
+				{
+					Name: "filter_topic_2",
+					In:   "query",
+				}: params.FilterTopic2,
+				{
+					Name: "filter_topic_3",
+					In:   "query",
+				}: params.FilterTopic3,
+				{
+					Name: "filter_topic_0",
+					In:   "query",
+				}: params.FilterTopic0,
 			},
 			Raw: r,
 		}
@@ -905,6 +949,50 @@ func (s *Server) handleEventsByAddressRequest(args [1]string, argsEscaped bool, 
 					Name: "page",
 					In:   "query",
 				}: params.Page,
+				{
+					Name: "sort_by",
+					In:   "query",
+				}: params.SortBy,
+				{
+					Name: "sort_order",
+					In:   "query",
+				}: params.SortOrder,
+				{
+					Name: "filter_block_timestamp",
+					In:   "query",
+				}: params.FilterBlockTimestamp,
+				{
+					Name: "filter_block_timestamp_gte",
+					In:   "query",
+				}: params.FilterBlockTimestampGte,
+				{
+					Name: "filter_block_timestamp_gt",
+					In:   "query",
+				}: params.FilterBlockTimestampGt,
+				{
+					Name: "filter_block_timestamp_lte",
+					In:   "query",
+				}: params.FilterBlockTimestampLte,
+				{
+					Name: "filter_block_timestamp_lt",
+					In:   "query",
+				}: params.FilterBlockTimestampLt,
+				{
+					Name: "filter_topic_1",
+					In:   "query",
+				}: params.FilterTopic1,
+				{
+					Name: "filter_topic_2",
+					In:   "query",
+				}: params.FilterTopic2,
+				{
+					Name: "filter_topic_3",
+					In:   "query",
+				}: params.FilterTopic3,
+				{
+					Name: "filter_topic_0",
+					In:   "query",
+				}: params.FilterTopic0,
 			},
 			Raw: r,
 		}
@@ -1066,6 +1154,50 @@ func (s *Server) handleEventsByAddressAndSignatureRequest(args [2]string, argsEs
 					Name: "page",
 					In:   "query",
 				}: params.Page,
+				{
+					Name: "sort_by",
+					In:   "query",
+				}: params.SortBy,
+				{
+					Name: "sort_order",
+					In:   "query",
+				}: params.SortOrder,
+				{
+					Name: "filter_block_timestamp",
+					In:   "query",
+				}: params.FilterBlockTimestamp,
+				{
+					Name: "filter_block_timestamp_gte",
+					In:   "query",
+				}: params.FilterBlockTimestampGte,
+				{
+					Name: "filter_block_timestamp_gt",
+					In:   "query",
+				}: params.FilterBlockTimestampGt,
+				{
+					Name: "filter_block_timestamp_lte",
+					In:   "query",
+				}: params.FilterBlockTimestampLte,
+				{
+					Name: "filter_block_timestamp_lt",
+					In:   "query",
+				}: params.FilterBlockTimestampLt,
+				{
+					Name: "filter_topic_1",
+					In:   "query",
+				}: params.FilterTopic1,
+				{
+					Name: "filter_topic_2",
+					In:   "query",
+				}: params.FilterTopic2,
+				{
+					Name: "filter_topic_3",
+					In:   "query",
+				}: params.FilterTopic3,
+				{
+					Name: "filter_topic_0",
+					In:   "query",
+				}: params.FilterTopic0,
 			},
 			Raw: r,
 		}
