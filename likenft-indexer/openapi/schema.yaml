@@ -259,6 +259,17 @@ paths:
       parameters:
         - $ref: "#/components/parameters/EventPaginationRequestLimit"
         - $ref: "#/components/parameters/EventPaginationRequestPage"
+        - $ref: "#/components/parameters/EventSortRequestSortBy"
+        - $ref: "#/components/parameters/EventSortRequestSortOrder"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestamp"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampGte"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampGt"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampLte"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampLt"
+        - $ref: "#/components/parameters/EventFilterRequestTopic1"
+        - $ref: "#/components/parameters/EventFilterRequestTopic2"
+        - $ref: "#/components/parameters/EventFilterRequestTopic3"
+        - $ref: "#/components/parameters/EventFilterRequestTopic0"
       responses:
         "200":
           description: Events found
@@ -298,6 +309,17 @@ paths:
             type: string
         - $ref: "#/components/parameters/EventPaginationRequestLimit"
         - $ref: "#/components/parameters/EventPaginationRequestPage"
+        - $ref: "#/components/parameters/EventSortRequestSortBy"
+        - $ref: "#/components/parameters/EventSortRequestSortOrder"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestamp"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampGte"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampGt"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampLte"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampLt"
+        - $ref: "#/components/parameters/EventFilterRequestTopic1"
+        - $ref: "#/components/parameters/EventFilterRequestTopic2"
+        - $ref: "#/components/parameters/EventFilterRequestTopic3"
+        - $ref: "#/components/parameters/EventFilterRequestTopic0"
       responses:
         "200":
           description: Events found
@@ -344,6 +366,17 @@ paths:
             type: string
         - $ref: "#/components/parameters/EventPaginationRequestLimit"
         - $ref: "#/components/parameters/EventPaginationRequestPage"
+        - $ref: "#/components/parameters/EventSortRequestSortBy"
+        - $ref: "#/components/parameters/EventSortRequestSortOrder"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestamp"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampGte"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampGt"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampLte"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampLt"
+        - $ref: "#/components/parameters/EventFilterRequestTopic1"
+        - $ref: "#/components/parameters/EventFilterRequestTopic2"
+        - $ref: "#/components/parameters/EventFilterRequestTopic3"
+        - $ref: "#/components/parameters/EventFilterRequestTopic0"
       responses:
         "200":
           description: Events found
@@ -465,6 +498,90 @@ components:
       schema:
         type: integer
         default: 0
+    EventSortRequestSortBy:
+      name: sort_by
+      in: query
+      description: sort_by
+      required: false
+      schema:
+        type: string
+        enum: [
+          block_number,
+          block_timestamp
+        ]
+        default: block_number
+    EventSortRequestSortOrder:
+      name: sort_order
+      in: query
+      description: sort_order
+      required: false
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: asc
+    EventFilterRequestBlockTimestamp:
+      name: filter_block_timestamp
+      in: query
+      description: filter_block_timestamp
+      required: false
+      schema:
+        type: string
+    EventFilterRequestBlockTimestampGte:
+      name: filter_block_timestamp_gte
+      in: query
+      description: filter_block_timestamp_gte
+      required: false
+      schema:
+        type: string
+    EventFilterRequestBlockTimestampGt:
+      name: filter_block_timestamp_gt
+      in: query
+      description: filter_block_timestamp_gt
+      required: false
+      schema:
+        type: string
+    EventFilterRequestBlockTimestampLte:
+      name: filter_block_timestamp_lte
+      in: query
+      description: filter_block_timestamp_lte
+      required: false
+      schema:
+        type: string
+    EventFilterRequestBlockTimestampLt:
+      name: filter_block_timestamp_lt
+      in: query
+      description: filter_block_timestamp_lt
+      required: false
+      schema:
+        type: string
+    EventFilterRequestTopic1:
+      name: filter_topic_1
+      in: query
+      description: filter_topic_1
+      required: false
+      schema:
+        type: string
+    EventFilterRequestTopic2:
+      name: filter_topic_2
+      in: query
+      description: filter_topic_2
+      required: false
+      schema:
+        type: string
+    EventFilterRequestTopic3:
+      name: filter_topic_3
+      in: query
+      description: filter_topic_3
+      required: false
+      schema:
+        type: string
+    EventFilterRequestTopic0:
+      name: filter_topic_0
+      in: query
+      description: filter_topic_0
+      required: false
+      schema:
+        type: string
     IndexActionAPIKeyHeader:
       name: X-Index-Action-Api-Key
       in: header
