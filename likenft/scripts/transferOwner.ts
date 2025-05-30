@@ -1,9 +1,8 @@
 import "@openzeppelin/hardhat-upgrades";
-import { ContractAlreadyVerifiedError } from "@nomicfoundation/hardhat-verify/internal/errors";
-import hardhat, { ethers, upgrades } from "hardhat";
+import { ethers } from "hardhat";
 
 async function main() {
-  const newOwner = process.env.PROTOCOL_OWNER_ADDRESS!
+  const newOwner = process.env.PROTOCOL_OWNER_ADDRESS!;
   console.log("TransferOwnership to", newOwner);
 
   const proxyAddress = process.env.ERC721_PROXY_ADDRESS!;
@@ -11,10 +10,7 @@ async function main() {
   console.log("Operator:", operator.address);
 
   const LikeProtocol = await ethers.getContractAt("LikeProtocol", proxyAddress);
-  console.log(
-    "Operating on LikeProtocol at:",
-    proxyAddress,
-  );
+  console.log("Operating on LikeProtocol at:", proxyAddress);
   const likeProtocol = LikeProtocol.connect(operator);
 
   console.log("On chain current owner:", await likeProtocol.owner());

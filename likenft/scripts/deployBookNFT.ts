@@ -1,5 +1,4 @@
 import "@openzeppelin/hardhat-upgrades";
-import { ContractAlreadyVerifiedError } from "@nomicfoundation/hardhat-verify/internal/errors";
 import hardhat, { ethers } from "hardhat";
 
 async function main() {
@@ -28,11 +27,13 @@ async function main() {
     newImplementationAddress,
   );
 
-// Too many time the block-explorer not yet catch the contract, not calling here.
-  console.log("Run following to verify after block-explorer catch the deployment")
+  // Too many time the block-explorer not yet catch the contract, not calling here.
+  console.log(
+    "Run following to verify after block-explorer catch the deployment",
+  );
   console.log(`
 BOOKNFT_ADDRESS=${newImplementationAddress} \\\n\
-    npm run script:${hardhat.network.name} scripts/verifyBookNFT.ts`)
+    npm run script:${hardhat.network.name} scripts/verifyBookNFT.ts`);
 }
 
 main()

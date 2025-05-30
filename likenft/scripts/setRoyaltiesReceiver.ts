@@ -1,6 +1,5 @@
 import "@openzeppelin/hardhat-upgrades";
-import { ContractAlreadyVerifiedError } from "@nomicfoundation/hardhat-verify/internal/errors";
-import hardhat, { ethers, upgrades } from "hardhat";
+import { ethers } from "hardhat";
 
 async function main() {
   const [operator] = await ethers.getSigners();
@@ -8,13 +7,13 @@ async function main() {
 
   const proxyAddress = process.env.ERC721_PROXY_ADDRESS!;
   const LikeProtocol = await ethers.getContractAt("LikeProtocol", proxyAddress);
-  console.log(
-    "Operating on LikeProtocol at:",
-    proxyAddress,
-  );
+  console.log("Operating on LikeProtocol at:", proxyAddress);
   const likeProtocol = LikeProtocol.connect(operator);
 
-  console.log("On chain royalty receiver:", await likeProtocol.getRoyaltyReceiver());
+  console.log(
+    "On chain royalty receiver:",
+    await likeProtocol.getRoyaltyReceiver(),
+  );
   await likeProtocol.setRoyaltyReceiver(process.env.RECEIVER);
   console.log("New royalty receiver:", await likeProtocol.getRoyaltyReceiver());
 }

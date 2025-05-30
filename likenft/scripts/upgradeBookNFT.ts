@@ -1,6 +1,5 @@
 import "@openzeppelin/hardhat-upgrades";
-import { ContractAlreadyVerifiedError } from "@nomicfoundation/hardhat-verify/internal/errors";
-import hardhat, { ethers } from "hardhat";
+import { ethers } from "hardhat";
 
 async function main() {
   const [operator] = await ethers.getSigners();
@@ -19,10 +18,7 @@ async function main() {
 
   const proxyAddress = process.env.ERC721_PROXY_ADDRESS!;
   const likeProtocol = await ethers.getContractAt("LikeProtocol", proxyAddress);
-  console.log(
-    "Operating on LikeProtocol at:",
-    proxyAddress,
-  );
+  console.log("Operating on LikeProtocol at:", proxyAddress);
 
   console.log(
     "Current bookNFT Implementation is:",

@@ -16,7 +16,7 @@ async function main() {
       timeout: 0,
       verifySourceCode: true,
       kind: "uups",
-      redeployImplementation: "always"
+      redeployImplementation: "always",
     },
   );
 

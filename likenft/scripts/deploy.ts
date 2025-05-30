@@ -3,8 +3,8 @@ import hardhat, { ethers, upgrades } from "hardhat";
 
 async function main() {
   console.log("Deploying LikeProtocol... Network:", hardhat.network.name);
-  
-  const deployer = await ethers.getSigner();
+
+  const [deployer] = await ethers.getSigners();
   console.log("Deploying contracts with:", await deployer.getAddress());
   const initOwner = process.env.INITIAL_OWNER_ADDRESS!;
   console.log("Deploying with initial owner with:", initOwner);
