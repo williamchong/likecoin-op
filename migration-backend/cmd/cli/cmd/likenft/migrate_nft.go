@@ -98,6 +98,7 @@ var migrateNFTCmd = &cobra.Command{
 			envCfg.InitialNewClassMinter,
 			envCfg.InitialNewClassUpdater,
 			envCfg.InitialBatchMintNFTsOwner,
+			envCfg.BatchMintItemPerPage,
 			id,
 		)
 		if err != nil {

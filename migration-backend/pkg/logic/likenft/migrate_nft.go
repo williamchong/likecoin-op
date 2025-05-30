@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"log/slog"
+	"strconv"
 	"time"
 
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
@@ -28,6 +29,7 @@ func MigrateNFTFromAssetMigration(
 	initialClassMinter string,
 	initialClassUpdater string,
 	initialBatchMintOwner string,
+	batchMintPerPage uint64,
 
 	assetMigrationNFTId uint64,
 ) (*model.LikeNFTAssetMigrationNFT, error) {
@@ -64,6 +66,7 @@ func MigrateNFTFromAssetMigration(
 		initialClassMinter,
 		initialClassUpdater,
 		initialBatchMintOwner,
+		batchMintPerPage,
 		mn.CosmosClassId,
 		mn.CosmosNFTId,
 		m.EthAddress,
@@ -100,6 +103,7 @@ func MigrateNFT(
 	initialClassMinter string,
 	initialClassUpdater string,
 	initialBatchMintOwner string,
+	batchMintPerPage uint64,
 
 	cosmosClassId string,
 	cosmosNFTId string,
@@ -135,6 +139,33 @@ func MigrateNFT(
 		p,
 		newClassAction,
 	)
+	if err != nil {
+		return nil, err
+	}
+
+	matches := nftIdRegex.FindStringSubmatch(cosmosNFTId)
+	nftIdStr := matches[numIndex]
+	nftId, err := strconv.ParseUint(nftIdStr, 10, 64)
+	if err == nil {
+		// nftid is serial
+		// tokenid is zero based
+		// So nftId=1 => expected token id should be from [0, 1]
+		expectedSupply := nftId + 1
+		_, err = DoBatchMintNFTsFromCosmosAction(
+			ctx,
+			logger,
+			db,
+			p,
+			n,
+			likecoinAPI,
+			c,
+			*newClassAction.EvmClassId,
+			expectedSupply,
+			batchMintPerPage,
+			initialBatchMintOwner,
+		)
+	}
+
 	if err != nil {
 		return nil, err
 	}
