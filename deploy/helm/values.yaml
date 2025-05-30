@@ -21,6 +21,8 @@ likecoinMigration:
 
 likenftMigration:
   name: likenft-migration
+  env:
+    BATCH_MINT_ITEM_PER_PAGE: "10"
 
   container:
     imageRepository: likecoin/likenft-migration
