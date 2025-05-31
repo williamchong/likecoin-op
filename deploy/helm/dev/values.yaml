@@ -50,7 +50,6 @@ migrationBackend:
     COSMOS_NODE_URL: https://node.testnet.like.co
     COSMOS_NODE_HTTP_TIMEOUT_SECONDS: "60"
     ROUTE_PREFIX: ""
-    ETH_NETWORK_PUBLIC_RPC_URL: https://sepolia.optimism.io
     ETH_SIGNER_BASE_URL: http://signer-backend
     ETH_TOKEN_ADDRESS: "0x0FE55BE56FDDafD0A6Eaf6D28e7F26ACFf1C51f0"
     ETH_LIKENFT_CONTRACT_ADDRESS: "0x67BCd74981c33E95E5e306085754DD0A721183F1"
@@ -77,7 +76,6 @@ signerBackend:
     SENTRY_DSN: https://09eb616dbe039a14c95a24f84003493a@o21224.ingest.us.sentry.io/4509349425905664
     SENTRY_DEBUG: "true"
     ROUTE_PREFIX: ""
-    ETH_NETWORK_PUBLIC_RPC_URL: https://sepolia.optimism.io
 
 likenftIndexer:
   container:
@@ -85,7 +83,6 @@ likenftIndexer:
   env:
     SENTRY_DSN: https://77cbd727e7667e05e0d1942037a06de6@o21224.ingest.us.sentry.io/4509349428199424
     SENTRY_DEBUG: "true"
-    ETH_NETWORK_PUBLIC_RPC_URL: https://sepolia.optimism.io
     ETH_LIKE_PROTOCOL_CONTRACT_ADDRESS: "0x67BCd74981c33E95E5e306085754DD0A721183F1"
     EVM_EVENT_LIKE_PROTOCOL_INITIAL_BLOCK_HEIGHT: "25837814"
     EVM_EVENT_QUERY_NUMBER_OF_BLOCKS_LIMIT: "500"

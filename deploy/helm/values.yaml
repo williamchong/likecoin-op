@@ -21,8 +21,6 @@ likecoinMigration:
 
 likenftMigration:
   name: likenft-migration
-  env:
-    BATCH_MINT_ITEM_PER_PAGE: "10"
 
   container:
     imageRepository: likecoin/likenft-migration
@@ -64,6 +62,8 @@ migrationAdmin:
 
 migrationBackend:
   name: migration-backend
+  env:
+    BATCH_MINT_ITEM_PER_PAGE: "10"
 
   container:
     imageRepository: likecoin/like-migration-backend
