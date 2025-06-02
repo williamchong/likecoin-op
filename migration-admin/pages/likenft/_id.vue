@@ -236,6 +236,39 @@
           </div>
         </UCard>
 
+        <UCard>
+          <!-- Action Buttons -->
+          <div :class="['flex', 'flex-col', 'gap-4']">
+            <div>
+              <AppButton
+                variant="warning"
+                :loading="deleting"
+                @click="promptRestartFailedMigrations"
+              >
+                {{ $t("migration.restart_failed") }}
+              </AppButton>
+            </div>
+            <div>
+              <AppButton
+                variant="warning"
+                :loading="deleting"
+                @click="promptRestartAllMigrations"
+              >
+                {{ $t("migration.restart_all") }}
+              </AppButton>
+            </div>
+            <div>
+              <AppButton
+                variant="warning"
+                :loading="deleting"
+                @click="promptRemoveMigration"
+              >
+                {{ $t("migration.delete_migration") }}
+              </AppButton>
+            </div>
+          </div>
+        </UCard>
+
         <!-- Error Details (if failed) -->
         <UCard
           v-if="migration.status === 'failed' && migration.failed_reason"
@@ -547,12 +580,14 @@
 import { format } from "date-fns";
 import Vue from "vue";
 
+import { makeCreateMigrationAPI } from "~/apis/CreateMigration";
 import { makeGetLikeNFTMigrationsAPI } from "~/apis/GetLikeNFTMigration";
 import {
   LikeNFTMigrationDetail,
   LikeNFTMigrationStatus,
 } from "~/apis/models/likenftMigration";
 import { makeRemoveLikeNFTMigrationsAPI } from "~/apis/RemoveLikeNFTMigration";
+import { makeRetryFailedAssetsMigrationAPI } from "~/apis/RetryFailedAssetsMigration";
 import AppButton from "~/components/AppButton.vue";
 import HeroBanner from "~/components/HeroBanner.vue";
 import LoadingIcon from "~/components/LoadingIcon.vue";
@@ -589,6 +624,12 @@ export default Vue.extend({
     },
     chain(): string {
       return LIKECOIN_CHAIN_NAME(this.$appConfig.isTestnet);
+    },
+    failedMigration(): LikeNFTMigrationDetail | null {
+      if (this.migration != null && this.migration.status === "failed") {
+        return this.migration;
+      }
+      return null;
     },
   },
 
@@ -632,6 +673,51 @@ export default Vue.extend({
       }
     },
 
+    async retryFailedAssetsMigration() {
+      if (this.failedMigration == null) {
+        return;
+      }
+      this.deleting = true;
+      try {
+        const resp = await makeRetryFailedAssetsMigrationAPI(
+          this.failedMigration.cosmos_address
+        )(this.$apiClient)({
+          book_nft_collection: this.failedMigration.classes
+            .filter((c) => c.status === "failed")
+            .map((c) => c.cosmos_class_id),
+          book_nft: this.failedMigration.nfts
+            .filter((n) => n.status === "failed")
+            .map((n) => ({
+              class_id: n.cosmos_class_id,
+              nft_id: n.cosmos_nft_id,
+            })),
+        });
+        this.migration = resp.migration;
+      } finally {
+        this.deleting = false;
+      }
+    },
+
+    async retryAllAssetsMigration() {
+      if (this.failedMigration == null) {
+        return;
+      }
+      this.deleting = true;
+      try {
+        await makeRemoveLikeNFTMigrationsAPI(this.migrationId)(
+          this.$apiClient
+        )();
+        const resp = await makeCreateMigrationAPI(this.$apiClient)({
+          asset_snapshot_id: this.failedMigration.likenft_asset_snapshot_id,
+          cosmos_address: this.failedMigration.cosmos_address,
+          eth_address: this.failedMigration.eth_address,
+        });
+        this.$router.replace(`/likenft/${resp.migration.id}`);
+      } finally {
+        this.deleting = false;
+      }
+    },
+
     async removeMigration() {
       this.deleting = true;
       try {
@@ -641,6 +727,24 @@ export default Vue.extend({
         this.$router.push("/likenft");
       } finally {
         this.deleting = false;
+      }
+    },
+
+    async promptRestartFailedMigrations() {
+      if (
+        confirm(
+          this.$t("migration.confirm_restart_failed_migrations") as string
+        )
+      ) {
+        await this.retryFailedAssetsMigration();
+      }
+    },
+
+    async promptRestartAllMigrations() {
+      if (
+        confirm(this.$t("migration.confirm_restart_all_migrations") as string)
+      ) {
+        await this.retryAllAssetsMigration();
       }
     },
 
