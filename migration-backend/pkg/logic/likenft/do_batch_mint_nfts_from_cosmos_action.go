@@ -3,6 +3,7 @@ package likenft
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"log/slog"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -18,7 +19,7 @@ import (
 )
 
 type BatchMintNFTsFromCosmosAction interface {
-	Act(ctx context.Context) (*model.LikeNFTMigrationActionBatchMintNFTsFromCosmos, error)
+	Act(ctx context.Context) error
 }
 
 type batchMintNFTsFromCosmosAction struct {
@@ -56,63 +57,49 @@ func MakeBatchMintNFTsFromCosmosAction(
 	}
 }
 
-func (a *batchMintNFTsFromCosmosAction) act(
-	ctx context.Context,
-	evmClassID string,
-	expectedSupply uint64,
-) ([]cosmostoevmnftmirror.CosmosToEVMNFTMirrorResult, error) {
-	cosmosClassID, err := a.cosmosClassIDRetriever.GetByEvmClassId(evmClassID)
+func (a *batchMintNFTsFromCosmosAction) Act(ctx context.Context) error {
+	cosmosClassID, err := a.cosmosClassIDRetriever.GetByEvmClassId(a.evmClassId)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return a.mirror.Mirror(ctx, cosmosClassID, evmClassID, expectedSupply)
-}
 
-func (a *batchMintNFTsFromCosmosAction) Act(ctx context.Context) (*model.LikeNFTMigrationActionBatchMintNFTsFromCosmos, error) {
-	lc := actionlifecycle.MakeLikeNFTMigrationActionBatchMintNFTsFromCosmosActionLifecycle(
-		db.MakeLikeNFTMigrationActionBatchMintNFTsFromCosmosRepository(a.db),
-		a.evmClassId,
-		a.currentSupply,
-		a.expectedSupply,
-		a.batchMintSize,
-		a.initialBatchMintOwner,
-	)
-
-	return actionlifecycle.WithActionLifecycle[
+	var lc actionlifecycle.ActionLifecycle[
 		actionlifecycle.LikeNFTMigrationActionBatchMintNFTsFromCosmosActionLifecycleSucResp,
 		model.LikeNFTMigrationActionBatchMintNFTsFromCosmos,
-		actionlifecycle.ActionLifecycle[
-			actionlifecycle.LikeNFTMigrationActionBatchMintNFTsFromCosmosActionLifecycleSucResp,
-			model.LikeNFTMigrationActionBatchMintNFTsFromCosmos,
-		],
-	](ctx, lc, func(
-		ctx context.Context,
-		lc actionlifecycle.ActionLifecycle[
-			actionlifecycle.LikeNFTMigrationActionBatchMintNFTsFromCosmosActionLifecycleSucResp,
-			model.LikeNFTMigrationActionBatchMintNFTsFromCosmos,
-		],
-	) (*actionlifecycle.LikeNFTMigrationActionBatchMintNFTsFromCosmosActionLifecycleSucResp, error) {
-		results, err := a.act(ctx, a.evmClassId, a.expectedSupply)
-		if err != nil {
-			return nil, err
-		}
-		// No minting at all
-		if len(results) == 0 {
-			return &actionlifecycle.LikeNFTMigrationActionBatchMintNFTsFromCosmosActionLifecycleSucResp{
-				FromID:    a.expectedSupply,
-				ToID:      a.expectedSupply,
-				EvmTxHash: "",
-			}, nil
-		}
-		fromID := results[0].FromID
-		toID := results[len(results)-1].ToID
-		evmTxHash := results[len(results)-1].EvmTxHash
-		return &actionlifecycle.LikeNFTMigrationActionBatchMintNFTsFromCosmosActionLifecycleSucResp{
-			FromID:    fromID,
-			ToID:      toID,
-			EvmTxHash: evmTxHash,
-		}, nil
-	})
+	]
+
+	_, err = a.mirror.Mirror(
+		ctx,
+		cosmosClassID,
+		a.evmClassId,
+		a.expectedSupply,
+		func(ctx context.Context, fromID, toID uint64) error {
+			lc = actionlifecycle.MakeLikeNFTMigrationActionBatchMintNFTsFromCosmosActionLifecycle(
+				db.MakeLikeNFTMigrationActionBatchMintNFTsFromCosmosRepository(a.db),
+				a.evmClassId,
+				fromID,
+				toID,
+				a.batchMintSize,
+				a.initialBatchMintOwner,
+			)
+			_, err := lc.Begin(ctx)
+			return err
+		},
+		func(ctx context.Context, result cosmostoevmnftmirror.CosmosToEVMNFTMirrorResult) error {
+			_, err := lc.Success(ctx, &actionlifecycle.LikeNFTMigrationActionBatchMintNFTsFromCosmosActionLifecycleSucResp{
+				FromID:    result.FromID,
+				ToID:      result.ToID,
+				EvmTxHash: result.EvmTxHash,
+			})
+			return err
+		},
+		func(ctx context.Context, err error) error {
+			_, fErr := lc.Failed(ctx, err)
+			return errors.Join(err, fErr)
+		},
+	)
+
+	return err
 }
 
 func DoBatchMintNFTsFromCosmosAction(
@@ -129,10 +116,10 @@ func DoBatchMintNFTsFromCosmosAction(
 	expectedSupply uint64,
 	batchMintSize uint64,
 	batchMintOwner string,
-) (*model.LikeNFTMigrationActionBatchMintNFTsFromCosmos, error) {
+) error {
 	currentEvmSupply, err := bookNFTEvmClient.TotalSupply(common.HexToAddress(evmClassId))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	doAction := MakeBatchMintNFTsFromCosmosAction(

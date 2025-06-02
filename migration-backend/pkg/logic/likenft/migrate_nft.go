@@ -151,7 +151,7 @@ func MigrateNFT(
 		// tokenid is zero based
 		// So nftId=1 => expected token id should be from [0, 1]
 		expectedSupply := nftId + 1
-		_, err = DoBatchMintNFTsFromCosmosAction(
+		err = DoBatchMintNFTsFromCosmosAction(
 			ctx,
 			logger,
 			db,
