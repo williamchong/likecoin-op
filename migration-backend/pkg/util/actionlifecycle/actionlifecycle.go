@@ -10,14 +10,14 @@ type ActionLifecycle[SucResp any, ActionModel any] interface {
 
 func WithActionLifecycle[SucResp any, ActionModel any, LC ActionLifecycle[SucResp, ActionModel]](
 	ctx context.Context,
-	lc ActionLifecycle[SucResp, ActionModel],
-	fn func(ctx context.Context, lc ActionLifecycle[SucResp, ActionModel]) (*SucResp, error),
+	lc LC,
+	fn func(ctx context.Context) (*SucResp, error),
 ) (*ActionModel, error) {
 	_, err := lc.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := fn(ctx, lc)
+	resp, err := fn(ctx)
 	if err != nil {
 		return lc.Failed(ctx, err)
 	}

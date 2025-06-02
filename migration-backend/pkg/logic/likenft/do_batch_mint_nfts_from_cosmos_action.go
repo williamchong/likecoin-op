@@ -78,20 +78,12 @@ func (a *batchMintNFTsFromCosmosAction) Act(ctx context.Context) (*model.LikeNFT
 		a.initialBatchMintOwner,
 	)
 
-	return actionlifecycle.WithActionLifecycle[
-		actionlifecycle.LikeNFTMigrationActionBatchMintNFTsFromCosmosActionLifecycleSucResp,
-		model.LikeNFTMigrationActionBatchMintNFTsFromCosmos,
-		actionlifecycle.ActionLifecycle[
-			actionlifecycle.LikeNFTMigrationActionBatchMintNFTsFromCosmosActionLifecycleSucResp,
-			model.LikeNFTMigrationActionBatchMintNFTsFromCosmos,
-		],
-	](ctx, lc, func(
+	return actionlifecycle.WithActionLifecycle(ctx, lc, func(
 		ctx context.Context,
-		lc actionlifecycle.ActionLifecycle[
-			actionlifecycle.LikeNFTMigrationActionBatchMintNFTsFromCosmosActionLifecycleSucResp,
-			model.LikeNFTMigrationActionBatchMintNFTsFromCosmos,
-		],
-	) (*actionlifecycle.LikeNFTMigrationActionBatchMintNFTsFromCosmosActionLifecycleSucResp, error) {
+	) (
+		*actionlifecycle.LikeNFTMigrationActionBatchMintNFTsFromCosmosActionLifecycleSucResp,
+		error,
+	) {
 		results, err := a.act(ctx, a.evmClassId, a.expectedSupply)
 		if err != nil {
 			return nil, err
