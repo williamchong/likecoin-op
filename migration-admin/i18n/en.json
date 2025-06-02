@@ -9,103 +9,103 @@
     }
   },
   "common": {
-    "loading": "Loading...",
     "copied_to_clipboard": "Copied to clipboard!",
-    "empty": "No records found"
+    "empty": "No records found",
+    "loading": "Loading..."
+  },
+  "migration": {
+    "confirm_delete_migration": "Are you sure you want to delete this migration? This cannot be undone.",
+    "delete_migration": "Delete Migration",
+    "error_details": "Error Details",
+    "error_fetching": "Error fetching transaction details",
+    "hashes": "Transaction Hashes",
+    "information": "Migration Information",
+    "network": "Network"
   },
   "section": {
     "likecoin-migration": {
-      "title": "LikeCoin Migration",
       "table": {
-        "header": {
-          "id": "ID",
-          "created-at": "Created At",
-          "cosmos-address": "Cosmos Address",
-          "eth-address": "ETH Address",
-          "amount": "Amount",
-          "cosmos-tx-hash": "Cosmos TX Hash",
-          "evm-tx-hash": "EVM TX Hash",
-          "status": "Status",
-          "failed_reason": "Failed Reason"
+        "data": {
+          "status": {
+            "completed": "Completed",
+            "evm_minting": "EVM Minting",
+            "evm_verifying": "EVM Verifying",
+            "failed": "Failed",
+            "pending_cosmos_tx_hash": "Pending Cosmos TX Hash",
+            "verifying_cosmos_tx": "Verifying Cosmos TX"
+          }
         },
         "filter": {
           "all-items": "All Items",
-          "pending_cosmos_tx_hash": "Pending Cosmos TX Hash",
-          "verifying_cosmos_tx": "Verifying Cosmos TX",
+          "completed": "Completed",
           "evm_minting": "EVM Minting",
           "evm_verifying": "EVM Verifying",
-          "completed": "Completed",
-          "failed": "Failed"
+          "failed": "Failed",
+          "pending_cosmos_tx_hash": "Pending Cosmos TX Hash",
+          "verifying_cosmos_tx": "Verifying Cosmos TX"
         },
-        "data": {
-          "status": {
-            "pending_cosmos_tx_hash": "Pending Cosmos TX Hash",
-            "verifying_cosmos_tx": "Verifying Cosmos TX",
-            "evm_minting": "EVM Minting",
-            "evm_verifying": "EVM Verifying",
-            "completed": "Completed",
-            "failed": "Failed"
-          }
+        "header": {
+          "amount": "Amount",
+          "cosmos-address": "Cosmos Address",
+          "cosmos-tx-hash": "Cosmos TX Hash",
+          "created-at": "Created At",
+          "eth-address": "ETH Address",
+          "evm-tx-hash": "EVM TX Hash",
+          "failed_reason": "Failed Reason",
+          "id": "ID",
+          "status": "Status"
         }
-      }
+      },
+      "title": "LikeCoin Migration"
     },
     "likenft-migration": {
-      "title": "LikeNFT Migration",
       "detail": {
-        "nft-class": {
-          "title": "NFT Classes",
-          "class-id": "Class ID: {class_id}",
-          "failed-reason": "Failed Reason",
-          "enqueued-time": "Enqueued Time",
-          "finished-time": "Finished Time",
-          "evn-tx-hash": "EVM Tx Hash"
-        },
         "nft": {
-          "title": "NFTs",
-          "nft-id": "ID: {nft_id}",
           "class-id": "Class ID: {class_id}",
-          "evn-tx-hash": "EVM Tx Hash: {hash}",
-          "enqueued-time": "Enqueued Time",
-          "finished-time": "Finished Time",
           "created-at": "Created At",
-          "failed-reason": "Failed Reason"
+          "enqueued-time": "Enqueued Time",
+          "evn-tx-hash": "EVM Tx Hash: {hash}",
+          "failed-reason": "Failed Reason",
+          "finished-time": "Finished Time",
+          "nft-id": "ID: {nft_id}",
+          "title": "NFTs"
+        },
+        "nft-class": {
+          "class-id": "Class ID: {class_id}",
+          "enqueued-time": "Enqueued Time",
+          "evn-tx-hash": "EVM Tx Hash",
+          "failed-reason": "Failed Reason",
+          "finished-time": "Finished Time",
+          "title": "NFT Classes"
         }
       },
       "table": {
-        "header": {
-          "id": "ID",
-          "asset-snapshot-id": "Asset Snapshot ID",
-          "created-at": "Created At",
-          "cosmos-address": "Cosmos Address",
-          "eth-address": "ETH Address",
-          "status": "Status",
-          "failed_reason": "Failed Reason"
+        "data": {
+          "status": {
+            "completed": "Completed",
+            "failed": "Failed",
+            "in_progress": "In Progress",
+            "init": "Initialized"
+          }
         },
         "filter": {
           "all-items": "All Items",
-          "init": "Initialized",
-          "in_progress": "In Progress",
           "completed": "Completed",
-          "failed": "Failed"
+          "failed": "Failed",
+          "in_progress": "In Progress",
+          "init": "Initialized"
         },
-        "data": {
-          "status": {
-            "init": "Initialized",
-            "in_progress": "In Progress",
-            "completed": "Completed",
-            "failed": "Failed"
-          }
+        "header": {
+          "asset-snapshot-id": "Asset Snapshot ID",
+          "cosmos-address": "Cosmos Address",
+          "created-at": "Created At",
+          "eth-address": "ETH Address",
+          "failed_reason": "Failed Reason",
+          "id": "ID",
+          "status": "Status"
         }
-      }
+      },
+      "title": "LikeNFT Migration"
     }
-  },
-  "migration": {
-    "information": "Migration Information",
-    "hashes": "Transaction Hashes",
-    "error_details": "Error Details",
-    "network": "Network",
-    "delete_migration": "Delete Migration",
-    "confirm_delete_migration": "Are you sure you want to delete this migration? This cannot be undone.",
-    "error_fetching": "Error fetching transaction details"
   }
 }

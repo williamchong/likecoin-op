@@ -134,13 +134,9 @@
                     'bg-green-100 text-green-800':
                       migration.status === 'completed',
                     'bg-yellow-100 text-yellow-800':
-                      migration.status === 'pending_cosmos_tx_hash',
+                      migration.status === 'init',
                     'bg-blue-100 text-blue-800':
-                      migration.status === 'verifying_cosmos_tx',
-                    'bg-purple-100 text-purple-800':
-                      migration.status === 'evm_minting',
-                    'bg-indigo-100 text-indigo-800':
-                      migration.status === 'evm_verifying',
+                      migration.status === 'in_progress',
                   },
                 ]"
               >

@@ -28,9 +28,9 @@
           <div :class="['relative']">
             <div :class="['flex', 'items-center']">
               <input
-                type="text"
                 ref="searchInput"
                 v-model="searchKeyword"
+                type="text"
                 placeholder="Search..."
                 :class="[
                   'w-full',
@@ -82,7 +82,7 @@
         </div>
       </div>
       <UTable
-        v-if="tableData.length > 0 || isLoading"
+        v-if="tableData.length > 0 || loading"
         :class="['w-full', 'flex', 'flex-1', 'flex-col']"
         :ui="{
           base: ['table-fixed', 'w-full'].join(' '),
@@ -149,12 +149,8 @@
           <span
             :class="[
               {
-                ['text-[#C19869]']:
-                  row.status === migrationStatus.PendingCosmosTxHash,
-                ['text-[#4195D2]']:
-                  row.status === migrationStatus.VerifyingCosmosTx ||
-                  row.status === migrationStatus.EvmMinting ||
-                  row.status === migrationStatus.EvmVerifying,
+                ['text-[#C19869]']: row.status === migrationStatus.Init,
+                ['text-[#4195D2]']: row.status === migrationStatus.InProgress,
                 ['text-[#8AB470]']: row.status === migrationStatus.Completed,
                 ['text-[#C72F2F]']: row.status === migrationStatus.Failed,
               },
@@ -251,20 +247,20 @@
 </template>
 
 <script lang="ts">
+import { format } from "date-fns";
 import Vue, { PropType } from "vue";
 import type { TranslateResult } from "vue-i18n";
-import { format } from "date-fns";
 
 import {
   LikeNFTMigration,
   LikeNFTMigrationStatus,
 } from "~/apis/models/likenftMigration";
-
+import FontAwesomeIcon from "~/components/FontAwesomeIcon.vue";
 import LoadingIcon from "~/components/LoadingIcon.vue";
+
 import UCard from "../nuxtui/components/UCard.vue";
 import USelectMenu from "../nuxtui/components/USelectMenu.vue";
 import UTable from "../nuxtui/components/UTable.vue";
-import FontAwesomeIcon from "~/components/FontAwesomeIcon.vue";
 
 interface Data {
   selectedStatus: "all-items" | LikeNFTMigrationStatus;
@@ -308,38 +304,6 @@ export default Vue.extend({
       searchTimeout: undefined,
       wasSearchInputFocused: false,
     };
-  },
-  watch: {
-    selectedStatus() {
-      this.$emit(
-        "status-change",
-        this.$data.selectedStatus === "all-items"
-          ? null
-          : this.$data.selectedStatus
-      );
-    },
-    searchKeyword() {
-      if (this.searchTimeout != null) {
-        clearTimeout(this.searchTimeout);
-      }
-      // Check if search input is focused before emitting search event
-      this.wasSearchInputFocused =
-        document.activeElement === this.$refs.searchInput;
-      this.searchTimeout = setTimeout(() => {
-        this.$emit("search", this.searchKeyword);
-      }, 500);
-    },
-    loading(newVal, oldVal) {
-      // If loading has finished and search input was focused before, refocus it
-      if (oldVal === true && newVal === false && this.wasSearchInputFocused) {
-        this.$nextTick(() => {
-          const searchInput = this.$refs.searchInput as HTMLInputElement;
-          if (searchInput) {
-            searchInput.focus();
-          }
-        });
-      }
-    },
   },
   computed: {
     statusTranslation(): { [key in LikeNFTMigrationStatus]: TranslateResult } {
@@ -439,6 +403,38 @@ export default Vue.extend({
     hasMoreItems(): boolean {
       // If we have fewer items than the limit, there are no more pages
       return this.migrations.length >= this.limit;
+    },
+  },
+  watch: {
+    selectedStatus() {
+      this.$emit(
+        "status-change",
+        this.$data.selectedStatus === "all-items"
+          ? null
+          : this.$data.selectedStatus
+      );
+    },
+    searchKeyword() {
+      if (this.searchTimeout != null) {
+        clearTimeout(this.searchTimeout);
+      }
+      // Check if search input is focused before emitting search event
+      this.wasSearchInputFocused =
+        document.activeElement === this.$refs.searchInput;
+      this.searchTimeout = setTimeout(() => {
+        this.$emit("search", this.searchKeyword);
+      }, 500);
+    },
+    loading(newVal, oldVal) {
+      // If loading has finished and search input was focused before, refocus it
+      if (oldVal === true && newVal === false && this.wasSearchInputFocused) {
+        this.$nextTick(() => {
+          const searchInput = this.$refs.searchInput as HTMLInputElement;
+          if (searchInput) {
+            searchInput.focus();
+          }
+        });
+      }
     },
   },
   methods: {
