@@ -10,6 +10,18 @@ export function makeAPI<Resp, Req = void>(def: {
 }): (axios: NuxtAxiosInstance) => (req: Req) => Promise<Resp>;
 export function makeAPI<Resp, Req = void>(def: {
   url: string;
+  method: "POST" | "put";
+  requestSchema?: z.ZodSchema<Req>;
+  responseSchema: z.ZodSchema<Resp>;
+}): (axios: NuxtAxiosInstance) => (req: Req) => Promise<Resp>;
+export function makeAPI<Resp, Req = void>(def: {
+  url: string;
+  method: "PUT" | "put";
+  requestSchema?: z.ZodSchema<Req>;
+  responseSchema: z.ZodSchema<Resp>;
+}): (axios: NuxtAxiosInstance) => (req: Req) => Promise<Resp>;
+export function makeAPI<Resp, Req = void>(def: {
+  url: string;
   method: "DELETE" | "delete";
   requestSchema?: z.ZodSchema<URLSearchParams, ZodTypeDef, Req>;
   responseSchema: z.ZodSchema<Resp>;
