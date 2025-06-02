@@ -99,6 +99,13 @@ spec:
                 name: {{ .Values.migrationBackend.name }}
                 port:
                   number: {{ .Values.migrationBackend.service.port }}
+          - path: /likenft/migration
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.migrationBackend.name }}
+                port:
+                  number: {{ .Values.migrationBackend.service.port }}
     - host: {{ .Values.migrationBackend.ingress.host }}
       http:
         paths:
