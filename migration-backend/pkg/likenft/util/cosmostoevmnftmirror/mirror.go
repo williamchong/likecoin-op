@@ -3,6 +3,7 @@ package cosmostoevmnftmirror
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"math"
 
@@ -26,6 +27,9 @@ type CosmosToEVMNFTMirror interface {
 		cosmosClassId string,
 		evmClassId string,
 		expectedSupply uint64,
+		onPageBegin func(ctx context.Context, fromID uint64, toID uint64) error,
+		onPageSuccess func(ctx context.Context, result CosmosToEVMNFTMirrorResult) error,
+		onPageFailed func(ctx context.Context, err error) error,
 	) ([]CosmosToEVMNFTMirrorResult, error)
 }
 
@@ -67,6 +71,9 @@ func (m *cosmosToEVMNFTMirror) Mirror(
 	cosmosClassId string,
 	evmClassId string,
 	expectedSupply uint64,
+	onPageBegin func(ctx context.Context, fromID uint64, toID uint64) error,
+	onPageSuccess func(ctx context.Context, result CosmosToEVMNFTMirrorResult) error,
+	onPageFailed func(ctx context.Context, err error) error,
 ) ([]CosmosToEVMNFTMirrorResult, error) {
 	mylogger := m.logger.WithGroup("Mirror").
 		With("cosmosClassId", cosmosClassId).
@@ -184,6 +191,12 @@ func (m *cosmosToEVMNFTMirror) Mirror(
 			break
 		}
 
+		err = onPageBegin(ctx, fromID, toID)
+
+		if err != nil {
+			return nil, err
+		}
+
 		_, txReceipt, err := m.bookNFTEvmClient.MintNFTs(
 			ctx,
 			mylogger,
@@ -195,15 +208,22 @@ func (m *cosmosToEVMNFTMirror) Mirror(
 		)
 
 		if err != nil {
-			return nil, err
+			return nil, errors.Join(err, onPageFailed(ctx, err))
 		}
 
 		mylogger.With("txHash", txReceipt.TxHash).Info("Page Completed")
-		results = append(results, CosmosToEVMNFTMirrorResult{
+		result := CosmosToEVMNFTMirrorResult{
 			FromID:    fromID,
 			ToID:      toID,
 			EvmTxHash: txReceipt.TxHash.Hex(),
-		})
+		}
+		err = onPageSuccess(ctx, result)
+
+		if err != nil {
+			return nil, err
+		}
+
+		results = append(results, result)
 	}
 
 	return results, nil
