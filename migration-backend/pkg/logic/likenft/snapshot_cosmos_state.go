@@ -39,9 +39,11 @@ func (l *SnapshotCosmosStateLogic) Execute(ctx context.Context, cosmosAddress st
 		return l.failed(ctx, l.DB, latestSnapshot, fmt.Errorf("failed getting latest block: %v", err))
 	}
 
-	cosmosClasses, err := l.LikeNFTCosmosClient.QueryAllNFTClassesByOwner(cosmos.QueryAllNFTClassesByOwnerRequest{
-		ISCNOwner: cosmosAddress,
-	})
+	cosmosClasses, err := l.LikeNFTCosmosClient.QueryAllNFTClassesByOwner(
+		ctx,
+		cosmos.QueryAllNFTClassesByOwnerRequest{
+			ISCNOwner: cosmosAddress,
+		})
 
 	if err != nil {
 		return l.failed(ctx, l.DB, latestSnapshot, fmt.Errorf("failed getting classes by owner: %v", err))

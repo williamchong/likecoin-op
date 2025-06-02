@@ -1,6 +1,7 @@
 package cosmos
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -15,11 +16,11 @@ type QueryNFTClassesByOwnerRequest struct {
 }
 
 type QueryNFTClassesByOwnerPageRequest struct {
-	Key        int    `url:"pagination.key"`
-	Offset     uint64 `url:"pagination.offset"`
-	Limit      uint64 `url:"pagination.limit"`
-	CountTotal bool   `url:"pagination.countTotal"`
-	Reverse    bool   `url:"reverse"`
+	Key        *int    `url:"pagination.key"`
+	Offset     *uint64 `url:"pagination.offset"`
+	Limit      *uint64 `url:"pagination.limit"`
+	CountTotal *bool   `url:"pagination.countTotal"`
+	Reverse    *bool   `url:"reverse"`
 }
 
 type QueryNFTClassesByOwnerResponse struct {
@@ -59,31 +60,46 @@ type QueryAllNFTClasssesByOwnerResponse struct {
 	Classes []model.ClassListItem `json:"classes,omitempty"`
 }
 
-func (c *LikeNFTCosmosClient) QueryAllNFTClassesByOwner(request QueryAllNFTClassesByOwnerRequest) (*QueryAllNFTClasssesByOwnerResponse, error) {
-	c1, err := c.QueryNFTClassesByOwner(QueryNFTClassesByOwnerRequest{
-		ISCNOwner: request.ISCNOwner,
-		QueryNFTClassesByOwnerPageRequest: QueryNFTClassesByOwnerPageRequest{
-			Limit:      1,
-			CountTotal: true,
-		},
-	})
+func (c *LikeNFTCosmosClient) QueryAllNFTClassesByOwner(ctx context.Context, request QueryAllNFTClassesByOwnerRequest) (*QueryAllNFTClasssesByOwnerResponse, error) {
+	successChan := make(chan []model.ClassListItem, 1)
+	errChan := make(chan error, 1)
 
-	if err != nil {
+	go func() {
+		classes := make([]model.ClassListItem, 0)
+		var nextKey *int = nil
+
+		for {
+			select {
+			case <-ctx.Done():
+				errChan <- ctx.Err()
+				return
+			default:
+			}
+			queryNFTClassesByOwnerResponse, err := c.QueryNFTClassesByOwner(QueryNFTClassesByOwnerRequest{
+				ISCNOwner: request.ISCNOwner,
+				QueryNFTClassesByOwnerPageRequest: QueryNFTClassesByOwnerPageRequest{
+					Key: nextKey,
+				},
+			})
+			if err != nil {
+				errChan <- err
+				return
+			}
+			if queryNFTClassesByOwnerResponse.Pagination.Count == 0 {
+				successChan <- classes
+				return
+			}
+			classes = append(classes, queryNFTClassesByOwnerResponse.Classes...)
+			nextKey = &queryNFTClassesByOwnerResponse.Pagination.NextKey
+		}
+	}()
+
+	select {
+	case err := <-errChan:
 		return nil, err
+	case classes := <-successChan:
+		return &QueryAllNFTClasssesByOwnerResponse{
+			Classes: classes,
+		}, nil
 	}
-
-	c2, err := c.QueryNFTClassesByOwner(QueryNFTClassesByOwnerRequest{
-		ISCNOwner: request.ISCNOwner,
-		QueryNFTClassesByOwnerPageRequest: QueryNFTClassesByOwnerPageRequest{
-			Limit: c1.Pagination.Count,
-		},
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &QueryAllNFTClasssesByOwnerResponse{
-		Classes: c2.Classes,
-	}, nil
 }
