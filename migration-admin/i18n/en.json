@@ -96,7 +96,8 @@
           "init": "Initialized"
         },
         "header": {
-          "asset-snapshot-id": "Asset Snapshot ID",
+          "asset-migration-id": "Migration ID",
+          "asset-snapshot-id": "Snapshot ID",
           "cosmos-address": "Cosmos Address",
           "created-at": "Created At",
           "eth-address": "ETH Address",

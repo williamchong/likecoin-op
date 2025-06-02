@@ -354,6 +354,14 @@ export default Vue.extend({
     columns() {
       return [
         {
+          key: "id",
+          label: this.$t(
+            "section.likenft-migration.table.header.asset-migration-id"
+          ),
+          class: "w-[10%]",
+          rowClass: "w-[10%]",
+        },
+        {
           key: "likenft_asset_snapshot_id",
           label: this.$t(
             "section.likenft-migration.table.header.asset-snapshot-id"
