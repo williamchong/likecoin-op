@@ -99,6 +99,15 @@ func (UnimplementedHandler) Token(ctx context.Context, params TokenParams) (r *N
 	return r, ht.ErrNotImplemented
 }
 
+// TokenAccountsByBookNFT implements tokenAccountsByBookNFT operation.
+//
+// Query token accounts by BookNFT.
+//
+// GET /booknft/{id}/tokens/account
+func (UnimplementedHandler) TokenAccountsByBookNFT(ctx context.Context, params TokenAccountsByBookNFTParams) (r *TokenAccountsByBookNFTOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // TokensByAccount implements tokensByAccount operation.
 //
 // Query tokens by account.

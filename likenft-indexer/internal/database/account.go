@@ -5,11 +5,19 @@ import (
 
 	"likenft-indexer/ent"
 	"likenft-indexer/ent/account"
+	"likenft-indexer/ent/nft"
+	"likenft-indexer/ent/nftclass"
 )
 
 type AccountRepository interface {
 	GetAccountByEvmAddress(ctx context.Context, evmAddress string) (*ent.Account, error)
 	GetOrCreateAccount(ctx context.Context, acct *ent.Account) (*ent.Account, error)
+
+	GetTokenAccountsByBookNFT(
+		ctx context.Context,
+		bookNFTId string,
+		pagination AccountPagination,
+	) (accounts []*ent.Account, count int, nextKey int, err error)
 }
 
 type accountRepository struct {
@@ -70,4 +78,36 @@ func (r *accountRepository) GetOrCreateAccount(ctx context.Context, acct *ent.Ac
 	}
 
 	return <-resChan, nil
+}
+
+func (r *accountRepository) GetTokenAccountsByBookNFT(
+	ctx context.Context,
+	bookNFTId string,
+	pagination AccountPagination,
+) (accounts []*ent.Account, count int, nextKey int, err error) {
+	q := r.dbService.Client().Account.Query().
+		Where(
+			account.HasNftsWith(
+				nft.HasClassWith(nftclass.AddressEqualFold(bookNFTId)),
+			),
+		)
+
+	count, err = q.Count(ctx)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	q = pagination.HandlePagination(q)
+
+	accounts, err = q.All(ctx)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	nextKey = 0
+	if len(accounts) > 0 {
+		nextKey = accounts[len(accounts)-1].ID
+	}
+
+	return accounts, count, nextKey, nil
 }
