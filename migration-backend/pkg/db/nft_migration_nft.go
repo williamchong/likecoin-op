@@ -1,8 +1,10 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
@@ -171,6 +173,31 @@ WHERE likenft_asset_migration_id = $1
 	}
 
 	return nfts, nil
+}
+
+func QueryTotalPendingEstimatedDurationFromMigrationNFTs(
+	ctx context.Context,
+	tx TxLike,
+) (time.Duration, error) {
+	row := tx.QueryRowContext(
+		ctx, `SELECT
+	SUM(estimated_duration_needed)
+FROM likenft_asset_migration_nft
+WHERE status in ($1, $2)
+`, model.LikeNFTAssetMigrationNFTStatusInit, model.LikeNFTAssetMigrationNFTStatusInProgress)
+
+	// Null when no records
+	var maybeTotalEstimatedDuration *time.Duration
+	err := row.Scan(&maybeTotalEstimatedDuration)
+
+	if err != nil {
+		return time.Duration(0), err
+	}
+
+	if maybeTotalEstimatedDuration != nil {
+		return *maybeTotalEstimatedDuration, nil
+	}
+	return time.Duration(0), nil
 }
 
 func InsertLikeNFTAssetMigrationNFTs(
