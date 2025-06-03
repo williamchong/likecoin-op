@@ -322,6 +322,9 @@ describe("BookNFTClass", () => {
     };
     await expect(mintNFT()).to.be.not.rejected;
     await expect(await nftClassContract.totalSupply()).to.equal(2n);
+    await expect(await nftClassContract.tokenURI(0n)).to.equal(
+      "data:application/json;base64,eyJpbWFnZSI6ImlwZnM6Ly9RbVVFVjQxSGJpN3FreGVZU1ZVdG9FNXhrZlJGbnFTZDYyZmE1djhOYXlhNVlzIiwiaW1hZ2VfZGF0YSI6IiIsImV4dGVybmFsX3VybCI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJkZXNjcmlwdGlvbiI6IjIwMjQxMjE5MTcyOSAjMDAwMSBEZXNjcmlwdGlvbiIsIm5hbWUiOiIyMDI0MTIxOTE3MjkgIzAwMDEiLCJhdHRyaWJ1dGVzIjpbeyJ0cmFpdF90eXBlIjoiSVNDTiBJRCIsInZhbHVlIjoiaXNjbjovL2xpa2Vjb2luLWNoYWluL0Z5WjEzbV9oZ3d6VUM2VW9hUzN2RmRZdmRHNlFYZmFqVTN2Y2F0dzdYMWMvMSJ9XSwiYmFja2dyb3VuZF9jb2xvciI6IiIsImFuaW1hdGlvbl91cmwiOiIiLCJ5b3V0dWJlX3VybCI6IiJ9",
+    );
   });
 
   it("should check token id when safe mint with token id", async function () {

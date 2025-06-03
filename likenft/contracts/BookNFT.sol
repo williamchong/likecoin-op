@@ -9,6 +9,7 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 import {IERC1967} from "@openzeppelin/contracts/interfaces/IERC1967.sol";
 
 import {BookConfig} from "../types/BookConfig.sol";
@@ -421,7 +422,12 @@ contract BookNFT is
     function contractURI() public view returns (string memory) {
         BookNFTStorage storage $ = _getClassStorage();
         return
-            string.concat("data:application/json; charset=utf-8,", $.metadata);
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    Base64.encode(abi.encodePacked($.metadata))
+                )
+            );
     }
 
     function maxSupply() public view returns (uint64) {
@@ -434,9 +440,11 @@ contract BookNFT is
     ) public view virtual override returns (string memory) {
         BookNFTStorage storage $ = _getClassStorage();
         return
-            string.concat(
-                "data:application/json; charset=utf-8,",
-                $.tokenURIMap[_tokenId]
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    Base64.encode(abi.encodePacked($.tokenURIMap[_tokenId]))
+                )
             );
     }
 
