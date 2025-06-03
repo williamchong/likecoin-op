@@ -8,6 +8,10 @@ import "@nomicfoundation/hardhat-ledger";
 
 import dotenv from "dotenv";
 dotenv.config({ path: process.env.DOTENV_CONFIG_PATH });
+let signerKey =
+  process.env.DEPLOY_WALLET_PRIVATE_KEY ||
+  "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+signerKey = `0x${signerKey}`;
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -72,12 +76,12 @@ const config: HardhatUserConfig = {
     "optimism-sepolia": {
       url: "https://sepolia.optimism.io",
       chainId: 11155420,
-      accounts: [`0x${process.env.DEPLOY_WALLET_PRIVATE_KEY}`],
+      accounts: [signerKey],
     },
     sepolia: {
       url: "https://sepolia.drpc.org",
       chainId: 11155111,
-      accounts: [`0x${process.env.DEPLOY_WALLET_PRIVATE_KEY}`],
+      accounts: [signerKey],
     },
   },
 };

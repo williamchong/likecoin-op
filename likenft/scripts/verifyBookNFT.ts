@@ -3,8 +3,8 @@ import { ContractAlreadyVerifiedError } from "@nomicfoundation/hardhat-verify/in
 import hardhat, { ethers } from "hardhat";
 
 async function main() {
-  if (hardhat.network.name !== "localhost") {
-    throw e;
+  if (hardhat.network.name == "localhost") {
+    throw "No verification at local";
   }
   console.log(
     "Trying to verify BookNFT implementation at:",
@@ -28,7 +28,13 @@ async function main() {
         bookNFTAddress,
       );
     }
+    console.log("Unknow error", e);
   }
+
+  console.log("Run following to upgrade LikeProtocol to use new BookNFT");
+  console.log(`
+BOOKNFT_ADDRESS=${bookNFTAddress} \\\n\
+    npm run script:${hardhat.network.name} scripts/upgradeBookNFT.ts`);
 }
 
 main()
