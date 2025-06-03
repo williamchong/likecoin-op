@@ -22,6 +22,9 @@ type EnvConfig struct {
 	LikecoinAPIUrlBase            string `envconfig:"LIKECOIN_API_URL_BASE"`
 	LikecoinAPIHTTPTimeoutSeconds int    `envconfig:"LIKECOIN_API_HTTP_TIMEOUT_SECONDS" default:"10"`
 	LikecoinBurningCosmosAddress  string `envconfig:"LIKECOIN_BURNING_COSMOS_ADDRESS"`
+
+	ClassMigrationEstimatedDurationSeconds int `envconfig:"CLASS_MIGRATION_ESTIMATED_DURATION_SECONDS" default:"0"`
+	NFTMigrationEstimatedDurationSeconds   int `envconfig:"NFT_MIGRATION_ESTIMATED_DURATION_SECONDS" default:"0"`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {
