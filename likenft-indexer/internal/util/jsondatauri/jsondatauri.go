@@ -1,6 +1,7 @@
 package jsondatauri
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -21,19 +22,27 @@ func (s JSONDataUri) HttpPrefix() string {
 	return "http"
 }
 
-func (s JSONDataUri) IsDataURIJson() (string, bool) {
+func (s JSONDataUri) IsDataURIJson() (string, bool, error) {
 	// Backward compatability for v0.1.0 and v0.2.0 which rewrites the metadata
 	// from "data:application/json;utf8," to "data:application/json; charset=utf-8,"
 	// for better block explorer compatability
 	if strings.HasPrefix(string(s), "data:application/json;utf8,") {
 		r, _ := strings.CutPrefix(string(s), "data:application/json;utf8,")
-		return r, true
+		return r, true, nil
 	}
 	if strings.HasPrefix(string(s), "data:application/json; charset=utf-8,") {
 		r, _ := strings.CutPrefix(string(s), "data:application/json; charset=utf-8,")
-		return r, true
+		return r, true, nil
 	}
-	return "", false
+	if strings.HasPrefix(string(s), "data:application/json;base64,") {
+		r, _ := strings.CutPrefix(string(s), "data:application/json;base64,")
+		decodedData, err := base64.StdEncoding.DecodeString(r)
+		if err != nil {
+			return "", false, err
+		}
+		return string(decodedData), true, nil
+	}
+	return "", false, nil
 }
 
 func (s JSONDataUri) IsHttpJson() bool {
@@ -67,7 +76,11 @@ func (s JSONDataUri) Resolve(httpClient HTTPClient, out any) error {
 		return nil
 	}
 
-	r, yes := s.IsDataURIJson()
+	r, yes, err := s.IsDataURIJson()
+	if err != nil {
+		return err
+	}
+
 	if yes {
 		return json.Unmarshal([]byte(r), &out)
 	}

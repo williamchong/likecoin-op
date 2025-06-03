@@ -154,6 +154,9 @@ describe("LikeProtocol", () => {
     expect(await _newNFTClass.name()).to.equal("My Book");
     expect(await _newNFTClass.symbol()).to.equal("KOOB");
     expect(await _newNFTClass.getProtocolBeacon()).to.equal(contractAddress);
+    expect(await _newNFTClass.contractURI()).to.equal(
+      "data:application/json;base64,eyJuYW1lIjoiQ29sbGVjdGlvbiBOYW1lIiwic3ltYm9sIjoiQ29sbGVjdGlvbiBTWU1CIiwiZGVzY3JpcHRpb24iOiJDb2xsZWN0aW9uIERlc2NyaXB0aW9uIiwiaW1hZ2UiOiJpcGZzOi8vYmFmeWJlaWV6cTR5cW9zYzJ1NHNhYW5vdmU1YnNhM3ljaXVmd2hmZHVlbXk1ejZ2dmY2cTNjNWxuYmkiLCJiYW5uZXJfaW1hZ2UiOiIiLCJmZWF0dXJlZF9pbWFnZSI6IiIsImV4dGVybmFsX2xpbmsiOiJodHRwczovL3d3dy5leGFtcGxlLmNvbSIsImNvbGxhYm9yYXRvcnMiOltdfQ==",
+    );
     const [receiver, royaltyAmount] = await _newNFTClass.royaltyInfo(0, 1000);
     expect(receiver).to.equal(this.ownerSigner.address);
     expect(royaltyAmount).to.equal(0n);
