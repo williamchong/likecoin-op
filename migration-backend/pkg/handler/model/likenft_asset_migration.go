@@ -13,6 +13,7 @@ type LikeNFTAssetMigrationBase struct {
 	CosmosAddress          string                            `json:"cosmos_address"`
 	EthAddress             string                            `json:"eth_address"`
 	Status                 model.LikeNFTAssetMigrationStatus `json:"status"`
+	EstimatedFinishedTime  time.Time                         `json:"estimated_finished_time"`
 	FailedReason           *string                           `json:"failed_reason"`
 }
 
@@ -43,6 +44,7 @@ func LikeNFTAssetMigrationFromModel(m *model.LikeNFTAssetMigration, classes []mo
 			CosmosAddress:          m.CosmosAddress,
 			EthAddress:             m.EthAddress,
 			Status:                 m.Status,
+			EstimatedFinishedTime:  m.EstimatedFinishedTime,
 			FailedReason:           m.FailedReason,
 		},
 		Classes: cs,
@@ -61,6 +63,7 @@ func LikeNFTAssetMigrationBasesFromModel(m []*model.LikeNFTAssetMigration) []*Li
 			CosmosAddress:          migration.CosmosAddress,
 			EthAddress:             migration.EthAddress,
 			Status:                 migration.Status,
+			EstimatedFinishedTime:  migration.EstimatedFinishedTime,
 			FailedReason:           migration.FailedReason,
 		})
 	}
