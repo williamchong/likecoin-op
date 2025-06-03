@@ -14,7 +14,8 @@ func QueryLikeNFTAssetSnapshotById(
 	block_height,
 	block_time,
 	status,
-	failed_reason
+	failed_reason,
+	estimated_migration_duration_needed
 FROM likenft_asset_snapshot WHERE id = $1 ORDER BY created_at DESC`,
 		id,
 	)
@@ -29,6 +30,7 @@ FROM likenft_asset_snapshot WHERE id = $1 ORDER BY created_at DESC`,
 		&snapshot.BlockTime,
 		&snapshot.Status,
 		&snapshot.FailedReason,
+		&snapshot.EstimatedMigrationDurationNeeded,
 	)
 
 	if err != nil {
@@ -50,7 +52,8 @@ func QueryLatestLikeNFTAssetSnapshotByCosmosAddress(
 	block_height,
 	block_time,
 	status,
-	failed_reason
+	failed_reason,
+	estimated_migration_duration_needed
 FROM likenft_asset_snapshot WHERE cosmos_address = $1 ORDER BY created_at DESC`,
 		cosmosAddress,
 	)
@@ -65,6 +68,7 @@ FROM likenft_asset_snapshot WHERE cosmos_address = $1 ORDER BY created_at DESC`,
 		&snapshot.BlockTime,
 		&snapshot.Status,
 		&snapshot.FailedReason,
+		&snapshot.EstimatedMigrationDurationNeeded,
 	)
 
 	if err != nil {
@@ -84,13 +88,15 @@ func InsertLikeNFTAssetSnapshot(
 	block_height,
 	block_time,
 	status,
-	failed_reason
-) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+	failed_reason,
+	estimated_migration_duration_needed
+) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
 		snapshot.CosmosAddress,
 		snapshot.BlockHeight,
 		snapshot.BlockTime,
 		snapshot.Status,
 		snapshot.FailedReason,
+		snapshot.EstimatedMigrationDurationNeeded,
 	)
 
 	lastInsertId := 0
@@ -116,13 +122,15 @@ func UpdateLikeNFTAssetSnapshot(
 	block_height = $2,
 	block_time = $3,
 	status = $4,
-	failed_reason = $5
-WHERE likenft_asset_snapshot.id = $6;`,
+	failed_reason = $5,
+	estimated_migration_duration_needed = $6
+WHERE likenft_asset_snapshot.id = $7;`,
 		snapshot.CosmosAddress,
 		snapshot.BlockHeight,
 		snapshot.BlockTime,
 		snapshot.Status,
 		snapshot.FailedReason,
+		snapshot.EstimatedMigrationDurationNeeded,
 		snapshot.Id,
 	)
 

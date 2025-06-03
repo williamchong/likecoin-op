@@ -13,13 +13,14 @@ func QueryLikeNFTAssetSnapshotNFTsByNFTSnapshotId(
 ) ([]model.LikeNFTAssetSnapshotNFT, error) {
 	rows, err := tx.Query(
 		`SELECT
-       id,
-       likenft_asset_snapshot_id,
-       created_at,
-       cosmos_class_id,
-       cosmos_nft_id,
-       name,
-       image
+	id,
+	likenft_asset_snapshot_id,
+	created_at,
+	cosmos_class_id,
+	cosmos_nft_id,
+	name,
+	image,
+	estimated_migration_duration_needed
 FROM likenft_asset_snapshot_nft WHERE likenft_asset_snapshot_id = $1`,
 		snapshotId,
 	)
@@ -40,6 +41,7 @@ FROM likenft_asset_snapshot_nft WHERE likenft_asset_snapshot_id = $1`,
 			&nft.CosmosNFTId,
 			&nft.Name,
 			&nft.Image,
+			&nft.EstimatedMigrationDurationNeeded,
 		)
 
 		if err != nil {
@@ -61,24 +63,29 @@ func InsertLikeNFTAssetSnapshotNFTs(
 	}
 
 	valueStrings := make([]string, 0, len(nfts))
-	numCol := 5
+	numCol := 6
 	valueArgs := make([]interface{}, 0, len(nfts)*numCol)
 
 	for i, nft := range nfts {
-		valueStrings = append(valueStrings, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d)", i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4, i*numCol+5))
+		valueStrings = append(valueStrings, fmt.Sprintf(
+			"($%d, $%d, $%d, $%d, $%d, $%d)",
+			i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4, i*numCol+5, i*numCol+6,
+		))
 		valueArgs = append(valueArgs, nft.NFTSnapshotId)
 		valueArgs = append(valueArgs, nft.CosmosClassId)
 		valueArgs = append(valueArgs, nft.CosmosNFTId)
 		valueArgs = append(valueArgs, nft.Name)
 		valueArgs = append(valueArgs, nft.Image)
+		valueArgs = append(valueArgs, nft.EstimatedMigrationDurationNeeded)
 	}
 
 	stmt := fmt.Sprintf(`INSERT INTO likenft_asset_snapshot_nft (
-       likenft_asset_snapshot_id,
-       cosmos_class_id,
-       cosmos_nft_id,
-       name,
-       image
+	likenft_asset_snapshot_id,
+	cosmos_class_id,
+	cosmos_nft_id,
+	name,
+	image,
+	estimated_migration_duration_needed
 ) VALUES %s`, strings.Join(valueStrings, ","))
 
 	_, err := tx.Exec(stmt, valueArgs...)

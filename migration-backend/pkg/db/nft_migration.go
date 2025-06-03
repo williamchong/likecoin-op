@@ -14,6 +14,7 @@ func QueryLikeNFTAssetMigrationById(
 	cosmos_address,
 	eth_address,
 	status,
+	estimated_finished_time,
 	failed_reason
 FROM likenft_asset_migration WHERE id = $1`,
 		id,
@@ -28,6 +29,7 @@ FROM likenft_asset_migration WHERE id = $1`,
 		&migration.CosmosAddress,
 		&migration.EthAddress,
 		&migration.Status,
+		&migration.EstimatedFinishedTime,
 		&migration.FailedReason,
 	)
 
@@ -50,6 +52,7 @@ func QueryLikeNFTAssetMigrationByCosmosAddress(
 	cosmos_address,
 	eth_address,
 	status,
+	estimated_finished_time,
 	failed_reason
 FROM likenft_asset_migration WHERE cosmos_address = $1`,
 		cosmosAddress,
@@ -64,6 +67,7 @@ FROM likenft_asset_migration WHERE cosmos_address = $1`,
 		&migration.CosmosAddress,
 		&migration.EthAddress,
 		&migration.Status,
+		&migration.EstimatedFinishedTime,
 		&migration.FailedReason,
 	)
 
@@ -89,6 +93,7 @@ func QueryPaginatedLikeNFTAssetMigration(
 	cosmos_address,
 	eth_address,
 	status,
+	estimated_finished_time,
 	failed_reason
 FROM likenft_asset_migration
 WHERE ($3::text IS NULL OR status = $3) AND
@@ -123,6 +128,7 @@ OFFSET $2
 			&m.CosmosAddress,
 			&m.EthAddress,
 			&m.Status,
+			&m.EstimatedFinishedTime,
 			&m.FailedReason,
 		)
 
@@ -146,12 +152,14 @@ func InsertLikeNFTAssetMigration(
 	cosmos_address,
 	eth_address,
 	status,
+	estimated_finished_time,
 	failed_reason
-) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
 		migration.LikeNFTAssetSnapshotId,
 		migration.CosmosAddress,
 		migration.EthAddress,
 		migration.Status,
+		migration.EstimatedFinishedTime,
 		migration.FailedReason,
 	)
 
@@ -178,12 +186,14 @@ func UpdateLikeNFTAssetMigration(
 	cosmos_address = $2,
 	eth_address = $3,
 	status = $4,
-	failed_reason = $5
-WHERE id = $6;`,
+	estimated_finished_time = $5,
+	failed_reason = $6
+WHERE id = $7;`,
 		migration.LikeNFTAssetSnapshotId,
 		migration.CosmosAddress,
 		migration.EthAddress,
 		migration.Status,
+		migration.EstimatedFinishedTime,
 		migration.FailedReason,
 		migration.Id,
 	)
