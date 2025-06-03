@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
@@ -14,6 +15,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	api_model "github.com/likecoin/like-migration-backend/pkg/handler/model"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likenft"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
@@ -30,7 +32,9 @@ type CreateMigrationPreviewHandler struct {
 	Db                  *sql.DB
 	CosmosAPI           *api.CosmosAPI
 	LikeNFTCosmosClient *cosmos.LikeNFTCosmosClient
-	LikerlandUrlBase    string
+
+	ClassMigrationEstimatedDuration time.Duration
+	NFTMigrationEstimatedDuration   time.Duration
 }
 
 var ErrLatestSnapshotInProgress = fmt.Errorf("error latest snapshot in progress")
@@ -70,6 +74,10 @@ func (h *CreateMigrationPreviewHandler) ServeHTTP(w http.ResponseWriter, r *http
 			DB:                  h.Db,
 			CosmosAPI:           h.CosmosAPI,
 			LikeNFTCosmosClient: h.LikeNFTCosmosClient,
+			CosmosNFTIDMatcher:  nftidmatcher.MakeNFTIDMatcher(),
+
+			ClassMigrationEstimatedDuration: h.ClassMigrationEstimatedDuration,
+			NFTMigrationEstimatedDuration:   h.NFTMigrationEstimatedDuration,
 		}
 		err := logic.Execute(context.Background(), snapshot.CosmosAddress)
 		if err != nil {
