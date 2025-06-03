@@ -9,4 +9,6 @@ type LikeNFTAssetSnapshotClass struct {
 	CosmosClassId string
 	Name          string
 	Image         string
+
+	EstimatedMigrationDurationNeeded time.Duration
 }

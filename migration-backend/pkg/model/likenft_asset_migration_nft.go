@@ -20,6 +20,7 @@ type LikeNFTAssetMigrationNFT struct {
 	Name                    string
 	Image                   string
 	Status                  LikeNFTAssetMigrationNFTStatus
+	EstimatedDurationNeeded time.Duration
 	EnqueueTime             *time.Time
 	FinishTime              *time.Time
 	EvmTxHash               *string
