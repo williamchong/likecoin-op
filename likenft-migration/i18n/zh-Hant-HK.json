@@ -73,6 +73,7 @@
       "title": "簡介"
     },
     "migration-result": {
+      "estimated-finished-time": "預計在{estimatedFinishedTime}完成",
       "failed-message": "有 {count} 個轉移失敗，請重試或聯絡我們尋求協助",
       "in-progress": "(進行中)",
       "retry": "重試",
@@ -104,7 +105,8 @@
           "type": "類別"
         }
       },
-      "title": "轉移結果"
+      "title": "轉移結果",
+      "wrapping-up": "最後整理中⋯⋯"
     },
     "start-migration": {
       "title": "開始轉移"

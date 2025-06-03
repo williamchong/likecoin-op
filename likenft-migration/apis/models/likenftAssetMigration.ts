@@ -65,6 +65,7 @@ export const LikeNFTAssetMigrationSchema = z.object({
   cosmos_address: z.string(),
   eth_address: z.string(),
   status: LikeNFTAssetMigrationStatusSchema,
+  estimated_finished_time: z.coerce.date(),
   failed_reason: z.string().nullable(),
   classes: z.array(LikeNFTAssetMigrationClassSchema),
   nfts: z.array(LikeNFTAssetMigrationNFTSchema),
