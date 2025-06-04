@@ -151,11 +151,6 @@ contractlevelmetadata: |
     "@context": "http://schema.org/",
     "@type": "Book",
     "keywords": "novel,hongkong,literature,classic",
-    "sameAs": [
-      "https://files.ckxpress.com/天工開物．栩栩如真.pdf",
-      "https://files.ckxpress.com/天工開物．栩栩如真.epub",
-      "https://arweave.net/WuffTBbQO8tntjt4jWSlSle-nRmvDP_Lvks7sT_UszQ"
-    ],
     "url": "https://nowherebookstore.io/worksandcreation",
     "usageInfo": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
     "version": 1,
@@ -339,11 +334,6 @@ contractlevelmetadata: |
     "@context": "http://schema.org/",
     "@type": "Book",
     "keywords": "novel,hongkong,literature,classic",
-    "sameAs": [
-      "https://files.ckxpress.com/天工開物．栩栩如真.pdf",
-      "https://files.ckxpress.com/天工開物．栩栩如真.epub",
-      "https://arweave.net/WuffTBbQO8tntjt4jWSlSle-nRmvDP_Lvks7sT_UszQ"
-    ],
     "url": "https://nowherebookstore.io/worksandcreation",
     "usageInfo": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
     "version": 1,
