@@ -152,10 +152,6 @@ contractlevelmetadata: |
     "isbn": "",
     "keywords": "私小說, 心靈書寫, 香港文學",
     "publisher": "董富記",
-    "sameAs": [
-      "ar://9AvcGVpJhtWuv47VHE4bggQd6d758LCqLEKcqWMAkayh?name=心.epub.epub",
-      "ar://4xvUgrPVcSK6Ffb2W76HmuPGcTVi9J3jQRE5MjTgVrch?name=《心》.pdf.pdf"
-    ],
     "thumbnailUrl": "ar://DEF1EwWZkjJhCDzoP55sUc1zRSsS3kTQueSoL2RkWS2D",
     "usageInfo": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
     "version": 1,

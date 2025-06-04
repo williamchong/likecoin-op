@@ -150,9 +150,6 @@ contractlevelmetadata: |
     "inLanguage": "en",
     "isbn": "",
     "keywords": "Dogs -- Fiction, Adventure stories, Nature stories, Klondike River Valley (Yukon) -- Fiction, Sled dogs -- Fiction, Pet theft -- Fiction, Feral dogs -- Fiction, Animal welfare -- Fiction",
-    "sameAs": [
-      "https://api.rinkeby.like.co/arweave/v2/link/A893E8B654D7FC63EC2D8469CE21AAD00E3F566D789D7F948E4DBD137DEFE810?name=call of the wild, The - Jack London.epub.epub"
-    ],
     "thumbnailUrl": "ar://2VP3czhnSFdXTrXG17tFocAsmYZbGmecp2vxnnHikpAA",
     "usageInfo": "All Rights Reserved",
     "version": 1,

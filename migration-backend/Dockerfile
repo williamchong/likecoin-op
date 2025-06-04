@@ -13,6 +13,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     tzdata \
+    media-types \
     && rm -rf /var/lib/apt/lists/*
 RUN update-ca-certificates
 

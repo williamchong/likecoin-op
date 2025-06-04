@@ -19,7 +19,6 @@ type MetadataISCN struct {
 	ISBN                *json.RawMessage             `json:"isbn,omitempty"`
 	Keywords            *json.RawMessage             `json:"keywords,omitempty"`
 	Publisher           string                       `json:"publisher,omitempty"`
-	SameAs              []string                     `json:"sameAs,omitempty"`
 	ThumbnailUrl        *json.RawMessage             `json:"thumbnailUrl,omitempty"`
 	Url                 string                       `json:"url,omitempty"`
 	UsageInfo           *json.RawMessage             `json:"usageInfo,omitempty"`
@@ -44,7 +43,6 @@ func MakeMetadataISCNFromCosmosISCN(cosmosISCN *cosmosmodel.ISCN) MetadataISCN {
 		ISBN:                iscnRecord.ContentMetadata.ISBN,
 		Keywords:            iscnRecord.ContentMetadata.Keywords,
 		Publisher:           iscnRecord.ContentMetadata.Publisher,
-		SameAs:              iscnRecord.ContentMetadata.SameAs,
 		UsageInfo:           iscnRecord.ContentMetadata.UsageInfo,
 		Version:             iscnRecord.ContentMetadata.Version,
 		ThumbnailUrl:        iscnRecord.ContentMetadata.ThumbnailUrl,
