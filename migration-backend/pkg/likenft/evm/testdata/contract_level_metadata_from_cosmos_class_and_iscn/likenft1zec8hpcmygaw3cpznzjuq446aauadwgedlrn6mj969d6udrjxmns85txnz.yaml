@@ -1,0 +1,217 @@
+name: class id = likenft1zec8hpcmygaw3cpznzjuq446aauadwgedlrn6mj969d6udrjxmns85txnz
+
+cosmosclassresponse: |
+  {
+    "class": {
+      "id": "likenft1zec8hpcmygaw3cpznzjuq446aauadwgedlrn6mj969d6udrjxmns85txnz",
+      "name": "心",
+      "symbol": "BOOK",
+      "description": "內容簡介： \n一個寒冷的冬夜，稱為こころ神秘女子突然闖入中年男作家的家中，與他發生一段疑幻似真、難捨難離的糾纏。こころ的形象既陌生又熟悉，既可怕又可憐，即脆弱又頑強。究竟她是女鬼？是幻象？是心魔？還是實際存在的第三者？在こころ的帶領下，男作家進入內心幽暗的領域，抵達精神病態的核心，在自我徹底分解後，重新發現生命的本源。 \nこころ在日文中，是「心」的意思。 \n向夏目漱石同名小說《心》的致敬之作。 \n2016年初版，相隔七年後，以NFT書形式再度推出，全新校訂及增添新版序言。 \n",
+      "uri": "",
+      "uri_hash": "",
+      "data": {
+        "@type": "/likechain.likenft.v1.ClassData",
+        "metadata": {
+          "name": "心",
+          "image": "ar://DEF1EwWZkjJhCDzoP55sUc1zRSsS3kTQueSoL2RkWS2D",
+          "external_url": "",
+          "nft_meta_collection_id": "nft_book",
+          "nft_meta_collection_name": "NFT Book",
+          "nft_meta_collection_description": "NFT Book by Liker Land"
+        },
+        "parent": {
+          "type": "ISCN",
+          "iscn_id_prefix": "iscn://likecoin-chain/uPwQCmb3ePqQdkLimFuoktsj5zIXouRiCEEkzItkQY8",
+          "iscn_version_at_mint": "1",
+          "account": ""
+        },
+        "config": {
+          "burnable": true,
+          "max_supply": "0",
+          "blind_box_config": null
+        },
+        "blind_box_state": {
+          "content_count": "0",
+          "to_be_revealed": false
+        }
+      }
+    }
+  }
+
+iscndataresponse: |
+  {
+    "owner": "like18sn9gaukejh9z5cdn7fq366w2gmmw8q5km8vqm",
+    "latest_version": "1",
+    "records": [
+      {
+        "ipld": "baguqeeraqgvt3e64jxlni4fhg3gwi2lgmx4zdcdimb3f75h2phf67tdb6l4q",
+        "data": {
+          "@context": {
+            "@vocab": "http://iscn.io/",
+            "contentMetadata": { "@context": null },
+            "recordParentIPLD": { "@container": "@index" },
+            "stakeholders": {
+              "@context": {
+                "@vocab": "http://schema.org/",
+                "contributionType": "http://iscn.io/contributionType",
+                "entity": "http://iscn.io/entity",
+                "footprint": "http://iscn.io/footprint",
+                "rewardProportion": "http://iscn.io/rewardProportion"
+              }
+            }
+          },
+          "@id": "iscn://likecoin-chain/uPwQCmb3ePqQdkLimFuoktsj5zIXouRiCEEkzItkQY8/1",
+          "@type": "Record",
+          "contentFingerprints": [
+            "ar://9AvcGVpJhtWuv47VHE4bggQd6d758LCqLEKcqWMAkayh",
+            "ar://DEF1EwWZkjJhCDzoP55sUc1zRSsS3kTQueSoL2RkWS2D",
+            "ar://4xvUgrPVcSK6Ffb2W76HmuPGcTVi9J3jQRE5MjTgVrch"
+          ],
+          "contentMetadata": {
+            "@context": "http://schema.org/",
+            "@type": "Book",
+            "author": {
+              "description": "董啟章生於香港，長於香港，寫小說。與狐狸和刺蝟為伍。以虛構的方式，書寫過去、現在與未來。亦寫書話及隨筆。近作有長篇小說《後人間喜劇》、《香港字》，讀書隨筆集《狐狸讀書》、《刺蝟讀書》、《非常讀》。 \n一九九二年開始發表小說，一九九四年獲聯合文學小說新人獎。之後曾獲紅樓夢長篇小說獎決審團獎、香港書獎、香港藝術發展獎、香港書展年度作家、台北國際書展大獎、梁實秋散文大師獎等。",
+              "name": "董啟章"
+            },
+            "coverUrl": "ar://DEF1EwWZkjJhCDzoP55sUc1zRSsS3kTQueSoL2RkWS2D",
+            "datePublished": "2025-06-03",
+            "description": "內容簡介： \n一個寒冷的冬夜，稱為こころ神秘女子突然闖入中年男作家的家中，與他發生一段疑幻似真、難捨難離的糾纏。こころ的形象既陌生又熟悉，既可怕又可憐，即脆弱又頑強。究竟她是女鬼？是幻象？是心魔？還是實際存在的第三者？在こころ的帶領下，男作家進入內心幽暗的領域，抵達精神病態的核心，在自我徹底分解後，重新發現生命的本源。 \nこころ在日文中，是「心」的意思。 \n向夏目漱石同名小說《心》的致敬之作。 \n2016年初版，相隔七年後，以NFT書形式再度推出，全新校訂及增添新版序言。 \n",
+            "downloadableUrls": [
+              {
+                "fileName": "心.epub",
+                "type": "epub",
+                "url": "ar://9AvcGVpJhtWuv47VHE4bggQd6d758LCqLEKcqWMAkayh"
+              },
+              {
+                "fileName": "《心》.pdf",
+                "type": "pdf",
+                "url": "ar://4xvUgrPVcSK6Ffb2W76HmuPGcTVi9J3jQRE5MjTgVrch"
+              }
+            ],
+            "inLanguage": "zh",
+            "isbn": "",
+            "keywords": "私小說, 心靈書寫, 香港文學",
+            "language": "zh",
+            "name": "心",
+            "publicationDate": "2025-06-03",
+            "publisher": "董富記",
+            "sameAs": [
+              "ar://9AvcGVpJhtWuv47VHE4bggQd6d758LCqLEKcqWMAkayh?name=心.epub.epub",
+              "ar://4xvUgrPVcSK6Ffb2W76HmuPGcTVi9J3jQRE5MjTgVrch?name=《心》.pdf.pdf"
+            ],
+            "tags": ["私小說", "心靈書寫", "香港文學"],
+            "thumbnailUrl": "ar://DEF1EwWZkjJhCDzoP55sUc1zRSsS3kTQueSoL2RkWS2D",
+            "title": "心",
+            "usageInfo": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+            "version": 1
+          },
+          "recordNotes": "",
+          "recordTimestamp": "2025-06-03T16:00:01+00:00",
+          "recordVersion": 1,
+          "stakeholders": []
+        }
+      }
+    ]
+  }
+
+royaltyconfig: |
+  {
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like18sn9gaukejh9z5cdn7fq366w2gmmw8q5km8vqm",
+          "weight": "975000"
+        },
+        {
+          "account": "like1yney2cqn5qdrlc50yr5l53898ufdhxafqz9gxp",
+          "weight": "25000"
+        }
+      ]
+    }
+  }
+
+contractlevelmetadata: |
+  {
+    "description": "內容簡介： \n一個寒冷的冬夜，稱為こころ神秘女子突然闖入中年男作家的家中，與他發生一段疑幻似真、難捨難離的糾纏。こころ的形象既陌生又熟悉，既可怕又可憐，即脆弱又頑強。究竟她是女鬼？是幻象？是心魔？還是實際存在的第三者？在こころ的帶領下，男作家進入內心幽暗的領域，抵達精神病態的核心，在自我徹底分解後，重新發現生命的本源。 \nこころ在日文中，是「心」的意思。 \n向夏目漱石同名小說《心》的致敬之作。 \n2016年初版，相隔七年後，以NFT書形式再度推出，全新校訂及增添新版序言。 \n",
+    "name": "心",
+    "symbol": "BOOK",
+    "image": "ar://DEF1EwWZkjJhCDzoP55sUc1zRSsS3kTQueSoL2RkWS2D",
+    "nft_meta_collection_id": "nft_book",
+    "nft_meta_collection_name": "NFT Book",
+    "nft_meta_collection_description": "NFT Book by Liker Land",
+    "@context": "http://schema.org/",
+    "@type": "Book",
+    "author": {
+      "description": "董啟章生於香港，長於香港，寫小說。與狐狸和刺蝟為伍。以虛構的方式，書寫過去、現在與未來。亦寫書話及隨筆。近作有長篇小說《後人間喜劇》、《香港字》，讀書隨筆集《狐狸讀書》、《刺蝟讀書》、《非常讀》。 \n一九九二年開始發表小說，一九九四年獲聯合文學小說新人獎。之後曾獲紅樓夢長篇小說獎決審團獎、香港書獎、香港藝術發展獎、香港書展年度作家、台北國際書展大獎、梁實秋散文大師獎等。",
+      "name": "董啟章"
+    },
+    "datePublished": "2025-06-03",
+    "inLanguage": "zh",
+    "isbn": "",
+    "keywords": "私小說, 心靈書寫, 香港文學",
+    "publisher": "董富記",
+    "sameAs": [
+      "ar://9AvcGVpJhtWuv47VHE4bggQd6d758LCqLEKcqWMAkayh?name=心.epub.epub",
+      "ar://4xvUgrPVcSK6Ffb2W76HmuPGcTVi9J3jQRE5MjTgVrch?name=《心》.pdf.pdf"
+    ],
+    "thumbnailUrl": "ar://DEF1EwWZkjJhCDzoP55sUc1zRSsS3kTQueSoL2RkWS2D",
+    "usageInfo": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "version": 1,
+    "contentFingerprints": [
+      "ar://9AvcGVpJhtWuv47VHE4bggQd6d758LCqLEKcqWMAkayh",
+      "ar://DEF1EwWZkjJhCDzoP55sUc1zRSsS3kTQueSoL2RkWS2D",
+      "ar://4xvUgrPVcSK6Ffb2W76HmuPGcTVi9J3jQRE5MjTgVrch"
+    ],
+    "dateCreated": "2025-06-03T16:00:01+00:00",
+    "attributes": [
+      {
+        "trait_type": "Author",
+        "value": "董啟章"
+      },
+      {
+        "trait_type": "Publisher",
+        "value": "董富記"
+      },
+      {
+        "display_type": "date",
+        "trait_type": "Publish Date",
+        "value": 1748908800
+      }
+    ],
+    "potentialAction": {
+      "@type": "ReadAction",
+      "target": [
+        {
+          "@type": "EntryPoint",
+          "contentType": "application/epub+zip",
+          "url": "ar://9AvcGVpJhtWuv47VHE4bggQd6d758LCqLEKcqWMAkayh",
+          "name": "心.epub.epub"
+        },
+        {
+          "@type": "EntryPoint",
+          "contentType": "application/pdf",
+          "url": "ar://4xvUgrPVcSK6Ffb2W76HmuPGcTVi9J3jQRE5MjTgVrch",
+          "name": "《心》.pdf.pdf"
+        }
+      ]
+    },
+    "likecoin": {
+      "iscnIdPrefix": "iscn://likecoin-chain/uPwQCmb3ePqQdkLimFuoktsj5zIXouRiCEEkzItkQY8",
+      "classId": "likenft1zec8hpcmygaw3cpznzjuq446aauadwgedlrn6mj969d6udrjxmns85txnz"
+    },
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like18sn9gaukejh9z5cdn7fq366w2gmmw8q5km8vqm",
+          "weight": "975000"
+        },
+        {
+          "account": "like1yney2cqn5qdrlc50yr5l53898ufdhxafqz9gxp",
+          "weight": "25000"
+        }
+      ]
+    }
+  }
