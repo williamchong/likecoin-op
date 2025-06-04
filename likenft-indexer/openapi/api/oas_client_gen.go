@@ -70,6 +70,18 @@ type Invoker interface {
 	//
 	// GET /events/{address}/{signature}
 	EventsByAddressAndSignature(ctx context.Context, params EventsByAddressAndSignatureParams) (*EventsByAddressAndSignatureOK, error)
+	// GetBookNFTLatestEventBlockNumber invokes GetBookNFTLatestEventBlockNumber operation.
+	//
+	// Get BookNFT latest event block number.
+	//
+	// GET /booknft/{id}/latest-event-block-number
+	GetBookNFTLatestEventBlockNumber(ctx context.Context, params GetBookNFTLatestEventBlockNumberParams) (*LatestEventBlockNumber, error)
+	// GetLikeProtocolLatestEventBlockNumber invokes GetLikeProtocolLatestEventBlockNumber operation.
+	//
+	// Get Like Protocol Latest Event Block Number.
+	//
+	// GET /likeprotocol/latest-event-block-number
+	GetLikeProtocolLatestEventBlockNumber(ctx context.Context) (*LatestEventBlockNumber, error)
 	// IndexActionBookNftBooknftIDPost invokes POST /index-action/book-nft/{booknft_id} operation.
 	//
 	// POST /index-action/book-nft/{booknft_id}
@@ -1544,6 +1556,169 @@ func (c *Client) sendEventsByAddressAndSignature(ctx context.Context, params Eve
 
 	stage = "DecodeResponse"
 	result, err := decodeEventsByAddressAndSignatureResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBookNFTLatestEventBlockNumber invokes GetBookNFTLatestEventBlockNumber operation.
+//
+// Get BookNFT latest event block number.
+//
+// GET /booknft/{id}/latest-event-block-number
+func (c *Client) GetBookNFTLatestEventBlockNumber(ctx context.Context, params GetBookNFTLatestEventBlockNumberParams) (*LatestEventBlockNumber, error) {
+	res, err := c.sendGetBookNFTLatestEventBlockNumber(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetBookNFTLatestEventBlockNumber(ctx context.Context, params GetBookNFTLatestEventBlockNumberParams) (res *LatestEventBlockNumber, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("GetBookNFTLatestEventBlockNumber"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/booknft/{id}/latest-event-block-number"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetBookNFTLatestEventBlockNumberOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/booknft/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/latest-event-block-number"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetBookNFTLatestEventBlockNumberResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetLikeProtocolLatestEventBlockNumber invokes GetLikeProtocolLatestEventBlockNumber operation.
+//
+// Get Like Protocol Latest Event Block Number.
+//
+// GET /likeprotocol/latest-event-block-number
+func (c *Client) GetLikeProtocolLatestEventBlockNumber(ctx context.Context) (*LatestEventBlockNumber, error) {
+	res, err := c.sendGetLikeProtocolLatestEventBlockNumber(ctx)
+	return res, err
+}
+
+func (c *Client) sendGetLikeProtocolLatestEventBlockNumber(ctx context.Context) (res *LatestEventBlockNumber, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("GetLikeProtocolLatestEventBlockNumber"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/likeprotocol/latest-event-block-number"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetLikeProtocolLatestEventBlockNumberOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/likeprotocol/latest-event-block-number"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetLikeProtocolLatestEventBlockNumberResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

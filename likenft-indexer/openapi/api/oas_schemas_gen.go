@@ -1042,6 +1042,21 @@ func (s *IndexActionLikeProtocolPostOK) SetTaskID(val OptString) {
 	s.TaskID = val
 }
 
+// Ref: #/components/schemas/LatestEventBlockNumber
+type LatestEventBlockNumber struct {
+	LatestEventBlockNumber Uint64 `json:"latest_event_block_number"`
+}
+
+// GetLatestEventBlockNumber returns the value of LatestEventBlockNumber.
+func (s *LatestEventBlockNumber) GetLatestEventBlockNumber() Uint64 {
+	return s.LatestEventBlockNumber
+}
+
+// SetLatestEventBlockNumber sets the value of LatestEventBlockNumber.
+func (s *LatestEventBlockNumber) SetLatestEventBlockNumber(val Uint64) {
+	s.LatestEventBlockNumber = val
+}
+
 // Ref: #/components/schemas/NFT
 type NFT struct {
 	ID              int                       `json:"id"`

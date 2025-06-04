@@ -15,10 +15,11 @@ import (
 type OpenAPIHandler struct {
 	likeProtocolAddress string
 
-	db                 *ent.Client
-	nftClassRepository database.NFTClassRepository
-	evmEventRepository database.EVMEventRepository
-	accountRepository  database.AccountRepository
+	db                     *ent.Client
+	nftClassRepository     database.NFTClassRepository
+	evmEventRepository     database.EVMEventRepository
+	accountRepository      database.AccountRepository
+	likeProtocolRepository database.LikeProtocolRepository
 
 	asynqClient *asynq.Client
 }
@@ -37,10 +38,11 @@ func NewOpenAPIHandler(
 	handler := &OpenAPIHandler{
 		likeProtocolAddress: likeProtocolAddress,
 
-		db:                 db.Client(),
-		nftClassRepository: database.MakeNFTClassRepository(db),
-		evmEventRepository: database.MakeEVMEventRepository(db),
-		accountRepository:  database.MakeAccountRepository(db),
+		db:                     db.Client(),
+		nftClassRepository:     database.MakeNFTClassRepository(db),
+		evmEventRepository:     database.MakeEVMEventRepository(db),
+		accountRepository:      database.MakeAccountRepository(db),
+		likeProtocolRepository: database.MakeLikeProtocolRepository(db),
 
 		asynqClient: asyncClient,
 	}

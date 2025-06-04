@@ -218,6 +218,28 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								return
 							}
 
+						case 'l': // Prefix: "latest-event-block-number"
+
+							if l := len("latest-event-block-number"); len(elem) >= l && elem[0:l] == "latest-event-block-number" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetBookNFTLatestEventBlockNumberRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
 						case 't': // Prefix: "tokens"
 
 							if l := len("tokens"); len(elem) >= l && elem[0:l] == "tokens" {
@@ -437,6 +459,26 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 
+				}
+
+			case 'l': // Prefix: "likeprotocol/latest-event-block-number"
+
+				if l := len("likeprotocol/latest-event-block-number"); len(elem) >= l && elem[0:l] == "likeprotocol/latest-event-block-number" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleGetLikeProtocolLatestEventBlockNumberRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
 				}
 
 			case 't': // Prefix: "token/"
@@ -753,6 +795,30 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								}
 							}
 
+						case 'l': // Prefix: "latest-event-block-number"
+
+							if l := len("latest-event-block-number"); len(elem) >= l && elem[0:l] == "latest-event-block-number" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = GetBookNFTLatestEventBlockNumberOperation
+									r.summary = "Get BookNFT latest event block number"
+									r.operationID = "GetBookNFTLatestEventBlockNumber"
+									r.pathPattern = "/booknft/{id}/latest-event-block-number"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
 						case 't': // Prefix: "tokens"
 
 							if l := len("tokens"); len(elem) >= l && elem[0:l] == "tokens" {
@@ -993,6 +1059,30 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 					}
 
+				}
+
+			case 'l': // Prefix: "likeprotocol/latest-event-block-number"
+
+				if l := len("likeprotocol/latest-event-block-number"); len(elem) >= l && elem[0:l] == "likeprotocol/latest-event-block-number" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch method {
+					case "GET":
+						r.name = GetLikeProtocolLatestEventBlockNumberOperation
+						r.summary = "Get Like Protocol latest event block number"
+						r.operationID = "GetLikeProtocolLatestEventBlockNumber"
+						r.pathPattern = "/likeprotocol/latest-event-block-number"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
 				}
 
 			case 't': // Prefix: "token/"
