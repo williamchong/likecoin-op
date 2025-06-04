@@ -66,8 +66,8 @@ func ContractLevelMetadataFromCosmosClassAndISCN(
 	}
 }
 
-func ERC721OpenSeaMetadataFromCosmosNFTMetadata(m *cosmosmodel.NFTMetadata) *evmmodel.ERC721MetadataOpenSea {
-	return &evmmodel.ERC721MetadataOpenSea{
+func ERC721OpenSeaMetadataFromCosmosNFTMetadata(m *cosmosmodel.NFTMetadata) *evmmodel.ERC721Metadata {
+	return &evmmodel.ERC721Metadata{
 		Image:       m.Image,
 		ExternalUrl: m.ExternalUrl,
 		Description: m.Description,
@@ -86,42 +86,27 @@ func ERC721MetadataFromCosmosNFTAndClassAndISCNData(
 
 	iscnAttributes := makeERC721MetadataAttributeFromISCN(iscn)
 
-	var metadataOverride *evmmodel.ERC721MetadataOpenSea
+	var metadataOverride *evmmodel.ERC721Metadata
 	if cosmosMetadataOverride != nil {
 		metadataOverride = ERC721OpenSeaMetadataFromCosmosNFTMetadata(cosmosMetadataOverride)
 	}
 
-	return &evmmodel.ERC721Metadata{
-		ERC721MetadataContractLevel: evmmodel.ERC721MetadataContractLevel{
-			Symbol: c.Symbol,
-		},
-		ERC721MetadataOpenSea: evmmodel.OverrideERC721MetadataOpenSea(
-			evmmodel.ERC721MetadataOpenSea{
-				Image:       c.Data.Metadata.Image,
-				ExternalUrl: iscnRecord.ContentMetadata.Url,
-				Description: iscnRecord.ContentMetadata.Description,
-				Name:        iscnRecord.ContentMetadata.Name,
-				Attributes: sortERC721MetadataAttributes(
-					slices.Concat(
-						makeERC721MetadataAttribute("", n.Data.Metadata.Attributes),
-						iscnAttributes,
-					),
+	metadata := evmmodel.OverrideERC721Metadata(
+		evmmodel.ERC721Metadata{
+			Image:       c.Data.Metadata.Image,
+			ExternalUrl: iscnRecord.ContentMetadata.Url,
+			Description: iscnRecord.ContentMetadata.Description,
+			Name:        iscnRecord.ContentMetadata.Name,
+			Attributes: sortERC721MetadataAttributes(
+				slices.Concat(
+					makeERC721MetadataAttribute("", n.Data.Metadata.Attributes),
+					iscnAttributes,
 				),
-				AnimationUrl: n.Data.Metadata.AnimationUrl,
-			}, metadataOverride),
-		MetadataAdditional: evmmodel.MetadataAdditional{
-			Message:                      c.Data.Metadata.Message,
-			NftMetaCollectionId:          c.Data.Metadata.NFTMetaCollectionID,
-			NftMetaCollectionName:        c.Data.Metadata.NFTMetaCollectionName,
-			NftMetaCollectionDescription: c.Data.Metadata.GetNFTMetaCollectionDescription(),
-		},
-		MetadataISCN: evmmodel.MakeMetadataISCNFromCosmosISCN(iscn),
-		LikeCoin: &evmmodel.ERC721MetadataLikeCoin{
-			ISCNIdPrefix: c.Data.Parent.IscnIdPrefix,
-			ClassId:      n.ClassId,
-			NFTId:        n.Id,
-		},
-	}
+			),
+			AnimationUrl: n.Data.Metadata.AnimationUrl,
+		}, metadataOverride)
+
+	return &metadata
 }
 
 func makeERC721MetadataAttribute(prefix string, m map[string]interface{}) []evmmodel.ERC721MetadataAttribute {
