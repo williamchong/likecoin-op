@@ -83,6 +83,26 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /likeprotocol/latest-event-block-number:
+    get:
+      tags:
+        - LikeProtocol
+      summary: Get Like Protocol latest event block number
+      description: Get Like Protocol Latest Event Block Number
+      operationId: GetLikeProtocolLatestEventBlockNumber
+      responses:
+        "200":
+          description: latest event block number
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LatestEventBlockNumber"
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /booknfts:
     get:
       tags:
@@ -138,6 +158,33 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BookNFT"
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /booknft/{id}/latest-event-block-number:
+    get:
+      tags:
+        - BookNFT
+      summary: Get BookNFT latest event block number
+      description: Get BookNFT latest event block number
+      operationId: GetBookNFTLatestEventBlockNumber
+      parameters:
+        - name: id
+          in: path
+          description: evm address of the BookNFT
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: BookNFT with requested ID was found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LatestEventBlockNumber"
         default:
           description: General Error
           content:
@@ -820,6 +867,13 @@ components:
         - data
         - topics
         - decoded
+    LatestEventBlockNumber:
+      type: object
+      properties:
+        latest_event_block_number:
+          $ref: "#/components/schemas/Uint64"
+      required:
+        - latest_event_block_number
     PaginationResponse:
       type: object
       properties:
