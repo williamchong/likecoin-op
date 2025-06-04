@@ -50,6 +50,18 @@ type Handler interface {
 	//
 	// GET /events/{address}/{signature}
 	EventsByAddressAndSignature(ctx context.Context, params EventsByAddressAndSignatureParams) (*EventsByAddressAndSignatureOK, error)
+	// GetBookNFTLatestEventBlockNumber implements GetBookNFTLatestEventBlockNumber operation.
+	//
+	// Get BookNFT latest event block number.
+	//
+	// GET /booknft/{id}/latest-event-block-number
+	GetBookNFTLatestEventBlockNumber(ctx context.Context, params GetBookNFTLatestEventBlockNumberParams) (*LatestEventBlockNumber, error)
+	// GetLikeProtocolLatestEventBlockNumber implements GetLikeProtocolLatestEventBlockNumber operation.
+	//
+	// Get Like Protocol Latest Event Block Number.
+	//
+	// GET /likeprotocol/latest-event-block-number
+	GetLikeProtocolLatestEventBlockNumber(ctx context.Context) (*LatestEventBlockNumber, error)
 	// IndexActionBookNftBooknftIDPost implements POST /index-action/book-nft/{booknft_id} operation.
 	//
 	// POST /index-action/book-nft/{booknft_id}

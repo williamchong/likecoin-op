@@ -76,6 +76,24 @@ func (UnimplementedHandler) EventsByAddressAndSignature(ctx context.Context, par
 	return r, ht.ErrNotImplemented
 }
 
+// GetBookNFTLatestEventBlockNumber implements GetBookNFTLatestEventBlockNumber operation.
+//
+// Get BookNFT latest event block number.
+//
+// GET /booknft/{id}/latest-event-block-number
+func (UnimplementedHandler) GetBookNFTLatestEventBlockNumber(ctx context.Context, params GetBookNFTLatestEventBlockNumberParams) (r *LatestEventBlockNumber, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetLikeProtocolLatestEventBlockNumber implements GetLikeProtocolLatestEventBlockNumber operation.
+//
+// Get Like Protocol Latest Event Block Number.
+//
+// GET /likeprotocol/latest-event-block-number
+func (UnimplementedHandler) GetLikeProtocolLatestEventBlockNumber(ctx context.Context) (r *LatestEventBlockNumber, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // IndexActionBookNftBooknftIDPost implements POST /index-action/book-nft/{booknft_id} operation.
 //
 // POST /index-action/book-nft/{booknft_id}
