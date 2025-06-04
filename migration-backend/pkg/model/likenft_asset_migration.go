@@ -29,5 +29,6 @@ type LikeNFTAssetMigration struct {
 	CosmosAddress          string
 	EthAddress             string
 	Status                 LikeNFTAssetMigrationStatus
+	EstimatedFinishedTime  time.Time
 	FailedReason           *string
 }

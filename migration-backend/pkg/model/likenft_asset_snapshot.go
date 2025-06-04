@@ -19,4 +19,6 @@ type LikeNFTAssetSnapshot struct {
 	BlockTime     *time.Time
 	Status        LikeNFTAssetSnapshotStatus
 	FailedReason  *string
+
+	EstimatedMigrationDurationNeeded *time.Duration
 }

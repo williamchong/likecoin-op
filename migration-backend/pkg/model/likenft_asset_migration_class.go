@@ -19,6 +19,7 @@ type LikeNFTAssetMigrationClass struct {
 	Name                    string
 	Image                   string
 	Status                  LikeLikeNFTAssetAssetMigrationClassStatus
+	EstimatedDurationNeeded time.Duration
 	EnqueueTime             *time.Time
 	FinishTime              *time.Time
 	EvmTxHash               *string

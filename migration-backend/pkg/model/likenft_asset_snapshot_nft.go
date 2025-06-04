@@ -10,4 +10,6 @@ type LikeNFTAssetSnapshotNFT struct {
 	CosmosNFTId   string
 	Name          string
 	Image         string
+
+	EstimatedMigrationDurationNeeded time.Duration
 }

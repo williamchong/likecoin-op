@@ -73,6 +73,7 @@
       "title": "Introduction"
     },
     "migration-result": {
+      "estimated-finished-time": "Estimated Finished At {estimatedFinishedTime}",
       "failed-message": "There are {count} failed migrations, please retry or contact us for more assistant",
       "in-progress": "(In Progress)",
       "retry": "Retry",
@@ -104,7 +105,8 @@
           "type": "Type"
         }
       },
-      "title": "Migration Results"
+      "title": "Migration Results",
+      "wrapping-up": "The migration is wrapping up..."
     },
     "start-migration": {
       "title": "Start Migration"

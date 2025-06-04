@@ -9,6 +9,7 @@ import (
 	"github.com/likecoin/like-migration-backend/cmd/cli/config"
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likenft"
 )
 
@@ -45,6 +46,10 @@ var initMigration = &cobra.Command{
 			DB:                  db,
 			CosmosAPI:           cosmosAPI,
 			LikeNFTCosmosClient: likenftClient,
+			CosmosNFTIDMatcher:  nftidmatcher.MakeNFTIDMatcher(),
+
+			ClassMigrationEstimatedDuration: time.Duration(envCfg.ClassMigrationEstimatedDurationSeconds) * time.Second,
+			NFTMigrationEstimatedDuration:   time.Duration(envCfg.NFTMigrationEstimatedDurationSeconds) * time.Second,
 		}
 		err = snapshotCosmosState.Execute(ctx, cosmosAddress)
 

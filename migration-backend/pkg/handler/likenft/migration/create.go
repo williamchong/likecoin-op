@@ -1,15 +1,18 @@
 package migration
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/hibiken/asynq"
+
 	"github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	api_model "github.com/likecoin/like-migration-backend/pkg/handler/model"
@@ -38,7 +41,8 @@ var ErrMigrationExists = fmt.Errorf("error migration exists")
 var ErrSignedEthAddressNotMatch = fmt.Errorf("error signed eth address not match")
 
 func (h *CreateMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	hub := sentry.GetHubFromContext(r.Context())
+	ctx := r.Context()
+	hub := sentry.GetHubFromContext(ctx)
 
 	decoder := json.NewDecoder(r.Body)
 	var data CreateMigrationRequestBody
@@ -49,7 +53,7 @@ func (h *CreateMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	migration, err := h.handle(data)
+	migration, err := h.handle(ctx, data)
 
 	if err != nil {
 		handler.SendJSON(w, http.StatusInternalServerError,
@@ -66,7 +70,7 @@ func (h *CreateMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	go h.enqueueMigrationTasks(migration.Id)
 }
 
-func (h *CreateMigrationHandler) handle(req CreateMigrationRequestBody) (*api_model.LikeNFTAssetMigration, error) {
+func (h *CreateMigrationHandler) handle(ctx context.Context, req CreateMigrationRequestBody) (*api_model.LikeNFTAssetMigration, error) {
 	userEVMMigrateResp, err := h.LikecoinAPI.GetUserEVMMigrate(req.CosmosAddress)
 
 	if err != nil {
@@ -93,6 +97,24 @@ func (h *CreateMigrationHandler) handle(req CreateMigrationRequestBody) (*api_mo
 				return nil, err
 			}
 
+			pendingEstimatedDurationFromMigrationClasses, err := db.QueryTotalPendingEstimatedDurationFromMigrationClasses(ctx, h.Db)
+			if err != nil {
+				return nil, err
+			}
+			pendingEstimatedDurationFromMigrationNFTs, err := db.QueryTotalPendingEstimatedDurationFromMigrationNFTs(ctx, h.Db)
+			if err != nil {
+				return nil, err
+			}
+
+			pendingEstimatedDurationFromSnapshotClasses := time.Duration(0)
+			for _, class := range classes {
+				pendingEstimatedDurationFromSnapshotClasses += class.EstimatedMigrationDurationNeeded
+			}
+			pendingEstimatedDurationFromSnapshotNFTs := time.Duration(0)
+			for _, nft := range nfts {
+				pendingEstimatedDurationFromSnapshotNFTs += nft.EstimatedMigrationDurationNeeded
+			}
+
 			tx, err := h.Db.Begin()
 			if err != nil {
 				return nil, err
@@ -103,6 +125,11 @@ func (h *CreateMigrationHandler) handle(req CreateMigrationRequestBody) (*api_mo
 				CosmosAddress:          req.CosmosAddress,
 				EthAddress:             req.EthAddress,
 				Status:                 model.NFTMigrationStatusInProgress,
+				EstimatedFinishedTime: time.Now().UTC().Add(
+					pendingEstimatedDurationFromMigrationClasses +
+						pendingEstimatedDurationFromMigrationNFTs +
+						pendingEstimatedDurationFromSnapshotClasses +
+						pendingEstimatedDurationFromSnapshotNFTs),
 			})
 			if err != nil {
 				tx.Rollback()
@@ -118,6 +145,7 @@ func (h *CreateMigrationHandler) handle(req CreateMigrationRequestBody) (*api_mo
 					Name:                    class.Name,
 					Image:                   class.Image,
 					Status:                  model.LikeNFTAssetMigrationClassStatusInit,
+					EstimatedDurationNeeded: class.EstimatedMigrationDurationNeeded,
 				})
 			}
 
@@ -131,6 +159,7 @@ func (h *CreateMigrationHandler) handle(req CreateMigrationRequestBody) (*api_mo
 					Name:                    nft.Name,
 					Image:                   nft.Image,
 					Status:                  model.LikeNFTAssetMigrationNFTStatusInit,
+					EstimatedDurationNeeded: nft.EstimatedMigrationDurationNeeded,
 				})
 			}
 

@@ -1,8 +1,10 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
@@ -21,6 +23,7 @@ func QueryLikeNFTAssetMigrationNFTById(
 	name,
 	image,
 	status,
+	estimated_duration_needed,
 	enqueue_time,
 	finish_time,
 	evm_tx_hash,
@@ -40,6 +43,7 @@ FROM likenft_asset_migration_nft WHERE id = $1`,
 		&nft.Name,
 		&nft.Image,
 		&nft.Status,
+		&nft.EstimatedDurationNeeded,
 		&nft.EnqueueTime,
 		&nft.FinishTime,
 		&nft.EvmTxHash,
@@ -67,6 +71,7 @@ func QueryLikeNFTAssetMigrationNFTsByNFTMigrationId(
 	name,
 	image,
 	status,
+	estimated_duration_needed,
 	enqueue_time,
 	finish_time,
 	evm_tx_hash,
@@ -92,6 +97,7 @@ FROM likenft_asset_migration_nft WHERE likenft_asset_migration_id = $1`,
 			&nft.Name,
 			&nft.Image,
 			&nft.Status,
+			&nft.EstimatedDurationNeeded,
 			&nft.EnqueueTime,
 			&nft.FinishTime,
 			&nft.EvmTxHash,
@@ -123,6 +129,7 @@ func QueryLikeNFTAssetMigrationNFTsByNFTMigrationIdAndStatus(
 	name,
 	image,
 	status,
+	estimated_duration_needed,
 	enqueue_time,
 	finish_time,
 	evm_tx_hash,
@@ -151,6 +158,7 @@ WHERE likenft_asset_migration_id = $1
 			&nft.Name,
 			&nft.Image,
 			&nft.Status,
+			&nft.EstimatedDurationNeeded,
 			&nft.EnqueueTime,
 			&nft.FinishTime,
 			&nft.EvmTxHash,
@@ -167,6 +175,31 @@ WHERE likenft_asset_migration_id = $1
 	return nfts, nil
 }
 
+func QueryTotalPendingEstimatedDurationFromMigrationNFTs(
+	ctx context.Context,
+	tx TxLike,
+) (time.Duration, error) {
+	row := tx.QueryRowContext(
+		ctx, `SELECT
+	SUM(estimated_duration_needed)
+FROM likenft_asset_migration_nft
+WHERE status in ($1, $2)
+`, model.LikeNFTAssetMigrationNFTStatusInit, model.LikeNFTAssetMigrationNFTStatusInProgress)
+
+	// Null when no records
+	var maybeTotalEstimatedDuration *time.Duration
+	err := row.Scan(&maybeTotalEstimatedDuration)
+
+	if err != nil {
+		return time.Duration(0), err
+	}
+
+	if maybeTotalEstimatedDuration != nil {
+		return *maybeTotalEstimatedDuration, nil
+	}
+	return time.Duration(0), nil
+}
+
 func InsertLikeNFTAssetMigrationNFTs(
 	tx TxLike,
 	nfts []model.LikeNFTAssetMigrationNFT,
@@ -176,19 +209,20 @@ func InsertLikeNFTAssetMigrationNFTs(
 	}
 
 	valueStrings := make([]string, 0, len(nfts))
-	numCol := 10
+	numCol := 11
 	valueArgs := make([]interface{}, 0, len(nfts)*numCol)
 
 	for i, nft := range nfts {
 		valueStrings = append(valueStrings, fmt.Sprintf(
-			"($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)",
-			i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4, i*numCol+5, i*numCol+6, i*numCol+7, i*numCol+8, i*numCol+9, i*numCol+10))
+			"($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)",
+			i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4, i*numCol+5, i*numCol+6, i*numCol+7, i*numCol+8, i*numCol+9, i*numCol+10, i*numCol+11))
 		valueArgs = append(valueArgs, nft.LikeNFTAssetMigrationId)
 		valueArgs = append(valueArgs, nft.CosmosClassId)
 		valueArgs = append(valueArgs, nft.CosmosNFTId)
 		valueArgs = append(valueArgs, nft.Name)
 		valueArgs = append(valueArgs, nft.Image)
 		valueArgs = append(valueArgs, nft.Status)
+		valueArgs = append(valueArgs, nft.EstimatedDurationNeeded)
 		valueArgs = append(valueArgs, nft.EnqueueTime)
 		valueArgs = append(valueArgs, nft.FinishTime)
 		valueArgs = append(valueArgs, nft.EvmTxHash)
@@ -202,6 +236,7 @@ func InsertLikeNFTAssetMigrationNFTs(
 	name,
 	image,
 	status,
+	estimated_duration_needed,
 	enqueue_time,
 	finish_time,
 	evm_tx_hash,

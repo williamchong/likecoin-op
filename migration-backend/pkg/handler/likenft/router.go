@@ -3,6 +3,7 @@ package likenft
 import (
 	"database/sql"
 	"net/http"
+	"time"
 
 	"github.com/hibiken/asynq"
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
@@ -18,7 +19,9 @@ type LikeNFTRouter struct {
 	CosmosAPI           *api.CosmosAPI
 	LikeNFTCosmosClient *cosmos.LikeNFTCosmosClient
 	LikecoinAPI         *likecoin_api.LikecoinAPI
-	LikerlandUrlBase    string
+
+	ClassMigrationEstimatedDuration time.Duration
+	NFTMigrationEstimatedDuration   time.Duration
 }
 
 func (h *LikeNFTRouter) Router() *http.ServeMux {
@@ -35,7 +38,9 @@ func (h *LikeNFTRouter) Router() *http.ServeMux {
 		Db:                  h.Db,
 		CosmosAPI:           h.CosmosAPI,
 		LikeNFTCosmosClient: h.LikeNFTCosmosClient,
-		LikerlandUrlBase:    h.LikerlandUrlBase,
+
+		ClassMigrationEstimatedDuration: h.ClassMigrationEstimatedDuration,
+		NFTMigrationEstimatedDuration:   h.NFTMigrationEstimatedDuration,
 	}
 
 	// FIXME: Find a way to handle CRUD paths

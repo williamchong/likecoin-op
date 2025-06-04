@@ -5,10 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
@@ -16,6 +18,10 @@ type SnapshotCosmosStateLogic struct {
 	DB                  *sql.DB
 	CosmosAPI           *api.CosmosAPI
 	LikeNFTCosmosClient *cosmos.LikeNFTCosmosClient
+	CosmosNFTIDMatcher  nftidmatcher.CosmosNFTIDMatcher
+
+	ClassMigrationEstimatedDuration time.Duration
+	NFTMigrationEstimatedDuration   time.Duration
 }
 
 func (l *SnapshotCosmosStateLogic) Execute(ctx context.Context, cosmosAddress string) error {
@@ -59,30 +65,47 @@ func (l *SnapshotCosmosStateLogic) Execute(ctx context.Context, cosmosAddress st
 
 	snapshotClasses := make([]model.LikeNFTAssetSnapshotClass, 0, len(cosmosClasses.Classes))
 
+	estimatedTotalDuration := time.Duration(0)
 	for _, cosmosClass := range cosmosClasses.Classes {
+		estimatedDurationNeeded := l.ClassMigrationEstimatedDuration
 		snapshotClasses = append(snapshotClasses, model.LikeNFTAssetSnapshotClass{
 			NFTSnapshotId: latestSnapshot.Id,
 			CosmosClassId: cosmosClass.Id,
 			Name:          cosmosClass.Name,
 			Image:         cosmosClass.Metadata.Image,
+
+			EstimatedMigrationDurationNeeded: estimatedDurationNeeded,
 		})
+
+		estimatedTotalDuration += estimatedDurationNeeded
 	}
 
 	snapshotNFTs := make([]model.LikeNFTAssetSnapshotNFT, 0, len(cosmosNFTs.NFTs))
 
 	for _, cosmosNFT := range cosmosNFTs.NFTs {
+		estimatedDurationNeeded := time.Duration(0)
+		serialID, yes := l.CosmosNFTIDMatcher.ExtractSerialID(cosmosNFT.NFT.Id)
+		if yes {
+			estimatedDurationNeeded = time.Duration(serialID) * l.NFTMigrationEstimatedDuration
+		}
+
 		snapshotNFTs = append(snapshotNFTs, model.LikeNFTAssetSnapshotNFT{
 			NFTSnapshotId: latestSnapshot.Id,
 			CosmosClassId: cosmosNFT.ClassId,
 			CosmosNFTId:   cosmosNFT.Id,
 			Name:          cosmosNFT.Data.Metadata.Name,
 			Image:         cosmosNFT.Data.Metadata.Image,
+
+			EstimatedMigrationDurationNeeded: estimatedDurationNeeded,
 		})
+
+		estimatedTotalDuration += estimatedDurationNeeded
 	}
 
 	latestSnapshot.BlockHeight = &block.Header.Height
 	latestSnapshot.BlockTime = &block.Header.Time
 	latestSnapshot.Status = model.NFTSnapshotStatusCompleted
+	latestSnapshot.EstimatedMigrationDurationNeeded = &estimatedTotalDuration
 
 	err = appdb.WithTx(ctx, l.DB, func(tx *sql.Tx) error {
 		err := appdb.UpdateLikeNFTAssetSnapshot(tx, latestSnapshot)

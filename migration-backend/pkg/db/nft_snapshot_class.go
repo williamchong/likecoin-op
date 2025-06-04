@@ -18,7 +18,8 @@ func QueryLikeNFTAssetSnapshotClassesByNFTSnapshotId(
 	created_at,
 	cosmos_class_id,
 	name,
-	image
+	image,
+	estimated_migration_duration_needed
 FROM likenft_asset_snapshot_class WHERE likenft_asset_snapshot_id = $1`,
 		snapshotId,
 	)
@@ -38,6 +39,7 @@ FROM likenft_asset_snapshot_class WHERE likenft_asset_snapshot_id = $1`,
 			&class.CosmosClassId,
 			&class.Name,
 			&class.Image,
+			&class.EstimatedMigrationDurationNeeded,
 		)
 
 		if err != nil {
@@ -58,22 +60,24 @@ func InsertLikeNFTAssetSnapshotClasses(
 		return nil
 	}
 	valueStrings := make([]string, 0, len(classes))
-	numCol := 4
+	numCol := 5
 	valueArgs := make([]interface{}, 0, len(classes)*numCol)
 
 	for i, class := range classes {
-		valueStrings = append(valueStrings, fmt.Sprintf("($%d, $%d, $%d, $%d)", i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4))
+		valueStrings = append(valueStrings, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d)", i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4, i*numCol+5))
 		valueArgs = append(valueArgs, class.NFTSnapshotId)
 		valueArgs = append(valueArgs, class.CosmosClassId)
 		valueArgs = append(valueArgs, class.Name)
 		valueArgs = append(valueArgs, class.Image)
+		valueArgs = append(valueArgs, class.EstimatedMigrationDurationNeeded)
 	}
 
 	stmt := fmt.Sprintf(`INSERT INTO likenft_asset_snapshot_class (
 	likenft_asset_snapshot_id,
 	cosmos_class_id,
 	name,
-	image
+	image,
+	estimated_migration_duration_needed
 ) VALUES %s`, strings.Join(valueStrings, ","))
 
 	_, err := tx.Exec(stmt, valueArgs...)

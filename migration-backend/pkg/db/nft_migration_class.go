@@ -1,8 +1,10 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
@@ -20,6 +22,7 @@ func QueryLikeNFTAssetMigrationClassById(
 	name,
 	image,
 	status,
+	estimated_duration_needed,
 	enqueue_time,
 	finish_time,
 	evm_tx_hash,
@@ -37,6 +40,7 @@ FROM likenft_asset_migration_class WHERE id = $1`,
 		&class.Name,
 		&class.Image,
 		&class.Status,
+		&class.EstimatedDurationNeeded,
 		&class.EnqueueTime,
 		&class.FinishTime,
 		&class.EvmTxHash,
@@ -62,6 +66,7 @@ func QueryLikeNFTAssetMigrationClassesByNFTMigrationId(
 	name,
 	image,
 	status,
+	estimated_duration_needed,
 	enqueue_time,
 	finish_time,
 	evm_tx_hash,
@@ -86,6 +91,7 @@ FROM likenft_asset_migration_class WHERE likenft_asset_migration_id = $1`,
 			&class.Name,
 			&class.Image,
 			&class.Status,
+			&class.EstimatedDurationNeeded,
 			&class.EnqueueTime,
 			&class.FinishTime,
 			&class.EvmTxHash,
@@ -116,6 +122,7 @@ func QueryLikeNFTAssetMigrationClassesByNFTMigrationIdAndStatus(
 	name,
 	image,
 	status,
+	estimated_duration_needed,
 	enqueue_time,
 	finish_time,
 	evm_tx_hash,
@@ -143,6 +150,7 @@ WHERE likenft_asset_migration_id = $1
 			&class.Name,
 			&class.Image,
 			&class.Status,
+			&class.EstimatedDurationNeeded,
 			&class.EnqueueTime,
 			&class.FinishTime,
 			&class.EvmTxHash,
@@ -159,6 +167,31 @@ WHERE likenft_asset_migration_id = $1
 	return classes, nil
 }
 
+func QueryTotalPendingEstimatedDurationFromMigrationClasses(
+	ctx context.Context,
+	tx TxLike,
+) (time.Duration, error) {
+	row := tx.QueryRowContext(
+		ctx, `SELECT
+	SUM(estimated_duration_needed)
+FROM likenft_asset_migration_class
+WHERE status in ($1, $2)
+`, model.LikeNFTAssetMigrationClassStatusInit, model.LikeNFTAssetMigrationClassStatusInProgress)
+
+	// Null when no records
+	var maybeTotalEstimatedDuration *time.Duration
+	err := row.Scan(&maybeTotalEstimatedDuration)
+
+	if err != nil {
+		return time.Duration(0), err
+	}
+
+	if maybeTotalEstimatedDuration != nil {
+		return *maybeTotalEstimatedDuration, nil
+	}
+	return time.Duration(0), nil
+}
+
 func InsertLikeNFTAssetMigrationClasses(
 	tx TxLike,
 	classes []model.LikeNFTAssetMigrationClass,
@@ -167,18 +200,19 @@ func InsertLikeNFTAssetMigrationClasses(
 		return nil
 	}
 	valueStrings := make([]string, 0, len(classes))
-	numCol := 9
+	numCol := 10
 	valueArgs := make([]interface{}, 0, len(classes)*numCol)
 
 	for i, class := range classes {
 		valueStrings = append(valueStrings, fmt.Sprintf(
-			"($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)",
-			i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4, i*numCol+5, i*numCol+6, i*numCol+7, i*numCol+8, i*numCol+9))
+			"($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)",
+			i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4, i*numCol+5, i*numCol+6, i*numCol+7, i*numCol+8, i*numCol+9, i*numCol+10))
 		valueArgs = append(valueArgs, class.LikeNFTAssetMigrationId)
 		valueArgs = append(valueArgs, class.CosmosClassId)
 		valueArgs = append(valueArgs, class.Name)
 		valueArgs = append(valueArgs, class.Image)
 		valueArgs = append(valueArgs, class.Status)
+		valueArgs = append(valueArgs, class.EstimatedDurationNeeded)
 		valueArgs = append(valueArgs, class.EnqueueTime)
 		valueArgs = append(valueArgs, class.FinishTime)
 		valueArgs = append(valueArgs, class.EvmTxHash)
@@ -191,6 +225,7 @@ func InsertLikeNFTAssetMigrationClasses(
 	name,
 	image,
 	status,
+	estimated_duration_needed,
 	enqueue_time,
 	finish_time,
 	evm_tx_hash,

@@ -1,6 +1,7 @@
 package migration
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -8,9 +9,11 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/hibiken/asynq"
+
 	"github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	api_model "github.com/likecoin/like-migration-backend/pkg/handler/model"
@@ -79,7 +82,8 @@ type RetryMigrationHandler struct {
 }
 
 func (h *RetryMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	hub := sentry.GetHubFromContext(r.Context())
+	ctx := r.Context()
+	hub := sentry.GetHubFromContext(ctx)
 
 	cosmosAddress := r.URL.Path[strings.LastIndex(r.URL.Path, "/")+1:]
 
@@ -91,7 +95,7 @@ func (h *RetryMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	migration, err := h.handle(cosmosAddress, &req)
+	migration, err := h.handle(ctx, cosmosAddress, &req)
 
 	if err != nil {
 		handler.SendJSON(w, http.StatusInternalServerError,
@@ -108,7 +112,7 @@ func (h *RetryMigrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	go h.enqueueFailedMigrationTasks(migration.Id)
 }
 
-func (h *RetryMigrationHandler) handle(cosmosAddress string, req *RetryMigrationRequestBody) (*api_model.LikeNFTAssetMigration, error) {
+func (h *RetryMigrationHandler) handle(ctx context.Context, cosmosAddress string, req *RetryMigrationRequestBody) (*api_model.LikeNFTAssetMigration, error) {
 	migration, err := db.QueryLikeNFTAssetMigrationByCosmosAddress(h.Db, cosmosAddress)
 
 	if err != nil {
@@ -142,6 +146,24 @@ func (h *RetryMigrationHandler) handle(cosmosAddress string, req *RetryMigration
 		return nil, ErrAssetsNotMatched
 	}
 
+	pendingEstimatedDurationFromMigrationClasses, err := db.QueryTotalPendingEstimatedDurationFromMigrationClasses(ctx, h.Db)
+	if err != nil {
+		return nil, err
+	}
+	pendingEstimatedDurationFromMigrationNFTs, err := db.QueryTotalPendingEstimatedDurationFromMigrationNFTs(ctx, h.Db)
+	if err != nil {
+		return nil, err
+	}
+
+	pendingEstimatedDurationFromSnapshotClasses := time.Duration(0)
+	for _, failedClass := range failedClasses {
+		pendingEstimatedDurationFromSnapshotClasses += failedClass.EstimatedDurationNeeded
+	}
+	pendingEstimatedDurationFromSnapshotNFTs := time.Duration(0)
+	for _, failedNFT := range failedNFTs {
+		pendingEstimatedDurationFromSnapshotNFTs += failedNFT.EstimatedDurationNeeded
+	}
+
 	// Return
 	classes, err := db.QueryLikeNFTAssetMigrationClassesByNFTMigrationId(h.Db, migration.Id)
 	if err != nil {
@@ -154,6 +176,11 @@ func (h *RetryMigrationHandler) handle(cosmosAddress string, req *RetryMigration
 	}
 
 	migration.Status = model.NFTMigrationStatusInProgress
+	migration.EstimatedFinishedTime = time.Now().UTC().Add(
+		pendingEstimatedDurationFromMigrationClasses +
+			pendingEstimatedDurationFromMigrationNFTs +
+			pendingEstimatedDurationFromSnapshotClasses +
+			pendingEstimatedDurationFromSnapshotNFTs)
 
 	err = db.UpdateLikeNFTAssetMigration(h.Db, migration)
 	if err != nil {

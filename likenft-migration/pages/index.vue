@@ -366,6 +366,7 @@
           </template>
           <template #current>
             <div
+              v-if="migration != null"
               :class="[
                 'flex',
                 'flex-row',
@@ -384,15 +385,31 @@
                 {{ $t('section.migration-result.title') }}
                 <span
                   v-if="
-                    migration != null &&
-                    (migration.status === 'in_progress' ||
-                      migration.status === 'init')
+                    migration.status === 'in_progress' ||
+                    migration.status === 'init'
                   "
                 >
                   {{ $t('section.migration-result.in-progress') }}
                 </span>
               </h2>
-              <LoadingIcon />
+              <div :class="['flex', 'flex-row', 'items-center', 'gap-4']">
+                <p
+                  v-if="now < migration.estimated_finished_time"
+                  :class="['text-base', 'text-likecoin-darkgrey']"
+                >
+                  {{
+                    $t('section.migration-result.estimated-finished-time', {
+                      estimatedFinishedTime: _formatDate(
+                        migration.estimated_finished_time
+                      ),
+                    })
+                  }}
+                </p>
+                <p v-else :class="['text-base', 'text-likecoin-darkgrey']">
+                  {{ $t('section.migration-result.wrapping-up') }}
+                </p>
+                <LoadingIcon />
+              </div>
             </div>
             <SectionMigrationResult
               v-if="migration != null"
@@ -490,6 +507,7 @@ import {
   makeRetryMigrationAPI,
   RetryMigrationRequest,
 } from '~/apis/retryMigration';
+import { getDateFmt, getDateFnsLocales } from '~/i18n/locale';
 import {
   authcoreRedirected,
   authcoreRedirectionFailed,
@@ -530,6 +548,8 @@ import UTooltip from '../nuxtui/components/UTooltip.vue';
 
 interface Data {
   isTransitioning: boolean;
+  now: Date;
+  nowInterval: ReturnType<typeof setInterval> | null;
 
   currentStep: StepState;
 
@@ -546,6 +566,9 @@ export default Vue.extend({
   data(): Data {
     return {
       isTransitioning: false,
+
+      now: new Date(),
+      nowInterval: null,
 
       currentStep: { step: 1 },
 
@@ -711,9 +734,18 @@ export default Vue.extend({
   },
 
   async mounted() {
+    this.nowInterval = setInterval(() => {
+      this.now = new Date();
+    }, 1000);
     await this.handleMaybeLikeCoinWalletConnectedFromRedirect();
   },
 
+  destroyed() {
+    if (this.nowInterval != null) {
+      clearInterval(this.nowInterval);
+      this.nowInterval = null;
+    }
+  },
   methods: {
     handleIntroductionSectionConfirmClick() {
       if (this.currentStep.step !== 1) {
@@ -1131,7 +1163,9 @@ export default Vue.extend({
     },
 
     _formatDate(value: Date) {
-      return formatDate(value, 'dd MMM, yyyy HH:mm:ss');
+      return formatDate(value, getDateFmt(this.$i18n.locale), {
+        locale: getDateFnsLocales(this.$i18n.locale),
+      });
     },
 
     _formatNumber(value: number | string) {
