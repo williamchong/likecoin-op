@@ -64,6 +64,8 @@ migrationBackend:
   name: migration-backend
   env:
     BATCH_MINT_ITEM_PER_PAGE: "10"
+    CLASS_MIGRATION_ESTIMATED_DURATION_SECONDS: "2"
+    NFT_MIGRATION_ESTIMATED_DURATION_SECONDS: "2"
 
   container:
     imageRepository: likecoin/like-migration-backend
