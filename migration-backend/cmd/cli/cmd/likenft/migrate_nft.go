@@ -95,7 +95,7 @@ var migrateNFTCmd = &cobra.Command{
 			&likeProtocolClient,
 			&likeNFTClient,
 			envCfg.InitialNewClassOwner,
-			envCfg.InitialNewClassMinter,
+			envCfg.InitialNewClassMinters,
 			envCfg.InitialNewClassUpdater,
 			envCfg.InitialBatchMintNFTsOwner,
 			envCfg.BatchMintItemPerPage,

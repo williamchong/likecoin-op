@@ -22,11 +22,11 @@ type EnvConfig struct {
 	LikecoinAPIUrlBase              string `envconfig:"LIKECOIN_API_URL_BASE"`
 	LikecoinAPIHTTPTimeoutSeconds   int    `envconfig:"LIKECOIN_API_HTTP_TIMEOUT_SECONDS" default:"10"`
 
-	InitialNewClassOwner      string `envconfig:"INITIAL_NEW_CLASS_OWNER"`
-	InitialNewClassMinter     string `envconfig:"INITIAL_NEW_CLASS_MINTER"`
-	InitialNewClassUpdater    string `envconfig:"INITIAL_NEW_CLASS_UPDATER"`
-	InitialBatchMintNFTsOwner string `envconfig:"INITIAL_BATCH_MINT_NFTS_OWNER"`
-	BatchMintItemPerPage      uint64 `envconfig:"BATCH_MINT_ITEM_PER_PAGE"`
+	InitialNewClassOwner      string   `envconfig:"INITIAL_NEW_CLASS_OWNER"`
+	InitialNewClassMinters    []string `envconfig:"INITIAL_NEW_CLASS_MINTERS"`
+	InitialNewClassUpdater    string   `envconfig:"INITIAL_NEW_CLASS_UPDATER"`
+	InitialBatchMintNFTsOwner string   `envconfig:"INITIAL_BATCH_MINT_NFTS_OWNER"`
+	BatchMintItemPerPage      uint64   `envconfig:"BATCH_MINT_ITEM_PER_PAGE"`
 
 	ClassMigrationEstimatedDurationSeconds int `envconfig:"CLASS_MIGRATION_ESTIMATED_DURATION_SECONDS" default:"0"`
 	NFTMigrationEstimatedDurationSeconds   int `envconfig:"NFT_MIGRATION_ESTIMATED_DURATION_SECONDS" default:"0"`

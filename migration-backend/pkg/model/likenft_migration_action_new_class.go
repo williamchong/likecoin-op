@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/likecoin/like-migration-backend/pkg/types/commaseparatedstring"
+)
 
 type LikeNFTMigrationActionNewClassStatus string
 
@@ -12,14 +16,14 @@ const (
 )
 
 type LikeNFTMigrationActionNewClass struct {
-	Id             uint64
-	CreatedAt      time.Time
-	CosmosClassId  string
-	InitialOwner   string
-	InitialMinter  string
-	InitialUpdater string
-	Status         LikeNFTMigrationActionNewClassStatus
-	EvmClassId     *string
-	EvmTxHash      *string
-	FailedReason   *string
+	Id                uint64
+	CreatedAt         time.Time
+	CosmosClassId     string
+	InitialOwner      string
+	InitialMintersStr commaseparatedstring.CommaSeparatedString
+	InitialUpdater    string
+	Status            LikeNFTMigrationActionNewClassStatus
+	EvmClassId        *string
+	EvmTxHash         *string
+	FailedReason      *string
 }

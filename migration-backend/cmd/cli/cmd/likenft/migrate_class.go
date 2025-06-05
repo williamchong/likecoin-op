@@ -96,7 +96,7 @@ var migrateClassCmd = &cobra.Command{
 			&evmLikeNFTClient,
 			&evmLikeNFTClassClient,
 			envCfg.InitialNewClassOwner,
-			envCfg.InitialNewClassMinter,
+			envCfg.InitialNewClassMinters,
 			envCfg.InitialNewClassUpdater,
 			id,
 		)

@@ -26,7 +26,7 @@ func MigrateNFTFromAssetMigration(
 	n *evm.BookNFT,
 
 	initialClassOwner string,
-	initialClassMinter string,
+	initialClassMinters []string,
 	initialClassUpdater string,
 	initialBatchMintOwner string,
 	batchMintPerPage uint64,
@@ -63,7 +63,7 @@ func MigrateNFTFromAssetMigration(
 		p,
 		n,
 		initialClassOwner,
-		initialClassMinter,
+		initialClassMinters,
 		initialClassUpdater,
 		initialBatchMintOwner,
 		batchMintPerPage,
@@ -100,7 +100,7 @@ func MigrateNFT(
 	n *evm.BookNFT,
 
 	initialClassOwner string,
-	initialClassMinter string,
+	initialClassMinters []string,
 	initialClassUpdater string,
 	initialBatchMintOwner string,
 	batchMintPerPage uint64,
@@ -112,7 +112,7 @@ func MigrateNFT(
 	mylogger := logger.
 		WithGroup("MigrateNFT").
 		With("initialClassOwner", initialClassOwner).
-		With("initialClassMinter", initialClassMinter).
+		With("initialClassMinters", initialClassMinters).
 		With("initialClassUpdater", initialClassUpdater).
 		With("initialBatchMintOwner", initialBatchMintOwner).
 		With("cosmosClassId", cosmosClassId).
@@ -123,7 +123,7 @@ func MigrateNFT(
 		db,
 		cosmosClassId,
 		initialClassOwner,
-		initialClassMinter,
+		initialClassMinters,
 		initialClassUpdater,
 	)
 	if err != nil {
