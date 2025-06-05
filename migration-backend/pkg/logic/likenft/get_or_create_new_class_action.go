@@ -13,7 +13,7 @@ func GetOrCreateNewClassAction(
 	db *sql.DB,
 	cosmosClassId string,
 	initialOwner string,
-	initialMinter string,
+	initialClassMinters []string,
 	initialUpdater string,
 ) (*model.LikeNFTMigrationActionNewClass, error) {
 	m, err := appdb.QueryLikeNFTMigrationActionNewClass(db, appdb.QueryLikeNFTMigrationActionNewClassFilter{
@@ -24,7 +24,7 @@ func GetOrCreateNewClassAction(
 			m = &model.LikeNFTMigrationActionNewClass{
 				CosmosClassId:     cosmosClassId,
 				InitialOwner:      initialOwner,
-				InitialMintersStr: commaseparatedstring.CommaSeparatedString(initialMinter),
+				InitialMintersStr: commaseparatedstring.FromSlice(initialClassMinters),
 				InitialUpdater:    initialUpdater,
 				Status:            model.LikeNFTMigrationActionNewClassStatusInit,
 			}

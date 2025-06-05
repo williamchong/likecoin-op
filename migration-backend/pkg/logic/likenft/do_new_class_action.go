@@ -73,8 +73,12 @@ func DoNewClassAction(
 		return nil, doNewClassActionFailed(db, a, err)
 	}
 
+	initialMinterAddresses := make([]common.Address, len(a.InitialMintersStr))
+	for i, initialMinterStr := range a.InitialMintersStr.ToSlice() {
+		initialMinterAddresses[i] = common.HexToAddress(initialMinterStr)
+	}
+
 	initialOwnerAddress := common.HexToAddress(a.InitialOwner)
-	initialMinterAddress := common.HexToAddress(a.InitialMinter)
 	initialUpdaterAddress := common.HexToAddress(a.InitialUpdater)
 
 	maxSupply := ^uint64(0)
@@ -100,7 +104,7 @@ func DoNewClassAction(
 	tx, txReceipt, err := n.NewBookNFT(ctx, mylogger, like_protocol.MsgNewBookNFT{
 		Creator:  initialOwnerAddress,
 		Updaters: []common.Address{initialUpdaterAddress},
-		Minters:  []common.Address{initialMinterAddress},
+		Minters:  initialMinterAddresses,
 		Config: like_protocol.BookConfig{
 			Name:      cosmosClass.Name,
 			Symbol:    cosmosClass.Symbol,

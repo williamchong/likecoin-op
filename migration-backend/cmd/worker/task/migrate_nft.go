@@ -83,7 +83,7 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 		&evmLikeProtocolClient,
 		&evmLikeNFTClient,
 		envCfg.InitialNewClassOwner,
-		envCfg.InitialNewClassMinter,
+		envCfg.InitialNewClassMinters,
 		envCfg.InitialNewClassUpdater,
 		envCfg.InitialBatchMintNFTsOwner,
 		envCfg.BatchMintItemPerPage,
