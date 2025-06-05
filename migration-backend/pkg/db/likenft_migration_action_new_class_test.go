@@ -1,6 +1,7 @@
 package db_test
 
 import (
+	"math/big"
 	"testing"
 
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
@@ -16,11 +17,12 @@ func TestLikeNFTMigrationActionNewClass(t *testing.T) {
 		defer done()
 
 		insertResult, err := appdb.InsertLikeNFTMigrationActionNewClass(db, &model.LikeNFTMigrationActionNewClass{
-			CosmosClassId:     "cosmosclassid",
-			InitialOwner:      "initialowner",
-			InitialMintersStr: commaseparatedstring.CommaSeparatedString("initialminter1,initialminter2"),
-			InitialUpdater:    "initialupdater",
-			Status:            model.LikeNFTMigrationActionNewClassStatusInit,
+			CosmosClassId:          "cosmosclassid",
+			InitialOwner:           "initialowner",
+			InitialMintersStr:      commaseparatedstring.CommaSeparatedString("initialminter1,initialminter2"),
+			InitialUpdater:         "initialupdater",
+			DefaultRoyaltyFraction: big.NewInt(10),
+			Status:                 model.LikeNFTMigrationActionNewClassStatusInit,
 		})
 		if err != nil {
 			t.Fatalf("failed to insert MigrationActionNewClass: %v", err)
