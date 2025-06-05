@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"net/http"
 	"time"
 
@@ -88,6 +89,7 @@ func HandleMigrateClassTask(ctx context.Context, t *asynq.Task) error {
 		envCfg.InitialNewClassOwner,
 		envCfg.InitialNewClassMinters,
 		envCfg.InitialNewClassUpdater,
+		new(big.Int).SetUint64(envCfg.DefaultRoyaltyFraction),
 		p.LikenftAssetMigrationClassId,
 	)
 
