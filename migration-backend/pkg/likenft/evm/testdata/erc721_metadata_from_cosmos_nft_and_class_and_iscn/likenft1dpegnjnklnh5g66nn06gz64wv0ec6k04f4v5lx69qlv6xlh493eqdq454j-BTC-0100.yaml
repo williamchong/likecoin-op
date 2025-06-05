@@ -174,5 +174,10 @@ erc721metadata: |
     },{
       "trait_type": "Publisher",
       "value": "飛地出版"
-    }]
+    }],
+    "likecoin": {
+      "iscnIdPrefix": "iscn://likecoin-chain/Cb-mL2bZeCffDeEmiZlaalJrYqGwOILYCT_WJ3kDmDg",
+      "classId": "likenft1dpegnjnklnh5g66nn06gz64wv0ec6k04f4v5lx69qlv6xlh493eqdq454j",
+      "nftId": "BTC-0100"
+    }
   }

@@ -196,5 +196,10 @@ erc721metadata: |
     "attributes": [{
       "trait_type": "Author",
       "value": "董啟章"
-    }]
+    }],
+    "likecoin": {
+      "iscnIdPrefix": "iscn://likecoin-chain/o91-umWGStNh5Hxdyc-1MsG5__kEhr7VutmJ7u0ZVwY",
+      "classId": "likenft1tgwav6zq3ean4ygz58hehlk3q5yghgtel97k260lugxqxszhcuws3pytae",
+      "nftId": "TIMEHISTORY-0023"
+    }
   }
