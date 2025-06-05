@@ -11,6 +11,7 @@ import (
 
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/event"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
 )
@@ -36,7 +37,8 @@ type CosmosToEVMNFTMirror interface {
 type cosmosToEVMNFTMirror struct {
 	logger *slog.Logger
 
-	cosmosNftIDMatcher nftidmatcher.CosmosNFTIDMatcher
+	cosmosNftIDMatcher       nftidmatcher.CosmosNFTIDMatcher
+	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder
 
 	likeNFTCosmosClient *cosmos.LikeNFTCosmosClient
 	bookNFTEvmClient    *evm.BookNFT
@@ -49,6 +51,7 @@ func MakeCosmosToEVMNFTMirror(
 	logger *slog.Logger,
 
 	cosmosNftIDMatcher nftidmatcher.CosmosNFTIDMatcher,
+	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
 	likeNFTCosmosClient *cosmos.LikeNFTCosmosClient,
 	bookNFTEvmClient *evm.BookNFT,
@@ -57,12 +60,13 @@ func MakeCosmosToEVMNFTMirror(
 	mintPageSize uint64,
 ) CosmosToEVMNFTMirror {
 	return &cosmosToEVMNFTMirror{
-		logger:                       logger,
-		cosmosNftIDMatcher:           cosmosNftIDMatcher,
-		likeNFTCosmosClient:          likeNFTCosmosClient,
-		bookNFTEvmClient:             bookNFTEvmClient,
-		initialBatchMintOwnerAddress: initialBatchMintOwnerAddress,
-		mintPageSize:                 mintPageSize,
+		logger,
+		cosmosNftIDMatcher,
+		erc721ExternalURLBuilder,
+		likeNFTCosmosClient,
+		bookNFTEvmClient,
+		initialBatchMintOwnerAddress,
+		mintPageSize,
 	}
 }
 
@@ -160,10 +164,13 @@ func (m *cosmosToEVMNFTMirror) Mirror(
 					return nil, err
 				}
 				metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFTAndClassAndISCNData(
+					m.erc721ExternalURLBuilder,
 					cosmosNFT,
 					cosmosClass,
 					iscnDataResponse,
 					metadataOverride,
+					evmClassId,
+					i,
 				))
 				if err != nil {
 					return nil, err

@@ -21,6 +21,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	cosmosmodel "github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/event"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
@@ -40,6 +41,8 @@ func DoMintNFTAction(
 	p *evm.LikeProtocol,
 	c *evm.BookNFT,
 	m *cosmos.LikeNFTCosmosClient,
+	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
+
 	a *model.LikeNFTMigrationActionMintNFT,
 ) (*model.LikeNFTMigrationActionMintNFT, error) {
 	mylogger := logger.
@@ -104,10 +107,13 @@ func DoMintNFTAction(
 			return nil, doMintNFTActionFailed(db, a, err)
 		}
 		metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFTAndClassAndISCNData(
+			erc721ExternalURLBuilder,
 			cosmosNFT.NFT,
 			cosmosClass.Class,
 			iscnDataResponse,
 			metadataOverride,
+			a.EvmClassId,
+			totalSupply,
 		))
 		if err != nil {
 			return nil, doMintNFTActionFailed(db, a, err)
@@ -150,10 +156,13 @@ func DoMintNFTAction(
 				return nil, doMintNFTActionFailed(db, a, err)
 			}
 			metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFTAndClassAndISCNData(
+				erc721ExternalURLBuilder,
 				cosmosNFT.NFT,
 				cosmosClass.Class,
 				iscnDataResponse,
 				metadataOverride,
+				a.EvmClassId,
+				nftId,
 			))
 			if err != nil {
 				return nil, doMintNFTActionFailed(db, a, err)
@@ -209,10 +218,13 @@ func DoMintNFTAction(
 							return nil, doMintNFTActionFailed(db, a, err)
 						}
 						metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFTAndClassAndISCNData(
+							erc721ExternalURLBuilder,
 							&cosmosNFT,
 							cosmosClass.Class,
 							iscnDataResponse,
 							metadataOverride,
+							a.EvmClassId,
+							nftId,
 						))
 						if err != nil {
 							return nil, doMintNFTActionFailed(db, a, err)

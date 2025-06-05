@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 
 	cosmosmodel "github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
 	evmmodel "github.com/likecoin/like-migration-backend/pkg/likenft/evm/model"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
 )
 
 func ContractLevelMetadataFromCosmosClassAndISCN(
@@ -77,10 +79,13 @@ func ERC721OpenSeaMetadataFromCosmosNFTMetadata(m *cosmosmodel.NFTMetadata) *evm
 }
 
 func ERC721MetadataFromCosmosNFTAndClassAndISCNData(
+	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 	n *cosmosmodel.NFT,
 	c *cosmosmodel.Class,
 	iscn *cosmosmodel.ISCN,
 	cosmosMetadataOverride *cosmosmodel.NFTMetadata,
+	evmClassId string,
+	evmTokenId uint64,
 ) *evmmodel.ERC721Metadata {
 	iscnRecord := iscn.Records[0].Data
 
@@ -94,9 +99,9 @@ func ERC721MetadataFromCosmosNFTAndClassAndISCNData(
 	metadata := evmmodel.OverrideERC721Metadata(
 		evmmodel.ERC721Metadata{
 			Image:       c.Data.Metadata.Image,
-			ExternalUrl: iscnRecord.ContentMetadata.Url,
-			Description: iscnRecord.ContentMetadata.Description,
-			Name:        iscnRecord.ContentMetadata.Name,
+			ExternalUrl: erc721ExternalURLBuilder.Build(evmClassId, evmTokenId),
+			Description: fmt.Sprintf("Copy #%s of %s", strconv.FormatUint(evmTokenId, 10), iscnRecord.ContentMetadata.Name),
+			Name:        fmt.Sprintf("%s #%s", iscnRecord.ContentMetadata.Name, strconv.FormatUint(evmTokenId, 10)),
 			Attributes: sortERC721MetadataAttributes(
 				slices.Concat(
 					makeERC721MetadataAttribute("", n.Data.Metadata.Attributes),
