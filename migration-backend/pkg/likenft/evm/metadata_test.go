@@ -88,7 +88,15 @@ func TestContractLevelMetadataFromCosmosClassAndISCN(t *testing.T) {
 	})
 }
 
+type erc721ExternalURLBuilderMock struct{}
+
+func (b *erc721ExternalURLBuilderMock) Build(classId string, tokenId uint64) string {
+	return fmt.Sprintf("https://sepolia.3ook.com/store/%s/%d", classId, tokenId)
+}
+
 func TestERC721MetadataFromCosmosNFTAndClassAndISCNData(t *testing.T) {
+	erc721ExternalURLBuilder := &erc721ExternalURLBuilderMock{}
+
 	Convey("ERC721MetadataFromCosmosNFTAndClassAndISCNData", t, func() {
 		rootDir := "testdata/erc721_metadata_from_cosmos_nft_and_class_and_iscn/"
 		entries, err := os.ReadDir(rootDir)
@@ -150,10 +158,13 @@ func TestERC721MetadataFromCosmosNFTAndClassAndISCNData(t *testing.T) {
 					}
 
 					contractLevelMetadata := evm.ERC721MetadataFromCosmosNFTAndClassAndISCNData(
+						erc721ExternalURLBuilder,
 						&cosmosNFT,
 						cosmosClass.Class,
 						&iscn,
 						metadataOverride,
+						"myclassid",
+						124,
 					)
 					contractLevelMetadataStr, err := json.Marshal(contractLevelMetadata)
 					if err != nil {

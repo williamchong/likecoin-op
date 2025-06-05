@@ -52,10 +52,6 @@ func (m *ContractLevelMetadata) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	additionalProps, err := json.Marshal(m.AdditionalProps)
-	if err != nil {
-		return nil, err
-	}
 
 	res := make(map[string]any)
 	err = json.Unmarshal(openSeaBytes, &res)
@@ -63,9 +59,18 @@ func (m *ContractLevelMetadata) MarshalJSON() ([]byte, error) {
 		return nil, err
 	}
 
-	err = json.Unmarshal(additionalProps, &res)
-	if err != nil {
-		return nil, err
+	// Unmarshalling null will make the target dict empty
+	// refs: https://go.dev/play/p/nxgfstsnRiL
+	if m.AdditionalProps != nil {
+		additionalPropsBytes, err := json.Marshal(m.AdditionalProps)
+		if err != nil {
+			return nil, err
+		}
+
+		err = json.Unmarshal(additionalPropsBytes, &res)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return json.Marshal(res)
@@ -116,10 +121,6 @@ func (m *ERC721Metadata) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	additionalProps, err := json.Marshal(m.AdditionalProps)
-	if err != nil {
-		return nil, err
-	}
 
 	res := make(map[string]any)
 	err = json.Unmarshal(openSeaBytes, &res)
@@ -127,9 +128,17 @@ func (m *ERC721Metadata) MarshalJSON() ([]byte, error) {
 		return nil, err
 	}
 
-	err = json.Unmarshal(additionalProps, &res)
-	if err != nil {
-		return nil, err
+	// Unmarshalling null will make the target dict empty
+	// refs: https://go.dev/play/p/nxgfstsnRiL
+	if m.AdditionalProps != nil {
+		additionalPropsBytes, err := json.Marshal(m.AdditionalProps)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(additionalPropsBytes, &res)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return json.Marshal(res)

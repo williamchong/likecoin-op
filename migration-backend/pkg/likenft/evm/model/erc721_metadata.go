@@ -2,18 +2,6 @@ package model
 
 // https://docs.opensea.io/docs/metadata-standards
 type ERC721Metadata struct {
-	ERC721MetadataContractLevel
-	ERC721MetadataOpenSea
-	MetadataAdditional
-	MetadataISCN
-	LikeCoin *ERC721MetadataLikeCoin `json:"likecoin,omitempty"`
-}
-
-type ERC721MetadataContractLevel struct {
-	Symbol string `json:"symbol,omitempty"`
-}
-
-type ERC721MetadataOpenSea struct {
 	Image           string                    `json:"image,omitempty"`
 	ImageData       string                    `json:"image_data,omitempty"`
 	ExternalUrl     string                    `json:"external_url,omitempty"`
@@ -39,11 +27,11 @@ func EitherArray[T any](v1 []T, v2 []T) []T {
 	return v2
 }
 
-func OverrideERC721MetadataOpenSea(m ERC721MetadataOpenSea, override *ERC721MetadataOpenSea) ERC721MetadataOpenSea {
+func OverrideERC721Metadata(m ERC721Metadata, override *ERC721Metadata) ERC721Metadata {
 	if override == nil {
 		return m
 	}
-	return ERC721MetadataOpenSea{
+	return ERC721Metadata{
 		Image:           EitherString(override.Image, m.Image),
 		ImageData:       EitherString(override.ImageData, m.ImageData),
 		ExternalUrl:     EitherString(override.ExternalUrl, m.ExternalUrl),

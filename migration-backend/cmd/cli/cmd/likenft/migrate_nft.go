@@ -17,6 +17,7 @@ import (
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likenft"
 	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
@@ -64,6 +65,14 @@ var migrateNFTCmd = &cobra.Command{
 			panic(err)
 		}
 
+		erc721ExternalURLBuilder, err := erc721externalurl.MakeErc721ExternalURLBuilder3ook(
+			envCfg.ERC721MetadataExternalURLBase3ook,
+		)
+
+		if err != nil {
+			panic(err)
+		}
+
 		signer := signer.NewSignerClient(
 			&http.Client{
 				Timeout: 10 * time.Second,
@@ -99,6 +108,7 @@ var migrateNFTCmd = &cobra.Command{
 			envCfg.InitialNewClassUpdater,
 			envCfg.InitialBatchMintNFTsOwner,
 			envCfg.BatchMintItemPerPage,
+			erc721ExternalURLBuilder,
 			id,
 		)
 		if err != nil {

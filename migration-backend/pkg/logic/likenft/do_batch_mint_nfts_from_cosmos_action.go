@@ -13,6 +13,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/cosmostoevmnftmirror"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 	"github.com/likecoin/like-migration-backend/pkg/util/actionlifecycle"
@@ -111,6 +112,7 @@ func DoBatchMintNFTsFromCosmosAction(
 	bookNFTEvmClient *evm.BookNFT,
 	likecoinAPI *likecoin_api.LikecoinAPI,
 	likeNFTCosmosClient *cosmos.LikeNFTCosmosClient,
+	externalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
 	evmClassId string,
 	expectedSupply uint64,
@@ -126,6 +128,7 @@ func DoBatchMintNFTsFromCosmosAction(
 		cosmostoevmnftmirror.MakeCosmosToEVMNFTMirror(
 			logger,
 			nftidmatcher.MakeNFTIDMatcher(),
+			externalURLBuilder,
 			likeNFTCosmosClient,
 			bookNFTEvmClient,
 			batchMintOwner,

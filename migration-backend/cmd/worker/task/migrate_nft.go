@@ -15,6 +15,7 @@ import (
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likenft"
 	"github.com/likecoin/like-migration-backend/pkg/signer"
 	apptask "github.com/likecoin/like-migration-backend/pkg/task"
@@ -73,6 +74,14 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 		signer,
 	)
 
+	erc721ExternalURLBuilder, err := erc721externalurl.MakeErc721ExternalURLBuilder3ook(
+		envCfg.ERC721MetadataExternalURLBase3ook,
+	)
+
+	if err != nil {
+		return err
+	}
+
 	mylogger.Info("running migrate nft")
 	mn, err := likenft.MigrateNFTFromAssetMigration(
 		ctx,
@@ -87,6 +96,7 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 		envCfg.InitialNewClassUpdater,
 		envCfg.InitialBatchMintNFTsOwner,
 		envCfg.BatchMintItemPerPage,
+		erc721ExternalURLBuilder,
 		p.LikenftAssetMigrationNFTId,
 	)
 

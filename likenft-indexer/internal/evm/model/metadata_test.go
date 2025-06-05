@@ -94,6 +94,46 @@ func TestContractLevelMetadata(t *testing.T) {
 			So(string(marshlledBytes), ShouldEqualJSON, string(data))
 		})
 	})
+
+	Convey("Test ContractLevelMetadata without additional props", t, func() {
+		data := []byte(`{
+  "name": "My Name",
+  "symbol": "BOOK",
+  "description": "Desc",
+  "image": "ipfs://bafybeierwqwwtj7wynjaud2jwi5yjxfqnnthvxfky66suih5wlpjuofvey",
+  "banner_image": "My Banner Image",
+  "featured_image": "My Featured Image",
+  "external_link": "https://ckxpress.com/moneyverse/",
+  "collaborators": ["123"]
+}
+`)
+
+		metadata := new(model.ContractLevelMetadata)
+		err := json.Unmarshal(data, &metadata)
+		So(err, ShouldBeNil)
+		Convey("Should construct opensea data from map correctly", func() {
+			opensea := metadata.ContractLevelMetadataOpenSea
+			So(opensea.BannerImage, ShouldEqual, "My Banner Image")
+			So(opensea.Collaborators, ShouldEqual, []string{"123"})
+			So(opensea.Description, ShouldEqual, "Desc")
+			So(opensea.ExternalLink, ShouldEqual, "https://ckxpress.com/moneyverse/")
+			So(opensea.FeaturedImage, ShouldEqual, "My Featured Image")
+			So(opensea.Image, ShouldEqual, "ipfs://bafybeierwqwwtj7wynjaud2jwi5yjxfqnnthvxfky66suih5wlpjuofvey")
+			So(opensea.Name, ShouldEqual, "My Name")
+			So(opensea.Symbol, ShouldEqual, "BOOK")
+		})
+		Convey("Should construct additional props correctly", func() {
+			additionalProps := metadata.AdditionalProps
+			So(additionalProps, ShouldBeNil)
+		})
+
+		marshlledBytes, err := json.Marshal(metadata)
+		So(err, ShouldBeNil)
+
+		Convey("Should reconstruct the original json", func() {
+			So(string(marshlledBytes), ShouldEqualJSON, string(data))
+		})
+	})
 }
 
 func TestERC721Metadata(t *testing.T) {
@@ -157,6 +197,60 @@ func TestERC721Metadata(t *testing.T) {
 		Convey("Should construct additional props from map correctly", func() {
 			additionalProps := metadata.AdditionalProps
 			So(additionalProps["message"], ShouldEqual, "My Token Message")
+		})
+
+		marshlledBytes, err := json.Marshal(metadata)
+		So(err, ShouldBeNil)
+
+		Convey("Should reconstruct the original json", func() {
+			So(string(marshlledBytes), ShouldEqualJSON, string(data))
+		})
+	})
+
+	Convey("Test ERC721Metadata without additional props", t, func() {
+		data := []byte(`{
+  "image": "https://nft-static-1.ckxpress.com/0-red-6.webp",
+  "external_url": "https://sepolia.3ook.com/store/0x84ce8aab5acecae283083761498440539a5dd8de/1",
+  "description": "Copy #1 of 心",
+  "name": "心 #1",
+  "attributes": [
+    {
+      "trait_type": "Author",
+      "value": "董啟章"
+    },
+    {
+      "trait_type": "publish_info_layout",
+      "value": "Kitty-Corner"
+    }
+  ]
+}`)
+
+		metadata := new(model.ERC721Metadata)
+		err := json.Unmarshal(data, &metadata)
+		So(err, ShouldBeNil)
+		Convey("Should construct opensea data from map correctly", func() {
+			opensea := metadata.ERC721MetadataOpenSea
+			So(opensea.Attributes, ShouldEqual, []model.ERC721MetadataAttribute{
+				{
+					DisplayType: nil,
+					TraitType:   "Author",
+					Value:       "董啟章",
+				},
+				{
+					DisplayType: nil,
+					TraitType:   "publish_info_layout",
+					Value:       "Kitty-Corner",
+				},
+			})
+			So(opensea.Description, ShouldEqual, "Copy #1 of 心")
+			So(opensea.ExternalUrl, ShouldEqual, "https://sepolia.3ook.com/store/0x84ce8aab5acecae283083761498440539a5dd8de/1")
+			So(opensea.Image, ShouldEqual, "https://nft-static-1.ckxpress.com/0-red-6.webp")
+			So(opensea.Name, ShouldEqual, "心 #1")
+		})
+
+		Convey("Should construct additional props from map correctly", func() {
+			additionalProps := metadata.AdditionalProps
+			So(additionalProps, ShouldBeNil)
 		})
 
 		marshlledBytes, err := json.Marshal(metadata)

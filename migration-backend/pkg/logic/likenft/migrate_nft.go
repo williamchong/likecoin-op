@@ -12,6 +12,7 @@ import (
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
@@ -30,6 +31,7 @@ func MigrateNFTFromAssetMigration(
 	initialClassUpdater string,
 	initialBatchMintOwner string,
 	batchMintPerPage uint64,
+	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
 	assetMigrationNFTId uint64,
 ) (*model.LikeNFTAssetMigrationNFT, error) {
@@ -67,6 +69,7 @@ func MigrateNFTFromAssetMigration(
 		initialClassUpdater,
 		initialBatchMintOwner,
 		batchMintPerPage,
+		erc721ExternalURLBuilder,
 		mn.CosmosClassId,
 		mn.CosmosNFTId,
 		m.EthAddress,
@@ -104,6 +107,7 @@ func MigrateNFT(
 	initialClassUpdater string,
 	initialBatchMintOwner string,
 	batchMintPerPage uint64,
+	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
 	cosmosClassId string,
 	cosmosNFTId string,
@@ -159,6 +163,7 @@ func MigrateNFT(
 			n,
 			likecoinAPI,
 			c,
+			erc721ExternalURLBuilder,
 			*newClassAction.EvmClassId,
 			expectedSupply,
 			batchMintPerPage,
@@ -188,6 +193,7 @@ func MigrateNFT(
 		p,
 		n,
 		c,
+		erc721ExternalURLBuilder,
 		mintNFTAction,
 	)
 

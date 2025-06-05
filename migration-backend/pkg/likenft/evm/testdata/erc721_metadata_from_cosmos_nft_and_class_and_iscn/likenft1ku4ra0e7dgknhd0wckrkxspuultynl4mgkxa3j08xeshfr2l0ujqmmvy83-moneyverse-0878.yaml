@@ -190,27 +190,10 @@ metadataoverride: |
   {"image":"https://nft-static-1.ckxpress.com/2-sliver-0212.webp"}
 erc721metadata: |
   {
-    "symbol": "BOOK",
-    "message": "唯有 NFT 的持有者，手上的 epub 和 pdf 才是正版。購買正版是一份美德，是能力所及的讀者該付出的一點承擔，代表著對作者的支持，對知識、報道和創作的尊重。",
-    "nft_meta_collection_id": "nft_book",
-    "nft_meta_collection_name": "NFT Book",
-    "nft_meta_collection_description": "NFT Book",
     "image":"https://nft-static-1.ckxpress.com/2-sliver-0212.webp",
-    "external_url":"https://ckxpress.com/moneyverse/",
-    "@context": "http://schema.org/",
-    "@type": "Book",
-    "author": "高重建",
-    "description": "甚麼是財富自由？如何才能達成財富自由？\n\nLikeCoin、DHK dao 發起人高重建以這本「死心塌地」之作，誠摯告訴你：\n在當前政經環境之下，財務自由必須被重新定義——\n「終極的財務自由，是免於被剝奪資產的自由。」\n\n學習「挖礦」、「區塊鏈」、「密碼貨幣」，才能在財富宇宙中自由穿梭。",
-    "isbn": "9786269836208",
-    "keywords": "投資,區塊鏈,密碼貨幣,金融,財經",
-    "name": "財富自由主義：金錢的多元宇宙",
-    "usageInfo": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
-    "version": 1,
-    "url": "https://ckxpress.com/moneyverse/",
-    "dateCreated": "2024-02-06T07:41:20+00:00",
-    "contentFingerprints": [
-      "ipfs://QmcbCCFEz8pLxDyqkZaqXVHr8eapeD6xsQGdvZzMJvQ2B4"
-    ],
+    "external_url":"https://sepolia.3ook.com/store/myclassid/124",
+    "description": "Copy #124 of 財富自由主義：金錢的多元宇宙",
+    "name": "財富自由主義：金錢的多元宇宙 #124",
     "attributes": [{
       "trait_type": "Author",
       "value": "高重建"
@@ -242,19 +225,5 @@ erc721metadata: |
     },{
       "trait_type": "publish_info_layout",
       "value": "Bottom"
-    }],
-    "potentialAction": {
-      "@type": "ReadAction",
-      "target": [{
-        "@type": "EntryPoint",
-        "contentType": "application/pdf",
-        "url": "https://files.ckxpress.com/moneyverse.pdf",
-        "name": "moneyverse.pdf"
-      }]
-    },
-    "likecoin": {
-      "iscnIdPrefix": "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c",
-      "classId": "likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83",
-      "nftId": "moneyverse-0878"
-    }
+    }]
   }
