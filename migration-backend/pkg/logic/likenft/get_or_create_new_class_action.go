@@ -6,6 +6,7 @@ import (
 
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/model"
+	"github.com/likecoin/like-migration-backend/pkg/types/commaseparatedstring"
 )
 
 func GetOrCreateNewClassAction(
@@ -21,11 +22,11 @@ func GetOrCreateNewClassAction(
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			m = &model.LikeNFTMigrationActionNewClass{
-				CosmosClassId:  cosmosClassId,
-				InitialOwner:   initialOwner,
-				InitialMinter:  initialMinter,
-				InitialUpdater: initialUpdater,
-				Status:         model.LikeNFTMigrationActionNewClassStatusInit,
+				CosmosClassId:     cosmosClassId,
+				InitialOwner:      initialOwner,
+				InitialMintersStr: commaseparatedstring.CommaSeparatedString(initialMinter),
+				InitialUpdater:    initialUpdater,
+				Status:            model.LikeNFTMigrationActionNewClassStatusInit,
 			}
 			m, err = appdb.InsertLikeNFTMigrationActionNewClass(db, m)
 			if err != nil {
