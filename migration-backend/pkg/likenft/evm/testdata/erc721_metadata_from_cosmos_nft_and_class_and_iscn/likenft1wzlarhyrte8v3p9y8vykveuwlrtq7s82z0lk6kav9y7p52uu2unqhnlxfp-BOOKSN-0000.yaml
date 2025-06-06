@@ -182,5 +182,10 @@ erc721metadata: |
     }, {
       "trait_type": "Publisher",
       "value": "FES 香港基督徒學生福音團契"
-    }]
+    }],
+    "likecoin": {
+      "iscnIdPrefix": "iscn://likecoin-chain/EgNp14O2nTpHEmZMS4oOKaOImCml65ZSuWQk_NKp8vU",
+      "classId": "likenft1wzlarhyrte8v3p9y8vykveuwlrtq7s82z0lk6kav9y7p52uu2unqhnlxfp",
+      "nftId": "BOOKSN-0000"
+    }
   }

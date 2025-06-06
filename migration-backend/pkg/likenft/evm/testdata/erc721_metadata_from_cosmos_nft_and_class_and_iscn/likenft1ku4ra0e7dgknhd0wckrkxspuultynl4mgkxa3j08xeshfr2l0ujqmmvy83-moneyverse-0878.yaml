@@ -225,5 +225,10 @@ erc721metadata: |
     },{
       "trait_type": "publish_info_layout",
       "value": "Bottom"
-    }]
+    }],
+    "likecoin": {
+      "iscnIdPrefix": "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c",
+      "classId": "likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83",
+      "nftId": "moneyverse-0878"
+    }
   }
