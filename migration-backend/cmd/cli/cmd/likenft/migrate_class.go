@@ -46,6 +46,7 @@ var migrateClassCmd = &cobra.Command{
 			With("id", id)
 
 		envCfg := ctx.Value(config.ContextKey).(*config.EnvConfig)
+
 		db, err := sql.Open("postgres", envCfg.DbConnectionStr)
 		if err != nil {
 			panic(err)
@@ -96,9 +97,11 @@ var migrateClassCmd = &cobra.Command{
 			likecoinAPI,
 			&evmLikeNFTClient,
 			&evmLikeNFTClassClient,
+			envCfg.ShouldPremintAllNFTsWhenNewClass,
 			envCfg.InitialNewClassOwner,
 			envCfg.InitialNewClassMinters,
 			envCfg.InitialNewClassUpdater,
+			envCfg.InitialBatchMintNFTsOwner,
 			new(big.Int).SetUint64(envCfg.DefaultRoyaltyFraction),
 			id,
 		)

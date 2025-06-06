@@ -27,6 +27,8 @@ func MigrateNFTFromAssetMigration(
 	p *evm.LikeProtocol,
 	n *evm.BookNFT,
 
+	shouldPremintAllNFTs bool,
+
 	initialClassOwner string,
 	initialClassMinters []string,
 	initialClassUpdater string,
@@ -66,6 +68,7 @@ func MigrateNFTFromAssetMigration(
 		likecoinAPI,
 		p,
 		n,
+		shouldPremintAllNFTs,
 		initialClassOwner,
 		initialClassMinters,
 		initialClassUpdater,
@@ -105,6 +108,8 @@ func MigrateNFT(
 	p *evm.LikeProtocol,
 	n *evm.BookNFT,
 
+	shouldPremintAllNFTs bool,
+
 	initialClassOwner string,
 	initialClassMinters []string,
 	initialClassUpdater string,
@@ -133,6 +138,8 @@ func MigrateNFT(
 		initialClassOwner,
 		initialClassMinters,
 		initialClassUpdater,
+		initialBatchMintOwner,
+		shouldPremintAllNFTs,
 		defaultRoyaltyFraction,
 	)
 	if err != nil {

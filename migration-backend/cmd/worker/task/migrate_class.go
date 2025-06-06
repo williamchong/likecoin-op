@@ -86,9 +86,11 @@ func HandleMigrateClassTask(ctx context.Context, t *asynq.Task) error {
 		likecoinAPI,
 		&evmLikeProtocolClient,
 		&evmLikeNFTClient,
+		envCfg.ShouldPremintAllNFTsWhenNewClass,
 		envCfg.InitialNewClassOwner,
 		envCfg.InitialNewClassMinters,
 		envCfg.InitialNewClassUpdater,
+		envCfg.InitialBatchMintNFTsOwner,
 		new(big.Int).SetUint64(envCfg.DefaultRoyaltyFraction),
 		p.LikenftAssetMigrationClassId,
 	)

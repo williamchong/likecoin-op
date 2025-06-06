@@ -25,9 +25,12 @@ func MigrateClassFromAssetMigration(
 	p *evm.LikeProtocol,
 	n *evm.BookNFT,
 
+	shouldPremintAllNFTs bool,
+
 	initialClassOwner string,
 	initialClassMinters []string,
 	initialClassUpdater string,
+	initialBatchMintOwner string,
 	defaultRoyaltyFraction *big.Int,
 
 	assetMigrationClassId uint64,
@@ -62,10 +65,12 @@ func MigrateClassFromAssetMigration(
 		likecoinAPI,
 		p,
 		n,
+		shouldPremintAllNFTs,
 		mc.CosmosClassId,
 		initialClassOwner,
 		initialClassMinters,
 		initialClassUpdater,
+		initialBatchMintOwner,
 		defaultRoyaltyFraction,
 		m.CosmosAddress,
 		m.EthAddress,
@@ -97,10 +102,13 @@ func MigrateClass(
 	p *evm.LikeProtocol,
 	n *evm.BookNFT,
 
+	shouldPremintAllNFTs bool,
+
 	cosmosClassId string,
 	initialClassOwner string,
 	initialClassMinters []string,
 	initialClassUpdater string,
+	initialBatchMintOwner string,
 	defaultRoyaltyFraction *big.Int,
 
 	cosmosOwner string,
@@ -121,6 +129,8 @@ func MigrateClass(
 		initialClassOwner,
 		initialClassMinters,
 		initialClassUpdater,
+		initialBatchMintOwner,
+		shouldPremintAllNFTs,
 		defaultRoyaltyFraction,
 	)
 	if err != nil {

@@ -104,6 +104,7 @@ var migrateNFTCmd = &cobra.Command{
 			likecoinAPI,
 			&likeProtocolClient,
 			&likeNFTClient,
+			envCfg.ShouldPremintAllNFTsWhenNewClass,
 			envCfg.InitialNewClassOwner,
 			envCfg.InitialNewClassMinters,
 			envCfg.InitialNewClassUpdater,
