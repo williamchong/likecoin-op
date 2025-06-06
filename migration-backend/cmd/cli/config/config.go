@@ -32,6 +32,8 @@ type EnvConfig struct {
 
 	ClassMigrationEstimatedDurationSeconds int `envconfig:"CLASS_MIGRATION_ESTIMATED_DURATION_SECONDS" default:"0"`
 	NFTMigrationEstimatedDurationSeconds   int `envconfig:"NFT_MIGRATION_ESTIMATED_DURATION_SECONDS" default:"0"`
+
+	ShouldPremintAllNFTsWhenNewClass bool `envconfig:"SHOULD_PREMINT_ALL_NFTS_WHEN_NEW_CLASS"`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {
