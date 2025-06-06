@@ -17,15 +17,18 @@ const (
 )
 
 type LikeNFTMigrationActionNewClass struct {
-	Id                     uint64
-	CreatedAt              time.Time
-	CosmosClassId          string
-	InitialOwner           string
-	InitialMintersStr      commaseparatedstring.CommaSeparatedString
-	InitialUpdater         string
-	DefaultRoyaltyFraction *big.Int
-	Status                 LikeNFTMigrationActionNewClassStatus
-	EvmClassId             *string
-	EvmTxHash              *string
-	FailedReason           *string
+	Id                      uint64
+	CreatedAt               time.Time
+	CosmosClassId           string
+	InitialOwner            string
+	InitialMintersStr       commaseparatedstring.CommaSeparatedString
+	InitialUpdater          string
+	InitialBatchMintOwner   string
+	DefaultRoyaltyFraction  *big.Int
+	ShouldPremintAllNFTs    bool
+	Status                  LikeNFTMigrationActionNewClassStatus
+	NumberOfCosmosNFTsFound *uint64
+	EvmClassId              *string
+	EvmTxHash               *string
+	FailedReason            *string
 }

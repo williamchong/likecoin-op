@@ -18,7 +18,9 @@ import (
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/cosmosnftidclassifier"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likenft"
 	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
@@ -47,6 +49,19 @@ var migrateNFTCmd = &cobra.Command{
 			With("id", id)
 
 		envCfg := ctx.Value(config.ContextKey).(*config.EnvConfig)
+
+		cosmosNFTIdClassifier := cosmosnftidclassifier.MakeCosmosNFTIDClassifier(
+			nftidmatcher.MakeNFTIDMatcher(),
+		)
+
+		erc721ExternalURLBuilder, err := erc721externalurl.MakeErc721ExternalURLBuilder3ook(
+			envCfg.ERC721MetadataExternalURLBase3ook,
+		)
+
+		if err != nil {
+			panic(err)
+		}
+
 		db, err := sql.Open("postgres", envCfg.DbConnectionStr)
 		if err != nil {
 			panic(err)
@@ -62,14 +77,6 @@ var migrateNFTCmd = &cobra.Command{
 			time.Duration(envCfg.LikecoinAPIHTTPTimeoutSeconds),
 		)
 		ethClient, err := ethclient.Dial(envCfg.EthNetworkPublicRPCURL)
-		if err != nil {
-			panic(err)
-		}
-
-		erc721ExternalURLBuilder, err := erc721externalurl.MakeErc721ExternalURLBuilder3ook(
-			envCfg.ERC721MetadataExternalURLBase3ook,
-		)
-
 		if err != nil {
 			panic(err)
 		}
@@ -104,13 +111,15 @@ var migrateNFTCmd = &cobra.Command{
 			likecoinAPI,
 			&likeProtocolClient,
 			&likeNFTClient,
+			cosmosNFTIdClassifier,
+			erc721ExternalURLBuilder,
+			envCfg.ShouldPremintAllNFTsWhenNewClass,
 			envCfg.InitialNewClassOwner,
 			envCfg.InitialNewClassMinters,
 			envCfg.InitialNewClassUpdater,
 			envCfg.InitialBatchMintNFTsOwner,
 			new(big.Int).SetUint64(envCfg.DefaultRoyaltyFraction),
 			envCfg.BatchMintItemPerPage,
-			erc721ExternalURLBuilder,
 			id,
 		)
 		if err != nil {

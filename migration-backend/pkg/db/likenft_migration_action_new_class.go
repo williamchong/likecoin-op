@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"strconv"
 	"strings"
 
 	"github.com/likecoin/like-migration-backend/pkg/model"
@@ -50,7 +51,10 @@ func QueryLikeNFTMigrationActionNewClass(
     initial_minter,
     initial_updater,
     default_royalty_fraction,
+    should_premint_all_nfts,
+    initial_batch_mint_owner,
     status,
+    number_of_cosmos_nfts_found,
     evm_class_id,
     evm_tx_hash,
     failed_reason
@@ -61,6 +65,7 @@ FROM likenft_migration_action_new_class
 	)
 
 	var defaultRoyaltyFractionStr string
+	var numberOfCosmosNFTsFoundStr *string
 	m := &model.LikeNFTMigrationActionNewClass{}
 
 	err := row.Scan(
@@ -71,7 +76,10 @@ FROM likenft_migration_action_new_class
 		&m.InitialMintersStr,
 		&m.InitialUpdater,
 		&defaultRoyaltyFractionStr,
+		&m.ShouldPremintAllNFTs,
+		&m.InitialBatchMintOwner,
 		&m.Status,
+		&numberOfCosmosNFTsFoundStr,
 		&m.EvmClassId,
 		&m.EvmTxHash,
 		&m.FailedReason,
@@ -84,6 +92,14 @@ FROM likenft_migration_action_new_class
 		return nil, err
 	}
 
+	if numberOfCosmosNFTsFoundStr != nil {
+		numberOfCosmosNFTsFound, err := strconv.ParseUint(*numberOfCosmosNFTsFoundStr, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		m.NumberOfCosmosNFTsFound = &numberOfCosmosNFTsFound
+	}
+
 	return m, nil
 }
 
@@ -91,6 +107,11 @@ func InsertLikeNFTMigrationActionNewClass(
 	tx TxLike,
 	a *model.LikeNFTMigrationActionNewClass,
 ) (*model.LikeNFTMigrationActionNewClass, error) {
+	var numberOfCosmosNFTsFoundStr *string
+	if a.NumberOfCosmosNFTsFound != nil {
+		str := strconv.FormatUint(*a.NumberOfCosmosNFTsFound, 10)
+		numberOfCosmosNFTsFoundStr = &str
+	}
 	row := tx.QueryRow(
 		`INSERT INTO likenft_migration_action_new_class (
     cosmos_class_id,
@@ -98,18 +119,24 @@ func InsertLikeNFTMigrationActionNewClass(
     initial_minter,
     initial_updater,
     default_royalty_fraction,
+    should_premint_all_nfts,
+    initial_batch_mint_owner,
     status,
+    number_of_cosmos_nfts_found,
     evm_class_id,
     evm_tx_hash,
     failed_reason
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 RETURNING id`,
 		a.CosmosClassId,
 		a.InitialOwner,
 		a.InitialMintersStr,
 		a.InitialUpdater,
 		a.DefaultRoyaltyFraction.String(),
+		a.ShouldPremintAllNFTs,
+		a.InitialBatchMintOwner,
 		a.Status,
+		numberOfCosmosNFTsFoundStr,
 		a.EvmClassId,
 		a.EvmTxHash,
 		a.FailedReason,
@@ -131,6 +158,11 @@ func UpdateLikeNFTMigrationActionNewClass(
 	tx TxLike,
 	a *model.LikeNFTMigrationActionNewClass,
 ) error {
+	var numberOfCosmosNFTsFoundStr *string
+	if a.NumberOfCosmosNFTsFound != nil {
+		str := strconv.FormatUint(*a.NumberOfCosmosNFTsFound, 10)
+		numberOfCosmosNFTsFoundStr = &str
+	}
 	result, err := tx.Exec(
 		`UPDATE likenft_migration_action_new_class SET
     cosmos_class_id = $1,
@@ -138,17 +170,23 @@ func UpdateLikeNFTMigrationActionNewClass(
     initial_minter = $3,
     initial_updater = $4,
     default_royalty_fraction = $5,
-    status = $6,
-    evm_class_id = $7,
-    evm_tx_hash = $8,
-    failed_reason = $9
-WHERE id = $10`,
+    should_premint_all_nfts = $6,
+    initial_batch_mint_owner = $7,
+    status = $8,
+    number_of_cosmos_nfts_found = $9,
+    evm_class_id = $10,
+    evm_tx_hash = $11,
+    failed_reason = $12
+WHERE id = $13`,
 		a.CosmosClassId,
 		a.InitialOwner,
 		a.InitialMintersStr,
 		a.InitialUpdater,
 		a.DefaultRoyaltyFraction.String(),
+		a.ShouldPremintAllNFTs,
+		a.InitialBatchMintOwner,
 		a.Status,
+		numberOfCosmosNFTsFoundStr,
 		a.EvmClassId,
 		a.EvmTxHash,
 		a.FailedReason,

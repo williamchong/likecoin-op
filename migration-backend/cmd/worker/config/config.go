@@ -29,6 +29,8 @@ type EnvConfig struct {
 	DefaultRoyaltyFraction            uint64   `envconfig:"DEFAULT_ROYALTY_FRACTION"`
 	BatchMintItemPerPage              uint64   `envconfig:"BATCH_MINT_ITEM_PER_PAGE"`
 	ERC721MetadataExternalURLBase3ook string   `envconfig:"ERC721_METADATA_EXTERNAL_URL_BASE_3OOK"`
+
+	ShouldPremintAllNFTsWhenNewClass bool `envconfig:"SHOULD_PREMINT_ALL_NFTS_WHEN_NEW_CLASS"`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {

@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"math/big"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -25,8 +24,13 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
 
-var migrateClassCmd = &cobra.Command{
-	Use:   "migrate-class likenft-asset-migration-class-id",
+const (
+	MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTs = "premint-all-nfts"
+	MigrateClassByCosmosClassIdCmdFlagNameEvmOwner       = "evm-owner"
+)
+
+var migrateClassByCosmosClassIdCmd = &cobra.Command{
+	Use:   "migrate-class-by-cosmos-class-id cosmos-class-id",
 	Short: "Mint NFT Class",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
@@ -38,15 +42,20 @@ var migrateClassCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
-		idStr := args[0]
-		id, err := strconv.ParseUint(idStr, 10, 64)
+		premintAllNFTs, err := cmd.Flags().GetBool(MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTs)
 		if err != nil {
-			panic(err)
+			panic(fmt.Errorf("cmd.Flags().GetBool: %v", err))
 		}
+		evmOwner, err := cmd.Flags().GetString(MigrateClassByCosmosClassIdCmdFlagNameEvmOwner)
+		if err != nil {
+			panic(fmt.Errorf("cmd.Flags().GetString: %v", err))
+		}
+
+		cosmosClassId := args[0]
 
 		logger := slog.New(slog.Default().Handler()).
 			WithGroup("migrateClassCmd").
-			With("id", id)
+			With("id", cosmosClassId)
 
 		cosmosNFTIdClassifier := cosmosnftidclassifier.MakeCosmosNFTIDClassifier(
 			nftidmatcher.MakeNFTIDMatcher(),
@@ -54,20 +63,24 @@ var migrateClassCmd = &cobra.Command{
 
 		envCfg := ctx.Value(config.ContextKey).(*config.EnvConfig)
 
+		if evmOwner == "" {
+			evmOwner = envCfg.InitialNewClassOwner
+		}
+
 		erc721ExternalURLBuilder, err := erc721externalurl.MakeErc721ExternalURLBuilder3ook(
 			envCfg.ERC721MetadataExternalURLBase3ook,
 		)
 
 		if err != nil {
-			panic(err)
+			panic(fmt.Errorf("erc721externalurl.MakeErc721ExternalURLBuilder3ook: %v", err))
 		}
 
 		db, err := sql.Open("postgres", envCfg.DbConnectionStr)
 		if err != nil {
-			panic(err)
+			panic(fmt.Errorf("sql.Open: %v", err))
 		}
 
-		likenftClient := cosmos.NewLikeNFTCosmosClient(
+		likenftCosmosClient := cosmos.NewLikeNFTCosmosClient(
 			envCfg.CosmosNodeUrl,
 			time.Duration(envCfg.CosmosNodeHTTPTimeoutSeconds),
 			envCfg.CosmosNftEventsIgnoreToList,
@@ -79,7 +92,7 @@ var migrateClassCmd = &cobra.Command{
 
 		ethClient, err := ethclient.Dial(envCfg.EthNetworkPublicRPCURL)
 		if err != nil {
-			panic(err)
+			panic(fmt.Errorf("ethclient.Dial: %v", err))
 		}
 
 		signer := signer.NewSignerClient(
@@ -104,32 +117,60 @@ var migrateClassCmd = &cobra.Command{
 			signer,
 		)
 
-		mc, err := likenft.MigrateClassFromAssetMigration(
+		cosmosClass, err := likenftCosmosClient.QueryClassByClassId(cosmos.QueryClassByClassIdRequest{
+			ClassId: cosmosClassId,
+		})
+		if err != nil {
+			panic(fmt.Errorf("likenftCosmosClient.QueryClassByClassId: %v", err))
+		}
+		iscn, err := likenftCosmosClient.GetISCNRecord(
+			cosmosClass.Class.Data.Parent.IscnIdPrefix,
+			cosmosClass.Class.Data.Parent.IscnVersionAtMint,
+		)
+		if err != nil {
+			panic(fmt.Errorf("likenftCosmosClient.GetISCNRecord: %v", err))
+		}
+
+		lastActionEvmTxHash, err := likenft.MigrateClass(
 			ctx,
 			logger,
 			db,
-			likenftClient,
+			likenftCosmosClient,
 			likecoinAPI,
 			&evmLikeNFTClient,
 			&evmLikeNFTClassClient,
 			cosmosNFTIdClassifier,
 			erc721ExternalURLBuilder,
-			envCfg.ShouldPremintAllNFTsWhenNewClass,
+			premintAllNFTs,
+			cosmosClassId,
 			envCfg.InitialNewClassOwner,
 			envCfg.InitialNewClassMinters,
 			envCfg.InitialNewClassUpdater,
 			envCfg.InitialBatchMintNFTsOwner,
 			envCfg.BatchMintItemPerPage,
 			new(big.Int).SetUint64(envCfg.DefaultRoyaltyFraction),
-			id,
+			iscn.Owner,
+			evmOwner,
 		)
 		if err != nil {
-			panic(err)
+			panic(fmt.Errorf("likenft.MigrateClass: %v", err))
 		}
-		fmt.Printf("migrate class completed, evm tx hash: %v", *mc.EvmTxHash)
+		fmt.Printf("migrate class completed, evm tx hash: %v", *lastActionEvmTxHash)
 	},
 }
 
 func init() {
-	LikeNFTCmd.AddCommand(migrateClassCmd)
+	_ = migrateClassByCosmosClassIdCmd.Flags().
+		Bool(
+			MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTs,
+			false,
+			"Should Premint Al NFTs When New Class",
+		)
+	_ = migrateClassByCosmosClassIdCmd.Flags().
+		String(
+			MigrateClassByCosmosClassIdCmdFlagNameEvmOwner,
+			"",
+			"The evm owner of the class",
+		)
+	LikeNFTCmd.AddCommand(migrateClassByCosmosClassIdCmd)
 }

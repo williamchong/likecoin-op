@@ -13,6 +13,7 @@ import (
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/cosmosnftidclassifier"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
@@ -26,6 +27,10 @@ func MigrateNFTFromAssetMigration(
 	likecoinAPI *likecoin_api.LikecoinAPI,
 	p *evm.LikeProtocol,
 	n *evm.BookNFT,
+	cosmosNFTIDClassifier cosmosnftidclassifier.CosmosNFTIDClassifier,
+	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
+
+	shouldPremintAllNFTs bool,
 
 	initialClassOwner string,
 	initialClassMinters []string,
@@ -33,7 +38,6 @@ func MigrateNFTFromAssetMigration(
 	initialBatchMintOwner string,
 	defaultRoyaltyFraction *big.Int,
 	batchMintPerPage uint64,
-	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
 	assetMigrationNFTId uint64,
 ) (*model.LikeNFTAssetMigrationNFT, error) {
@@ -66,13 +70,15 @@ func MigrateNFTFromAssetMigration(
 		likecoinAPI,
 		p,
 		n,
+		cosmosNFTIDClassifier,
+		erc721ExternalURLBuilder,
+		shouldPremintAllNFTs,
 		initialClassOwner,
 		initialClassMinters,
 		initialClassUpdater,
 		initialBatchMintOwner,
 		defaultRoyaltyFraction,
 		batchMintPerPage,
-		erc721ExternalURLBuilder,
 		mn.CosmosClassId,
 		mn.CosmosNFTId,
 		m.EthAddress,
@@ -104,6 +110,10 @@ func MigrateNFT(
 	likecoinAPI *likecoin_api.LikecoinAPI,
 	p *evm.LikeProtocol,
 	n *evm.BookNFT,
+	cosmosNFTIDClassifier cosmosnftidclassifier.CosmosNFTIDClassifier,
+	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
+
+	shouldPremintAllNFTs bool,
 
 	initialClassOwner string,
 	initialClassMinters []string,
@@ -111,7 +121,6 @@ func MigrateNFT(
 	initialBatchMintOwner string,
 	defaultRoyaltyFraction *big.Int,
 	batchMintPerPage uint64,
-	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
 	cosmosClassId string,
 	cosmosNFTId string,
@@ -133,10 +142,25 @@ func MigrateNFT(
 		initialClassOwner,
 		initialClassMinters,
 		initialClassUpdater,
+		initialBatchMintOwner,
+		shouldPremintAllNFTs,
 		defaultRoyaltyFraction,
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	// Also sync fields if the class already created
+	if shouldPremintAllNFTs != newClassAction.ShouldPremintAllNFTs ||
+		initialBatchMintOwner != newClassAction.InitialBatchMintOwner {
+		newClassAction.ShouldPremintAllNFTs = shouldPremintAllNFTs
+		newClassAction.InitialBatchMintOwner = initialBatchMintOwner
+		err := appdb.UpdateLikeNFTMigrationActionNewClass(
+			db, newClassAction,
+		)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	newClassAction, err = DoNewClassAction(
@@ -148,6 +172,24 @@ func MigrateNFT(
 		p,
 		newClassAction,
 	)
+	if err != nil {
+		return nil, err
+	}
+
+	err = DoPremintAllNFTsAction(
+		ctx,
+		mylogger,
+		db,
+		c,
+		likecoinAPI,
+		p,
+		n,
+		cosmosNFTIDClassifier,
+		erc721ExternalURLBuilder,
+		batchMintPerPage,
+		newClassAction,
+	)
+
 	if err != nil {
 		return nil, err
 	}

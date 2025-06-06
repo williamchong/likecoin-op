@@ -16,7 +16,9 @@ import (
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/cosmosnftidclassifier"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likenft"
 	"github.com/likecoin/like-migration-backend/pkg/signer"
 	apptask "github.com/likecoin/like-migration-backend/pkg/task"
@@ -37,6 +39,18 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 	}
 
 	mylogger = mylogger.With("LikenftAssetMigrationNFTId", p.LikenftAssetMigrationNFTId)
+
+	cosmosNFTIdClassifier := cosmosnftidclassifier.MakeCosmosNFTIDClassifier(
+		nftidmatcher.MakeNFTIDMatcher(),
+	)
+
+	erc721ExternalURLBuilder, err := erc721externalurl.MakeErc721ExternalURLBuilder3ook(
+		envCfg.ERC721MetadataExternalURLBase3ook,
+	)
+
+	if err != nil {
+		panic(err)
+	}
 
 	likenftClient := &cosmos.LikeNFTCosmosClient{
 		HTTPClient: &http.Client{
@@ -75,14 +89,6 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 		signer,
 	)
 
-	erc721ExternalURLBuilder, err := erc721externalurl.MakeErc721ExternalURLBuilder3ook(
-		envCfg.ERC721MetadataExternalURLBase3ook,
-	)
-
-	if err != nil {
-		return err
-	}
-
 	mylogger.Info("running migrate nft")
 	mn, err := likenft.MigrateNFTFromAssetMigration(
 		ctx,
@@ -92,13 +98,15 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 		likecoinAPI,
 		&evmLikeProtocolClient,
 		&evmLikeNFTClient,
+		cosmosNFTIdClassifier,
+		erc721ExternalURLBuilder,
+		envCfg.ShouldPremintAllNFTsWhenNewClass,
 		envCfg.InitialNewClassOwner,
 		envCfg.InitialNewClassMinters,
 		envCfg.InitialNewClassUpdater,
 		envCfg.InitialBatchMintNFTsOwner,
 		new(big.Int).SetUint64(envCfg.DefaultRoyaltyFraction),
 		envCfg.BatchMintItemPerPage,
-		erc721ExternalURLBuilder,
 		p.LikenftAssetMigrationNFTId,
 	)
 

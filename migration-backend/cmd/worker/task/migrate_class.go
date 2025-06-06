@@ -16,6 +16,9 @@ import (
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/cosmosnftidclassifier"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likenft"
 	"github.com/likecoin/like-migration-backend/pkg/signer"
 	apptask "github.com/likecoin/like-migration-backend/pkg/task"
@@ -30,6 +33,18 @@ func HandleMigrateClassTask(ctx context.Context, t *asynq.Task) error {
 	logger := appcontext.LoggerFromContext(ctx)
 
 	mylogger := logger.WithGroup("HandleMigrateClassTask")
+
+	cosmosNFTIdClassifier := cosmosnftidclassifier.MakeCosmosNFTIDClassifier(
+		nftidmatcher.MakeNFTIDMatcher(),
+	)
+
+	erc721ExternalURLBuilder, err := erc721externalurl.MakeErc721ExternalURLBuilder3ook(
+		envCfg.ERC721MetadataExternalURLBase3ook,
+	)
+
+	if err != nil {
+		panic(err)
+	}
 
 	var p apptask.MigrateClassPayload
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
@@ -86,9 +101,14 @@ func HandleMigrateClassTask(ctx context.Context, t *asynq.Task) error {
 		likecoinAPI,
 		&evmLikeProtocolClient,
 		&evmLikeNFTClient,
+		cosmosNFTIdClassifier,
+		erc721ExternalURLBuilder,
+		envCfg.ShouldPremintAllNFTsWhenNewClass,
 		envCfg.InitialNewClassOwner,
 		envCfg.InitialNewClassMinters,
 		envCfg.InitialNewClassUpdater,
+		envCfg.InitialBatchMintNFTsOwner,
+		envCfg.BatchMintItemPerPage,
 		new(big.Int).SetUint64(envCfg.DefaultRoyaltyFraction),
 		p.LikenftAssetMigrationClassId,
 	)

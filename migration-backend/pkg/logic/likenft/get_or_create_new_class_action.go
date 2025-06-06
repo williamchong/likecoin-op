@@ -16,6 +16,8 @@ func GetOrCreateNewClassAction(
 	initialOwner string,
 	initialClassMinters []string,
 	initialUpdater string,
+	initialBatchMintOwner string,
+	shouldPremintAllNFTs bool,
 	defaultRoyaltyFraction *big.Int,
 ) (*model.LikeNFTMigrationActionNewClass, error) {
 	m, err := appdb.QueryLikeNFTMigrationActionNewClass(db, appdb.QueryLikeNFTMigrationActionNewClassFilter{
@@ -28,6 +30,8 @@ func GetOrCreateNewClassAction(
 				InitialOwner:           initialOwner,
 				InitialMintersStr:      commaseparatedstring.FromSlice(initialClassMinters),
 				InitialUpdater:         initialUpdater,
+				InitialBatchMintOwner:  initialBatchMintOwner,
+				ShouldPremintAllNFTs:   shouldPremintAllNFTs,
 				DefaultRoyaltyFraction: defaultRoyaltyFraction,
 				Status:                 model.LikeNFTMigrationActionNewClassStatusInit,
 			}
