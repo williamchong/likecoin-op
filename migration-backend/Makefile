@@ -46,6 +46,10 @@ start-scheduler:
 build:
 	go build -o like-migration-backend ./cmd/server
 
+.PHONY: build-cli
+build-cli:
+	go build -o like-migration-backend-cli ./cmd/cli
+
 .PHONY: build-worker-cli
 build-worker-cli:
 	go build -o like-migration-backend-worker-cli ./cmd/worker
