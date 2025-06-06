@@ -12,6 +12,8 @@ import (
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/cosmosnftidclassifier"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
@@ -24,6 +26,8 @@ func MigrateClassFromAssetMigration(
 	likecoinAPI *likecoin_api.LikecoinAPI,
 	p *evm.LikeProtocol,
 	n *evm.BookNFT,
+	cosmosNFTIDClassifier cosmosnftidclassifier.CosmosNFTIDClassifier,
+	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
 	shouldPremintAllNFTs bool,
 
@@ -31,6 +35,7 @@ func MigrateClassFromAssetMigration(
 	initialClassMinters []string,
 	initialClassUpdater string,
 	initialBatchMintOwner string,
+	batchMintPerPage uint64,
 	defaultRoyaltyFraction *big.Int,
 
 	assetMigrationClassId uint64,
@@ -57,7 +62,7 @@ func MigrateClassFromAssetMigration(
 
 	defer RecalculateMigrationStatus(db, m.Id)
 
-	lastAction, err := MigrateClass(
+	lastActionEvmTxHash, err := MigrateClass(
 		ctx,
 		mylogger,
 		db,
@@ -65,12 +70,15 @@ func MigrateClassFromAssetMigration(
 		likecoinAPI,
 		p,
 		n,
+		cosmosNFTIDClassifier,
+		erc721ExternalURLBuilder,
 		shouldPremintAllNFTs,
 		mc.CosmosClassId,
 		initialClassOwner,
 		initialClassMinters,
 		initialClassUpdater,
 		initialBatchMintOwner,
+		batchMintPerPage,
 		defaultRoyaltyFraction,
 		m.CosmosAddress,
 		m.EthAddress,
@@ -79,7 +87,7 @@ func MigrateClassFromAssetMigration(
 		return nil, migrateClassFromAssetMigrationFailed(db, mc, err)
 	}
 
-	mc.EvmTxHash = lastAction.EvmTxHash
+	mc.EvmTxHash = lastActionEvmTxHash
 	mc.Status = model.LikeNFTAssetMigrationClassStatusCompleted
 	finishTime := time.Now().UTC()
 	mc.FinishTime = &finishTime
@@ -101,6 +109,8 @@ func MigrateClass(
 	likecoinAPI *likecoin_api.LikecoinAPI,
 	p *evm.LikeProtocol,
 	n *evm.BookNFT,
+	cosmosNFTIDClassifier cosmosnftidclassifier.CosmosNFTIDClassifier,
+	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
 	shouldPremintAllNFTs bool,
 
@@ -109,11 +119,12 @@ func MigrateClass(
 	initialClassMinters []string,
 	initialClassUpdater string,
 	initialBatchMintOwner string,
+	batchMintPerPage uint64,
 	defaultRoyaltyFraction *big.Int,
 
 	cosmosOwner string,
 	evmOwner string,
-) (*model.LikeNFTMigrationActionTransferClass, error) {
+) (lastTxEvmHash *string, err error) {
 	mylogger := logger.
 		WithGroup("MigrateClass").
 		With("cosmosClassId", cosmosClassId).
@@ -137,6 +148,19 @@ func MigrateClass(
 		return nil, err
 	}
 
+	// Also sync fields if the class already created
+	if shouldPremintAllNFTs != newClassAction.ShouldPremintAllNFTs ||
+		initialBatchMintOwner != newClassAction.InitialBatchMintOwner {
+		newClassAction.ShouldPremintAllNFTs = shouldPremintAllNFTs
+		newClassAction.InitialBatchMintOwner = initialBatchMintOwner
+		err := appdb.UpdateLikeNFTMigrationActionNewClass(
+			db, newClassAction,
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	newClassAction, err = DoNewClassAction(
 		ctx,
 		mylogger,
@@ -151,25 +175,51 @@ func MigrateClass(
 		return nil, err
 	}
 
-	transferClassAction, err := GetOrCreateTransferClassAction(
-		db, *newClassAction.EvmClassId, cosmosOwner, evmOwner,
-	)
-	if err != nil {
-		return nil, err
-	}
+	lastTxEvmHash = newClassAction.EvmTxHash
 
-	transferClassAction, err = DoTransferClassAction(
+	err = DoPremintAllNFTsAction(
 		ctx,
 		mylogger,
 		db,
 		c,
+		likecoinAPI,
+		p,
 		n,
-		transferClassAction,
+		cosmosNFTIDClassifier,
+		erc721ExternalURLBuilder,
+		batchMintPerPage,
+		newClassAction,
 	)
+
 	if err != nil {
 		return nil, err
 	}
-	return transferClassAction, err
+
+	if evmOwner != initialClassOwner {
+		transferClassAction, err := GetOrCreateTransferClassAction(
+			db, *newClassAction.EvmClassId, cosmosOwner, evmOwner,
+		)
+		if err != nil {
+			return nil, err
+		}
+		transferClassAction, err = DoTransferClassAction(
+			ctx,
+			mylogger,
+			db,
+			c,
+			n,
+			transferClassAction,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		lastTxEvmHash = transferClassAction.EvmTxHash
+	} else {
+		mylogger.Info("initial class owner and evm owner are the same. skip.")
+	}
+
+	return lastTxEvmHash, err
 }
 
 func migrateClassFromAssetMigrationFailed(
