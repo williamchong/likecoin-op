@@ -62,6 +62,14 @@ func (e *newBookNFTProcessor) Process(
 		return err
 	}
 
+	blockHeader, err := e.evmClient.GetHeaderByBlockNumber(
+		ctx,
+		uint64(evmEvent.BlockNumber))
+	if err != nil {
+		mylogger.Error("e.evmClient.GetHeaderByBlockNumber", "err", err)
+		return err
+	}
+
 	contractLevelMetadata := new(model.ContractLevelMetadata)
 	err = jsondatauri.JSONDataUri(newBookNFTEvent.Config.Metadata).Resolve(e.httpClient, &contractLevelMetadata)
 
@@ -111,7 +119,7 @@ func (e *newBookNFTProcessor) Process(
 		common.BytesToAddress([]byte{}).Hex(),
 		evmEvent.BlockNumber,
 		evmEvent.BlockNumber,
-		time.Now(),
+		time.Unix(int64(blockHeader.Time), 0),
 		account,
 	)
 }
