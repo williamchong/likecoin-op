@@ -101,7 +101,7 @@ func DoNewClassAction(
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)
 	}
-	tx, txReceipt, err := n.NewBookNFT(ctx, mylogger, like_protocol.MsgNewBookNFT{
+	tx, txReceipt, err := n.NewBookNFTWithRoyalty(ctx, mylogger, like_protocol.MsgNewBookNFT{
 		Creator:  initialOwnerAddress,
 		Updaters: []common.Address{initialUpdaterAddress},
 		Minters:  initialMinterAddresses,
@@ -111,7 +111,7 @@ func DoNewClassAction(
 			Metadata:  string(metadataBytes),
 			MaxSupply: maxSupply,
 		},
-	})
+	}, a.DefaultRoyaltyFraction)
 
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)

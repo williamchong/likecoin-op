@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"math/big"
 	"net/http"
 	"strconv"
 	"time"
@@ -107,6 +108,7 @@ var migrateNFTCmd = &cobra.Command{
 			envCfg.InitialNewClassMinters,
 			envCfg.InitialNewClassUpdater,
 			envCfg.InitialBatchMintNFTsOwner,
+			new(big.Int).SetUint64(envCfg.DefaultRoyaltyFraction),
 			envCfg.BatchMintItemPerPage,
 			erc721ExternalURLBuilder,
 			id,

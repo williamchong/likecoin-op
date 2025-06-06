@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"log/slog"
+	"math/big"
 	"time"
 
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
@@ -27,6 +28,7 @@ func MigrateClassFromAssetMigration(
 	initialClassOwner string,
 	initialClassMinters []string,
 	initialClassUpdater string,
+	defaultRoyaltyFraction *big.Int,
 
 	assetMigrationClassId uint64,
 ) (*model.LikeNFTAssetMigrationClass, error) {
@@ -64,6 +66,7 @@ func MigrateClassFromAssetMigration(
 		initialClassOwner,
 		initialClassMinters,
 		initialClassUpdater,
+		defaultRoyaltyFraction,
 		m.CosmosAddress,
 		m.EthAddress,
 	)
@@ -98,6 +101,7 @@ func MigrateClass(
 	initialClassOwner string,
 	initialClassMinters []string,
 	initialClassUpdater string,
+	defaultRoyaltyFraction *big.Int,
 
 	cosmosOwner string,
 	evmOwner string,
@@ -117,6 +121,7 @@ func MigrateClass(
 		initialClassOwner,
 		initialClassMinters,
 		initialClassUpdater,
+		defaultRoyaltyFraction,
 	)
 	if err != nil {
 		return nil, err

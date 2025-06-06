@@ -3,6 +3,7 @@ package likenft
 import (
 	"database/sql"
 	"errors"
+	"math/big"
 
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/model"
@@ -15,6 +16,7 @@ func GetOrCreateNewClassAction(
 	initialOwner string,
 	initialClassMinters []string,
 	initialUpdater string,
+	defaultRoyaltyFraction *big.Int,
 ) (*model.LikeNFTMigrationActionNewClass, error) {
 	m, err := appdb.QueryLikeNFTMigrationActionNewClass(db, appdb.QueryLikeNFTMigrationActionNewClassFilter{
 		CosmosClassId: &cosmosClassId,
@@ -22,11 +24,12 @@ func GetOrCreateNewClassAction(
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			m = &model.LikeNFTMigrationActionNewClass{
-				CosmosClassId:     cosmosClassId,
-				InitialOwner:      initialOwner,
-				InitialMintersStr: commaseparatedstring.FromSlice(initialClassMinters),
-				InitialUpdater:    initialUpdater,
-				Status:            model.LikeNFTMigrationActionNewClassStatusInit,
+				CosmosClassId:          cosmosClassId,
+				InitialOwner:           initialOwner,
+				InitialMintersStr:      commaseparatedstring.FromSlice(initialClassMinters),
+				InitialUpdater:         initialUpdater,
+				DefaultRoyaltyFraction: defaultRoyaltyFraction,
+				Status:                 model.LikeNFTMigrationActionNewClassStatusInit,
 			}
 			m, err = appdb.InsertLikeNFTMigrationActionNewClass(db, m)
 			if err != nil {

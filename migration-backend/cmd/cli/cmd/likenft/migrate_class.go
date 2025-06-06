@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"math/big"
 	"net/http"
 	"strconv"
 	"time"
@@ -98,6 +99,7 @@ var migrateClassCmd = &cobra.Command{
 			envCfg.InitialNewClassOwner,
 			envCfg.InitialNewClassMinters,
 			envCfg.InitialNewClassUpdater,
+			new(big.Int).SetUint64(envCfg.DefaultRoyaltyFraction),
 			id,
 		)
 		if err != nil {

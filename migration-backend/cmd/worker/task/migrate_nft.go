@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"net/http"
 	"time"
 
@@ -95,6 +96,7 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 		envCfg.InitialNewClassMinters,
 		envCfg.InitialNewClassUpdater,
 		envCfg.InitialBatchMintNFTsOwner,
+		new(big.Int).SetUint64(envCfg.DefaultRoyaltyFraction),
 		envCfg.BatchMintItemPerPage,
 		erc721ExternalURLBuilder,
 		p.LikenftAssetMigrationNFTId,

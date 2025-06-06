@@ -3,6 +3,7 @@ package db
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"strings"
 
 	"github.com/likecoin/like-migration-backend/pkg/model"
@@ -48,6 +49,7 @@ func QueryLikeNFTMigrationActionNewClass(
     initial_owner,
     initial_minter,
     initial_updater,
+    default_royalty_fraction,
     status,
     evm_class_id,
     evm_tx_hash,
@@ -58,6 +60,7 @@ FROM likenft_migration_action_new_class
 		attributes...,
 	)
 
+	var defaultRoyaltyFractionStr string
 	m := &model.LikeNFTMigrationActionNewClass{}
 
 	err := row.Scan(
@@ -67,11 +70,15 @@ FROM likenft_migration_action_new_class
 		&m.InitialOwner,
 		&m.InitialMintersStr,
 		&m.InitialUpdater,
+		&defaultRoyaltyFractionStr,
 		&m.Status,
 		&m.EvmClassId,
 		&m.EvmTxHash,
 		&m.FailedReason,
 	)
+
+	defaultRoyaltyFraction, _ := new(big.Int).SetString(defaultRoyaltyFractionStr, 10)
+	m.DefaultRoyaltyFraction = defaultRoyaltyFraction
 
 	if err != nil {
 		return nil, err
@@ -90,16 +97,18 @@ func InsertLikeNFTMigrationActionNewClass(
     initial_owner,
     initial_minter,
     initial_updater,
+    default_royalty_fraction,
     status,
     evm_class_id,
     evm_tx_hash,
     failed_reason
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING id`,
 		a.CosmosClassId,
 		a.InitialOwner,
 		a.InitialMintersStr,
 		a.InitialUpdater,
+		a.DefaultRoyaltyFraction.String(),
 		a.Status,
 		a.EvmClassId,
 		a.EvmTxHash,
@@ -128,15 +137,17 @@ func UpdateLikeNFTMigrationActionNewClass(
     initial_owner = $2,
     initial_minter = $3,
     initial_updater = $4,
-    status = $5,
-    evm_class_id = $6,
-    evm_tx_hash = $7,
-    failed_reason = $8
-WHERE id = $9`,
+    default_royalty_fraction = $5,
+    status = $6,
+    evm_class_id = $7,
+    evm_tx_hash = $8,
+    failed_reason = $9
+WHERE id = $10`,
 		a.CosmosClassId,
 		a.InitialOwner,
 		a.InitialMintersStr,
 		a.InitialUpdater,
+		a.DefaultRoyaltyFraction.String(),
 		a.Status,
 		a.EvmClassId,
 		a.EvmTxHash,

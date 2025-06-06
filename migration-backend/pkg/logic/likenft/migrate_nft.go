@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"log/slog"
+	"math/big"
 	"strconv"
 	"time"
 
@@ -30,6 +31,7 @@ func MigrateNFTFromAssetMigration(
 	initialClassMinters []string,
 	initialClassUpdater string,
 	initialBatchMintOwner string,
+	defaultRoyaltyFraction *big.Int,
 	batchMintPerPage uint64,
 	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
@@ -68,6 +70,7 @@ func MigrateNFTFromAssetMigration(
 		initialClassMinters,
 		initialClassUpdater,
 		initialBatchMintOwner,
+		defaultRoyaltyFraction,
 		batchMintPerPage,
 		erc721ExternalURLBuilder,
 		mn.CosmosClassId,
@@ -106,6 +109,7 @@ func MigrateNFT(
 	initialClassMinters []string,
 	initialClassUpdater string,
 	initialBatchMintOwner string,
+	defaultRoyaltyFraction *big.Int,
 	batchMintPerPage uint64,
 	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
@@ -129,6 +133,7 @@ func MigrateNFT(
 		initialClassOwner,
 		initialClassMinters,
 		initialClassUpdater,
+		defaultRoyaltyFraction,
 	)
 	if err != nil {
 		return nil, err
