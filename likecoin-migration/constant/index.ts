@@ -52,6 +52,6 @@ export function EVM_RPC_URL(isTestnet: boolean): string {
     : 'https://mainnet.optimism.io';
 }
 
-export function EVM_MAGIC_LINK_API_KEY(isTestnet: boolean): string | undefined {
-  return isTestnet ? 'pk_live_5E14E3184484268D' : undefined;
+export function EVM_MAGIC_LINK_API_KEY(isTestnet: boolean): string {
+  return isTestnet ? 'pk_live_5E14E3184484268D' : 'pk_live_583D0D54D78940DA';
 }
