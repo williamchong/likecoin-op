@@ -22,7 +22,7 @@ func MakeNFTIDMatcher() CosmosNFTIDMatcher {
 }
 
 func (m *nftidMatcher) ExtractSerialID(cosmosNFTID string) (uint64, bool) {
-	regex := regexp.MustCompile("(?P<prefix>.+)-(?P<maybe_num>[0-9]+)")
+	regex := regexp.MustCompile(`^(?P<prefix>[^\-]+)-(?P<maybe_num>[0-9]+)$`)
 
 	matches := regex.FindStringSubmatch(cosmosNFTID)
 	if matches == nil {
