@@ -97,11 +97,15 @@ var migrateNFTCmd = &cobra.Command{
 			signer,
 			contractAddress,
 		)
-		likeNFTClient := evm.NewBookNFT(
+		likeNFTClient, err := evm.NewBookNFT(
 			logger,
 			ethClient,
 			signer,
 		)
+
+		if err != nil {
+			panic(err)
+		}
 
 		mn, err := likenft.MigrateNFTFromAssetMigration(
 			ctx,

@@ -118,11 +118,15 @@ var migrateClassByCosmosClassIdCmd = &cobra.Command{
 			signer,
 			contractAddress,
 		)
-		evmLikeNFTClassClient := evm.NewBookNFT(
+		evmLikeNFTClassClient, err := evm.NewBookNFT(
 			logger,
 			ethClient,
 			signer,
 		)
+
+		if err != nil {
+			panic(fmt.Errorf("evm.NewBookNFT: %v", err))
+		}
 
 		cosmosClass, err := likenftCosmosClient.QueryClassByClassId(cosmos.QueryClassByClassIdRequest{
 			ClassId: cosmosClassId,
