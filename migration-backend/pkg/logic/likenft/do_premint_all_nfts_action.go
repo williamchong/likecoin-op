@@ -31,6 +31,8 @@ func DoPremintAllNFTsAction(
 	cosmosNFTIDClassifier cosmosnftidclassifier.CosmosNFTIDClassifier,
 	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
+	shouldPremintArbitraryNFTIDs bool,
+
 	batchMintPerPage uint64,
 	newClassAction *model.LikeNFTMigrationActionNewClass,
 ) error {
@@ -96,6 +98,10 @@ func DoPremintAllNFTsAction(
 				return err
 			}
 		} else if allArbitrary, isAllArbitrary := classifyResult.AllArbitrary(); isAllArbitrary {
+			if !shouldPremintArbitraryNFTIDs {
+				mylogger.Info("found nft ids all arbitrary but shouldMintWithArbitraryNFTIDs is false. skip")
+				return nil
+			}
 			// the nft ids are not in serial
 			// Will mint arbitrarily and reassign a new evm nft id
 			// Will skip minting if the cosmosNFTId already minted
