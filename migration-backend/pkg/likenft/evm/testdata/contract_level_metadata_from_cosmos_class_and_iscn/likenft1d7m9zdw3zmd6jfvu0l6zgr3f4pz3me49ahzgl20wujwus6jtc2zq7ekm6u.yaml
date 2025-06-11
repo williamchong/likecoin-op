@@ -188,6 +188,15 @@ contractlevelmetadata: |
       "trait_type": "Author",
       "value": "邵家臻家屬和朋友"
     }],
+    "potentialAction": {
+      "@type": "ReadAction",
+      "target": [{
+        "@type": "EntryPoint",
+        "contentType": "application/pdf",
+        "url": "ar://9DkmebZZQvEvehM8m7XFRiQy11VkhiuFiAiGRc_wDvc",
+        "name": "Losing Weight Book for Read _Full.pdf"
+      }]
+    },
     "likecoin": {
       "iscnIdPrefix": "iscn://likecoin-chain/7Qa4Y97nncypyPXVhe1nbiPpTp1TE3csYotjV4A3HGI",
       "classId": "likenft1d7m9zdw3zmd6jfvu0l6zgr3f4pz3me49ahzgl20wujwus6jtc2zq7ekm6u"
