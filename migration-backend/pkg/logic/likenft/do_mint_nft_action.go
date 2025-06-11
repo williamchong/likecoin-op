@@ -86,50 +86,85 @@ func DoMintNFTAction(
 	)
 
 	if !ok {
-		cosmosNFT, err := m.QueryNFT(cosmos.QueryNFTRequest{
-			ClassId: newClassAction.CosmosClassId,
-			Id:      a.CosmosNFTId,
-		})
-		if err != nil {
-			return nil, doMintNFTActionFailed(db, a, err)
-		}
-		metadataOverride, err := m.QueryNFTExternalMetadata(cosmosNFT.NFT)
-		if err != nil {
-			return nil, doMintNFTActionFailed(db, a, err)
-		}
-		metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFTAndClassAndISCNData(
-			erc721ExternalURLBuilder,
-			cosmosNFT.NFT,
-			cosmosClass.Class,
-			iscnDataResponse,
-			metadataOverride,
-			a.EvmClassId,
-			totalSupply,
-		))
-		if err != nil {
+		// arbitrary id: wnft
+
+		// Find if the cosmos nft id has initial mint (by batch mint owner)
+		// if initial mint action found
+		initialMintAction, err := appdb.QueryLikeNFTMigrationActionMintNFTByEvmClassIDAndCosmosNFTIDAndEvmOwner(
+			db, a.EvmClassId, a.CosmosNFTId, a.InitialBatchMintOwner)
+
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return nil, doMintNFTActionFailed(db, a, err)
 		}
 
-		events, err := m.QueryAllNFTEvents(m.MakeQueryNFTEventsRequest(newClassAction.CosmosClassId, a.CosmosNFTId))
-		if err != nil {
-			return nil, doMintNFTActionFailed(db, a, err)
-		}
-
-		metadataString := string(metadataBytes)
-		tx, _, err = c.MintNFTs(
-			ctx,
-			mylogger,
-			evmClassAddress,
-			totalSupplyBigInt,
-			[]common.Address{toOwner},
-			[]string{
-				event.MakeMemoFromEvent(events),
-			},
-			[]string{
-				metadataString,
+		if err != nil && errors.Is(err, sql.ErrNoRows) || initialMintAction.Id == a.Id {
+			// No initial minter, possibly is not preminted, or it is myself
+			cosmosNFT, err := m.QueryNFT(cosmos.QueryNFTRequest{
+				ClassId: newClassAction.CosmosClassId,
+				Id:      a.CosmosNFTId,
 			})
-		if err != nil {
-			return nil, doMintNFTActionFailed(db, a, err)
+			if err != nil {
+				return nil, doMintNFTActionFailed(db, a, err)
+			}
+			metadataOverride, err := m.QueryNFTExternalMetadata(cosmosNFT.NFT)
+			if err != nil {
+				return nil, doMintNFTActionFailed(db, a, err)
+			}
+			metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFTAndClassAndISCNData(
+				erc721ExternalURLBuilder,
+				cosmosNFT.NFT,
+				cosmosClass.Class,
+				iscnDataResponse,
+				metadataOverride,
+				a.EvmClassId,
+				totalSupply,
+			))
+			if err != nil {
+				return nil, doMintNFTActionFailed(db, a, err)
+			}
+
+			events, err := m.QueryAllNFTEvents(m.MakeQueryNFTEventsRequest(newClassAction.CosmosClassId, a.CosmosNFTId))
+			if err != nil {
+				return nil, doMintNFTActionFailed(db, a, err)
+			}
+
+			metadataString := string(metadataBytes)
+			tx, _, err = c.MintNFTs(
+				ctx,
+				mylogger,
+				evmClassAddress,
+				totalSupplyBigInt,
+				[]common.Address{toOwner},
+				[]string{
+					event.MakeMemoFromEvent(events),
+				},
+				[]string{
+					metadataString,
+				})
+			if err != nil {
+				return nil, doMintNFTActionFailed(db, a, err)
+			}
+		} else {
+			// Has initial minter but not myself
+			if initialMintAction.Status != model.LikeNFTMigrationActionMintNFTStatusCompleted {
+				return nil, doMintNFTActionFailed(db, a, errors.New("initial mint nft action not completed"))
+			}
+			transferEvent, err := c.QueryTransfer(ctx, common.HexToAddress(a.EvmClassId), common.HexToHash(*initialMintAction.EvmTxHash))
+			if err != nil {
+				return nil, doMintNFTActionFailed(db, a, err)
+			}
+			tokenId := transferEvent.TokenId
+			tx, _, err = p.TransferNFT(
+				ctx,
+				mylogger,
+				evmClassAddress,
+				initialBatchMintOwnerAddress,
+				toOwner,
+				tokenId,
+			)
+			if err != nil {
+				return nil, doMintNFTActionFailed(db, a, err)
+			}
 		}
 	} else {
 
