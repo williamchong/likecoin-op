@@ -25,8 +25,9 @@ import (
 )
 
 const (
-	MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTs = "premint-all-nfts"
-	MigrateClassByCosmosClassIdCmdFlagNameEvmOwner       = "evm-owner"
+	MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTs                             = "premint-all-nfts"
+	MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTsShouldPremintArbitraryNFTIDs = "premint-all-nfts-should-premint-arbitrary-nftids"
+	MigrateClassByCosmosClassIdCmdFlagNameEvmOwner                                   = "evm-owner"
 )
 
 var migrateClassByCosmosClassIdCmd = &cobra.Command{
@@ -165,6 +166,15 @@ func init() {
 			MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTs,
 			false,
 			"Should Premint Al NFTs When New Class",
+		)
+	_ = migrateClassByCosmosClassIdCmd.Flags().
+		Bool(
+			MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTsShouldPremintArbitraryNFTIDs,
+			false,
+			fmt.Sprintf(
+				"Should Premint Arbitrary NFTIDs When New Class. Given %s is true",
+				MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTs,
+			),
 		)
 	_ = migrateClassByCosmosClassIdCmd.Flags().
 		String(
