@@ -2,46 +2,16 @@ package db
 
 import (
 	"errors"
-	"fmt"
-	"strings"
 
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
-type QueryLikeNFTMigrationActionMintNFTFilter struct {
-	EvmClassId  *string
-	CosmosNFTId *string
-}
-
-func makeQueryLikeNFTMigrationActionMintNFTWhereClauseFromFilter(f QueryLikeNFTMigrationActionMintNFTFilter) (string, []any) {
-	wheres := make([]string, 0)
-	attributes := make([]any, 0)
-
-	if f.EvmClassId != nil {
-		wheres = append(wheres, fmt.Sprintf("evm_class_id = $%d", len(wheres)+1))
-		attributes = append(attributes, f.EvmClassId)
-	}
-
-	if f.CosmosNFTId != nil {
-		wheres = append(wheres, fmt.Sprintf("cosmos_nft_id = $%d", len(wheres)+1))
-		attributes = append(attributes, f.CosmosNFTId)
-	}
-
-	whereClause := ""
-	if len(wheres) > 0 {
-		whereClause = fmt.Sprintf("%s %s", "WHERE", strings.Join(wheres, " AND "))
-	}
-
-	return whereClause, attributes
-}
-
-func QueryLikeNFTMigrationActionMintNFT(
+func QueryLikeNFTMigrationActionMintNFTByEvmClassIDAndCosmosNFTID(
 	tx TxLike,
-	filter QueryLikeNFTMigrationActionMintNFTFilter,
+	evmClassId string,
+	cosmosNFTId string,
 ) (*model.LikeNFTMigrationActionMintNFT, error) {
-	whereClause, attributes := makeQueryLikeNFTMigrationActionMintNFTWhereClauseFromFilter(filter)
-	row := tx.QueryRow(
-		fmt.Sprintf(`SELECT
+	row := tx.QueryRow(`SELECT
     id,
     created_at,
     evm_class_id,
@@ -52,10 +22,9 @@ func QueryLikeNFTMigrationActionMintNFT(
     evm_tx_hash,
     failed_reason
 FROM likenft_migration_action_mint_nft
-%s
-`, whereClause),
-		attributes...,
-	)
+WHERE
+    evm_class_id = $1 AND
+    cosmos_nft_id = $2`, evmClassId, cosmosNFTId)
 
 	m := &model.LikeNFTMigrationActionMintNFT{}
 

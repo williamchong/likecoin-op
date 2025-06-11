@@ -15,10 +15,11 @@ func GetOrCreateMintNFTAction(
 	initialBatchMintOwner string,
 	evmOwner string,
 ) (*model.LikeNFTMigrationActionMintNFT, error) {
-	m, err := appdb.QueryLikeNFTMigrationActionMintNFT(db, appdb.QueryLikeNFTMigrationActionMintNFTFilter{
-		EvmClassId:  &evmClassId,
-		CosmosNFTId: &cosmosNFTId,
-	})
+	m, err := appdb.QueryLikeNFTMigrationActionMintNFTByEvmClassIDAndCosmosNFTID(
+		db,
+		evmClassId,
+		cosmosNFTId,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			m = &model.LikeNFTMigrationActionMintNFT{
