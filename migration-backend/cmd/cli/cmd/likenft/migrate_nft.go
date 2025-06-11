@@ -114,6 +114,7 @@ var migrateNFTCmd = &cobra.Command{
 			cosmosNFTIdClassifier,
 			erc721ExternalURLBuilder,
 			envCfg.ShouldPremintAllNFTsWhenNewClass,
+			envCfg.PremintAllNFTsWhenNewClassShouldPremintArbitraryNFTIDs,
 			envCfg.InitialNewClassOwner,
 			envCfg.InitialNewClassMinters,
 			envCfg.InitialNewClassUpdater,

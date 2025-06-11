@@ -30,6 +30,7 @@ func MigrateClassFromAssetMigration(
 	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
 	shouldPremintAllNFTs bool,
+	premintAllNFTsShouldPremintArbitraryNFTIDs bool,
 
 	initialClassOwner string,
 	initialClassMinters []string,
@@ -73,6 +74,7 @@ func MigrateClassFromAssetMigration(
 		cosmosNFTIDClassifier,
 		erc721ExternalURLBuilder,
 		shouldPremintAllNFTs,
+		premintAllNFTsShouldPremintArbitraryNFTIDs,
 		mc.CosmosClassId,
 		initialClassOwner,
 		initialClassMinters,
@@ -113,6 +115,7 @@ func MigrateClass(
 	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
 	shouldPremintAllNFTs bool,
+	premintAllNFTsShouldPremintArbitraryNFTIDs bool,
 
 	cosmosClassId string,
 	initialClassOwner string,
@@ -187,6 +190,7 @@ func MigrateClass(
 		n,
 		cosmosNFTIDClassifier,
 		erc721ExternalURLBuilder,
+		premintAllNFTsShouldPremintArbitraryNFTIDs,
 		batchMintPerPage,
 		newClassAction,
 	)

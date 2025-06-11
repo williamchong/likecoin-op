@@ -47,6 +47,12 @@ var migrateClassByCosmosClassIdCmd = &cobra.Command{
 		if err != nil {
 			panic(fmt.Errorf("cmd.Flags().GetBool: %v", err))
 		}
+		premintAllNFTsShouldPremintArbitraryNFTIDs, err := cmd.Flags().GetBool(
+			MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTsShouldPremintArbitraryNFTIDs,
+		)
+		if err != nil {
+			panic(fmt.Errorf("cmd.Flags().GetBool: %v", err))
+		}
 		evmOwner, err := cmd.Flags().GetString(MigrateClassByCosmosClassIdCmdFlagNameEvmOwner)
 		if err != nil {
 			panic(fmt.Errorf("cmd.Flags().GetString: %v", err))
@@ -143,6 +149,7 @@ var migrateClassByCosmosClassIdCmd = &cobra.Command{
 			cosmosNFTIdClassifier,
 			erc721ExternalURLBuilder,
 			premintAllNFTs,
+			premintAllNFTsShouldPremintArbitraryNFTIDs,
 			cosmosClassId,
 			envCfg.InitialNewClassOwner,
 			envCfg.InitialNewClassMinters,

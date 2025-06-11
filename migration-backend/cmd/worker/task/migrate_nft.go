@@ -101,6 +101,7 @@ func HandleMigrateNFTTask(ctx context.Context, t *asynq.Task) error {
 		cosmosNFTIdClassifier,
 		erc721ExternalURLBuilder,
 		envCfg.ShouldPremintAllNFTsWhenNewClass,
+		envCfg.PremintAllNFTsWhenNewClassShouldPremintArbitraryNFTIDs,
 		envCfg.InitialNewClassOwner,
 		envCfg.InitialNewClassMinters,
 		envCfg.InitialNewClassUpdater,
