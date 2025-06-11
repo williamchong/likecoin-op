@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log/slog"
 	"math/big"
-	"strconv"
 	"time"
 
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
@@ -15,6 +14,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/cosmosnftidclassifier"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
@@ -129,6 +129,8 @@ func MigrateNFT(
 	cosmosNFTId string,
 	evmOwner string,
 ) (*model.LikeNFTMigrationActionMintNFT, error) {
+	nftIDMatcher := nftidmatcher.MakeNFTIDMatcher()
+
 	mylogger := logger.
 		WithGroup("MigrateNFT").
 		With("initialClassOwner", initialClassOwner).
@@ -198,10 +200,8 @@ func MigrateNFT(
 		return nil, err
 	}
 
-	matches := nftIdRegex.FindStringSubmatch(cosmosNFTId)
-	nftIdStr := matches[numIndex]
-	nftId, err := strconv.ParseUint(nftIdStr, 10, 64)
-	if err == nil {
+	nftId, ok := nftIDMatcher.ExtractSerialID(cosmosNFTId)
+	if ok {
 		// nftid is serial
 		// tokenid is zero based
 		// So nftId=1 => expected token id should be from [0, 1]
