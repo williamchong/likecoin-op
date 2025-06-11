@@ -78,8 +78,26 @@ func TestEvmEvent(t *testing.T) {
 		defer dbService.Close()
 		evmEventRepository := database.MakeEVMEventRepository(dbService)
 		evmEvents := util.makeEvmEvents(20, 20, 20)
-		_, err := evmEventRepository.InsertEvmEventsIfNeeded(context.Background(), evmEvents)
+		evmEvents, err := evmEventRepository.InsertEvmEventsIfNeeded(context.Background(), evmEvents)
+		So(err, ShouldBeNil)
+		So(evmEvents, ShouldHaveLength, 20*20*20)
+	})
+
+	Convey("Test InsertEvmEventsIfNeeded edge", t, func() {
+		dbService := newTestService(t)
+		defer dbService.Close()
+		evmEventRepository := database.MakeEVMEventRepository(dbService)
+
+		// Now should be 16 params per record to be inserted
+		// So at most 4095 records per block number
+		evmEvents := util.makeEvmEvents(1, 35, 118)
+		evmEvents, err := evmEventRepository.InsertEvmEventsIfNeeded(context.Background(), evmEvents)
 		So(err, ShouldNotBeNil)
-		So(err.Error(), ShouldContainSubstring, "parameters but PostgreSQL only supports 65535 parameters")
+		So(err.Error(), ShouldContainSubstring, "got 66080 parameters but PostgreSQL only supports 65535 parameters")
+
+		evmEvents = util.makeEvmEvents(1, 35, 117)
+		evmEvents, err = evmEventRepository.InsertEvmEventsIfNeeded(context.Background(), evmEvents)
+		So(err, ShouldBeNil)
+		So(evmEvents, ShouldHaveLength, 4095)
 	})
 }
