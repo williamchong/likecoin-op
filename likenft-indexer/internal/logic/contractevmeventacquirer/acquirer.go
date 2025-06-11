@@ -117,6 +117,11 @@ func (a *contractEvmEventsAcquirer) Acquire(
 
 	myLogger = myLogger.With("toBlock", toBlock)
 
+	if fromBlock >= toBlock {
+		myLogger.Info("no new blocks. skip")
+		return toBlock, nil
+	}
+
 	var addresses = make([]common.Address, len(a.contractAddresses))
 	for i, contractAddress := range a.contractAddresses {
 		addresses[i] = common.HexToAddress(contractAddress)
