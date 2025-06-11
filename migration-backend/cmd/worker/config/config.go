@@ -30,7 +30,8 @@ type EnvConfig struct {
 	BatchMintItemPerPage              uint64   `envconfig:"BATCH_MINT_ITEM_PER_PAGE"`
 	ERC721MetadataExternalURLBase3ook string   `envconfig:"ERC721_METADATA_EXTERNAL_URL_BASE_3OOK"`
 
-	ShouldPremintAllNFTsWhenNewClass bool `envconfig:"SHOULD_PREMINT_ALL_NFTS_WHEN_NEW_CLASS"`
+	ShouldPremintAllNFTsWhenNewClass                       bool `envconfig:"SHOULD_PREMINT_ALL_NFTS_WHEN_NEW_CLASS"`
+	PremintAllNFTsWhenNewClassShouldPremintArbitraryNFTIDs bool `envconfig:"PREMINT_ALL_NFTS_WHEN_NEW_CLASS_SHOULD_PREMINT_ARBITRARY_NFTIDS" default:"false"`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {

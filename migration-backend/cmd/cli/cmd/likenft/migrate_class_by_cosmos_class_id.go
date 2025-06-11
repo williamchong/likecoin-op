@@ -25,8 +25,9 @@ import (
 )
 
 const (
-	MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTs = "premint-all-nfts"
-	MigrateClassByCosmosClassIdCmdFlagNameEvmOwner       = "evm-owner"
+	MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTs                             = "premint-all-nfts"
+	MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTsShouldPremintArbitraryNFTIDs = "premint-all-nfts-should-premint-arbitrary-nftids"
+	MigrateClassByCosmosClassIdCmdFlagNameEvmOwner                                   = "evm-owner"
 )
 
 var migrateClassByCosmosClassIdCmd = &cobra.Command{
@@ -43,6 +44,12 @@ var migrateClassByCosmosClassIdCmd = &cobra.Command{
 		defer cancel()
 
 		premintAllNFTs, err := cmd.Flags().GetBool(MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTs)
+		if err != nil {
+			panic(fmt.Errorf("cmd.Flags().GetBool: %v", err))
+		}
+		premintAllNFTsShouldPremintArbitraryNFTIDs, err := cmd.Flags().GetBool(
+			MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTsShouldPremintArbitraryNFTIDs,
+		)
 		if err != nil {
 			panic(fmt.Errorf("cmd.Flags().GetBool: %v", err))
 		}
@@ -111,11 +118,15 @@ var migrateClassByCosmosClassIdCmd = &cobra.Command{
 			signer,
 			contractAddress,
 		)
-		evmLikeNFTClassClient := evm.NewBookNFT(
+		evmLikeNFTClassClient, err := evm.NewBookNFT(
 			logger,
 			ethClient,
 			signer,
 		)
+
+		if err != nil {
+			panic(fmt.Errorf("evm.NewBookNFT: %v", err))
+		}
 
 		cosmosClass, err := likenftCosmosClient.QueryClassByClassId(cosmos.QueryClassByClassIdRequest{
 			ClassId: cosmosClassId,
@@ -142,6 +153,7 @@ var migrateClassByCosmosClassIdCmd = &cobra.Command{
 			cosmosNFTIdClassifier,
 			erc721ExternalURLBuilder,
 			premintAllNFTs,
+			premintAllNFTsShouldPremintArbitraryNFTIDs,
 			cosmosClassId,
 			envCfg.InitialNewClassOwner,
 			envCfg.InitialNewClassMinters,
@@ -165,6 +177,15 @@ func init() {
 			MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTs,
 			false,
 			"Should Premint Al NFTs When New Class",
+		)
+	_ = migrateClassByCosmosClassIdCmd.Flags().
+		Bool(
+			MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTsShouldPremintArbitraryNFTIDs,
+			false,
+			fmt.Sprintf(
+				"Should Premint Arbitrary NFTIDs When New Class. Given %s is true",
+				MigrateClassByCosmosClassIdCmdFlagNamePremintAllNFTs,
+			),
 		)
 	_ = migrateClassByCosmosClassIdCmd.Flags().
 		String(

@@ -33,7 +33,8 @@ type EnvConfig struct {
 	ClassMigrationEstimatedDurationSeconds int `envconfig:"CLASS_MIGRATION_ESTIMATED_DURATION_SECONDS" default:"0"`
 	NFTMigrationEstimatedDurationSeconds   int `envconfig:"NFT_MIGRATION_ESTIMATED_DURATION_SECONDS" default:"0"`
 
-	ShouldPremintAllNFTsWhenNewClass bool `envconfig:"SHOULD_PREMINT_ALL_NFTS_WHEN_NEW_CLASS"`
+	ShouldPremintAllNFTsWhenNewClass                       bool `envconfig:"SHOULD_PREMINT_ALL_NFTS_WHEN_NEW_CLASS"`
+	PremintAllNFTsWhenNewClassShouldPremintArbitraryNFTIDs bool `envconfig:"PREMINT_ALL_NFTS_WHEN_NEW_CLASS_SHOULD_PREMINT_ARBITRARY_NFTIDS" default:"false"`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {

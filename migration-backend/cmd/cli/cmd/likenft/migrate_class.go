@@ -98,11 +98,15 @@ var migrateClassCmd = &cobra.Command{
 			signer,
 			contractAddress,
 		)
-		evmLikeNFTClassClient := evm.NewBookNFT(
+		evmLikeNFTClassClient, err := evm.NewBookNFT(
 			logger,
 			ethClient,
 			signer,
 		)
+
+		if err != nil {
+			panic(err)
+		}
 
 		mc, err := likenft.MigrateClassFromAssetMigration(
 			ctx,
@@ -115,6 +119,7 @@ var migrateClassCmd = &cobra.Command{
 			cosmosNFTIdClassifier,
 			erc721ExternalURLBuilder,
 			envCfg.ShouldPremintAllNFTsWhenNewClass,
+			envCfg.PremintAllNFTsWhenNewClassShouldPremintArbitraryNFTIDs,
 			envCfg.InitialNewClassOwner,
 			envCfg.InitialNewClassMinters,
 			envCfg.InitialNewClassUpdater,

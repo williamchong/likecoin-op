@@ -86,11 +86,15 @@ func HandleMigrateClassTask(ctx context.Context, t *asynq.Task) error {
 		signer,
 		contractAddress,
 	)
-	evmLikeNFTClient := evm.NewBookNFT(
+	evmLikeNFTClient, err := evm.NewBookNFT(
 		logger,
 		ethClient,
 		signer,
 	)
+
+	if err != nil {
+		return err
+	}
 
 	mylogger.Info("running migrate class")
 	mc, err := likenft.MigrateClassFromAssetMigration(
@@ -104,6 +108,7 @@ func HandleMigrateClassTask(ctx context.Context, t *asynq.Task) error {
 		cosmosNFTIdClassifier,
 		erc721ExternalURLBuilder,
 		envCfg.ShouldPremintAllNFTsWhenNewClass,
+		envCfg.PremintAllNFTsWhenNewClassShouldPremintArbitraryNFTIDs,
 		envCfg.InitialNewClassOwner,
 		envCfg.InitialNewClassMinters,
 		envCfg.InitialNewClassUpdater,
