@@ -8,6 +8,7 @@ import (
 	"path"
 
 	cosmosmodel "github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
+	"github.com/likecoin/like-migration-backend/pkg/types/trimmedstring"
 )
 
 type MetadataISCN struct {
@@ -69,9 +70,9 @@ type MetadataISCNPotentialAction struct {
 }
 
 func resolveActionTargetParts(
-	urlString string,
+	urlString trimmedstring.TrimmedString,
 ) (urlPathBase string, filename string, contentType string) {
-	u, err := url.Parse(urlString)
+	u, err := url.Parse(urlString.String())
 	if err != nil {
 		return "", "", ""
 	}
@@ -107,7 +108,7 @@ func resolveActionTargetParts(
 func makePotentialActionTargetFromString(
 	str string,
 ) *MetadataISCNPotentialActionTarget {
-	url, fileName, contentType := resolveActionTargetParts(str)
+	url, fileName, contentType := resolveActionTargetParts(trimmedstring.FromString(str))
 
 	if contentType != "" {
 		return &MetadataISCNPotentialActionTarget{
