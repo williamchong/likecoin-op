@@ -108,7 +108,10 @@ func HandleCheckBookNFTToLatestBlockNumber(ctx context.Context, t *asynq.Task) e
 		}
 
 		_, err = asynqClient.Enqueue(task, asynq.MaxRetry(0))
-		return err
+
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

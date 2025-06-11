@@ -110,7 +110,9 @@ func HandleCheckLikeProtocolToLatestBlockNumber(ctx context.Context, t *asynq.Ta
 
 		_, err = asynqClient.Enqueue(task, asynq.MaxRetry(0))
 
-		return err
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
