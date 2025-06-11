@@ -1,0 +1,208 @@
+name: class id = likenft1d7m9zdw3zmd6jfvu0l6zgr3f4pz3me49ahzgl20wujwus6jtc2zq7ekm6u
+cosmosclassresponse: |
+  {
+    "class": {
+      "id": "likenft1d7m9zdw3zmd6jfvu0l6zgr3f4pz3me49ahzgl20wujwus6jtc2zq7ekm6u",
+      "name": "I am losing weight, not faith",
+      "symbol": "BOOK",
+      "description": "I am losing weight, not faith",
+      "uri": "",
+      "uri_hash": "",
+      "data": {
+        "@type": "/likechain.likenft.v1.ClassData",
+        "metadata": {
+          "name": "I am losing weight, not faith",
+          "image": "ar://lDQqEqPw4C36MzCH3hJaaRp04KtQf3boBM7SJ3lJy4E",
+          "external_url": "",
+          "nft_meta_collection_id": "nft_book",
+          "nft_meta_collection_name": "NFT Book",
+          "nft_meta_collection_descrption": "NFT Book by Liker Land"
+        },
+        "parent": {
+          "type": "ISCN",
+          "iscn_id_prefix": "iscn://likecoin-chain/7Qa4Y97nncypyPXVhe1nbiPpTp1TE3csYotjV4A3HGI",
+          "iscn_version_at_mint": "1",
+          "account": ""
+        },
+        "config": {
+          "burnable": true,
+          "max_supply": "0",
+          "blind_box_config": null
+        },
+        "blind_box_state": {
+          "content_count": "0",
+          "to_be_revealed": false
+        }
+      }
+    }
+  }
+
+iscndataresponse: |
+  {
+    "owner": "like1w399ffzqhxxhhwny3ckt9naezn6l9uv77kurd9",
+    "latest_version": "7",
+    "records": [
+      {
+        "ipld": "baguqeerawe6fkddakmy5p4xa27qoyarrpnlcwaldxokgp52sxreu2bn65bra",
+        "data": {
+          "@context": {
+            "@vocab": "http://iscn.io/",
+            "contentMetadata": { "@context": null },
+            "recordParentIPLD": { "@container": "@index" },
+            "stakeholders": {
+              "@context": {
+                "@vocab": "http://schema.org/",
+                "contributionType": "http://iscn.io/contributionType",
+                "entity": "http://iscn.io/entity",
+                "footprint": "http://iscn.io/footprint",
+                "rewardProportion": "http://iscn.io/rewardProportion"
+              }
+            }
+          },
+          "@id": "iscn://likecoin-chain/7Qa4Y97nncypyPXVhe1nbiPpTp1TE3csYotjV4A3HGI/7",
+          "@type": "Record",
+          "contentFingerprints": [
+            "ipfs://QmPJmFWFcRWZosTPr7kXXHXn6b5zqyqbxGuw1wiaoJnYhw",
+            "ipfs://QmNnkhLkdmUECzhuMxRQs2gZfbd3m1nnEP6Q5Quq22Yu1Q",
+            "ar://lDQqEqPw4C36MzCH3hJaaRp04KtQf3boBM7SJ3lJy4E",
+            "ar://9DkmebZZQvEvehM8m7XFRiQy11VkhiuFiAiGRc_wDvc"
+          ],
+          "contentMetadata": {
+            "@context": "http://schema.org/",
+            "@type": "Book",
+            "author": "邵家臻家屬和朋友",
+            "description": "I am losing weight, not faith",
+            "exifInfo": [
+              {
+                "BitDepth": 8,
+                "ColorType": "RGB with Alpha",
+                "Compression": "Deflate/Inflate",
+                "ExifImageHeight": 6889,
+                "ExifImageWidth": 5118,
+                "Filter": "Adaptive",
+                "Format": "image/png",
+                "ImageHeight": 6889,
+                "ImageWidth": 5118,
+                "Interlace": "Noninterlaced",
+                "ProfileName": "kCGColorSpaceAdobeRGB1998",
+                "Size": "6889 x 5118 PNG (1643799)"
+              }
+            ],
+            "inLanguage": "zh",
+            "isbn": "",
+            "keywords": "",
+            "name": "I am losing weight, not faith",
+            "publisher": "",
+            "sameAs": [
+              "ar://9DkmebZZQvEvehM8m7XFRiQy11VkhiuFiAiGRc_wDvc?name=Losing+Weight+Book+for+Read+_Full.pdf "
+            ],
+            "thumbnailUrl": "ar://lDQqEqPw4C36MzCH3hJaaRp04KtQf3boBM7SJ3lJy4E",
+            "url": "",
+            "usageInfo": "All Rights Reserved",
+            "version": 6
+          },
+          "recordNotes": "file_updated",
+          "recordParentIPLD": {
+            "/": "baguqeeraw6d3kwxwxxgoz3hzy3oeiaxthys4xs77ncpyxwvxwc6ikjjwqloa"
+          },
+          "recordTimestamp": "2025-02-14T07:32:41+00:00",
+          "recordVersion": 7,
+          "stakeholders": [
+            {
+              "contributionType": "http://schema.org/author",
+              "entity": {
+                "@id": "",
+                "description": "",
+                "identifier": [],
+                "name": "邵家臻家屬",
+                "sameAs": [],
+                "url": ""
+              },
+              "rewardProportion": 1
+            }
+          ]
+        }
+      }
+    ]
+  }
+
+royaltyconfig: |
+  {
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "975000"
+        },
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "25000"
+        }
+      ]
+    }
+  }
+
+contractlevelmetadata: |
+  {
+    "name": "I am losing weight, not faith",
+    "symbol": "BOOK",
+    "description": "I am losing weight, not faith",
+    "image": "ar://lDQqEqPw4C36MzCH3hJaaRp04KtQf3boBM7SJ3lJy4E",
+    "nft_meta_collection_id": "nft_book",
+    "nft_meta_collection_name": "NFT Book",
+    "nft_meta_collection_description": "NFT Book by Liker Land",
+    "@context": "http://schema.org/",
+    "@type": "Book",
+    "author": "邵家臻家屬和朋友",
+    "exifInfo": [
+      {
+        "BitDepth": 8,
+        "ColorType": "RGB with Alpha",
+        "Compression": "Deflate/Inflate",
+        "ExifImageHeight": 6889,
+        "ExifImageWidth": 5118,
+        "Filter": "Adaptive",
+        "Format": "image/png",
+        "ImageHeight": 6889,
+        "ImageWidth": 5118,
+        "Interlace":"Noninterlaced",
+        "ProfileName": "kCGColorSpaceAdobeRGB1998",
+        "Size": "6889 x 5118 PNG (1643799)"
+      }
+    ],
+    "inLanguage": "zh",
+    "isbn": "",
+    "keywords": "",
+    "thumbnailUrl": "ar://lDQqEqPw4C36MzCH3hJaaRp04KtQf3boBM7SJ3lJy4E",
+    "usageInfo": "All Rights Reserved",
+    "version": 6,
+    "contentFingerprints": [
+      "ipfs://QmPJmFWFcRWZosTPr7kXXHXn6b5zqyqbxGuw1wiaoJnYhw",
+      "ipfs://QmNnkhLkdmUECzhuMxRQs2gZfbd3m1nnEP6Q5Quq22Yu1Q",
+      "ar://lDQqEqPw4C36MzCH3hJaaRp04KtQf3boBM7SJ3lJy4E",
+      "ar://9DkmebZZQvEvehM8m7XFRiQy11VkhiuFiAiGRc_wDvc"
+    ],
+    "dateCreated": "2025-02-14T07:32:41+00:00",
+    "attributes": [{
+      "trait_type": "Author",
+      "value": "邵家臻家屬和朋友"
+    }],
+    "likecoin": {
+      "iscnIdPrefix": "iscn://likecoin-chain/7Qa4Y97nncypyPXVhe1nbiPpTp1TE3csYotjV4A3HGI",
+      "classId": "likenft1d7m9zdw3zmd6jfvu0l6zgr3f4pz3me49ahzgl20wujwus6jtc2zq7ekm6u"
+    },
+    "royalty_config": {
+      "rate_basis_points": "1000",
+      "stakeholders": [
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "975000"
+        },
+        {
+          "account": "like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl",
+          "weight": "25000"
+        }
+      ]
+    }
+  }
