@@ -67,6 +67,7 @@ migrationBackend:
     CLASS_MIGRATION_ESTIMATED_DURATION_SECONDS: "2"
     NFT_MIGRATION_ESTIMATED_DURATION_SECONDS: "2"
     SHOULD_PREMINT_ALL_NFTS_WHEN_NEW_CLASS: "true"
+    PREMINT_ALL_NFTS_WHEN_NEW_CLASS_SHOULD_PREMINT_ARBITRARY_NFTIDS: "false"
 
   container:
     imageRepository: likecoin/like-migration-backend
