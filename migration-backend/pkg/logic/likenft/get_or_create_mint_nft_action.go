@@ -3,10 +3,34 @@ package likenft
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
+
+type ErrNFTAlreadyMinted struct {
+	mintedEvmOwner string
+	txHash         string
+}
+
+func MakeErrAlreadyMinted(
+	mintedEvmOwner string,
+	txHash string,
+) *ErrNFTAlreadyMinted {
+	return &ErrNFTAlreadyMinted{
+		mintedEvmOwner,
+		txHash,
+	}
+}
+
+func (e *ErrNFTAlreadyMinted) Error() string {
+	return fmt.Sprintf(
+		"err already minted, mintedEvmOwner:%s, txHash:%s",
+		e.mintedEvmOwner,
+		e.txHash,
+	)
+}
 
 func GetOrCreateMintNFTAction(
 	db *sql.DB,
@@ -36,6 +60,12 @@ func GetOrCreateMintNFTAction(
 		} else {
 			return nil, err
 		}
+	}
+	if m.Status == model.LikeNFTMigrationActionMintNFTStatusCompleted && m.EvmOwner != evmOwner {
+		return nil, MakeErrAlreadyMinted(
+			m.EvmOwner,
+			*m.EvmTxHash,
+		)
 	}
 	return m, nil
 }
