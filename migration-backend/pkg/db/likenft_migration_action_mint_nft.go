@@ -6,11 +6,10 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
-func QueryLikeNFTMigrationActionMintNFTByEvmClassIDAndCosmosNFTIDAndEvmOwner(
+func QueryLikeNFTMigrationActionMintNFTByEvmClassIDAndCosmosNFTID(
 	tx TxLike,
 	evmClassId string,
 	cosmosNFTId string,
-	evmOwner string,
 ) (*model.LikeNFTMigrationActionMintNFT, error) {
 	row := tx.QueryRow(`SELECT
     id,
@@ -25,8 +24,10 @@ func QueryLikeNFTMigrationActionMintNFTByEvmClassIDAndCosmosNFTIDAndEvmOwner(
 FROM likenft_migration_action_mint_nft
 WHERE
     evm_class_id = $1 AND
-    cosmos_nft_id = $2 AND
-    evm_owner = $3`, evmClassId, cosmosNFTId, evmOwner)
+    cosmos_nft_id = $2`,
+		evmClassId,
+		cosmosNFTId,
+	)
 
 	m := &model.LikeNFTMigrationActionMintNFT{}
 

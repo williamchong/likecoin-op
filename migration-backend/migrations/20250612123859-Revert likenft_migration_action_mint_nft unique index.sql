@@ -1,0 +1,20 @@
+
+-- +migrate Up
+CREATE UNIQUE INDEX likenft_migration_action_mint_nf_evm_class_id_cosmos_nft_id_key
+ON "likenft_migration_action_mint_nft"
+(evm_class_id,cosmos_nft_id);
+
+ALTER TABLE "likenft_migration_action_mint_nft"
+ADD CONSTRAINT likenft_migration_action_mint_nf_evm_class_id_cosmos_nft_id_key
+UNIQUE USING INDEX likenft_migration_action_mint_nf_evm_class_id_cosmos_nft_id_key;
+
+DROP INDEX
+likenft_migration_action_mint_nf_evm_class_id_cosmos_nft_id_evm;
+
+-- +migrate Down
+CREATE UNIQUE INDEX likenft_migration_action_mint_nf_evm_class_id_cosmos_nft_id_evm
+ON "likenft_migration_action_mint_nft"
+(evm_class_id,cosmos_nft_id,evm_owner);
+
+ALTER TABLE "likenft_migration_action_mint_nft" DROP CONSTRAINT
+likenft_migration_action_mint_nf_evm_class_id_cosmos_nft_id_key;

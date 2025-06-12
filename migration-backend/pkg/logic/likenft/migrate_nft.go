@@ -181,7 +181,7 @@ func MigrateNFT(
 		return nil, err
 	}
 
-	err = DoPremintAllNFTsAction(
+	err = DoPremintAllNFTsActionIfNeeded(
 		ctx,
 		mylogger,
 		db,

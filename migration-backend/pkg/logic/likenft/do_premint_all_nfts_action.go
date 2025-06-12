@@ -19,7 +19,9 @@ var (
 	ErrCosmosNFTIDsNotConsistent = errors.New("cosmos nftids not consistent")
 )
 
-func DoPremintAllNFTsAction(
+// Will do premint all nfts if the new class action
+// specified `ShouldPremintAllNFTs` and checked the nft ids are serial
+func DoPremintAllNFTsActionIfNeeded(
 	ctx context.Context,
 	logger *slog.Logger,
 
