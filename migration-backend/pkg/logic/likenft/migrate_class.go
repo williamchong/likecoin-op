@@ -180,7 +180,7 @@ func MigrateClass(
 
 	lastTxEvmHash = newClassAction.EvmTxHash
 
-	err = DoPremintAllNFTsAction(
+	err = DoPremintAllNFTsActionIfNeeded(
 		ctx,
 		mylogger,
 		db,
