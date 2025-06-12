@@ -34,7 +34,7 @@ func MigrateClassFromAssetMigration(
 
 	initialClassOwner string,
 	initialClassMinters []string,
-	initialClassUpdater string,
+	initialClassUpdaters []string,
 	initialBatchMintOwner string,
 	batchMintPerPage uint64,
 	defaultRoyaltyFraction *big.Int,
@@ -78,7 +78,7 @@ func MigrateClassFromAssetMigration(
 		mc.CosmosClassId,
 		initialClassOwner,
 		initialClassMinters,
-		initialClassUpdater,
+		initialClassUpdaters,
 		initialBatchMintOwner,
 		batchMintPerPage,
 		defaultRoyaltyFraction,
@@ -120,7 +120,7 @@ func MigrateClass(
 	cosmosClassId string,
 	initialClassOwner string,
 	initialClassMinters []string,
-	initialClassUpdater string,
+	initialClassUpdaters []string,
 	initialBatchMintOwner string,
 	batchMintPerPage uint64,
 	defaultRoyaltyFraction *big.Int,
@@ -133,7 +133,7 @@ func MigrateClass(
 		With("cosmosClassId", cosmosClassId).
 		With("initialClassOwner", initialClassOwner).
 		With("initialClassMinters", initialClassMinters).
-		With("initialClassUpdater", initialClassUpdater).
+		With("initialClassUpdaters", initialClassUpdaters).
 		With("cosmosOwner", cosmosOwner).
 		With("evmOwner", evmOwner)
 
@@ -142,7 +142,7 @@ func MigrateClass(
 		cosmosClassId,
 		initialClassOwner,
 		initialClassMinters,
-		initialClassUpdater,
+		initialClassUpdaters,
 		initialBatchMintOwner,
 		shouldPremintAllNFTs,
 		defaultRoyaltyFraction,

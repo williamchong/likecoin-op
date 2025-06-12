@@ -157,7 +157,7 @@ var migrateClassByCosmosClassIdCmd = &cobra.Command{
 			cosmosClassId,
 			envCfg.InitialNewClassOwner,
 			envCfg.InitialNewClassMinters,
-			envCfg.InitialNewClassUpdater,
+			envCfg.InitialNewClassUpdaters,
 			envCfg.InitialBatchMintNFTsOwner,
 			envCfg.BatchMintItemPerPage,
 			new(big.Int).SetUint64(envCfg.DefaultRoyaltyFraction),

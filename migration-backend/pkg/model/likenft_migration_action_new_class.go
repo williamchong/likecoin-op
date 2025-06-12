@@ -22,7 +22,7 @@ type LikeNFTMigrationActionNewClass struct {
 	CosmosClassId           string
 	InitialOwner            string
 	InitialMintersStr       commaseparatedstring.CommaSeparatedString
-	InitialUpdater          string
+	InitialUpdatersStr      commaseparatedstring.CommaSeparatedString
 	InitialBatchMintOwner   string
 	DefaultRoyaltyFraction  *big.Int
 	ShouldPremintAllNFTs    bool
