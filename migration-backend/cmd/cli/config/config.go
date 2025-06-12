@@ -24,7 +24,7 @@ type EnvConfig struct {
 
 	InitialNewClassOwner              string   `envconfig:"INITIAL_NEW_CLASS_OWNER"`
 	InitialNewClassMinters            []string `envconfig:"INITIAL_NEW_CLASS_MINTERS"`
-	InitialNewClassUpdater            string   `envconfig:"INITIAL_NEW_CLASS_UPDATER"`
+	InitialNewClassUpdaters           []string `envconfig:"INITIAL_NEW_CLASS_UPDATERS"`
 	InitialBatchMintNFTsOwner         string   `envconfig:"INITIAL_BATCH_MINT_NFTS_OWNER"`
 	DefaultRoyaltyFraction            uint64   `envconfig:"DEFAULT_ROYALTY_FRACTION"`
 	BatchMintItemPerPage              uint64   `envconfig:"BATCH_MINT_ITEM_PER_PAGE"`

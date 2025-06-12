@@ -20,7 +20,7 @@ func TestLikeNFTMigrationActionNewClass(t *testing.T) {
 			CosmosClassId:          "cosmosclassid",
 			InitialOwner:           "initialowner",
 			InitialMintersStr:      commaseparatedstring.CommaSeparatedString("initialminter1,initialminter2"),
-			InitialUpdater:         "initialupdater",
+			InitialUpdatersStr:     commaseparatedstring.CommaSeparatedString("initialupdater1,initialupdater2"),
 			DefaultRoyaltyFraction: big.NewInt(10),
 			Status:                 model.LikeNFTMigrationActionNewClassStatusInit,
 		})
@@ -39,5 +39,6 @@ func TestLikeNFTMigrationActionNewClass(t *testing.T) {
 		}
 
 		So(queryResult.InitialMintersStr, ShouldEqual, commaseparatedstring.CommaSeparatedString("initialminter1,initialminter2"))
+		So(queryResult.InitialUpdatersStr, ShouldEqual, commaseparatedstring.CommaSeparatedString("initialupdater1,initialupdater2"))
 	})
 }

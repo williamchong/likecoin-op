@@ -122,7 +122,7 @@ var migrateClassCmd = &cobra.Command{
 			envCfg.PremintAllNFTsWhenNewClassShouldPremintArbitraryNFTIDs,
 			envCfg.InitialNewClassOwner,
 			envCfg.InitialNewClassMinters,
-			envCfg.InitialNewClassUpdater,
+			envCfg.InitialNewClassUpdaters,
 			envCfg.InitialBatchMintNFTsOwner,
 			envCfg.BatchMintItemPerPage,
 			new(big.Int).SetUint64(envCfg.DefaultRoyaltyFraction),
