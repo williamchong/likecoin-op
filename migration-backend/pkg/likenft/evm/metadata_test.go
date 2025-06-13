@@ -90,8 +90,12 @@ func TestContractLevelMetadataFromCosmosClassAndISCN(t *testing.T) {
 
 type erc721ExternalURLBuilderMock struct{}
 
-func (b *erc721ExternalURLBuilderMock) Build(classId string, tokenId uint64) string {
+func (b *erc721ExternalURLBuilderMock) BuildSerial(classId string, tokenId uint64) string {
 	return fmt.Sprintf("https://sepolia.3ook.com/store/%s/%d", classId, tokenId)
+}
+
+func (b *erc721ExternalURLBuilderMock) BuildArbitrary(classId string) string {
+	return fmt.Sprintf("https://sepolia.3ook.com/store/%s", classId)
 }
 
 func TestERC721MetadataFromCosmosNFTAndClassAndISCNData(t *testing.T) {

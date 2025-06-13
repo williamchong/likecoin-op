@@ -78,6 +78,46 @@ func ERC721OpenSeaMetadataFromCosmosNFTMetadata(m *cosmosmodel.NFTMetadata) *evm
 	}
 }
 
+func ERC721MetadataFromCosmosNFTAndClassAndISCNDataArbitrary(
+	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
+	n *cosmosmodel.NFT,
+	c *cosmosmodel.Class,
+	iscn *cosmosmodel.ISCN,
+	cosmosMetadataOverride *cosmosmodel.NFTMetadata,
+	evmClassId string,
+) *evmmodel.ERC721Metadata {
+	iscnAttributes := makeERC721MetadataAttributeFromISCN(iscn)
+
+	var metadataOverride *evmmodel.ERC721MetadataOpenSea
+	if cosmosMetadataOverride != nil {
+		metadataOverride = ERC721OpenSeaMetadataFromCosmosNFTMetadata(cosmosMetadataOverride)
+	}
+
+	metadata := &evmmodel.ERC721Metadata{
+		ERC721MetadataOpenSea: evmmodel.OverrideERC721MetadataOpenSea(
+			evmmodel.ERC721MetadataOpenSea{
+				Image:       c.Data.Metadata.Image,
+				ExternalUrl: erc721ExternalURLBuilder.BuildArbitrary(evmClassId),
+				Description: c.Description,
+				Name:        c.Name,
+				Attributes: sortERC721MetadataAttributes(
+					slices.Concat(
+						makeERC721MetadataAttribute("", n.Data.Metadata.Attributes),
+						iscnAttributes,
+					),
+				),
+				AnimationUrl: n.Data.Metadata.AnimationUrl,
+			}, metadataOverride),
+		LikeCoin: &evmmodel.ERC721MetadataLikeCoin{
+			ISCNIdPrefix: c.Data.Parent.IscnIdPrefix,
+			ClassId:      n.ClassId,
+			NFTId:        n.Id,
+		},
+	}
+
+	return metadata
+}
+
 func ERC721MetadataFromCosmosNFTAndClassAndISCNData(
 	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 	n *cosmosmodel.NFT,
@@ -100,7 +140,7 @@ func ERC721MetadataFromCosmosNFTAndClassAndISCNData(
 		ERC721MetadataOpenSea: evmmodel.OverrideERC721MetadataOpenSea(
 			evmmodel.ERC721MetadataOpenSea{
 				Image:       c.Data.Metadata.Image,
-				ExternalUrl: erc721ExternalURLBuilder.Build(evmClassId, evmTokenId),
+				ExternalUrl: erc721ExternalURLBuilder.BuildSerial(evmClassId, evmTokenId),
 				Description: fmt.Sprintf("Copy #%s of %s", strconv.FormatUint(evmTokenId, 10), iscnRecord.ContentMetadata.Name),
 				Name:        fmt.Sprintf("%s #%s", iscnRecord.ContentMetadata.Name, strconv.FormatUint(evmTokenId, 10)),
 				Attributes: sortERC721MetadataAttributes(

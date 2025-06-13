@@ -62,7 +62,6 @@ func DoMintNFTAction(
 	if err != nil {
 		return nil, doMintNFTActionFailed(db, a, err)
 	}
-	totalSupply := totalSupplyBigInt.Uint64()
 
 	cosmosClass, err := m.QueryClassByClassId(cosmos.QueryClassByClassIdRequest{
 		ClassId: newClassAction.CosmosClassId,
@@ -101,14 +100,13 @@ func DoMintNFTAction(
 		if err != nil {
 			return nil, doMintNFTActionFailed(db, a, err)
 		}
-		metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFTAndClassAndISCNData(
+		metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFTAndClassAndISCNDataArbitrary(
 			erc721ExternalURLBuilder,
 			cosmosNFT.NFT,
 			cosmosClass.Class,
 			iscnDataResponse,
 			metadataOverride,
 			a.EvmClassId,
-			totalSupply,
 		))
 		if err != nil {
 			return nil, doMintNFTActionFailed(db, a, err)

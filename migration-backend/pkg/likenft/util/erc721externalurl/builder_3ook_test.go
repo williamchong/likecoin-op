@@ -14,6 +14,6 @@ func TestErc721ExternalURLBuilder3ook(t *testing.T) {
 		t.Fatal(err)
 	}
 	Convey("Erc721ExternalURLBuilder3ook", t, func() {
-		So(builder.Build("myclassid", 123), ShouldEqual, "https://sepolia.3ook.com/store/myclassid/123")
+		So(builder.BuildSerial("myclassid", 123), ShouldEqual, "https://sepolia.3ook.com/store/myclassid/123")
 	})
 }
