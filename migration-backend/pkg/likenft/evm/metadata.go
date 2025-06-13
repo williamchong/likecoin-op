@@ -204,10 +204,12 @@ func makeERC721MetadataAttributeFromISCN(iscn *cosmosmodel.ISCN) []evmmodel.ERC7
 
 	if iscnRecord.ContentMetadata.Author != nil {
 		author := iscnRecord.ContentMetadata.Author.Name()
-		attributes = append(attributes, evmmodel.ERC721MetadataAttribute{
-			TraitType: "Author",
-			Value:     author,
-		})
+		if author != "" {
+			attributes = append(attributes, evmmodel.ERC721MetadataAttribute{
+				TraitType: "Author",
+				Value:     author,
+			})
+		}
 	}
 
 	if iscnRecord.ContentMetadata.Publisher != "" {
