@@ -143,7 +143,7 @@ erc721metadata: |
   {
     "name": "《天工開物・栩栩如真》 #124",
     "description": "Copy #124 of 《天工開物・栩栩如真》",
-    "image": "https://files.ckxpress.com/worksandcreation.jpeg",
+    "image": "ipfs://bafkreiea72dqqcb6knkd2st747634xfzvqdu3xrlvzadnvseno5kaf42qi",
     "animation_url": "ipfs://bafybeiguggiu6ys2cdq6xkbwiunw6gh225wd3qbpel5ohsw3jz3xeo2bzm",
     "external_url": "https://sepolia.3ook.com/store/myclassid/124",
     "likecoin": {
