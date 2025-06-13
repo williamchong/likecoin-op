@@ -9,7 +9,7 @@ cosmosnft: |
       "@type": "/likechain.likenft.v1.NFTData",
       "metadata": {
         "name": "每天買一百元比特幣：我的定額定投四年戰績實錄",
-        "image": "ar://yY1IjxpTtp_QItTzirhOREYmFZEeW9IjlEmRcp-Cz5w",
+        "image": "ar://metadata-image-not-same-as-class-image",
         "external_url": ""
       },
       "class_parent": {
@@ -166,7 +166,7 @@ erc721metadata: |
   {
     "name": "每天買一百元比特幣：我的定額定投四年戰績實錄 #124",
     "description": "Copy #124 of 每天買一百元比特幣：我的定額定投四年戰績實錄",
-    "image": "ar://yY1IjxpTtp_QItTzirhOREYmFZEeW9IjlEmRcp-Cz5w",
+    "image": "ar://metadata-image-not-same-as-class-image",
     "external_url": "https://sepolia.3ook.com/store/myclassid/124",
     "attributes": [{
       "trait_type": "Author",
