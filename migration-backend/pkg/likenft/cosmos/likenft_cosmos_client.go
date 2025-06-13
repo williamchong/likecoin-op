@@ -10,6 +10,8 @@ type LikeNFTCosmosClient struct {
 	NodeURL    string
 
 	nftEventsIgnoreToList string
+
+	nftExternalMetadataURLBaseIgnoreList []string
 }
 
 func NewLikeNFTCosmosClient(
@@ -23,5 +25,9 @@ func NewLikeNFTCosmosClient(
 		},
 		NodeURL:               nodeURL,
 		nftEventsIgnoreToList: nftEventsIgnoreToList,
+		nftExternalMetadataURLBaseIgnoreList: []string{
+			"https://api.like.co",
+			"https://api.rinkeby.like.co",
+		},
 	}
 }
