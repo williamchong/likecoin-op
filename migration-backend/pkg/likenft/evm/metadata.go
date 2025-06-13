@@ -136,10 +136,15 @@ func ERC721MetadataFromCosmosNFTAndClassAndISCNData(
 		metadataOverride = ERC721OpenSeaMetadataFromCosmosNFTMetadata(cosmosMetadataOverride)
 	}
 
+	image := n.Data.Metadata.Image
+	if image == "" {
+		image = c.Data.Metadata.Image
+	}
+
 	metadata := &evmmodel.ERC721Metadata{
 		ERC721MetadataOpenSea: evmmodel.OverrideERC721MetadataOpenSea(
 			evmmodel.ERC721MetadataOpenSea{
-				Image:       c.Data.Metadata.Image,
+				Image:       image,
 				ExternalUrl: erc721ExternalURLBuilder.BuildSerial(evmClassId, evmTokenId),
 				Description: fmt.Sprintf("Copy #%s of %s", strconv.FormatUint(evmTokenId, 10), iscnRecord.ContentMetadata.Name),
 				Name:        fmt.Sprintf("%s #%s", iscnRecord.ContentMetadata.Name, strconv.FormatUint(evmTokenId, 10)),
