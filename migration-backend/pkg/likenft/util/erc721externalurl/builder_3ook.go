@@ -21,7 +21,12 @@ func MakeErc721ExternalURLBuilder3ook(baseUrlStr string) (ERC721ExternalURLBuild
 	}, nil
 }
 
-func (b *erc721ExternalURLBuilder3ook) Build(classId string, tokenId uint64) string {
+func (b *erc721ExternalURLBuilder3ook) BuildSerial(classId string, tokenId uint64) string {
 	url := b.baseUrl.JoinPath(fmt.Sprintf("%s/%s", classId, strconv.FormatUint(tokenId, 10)))
+	return url.String()
+}
+
+func (b *erc721ExternalURLBuilder3ook) BuildArbitrary(classId string) string {
+	url := b.baseUrl.JoinPath(classId)
 	return url.String()
 }
