@@ -2,6 +2,7 @@ package cosmos
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
 )
@@ -9,6 +10,12 @@ import (
 func (c *LikeNFTCosmosClient) QueryNFTExternalMetadata(n *model.NFT) (*model.NFTMetadata, error) {
 	if n.Uri == "" {
 		return nil, nil
+	}
+
+	for _, urlBase := range c.nftExternalMetadataURLBaseIgnoreList {
+		if strings.HasPrefix(n.Uri, urlBase) {
+			return nil, nil
+		}
 	}
 
 	resp, err := c.HTTPClient.Get(n.Uri)
