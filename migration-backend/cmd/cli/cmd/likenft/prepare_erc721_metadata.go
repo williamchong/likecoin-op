@@ -11,6 +11,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
+	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
 )
 
 var prepareERC721MetadataCmd = &cobra.Command{
@@ -27,7 +28,7 @@ var prepareERC721MetadataCmd = &cobra.Command{
 		ctx := cmd.Context()
 		envCfg := ctx.Value(config.ContextKey).(*config.EnvConfig)
 
-		erc721ExternalURLBuilder, err := erc721externalurl.MakeErc721ExternalURLBuilder3ook("https://www.example.com")
+		erc721ExternalURLBuilder, err := erc721externalurl.MakeErc721ExternalURLBuilder3ook("https://3ook.com/store")
 
 		if err != nil {
 			panic(err)
@@ -71,15 +72,33 @@ var prepareERC721MetadataCmd = &cobra.Command{
 			panic(err)
 		}
 
-		metadataBytes, err := json.Marshal(evm.ERC721MetadataFromCosmosNFTAndClassAndISCNData(
-			erc721ExternalURLBuilder,
-			cosmosNFT.NFT,
-			cosmosClass.Class,
-			iscnDataResponse,
-			metadataOverride,
-			"evm-class-id",
-			10,
-		))
+		nftIDMatcher := nftidmatcher.MakeNFTIDMatcher()
+		_nftId, ok := nftIDMatcher.ExtractSerialID(nftId)
+
+		var (
+			metadataBytes []byte
+		)
+
+		if ok {
+			metadataBytes, err = json.Marshal(evm.ERC721MetadataFromCosmosNFTAndClassAndISCNData(
+				erc721ExternalURLBuilder,
+				cosmosNFT.NFT,
+				cosmosClass.Class,
+				iscnDataResponse,
+				metadataOverride,
+				classId,
+				_nftId,
+			))
+		} else {
+			metadataBytes, err = json.Marshal(evm.ERC721MetadataFromCosmosNFTAndClassAndISCNDataArbitrary(
+				erc721ExternalURLBuilder,
+				cosmosNFT.NFT,
+				cosmosClass.Class,
+				iscnDataResponse,
+				metadataOverride,
+				classId,
+			))
+		}
 
 		if err != nil {
 			panic(err)
