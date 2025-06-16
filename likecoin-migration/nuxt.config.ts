@@ -52,6 +52,7 @@ export default {
     '~/plugins/cosmosNetworkConfig.ts',
     '~/plugins/likeCoinWalletConnector.ts',
     '~/plugins/likeCoinEVMWalletConnector.ts',
+    '~/plugins/gtag.ts',
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

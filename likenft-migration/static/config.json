@@ -5,5 +5,6 @@
   "likerlandUrlBase": "https://rinkeby.liker.land",
   "crispWebsiteId": "4e80ff4a-e151-4393-a09b-14e6342ad11d",
   "ipfsHTTPBaseURL": "https://w3s.link/ipfs",
-  "arHTTPBaseURL": "https://gateway.irys.xyz"
+  "arHTTPBaseURL": "https://gateway.irys.xyz",
+  "googleAnalyticsTagId": "G-NKE5KHQPM6"
 }
