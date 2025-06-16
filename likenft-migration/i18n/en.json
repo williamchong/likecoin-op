@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Liker ID and LikeNFT 轉換 Transfer"
+    "title": "Migration of Liker ID, NFT books and Writing NFT"
   },
   "errors": {
     "liker-id-migration": {
@@ -69,7 +69,7 @@
     },
     "introduction": {
       "confirm": "Confirm",
-      "text": "期待已久的LikeCoin@Optimism已正式啟用！我們現正支援最新版本的LikeCoin轉換。如果您是LikeCoin Chain的持有者，請按照以下的指示，準備您的Cosmos錢包和 ETH錢包（Metamask或Ledger）。\n在此過程中，您的LikeCoin@Cosmos將被轉換到新的LikeCoin@Optimism。請注意，您的LikeCoin@Cosmos將被永久註銷。\n請檢查您的ETH錢包地址是否正確填寫。若不慎將您的幣發送到不同的幣種錢包中，你的LikeCoin有可能會丟失並且無法找回。",
+      "text": "Liker Land has upgraded its infrastructure, and updated to the new brand 3ook.com. Not only has 3ook.com a shiny new look, it also features AI companion, making every book audible as well as readable.\n\nThis upgrade program will seamlessly transfer your existing account (Liker ID), NFT books, and Writing NFTs to 3ook.com.",
       "title": "Introduction"
     },
     "migration-result": {
