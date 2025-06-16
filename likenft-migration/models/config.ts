@@ -15,6 +15,7 @@ export const ConfigSchema = z
     apiBaseURL: z.string(),
     likerlandUrlBase: z.string(),
     crispWebsiteId: z.string(),
+    googleAnalyticsTagId: z.string().default(''),
   })
   .merge(ImageURLConfigSchema);
 

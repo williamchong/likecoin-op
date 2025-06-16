@@ -206,6 +206,7 @@ export default Vue.extend({
 
   methods: {
     async handleConnectLikeCoinWalletClick() {
+      this.$emit('connectLikeCoinWalletClick');
       const connection =
         await this.$likeCoinWalletConnector.openConnectionMethodSelectionDialog(
           {}
@@ -224,6 +225,7 @@ export default Vue.extend({
     },
 
     handleConnectTargetWalletClick() {
+      this.$emit('connectTargetWalletClick');
       this.$likeCoinEVMWalletConnector.connector.showConnectPortal({
         preferredProviderId: this.preferredEvmProviderId || undefined,
         email: this.email || undefined,

@@ -48,6 +48,10 @@
                 :email="email"
                 :preferred-evm-provider-id="preferredEvmProviderId"
                 :eth-address="ethAddress"
+                @connectLikeCoinWalletClick="handleConnectLikeCoinWalletClick"
+                @connectLikeCoinEVMWalletClick="
+                  handleConnectLikeCoinEVMWalletClick
+                "
                 @likeCoinWalletConnected="handleLikeCoinWalletConnected"
                 @likeCoinEVMWalletConnected="handleLikeCoinEVMWalletConnected"
               />
@@ -62,6 +66,10 @@
                 :email="email"
                 :preferred-evm-provider-id="preferredEvmProviderId"
                 :eth-address="ethAddress"
+                @connectLikeCoinWalletClick="handleConnectLikeCoinWalletClick"
+                @connectLikeCoinEVMWalletClick="
+                  handleConnectLikeCoinEVMWalletClick
+                "
                 @likeCoinWalletConnected="handleLikeCoinWalletConnected"
                 @likeCoinEVMWalletConnected="handleLikeCoinEVMWalletConnected"
               />
@@ -748,6 +756,10 @@ export default Vue.extend({
   },
   methods: {
     handleIntroductionSectionConfirmClick() {
+      this.$gtag.event('introduction_confirm', {
+        event_category: 'book_migration',
+      });
+
       if (this.currentStep.step !== 1) {
         return;
       }
@@ -767,6 +779,11 @@ export default Vue.extend({
       method: string | (string | null)[],
       code: string | (string | null)[]
     ) {
+      this.$gtag.event('likecoin_wallet_authcore_redirected', {
+        event_category: 'book_migration',
+        event_label: method,
+      });
+
       this.currentStep = authcoreRedirected(this.currentStep, method, code);
       this.currentStep = await this._asyncStateTransition(
         this.currentStep,
@@ -786,6 +803,18 @@ export default Vue.extend({
       }
     },
 
+    handleConnectLikeCoinWalletClick() {
+      this.$gtag.event('connect_likecoin_wallet_click', {
+        event_category: 'book_migration',
+      });
+    },
+
+    handleConnectLikeCoinEVMWalletClick() {
+      this.$gtag.event('connect_likecoin_evm_wallet_click', {
+        event_category: 'book_migration',
+      });
+    },
+
     async handleLikeCoinWalletConnected({
       method,
       cosmosAddress,
@@ -793,6 +822,11 @@ export default Vue.extend({
       method?: LikeCoinWalletConnectorMethodType;
       cosmosAddress: string;
     }) {
+      this.$gtag.event('likecoin_wallet_connected', {
+        event_category: 'book_migration',
+        event_label: method,
+      });
+
       this.currentStep = initCosmosConnected(
         this.currentStep,
         method,
@@ -812,6 +846,10 @@ export default Vue.extend({
     },
 
     async handleLikeCoinEVMWalletConnected(ethAddress: string) {
+      this.$gtag.event('likecoin_evm_wallet_connected', {
+        event_category: 'book_migration',
+      });
+
       if (this.currentStep.step !== 2) {
         return;
       }
@@ -836,6 +874,9 @@ export default Vue.extend({
       cosmosSignature: StdSignature,
       ethSignature: string
     ) {
+      this.$gtag.event('signature_signed', {
+        event_category: 'book_migration',
+      });
       if (this.currentStep.step === 3 && this.currentStep.state === 'Signing') {
         this.currentStep = await this._asyncStateTransition(
           this.currentStep,
@@ -858,6 +899,9 @@ export default Vue.extend({
     },
 
     handleReconnectEvmWallet() {
+      this.$gtag.event('reconnect_evm_wallet', {
+        event_category: 'book_migration',
+      });
       if (this.currentStep.step === 3) {
         this.handleLikeCoinWalletConnected({
           cosmosAddress: this.currentStep.cosmosAddress,
@@ -866,6 +910,9 @@ export default Vue.extend({
     },
 
     handleRestartLikerIDMigration() {
+      this.$gtag.event('restart_liker_id_migration', {
+        event_category: 'book_migration',
+      });
       if (this.currentStep.step === 3) {
         this.currentStep = restarted(this.currentStep);
       }
@@ -880,6 +927,9 @@ export default Vue.extend({
     },
 
     async handleConfirmMigrate() {
+      this.$gtag.event('migration_confirm', {
+        event_category: 'book_migration',
+      });
       if (
         this.currentStep.step === 4 &&
         this.currentStep.state === 'NonEmptyMigrationPreview'
@@ -902,6 +952,9 @@ export default Vue.extend({
     },
 
     handleRetryClick() {
+      this.$gtag.event('migration_retry_click', {
+        event_category: 'book_migration',
+      });
       if (
         this.currentStep.step === 99999 &&
         this.currentStep.state === 'Failed'
