@@ -96,7 +96,9 @@ func DoMintNFTAction(
 		if err != nil {
 			return nil, doMintNFTActionFailed(db, a, err)
 		}
-		metadataOverride, err := m.QueryNFTExternalMetadata(cosmosNFT.NFT)
+		metadataOverride, err := cosmos.ProcessQueryNFTExternalMetadataErrors(
+			m.QueryNFTExternalMetadata(cosmosNFT.NFT),
+		)
 		if err != nil {
 			return nil, doMintNFTActionFailed(db, a, err)
 		}

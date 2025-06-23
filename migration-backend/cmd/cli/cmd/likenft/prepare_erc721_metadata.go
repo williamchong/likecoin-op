@@ -66,7 +66,9 @@ var prepareERC721MetadataCmd = &cobra.Command{
 			panic(err)
 		}
 
-		metadataOverride, err := likenftClient.QueryNFTExternalMetadata(cosmosNFT.NFT)
+		metadataOverride, err := cosmos.ProcessQueryNFTExternalMetadataErrors(
+			likenftClient.QueryNFTExternalMetadata(cosmosNFT.NFT),
+		)
 
 		if err != nil {
 			panic(err)

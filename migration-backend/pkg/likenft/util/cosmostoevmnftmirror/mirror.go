@@ -159,7 +159,9 @@ func (m *cosmosToEVMNFTMirror) Mirror(
 			metadataStr := "{}"
 			memo := ""
 			if found {
-				metadataOverride, err := m.likeNFTCosmosClient.QueryNFTExternalMetadata(cosmosNFT)
+				metadataOverride, err := cosmos.ProcessQueryNFTExternalMetadataErrors(
+					m.likeNFTCosmosClient.QueryNFTExternalMetadata(cosmosNFT),
+				)
 				if err != nil {
 					return nil, err
 				}
