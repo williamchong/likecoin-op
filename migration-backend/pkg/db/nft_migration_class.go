@@ -3,10 +3,12 @@ package db
 import (
 	"context"
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
 	"github.com/likecoin/like-migration-backend/pkg/model"
+	"github.com/likecoin/like-migration-backend/pkg/util/slice"
 )
 
 func QueryLikeNFTAssetMigrationClassById(
@@ -199,27 +201,31 @@ func InsertLikeNFTAssetMigrationClasses(
 	if len(classes) == 0 {
 		return nil
 	}
-	valueStrings := make([]string, 0, len(classes))
+
 	numCol := 10
-	valueArgs := make([]interface{}, 0, len(classes)*numCol)
+	chunkSize := int(math.Floor(float64(PGSQL_DB_PARAMS_LIMIT) / float64(numCol)))
 
-	for i, class := range classes {
-		valueStrings = append(valueStrings, fmt.Sprintf(
-			"($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)",
-			i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4, i*numCol+5, i*numCol+6, i*numCol+7, i*numCol+8, i*numCol+9, i*numCol+10))
-		valueArgs = append(valueArgs, class.LikeNFTAssetMigrationId)
-		valueArgs = append(valueArgs, class.CosmosClassId)
-		valueArgs = append(valueArgs, class.Name)
-		valueArgs = append(valueArgs, class.Image)
-		valueArgs = append(valueArgs, class.Status)
-		valueArgs = append(valueArgs, class.EstimatedDurationNeeded)
-		valueArgs = append(valueArgs, class.EnqueueTime)
-		valueArgs = append(valueArgs, class.FinishTime)
-		valueArgs = append(valueArgs, class.EvmTxHash)
-		valueArgs = append(valueArgs, class.FailedReason)
-	}
+	for _, chunk := range slice.ChunkBy(classes, chunkSize) {
+		valueStrings := make([]string, 0, len(chunk))
+		valueArgs := make([]interface{}, 0, len(chunk)*numCol)
 
-	stmt := fmt.Sprintf(`INSERT INTO likenft_asset_migration_class (
+		for i, class := range chunk {
+			valueStrings = append(valueStrings, fmt.Sprintf(
+				"($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)",
+				i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4, i*numCol+5, i*numCol+6, i*numCol+7, i*numCol+8, i*numCol+9, i*numCol+10))
+			valueArgs = append(valueArgs, class.LikeNFTAssetMigrationId)
+			valueArgs = append(valueArgs, class.CosmosClassId)
+			valueArgs = append(valueArgs, class.Name)
+			valueArgs = append(valueArgs, class.Image)
+			valueArgs = append(valueArgs, class.Status)
+			valueArgs = append(valueArgs, class.EstimatedDurationNeeded)
+			valueArgs = append(valueArgs, class.EnqueueTime)
+			valueArgs = append(valueArgs, class.FinishTime)
+			valueArgs = append(valueArgs, class.EvmTxHash)
+			valueArgs = append(valueArgs, class.FailedReason)
+		}
+
+		stmt := fmt.Sprintf(`INSERT INTO likenft_asset_migration_class (
 	likenft_asset_migration_id,
 	cosmos_class_id,
 	name,
@@ -232,8 +238,12 @@ func InsertLikeNFTAssetMigrationClasses(
 	failed_reason
 ) VALUES %s`, strings.Join(valueStrings, ","))
 
-	_, err := tx.Exec(stmt, valueArgs...)
-	return err
+		_, err := tx.Exec(stmt, valueArgs...)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func UpdateLikeNFTAssetMigrationClass(

@@ -138,8 +138,11 @@ func TestInsertLikeNFTAssetMigrationClasses(t *testing.T) {
 		err = appdb.InsertLikeNFTAssetMigrationClasses(
 			db, classes,
 		)
+		So(err, ShouldBeNil)
 
-		So(err.Error(), ShouldContainSubstring, "but PostgreSQL only supports 65535 parameters")
+		classes, err = appdb.QueryLikeNFTAssetMigrationClassesByNFTMigrationId(db, m.Id)
+		So(err, ShouldBeNil)
+		So(len(classes), ShouldEqual, 10000)
 	})
 }
 
