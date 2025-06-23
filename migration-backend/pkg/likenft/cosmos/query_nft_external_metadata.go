@@ -9,10 +9,15 @@ import (
 )
 
 var ErrNotOK = errors.New("err not ok")
+var ErrDataIsNotNFTMetadata = errors.New("err data is not model.NFTMetadata")
 
 func ProcessQueryNFTExternalMetadataErrors(m *model.NFTMetadata, err error) (*model.NFTMetadata, error) {
 	if err != nil {
 		if errors.Is(err, ErrNotOK) {
+			return nil, nil
+		}
+
+		if errors.Is(err, ErrDataIsNotNFTMetadata) {
 			return nil, nil
 		}
 
@@ -50,7 +55,7 @@ func (c *LikeNFTCosmosClient) QueryNFTExternalMetadata(n *model.NFT) (*model.NFT
 	err = decoder.Decode(&m)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrDataIsNotNFTMetadata, err)
 	}
 
 	return &m, nil
