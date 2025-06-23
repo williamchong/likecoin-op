@@ -7,6 +7,8 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
 )
 
+var ErrNotOK = errors.New("err not ok")
+
 func (c *LikeNFTCosmosClient) QueryNFTExternalMetadata(n *model.NFT) (*model.NFTMetadata, error) {
 	if n.Uri == "" {
 		return nil, nil
@@ -24,6 +26,10 @@ func (c *LikeNFTCosmosClient) QueryNFTExternalMetadata(n *model.NFT) (*model.NFT
 	}
 
 	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		return nil, errors.Join(ErrNotOK, errors.New(resp.Status))
+	}
 
 	var m model.NFTMetadata
 
