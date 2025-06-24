@@ -16,10 +16,10 @@ import (
 var ErrQueryNFTEvents = errors.New("err querying nft events")
 
 type queryNFTEventsRequest struct {
-	ClassId      string   `url:"class_id"`
-	NFTId        string   `url:"nft_id"`
-	ActionTypes  []string `url:"action_type"`
-	IgnoreToList string   `url:"ignore_to_list"`
+	ClassId      string   `url:"class_id,omitempty"`
+	NFTId        string   `url:"nft_id,omitempty"`
+	ActionTypes  []string `url:"action_type,omitempty"`
+	IgnoreToList string   `url:"ignore_to_list,omitempty"`
 }
 
 func (c *LikeNFTCosmosClient) MakeQueryNFTEventsRequest(
@@ -40,11 +40,11 @@ func (c *LikeNFTCosmosClient) MakeQueryNFTEventsRequest(
 }
 
 type QueryEventsPageRequest struct {
-	Key        int    `url:"pagination.key"`
-	Offset     uint64 `url:"pagination.offset"`
-	Limit      uint64 `url:"pagination.limit"`
-	CountTotal bool   `url:"pagination.countTotal"`
-	Reverse    bool   `url:"reverse"`
+	Key        int    `url:"pagination.key,omitempty"`
+	Offset     uint64 `url:"pagination.offset,omitempty"`
+	Limit      uint64 `url:"pagination.limit,omitempty"`
+	CountTotal bool   `url:"pagination.countTotal,omitempty"`
+	Reverse    bool   `url:"reverse,omitempty"`
 }
 
 type QueryEventsResponse struct {

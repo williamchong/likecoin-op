@@ -20,11 +20,11 @@ type QueryNFTClassesByOwnerRequest struct {
 }
 
 type QueryNFTClassesByOwnerPageRequest struct {
-	Key        *int    `url:"pagination.key"`
-	Offset     *uint64 `url:"pagination.offset"`
-	Limit      *uint64 `url:"pagination.limit"`
-	CountTotal *bool   `url:"pagination.countTotal"`
-	Reverse    *bool   `url:"reverse"`
+	Key        *int    `url:"pagination.key,omitempty"`
+	Offset     *uint64 `url:"pagination.offset,omitempty"`
+	Limit      *uint64 `url:"pagination.limit,omitempty"`
+	CountTotal *bool   `url:"pagination.countTotal,omitempty"`
+	Reverse    *bool   `url:"reverse,omitempty"`
 }
 
 type QueryNFTClassesByOwnerResponse struct {

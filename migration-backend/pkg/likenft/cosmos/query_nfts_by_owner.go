@@ -20,10 +20,10 @@ type QueryNFTsByOwnerRequest struct {
 }
 
 type QueryNFTsByOwnerPageRequest struct {
-	Key        string `url:"pagination.key"`
-	Offset     uint64 `url:"pagination.offset"`
-	Limit      uint64 `url:"pagination.limit"`
-	CountTotal bool   `url:"pagination.countTotal"`
+	Key        string `url:"pagination.key,omitempty"`
+	Offset     uint64 `url:"pagination.offset,omitempty"`
+	Limit      uint64 `url:"pagination.limit,omitempty"`
+	CountTotal bool   `url:"pagination.countTotal,omitempty"`
 }
 
 type QueryNFTsByOwnerResponse struct {
