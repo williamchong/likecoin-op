@@ -153,6 +153,7 @@ likenftIndexer:
 
   scheduler:
     name: likenft-indexer-scheduler
+    cron: "*/1 * * * *"
 
     resources: {}
 

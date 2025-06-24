@@ -20,7 +20,7 @@ spec:
       - name: {{ .Values.likenftIndexer.scheduler.name }}
         image: {{ .Values.likenftIndexer.container.imageRepository }}:{{ .Values.appVersion }}
         imagePullPolicy: {{ .Values.likenftIndexer.container.imagePullPolicy}}
-        command: ["likenft-indexer-worker-cli", "scheduler"]
+        command: ["likenft-indexer-worker-cli", "scheduler", "--cron", "{{ .Values.likenftIndexer.scheduler.cron }}"]
         envFrom:
           - secretRef:
               name: {{ .Values.likenftIndexer.name }}

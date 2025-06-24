@@ -102,3 +102,6 @@ likenftIndexer:
       tls:
         secretName: tls-api.v3.like.co
         host: api.v3.like.co
+
+  scheduler:
+    cron: "*/5 * * * *"

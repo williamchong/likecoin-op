@@ -10,6 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var defaultCronSchedule = "* * * * *"
+
 var schedulerCmd = &cobra.Command{
 	Use:   "scheduler",
 	Short: "Start scheduelr",
@@ -35,16 +37,21 @@ var schedulerCmd = &cobra.Command{
 			log.Fatalf("could not create task: %v", err)
 		}
 
-		// ... Register tasks
-		_, err = scheduler.Register("* * * * *", checkBookNFTsTask, asynq.MaxRetry(0))
+		cronSchedule, err := cmd.Flags().GetString("cron")
+		if err != nil {
+			_ = cmd.Usage()
+			return
+		}
+
+		_, err = scheduler.Register(cronSchedule, checkBookNFTsTask, asynq.MaxRetry(0))
 		if err != nil {
 			log.Fatalf("could not register task: %v", err)
 		}
-		_, err = scheduler.Register("* * * * *", checkLikeProtocolTask, asynq.MaxRetry(0))
+		_, err = scheduler.Register(cronSchedule, checkLikeProtocolTask, asynq.MaxRetry(0))
 		if err != nil {
 			log.Fatalf("could not register task: %v", err)
 		}
-		_, err = scheduler.Register("* * * * *", checkReceivedEVMEventsTask, asynq.MaxRetry(0))
+		_, err = scheduler.Register(cronSchedule, checkReceivedEVMEventsTask, asynq.MaxRetry(0))
 		if err != nil {
 			log.Fatalf("could not register task: %v", err)
 		}
@@ -56,5 +63,6 @@ var schedulerCmd = &cobra.Command{
 }
 
 func init() {
+	_ = schedulerCmd.Flags().String("cron", defaultCronSchedule, "Cron schedule for the scheduler")
 	rootCmd.AddCommand(schedulerCmd)
 }
