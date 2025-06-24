@@ -71,8 +71,8 @@ func handleCheckBookNFTs_enqueueAcquireBookNFTEvents(
 		addresses[i] = nftClass.Address
 	}
 
-	myLogger := logger.With("contractAddresses", addresses)
-	myLogger.Info("Enqueueing AcquireBookNFTEvents task...")
+	myLogger := logger.With("batchSize", len(addresses))
+	myLogger.Info("Enqueueing AcquireBookNFTEvents tasks...")
 	for _, address := range addresses {
 		mylogger := myLogger.With("address", address)
 		t, err := NewAcquireBookNFTEventsTask([]string{address})
@@ -85,7 +85,7 @@ func handleCheckBookNFTs_enqueueAcquireBookNFTEvents(
 			mylogger.Error("Cannot enqueue task", "err", err)
 			continue
 		}
-		mylogger.Info("task enqueued", "taskId", taskInfo.ID)
+		mylogger.Debug("task enqueued", "taskId", taskInfo.ID)
 	}
 	return nil
 }
