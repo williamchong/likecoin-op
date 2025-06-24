@@ -2,19 +2,24 @@ package cosmos
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"net/url"
 
 	"github.com/google/go-querystring/query"
+
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
+	"github.com/likecoin/like-migration-backend/pkg/util/httputil"
 )
 
+var ErrQueryNFTEvents = errors.New("err querying nft events")
+
 type queryNFTEventsRequest struct {
-	ClassId      string   `url:"class_id"`
-	NFTId        string   `url:"nft_id"`
-	ActionTypes  []string `url:"action_type"`
-	IgnoreToList string   `url:"ignore_to_list"`
+	ClassId      string   `url:"class_id,omitempty"`
+	NFTId        string   `url:"nft_id,omitempty"`
+	ActionTypes  []string `url:"action_type,omitempty"`
+	IgnoreToList string   `url:"ignore_to_list,omitempty"`
 }
 
 func (c *LikeNFTCosmosClient) MakeQueryNFTEventsRequest(
@@ -35,11 +40,11 @@ func (c *LikeNFTCosmosClient) MakeQueryNFTEventsRequest(
 }
 
 type QueryEventsPageRequest struct {
-	Key        int    `url:"pagination.key"`
-	Offset     uint64 `url:"pagination.offset"`
-	Limit      uint64 `url:"pagination.limit"`
-	CountTotal bool   `url:"pagination.countTotal"`
-	Reverse    bool   `url:"reverse"`
+	Key        int    `url:"pagination.key,omitempty"`
+	Offset     uint64 `url:"pagination.offset,omitempty"`
+	Limit      uint64 `url:"pagination.limit,omitempty"`
+	CountTotal bool   `url:"pagination.countTotal,omitempty"`
+	Reverse    bool   `url:"reverse,omitempty"`
 }
 
 type QueryEventsResponse struct {
@@ -59,19 +64,19 @@ func (c *LikeNFTCosmosClient) queryNFTEvents(
 	u, err := url.Parse("/likechain/likenft/v1/event")
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTEvents, fmt.Errorf("url.Parse %s", "/likechain/likenft/v1/event"), err)
 	}
 
 	requestQuery, err := query.Values(requestParams)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTEvents, fmt.Errorf("query.Values requestParams"), err)
 	}
 
 	pageQuery, err := query.Values(pageParams)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTEvents, fmt.Errorf("query.Values pageParams"), err)
 	}
 
 	u.RawQuery = fmt.Sprintf("%s&%s", requestQuery.Encode(), pageQuery.Encode())
@@ -79,13 +84,16 @@ func (c *LikeNFTCosmosClient) queryNFTEvents(
 	base, err := url.Parse(c.NodeURL)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTEvents, fmt.Errorf("url.Parse %s", c.NodeURL), err)
 	}
 
 	resp, err := c.HTTPClient.Get(base.ResolveReference(u).String())
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTEvents, fmt.Errorf("c.HTTPClient.Get"), err)
+	}
+	if err = httputil.HandleResponseStatus(resp); err != nil {
+		return nil, errors.Join(ErrQueryNFTEvents, err)
 	}
 
 	defer resp.Body.Close()
@@ -93,10 +101,14 @@ func (c *LikeNFTCosmosClient) queryNFTEvents(
 	var response QueryEventsResponse
 	err = decoder.Decode(&response)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTEvents, fmt.Errorf("decoder.Decode"), err)
 	}
 	return &response, nil
 }
+
+var (
+	ErrQueryAllNFTEvents = errors.New("err querying all nft events")
+)
 
 func (c *LikeNFTCosmosClient) QueryAllNFTEvents(
 	request queryNFTEventsRequest,
@@ -113,7 +125,7 @@ func (c *LikeNFTCosmosClient) QueryAllNFTEvents(
 	resp, err := c.queryNFTEvents(request, p)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryAllNFTEvents, fmt.Errorf("c.queryNFTEvents"), err)
 	}
 
 	events = append(events, resp.Events...)
@@ -131,7 +143,7 @@ func (c *LikeNFTCosmosClient) QueryAllNFTEvents(
 		resp, err = c.queryNFTEvents(request, _p)
 
 		if err != nil {
-			return nil, err
+			return nil, errors.Join(ErrQueryAllNFTEvents, fmt.Errorf("c.queryNFTEvents"), err)
 		}
 
 		events = append(events, resp.Events...)

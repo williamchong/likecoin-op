@@ -84,6 +84,19 @@ $ ISCN_ID="iscn://xxx" make mint-nft-existing-iscn
 | class-id       | A string. The NFT class ID that the NFT belongs to. It is used in the case to mint additional NFTs within the same Class (collection). The script will create one based on nft-class.json if not specified. | --class-id likenft1yhsps5l8tmeuy9y7k0rjpx97cl67cjkjnzkycecw5xrvjjp6c5yqz0ttmc | NO                                   |
 | nft-max-supply | An integer. Maximum number of NFTs that can be minted in an NFT class. No limitation if not specified.                                                                                                      | --nft-max-supply 1000                                                         | NO                                   |
 
+---
+
+#### Mint multiple iscns
+
+Procedure:
+
+1. Prepare the data files
+2. Run the script
+
+```bash
+$ make batch-mint-nft-new-iscns FROM=0 TO=200
+```
+
 ### Configuration
 
 When creating new [ISCN](https://iscn.io), change the ISCN data in `./data/iscn.json`

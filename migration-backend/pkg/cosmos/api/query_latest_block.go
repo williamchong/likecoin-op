@@ -2,9 +2,15 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/model"
+	"github.com/likecoin/like-migration-backend/pkg/util/httputil"
+)
+
+var (
+	ErrQueryLatestBlock = errors.New("err querying latest block")
 )
 
 type queryLatestBlockResponse struct {
@@ -16,14 +22,17 @@ func (a *CosmosAPI) QueryLatestBlock() (*model.Block, error) {
 		fmt.Sprintf("%s/cosmos/base/tendermint/v1beta1/blocks/latest", a.NodeURL),
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryLatestBlock, fmt.Errorf("a.HTTPClient.Get"), err)
+	}
+	if err = httputil.HandleResponseStatus(resp); err != nil {
+		return nil, errors.Join(ErrQueryLatestBlock, err)
 	}
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)
 	var response queryLatestBlockResponse
 	err = decoder.Decode(&response)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryLatestBlock, fmt.Errorf("decoder.Decode"), err)
 	}
 	return &response.Block, nil
 }

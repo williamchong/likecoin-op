@@ -3,8 +3,15 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/likecoin/like-migration-backend/pkg/util/httputil"
+)
+
+var (
+	ErrMigrateUserEVMWallet = errors.New("err migrating user evm wallet")
 )
 
 type MigrateUserEVMWalletRequestSignMethod string
@@ -45,7 +52,7 @@ func (a *LikecoinAPI) MigrateUserEVMWallet(
 ) (*MigrateUserEVMWalletResponse, error) {
 	requestBody, err := json.Marshal(request)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrMigrateUserEVMWallet, fmt.Errorf("json.Marshal"), err)
 	}
 	req, err := http.NewRequest(
 		http.MethodPost,
@@ -53,20 +60,23 @@ func (a *LikecoinAPI) MigrateUserEVMWallet(
 		bytes.NewBuffer(requestBody),
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrMigrateUserEVMWallet, fmt.Errorf("http.NewRequest"), err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := a.HTTPClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrMigrateUserEVMWallet, fmt.Errorf("a.HTTPClient.Do"), err)
+	}
+	if err = httputil.HandleResponseStatus(resp); err != nil {
+		return nil, errors.Join(ErrMigrateUserEVMWallet, err)
 	}
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)
 	var response MigrateUserEVMWalletResponse
 	err = decoder.Decode(&response)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrMigrateUserEVMWallet, fmt.Errorf("decoder.Decode"), err)
 	}
 	return &response, nil
 }
