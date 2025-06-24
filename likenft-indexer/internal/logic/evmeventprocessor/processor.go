@@ -128,9 +128,10 @@ func (e *evmEventProcessor) Process(
 	}
 
 	evmEvent, err = e.evmEventRepository.UpdateEvmEventStatus(ctx, evmEvent, evmevent.StatusProcessed, nil)
+	mylogger.Info("updated evm event status to processed")
 
 	if err != nil {
-		mylogger.Error(" e.evmEventRepository.UpdateEvmEventStatus", "err", err)
+		mylogger.Error("e.evmEventRepository.UpdateEvmEventStatus", "err", err)
 		return err
 	}
 
