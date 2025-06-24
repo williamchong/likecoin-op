@@ -10,7 +10,6 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
-	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
@@ -18,7 +17,6 @@ type SnapshotCosmosStateLogic struct {
 	DB                  *sql.DB
 	CosmosAPI           *api.CosmosAPI
 	LikeNFTCosmosClient *cosmos.LikeNFTCosmosClient
-	CosmosNFTIDMatcher  nftidmatcher.CosmosNFTIDMatcher
 
 	ClassMigrationEstimatedDuration time.Duration
 	NFTMigrationEstimatedDuration   time.Duration
@@ -83,11 +81,7 @@ func (l *SnapshotCosmosStateLogic) Execute(ctx context.Context, cosmosAddress st
 	snapshotNFTs := make([]model.LikeNFTAssetSnapshotNFT, 0, len(cosmosNFTs.NFTs))
 
 	for _, cosmosNFT := range cosmosNFTs.NFTs {
-		estimatedDurationNeeded := time.Duration(0)
-		serialID, yes := l.CosmosNFTIDMatcher.ExtractSerialID(cosmosNFT.NFT.Id)
-		if yes {
-			estimatedDurationNeeded = time.Duration(serialID) * l.NFTMigrationEstimatedDuration
-		}
+		estimatedDurationNeeded := l.NFTMigrationEstimatedDuration
 
 		snapshotNFTs = append(snapshotNFTs, model.LikeNFTAssetSnapshotNFT{
 			NFTSnapshotId: latestSnapshot.Id,

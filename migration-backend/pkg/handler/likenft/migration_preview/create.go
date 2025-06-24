@@ -10,12 +10,12 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
 	"github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
 	api_model "github.com/likecoin/like-migration-backend/pkg/handler/model"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
-	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likenft"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
@@ -74,7 +74,6 @@ func (h *CreateMigrationPreviewHandler) ServeHTTP(w http.ResponseWriter, r *http
 			DB:                  h.Db,
 			CosmosAPI:           h.CosmosAPI,
 			LikeNFTCosmosClient: h.LikeNFTCosmosClient,
-			CosmosNFTIDMatcher:  nftidmatcher.MakeNFTIDMatcher(),
 
 			ClassMigrationEstimatedDuration: h.ClassMigrationEstimatedDuration,
 			NFTMigrationEstimatedDuration:   h.NFTMigrationEstimatedDuration,
