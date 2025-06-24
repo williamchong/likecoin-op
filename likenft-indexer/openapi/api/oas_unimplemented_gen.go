@@ -126,6 +126,15 @@ func (UnimplementedHandler) TokenAccountsByBookNFT(ctx context.Context, params T
 	return r, ht.ErrNotImplemented
 }
 
+// TokenBookNFTsByAccount implements tokenBookNFTsByAccount operation.
+//
+// Query booknfts of tokens owned by account.
+//
+// GET /account/{evm_address}/token-booknfts
+func (UnimplementedHandler) TokenBookNFTsByAccount(ctx context.Context, params TokenBookNFTsByAccountParams) (r *TokenBookNFTsByAccountOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // TokensByAccount implements tokensByAccount operation.
 //
 // Query tokens by account.

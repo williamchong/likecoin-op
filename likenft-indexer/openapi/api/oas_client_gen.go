@@ -102,6 +102,12 @@ type Invoker interface {
 	//
 	// GET /booknft/{id}/tokens/account
 	TokenAccountsByBookNFT(ctx context.Context, params TokenAccountsByBookNFTParams) (*TokenAccountsByBookNFTOK, error)
+	// TokenBookNFTsByAccount invokes tokenBookNFTsByAccount operation.
+	//
+	// Query booknfts of tokens owned by account.
+	//
+	// GET /account/{evm_address}/token-booknfts
+	TokenBookNFTsByAccount(ctx context.Context, params TokenBookNFTsByAccountParams) (*TokenBookNFTsByAccountOK, error)
 	// TokensByAccount invokes tokensByAccount operation.
 	//
 	// Query tokens by account.
@@ -2161,6 +2167,152 @@ func (c *Client) sendTokenAccountsByBookNFT(ctx context.Context, params TokenAcc
 
 	stage = "DecodeResponse"
 	result, err := decodeTokenAccountsByBookNFTResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// TokenBookNFTsByAccount invokes tokenBookNFTsByAccount operation.
+//
+// Query booknfts of tokens owned by account.
+//
+// GET /account/{evm_address}/token-booknfts
+func (c *Client) TokenBookNFTsByAccount(ctx context.Context, params TokenBookNFTsByAccountParams) (*TokenBookNFTsByAccountOK, error) {
+	res, err := c.sendTokenBookNFTsByAccount(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendTokenBookNFTsByAccount(ctx context.Context, params TokenBookNFTsByAccountParams) (res *TokenBookNFTsByAccountOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("tokenBookNFTsByAccount"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/account/{evm_address}/token-booknfts"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, TokenBookNFTsByAccountOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/account/"
+	{
+		// Encode "evm_address" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "evm_address",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.EvmAddress))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/token-booknfts"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "pagination.limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "pagination.limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.PaginationLimit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "pagination.key" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "pagination.key",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.PaginationKey.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "reverse" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "reverse",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Reverse.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeTokenBookNFTsByAccountResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

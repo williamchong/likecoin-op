@@ -116,26 +116,62 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							return
 						}
 
-					case 't': // Prefix: "tokens"
+					case 't': // Prefix: "token"
 
-						if l := len("tokens"); len(elem) >= l && elem[0:l] == "tokens" {
+						if l := len("token"); len(elem) >= l && elem[0:l] == "token" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleTokensByAccountRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
+							break
+						}
+						switch elem[0] {
+						case '-': // Prefix: "-booknfts"
+
+							if l := len("-booknfts"); len(elem) >= l && elem[0:l] == "-booknfts" {
+								elem = elem[l:]
+							} else {
+								break
 							}
 
-							return
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleTokenBookNFTsByAccountRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+						case 's': // Prefix: "s"
+
+							if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleTokensByAccountRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
 						}
 
 					}
@@ -687,28 +723,66 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							}
 						}
 
-					case 't': // Prefix: "tokens"
+					case 't': // Prefix: "token"
 
-						if l := len("tokens"); len(elem) >= l && elem[0:l] == "tokens" {
+						if l := len("token"); len(elem) >= l && elem[0:l] == "token" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "GET":
-								r.name = TokensByAccountOperation
-								r.summary = "Query tokens by account"
-								r.operationID = "tokensByAccount"
-								r.pathPattern = "/account/{evm_address}/tokens"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
+							break
+						}
+						switch elem[0] {
+						case '-': // Prefix: "-booknfts"
+
+							if l := len("-booknfts"); len(elem) >= l && elem[0:l] == "-booknfts" {
+								elem = elem[l:]
+							} else {
+								break
 							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = TokenBookNFTsByAccountOperation
+									r.summary = "Query booknfts of tokens owned by account"
+									r.operationID = "tokenBookNFTsByAccount"
+									r.pathPattern = "/account/{evm_address}/token-booknfts"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+						case 's': // Prefix: "s"
+
+							if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = TokensByAccountOperation
+									r.summary = "Query tokens by account"
+									r.operationID = "tokensByAccount"
+									r.pathPattern = "/account/{evm_address}/tokens"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
 						}
 
 					}
