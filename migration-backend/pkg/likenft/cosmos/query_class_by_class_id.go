@@ -23,8 +23,7 @@ func (c *LikeNFTCosmosClient) QueryClassByClassId(request QueryClassByClassIdReq
 	url := fmt.Sprintf("%s/cosmos/nft/v1beta1/classes/%v", c.NodeURL, request.ClassId)
 	resp, err := c.HTTPClient.Get(url)
 	if err != nil {
-		fmt.Printf("c.HTTPClient.Get error %v\n", err)
-		return nil, err
+		return nil, errors.Join(ErrQueryClassByClassId, fmt.Errorf("c.HTTPClient.Get"), err)
 	}
 	if err = httputil.HandleResponseStatus(resp); err != nil {
 		return nil, errors.Join(ErrQueryClassByClassId, err)
@@ -34,8 +33,7 @@ func (c *LikeNFTCosmosClient) QueryClassByClassId(request QueryClassByClassIdReq
 	var res QueryClassByClassIdResponse
 	err = decoder.Decode(&res)
 	if err != nil {
-		fmt.Printf("decoder.Decode error %v\n", err)
-		return nil, err
+		return nil, errors.Join(ErrQueryClassByClassId, fmt.Errorf("decoder.Decode"), err)
 	}
 	return &res, nil
 }

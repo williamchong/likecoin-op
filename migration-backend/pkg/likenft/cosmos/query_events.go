@@ -64,19 +64,19 @@ func (c *LikeNFTCosmosClient) queryNFTEvents(
 	u, err := url.Parse("/likechain/likenft/v1/event")
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTEvents, fmt.Errorf("url.Parse %s", "/likechain/likenft/v1/event"), err)
 	}
 
 	requestQuery, err := query.Values(requestParams)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTEvents, fmt.Errorf("query.Values requestParams"), err)
 	}
 
 	pageQuery, err := query.Values(pageParams)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTEvents, fmt.Errorf("query.Values pageParams"), err)
 	}
 
 	u.RawQuery = fmt.Sprintf("%s&%s", requestQuery.Encode(), pageQuery.Encode())
@@ -84,13 +84,13 @@ func (c *LikeNFTCosmosClient) queryNFTEvents(
 	base, err := url.Parse(c.NodeURL)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTEvents, fmt.Errorf("url.Parse %s", c.NodeURL), err)
 	}
 
 	resp, err := c.HTTPClient.Get(base.ResolveReference(u).String())
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTEvents, fmt.Errorf("c.HTTPClient.Get"), err)
 	}
 	if err = httputil.HandleResponseStatus(resp); err != nil {
 		return nil, errors.Join(ErrQueryNFTEvents, err)
@@ -101,10 +101,14 @@ func (c *LikeNFTCosmosClient) queryNFTEvents(
 	var response QueryEventsResponse
 	err = decoder.Decode(&response)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTEvents, fmt.Errorf("decoder.Decode"), err)
 	}
 	return &response, nil
 }
+
+var (
+	ErrQueryAllNFTEvents = errors.New("err querying all nft events")
+)
 
 func (c *LikeNFTCosmosClient) QueryAllNFTEvents(
 	request queryNFTEventsRequest,
@@ -121,7 +125,7 @@ func (c *LikeNFTCosmosClient) QueryAllNFTEvents(
 	resp, err := c.queryNFTEvents(request, p)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryAllNFTEvents, fmt.Errorf("c.queryNFTEvents"), err)
 	}
 
 	events = append(events, resp.Events...)
@@ -139,7 +143,7 @@ func (c *LikeNFTCosmosClient) QueryAllNFTEvents(
 		resp, err = c.queryNFTEvents(request, _p)
 
 		if err != nil {
-			return nil, err
+			return nil, errors.Join(ErrQueryAllNFTEvents, fmt.Errorf("c.queryNFTEvents"), err)
 		}
 
 		events = append(events, resp.Events...)

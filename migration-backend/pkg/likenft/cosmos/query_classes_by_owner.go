@@ -42,8 +42,7 @@ func (c *LikeNFTCosmosClient) QueryNFTClassesByOwner(request QueryNFTClassesByOw
 	url := fmt.Sprintf("%s/likechain/likenft/v1/class?%v", c.NodeURL, v.Encode())
 	resp, err := c.HTTPClient.Get(url)
 	if err != nil {
-		fmt.Printf("c.HTTPClient.Get error %v\n", err)
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTClassesByOwner, fmt.Errorf("c.HTTPClient.Get"), err)
 	}
 	if err = httputil.HandleResponseStatus(resp); err != nil {
 		return nil, errors.Join(ErrQueryNFTClassesByOwner, err)
@@ -53,11 +52,14 @@ func (c *LikeNFTCosmosClient) QueryNFTClassesByOwner(request QueryNFTClassesByOw
 	var res QueryNFTClassesByOwnerResponse
 	err = decoder.Decode(&res)
 	if err != nil {
-		fmt.Printf("decoder.Decode error %v\n", err)
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTClassesByOwner, fmt.Errorf("decoder.Decode"), err)
 	}
 	return &res, nil
 }
+
+var (
+	ErrQueryAllNFTClassesByOwner = errors.New("err querying all nft classes by owner")
+)
 
 type QueryAllNFTClassesByOwnerRequest struct {
 	ISCNOwner string `url:"iscn_owner"`
@@ -89,7 +91,7 @@ func (c *LikeNFTCosmosClient) QueryAllNFTClassesByOwner(ctx context.Context, req
 				},
 			})
 			if err != nil {
-				errChan <- err
+				errChan <- errors.Join(fmt.Errorf("c.QueryNFTClassesByOwner"), err)
 				return
 			}
 			if queryNFTClassesByOwnerResponse.Pagination.Count == 0 {
@@ -103,7 +105,7 @@ func (c *LikeNFTCosmosClient) QueryAllNFTClassesByOwner(ctx context.Context, req
 
 	select {
 	case err := <-errChan:
-		return nil, err
+		return nil, errors.Join(ErrQueryAllNFTClassesByOwner, err)
 	case classes := <-successChan:
 		return &QueryAllNFTClasssesByOwnerResponse{
 			Classes: classes,

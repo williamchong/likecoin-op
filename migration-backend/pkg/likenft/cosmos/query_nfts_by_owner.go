@@ -41,8 +41,7 @@ func (c *LikeNFTCosmosClient) QueryNFTsByOwner(request QueryNFTsByOwnerRequest) 
 	url := fmt.Sprintf("%s/cosmos/nft/v1beta1/nfts?%v", c.NodeURL, v.Encode())
 	resp, err := c.HTTPClient.Get(url)
 	if err != nil {
-		fmt.Printf("c.HTTPClient.Get error %v\n", err)
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTsByOwner, fmt.Errorf("c.HTTPClient.Get error"), err)
 	}
 	if err = httputil.HandleResponseStatus(resp); err != nil {
 		return nil, errors.Join(ErrQueryNFTsByOwner, err)
@@ -52,11 +51,14 @@ func (c *LikeNFTCosmosClient) QueryNFTsByOwner(request QueryNFTsByOwnerRequest) 
 	var res QueryNFTsByOwnerResponse
 	err = decoder.Decode(&res)
 	if err != nil {
-		fmt.Printf("decoder.Decode error %v\n", err)
-		return nil, err
+		return nil, errors.Join(ErrQueryNFTsByOwner, fmt.Errorf("decoder.Decode"), err)
 	}
 	return &res, nil
 }
+
+var (
+	ErrQueryAllNFTsByOwner = errors.New("err query all nfts by owner")
+)
 
 type QueryAllNFTsByOwnerRequest struct {
 	Owner string `url:"owner"`
@@ -76,13 +78,13 @@ func (c *LikeNFTCosmosClient) QueryAllNFTsByOwner(request QueryAllNFTsByOwnerReq
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryAllNFTsByOwner, fmt.Errorf("c.QueryNFTsByOwner limit=%d", 1), err)
 	}
 
 	limit, err := strconv.ParseInt(c1.Pagination.Total, 10, 64)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryAllNFTsByOwner, fmt.Errorf("strconv.ParseInt %s", c1.Pagination.Total), err)
 	}
 
 	c2, err := c.QueryNFTsByOwner(QueryNFTsByOwnerRequest{
@@ -93,7 +95,7 @@ func (c *LikeNFTCosmosClient) QueryAllNFTsByOwner(request QueryAllNFTsByOwnerReq
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryAllNFTsByOwner, fmt.Errorf("c.QueryNFTsByOwner limit=%d", limit), err)
 	}
 
 	return &QueryAllNFTsByOwnerResponse{

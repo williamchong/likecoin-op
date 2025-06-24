@@ -25,7 +25,7 @@ func (c *LikeNFTCosmosClient) QueryNFT(request QueryNFTRequest) (*QueryNFTRespon
 	resp, err := c.HTTPClient.Get(url)
 	if err != nil {
 		fmt.Printf("c.HTTPClient.Get error %v\n", err)
-		return nil, err
+		return nil, errors.Join(ErrQueryNFT, fmt.Errorf("c.HTTPClient.Get"), err)
 	}
 	if err = httputil.HandleResponseStatus(resp); err != nil {
 		return nil, errors.Join(ErrQueryNFT, err)
@@ -35,8 +35,7 @@ func (c *LikeNFTCosmosClient) QueryNFT(request QueryNFTRequest) (*QueryNFTRespon
 	var res QueryNFTResponse
 	err = decoder.Decode(&res)
 	if err != nil {
-		fmt.Printf("decoder.Decode error %v\n", err)
-		return nil, err
+		return nil, errors.Join(ErrQueryNFT, fmt.Errorf("decoder.Decode error"), err)
 	}
 	return &res, nil
 }

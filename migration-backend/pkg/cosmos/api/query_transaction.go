@@ -18,7 +18,7 @@ func (a *CosmosAPI) QueryTransaction(txHash string) (*cosmos.TxResponse, error) 
 		fmt.Sprintf("%s/cosmos/tx/v1beta1/txs/%s", a.NodeURL, txHash),
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryTransaction, fmt.Errorf("a.HTTPClient.Get"), err)
 	}
 	if err = httputil.HandleResponseStatus(resp); err != nil {
 		return nil, errors.Join(ErrQueryTransaction, err)
@@ -28,7 +28,7 @@ func (a *CosmosAPI) QueryTransaction(txHash string) (*cosmos.TxResponse, error) 
 	var txResponse cosmos.TxResponse
 	err = decoder.Decode(&txResponse)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrQueryTransaction, fmt.Errorf("decoder.Decode"), err)
 	}
 	return &txResponse, nil
 }

@@ -52,7 +52,7 @@ func (a *LikecoinAPI) MigrateUserEVMWallet(
 ) (*MigrateUserEVMWalletResponse, error) {
 	requestBody, err := json.Marshal(request)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrMigrateUserEVMWallet, fmt.Errorf("json.Marshal"), err)
 	}
 	req, err := http.NewRequest(
 		http.MethodPost,
@@ -60,13 +60,13 @@ func (a *LikecoinAPI) MigrateUserEVMWallet(
 		bytes.NewBuffer(requestBody),
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrMigrateUserEVMWallet, fmt.Errorf("http.NewRequest"), err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := a.HTTPClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrMigrateUserEVMWallet, fmt.Errorf("a.HTTPClient.Do"), err)
 	}
 	if err = httputil.HandleResponseStatus(resp); err != nil {
 		return nil, errors.Join(ErrMigrateUserEVMWallet, err)
@@ -76,7 +76,7 @@ func (a *LikecoinAPI) MigrateUserEVMWallet(
 	var response MigrateUserEVMWalletResponse
 	err = decoder.Decode(&response)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrMigrateUserEVMWallet, fmt.Errorf("decoder.Decode"), err)
 	}
 	return &response, nil
 }

@@ -18,7 +18,7 @@ func (a *LikecoinAPI) GetUserProfileViaWallet(cosmosAddress string) (*api_model.
 		fmt.Sprintf("%s/users/addr/%s/min", a.LikecoinAPIUrlBase, cosmosAddress),
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrGetUserProfile, fmt.Errorf("a.HTTPClient.Get"), err)
 	}
 	if err = httputil.HandleResponseStatus(resp); err != nil {
 		return nil, errors.Join(ErrGetUserProfile, err)
@@ -28,7 +28,7 @@ func (a *LikecoinAPI) GetUserProfileViaWallet(cosmosAddress string) (*api_model.
 	var userProfile api_model.UserProfile
 	err = decoder.Decode(&userProfile)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrGetUserProfile, fmt.Errorf("decoder.Decode"), err)
 	}
 	return &userProfile, nil
 }

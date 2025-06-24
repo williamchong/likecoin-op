@@ -30,7 +30,7 @@ func (a *LikecoinAPI) SubmitEvmBookMigrated(request *EvmMigrateBookRequest) (*Ev
 func (a *LikecoinAPI) EvmMigrateBook(request *EvmMigrateBookRequest) (*EvmMigrateBookResponse, error) {
 	body, err := json.Marshal(request)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrEvmMigrateBook, fmt.Errorf("json.Marshal"), err)
 	}
 	req, err := http.NewRequest(
 		"POST",
@@ -38,12 +38,12 @@ func (a *LikecoinAPI) EvmMigrateBook(request *EvmMigrateBookRequest) (*EvmMigrat
 		bytes.NewBuffer(body),
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrEvmMigrateBook, fmt.Errorf("http.NewRequest"), err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := a.HTTPClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrEvmMigrateBook, fmt.Errorf("a.HTTPClient.Do"), err)
 	}
 	if err = httputil.HandleResponseStatus(resp); err != nil {
 		return nil, errors.Join(ErrEvmMigrateBook, err)
@@ -53,7 +53,7 @@ func (a *LikecoinAPI) EvmMigrateBook(request *EvmMigrateBookRequest) (*EvmMigrat
 	var response EvmMigrateBookResponse
 	err = decoder.Decode(&response)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrEvmMigrateBook, fmt.Errorf("decoder.Decode"), err)
 	}
 	return &response, nil
 }

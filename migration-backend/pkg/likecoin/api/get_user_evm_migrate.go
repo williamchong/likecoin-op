@@ -22,7 +22,7 @@ func (a *LikecoinAPI) GetUserEVMMigrate(cosmosAddress string) (*GetUserEVMMigrat
 	)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrGetUserEVMMigrate, fmt.Errorf("a.HTTPClient.Get"), err)
 	}
 	if err = httputil.HandleResponseStatus(resp); err != nil {
 		return nil, errors.Join(ErrGetUserEVMMigrate, err)
@@ -33,7 +33,7 @@ func (a *LikecoinAPI) GetUserEVMMigrate(cosmosAddress string) (*GetUserEVMMigrat
 	var response GetUserEVMMigrateResponse
 	err = decoder.Decode(&response)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrGetUserEVMMigrate, fmt.Errorf("decoder.Decode"), err)
 	}
 	return &response, nil
 }

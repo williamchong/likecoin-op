@@ -3,6 +3,7 @@ package cosmos
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/url"
 
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
@@ -18,7 +19,7 @@ func (a *LikeNFTCosmosClient) GetISCNRecord(
 	u, err := url.Parse("/iscn/records/id")
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrGetISCNRecord, fmt.Errorf("url.Parse %s", "/iscn/records/id"), err)
 	}
 
 	if iscnVersionAtMint == "" {
@@ -32,13 +33,13 @@ func (a *LikeNFTCosmosClient) GetISCNRecord(
 
 	base, err := url.Parse(a.NodeURL)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrGetISCNRecord, fmt.Errorf("url.Parse %s", a.NodeURL), err)
 	}
 
 	resp, err := a.HTTPClient.Get(base.ResolveReference(u).String())
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrGetISCNRecord, fmt.Errorf("a.HTTPClient.Get"), err)
 	}
 	if err = httputil.HandleResponseStatus(resp); err != nil {
 		return nil, errors.Join(ErrGetISCNRecord, err)
@@ -48,7 +49,7 @@ func (a *LikeNFTCosmosClient) GetISCNRecord(
 	var response model.ISCN
 	err = decoder.Decode(&response)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrGetISCNRecord, fmt.Errorf("decoder.Decode"), err)
 	}
 	return &response, nil
 }
