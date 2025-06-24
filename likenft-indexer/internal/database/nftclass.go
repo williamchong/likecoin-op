@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"likenft-indexer/ent"
+	"likenft-indexer/ent/nft"
 	"likenft-indexer/ent/nftclass"
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/evm/model"
@@ -25,6 +26,11 @@ type NFTClassRepository interface {
 		ctx context.Context,
 		addresses []string,
 	) ([]*ent.NFTClass, error)
+	QueryNFTClassesByAccountTokens(
+		ctx context.Context,
+		accountEvmAddress string,
+		pagination NFTClassPagination,
+	) (nftClasses []*ent.NFTClass, count int, nextKey int, err error)
 	InsertNFTClass(
 		ctx context.Context,
 		address string,
@@ -115,6 +121,38 @@ func (r *nftClassRepository) QueryNFTClassesByAddressesExact(
 	}
 
 	return res, nil
+}
+
+func (r *nftClassRepository) QueryNFTClassesByAccountTokens(
+	ctx context.Context,
+	accountEvmAddress string,
+	pagination NFTClassPagination,
+) (nftClasses []*ent.NFTClass, count int, nextKey int, err error) {
+	q := r.dbService.Client().NFTClass.Query().
+		Where(
+			nftclass.HasNftsWith(
+				nft.OwnerAddressEqualFold(accountEvmAddress),
+			),
+		)
+
+	count, err = q.Count(ctx)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	q = pagination.HandlePagination(q)
+
+	nftClasses, err = q.All(ctx)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	nextKey = 0
+	if len(nftClasses) > 0 {
+		nextKey = nftClasses[len(nftClasses)-1].ID
+	}
+
+	return nftClasses, count, nextKey, nil
 }
 
 func (r *nftClassRepository) InsertNFTClass(
