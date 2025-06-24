@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 
 	api_model "github.com/likecoin/like-migration-backend/pkg/likecoin/api/model"
+	"github.com/likecoin/like-migration-backend/pkg/util/httputil"
 )
 
-var ErrUserProfileNotFound = errors.New("user profile not found")
+var (
+	ErrGetUserProfile = errors.New("err getting user profile")
+)
 
 func (a *LikecoinAPI) GetUserProfileViaWallet(cosmosAddress string) (*api_model.UserProfile, error) {
 	resp, err := a.HTTPClient.Get(
@@ -18,8 +20,8 @@ func (a *LikecoinAPI) GetUserProfileViaWallet(cosmosAddress string) (*api_model.
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, ErrUserProfileNotFound
+	if err = httputil.HandleResponseStatus(resp); err != nil {
+		return nil, errors.Join(ErrGetUserProfile, err)
 	}
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)

@@ -2,10 +2,14 @@ package cosmos
 
 import (
 	"encoding/json"
+	"errors"
 	"net/url"
 
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
+	"github.com/likecoin/like-migration-backend/pkg/util/httputil"
 )
+
+var ErrGetISCNRecord = errors.New("err getting iscn record")
 
 func (a *LikeNFTCosmosClient) GetISCNRecord(
 	iscnIdPrefix string,
@@ -35,6 +39,9 @@ func (a *LikeNFTCosmosClient) GetISCNRecord(
 
 	if err != nil {
 		return nil, err
+	}
+	if err = httputil.HandleResponseStatus(resp); err != nil {
+		return nil, errors.Join(ErrGetISCNRecord, err)
 	}
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)

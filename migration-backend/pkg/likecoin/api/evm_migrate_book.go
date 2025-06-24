@@ -3,9 +3,14 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/likecoin/like-migration-backend/pkg/util/httputil"
 )
+
+var ErrEvmMigrateBook = errors.New("err migrating evm book")
 
 type EvmMigrateBookRequest struct {
 	LikeClassID string `json:"like_class_id"`
@@ -39,6 +44,9 @@ func (a *LikecoinAPI) EvmMigrateBook(request *EvmMigrateBookRequest) (*EvmMigrat
 	resp, err := a.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
+	}
+	if err = httputil.HandleResponseStatus(resp); err != nil {
+		return nil, errors.Join(ErrEvmMigrateBook, err)
 	}
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)

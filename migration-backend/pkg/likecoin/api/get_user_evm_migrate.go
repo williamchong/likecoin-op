@@ -2,10 +2,14 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	api_model "github.com/likecoin/like-migration-backend/pkg/likecoin/api/model"
+	"github.com/likecoin/like-migration-backend/pkg/util/httputil"
 )
+
+var ErrGetUserEVMMigrate = errors.New("err getting user evm migrate")
 
 type GetUserEVMMigrateResponse struct {
 	LikerIdInfo *api_model.LikerIdInfo `json:"likerIdInfo"`
@@ -19,6 +23,9 @@ func (a *LikecoinAPI) GetUserEVMMigrate(cosmosAddress string) (*GetUserEVMMigrat
 
 	if err != nil {
 		return nil, err
+	}
+	if err = httputil.HandleResponseStatus(resp); err != nil {
+		return nil, errors.Join(ErrGetUserEVMMigrate, err)
 	}
 
 	defer resp.Body.Close()

@@ -2,12 +2,17 @@ package cosmos
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 
 	"github.com/google/go-querystring/query"
+
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
+	"github.com/likecoin/like-migration-backend/pkg/util/httputil"
 )
+
+var ErrQueryNFTsByClassId = errors.New("err querying nfts by class id")
 
 type QueryNFTsByClassIdRequest struct {
 	QueryNFTsByClassIdPageRequest
@@ -38,6 +43,9 @@ func (c *LikeNFTCosmosClient) QueryNFTsByClassId(request QueryNFTsByClassIdReque
 	if err != nil {
 		fmt.Printf("c.HTTPClient.Get error %v\n", err)
 		return nil, err
+	}
+	if err = httputil.HandleResponseStatus(resp); err != nil {
+		return nil, errors.Join(ErrQueryNFTsByClassId, err)
 	}
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)

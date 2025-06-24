@@ -3,8 +3,15 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/likecoin/like-migration-backend/pkg/util/httputil"
+)
+
+var (
+	ErrMigrateUserEVMWallet = errors.New("err migrating user evm wallet")
 )
 
 type MigrateUserEVMWalletRequestSignMethod string
@@ -60,6 +67,9 @@ func (a *LikecoinAPI) MigrateUserEVMWallet(
 	resp, err := a.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
+	}
+	if err = httputil.HandleResponseStatus(resp); err != nil {
+		return nil, errors.Join(ErrMigrateUserEVMWallet, err)
 	}
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)

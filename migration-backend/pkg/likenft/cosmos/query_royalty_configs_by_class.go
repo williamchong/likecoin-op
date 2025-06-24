@@ -2,11 +2,15 @@ package cosmos
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
+	"github.com/likecoin/like-migration-backend/pkg/util/httputil"
 )
+
+var ErrQueryRoyaltyConfigsByClassId = errors.New("err querying royalty configs by class id")
 
 type QueryRoyaltyConfigsByClassIdRequest struct {
 	ClassId string
@@ -39,6 +43,9 @@ func (c *LikeNFTCosmosClient) QueryRoyaltyConfigsByClassId(request QueryRoyaltyC
 	if err != nil {
 		fmt.Printf("c.HTTPClient.Get error %v\n", err)
 		return nil, err
+	}
+	if err = httputil.HandleResponseStatus(resp); err != nil {
+		return nil, errors.Join(ErrQueryRoyaltyConfigsByClassId, err)
 	}
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)
