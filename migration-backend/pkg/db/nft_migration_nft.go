@@ -3,10 +3,12 @@ package db
 import (
 	"context"
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
 	"github.com/likecoin/like-migration-backend/pkg/model"
+	"github.com/likecoin/like-migration-backend/pkg/util/slice"
 )
 
 func QueryLikeNFTAssetMigrationNFTById(
@@ -208,28 +210,31 @@ func InsertLikeNFTAssetMigrationNFTs(
 		return nil
 	}
 
-	valueStrings := make([]string, 0, len(nfts))
 	numCol := 11
-	valueArgs := make([]interface{}, 0, len(nfts)*numCol)
+	chunkSize := int(math.Floor(float64(PGSQL_DB_PARAMS_LIMIT) / float64(numCol)))
 
-	for i, nft := range nfts {
-		valueStrings = append(valueStrings, fmt.Sprintf(
-			"($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)",
-			i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4, i*numCol+5, i*numCol+6, i*numCol+7, i*numCol+8, i*numCol+9, i*numCol+10, i*numCol+11))
-		valueArgs = append(valueArgs, nft.LikeNFTAssetMigrationId)
-		valueArgs = append(valueArgs, nft.CosmosClassId)
-		valueArgs = append(valueArgs, nft.CosmosNFTId)
-		valueArgs = append(valueArgs, nft.Name)
-		valueArgs = append(valueArgs, nft.Image)
-		valueArgs = append(valueArgs, nft.Status)
-		valueArgs = append(valueArgs, nft.EstimatedDurationNeeded)
-		valueArgs = append(valueArgs, nft.EnqueueTime)
-		valueArgs = append(valueArgs, nft.FinishTime)
-		valueArgs = append(valueArgs, nft.EvmTxHash)
-		valueArgs = append(valueArgs, nft.FailedReason)
-	}
+	for _, chunk := range slice.ChunkBy(nfts, chunkSize) {
+		valueStrings := make([]string, 0, len(chunk))
+		valueArgs := make([]interface{}, 0, len(chunk)*numCol)
 
-	stmt := fmt.Sprintf(`INSERT INTO likenft_asset_migration_nft (
+		for i, nft := range chunk {
+			valueStrings = append(valueStrings, fmt.Sprintf(
+				"($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)",
+				i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4, i*numCol+5, i*numCol+6, i*numCol+7, i*numCol+8, i*numCol+9, i*numCol+10, i*numCol+11))
+			valueArgs = append(valueArgs, nft.LikeNFTAssetMigrationId)
+			valueArgs = append(valueArgs, nft.CosmosClassId)
+			valueArgs = append(valueArgs, nft.CosmosNFTId)
+			valueArgs = append(valueArgs, nft.Name)
+			valueArgs = append(valueArgs, nft.Image)
+			valueArgs = append(valueArgs, nft.Status)
+			valueArgs = append(valueArgs, nft.EstimatedDurationNeeded)
+			valueArgs = append(valueArgs, nft.EnqueueTime)
+			valueArgs = append(valueArgs, nft.FinishTime)
+			valueArgs = append(valueArgs, nft.EvmTxHash)
+			valueArgs = append(valueArgs, nft.FailedReason)
+		}
+
+		stmt := fmt.Sprintf(`INSERT INTO likenft_asset_migration_nft (
 	likenft_asset_migration_id,
 	cosmos_class_id,
 	cosmos_nft_id,
@@ -243,8 +248,12 @@ func InsertLikeNFTAssetMigrationNFTs(
 	failed_reason
 ) VALUES %s`, strings.Join(valueStrings, ","))
 
-	_, err := tx.Exec(stmt, valueArgs...)
-	return err
+		_, err := tx.Exec(stmt, valueArgs...)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func UpdateLikeNFTAssetMigrationNFT(

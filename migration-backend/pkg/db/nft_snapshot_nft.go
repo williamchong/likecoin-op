@@ -2,9 +2,11 @@ package db
 
 import (
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/likecoin/like-migration-backend/pkg/model"
+	"github.com/likecoin/like-migration-backend/pkg/util/slice"
 )
 
 func QueryLikeNFTAssetSnapshotNFTsByNFTSnapshotId(
@@ -62,24 +64,27 @@ func InsertLikeNFTAssetSnapshotNFTs(
 		return nil
 	}
 
-	valueStrings := make([]string, 0, len(nfts))
 	numCol := 6
-	valueArgs := make([]interface{}, 0, len(nfts)*numCol)
+	chunkSize := int(math.Floor(float64(PGSQL_DB_PARAMS_LIMIT) / float64(numCol)))
 
-	for i, nft := range nfts {
-		valueStrings = append(valueStrings, fmt.Sprintf(
-			"($%d, $%d, $%d, $%d, $%d, $%d)",
-			i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4, i*numCol+5, i*numCol+6,
-		))
-		valueArgs = append(valueArgs, nft.NFTSnapshotId)
-		valueArgs = append(valueArgs, nft.CosmosClassId)
-		valueArgs = append(valueArgs, nft.CosmosNFTId)
-		valueArgs = append(valueArgs, nft.Name)
-		valueArgs = append(valueArgs, nft.Image)
-		valueArgs = append(valueArgs, nft.EstimatedMigrationDurationNeeded)
-	}
+	for _, chunk := range slice.ChunkBy(nfts, chunkSize) {
+		valueStrings := make([]string, 0, len(nfts))
+		valueArgs := make([]interface{}, 0, len(nfts)*numCol)
 
-	stmt := fmt.Sprintf(`INSERT INTO likenft_asset_snapshot_nft (
+		for i, nft := range chunk {
+			valueStrings = append(valueStrings, fmt.Sprintf(
+				"($%d, $%d, $%d, $%d, $%d, $%d)",
+				i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4, i*numCol+5, i*numCol+6,
+			))
+			valueArgs = append(valueArgs, nft.NFTSnapshotId)
+			valueArgs = append(valueArgs, nft.CosmosClassId)
+			valueArgs = append(valueArgs, nft.CosmosNFTId)
+			valueArgs = append(valueArgs, nft.Name)
+			valueArgs = append(valueArgs, nft.Image)
+			valueArgs = append(valueArgs, nft.EstimatedMigrationDurationNeeded)
+		}
+
+		stmt := fmt.Sprintf(`INSERT INTO likenft_asset_snapshot_nft (
 	likenft_asset_snapshot_id,
 	cosmos_class_id,
 	cosmos_nft_id,
@@ -88,6 +93,12 @@ func InsertLikeNFTAssetSnapshotNFTs(
 	estimated_migration_duration_needed
 ) VALUES %s`, strings.Join(valueStrings, ","))
 
-	_, err := tx.Exec(stmt, valueArgs...)
-	return err
+		_, err := tx.Exec(stmt, valueArgs...)
+		if err != nil {
+			return err
+
+		}
+	}
+	return nil
+
 }

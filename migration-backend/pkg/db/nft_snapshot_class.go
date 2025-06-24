@@ -2,9 +2,11 @@ package db
 
 import (
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/likecoin/like-migration-backend/pkg/model"
+	"github.com/likecoin/like-migration-backend/pkg/util/slice"
 )
 
 func QueryLikeNFTAssetSnapshotClassesByNFTSnapshotId(
@@ -59,20 +61,27 @@ func InsertLikeNFTAssetSnapshotClasses(
 	if len(classes) == 0 {
 		return nil
 	}
-	valueStrings := make([]string, 0, len(classes))
+
 	numCol := 5
-	valueArgs := make([]interface{}, 0, len(classes)*numCol)
+	chunkSize := int(math.Floor(float64(PGSQL_DB_PARAMS_LIMIT) / float64(numCol)))
 
-	for i, class := range classes {
-		valueStrings = append(valueStrings, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d)", i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4, i*numCol+5))
-		valueArgs = append(valueArgs, class.NFTSnapshotId)
-		valueArgs = append(valueArgs, class.CosmosClassId)
-		valueArgs = append(valueArgs, class.Name)
-		valueArgs = append(valueArgs, class.Image)
-		valueArgs = append(valueArgs, class.EstimatedMigrationDurationNeeded)
-	}
+	for _, chunk := range slice.ChunkBy(classes, chunkSize) {
+		valueStrings := make([]string, 0, len(classes))
+		valueArgs := make([]interface{}, 0, len(classes)*numCol)
 
-	stmt := fmt.Sprintf(`INSERT INTO likenft_asset_snapshot_class (
+		for i, class := range chunk {
+			valueStrings = append(valueStrings, fmt.Sprintf(
+				"($%d, $%d, $%d, $%d, $%d)",
+				i*numCol+1, i*numCol+2, i*numCol+3, i*numCol+4, i*numCol+5,
+			))
+			valueArgs = append(valueArgs, class.NFTSnapshotId)
+			valueArgs = append(valueArgs, class.CosmosClassId)
+			valueArgs = append(valueArgs, class.Name)
+			valueArgs = append(valueArgs, class.Image)
+			valueArgs = append(valueArgs, class.EstimatedMigrationDurationNeeded)
+		}
+
+		stmt := fmt.Sprintf(`INSERT INTO likenft_asset_snapshot_class (
 	likenft_asset_snapshot_id,
 	cosmos_class_id,
 	name,
@@ -80,6 +89,10 @@ func InsertLikeNFTAssetSnapshotClasses(
 	estimated_migration_duration_needed
 ) VALUES %s`, strings.Join(valueStrings, ","))
 
-	_, err := tx.Exec(stmt, valueArgs...)
-	return err
+		_, err := tx.Exec(stmt, valueArgs...)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

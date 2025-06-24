@@ -1,12 +1,15 @@
 package db_test
 
 import (
+	"fmt"
 	"testing"
+	"time"
+
+	. "github.com/smartystreets/goconvey/convey"
 
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 	"github.com/likecoin/like-migration-backend/pkg/testutil"
-	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestQueryLikeNFTAssetMigrationClassesByNFTMigrationIdAndStatus(t *testing.T) {
@@ -91,6 +94,55 @@ func TestQueryLikeNFTAssetMigrationClassesByNFTMigrationIdAndStatus(t *testing.T
 			So(err, ShouldBeNil)
 			So(len(classes), ShouldEqual, 0)
 		}
+	})
+}
+
+func TestInsertLikeNFTAssetMigrationClasses(t *testing.T) {
+	Convey("InsertLikeNFTAssetMigrationClasses", t, func() {
+		db, done := testutil.GetDB(t)
+		defer done()
+
+		var err error
+
+		s := &model.LikeNFTAssetSnapshot{
+			CreatedAt:     time.Now(),
+			CosmosAddress: "cosmos-address",
+			Status:        model.NFTSnapshotStatusInProgress,
+		}
+		s, err = appdb.InsertLikeNFTAssetSnapshot(db, s)
+		So(err, ShouldBeNil)
+
+		m := &model.LikeNFTAssetMigration{
+			CreatedAt:              time.Now(),
+			LikeNFTAssetSnapshotId: s.Id,
+			CosmosAddress:          "cosmos-address",
+			EthAddress:             "eth-address",
+			Status:                 model.NFTMigrationStatusInit,
+			EstimatedFinishedTime:  time.Now(),
+		}
+		m, err = appdb.InsertLikeNFTAssetMigration(db, m)
+		So(err, ShouldBeNil)
+
+		classes := make([]model.LikeNFTAssetMigrationClass, 10000)
+		for i := uint64(0); i < 10000; i++ {
+			classes[i] = model.LikeNFTAssetMigrationClass{
+				LikeNFTAssetMigrationId: m.Id,
+				CreatedAt:               time.Now(),
+				CosmosClassId:           fmt.Sprintf("cosmos-class-id-%d", i),
+				Name:                    "name",
+				Image:                   "image",
+				Status:                  model.LikeNFTAssetMigrationClassStatusInit,
+			}
+		}
+
+		err = appdb.InsertLikeNFTAssetMigrationClasses(
+			db, classes,
+		)
+		So(err, ShouldBeNil)
+
+		classes, err = appdb.QueryLikeNFTAssetMigrationClassesByNFTMigrationId(db, m.Id)
+		So(err, ShouldBeNil)
+		So(len(classes), ShouldEqual, 10000)
 	})
 }
 
