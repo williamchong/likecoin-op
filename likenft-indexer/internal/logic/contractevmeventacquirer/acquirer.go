@@ -173,8 +173,9 @@ func (a *contractEvmEventsAcquirer) Acquire(
 			myLogger.Error("failed to insert events", "error", err)
 			return fromBlock, err
 		}
+		myLogger.Info("inserted events", "count", len(evmEvents))
 	} else {
-		myLogger.Info("no logs found in range")
+		myLogger.Debug("no logs found in range")
 	}
 
 	return toBlock, nil
