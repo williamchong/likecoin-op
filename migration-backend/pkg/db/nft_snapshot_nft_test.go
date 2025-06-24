@@ -42,6 +42,10 @@ func TestInsertLikeNFTAssetSnapshotNFTs(t *testing.T) {
 		err = appdb.InsertLikeNFTAssetSnapshotNFTs(
 			db, nfts,
 		)
-		So(err.Error(), ShouldContainSubstring, "but PostgreSQL only supports 65535 parameters")
+		So(err, ShouldBeNil)
+
+		nfts, err = appdb.QueryLikeNFTAssetSnapshotNFTsByNFTSnapshotId(db, s.Id)
+		So(err, ShouldBeNil)
+		So(len(nfts), ShouldEqual, 15000)
 	})
 }
