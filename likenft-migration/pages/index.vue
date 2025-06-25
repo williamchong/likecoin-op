@@ -160,6 +160,26 @@
                 />
               </div>
             </template>
+            <template
+              v-else-if="currentStep.state === 'LoadingMigrationPreview'"
+            >
+              <div :class="['flex', 'flex-row', 'gap-1']">
+                <h2
+                  :class="[
+                    'text-base',
+                    'font-semibold',
+                    'leading-[30px]',
+                    'text-likecoin-darkgrey',
+                  ]"
+                >
+                  {{ $t('migrate.preview') }}
+                </h2>
+              </div>
+              <SectionAssetPreview
+                :class="['max-w-full', 'mt-2']"
+                :loading="true"
+              />
+            </template>
             <template v-else-if="currentStep.state === 'EmptyMigrationPreview'">
               <div :class="['flex', 'flex-row', 'gap-1']">
                 <h2
@@ -203,10 +223,6 @@
               </div>
               <SectionAssetPreview
                 :class="['max-w-full', 'mt-2']"
-                :loading="
-                  currentStep.migrationPreview.status === 'init' ||
-                  currentStep.migrationPreview.status === 'in_progress'
-                "
                 :snapshot="currentStep.migrationPreview"
                 @retryPreview="handleRetryPreview(currentStep)"
               />
@@ -256,12 +272,29 @@
               </div>
               <SectionAssetPreview
                 :class="['max-w-full', 'mt-2']"
-                :loading="
-                  currentStep.migrationPreview.status === 'init' ||
-                  currentStep.migrationPreview.status === 'in_progress'
-                "
                 :snapshot="currentStep.migrationPreview"
                 @confirmMigration="handleConfirmMigrate"
+              />
+            </template>
+            <template
+              v-else-if="currentStep.state === 'FailedMigrationPreview'"
+            >
+              <div :class="['flex', 'flex-row', 'gap-1']">
+                <h2
+                  :class="[
+                    'text-base',
+                    'font-semibold',
+                    'leading-[30px]',
+                    'text-likecoin-darkgrey',
+                  ]"
+                >
+                  {{ $t('migrate.preview') }}
+                </h2>
+              </div>
+              <SectionAssetPreview
+                :class="['max-w-full', 'mt-2']"
+                :snapshot="currentStep.migrationPreview"
+                @retryPreview="handleRetryPreview(currentStep)"
               />
             </template>
             <template v-else-if="currentStep.state === 'MigrationRetryPreview'">
@@ -508,6 +541,8 @@ import {
 } from '~/apis/models/likenftAssetMigration';
 import {
   isEmptyLikeNFTAssetSnapshot,
+  isLoadingLikeNFTAssetSnapshot,
+  isNonEmptyLikeNFTAssetSnapshot,
   LikeNFTAssetSnapshot,
 } from '~/apis/models/likenftAssetSnapshot';
 import { LikerIDMigrationErrorSchema } from '~/apis/models/likerIDMigration';
@@ -520,7 +555,8 @@ import {
   authcoreRedirected,
   authcoreRedirectionFailed,
   emptyMigrationPreviewFetched,
-  emptySnapshotRetried,
+  emptyOrFailedSnapshotRetried,
+  failedMigrationPreviewFetched,
   initCosmosConnected,
   initEvmConnected,
   introductionConfirmed,
@@ -528,6 +564,7 @@ import {
   likerIdMigrated,
   likerIdMigrationFailed,
   likerIdResolved,
+  loadingMigrationPreviewFetched,
   migrationCompleted,
   migrationFailed,
   migrationResultFetched,
@@ -546,7 +583,9 @@ import {
   StepStateStep3Signing,
   StepStateStep3SigningFailed,
   StepStateStep4EmptyMigrationPreview,
+  StepStateStep4FailedMigrationPreview,
   StepStateStep4Init,
+  StepStateStep4LoadingMigrationPreview,
   StepStateStep4MigrationRetryPreview,
   StepStateStep4NonEmptyMigrationPreview,
   StepStateStep5MigrationResult,
@@ -702,22 +741,16 @@ export default Vue.extend({
       }
       if (
         this.currentStep.step !== 4 ||
-        this.currentStep.state !== 'EmptyMigrationPreview'
+        this.currentStep.state !== 'LoadingMigrationPreview'
       ) {
         return;
       }
-      if (
-        migrationPreview.status === 'init' ||
-        migrationPreview.status === 'in_progress'
-      ) {
-        const currentStep = this.currentStep;
-        this.migrationPreviewFetchTimeout = setTimeout(async () => {
-          this.currentStep = await this._asyncStateTransition(
-            currentStep,
-            (s) => this._getOrCreateMigrationPreview(s)
-          );
-        }, 1000);
-      }
+      const currentStep = this.currentStep;
+      this.migrationPreviewFetchTimeout = setTimeout(async () => {
+        this.currentStep = await this._asyncStateTransition(currentStep, (s) =>
+          this._getOrCreateMigrationPreview(s)
+        );
+      }, 1000);
     },
 
     migration(_: LikeNFTAssetMigration | null) {
@@ -918,8 +951,12 @@ export default Vue.extend({
       }
     },
 
-    async handleRetryPreview(s: StepStateStep4EmptyMigrationPreview) {
-      this.currentStep = emptySnapshotRetried(s);
+    async handleRetryPreview(
+      s:
+        | StepStateStep4EmptyMigrationPreview
+        | StepStateStep4FailedMigrationPreview
+    ) {
+      this.currentStep = emptyOrFailedSnapshotRetried(s);
       this.currentStep = await this._asyncStateTransition(
         this.currentStep,
         (s) => this._recreateMigrationPreview(s)
@@ -1076,36 +1113,47 @@ export default Vue.extend({
     },
 
     async _getOrCreateMigrationPreview(
-      s: StepStateStep4Init | StepStateStep4EmptyMigrationPreview
+      s: StepStateStep4Init | StepStateStep4LoadingMigrationPreview
     ): Promise<
+      | StepStateStep4LoadingMigrationPreview
       | StepStateStep4EmptyMigrationPreview
       | StepStateStep4NonEmptyMigrationPreview
+      | StepStateStep4FailedMigrationPreview
     > {
       let migrationPreview = await this._fetchMigrationPreview(s.cosmosAddress);
 
       if (migrationPreview == null) {
         migrationPreview = await this._createMigrationPreview(s.cosmosAddress);
       }
-      if (isEmptyLikeNFTAssetSnapshot(migrationPreview)) {
+      if (isLoadingLikeNFTAssetSnapshot(migrationPreview)) {
+        return loadingMigrationPreviewFetched(s, migrationPreview);
+      } else if (isEmptyLikeNFTAssetSnapshot(migrationPreview)) {
         return emptyMigrationPreviewFetched(s, migrationPreview);
-      } else {
+      } else if (isNonEmptyLikeNFTAssetSnapshot(migrationPreview)) {
         return nonEmptyMigrationPreviewFetched(s, migrationPreview);
       }
+      return failedMigrationPreviewFetched(s, migrationPreview);
     },
 
     async _recreateMigrationPreview(
       s: StepStateStep4Init
     ): Promise<
+      | StepStateStep4LoadingMigrationPreview
       | StepStateStep4EmptyMigrationPreview
       | StepStateStep4NonEmptyMigrationPreview
+      | StepStateStep4FailedMigrationPreview
     > {
       const newMigrationPreview = await this._createMigrationPreview(
         s.cosmosAddress
       );
-      if (isEmptyLikeNFTAssetSnapshot(newMigrationPreview)) {
+      if (isLoadingLikeNFTAssetSnapshot(newMigrationPreview)) {
+        return loadingMigrationPreviewFetched(s, newMigrationPreview);
+      } else if (isEmptyLikeNFTAssetSnapshot(newMigrationPreview)) {
         return emptyMigrationPreviewFetched(s, newMigrationPreview);
+      } else if (isNonEmptyLikeNFTAssetSnapshot(newMigrationPreview)) {
+        return nonEmptyMigrationPreviewFetched(s, newMigrationPreview);
       }
-      return nonEmptyMigrationPreviewFetched(s, newMigrationPreview);
+      return failedMigrationPreviewFetched(s, newMigrationPreview);
     },
 
     async _fetchMigrationPreview(cosmosWalletAddress: string) {
@@ -1188,8 +1236,10 @@ export default Vue.extend({
     async _checkMigration(
       s: StepStateStep4Init
     ): Promise<
+      | StepStateStep4LoadingMigrationPreview
       | StepStateStep4EmptyMigrationPreview
       | StepStateStep4NonEmptyMigrationPreview
+      | StepStateStep4FailedMigrationPreview
       | StepStateStep5MigrationResult
       | StepStateCompleted
       | StepStateFailed

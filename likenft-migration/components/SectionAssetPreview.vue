@@ -168,7 +168,11 @@ import Vue, { PropType } from 'vue';
 import type { TranslateResult } from 'vue-i18n';
 
 import { LikeNFTAssetMigrationClass } from '~/apis/models/likenftAssetMigration';
-import { LikeNFTAssetSnapshot } from '~/apis/models/likenftAssetSnapshot';
+import {
+  isNonEmptyLikeNFTAssetSnapshot,
+  LikeNFTAssetSnapshot,
+  NonEmptyLikeNFTAssetSnapshot,
+} from '~/apis/models/likenftAssetSnapshot';
 import { ImageURLConfig, makeImageUrl } from '~/utils/imageUrl';
 import { cosmosClassUrl, cosmosNFTUrl } from '~/utils/nft';
 
@@ -192,7 +196,7 @@ interface Data {
 function makeTableDataRows(
   imageURLConfig: ImageURLConfig,
   assetUrlBase: string,
-  snapshot: LikeNFTAssetSnapshot
+  snapshot: NonEmptyLikeNFTAssetSnapshot
 ): TableData[] {
   const res: TableData[] = [];
   for (const c of snapshot.classes) {
@@ -308,7 +312,10 @@ export default Vue.extend({
       ];
     },
     allTableRows(): TableData[] {
-      if (this.snapshot != null) {
+      if (
+        this.snapshot != null &&
+        isNonEmptyLikeNFTAssetSnapshot(this.snapshot)
+      ) {
         return makeTableDataRows(
           this.$appConfig,
           this.$appConfig.likerlandUrlBase,
