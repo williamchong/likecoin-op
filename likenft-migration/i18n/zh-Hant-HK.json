@@ -54,6 +54,11 @@
       "tooltip": "此為 {date} [{height}] 的快照，如發現有任何遺漏或與您目前的 NFT 錢包不符，請聯絡我們尋求協助。"
     },
     "confirm-by-signing": {
+      "completed-no-books": {
+        "message": "Liker ID 遷移完成",
+        "no-books": "找不到電子書。",
+        "retry": "重試"
+      },
       "error-type": {
         "liker-id-migration": "Liker ID 遷移",
         "signing": "簽署",

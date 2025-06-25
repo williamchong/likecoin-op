@@ -76,7 +76,13 @@
             </div>
           </template>
         </StepSection>
-        <StepSection :step="3" :current-step="currentStep.step">
+        <StepSection
+          :step="3"
+          :current-step="currentStep.step"
+          :completed="
+            currentStep.step === 3 && currentStep.state === 'CompletedNoBooks'
+          "
+        >
           <template #future>
             <h2
               :class="[
@@ -90,30 +96,119 @@
             </h2>
           </template>
           <template v-if="currentStep.step === 3" #current>
-            <SectionSign
-              :signing-message="currentStep.signMessage"
-              :external-failed-reason="
-                currentStep.state === 'SigningFailed'
-                  ? currentStep.failedReason
-                  : null
-              "
-              @reconnect-evm-wallet="handleReconnectEvmWallet"
-              @restart="handleRestartLikerIDMigration"
-              @signed="handleSigned"
-            >
-              <template #title>
-                <h2
+            <template v-if="currentStep.state === 'CompletedNoBooks'">
+              <h2
+                :class="[
+                  'text-base',
+                  'font-semibold',
+                  'leading-[30px]',
+                  'text-likecoin-darkgrey',
+                ]"
+              >
+                {{ $t('section.confirm-by-signing.title') }}
+              </h2>
+
+              <div :class="['flex', 'flex-row', 'items-center']">
+                <div
                   :class="[
-                    'text-base',
-                    'font-semibold',
-                    'leading-[30px]',
-                    'text-likecoin-darkgrey',
+                    'flex-1',
+                    'flex',
+                    'flex-row',
+                    'items-center',
+                    'gap-1',
                   ]"
                 >
-                  {{ $t('section.confirm-by-signing.title') }}
-                </h2>
-              </template>
-            </SectionSign>
+                  <p
+                    :class="[
+                      'text-sm',
+                      'leading-[30px]',
+                      'text-likecoin-darkgrey',
+                    ]"
+                  >
+                    {{
+                      $t(
+                        'section.confirm-by-signing.completed-no-books.message'
+                      )
+                    }}
+                  </p>
+                </div>
+                <div :class="['flex', 'flex-row', 'gap-1', 'items-center']">
+                  <UTooltip
+                    v-if="
+                      currentStep.migrationPreview.block_time != null &&
+                      currentStep.migrationPreview.block_height != null
+                    "
+                    :text="
+                      $t('section.asset-preview.tooltip', {
+                        date: _formatDate(
+                          currentStep.migrationPreview.block_time
+                        ),
+                        height: _formatNumber(
+                          currentStep.migrationPreview.block_height
+                        ),
+                      })
+                    "
+                    :ui="{
+                      base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
+                    }"
+                  >
+                    <FontAwesomeIcon
+                      icon="circle-exclamation"
+                      :class="[
+                        'text-sm',
+                        'leading-[30px]',
+                        'text-likecoin-votecolor-yes',
+                      ]"
+                    />
+                  </UTooltip>
+                  <p
+                    :class="[
+                      'text-sm',
+                      'leading-[30px]',
+                      'text-likecoin-darkgrey',
+                    ]"
+                  >
+                    {{
+                      $t(
+                        'section.confirm-by-signing.completed-no-books.no-books'
+                      )
+                    }}
+                  </p>
+
+                  <AppButton @click="handleRetryPreview(currentStep)">
+                    {{
+                      $t('section.confirm-by-signing.completed-no-books.retry')
+                    }}
+                  </AppButton>
+                </div>
+              </div>
+            </template>
+            <template v-else>
+              <SectionSign
+                :signing-message="currentStep.signMessage"
+                :external-failed-reason="
+                  currentStep.state === 'SigningFailed'
+                    ? currentStep.failedReason
+                    : null
+                "
+                @reconnect-evm-wallet="handleReconnectEvmWallet"
+                @restart="handleRestartLikerIDMigration"
+                @signed="handleSigned"
+              >
+                <template #title>
+                  <h2
+                    :class="[
+                      'text-base',
+                      'font-semibold',
+                      'leading-[30px]',
+                      'text-likecoin-darkgrey',
+                    ]"
+                  >
+                    {{ $t('section.confirm-by-signing.title') }}
+                  </h2>
+                </template>
+              </SectionSign>
+            </template>
           </template>
           <template #past>
             <h2
@@ -178,53 +273,6 @@
               <SectionAssetPreview
                 :class="['max-w-full', 'mt-2']"
                 :loading="true"
-              />
-            </template>
-            <template v-else-if="currentStep.state === 'EmptyMigrationPreview'">
-              <div :class="['flex', 'flex-row', 'gap-1']">
-                <h2
-                  :class="[
-                    'text-base',
-                    'font-semibold',
-                    'leading-[30px]',
-                    'text-likecoin-darkgrey',
-                  ]"
-                >
-                  {{ $t('migrate.preview') }}
-                </h2>
-                <UTooltip
-                  v-if="
-                    currentStep.migrationPreview.block_time != null &&
-                    currentStep.migrationPreview.block_height != null
-                  "
-                  :text="
-                    $t('section.asset-preview.tooltip', {
-                      date: _formatDate(
-                        currentStep.migrationPreview.block_time
-                      ),
-                      height: _formatNumber(
-                        currentStep.migrationPreview.block_height
-                      ),
-                    })
-                  "
-                  :ui="{
-                    base: '[@media(pointer:coarse)]:hidden px-2 py-1 text-xs font-normal w-80 relative',
-                  }"
-                >
-                  <FontAwesomeIcon
-                    icon="circle-exclamation"
-                    :class="[
-                      'text-sm',
-                      'leading-[30px]',
-                      'text-likecoin-votecolor-yes',
-                    ]"
-                  />
-                </UTooltip>
-              </div>
-              <SectionAssetPreview
-                :class="['max-w-full', 'mt-2']"
-                :snapshot="currentStep.migrationPreview"
-                @retryPreview="handleRetryPreview(currentStep)"
               />
             </template>
             <template
@@ -580,9 +628,9 @@ import {
   StepStateStep2Init,
   StepStateStep2LikerIdEvmConnected,
   StepStateStep2LikerIdResolved,
+  StepStateStep3CompletedNoBooks,
   StepStateStep3Signing,
   StepStateStep3SigningFailed,
-  StepStateStep4EmptyMigrationPreview,
   StepStateStep4FailedMigrationPreview,
   StepStateStep4Init,
   StepStateStep4LoadingMigrationPreview,
@@ -952,9 +1000,7 @@ export default Vue.extend({
     },
 
     async handleRetryPreview(
-      s:
-        | StepStateStep4EmptyMigrationPreview
-        | StepStateStep4FailedMigrationPreview
+      s: StepStateStep3CompletedNoBooks | StepStateStep4FailedMigrationPreview
     ) {
       this.currentStep = emptyOrFailedSnapshotRetried(s);
       this.currentStep = await this._asyncStateTransition(
@@ -1115,8 +1161,8 @@ export default Vue.extend({
     async _getOrCreateMigrationPreview(
       s: StepStateStep4Init | StepStateStep4LoadingMigrationPreview
     ): Promise<
+      | StepStateStep3CompletedNoBooks
       | StepStateStep4LoadingMigrationPreview
-      | StepStateStep4EmptyMigrationPreview
       | StepStateStep4NonEmptyMigrationPreview
       | StepStateStep4FailedMigrationPreview
     > {
@@ -1138,8 +1184,8 @@ export default Vue.extend({
     async _recreateMigrationPreview(
       s: StepStateStep4Init
     ): Promise<
+      | StepStateStep3CompletedNoBooks
       | StepStateStep4LoadingMigrationPreview
-      | StepStateStep4EmptyMigrationPreview
       | StepStateStep4NonEmptyMigrationPreview
       | StepStateStep4FailedMigrationPreview
     > {
@@ -1236,8 +1282,8 @@ export default Vue.extend({
     async _checkMigration(
       s: StepStateStep4Init
     ): Promise<
+      | StepStateStep3CompletedNoBooks
       | StepStateStep4LoadingMigrationPreview
-      | StepStateStep4EmptyMigrationPreview
       | StepStateStep4NonEmptyMigrationPreview
       | StepStateStep4FailedMigrationPreview
       | StepStateStep5MigrationResult

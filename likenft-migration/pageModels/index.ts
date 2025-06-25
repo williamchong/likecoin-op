@@ -74,6 +74,16 @@ export type StepStateStep3SigningFailedReason = {
   error: LikerIDMigrationError;
 };
 
+export interface StepStateStep3CompletedNoBooks {
+  step: 3;
+  state: 'CompletedNoBooks';
+  cosmosAddress: string;
+  ethAddress: string;
+  avatar: string | null;
+  likerId: string | null;
+  migrationPreview: EmptyLikeNFTAssetSnapshot;
+}
+
 export interface StepStateStep3SigningFailed {
   step: 3;
   state: 'SigningFailed';
@@ -102,16 +112,6 @@ export interface StepStateStep4LoadingMigrationPreview {
   avatar: string | null;
   likerId: string | null;
   migrationPreview: LoadingLikeNFTAssetSnapshot;
-}
-
-export interface StepStateStep4EmptyMigrationPreview {
-  step: 4;
-  state: 'EmptyMigrationPreview';
-  cosmosAddress: string;
-  ethAddress: string;
-  avatar: string | null;
-  likerId: string | null;
-  migrationPreview: EmptyLikeNFTAssetSnapshot;
 }
 
 export interface StepStateStep4NonEmptyMigrationPreview {
@@ -187,9 +187,9 @@ export type StepState =
   | StepStateStep2EthConnected
   | StepStateStep3Signing
   | StepStateStep3SigningFailed
+  | StepStateStep3CompletedNoBooks
   | StepStateStep4Init
   | StepStateStep4LoadingMigrationPreview
-  | StepStateStep4EmptyMigrationPreview
   | StepStateStep4NonEmptyMigrationPreview
   | StepStateStep4FailedMigrationPreview
   | StepStateStep4MigrationRetryPreview
@@ -306,9 +306,7 @@ export function likerIdMigrated(
 }
 
 export function emptyOrFailedSnapshotRetried(
-  prev:
-    | StepStateStep4EmptyMigrationPreview
-    | StepStateStep4FailedMigrationPreview
+  prev: StepStateStep3CompletedNoBooks | StepStateStep4FailedMigrationPreview
 ): StepStateStep4Init {
   return {
     step: 4,
@@ -351,13 +349,13 @@ export function likerIdMigrationFailed(
   };
 }
 
-export function loadingMigrationPreviewFetched(
+export function emptyMigrationPreviewFetched(
   prev: StepStateStep4Init | StepStateStep4LoadingMigrationPreview,
-  snapshot: LoadingLikeNFTAssetSnapshot
-): StepStateStep4LoadingMigrationPreview {
+  snapshot: EmptyLikeNFTAssetSnapshot
+): StepStateStep3CompletedNoBooks {
   return {
-    step: 4,
-    state: 'LoadingMigrationPreview',
+    step: 3,
+    state: 'CompletedNoBooks',
     cosmosAddress: prev.cosmosAddress,
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
@@ -366,13 +364,13 @@ export function loadingMigrationPreviewFetched(
   };
 }
 
-export function emptyMigrationPreviewFetched(
+export function loadingMigrationPreviewFetched(
   prev: StepStateStep4Init | StepStateStep4LoadingMigrationPreview,
-  snapshot: EmptyLikeNFTAssetSnapshot
-): StepStateStep4EmptyMigrationPreview {
+  snapshot: LoadingLikeNFTAssetSnapshot
+): StepStateStep4LoadingMigrationPreview {
   return {
     step: 4,
-    state: 'EmptyMigrationPreview',
+    state: 'LoadingMigrationPreview',
     cosmosAddress: prev.cosmosAddress,
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
