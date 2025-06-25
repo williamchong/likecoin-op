@@ -5,7 +5,9 @@ import {
 } from '~/apis/models/likenftAssetMigration';
 import {
   EmptyLikeNFTAssetSnapshot,
+  FailedLikeNFTAssetSnapshot,
   LikeNFTAssetSnapshot,
+  LoadingLikeNFTAssetSnapshot,
   NonEmptyLikeNFTAssetSnapshot,
 } from '~/apis/models/likenftAssetSnapshot';
 import { LikerIDMigrationError } from '~/apis/models/likerIDMigration';
@@ -72,6 +74,16 @@ export type StepStateStep3SigningFailedReason = {
   error: LikerIDMigrationError;
 };
 
+export interface StepStateStep3CompletedNoBooks {
+  step: 3;
+  state: 'CompletedNoBooks';
+  cosmosAddress: string;
+  ethAddress: string;
+  avatar: string | null;
+  likerId: string | null;
+  migrationPreview: EmptyLikeNFTAssetSnapshot;
+}
+
 export interface StepStateStep3SigningFailed {
   step: 3;
   state: 'SigningFailed';
@@ -92,14 +104,14 @@ export interface StepStateStep4Init {
   likerId: string | null;
 }
 
-export interface StepStateStep4EmptyMigrationPreview {
+export interface StepStateStep4LoadingMigrationPreview {
   step: 4;
-  state: 'EmptyMigrationPreview';
+  state: 'LoadingMigrationPreview';
   cosmosAddress: string;
   ethAddress: string;
   avatar: string | null;
   likerId: string | null;
-  migrationPreview: EmptyLikeNFTAssetSnapshot;
+  migrationPreview: LoadingLikeNFTAssetSnapshot;
 }
 
 export interface StepStateStep4NonEmptyMigrationPreview {
@@ -110,6 +122,16 @@ export interface StepStateStep4NonEmptyMigrationPreview {
   avatar: string | null;
   likerId: string | null;
   migrationPreview: NonEmptyLikeNFTAssetSnapshot;
+}
+
+export interface StepStateStep4FailedMigrationPreview {
+  step: 4;
+  state: 'FailedMigrationPreview';
+  cosmosAddress: string;
+  ethAddress: string;
+  avatar: string | null;
+  likerId: string | null;
+  migrationPreview: FailedLikeNFTAssetSnapshot;
 }
 
 export interface StepStateStep4MigrationRetryPreview {
@@ -165,9 +187,11 @@ export type StepState =
   | StepStateStep2EthConnected
   | StepStateStep3Signing
   | StepStateStep3SigningFailed
+  | StepStateStep3CompletedNoBooks
   | StepStateStep4Init
-  | StepStateStep4EmptyMigrationPreview
+  | StepStateStep4LoadingMigrationPreview
   | StepStateStep4NonEmptyMigrationPreview
+  | StepStateStep4FailedMigrationPreview
   | StepStateStep4MigrationRetryPreview
   | StepStateStep5MigrationResult
   | StepStateCompleted
@@ -281,8 +305,8 @@ export function likerIdMigrated(
   };
 }
 
-export function emptySnapshotRetried(
-  prev: StepStateStep4EmptyMigrationPreview
+export function emptyOrFailedSnapshotRetried(
+  prev: StepStateStep3CompletedNoBooks | StepStateStep4FailedMigrationPreview
 ): StepStateStep4Init {
   return {
     step: 4,
@@ -326,12 +350,27 @@ export function likerIdMigrationFailed(
 }
 
 export function emptyMigrationPreviewFetched(
-  prev: StepStateStep4Init | StepStateStep4EmptyMigrationPreview,
+  prev: StepStateStep4Init | StepStateStep4LoadingMigrationPreview,
   snapshot: EmptyLikeNFTAssetSnapshot
-): StepStateStep4EmptyMigrationPreview {
+): StepStateStep3CompletedNoBooks {
+  return {
+    step: 3,
+    state: 'CompletedNoBooks',
+    cosmosAddress: prev.cosmosAddress,
+    ethAddress: prev.ethAddress,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    migrationPreview: snapshot,
+  };
+}
+
+export function loadingMigrationPreviewFetched(
+  prev: StepStateStep4Init | StepStateStep4LoadingMigrationPreview,
+  snapshot: LoadingLikeNFTAssetSnapshot
+): StepStateStep4LoadingMigrationPreview {
   return {
     step: 4,
-    state: 'EmptyMigrationPreview',
+    state: 'LoadingMigrationPreview',
     cosmosAddress: prev.cosmosAddress,
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,
@@ -341,12 +380,27 @@ export function emptyMigrationPreviewFetched(
 }
 
 export function nonEmptyMigrationPreviewFetched(
-  prev: StepStateStep4Init | StepStateStep4EmptyMigrationPreview,
+  prev: StepStateStep4Init | StepStateStep4LoadingMigrationPreview,
   snapshot: NonEmptyLikeNFTAssetSnapshot
 ): StepStateStep4NonEmptyMigrationPreview {
   return {
     step: 4,
     state: 'NonEmptyMigrationPreview',
+    cosmosAddress: prev.cosmosAddress,
+    ethAddress: prev.ethAddress,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    migrationPreview: snapshot,
+  };
+}
+
+export function failedMigrationPreviewFetched(
+  prev: StepStateStep4Init | StepStateStep4LoadingMigrationPreview,
+  snapshot: FailedLikeNFTAssetSnapshot
+): StepStateStep4FailedMigrationPreview {
+  return {
+    step: 4,
+    state: 'FailedMigrationPreview',
     cosmosAddress: prev.cosmosAddress,
     ethAddress: prev.ethAddress,
     avatar: prev.avatar,

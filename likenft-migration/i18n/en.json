@@ -54,6 +54,11 @@
       "tooltip": "This is a snapshot taken on {date} [{height}], if you found there is something missing or misalign with your current NFT wallet, please contact us for more assistant."
     },
     "confirm-by-signing": {
+      "completed-no-books": {
+        "message": "Liker ID Migration Completed.",
+        "no-books": "No books are found.",
+        "retry": "Retry"
+      },
       "error-type": {
         "liker-id-migration": "Liker ID Migration",
         "signing": "Signing",
