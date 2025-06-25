@@ -61,6 +61,11 @@ export default Vue.extend({
       type: Number,
       required: true,
     },
+    completed: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
     stepState(): StepState {
@@ -73,7 +78,7 @@ export default Vue.extend({
       return 'past';
     },
     icon(): SupportedIcon | undefined {
-      if (this.stepState === 'past') {
+      if (this.completed || this.stepState === 'past') {
         return 'circle-check';
       }
 
