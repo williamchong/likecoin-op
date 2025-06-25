@@ -3,6 +3,7 @@ package cmd
 import (
 	"log"
 
+	verbosityutil "likenft-indexer/cmd/worker/cmd/util/verbosity"
 	"likenft-indexer/cmd/worker/context"
 	"likenft-indexer/cmd/worker/task"
 	"likenft-indexer/internal/util/sentry"
@@ -26,6 +27,12 @@ var workerCmd = &cobra.Command{
 			return
 		}
 
+		logger, err := verbosityutil.GetLoggerFromCmd(cmd)
+		if err != nil {
+			_ = cmd.Usage()
+			return
+		}
+
 		queues := make(map[string]int)
 
 		for _, q := range args {
@@ -33,7 +40,6 @@ var workerCmd = &cobra.Command{
 		}
 
 		envCfg := context.ConfigFromContext(cmd.Context())
-		logger := context.LoggerFromContext(cmd.Context())
 		asynqClient := context.AsynqClientFromContext(cmd.Context())
 		evmQueryClient := context.EvmQueryClientFromContext(cmd.Context())
 		evmClient := context.EvmClientFromContext(cmd.Context())
