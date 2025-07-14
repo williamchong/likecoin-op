@@ -28,7 +28,11 @@ func NewAcquireLikeProtocolEventsTask(contractAddress string) (*asynq.Task, erro
 	if err != nil {
 		return nil, err
 	}
-	return asynq.NewTask(TypeAcquireLikeProtocolEventsTaskPayload, payload), nil
+	return asynq.NewTask(
+		TypeAcquireLikeProtocolEventsTaskPayload,
+		payload,
+		asynq.Queue(TypeAcquireLikeProtocolEventsTaskPayload),
+	), nil
 }
 
 func HandleAcquireLikeProtocolEventsTask(ctx context.Context, t *asynq.Task) error {

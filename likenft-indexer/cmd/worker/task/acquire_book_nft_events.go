@@ -29,7 +29,11 @@ func NewAcquireBookNFTEventsTask(contractAddresses []string) (*asynq.Task, error
 	if err != nil {
 		return nil, err
 	}
-	return asynq.NewTask(TypeAcquireBookNFTEventsTaskPayload, payload), nil
+	return asynq.NewTask(
+		TypeAcquireBookNFTEventsTaskPayload,
+		payload,
+		asynq.Queue(TypeAcquireBookNFTEventsTaskPayload),
+	), nil
 }
 
 func groupByProperty[T any, K comparable](items []T, getProperty func(T) K) map[K][]T {

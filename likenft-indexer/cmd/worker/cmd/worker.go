@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
+	"strings"
 
 	"likenft-indexer/cmd/worker/context"
 	"likenft-indexer/cmd/worker/task"
@@ -17,11 +19,16 @@ import (
 var DEFAULT_QUEUE_PRIORITY = 1
 
 var workerCmd = &cobra.Command{
-	Use:   "worker [queues...]",
+	Use:   fmt.Sprintf("worker [%s]...", strings.Join(task.Tasks.GetRegisteredTasks(), " | ")),
 	Short: "Start worker",
 	Run: func(cmd *cobra.Command, args []string) {
 		concurrency, err := cmd.Flags().GetInt("concurrency")
 		if err != nil {
+			_ = cmd.Usage()
+			return
+		}
+
+		if len(args) < 1 {
 			_ = cmd.Usage()
 			return
 		}
@@ -70,14 +77,13 @@ var workerCmd = &cobra.Command{
 
 		// mux maps a type to a handler
 		mux := asynq.NewServeMux()
-		mux.HandleFunc(task.TypeAcquireBookNFTEventsTaskPayload, task.HandleAcquireBookNFTEventsTask)
-		mux.HandleFunc(task.TypeAcquireLikeProtocolEventsTaskPayload, task.HandleAcquireLikeProtocolEventsTask)
-		mux.HandleFunc(task.TypeCheckBookNFTsPayload, task.HandleCheckBookNFTs)
-		mux.HandleFunc(task.TypeCheckLikeProtocolPayload, task.HandleCheckLikeProtocol)
-		mux.HandleFunc(task.TypeCheckReceivedEVMEventsPayload, task.HandleCheckReceivedEVMEvents)
-		mux.HandleFunc(task.TypeProcessEVMEventPayload, task.HandleProcessEVMEvent)
-		mux.HandleFunc(task.TypeCheckLikeProtocolToLatestBlockNumberPayload, task.HandleCheckLikeProtocolToLatestBlockNumber)
-		mux.HandleFunc(task.TypeCheckBookNFTToLatestBlockNumberPayload, task.HandleCheckBookNFTToLatestBlockNumber)
+
+		worker, err := task.Tasks.MakeWorker(args...)
+		if err != nil {
+			panic(err)
+		}
+
+		worker.ConfigServerMux(mux)
 
 		// ...register other handlers...
 		mux.Use(context.AsynqMiddlewareWithConfigContext(envCfg))

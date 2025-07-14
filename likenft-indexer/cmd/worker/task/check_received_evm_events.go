@@ -27,7 +27,11 @@ func NewCheckReceivedEVMEventsTask() (*asynq.Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	return asynq.NewTask(TypeCheckReceivedEVMEventsPayload, payload), nil
+	return asynq.NewTask(
+		TypeCheckReceivedEVMEventsPayload,
+		payload,
+		asynq.Queue(TypeCheckReceivedEVMEventsPayload),
+	), nil
 }
 
 func HandleCheckReceivedEVMEvents(ctx context.Context, t *asynq.Task) error {

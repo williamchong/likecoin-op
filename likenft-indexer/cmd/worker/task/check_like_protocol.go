@@ -22,7 +22,11 @@ func NewCheckLikeProtocolTask() (*asynq.Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	return asynq.NewTask(TypeCheckLikeProtocolPayload, payload), nil
+	return asynq.NewTask(
+		TypeCheckLikeProtocolPayload,
+		payload,
+		asynq.Queue(TypeCheckLikeProtocolPayload),
+	), nil
 }
 
 func HandleCheckLikeProtocol(ctx context.Context, t *asynq.Task) error {

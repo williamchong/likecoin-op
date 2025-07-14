@@ -24,7 +24,11 @@ func NewCheckBookNFTsTask() (*asynq.Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	return asynq.NewTask(TypeCheckBookNFTsPayload, payload), nil
+	return asynq.NewTask(
+		TypeCheckBookNFTsPayload,
+		payload,
+		asynq.Queue(TypeCheckBookNFTsPayload),
+	), nil
 }
 
 func HandleCheckBookNFTs(ctx context.Context, t *asynq.Task) error {

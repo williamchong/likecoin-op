@@ -27,7 +27,11 @@ func NewProcessEVMEvent(evmEventId int) (*asynq.Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	return asynq.NewTask(TypeProcessEVMEventPayload, payload), nil
+	return asynq.NewTask(
+		TypeProcessEVMEventPayload,
+		payload,
+		asynq.Queue(TypeProcessEVMEventPayload),
+	), nil
 }
 
 func HandleProcessEVMEvent(ctx context.Context, t *asynq.Task) error {

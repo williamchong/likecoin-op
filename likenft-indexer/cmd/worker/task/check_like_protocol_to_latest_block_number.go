@@ -27,7 +27,11 @@ func NewCheckLikeProtocolToLatestBlockNumberTask(contractAddress string) (*asynq
 	if err != nil {
 		return nil, err
 	}
-	return asynq.NewTask(TypeCheckLikeProtocolToLatestBlockNumberPayload, payload), nil
+	return asynq.NewTask(
+		TypeCheckLikeProtocolToLatestBlockNumberPayload,
+		payload,
+		asynq.Queue(TypeCheckLikeProtocolToLatestBlockNumberPayload),
+	), nil
 }
 
 func HandleCheckLikeProtocolToLatestBlockNumber(ctx context.Context, t *asynq.Task) error {

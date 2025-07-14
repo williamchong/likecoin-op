@@ -27,7 +27,11 @@ func NewCheckBookNFTToLatestBlockNumberTask(contractAddress string) (*asynq.Task
 	if err != nil {
 		return nil, err
 	}
-	return asynq.NewTask(TypeCheckBookNFTToLatestBlockNumberPayload, payload), nil
+	return asynq.NewTask(
+		TypeCheckBookNFTToLatestBlockNumberPayload,
+		payload,
+		asynq.Queue(TypeCheckBookNFTToLatestBlockNumberPayload),
+	), nil
 }
 
 func HandleCheckBookNFTToLatestBlockNumber(ctx context.Context, t *asynq.Task) error {
