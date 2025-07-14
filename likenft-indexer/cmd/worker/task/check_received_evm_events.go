@@ -12,6 +12,7 @@ import (
 	"likenft-indexer/ent/evmevent"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/model"
+	"likenft-indexer/internal/worker/task"
 
 	"github.com/hibiken/asynq"
 )
@@ -103,4 +104,15 @@ func handleCheckReceivedEVMEvents_enqueueProcessEVMEvent(
 	}
 	mylogger.Info("task enqueued", "taskId", taskInfo.ID)
 	return nil
+}
+
+func init() {
+	t := Tasks.Register(task.DefineTask(
+		TypeCheckReceivedEVMEventsPayload,
+		HandleCheckReceivedEVMEvents,
+	))
+	PeriodicTasks.Register(task.DefinePeriodicTask(
+		t,
+		NewCheckReceivedEVMEventsTask,
+	))
 }

@@ -11,6 +11,7 @@ import (
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/logic/contractevmeventacquirer"
+	"likenft-indexer/internal/worker/task"
 
 	"github.com/hibiken/asynq"
 )
@@ -117,4 +118,11 @@ func HandleAcquireBookNFTEventsTask(ctx context.Context, t *asynq.Task) error {
 	}
 
 	return nil
+}
+
+func init() {
+	Tasks.Register(task.DefineTask(
+		TypeAcquireBookNFTEventsTaskPayload,
+		HandleAcquireBookNFTEventsTask,
+	))
 }

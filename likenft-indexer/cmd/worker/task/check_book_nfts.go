@@ -9,6 +9,7 @@ import (
 	appcontext "likenft-indexer/cmd/worker/context"
 	"likenft-indexer/ent"
 	"likenft-indexer/internal/database"
+	"likenft-indexer/internal/worker/task"
 
 	"github.com/hibiken/asynq"
 )
@@ -88,4 +89,15 @@ func handleCheckBookNFTs_enqueueAcquireBookNFTEvents(
 		mylogger.Debug("task enqueued", "taskId", taskInfo.ID)
 	}
 	return nil
+}
+
+func init() {
+	t := Tasks.Register(task.DefineTask(
+		TypeCheckBookNFTsPayload,
+		HandleCheckBookNFTs,
+	))
+	PeriodicTasks.Register(task.DefinePeriodicTask(
+		t,
+		NewCheckBookNFTsTask,
+	))
 }

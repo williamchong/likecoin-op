@@ -9,6 +9,7 @@ import (
 	appcontext "likenft-indexer/cmd/worker/context"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/logic/evmeventprocessor"
+	"likenft-indexer/internal/worker/task"
 
 	"github.com/hibiken/asynq"
 )
@@ -78,4 +79,11 @@ func HandleProcessEVMEvent(ctx context.Context, t *asynq.Task) error {
 	}
 
 	return nil
+}
+
+func init() {
+	Tasks.Register(task.DefineTask(
+		TypeProcessEVMEventPayload,
+		HandleProcessEVMEvent,
+	))
 }

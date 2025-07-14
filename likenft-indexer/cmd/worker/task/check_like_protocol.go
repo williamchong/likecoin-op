@@ -7,6 +7,7 @@ import (
 	"log/slog"
 
 	appcontext "likenft-indexer/cmd/worker/context"
+	"likenft-indexer/internal/worker/task"
 
 	"github.com/hibiken/asynq"
 )
@@ -71,4 +72,15 @@ func handleCheckLikeProtocol_enqueueAcquireLikeProtocolEventsTask(
 	mylogger.Info("task enqueued", "taskId", taskInfo.ID)
 
 	return nil
+}
+
+func init() {
+	t := Tasks.Register(task.DefineTask(
+		TypeCheckLikeProtocolPayload,
+		HandleCheckLikeProtocol,
+	))
+	PeriodicTasks.Register(task.DefinePeriodicTask(
+		t,
+		NewCheckLikeProtocolTask,
+	))
 }

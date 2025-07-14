@@ -9,6 +9,7 @@ import (
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/logic/contractevmeventacquirer"
+	"likenft-indexer/internal/worker/task"
 
 	"github.com/hibiken/asynq"
 )
@@ -115,4 +116,11 @@ func HandleCheckLikeProtocolToLatestBlockNumber(ctx context.Context, t *asynq.Ta
 		}
 	}
 	return nil
+}
+
+func init() {
+	Tasks.Register(task.DefineTask(
+		TypeCheckLikeProtocolToLatestBlockNumberPayload,
+		HandleCheckLikeProtocolToLatestBlockNumber,
+	))
 }
