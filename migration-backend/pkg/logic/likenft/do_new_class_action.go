@@ -15,6 +15,7 @@ import (
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
+	cosmosmodel "github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/like_protocol"
 	"github.com/likecoin/like-migration-backend/pkg/model"
@@ -65,12 +66,17 @@ func DoNewClassAction(
 		return nil, doNewClassActionFailed(db, a, err)
 	}
 
-	royaltyConfigs, err := c.QueryRoyaltyConfigsByClassId(cosmos.QueryRoyaltyConfigsByClassIdRequest{
+	royaltyConfigsResponse, err := c.QueryRoyaltyConfigsByClassId(cosmos.QueryRoyaltyConfigsByClassIdRequest{
 		ClassId: cosmosClass.Id,
 	})
 
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)
+	}
+
+	var royaltyConfig *cosmosmodel.RoyaltyConfig = nil
+	if royaltyConfigsResponse != nil {
+		royaltyConfig = royaltyConfigsResponse.RoyaltyConfig
 	}
 
 	initialMinterAddresses := make([]common.Address, len(a.InitialMintersStr.ToSlice()))
@@ -99,7 +105,7 @@ func DoNewClassAction(
 		evm.ContractLevelMetadataFromCosmosClassAndISCN(
 			cosmosClass,
 			iscnDataResponse,
-			royaltyConfigs.RoyaltyConfig,
+			royaltyConfig,
 		))
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)
