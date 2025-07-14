@@ -15,6 +15,7 @@ import (
 )
 
 const TypeProcessEVMEventPayload = "process-evm-event"
+const TypeIndexActionProcessEVMEventPayload = "index-action-process-evm-event"
 
 type ProcessEVMEventPayload struct {
 	EvmEventId int
@@ -31,6 +32,20 @@ func NewProcessEVMEvent(evmEventId int) (*asynq.Task, error) {
 		TypeProcessEVMEventPayload,
 		payload,
 		asynq.Queue(TypeProcessEVMEventPayload),
+	), nil
+}
+
+func NewIndexActionProcessEVMEvent(evmEventId int) (*asynq.Task, error) {
+	payload, err := json.Marshal(ProcessEVMEventPayload{
+		EvmEventId: evmEventId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return asynq.NewTask(
+		TypeIndexActionProcessEVMEventPayload,
+		payload,
+		asynq.Queue(TypeIndexActionProcessEVMEventPayload),
 	), nil
 }
 
@@ -88,6 +103,10 @@ func HandleProcessEVMEvent(ctx context.Context, t *asynq.Task) error {
 func init() {
 	Tasks.Register(task.DefineTask(
 		TypeProcessEVMEventPayload,
+		HandleProcessEVMEvent,
+	))
+	Tasks.Register(task.DefineTask(
+		TypeIndexActionProcessEVMEventPayload,
 		HandleProcessEVMEvent,
 	))
 }
