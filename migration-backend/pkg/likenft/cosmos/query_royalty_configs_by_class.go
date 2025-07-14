@@ -36,14 +36,15 @@ func (c *LikeNFTCosmosClient) QueryRoyaltyConfigsByClassId(request QueryRoyaltyC
 		return nil, errors.Join(ErrQueryRoyaltyConfigsByClassId, fmt.Errorf("url.Parse %s", c.NodeURL), err)
 	}
 
-	fmt.Println(base.ResolveReference(url).String())
-
 	resp, err := c.HTTPClient.Get(base.ResolveReference(url).String())
 
 	if err != nil {
 		return nil, errors.Join(ErrQueryRoyaltyConfigsByClassId, fmt.Errorf("c.HTTPClient.Get"), err)
 	}
 	if err = httputil.HandleResponseStatus(resp); err != nil {
+		if errors.Is(err, httputil.ErrNotFound) {
+			return nil, nil
+		}
 		return nil, errors.Join(ErrQueryRoyaltyConfigsByClassId, err)
 	}
 	defer resp.Body.Close()
