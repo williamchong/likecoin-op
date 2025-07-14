@@ -96,7 +96,12 @@ func HandleAcquireBookNFTEventsTask(ctx context.Context, t *asynq.Task) error {
 			addresses,
 		)
 
-		newBlockHeight, err := acquirer.Acquire(ctx, logger, uint64(latestEventsBlockHeight), cfg.EvmEventQueryNumberOfBlocksLimit)
+		newBlockHeight, _, err := acquirer.Acquire(
+			ctx,
+			logger,
+			uint64(latestEventsBlockHeight),
+			cfg.EvmEventQueryNumberOfBlocksLimit,
+		)
 
 		if err != nil {
 			mylogger.Error("acquirer.Acquire", "err", err)

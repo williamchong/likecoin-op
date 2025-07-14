@@ -79,7 +79,12 @@ func HandleAcquireLikeProtocolEventsTask(ctx context.Context, t *asynq.Task) err
 		[]string{p.ContractAddress},
 	)
 
-	newBlockHeight, err := acquirer.Acquire(ctx, logger, fromBlock, cfg.EvmEventQueryNumberOfBlocksLimit)
+	newBlockHeight, _, err := acquirer.Acquire(
+		ctx,
+		logger,
+		fromBlock,
+		cfg.EvmEventQueryNumberOfBlocksLimit,
+	)
 	if err != nil {
 		mylogger.Error("acquirer.Acquire", "err", err)
 		return err

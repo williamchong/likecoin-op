@@ -90,7 +90,7 @@ func HandleCheckBookNFTToLatestBlockNumber(ctx context.Context, t *asynq.Task) e
 			"partition",
 			fmt.Sprintf("%d/%d", i, len(blockStarts)),
 		)
-		newBlockNumber, err := acquirer.Acquire(
+		newBlockNumber, _, err := acquirer.Acquire(
 			ctx,
 			mylogger,
 			blockStart,
