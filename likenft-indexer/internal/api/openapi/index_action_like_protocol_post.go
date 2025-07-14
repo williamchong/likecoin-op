@@ -15,7 +15,7 @@ func (h *OpenAPIHandler) IndexActionLikeProtocolPost(
 	ctx context.Context,
 	params api.IndexActionLikeProtocolPostParams,
 ) (*api.IndexActionLikeProtocolPostOK, error) {
-	task, err := task.NewCheckLikeProtocolToLatestBlockNumberTask(h.likeProtocolAddress)
+	task, err := task.NewIndexActionCheckLikeProtocolTask(h.likeProtocolAddress)
 	if err != nil {
 		return nil, err
 	}

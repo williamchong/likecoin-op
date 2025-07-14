@@ -14,27 +14,27 @@ import (
 	"github.com/hibiken/asynq"
 )
 
-const TypeCheckLikeProtocolToLatestBlockNumberPayload = "check-like-protocol-to-latest-block-number"
+const TypeIndexActionCheckBookNFTPayload = "index-action-check-book-nft"
 
-type CheckLikeProtocolToLatestBlockNumberPayload struct {
+type IndexActionCheckBookNFTPayload struct {
 	ContractAddress string
 }
 
-func NewCheckLikeProtocolToLatestBlockNumberTask(contractAddress string) (*asynq.Task, error) {
-	payload, err := json.Marshal(CheckLikeProtocolToLatestBlockNumberPayload{
+func NewIndexActionCheckBookNFTTask(contractAddress string) (*asynq.Task, error) {
+	payload, err := json.Marshal(IndexActionCheckBookNFTPayload{
 		ContractAddress: contractAddress,
 	})
 	if err != nil {
 		return nil, err
 	}
 	return asynq.NewTask(
-		TypeCheckLikeProtocolToLatestBlockNumberPayload,
+		TypeIndexActionCheckBookNFTPayload,
 		payload,
-		asynq.Queue(TypeCheckLikeProtocolToLatestBlockNumberPayload),
+		asynq.Queue(TypeIndexActionCheckBookNFTPayload),
 	), nil
 }
 
-func HandleCheckLikeProtocolToLatestBlockNumber(ctx context.Context, t *asynq.Task) error {
+func HandleIndexActionCheckBookNFT(ctx context.Context, t *asynq.Task) error {
 	logger := appcontext.LoggerFromContext(ctx)
 	envCfg := appcontext.ConfigFromContext(ctx)
 	asynqClient := appcontext.AsynqClientFromContext(ctx)
@@ -42,18 +42,18 @@ func HandleCheckLikeProtocolToLatestBlockNumber(ctx context.Context, t *asynq.Ta
 	evmClient := appcontext.EvmClientFromContext(ctx)
 
 	dbService := database.New()
-	likeProtocolRepository := database.MakeLikeProtocolRepository(dbService)
+	nftClassRepository := database.MakeNFTClassRepository(dbService)
 	evmEventRepository := database.MakeEVMEventRepository(dbService)
 
-	mylogger := logger.WithGroup("HandleCheckLikeProtocolToLatestBlockNumber")
+	mylogger := logger.WithGroup("HandleIndexActionCheckBookNFT")
 
-	var p CheckLikeProtocolToLatestBlockNumberPayload
+	var p IndexActionCheckBookNFTPayload
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
-		mylogger.Error("json.Unmarshal CheckLikeProtocolToLatestBlockNumberPayload", "err", err)
+		mylogger.Error("json.Unmarshal IndexActionCheckBookNFTPayload", "err", err)
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	likeProtocol, err := likeProtocolRepository.GetLikeProtocol(ctx, p.ContractAddress)
+	nftClass, err := nftClassRepository.QueryNFTClassByAddress(ctx, p.ContractAddress)
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func HandleCheckLikeProtocolToLatestBlockNumber(ctx context.Context, t *asynq.Ta
 
 	blockStarts := make([]uint64, 0)
 
-	for i := uint64(likeProtocol.LatestEventBlockNumber); i < latestBlockNumber; i = i + envCfg.EvmEventQueryNumberOfBlocksLimit {
+	for i := uint64(nftClass.LatestEventBlockNumber); i < latestBlockNumber; i = i + envCfg.EvmEventQueryNumberOfBlocksLimit {
 		blockStarts = append(blockStarts, i)
 	}
 
@@ -76,7 +76,7 @@ func HandleCheckLikeProtocolToLatestBlockNumber(ctx context.Context, t *asynq.Ta
 		evmEventRepository,
 		evmQueryClient,
 		evmClient,
-		contractevmeventacquirer.ContractEvmEventsAcquirerContractTypeLikeProtocol,
+		contractevmeventacquirer.ContractEvmEventsAcquirerContractTypeBookNFT,
 		[]string{p.ContractAddress},
 	)
 
@@ -99,15 +99,14 @@ func HandleCheckLikeProtocolToLatestBlockNumber(ctx context.Context, t *asynq.Ta
 		if err != nil {
 			return err
 		}
-		err = likeProtocolRepository.CreateOrUpdateLatestEventBlockHeight(
+		err = nftClassRepository.UpdateNFTClassesLatestEventBlockNumber(
 			ctx,
-			p.ContractAddress,
+			[]string{p.ContractAddress},
 			typeutil.Uint64(newBlockNumber),
 		)
 		if err != nil {
 			return err
 		}
-
 		task, err := NewCheckReceivedEVMEventsTask()
 		if err != nil {
 			return err
@@ -124,7 +123,7 @@ func HandleCheckLikeProtocolToLatestBlockNumber(ctx context.Context, t *asynq.Ta
 
 func init() {
 	Tasks.Register(task.DefineTask(
-		TypeCheckLikeProtocolToLatestBlockNumberPayload,
-		HandleCheckLikeProtocolToLatestBlockNumber,
+		TypeIndexActionCheckBookNFTPayload,
+		HandleIndexActionCheckBookNFT,
 	))
 }

@@ -14,27 +14,27 @@ import (
 	"github.com/hibiken/asynq"
 )
 
-const TypeCheckBookNFTToLatestBlockNumberPayload = "check-book-nft-to-latest-block-number"
+const TypeIndexActionCheckLikeProtocolPayload = "index-action-check-like-protocol"
 
-type CheckBookNFTToLatestBlockNumberPayload struct {
+type IndexActionCheckLikeProtocolPayload struct {
 	ContractAddress string
 }
 
-func NewCheckBookNFTToLatestBlockNumberTask(contractAddress string) (*asynq.Task, error) {
-	payload, err := json.Marshal(CheckBookNFTToLatestBlockNumberPayload{
+func NewIndexActionCheckLikeProtocolTask(contractAddress string) (*asynq.Task, error) {
+	payload, err := json.Marshal(IndexActionCheckLikeProtocolPayload{
 		ContractAddress: contractAddress,
 	})
 	if err != nil {
 		return nil, err
 	}
 	return asynq.NewTask(
-		TypeCheckBookNFTToLatestBlockNumberPayload,
+		TypeIndexActionCheckLikeProtocolPayload,
 		payload,
-		asynq.Queue(TypeCheckBookNFTToLatestBlockNumberPayload),
+		asynq.Queue(TypeIndexActionCheckLikeProtocolPayload),
 	), nil
 }
 
-func HandleCheckBookNFTToLatestBlockNumber(ctx context.Context, t *asynq.Task) error {
+func HandleIndexActionCheckLikeProtocol(ctx context.Context, t *asynq.Task) error {
 	logger := appcontext.LoggerFromContext(ctx)
 	envCfg := appcontext.ConfigFromContext(ctx)
 	asynqClient := appcontext.AsynqClientFromContext(ctx)
@@ -42,18 +42,18 @@ func HandleCheckBookNFTToLatestBlockNumber(ctx context.Context, t *asynq.Task) e
 	evmClient := appcontext.EvmClientFromContext(ctx)
 
 	dbService := database.New()
-	nftClassRepository := database.MakeNFTClassRepository(dbService)
+	likeProtocolRepository := database.MakeLikeProtocolRepository(dbService)
 	evmEventRepository := database.MakeEVMEventRepository(dbService)
 
-	mylogger := logger.WithGroup("HandleCheckBookNFTToLatestBlockNumber")
+	mylogger := logger.WithGroup("HandleIndexActionCheckLikeProtocol")
 
-	var p CheckBookNFTToLatestBlockNumberPayload
+	var p IndexActionCheckLikeProtocolPayload
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
-		mylogger.Error("json.Unmarshal CheckBookNFTToLatestBlockNumberPayload", "err", err)
+		mylogger.Error("json.Unmarshal IndexActionCheckLikeProtocolPayload", "err", err)
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	nftClass, err := nftClassRepository.QueryNFTClassByAddress(ctx, p.ContractAddress)
+	likeProtocol, err := likeProtocolRepository.GetLikeProtocol(ctx, p.ContractAddress)
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func HandleCheckBookNFTToLatestBlockNumber(ctx context.Context, t *asynq.Task) e
 
 	blockStarts := make([]uint64, 0)
 
-	for i := uint64(nftClass.LatestEventBlockNumber); i < latestBlockNumber; i = i + envCfg.EvmEventQueryNumberOfBlocksLimit {
+	for i := uint64(likeProtocol.LatestEventBlockNumber); i < latestBlockNumber; i = i + envCfg.EvmEventQueryNumberOfBlocksLimit {
 		blockStarts = append(blockStarts, i)
 	}
 
@@ -76,7 +76,7 @@ func HandleCheckBookNFTToLatestBlockNumber(ctx context.Context, t *asynq.Task) e
 		evmEventRepository,
 		evmQueryClient,
 		evmClient,
-		contractevmeventacquirer.ContractEvmEventsAcquirerContractTypeBookNFT,
+		contractevmeventacquirer.ContractEvmEventsAcquirerContractTypeLikeProtocol,
 		[]string{p.ContractAddress},
 	)
 
@@ -99,14 +99,15 @@ func HandleCheckBookNFTToLatestBlockNumber(ctx context.Context, t *asynq.Task) e
 		if err != nil {
 			return err
 		}
-		err = nftClassRepository.UpdateNFTClassesLatestEventBlockNumber(
+		err = likeProtocolRepository.CreateOrUpdateLatestEventBlockHeight(
 			ctx,
-			[]string{p.ContractAddress},
+			p.ContractAddress,
 			typeutil.Uint64(newBlockNumber),
 		)
 		if err != nil {
 			return err
 		}
+
 		task, err := NewCheckReceivedEVMEventsTask()
 		if err != nil {
 			return err
@@ -123,7 +124,7 @@ func HandleCheckBookNFTToLatestBlockNumber(ctx context.Context, t *asynq.Task) e
 
 func init() {
 	Tasks.Register(task.DefineTask(
-		TypeCheckBookNFTToLatestBlockNumberPayload,
-		HandleCheckBookNFTToLatestBlockNumber,
+		TypeIndexActionCheckLikeProtocolPayload,
+		HandleIndexActionCheckLikeProtocol,
 	))
 }

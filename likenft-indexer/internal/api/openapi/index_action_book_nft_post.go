@@ -20,7 +20,7 @@ func (h *OpenAPIHandler) IndexActionBookNftBooknftIDPost(
 		return nil, err
 	}
 
-	task, err := task.NewCheckBookNFTToLatestBlockNumberTask(nftClass.Address)
+	task, err := task.NewIndexActionCheckBookNFTTask(nftClass.Address)
 	if err != nil {
 		return nil, err
 	}
