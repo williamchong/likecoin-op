@@ -99,21 +99,21 @@ func HandleIndexActionCheckBookNFT(ctx context.Context, t *asynq.Task) error {
 		if err != nil {
 			return err
 		}
+		task, err := NewIndexActionCheckReceivedEventsTask(p.ContractAddress)
+		if err != nil {
+			mylogger.
+				WarnContext(ctx, "cannot create task. should eventually picked up by periodic worker. skip.", "err", err)
+		}
+		_, err = asynqClient.EnqueueContext(ctx, task, asynq.MaxRetry(0))
+		if err != nil {
+			mylogger.
+				WarnContext(ctx, "cannot enqueue task. should eventually picked up by periodic worker. skip.", "err", err)
+		}
 		err = nftClassRepository.UpdateNFTClassesLatestEventBlockNumber(
 			ctx,
 			[]string{p.ContractAddress},
 			typeutil.Uint64(newBlockNumber),
 		)
-		if err != nil {
-			return err
-		}
-		task, err := NewCheckReceivedEVMEventsTask()
-		if err != nil {
-			return err
-		}
-
-		_, err = asynqClient.Enqueue(task, asynq.MaxRetry(0))
-
 		if err != nil {
 			return err
 		}
