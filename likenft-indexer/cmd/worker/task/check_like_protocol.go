@@ -14,13 +14,10 @@ import (
 const TypeCheckLikeProtocolPayload = "check-like-protocol"
 
 type CheckLikeProtocolPayload struct {
-	ContractAddress string
 }
 
-func NewCheckLikeProtocolTask(contractAddress string) (*asynq.Task, error) {
-	payload, err := json.Marshal(CheckLikeProtocolPayload{
-		ContractAddress: contractAddress,
-	})
+func NewCheckLikeProtocolTask() (*asynq.Task, error) {
+	payload, err := json.Marshal(CheckLikeProtocolPayload{})
 	if err != nil {
 		return nil, err
 	}
@@ -30,6 +27,7 @@ func NewCheckLikeProtocolTask(contractAddress string) (*asynq.Task, error) {
 func HandleCheckLikeProtocol(ctx context.Context, t *asynq.Task) error {
 	logger := appcontext.LoggerFromContext(ctx)
 	asynqClient := appcontext.AsynqClientFromContext(ctx)
+	cfg := appcontext.ConfigFromContext(ctx)
 
 	mylogger := logger.WithGroup("HandleCheckLikeProtocol")
 
@@ -42,7 +40,7 @@ func HandleCheckLikeProtocol(ctx context.Context, t *asynq.Task) error {
 	err := handleCheckLikeProtocol_enqueueAcquireLikeProtocolEventsTask(
 		mylogger,
 		asynqClient,
-		p.ContractAddress,
+		cfg.EthLikeProtocolContractAddress,
 	)
 
 	if err != nil {

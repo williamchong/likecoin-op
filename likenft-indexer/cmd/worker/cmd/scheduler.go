@@ -17,7 +17,6 @@ var schedulerCmd = &cobra.Command{
 	Short: "Start scheduelr",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := cmd.Context()
-		cfg := context.ConfigFromContext(ctx)
 		scheduler := context.AsynqSchedulerFromContext(ctx)
 
 		checkBookNFTsTask, err := task.NewCheckBookNFTsTask()
@@ -25,9 +24,7 @@ var schedulerCmd = &cobra.Command{
 			log.Fatalf("could not create task: %v", err)
 		}
 
-		checkLikeProtocolTask, err := task.NewCheckLikeProtocolTask(
-			cfg.EthLikeProtocolContractAddress,
-		)
+		checkLikeProtocolTask, err := task.NewCheckLikeProtocolTask()
 		if err != nil {
 			log.Fatalf("could not create task: %v", err)
 		}
