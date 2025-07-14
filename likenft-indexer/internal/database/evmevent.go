@@ -24,6 +24,11 @@ type EVMEventRepository interface {
 	GetEvmEvents(ctx context.Context, filter *EvmEventsFilter) ([]*ent.EVMEvent, int, error)
 
 	GetEVMEventsByStatus(ctx context.Context, status evmevent.Status) ([]*ent.EVMEvent, error)
+	GetEVMEventsByContractAddressAndStatus(
+		ctx context.Context,
+		contractAddress string,
+		status evmevent.Status,
+	) ([]*ent.EVMEvent, error)
 
 	InsertEvmEventsIfNeeded(
 		ctx context.Context,
@@ -126,6 +131,18 @@ func (s *evmEventRepository) GetEvmEvents(ctx context.Context, filter *EvmEvents
 func (s *evmEventRepository) GetEVMEventsByStatus(ctx context.Context, status evmevent.Status) ([]*ent.EVMEvent, error) {
 	return s.BaseQuery(s.dbService.Client().EVMEvent.Query()).
 		Where(evmevent.StatusEQ(status)).All(ctx)
+}
+
+func (s *evmEventRepository) GetEVMEventsByContractAddressAndStatus(
+	ctx context.Context,
+	contractAddress string,
+	status evmevent.Status,
+) ([]*ent.EVMEvent, error) {
+	return s.BaseQuery(s.dbService.Client().EVMEvent.Query()).
+		Where(
+			evmevent.AddressEqualFold(contractAddress),
+			evmevent.StatusEQ(status),
+		).All(ctx)
 }
 
 func (s *evmEventRepository) InsertEvmEventsIfNeeded(
