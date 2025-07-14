@@ -149,13 +149,41 @@ likenftIndexer:
   worker:
     name: likenft-indexer-worker
 
-    resources: {}
+    deployments:
+      periodic:
+        resources: {}
+        tasks:
+          - acquire-book-nft-events
+          - acquire-like-protocol-events
+          - check-book-nfts
+          - check-like-protocol
+          - check-received-evm-events
+      process-evm-event:
+        resources: {}
+        tasks:
+          - process-evm-event
+      index-action-request:
+        resources: {}
+        tasks:
+          - index-action-check-book-nft
+          - index-action-check-like-protocol
+      index-action-process-evm-event:
+        resources: {}
+        tasks:
+          - index-action-process-evm-event
+          - index-action-check-received-evm-events
 
   scheduler:
     name: likenft-indexer-scheduler
-    cron: "*/1 * * * *"
 
-    resources: {}
+    deployments:
+      all-in-one:
+        cron: "*/1 * * * *"
+        tasks:
+          - check-book-nfts
+          - check-like-protocol
+          - check-received-evm-events
+        resources: {}
 
 redis:
   name: redis

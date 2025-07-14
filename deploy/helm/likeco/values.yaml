@@ -104,4 +104,6 @@ likenftIndexer:
         host: api.v3.like.co
 
   scheduler:
-    cron: "*/5 * * * *"
+    deployments:
+      all-in-one:
+        cron: "*/5 * * * *"
