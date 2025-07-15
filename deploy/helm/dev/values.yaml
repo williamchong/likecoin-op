@@ -96,3 +96,8 @@ likenftIndexer:
       tls:
         secretName: likenft-indexer.pandawork.com
         host: likenft-indexer.pandawork.com
+
+  scheduler:
+    deployments:
+      all-in-one:
+        cron: "*/15 * * * *"

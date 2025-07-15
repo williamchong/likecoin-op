@@ -106,4 +106,12 @@ likenftIndexer:
   scheduler:
     deployments:
       all-in-one:
-        cron: "*/5 * * * *"
+        cron: "*/10 * * * *"
+        tasks:
+          - check-book-nfts
+          - check-like-protocol
+
+      evm-events:
+        cron: "*/1 * * * *"
+        tasks:
+          - check-received-evm-events
