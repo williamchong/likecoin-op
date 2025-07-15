@@ -17,33 +17,38 @@ import (
 	"github.com/hibiken/asynq"
 )
 
-const TypeCheckReceivedEVMEventsPayload = "check-received-evm-events"
+const TypeIndexActionCheckReceivedEventsPayload = "index-action-check-received-evm-events"
 
-type CheckReceivedEVMEventsPayload struct {
+type IndexActionCheckReceivedEventsPayload struct {
+	ContractAddresses string
 }
 
-func NewCheckReceivedEVMEventsTask() (*asynq.Task, error) {
-	payload, err := json.Marshal(CheckReceivedEVMEventsPayload{})
+func NewIndexActionCheckReceivedEventsTask(
+	contractAddress string,
+) (*asynq.Task, error) {
+	payload, err := json.Marshal(IndexActionCheckReceivedEventsPayload{
+		ContractAddresses: contractAddress,
+	})
 	if err != nil {
 		return nil, err
 	}
 	return asynq.NewTask(
-		TypeCheckReceivedEVMEventsPayload,
+		TypeIndexActionCheckReceivedEventsPayload,
 		payload,
-		asynq.Queue(TypeCheckReceivedEVMEventsPayload),
+		asynq.Queue(TypeIndexActionCheckReceivedEventsPayload),
 	), nil
 }
 
-func HandleCheckReceivedEVMEvents(ctx context.Context, t *asynq.Task) error {
+func HandleIndexActionCheckReceivedEvents(ctx context.Context, t *asynq.Task) error {
 	logger := appcontext.LoggerFromContext(ctx)
 	asynqClient := appcontext.AsynqClientFromContext(ctx)
 
-	mylogger := logger.WithGroup("HandleCheckReceivedEVMEvents")
+	mylogger := logger.WithGroup("HandleIndexActionCheckReceivedEvents")
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	var p CheckReceivedEVMEventsPayload
+	var p IndexActionCheckReceivedEventsPayload
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
 		mylogger.Error("json.Unmarshal EnqueueProcessEvmEventPayload", "err", err)
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
@@ -53,7 +58,11 @@ func HandleCheckReceivedEVMEvents(ctx context.Context, t *asynq.Task) error {
 
 	evmEventRepository := database.MakeEVMEventRepository(dbService)
 
-	receivedEvents, err := evmEventRepository.GetEVMEventsByStatus(ctx, evmevent.StatusReceived)
+	receivedEvents, err := evmEventRepository.GetEVMEventsByContractAddressAndStatus(
+		ctx,
+		p.ContractAddresses,
+		evmevent.StatusReceived,
+	)
 
 	if err != nil {
 		return err
@@ -65,7 +74,7 @@ func HandleCheckReceivedEVMEvents(ctx context.Context, t *asynq.Task) error {
 	receivedEventIds := make([]int, 0, len(receivedEventIdsInProcessingOrder))
 
 	for _, evmEvent := range receivedEventIdsInProcessingOrder {
-		err := handleCheckReceivedEVMEvents_enqueueProcessEVMEvent(
+		err := handleIndexActionCheckReceivedEvents_enqueueProcessEVMEvent(
 			mylogger,
 			asynqClient,
 			evmEvent,
@@ -87,7 +96,7 @@ func HandleCheckReceivedEVMEvents(ctx context.Context, t *asynq.Task) error {
 	return nil
 }
 
-func handleCheckReceivedEVMEvents_enqueueProcessEVMEvent(
+func handleIndexActionCheckReceivedEvents_enqueueProcessEVMEvent(
 	logger *slog.Logger,
 	asynqClient *asynq.Client,
 
@@ -95,8 +104,8 @@ func handleCheckReceivedEVMEvents_enqueueProcessEVMEvent(
 ) error {
 	mylogger := logger.WithGroup("enqueueProcessEVMEvent").
 		With("evmEventId", evmEvent.ID)
-	mylogger.Info("Enqueueing NewProcessEVMEvent task...")
-	t, err := NewProcessEVMEvent(evmEvent.ID)
+	mylogger.Info("Enqueueing NewIndexActionProcessEVMEvent task...")
+	t, err := NewIndexActionProcessEVMEvent(evmEvent.ID)
 	if err != nil {
 		mylogger.Error("Cannot create task", "err", err)
 		return err
@@ -111,12 +120,8 @@ func handleCheckReceivedEVMEvents_enqueueProcessEVMEvent(
 }
 
 func init() {
-	t := Tasks.Register(task.DefineTask(
-		TypeCheckReceivedEVMEventsPayload,
-		HandleCheckReceivedEVMEvents,
-	))
-	PeriodicTasks.Register(task.DefinePeriodicTask(
-		t,
-		NewCheckReceivedEVMEventsTask,
+	Tasks.Register(task.DefineTask(
+		TypeIndexActionCheckReceivedEventsPayload,
+		HandleIndexActionCheckReceivedEvents,
 	))
 }

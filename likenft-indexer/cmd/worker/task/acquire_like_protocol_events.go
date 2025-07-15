@@ -10,6 +10,7 @@ import (
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/logic/contractevmeventacquirer"
+	"likenft-indexer/internal/worker/task"
 
 	"github.com/hibiken/asynq"
 )
@@ -27,7 +28,11 @@ func NewAcquireLikeProtocolEventsTask(contractAddress string) (*asynq.Task, erro
 	if err != nil {
 		return nil, err
 	}
-	return asynq.NewTask(TypeAcquireLikeProtocolEventsTaskPayload, payload), nil
+	return asynq.NewTask(
+		TypeAcquireLikeProtocolEventsTaskPayload,
+		payload,
+		asynq.Queue(TypeAcquireLikeProtocolEventsTaskPayload),
+	), nil
 }
 
 func HandleAcquireLikeProtocolEventsTask(ctx context.Context, t *asynq.Task) error {
@@ -74,7 +79,12 @@ func HandleAcquireLikeProtocolEventsTask(ctx context.Context, t *asynq.Task) err
 		[]string{p.ContractAddress},
 	)
 
-	newBlockHeight, err := acquirer.Acquire(ctx, logger, fromBlock, cfg.EvmEventQueryNumberOfBlocksLimit)
+	newBlockHeight, _, err := acquirer.Acquire(
+		ctx,
+		logger,
+		fromBlock,
+		cfg.EvmEventQueryNumberOfBlocksLimit,
+	)
 	if err != nil {
 		mylogger.Error("acquirer.Acquire", "err", err)
 		return err
@@ -83,4 +93,11 @@ func HandleAcquireLikeProtocolEventsTask(ctx context.Context, t *asynq.Task) err
 	likeProtocolRepository.CreateOrUpdateLatestEventBlockHeight(ctx, p.ContractAddress, typeutil.Uint64(newBlockHeight))
 
 	return nil
+}
+
+func init() {
+	Tasks.Register(task.DefineTask(
+		TypeAcquireLikeProtocolEventsTaskPayload,
+		HandleAcquireLikeProtocolEventsTask,
+	))
 }

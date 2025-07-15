@@ -33,28 +33,29 @@ make start-api
 Tasks:
 
 - `cmd/worker/task`
-- `cmd/worker/cmd/worker.go`
 
-To start worker on destinated queues
-
-```bash
-make start-worker-default
-```
+To start workers of all tasks
 
 ```bash
-make start-worker-index-action
-```
-
-To start worker on all queues
-
-```bash
-make start-worker-all
+make start-worker
 ```
 
 Start task scheduler
 
 ```bash
-make start-worker-scheduler
+make start-scheduler
+```
+
+To stop workers of all tasks
+
+```bash
+make stop-worker
+```
+
+Stop task scheduler
+
+```bash
+make stop-scheduler
 ```
 
 ## MakeFile

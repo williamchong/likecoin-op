@@ -55,26 +55,27 @@ abigen:
 
 .PHONY: start-api
 start-api:
-	go run ./cmd/api
+	docker compose --profile api up -d && docker compose --profile api logs -f
 
-.PHONY: start-worker-scheduler
-start-worker-scheduler:
-	go run ./cmd/worker scheduler
+.PHONY: stop-api
+stop-api:
+	docker compose --profile api stop && docker compose --profile api rm -f
 
-DEFAULT_QUEUE ?= default
-INDEX_ACTION_QUEUE ?= index-action
+.PHONY: start-scheduler
+start-scheduler:
+	docker compose --profile scheduler up -d && docker compose --profile scheduler logs -f
 
-.PHONY: start-worker-all
-start-worker-all:
-	go run ./cmd/worker worker $(DEFAULT_QUEUE) $(INDEX_ACTION_QUEUE)
+.PHONY: stop-scheduler
+stop-scheduler:
+	docker compose --profile scheduler stop && docker compose --profile scheduler rm -f
 
-.PHONY: start-worker-default
-start-worker-default:
-	go run ./cmd/worker worker $(DEFAULT_QUEUE)
+.PHONY: start-worker
+start-worker:
+	docker compose --profile worker up -d && docker compose --profile worker logs -f
 
-.PHONY: start-worker-index-action
-start-worker-index-action:
-	go run ./cmd/worker worker $(INDEX_ACTION_QUEUE)
+.PHONY: stop-worker
+stop-worker:
+	docker compose --profile worker stop && docker compose --profile worker rm -f
 
 .PHONY: migration
 migration:

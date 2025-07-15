@@ -1,28 +1,42 @@
+{{- with .Values.likenftIndexer.scheduler.deployments }}
+{{- range $name, $value := . }}
+{{- if ne (len .tasks) 0}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app.kubernetes.io/component: {{ .Values.likenftIndexer.scheduler.name }}
-  name: {{ .Values.likenftIndexer.scheduler.name }}
-  namespace: {{ .Values.namespace }}
+    app.kubernetes.io/component: {{ $.Values.likenftIndexer.scheduler.name }}-{{ $name }}
+  name: {{ $.Values.likenftIndexer.scheduler.name }}-{{ $name }}
+  namespace: {{ $.Values.namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/component: {{ .Values.likenftIndexer.scheduler.name }}
+      app.kubernetes.io/component: {{ $.Values.likenftIndexer.scheduler.name }}-{{ $name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: {{ .Values.likenftIndexer.scheduler.name }}
+        app.kubernetes.io/component: {{ $.Values.likenftIndexer.scheduler.name }}-{{ $name }}
     spec:
       restartPolicy: Always
       containers:
-      - name: {{ .Values.likenftIndexer.scheduler.name }}
-        image: {{ .Values.likenftIndexer.container.imageRepository }}:{{ .Values.appVersion }}
-        imagePullPolicy: {{ .Values.likenftIndexer.container.imagePullPolicy}}
-        command: ["likenft-indexer-worker-cli", "scheduler", "--cron", "{{ .Values.likenftIndexer.scheduler.cron }}"]
+      - name: {{ $.Values.likenftIndexer.scheduler.name }}-{{ $name }}
+        image: {{ $.Values.likenftIndexer.container.imageRepository }}:{{ $.Values.appVersion }}
+        imagePullPolicy: {{ $.Values.likenftIndexer.container.imagePullPolicy}}
+        command:
+          - "likenft-indexer-worker-cli"
+          - "scheduler"
+          - "--cron"
+          - "{{ .cron }}"
+          {{- range $task := .tasks }}
+          - "{{ $task }}"
+          {{- end }}
         envFrom:
           - secretRef:
-              name: {{ .Values.likenftIndexer.name }}
+              name: {{ $.Values.likenftIndexer.name }}
         resources:
-          {{- toYaml .Values.likenftIndexer.scheduler.resources | nindent 12 }}
+          {{- toYaml $value.resources | nindent 12 }}
+---
+{{- end }}
+{{- end }}
+{{- end }}

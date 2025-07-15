@@ -7,6 +7,7 @@ import (
 	"log/slog"
 
 	appcontext "likenft-indexer/cmd/worker/context"
+	"likenft-indexer/internal/worker/task"
 
 	"github.com/hibiken/asynq"
 )
@@ -14,22 +15,24 @@ import (
 const TypeCheckLikeProtocolPayload = "check-like-protocol"
 
 type CheckLikeProtocolPayload struct {
-	ContractAddress string
 }
 
-func NewCheckLikeProtocolTask(contractAddress string) (*asynq.Task, error) {
-	payload, err := json.Marshal(CheckLikeProtocolPayload{
-		ContractAddress: contractAddress,
-	})
+func NewCheckLikeProtocolTask() (*asynq.Task, error) {
+	payload, err := json.Marshal(CheckLikeProtocolPayload{})
 	if err != nil {
 		return nil, err
 	}
-	return asynq.NewTask(TypeCheckLikeProtocolPayload, payload), nil
+	return asynq.NewTask(
+		TypeCheckLikeProtocolPayload,
+		payload,
+		asynq.Queue(TypeCheckLikeProtocolPayload),
+	), nil
 }
 
 func HandleCheckLikeProtocol(ctx context.Context, t *asynq.Task) error {
 	logger := appcontext.LoggerFromContext(ctx)
 	asynqClient := appcontext.AsynqClientFromContext(ctx)
+	cfg := appcontext.ConfigFromContext(ctx)
 
 	mylogger := logger.WithGroup("HandleCheckLikeProtocol")
 
@@ -42,7 +45,7 @@ func HandleCheckLikeProtocol(ctx context.Context, t *asynq.Task) error {
 	err := handleCheckLikeProtocol_enqueueAcquireLikeProtocolEventsTask(
 		mylogger,
 		asynqClient,
-		p.ContractAddress,
+		cfg.EthLikeProtocolContractAddress,
 	)
 
 	if err != nil {
@@ -73,4 +76,15 @@ func handleCheckLikeProtocol_enqueueAcquireLikeProtocolEventsTask(
 	mylogger.Info("task enqueued", "taskId", taskInfo.ID)
 
 	return nil
+}
+
+func init() {
+	t := Tasks.Register(task.DefineTask(
+		TypeCheckLikeProtocolPayload,
+		HandleCheckLikeProtocol,
+	))
+	PeriodicTasks.Register(task.DefinePeriodicTask(
+		t,
+		NewCheckLikeProtocolTask,
+	))
 }

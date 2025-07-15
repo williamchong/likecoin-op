@@ -9,27 +9,32 @@ import (
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/logic/contractevmeventacquirer"
+	"likenft-indexer/internal/worker/task"
 
 	"github.com/hibiken/asynq"
 )
 
-const TypeCheckLikeProtocolToLatestBlockNumberPayload = "check-like-protocol-to-latest-block-number"
+const TypeIndexActionCheckLikeProtocolPayload = "index-action-check-like-protocol"
 
-type CheckLikeProtocolToLatestBlockNumberPayload struct {
+type IndexActionCheckLikeProtocolPayload struct {
 	ContractAddress string
 }
 
-func NewCheckLikeProtocolToLatestBlockNumberTask(contractAddress string) (*asynq.Task, error) {
-	payload, err := json.Marshal(CheckLikeProtocolToLatestBlockNumberPayload{
+func NewIndexActionCheckLikeProtocolTask(contractAddress string) (*asynq.Task, error) {
+	payload, err := json.Marshal(IndexActionCheckLikeProtocolPayload{
 		ContractAddress: contractAddress,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return asynq.NewTask(TypeCheckLikeProtocolToLatestBlockNumberPayload, payload), nil
+	return asynq.NewTask(
+		TypeIndexActionCheckLikeProtocolPayload,
+		payload,
+		asynq.Queue(TypeIndexActionCheckLikeProtocolPayload),
+	), nil
 }
 
-func HandleCheckLikeProtocolToLatestBlockNumber(ctx context.Context, t *asynq.Task) error {
+func HandleIndexActionCheckLikeProtocol(ctx context.Context, t *asynq.Task) error {
 	logger := appcontext.LoggerFromContext(ctx)
 	envCfg := appcontext.ConfigFromContext(ctx)
 	asynqClient := appcontext.AsynqClientFromContext(ctx)
@@ -40,11 +45,11 @@ func HandleCheckLikeProtocolToLatestBlockNumber(ctx context.Context, t *asynq.Ta
 	likeProtocolRepository := database.MakeLikeProtocolRepository(dbService)
 	evmEventRepository := database.MakeEVMEventRepository(dbService)
 
-	mylogger := logger.WithGroup("HandleCheckLikeProtocolToLatestBlockNumber")
+	mylogger := logger.WithGroup("HandleIndexActionCheckLikeProtocol")
 
-	var p CheckLikeProtocolToLatestBlockNumberPayload
+	var p IndexActionCheckLikeProtocolPayload
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
-		mylogger.Error("json.Unmarshal CheckLikeProtocolToLatestBlockNumberPayload", "err", err)
+		mylogger.Error("json.Unmarshal IndexActionCheckLikeProtocolPayload", "err", err)
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
@@ -85,7 +90,7 @@ func HandleCheckLikeProtocolToLatestBlockNumber(ctx context.Context, t *asynq.Ta
 			"partition",
 			fmt.Sprintf("%d/%d", i, len(blockStarts)),
 		)
-		newBlockNumber, err := acquirer.Acquire(
+		newBlockNumber, _, err := acquirer.Acquire(
 			ctx,
 			mylogger,
 			blockStart,
@@ -94,6 +99,18 @@ func HandleCheckLikeProtocolToLatestBlockNumber(ctx context.Context, t *asynq.Ta
 		if err != nil {
 			return err
 		}
+
+		task, err := NewIndexActionCheckReceivedEventsTask(p.ContractAddress)
+		if err != nil {
+			mylogger.
+				WarnContext(ctx, "cannot create task. should eventually picked up by periodic worker. skip.", "err", err)
+		}
+		_, err = asynqClient.EnqueueContext(ctx, task, asynq.MaxRetry(0))
+		if err != nil {
+			mylogger.
+				WarnContext(ctx, "cannot enqueue task. should eventually picked up by periodic worker. skip.", "err", err)
+		}
+
 		err = likeProtocolRepository.CreateOrUpdateLatestEventBlockHeight(
 			ctx,
 			p.ContractAddress,
@@ -102,17 +119,13 @@ func HandleCheckLikeProtocolToLatestBlockNumber(ctx context.Context, t *asynq.Ta
 		if err != nil {
 			return err
 		}
-
-		task, err := NewCheckReceivedEVMEventsTask()
-		if err != nil {
-			return err
-		}
-
-		_, err = asynqClient.Enqueue(task, asynq.MaxRetry(0))
-
-		if err != nil {
-			return err
-		}
 	}
 	return nil
+}
+
+func init() {
+	Tasks.Register(task.DefineTask(
+		TypeIndexActionCheckLikeProtocolPayload,
+		HandleIndexActionCheckLikeProtocol,
+	))
 }

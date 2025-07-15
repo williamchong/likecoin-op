@@ -9,11 +9,13 @@ import (
 	appcontext "likenft-indexer/cmd/worker/context"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/logic/evmeventprocessor"
+	"likenft-indexer/internal/worker/task"
 
 	"github.com/hibiken/asynq"
 )
 
 const TypeProcessEVMEventPayload = "process-evm-event"
+const TypeIndexActionProcessEVMEventPayload = "index-action-process-evm-event"
 
 type ProcessEVMEventPayload struct {
 	EvmEventId int
@@ -26,7 +28,25 @@ func NewProcessEVMEvent(evmEventId int) (*asynq.Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	return asynq.NewTask(TypeProcessEVMEventPayload, payload), nil
+	return asynq.NewTask(
+		TypeProcessEVMEventPayload,
+		payload,
+		asynq.Queue(TypeProcessEVMEventPayload),
+	), nil
+}
+
+func NewIndexActionProcessEVMEvent(evmEventId int) (*asynq.Task, error) {
+	payload, err := json.Marshal(ProcessEVMEventPayload{
+		EvmEventId: evmEventId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return asynq.NewTask(
+		TypeIndexActionProcessEVMEventPayload,
+		payload,
+		asynq.Queue(TypeIndexActionProcessEVMEventPayload),
+	), nil
 }
 
 func HandleProcessEVMEvent(ctx context.Context, t *asynq.Task) error {
@@ -78,4 +98,15 @@ func HandleProcessEVMEvent(ctx context.Context, t *asynq.Task) error {
 	}
 
 	return nil
+}
+
+func init() {
+	Tasks.Register(task.DefineTask(
+		TypeProcessEVMEventPayload,
+		HandleProcessEVMEvent,
+	))
+	Tasks.Register(task.DefineTask(
+		TypeIndexActionProcessEVMEventPayload,
+		HandleProcessEVMEvent,
+	))
 }

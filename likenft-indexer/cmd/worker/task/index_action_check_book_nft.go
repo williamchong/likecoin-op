@@ -9,27 +9,32 @@ import (
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/logic/contractevmeventacquirer"
+	"likenft-indexer/internal/worker/task"
 
 	"github.com/hibiken/asynq"
 )
 
-const TypeCheckBookNFTToLatestBlockNumberPayload = "check-book-nft-to-latest-block-number"
+const TypeIndexActionCheckBookNFTPayload = "index-action-check-book-nft"
 
-type CheckBookNFTToLatestBlockNumberPayload struct {
+type IndexActionCheckBookNFTPayload struct {
 	ContractAddress string
 }
 
-func NewCheckBookNFTToLatestBlockNumberTask(contractAddress string) (*asynq.Task, error) {
-	payload, err := json.Marshal(CheckBookNFTToLatestBlockNumberPayload{
+func NewIndexActionCheckBookNFTTask(contractAddress string) (*asynq.Task, error) {
+	payload, err := json.Marshal(IndexActionCheckBookNFTPayload{
 		ContractAddress: contractAddress,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return asynq.NewTask(TypeCheckBookNFTToLatestBlockNumberPayload, payload), nil
+	return asynq.NewTask(
+		TypeIndexActionCheckBookNFTPayload,
+		payload,
+		asynq.Queue(TypeIndexActionCheckBookNFTPayload),
+	), nil
 }
 
-func HandleCheckBookNFTToLatestBlockNumber(ctx context.Context, t *asynq.Task) error {
+func HandleIndexActionCheckBookNFT(ctx context.Context, t *asynq.Task) error {
 	logger := appcontext.LoggerFromContext(ctx)
 	envCfg := appcontext.ConfigFromContext(ctx)
 	asynqClient := appcontext.AsynqClientFromContext(ctx)
@@ -40,11 +45,11 @@ func HandleCheckBookNFTToLatestBlockNumber(ctx context.Context, t *asynq.Task) e
 	nftClassRepository := database.MakeNFTClassRepository(dbService)
 	evmEventRepository := database.MakeEVMEventRepository(dbService)
 
-	mylogger := logger.WithGroup("HandleCheckBookNFTToLatestBlockNumber")
+	mylogger := logger.WithGroup("HandleIndexActionCheckBookNFT")
 
-	var p CheckBookNFTToLatestBlockNumberPayload
+	var p IndexActionCheckBookNFTPayload
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
-		mylogger.Error("json.Unmarshal CheckBookNFTToLatestBlockNumberPayload", "err", err)
+		mylogger.Error("json.Unmarshal IndexActionCheckBookNFTPayload", "err", err)
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
@@ -85,7 +90,7 @@ func HandleCheckBookNFTToLatestBlockNumber(ctx context.Context, t *asynq.Task) e
 			"partition",
 			fmt.Sprintf("%d/%d", i, len(blockStarts)),
 		)
-		newBlockNumber, err := acquirer.Acquire(
+		newBlockNumber, _, err := acquirer.Acquire(
 			ctx,
 			mylogger,
 			blockStart,
@@ -93,6 +98,16 @@ func HandleCheckBookNFTToLatestBlockNumber(ctx context.Context, t *asynq.Task) e
 		)
 		if err != nil {
 			return err
+		}
+		task, err := NewIndexActionCheckReceivedEventsTask(p.ContractAddress)
+		if err != nil {
+			mylogger.
+				WarnContext(ctx, "cannot create task. should eventually picked up by periodic worker. skip.", "err", err)
+		}
+		_, err = asynqClient.EnqueueContext(ctx, task, asynq.MaxRetry(0))
+		if err != nil {
+			mylogger.
+				WarnContext(ctx, "cannot enqueue task. should eventually picked up by periodic worker. skip.", "err", err)
 		}
 		err = nftClassRepository.UpdateNFTClassesLatestEventBlockNumber(
 			ctx,
@@ -102,16 +117,13 @@ func HandleCheckBookNFTToLatestBlockNumber(ctx context.Context, t *asynq.Task) e
 		if err != nil {
 			return err
 		}
-		task, err := NewCheckReceivedEVMEventsTask()
-		if err != nil {
-			return err
-		}
-
-		_, err = asynqClient.Enqueue(task, asynq.MaxRetry(0))
-
-		if err != nil {
-			return err
-		}
 	}
 	return nil
+}
+
+func init() {
+	Tasks.Register(task.DefineTask(
+		TypeIndexActionCheckBookNFTPayload,
+		HandleIndexActionCheckBookNFT,
+	))
 }

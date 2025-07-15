@@ -11,6 +11,7 @@ import (
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/logic/contractevmeventacquirer"
+	"likenft-indexer/internal/worker/task"
 
 	"github.com/hibiken/asynq"
 )
@@ -28,7 +29,11 @@ func NewAcquireBookNFTEventsTask(contractAddresses []string) (*asynq.Task, error
 	if err != nil {
 		return nil, err
 	}
-	return asynq.NewTask(TypeAcquireBookNFTEventsTaskPayload, payload), nil
+	return asynq.NewTask(
+		TypeAcquireBookNFTEventsTaskPayload,
+		payload,
+		asynq.Queue(TypeAcquireBookNFTEventsTaskPayload),
+	), nil
 }
 
 func groupByProperty[T any, K comparable](items []T, getProperty func(T) K) map[K][]T {
@@ -91,7 +96,12 @@ func HandleAcquireBookNFTEventsTask(ctx context.Context, t *asynq.Task) error {
 			addresses,
 		)
 
-		newBlockHeight, err := acquirer.Acquire(ctx, logger, uint64(latestEventsBlockHeight), cfg.EvmEventQueryNumberOfBlocksLimit)
+		newBlockHeight, _, err := acquirer.Acquire(
+			ctx,
+			logger,
+			uint64(latestEventsBlockHeight),
+			cfg.EvmEventQueryNumberOfBlocksLimit,
+		)
 
 		if err != nil {
 			mylogger.Error("acquirer.Acquire", "err", err)
@@ -117,4 +127,11 @@ func HandleAcquireBookNFTEventsTask(ctx context.Context, t *asynq.Task) error {
 	}
 
 	return nil
+}
+
+func init() {
+	Tasks.Register(task.DefineTask(
+		TypeAcquireBookNFTEventsTaskPayload,
+		HandleAcquireBookNFTEventsTask,
+	))
 }

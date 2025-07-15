@@ -37,7 +37,7 @@ type ContractEvmEventsAcquirer interface {
 		logger *slog.Logger,
 		fromBlock uint64,
 		numberOfBlocksLimit uint64,
-	) (uint64, error)
+	) (uint64, []*ent.EVMEvent, error)
 }
 
 type contractEvmEventsAcquirer struct {
@@ -85,7 +85,7 @@ func (a *contractEvmEventsAcquirer) Acquire(
 	logger *slog.Logger,
 	fromBlock uint64,
 	numberOfBlocksLimit uint64,
-) (uint64, error) {
+) (uint64, []*ent.EVMEvent, error) {
 	myLogger := logger.WithGroup("ContractEvmEventsAcquire").
 		With("contractAddresses", a.contractAddresses).
 		With("contractType", a.contractType).
@@ -95,21 +95,21 @@ func (a *contractEvmEventsAcquirer) Acquire(
 	abi, err := a.abi()
 	if err != nil {
 		myLogger.Error("failed to get abi", "error", err)
-		return fromBlock, err
+		return fromBlock, nil, err
 	}
 
 	// Get chain ID
 	chainID, err := a.evmClient.ChainID(ctx)
 	if err != nil {
 		myLogger.Error("failed to get chain ID", "error", err)
-		return fromBlock, err
+		return fromBlock, nil, err
 	}
 
 	// Get block height
 	blockHeight, err := a.evmClient.BlockNumber(ctx)
 	if err != nil {
 		myLogger.Error("failed to get block height", "error", err)
-		return fromBlock, err
+		return fromBlock, nil, err
 	}
 
 	// The block limit includes `fromBlock` itself so need to -1
@@ -119,7 +119,7 @@ func (a *contractEvmEventsAcquirer) Acquire(
 
 	if fromBlock >= toBlock {
 		myLogger.Info("no new blocks. skip")
-		return toBlock, nil
+		return toBlock, []*ent.EVMEvent{}, nil
 	}
 
 	var addresses = make([]common.Address, len(a.contractAddresses))
@@ -131,7 +131,7 @@ func (a *contractEvmEventsAcquirer) Acquire(
 
 	if err != nil {
 		myLogger.Error("failed to query events", "error", err)
-		return fromBlock, err
+		return fromBlock, nil, err
 	}
 
 	blockNumbers := make([]uint64, len(logs))
@@ -143,14 +143,15 @@ func (a *contractEvmEventsAcquirer) Acquire(
 	headerMap, err := a.evmClient.GetHeaderMapByBlockNumbers(ctx, blockNumbers)
 	if err != nil {
 		myLogger.Error("a.evmClient.GetHeaderMapByBlockNumbers", "err", err)
-		return fromBlock, err
+		return fromBlock, nil, err
 	}
 
+	var allEvmEvents = make([]*ent.EVMEvent, 0)
 	if len(logs) > 0 {
 		// Convert logs to EVMEvents
 		logConverter := logconverter.NewLogConverter(abi)
-		evmEvents := make([]*ent.EVMEvent, 0, len(logs))
 
+		evmEvents := make([]*ent.EVMEvent, 0, len(logs))
 		for _, log := range logs {
 			mylogger := myLogger.
 				With("txHash", log.TxHash).
@@ -159,7 +160,7 @@ func (a *contractEvmEventsAcquirer) Acquire(
 			evmEvent, err := logConverter.ConvertLogToEvmEvent(log, headerMap[log.BlockNumber])
 			if err != nil {
 				mylogger.Error("failed to convert log", "error", err)
-				return fromBlock, errors.Join(&ErrCannotConvertLog{
+				return fromBlock, nil, errors.Join(&ErrCannotConvertLog{
 					Log: log,
 				}, err)
 			}
@@ -168,15 +169,15 @@ func (a *contractEvmEventsAcquirer) Acquire(
 		}
 
 		// Insert events into database
-		_, err = a.evmEventRepository.InsertEvmEventsIfNeeded(ctx, evmEvents)
+		allEvmEvents, err = a.evmEventRepository.InsertEvmEventsIfNeeded(ctx, evmEvents)
 		if err != nil {
 			myLogger.Error("failed to insert events", "error", err)
-			return fromBlock, err
+			return fromBlock, nil, err
 		}
 		myLogger.Info("inserted events", "count", len(evmEvents))
 	} else {
 		myLogger.Debug("no logs found in range")
 	}
 
-	return toBlock, nil
+	return toBlock, allEvmEvents, nil
 }

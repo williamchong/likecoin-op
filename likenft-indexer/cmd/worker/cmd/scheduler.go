@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
+	"strings"
 
 	"likenft-indexer/cmd/worker/context"
 	"likenft-indexer/cmd/worker/task"
@@ -13,28 +15,15 @@ import (
 var defaultCronSchedule = "* * * * *"
 
 var schedulerCmd = &cobra.Command{
-	Use:   "scheduler",
+	Use:   fmt.Sprintf("scheduler [%s]...", strings.Join(task.PeriodicTasks.GetRegisteredPeriodicTasks(), " | ")),
 	Short: "Start scheduelr",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := cmd.Context()
-		cfg := context.ConfigFromContext(ctx)
 		scheduler := context.AsynqSchedulerFromContext(ctx)
 
-		checkBookNFTsTask, err := task.NewCheckBookNFTsTask()
-		if err != nil {
-			log.Fatalf("could not create task: %v", err)
-		}
-
-		checkLikeProtocolTask, err := task.NewCheckLikeProtocolTask(
-			cfg.EthLikeProtocolContractAddress,
-		)
-		if err != nil {
-			log.Fatalf("could not create task: %v", err)
-		}
-
-		checkReceivedEVMEventsTask, err := task.NewCheckReceivedEVMEventsTask()
-		if err != nil {
-			log.Fatalf("could not create task: %v", err)
+		if len(args) < 1 {
+			_ = cmd.Usage()
+			return
 		}
 
 		cronSchedule, err := cmd.Flags().GetString("cron")
@@ -43,17 +32,16 @@ var schedulerCmd = &cobra.Command{
 			return
 		}
 
-		_, err = scheduler.Register(cronSchedule, checkBookNFTsTask, asynq.MaxRetry(0))
+		periodic, err := task.PeriodicTasks.MakePeriodic(args...)
+
 		if err != nil {
-			log.Fatalf("could not register task: %v", err)
+			log.Fatalf("could not make periodic: %v", err)
 		}
-		_, err = scheduler.Register(cronSchedule, checkLikeProtocolTask, asynq.MaxRetry(0))
+
+		scheduler, err = periodic.ConfigScheduler(cronSchedule, scheduler, asynq.MaxRetry(0))
+
 		if err != nil {
-			log.Fatalf("could not register task: %v", err)
-		}
-		_, err = scheduler.Register(cronSchedule, checkReceivedEVMEventsTask, asynq.MaxRetry(0))
-		if err != nil {
-			log.Fatalf("could not register task: %v", err)
+			log.Fatalf("could not configure scheduler: %v", err)
 		}
 
 		if err := scheduler.Run(); err != nil {

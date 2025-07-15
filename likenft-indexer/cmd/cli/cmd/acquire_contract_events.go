@@ -51,7 +51,12 @@ var AcquireContractEvents = &cobra.Command{
 			[]string{contractAddress},
 		)
 
-		newBlockHeight, err := acquirer.Acquire(ctx, logger, fromBlock, numberOfBlocksLimit)
+		newBlockHeight, _, err := acquirer.Acquire(
+			ctx,
+			logger,
+			fromBlock,
+			numberOfBlocksLimit,
+		)
 
 		if err != nil {
 			panic(err)
