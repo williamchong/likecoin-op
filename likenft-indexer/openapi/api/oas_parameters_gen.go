@@ -236,11 +236,6 @@ func decodeBookNFTsParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 			Err:  err,
 		}
 	}
-	// Set default value for query: pagination.key.
-	{
-		val := int(0)
-		params.PaginationKey.SetTo(val)
-	}
 	// Decode query: pagination.key.
 	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
@@ -473,11 +468,6 @@ func decodeBookNFTsByAccountParams(args [1]string, argsEscaped bool, r *http.Req
 			In:   "query",
 			Err:  err,
 		}
-	}
-	// Set default value for query: pagination.key.
-	{
-		val := int(0)
-		params.PaginationKey.SetTo(val)
 	}
 	// Decode query: pagination.key.
 	if err := func() error {
@@ -3450,11 +3440,6 @@ func decodeTokenAccountsByBookNFTParams(args [1]string, argsEscaped bool, r *htt
 			Err:  err,
 		}
 	}
-	// Set default value for query: pagination.key.
-	{
-		val := int(0)
-		params.PaginationKey.SetTo(val)
-	}
 	// Decode query: pagination.key.
 	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
@@ -3688,11 +3673,6 @@ func decodeTokensByAccountParams(args [1]string, argsEscaped bool, r *http.Reque
 			Err:  err,
 		}
 	}
-	// Set default value for query: pagination.key.
-	{
-		val := int(0)
-		params.PaginationKey.SetTo(val)
-	}
 	// Decode query: pagination.key.
 	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
@@ -3925,11 +3905,6 @@ func decodeTokensByBookNFTParams(args [1]string, argsEscaped bool, r *http.Reque
 			In:   "query",
 			Err:  err,
 		}
-	}
-	// Set default value for query: pagination.key.
-	{
-		val := int(0)
-		params.PaginationKey.SetTo(val)
 	}
 	// Decode query: pagination.key.
 	if err := func() error {
