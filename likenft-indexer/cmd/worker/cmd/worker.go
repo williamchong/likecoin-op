@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	verbosityutil "likenft-indexer/cmd/worker/cmd/util/verbosity"
 	"likenft-indexer/cmd/worker/context"
 	"likenft-indexer/cmd/worker/task"
 	"likenft-indexer/internal/util/sentry"
@@ -27,6 +28,7 @@ var workerCmd = &cobra.Command{
 			_ = cmd.Usage()
 			return
 		}
+		logger, err := verbosityutil.GetLoggerFromCmd(cmd)
 
 		if len(args) < 1 {
 			_ = cmd.Usage()
@@ -40,7 +42,6 @@ var workerCmd = &cobra.Command{
 		}
 
 		envCfg := context.ConfigFromContext(cmd.Context())
-		logger := context.LoggerFromContext(cmd.Context())
 		asynqClient := context.AsynqClientFromContext(cmd.Context())
 		evmQueryClient := context.EvmQueryClientFromContext(cmd.Context())
 		evmClient := context.EvmClientFromContext(cmd.Context())
