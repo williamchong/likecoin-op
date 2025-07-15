@@ -2,6 +2,7 @@ package model
 
 import (
 	"likenft-indexer/ent"
+	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/evm/model"
 	"likenft-indexer/openapi/api"
 
@@ -38,4 +39,33 @@ func MakeNFTClass(e *ent.NFTClass) (*api.BookNFT, error) {
 		UpdatedAt:           e.UpdatedAt,
 		Owner:               MakeOptAccount(e.Edges.Owner),
 	}, nil
+}
+
+type NFTClassPagination struct {
+	// Pagination.limit.
+	PaginationLimit api.OptInt
+	// Pagination.key.
+	PaginationKey api.OptInt
+	// Reverse.
+	Reverse api.OptBool
+}
+
+func (p *NFTClassPagination) ToEntPagination() database.NFTClassPagination {
+	limit := FromOpt(p.PaginationLimit)
+	if limit != nil && *limit == 0 {
+		limit = nil
+	}
+
+	key := FromOpt(p.PaginationKey)
+	if key != nil && *key == 0 {
+		key = nil
+	}
+
+	reverse := FromOpt(p.Reverse)
+
+	return database.NFTClassPagination{
+		Limit:   limit,
+		Key:     key,
+		Reverse: reverse,
+	}
 }

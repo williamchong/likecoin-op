@@ -83,6 +83,46 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /account/{evm_address}/token-booknfts:
+    get:
+      tags:
+        - Account
+      summary: Query booknfts of tokens owned by account
+      description: Query booknfts of tokens owned by account
+      operationId: tokenBookNFTsByAccount
+      parameters:
+        - name: evm_address
+          in: path
+          description: evm_address of the Account
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/PaginationRequestLimit"
+        - $ref: "#/components/parameters/PaginationRequestKey"
+        - $ref: "#/components/parameters/PaginationRequestReverse"
+      responses:
+        "200":
+          description: BookNFT with requested ID was found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/PaginationResponse"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/BookNFT"
+                required:
+                  - pagination
+                  - data
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /likeprotocol/latest-event-block-number:
     get:
       tags:
