@@ -3673,11 +3673,6 @@ func decodeTokenBookNFTsByAccountParams(args [1]string, argsEscaped bool, r *htt
 			Err:  err,
 		}
 	}
-	// Set default value for query: pagination.key.
-	{
-		val := int(0)
-		params.PaginationKey.SetTo(val)
-	}
 	// Decode query: pagination.key.
 	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
