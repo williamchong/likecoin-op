@@ -411,6 +411,28 @@ func (s *ContractLevelMetadataAdditional) init() ContractLevelMetadataAdditional
 	return m
 }
 
+type ContractLevelMetadataEQ map[string]string
+
+func (s *ContractLevelMetadataEQ) init() ContractLevelMetadataEQ {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
+type ContractLevelMetadataNEQ map[string]string
+
+func (s *ContractLevelMetadataNEQ) init() ContractLevelMetadataNEQ {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
 // Ref: #/components/schemas/Erc721MetadataAttribute
 type Erc721MetadataAttribute struct {
 	DisplayType OptErc721MetadataAttributeDisplayType `json:"display_type"`
@@ -1369,6 +1391,98 @@ func (o OptContractLevelMetadata) Get() (v ContractLevelMetadata, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptContractLevelMetadata) Or(d ContractLevelMetadata) ContractLevelMetadata {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptContractLevelMetadataEQ returns new OptContractLevelMetadataEQ with value set to v.
+func NewOptContractLevelMetadataEQ(v ContractLevelMetadataEQ) OptContractLevelMetadataEQ {
+	return OptContractLevelMetadataEQ{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptContractLevelMetadataEQ is optional ContractLevelMetadataEQ.
+type OptContractLevelMetadataEQ struct {
+	Value ContractLevelMetadataEQ
+	Set   bool
+}
+
+// IsSet returns true if OptContractLevelMetadataEQ was set.
+func (o OptContractLevelMetadataEQ) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptContractLevelMetadataEQ) Reset() {
+	var v ContractLevelMetadataEQ
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptContractLevelMetadataEQ) SetTo(v ContractLevelMetadataEQ) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptContractLevelMetadataEQ) Get() (v ContractLevelMetadataEQ, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptContractLevelMetadataEQ) Or(d ContractLevelMetadataEQ) ContractLevelMetadataEQ {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptContractLevelMetadataNEQ returns new OptContractLevelMetadataNEQ with value set to v.
+func NewOptContractLevelMetadataNEQ(v ContractLevelMetadataNEQ) OptContractLevelMetadataNEQ {
+	return OptContractLevelMetadataNEQ{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptContractLevelMetadataNEQ is optional ContractLevelMetadataNEQ.
+type OptContractLevelMetadataNEQ struct {
+	Value ContractLevelMetadataNEQ
+	Set   bool
+}
+
+// IsSet returns true if OptContractLevelMetadataNEQ was set.
+func (o OptContractLevelMetadataNEQ) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptContractLevelMetadataNEQ) Reset() {
+	var v ContractLevelMetadataNEQ
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptContractLevelMetadataNEQ) SetTo(v ContractLevelMetadataNEQ) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptContractLevelMetadataNEQ) Get() (v ContractLevelMetadataNEQ, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptContractLevelMetadataNEQ) Or(d ContractLevelMetadataNEQ) ContractLevelMetadataNEQ {
 	if v, ok := o.Get(); ok {
 		return v
 	}
