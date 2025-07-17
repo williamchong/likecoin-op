@@ -17,6 +17,7 @@ type OpenAPIHandler struct {
 
 	db                     *ent.Client
 	nftClassRepository     database.NFTClassRepository
+	nftRepository          database.NFTRepository
 	evmEventRepository     database.EVMEventRepository
 	accountRepository      database.AccountRepository
 	likeProtocolRepository database.LikeProtocolRepository
@@ -40,6 +41,7 @@ func NewOpenAPIHandler(
 
 		db:                     db.Client(),
 		nftClassRepository:     database.MakeNFTClassRepository(db),
+		nftRepository:          database.MakeNFTRepository(db),
 		evmEventRepository:     database.MakeEVMEventRepository(db),
 		accountRepository:      database.MakeAccountRepository(db),
 		likeProtocolRepository: database.MakeLikeProtocolRepository(db),

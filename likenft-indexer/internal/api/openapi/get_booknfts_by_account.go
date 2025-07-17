@@ -3,8 +3,8 @@ package openapi
 import (
 	"context"
 
-	"likenft-indexer/ent/account"
 	"likenft-indexer/internal/api/openapi/model"
+	"likenft-indexer/internal/database"
 	"likenft-indexer/openapi/api"
 )
 
@@ -12,37 +12,30 @@ func (h *OpenAPIHandler) BookNFTsByAccount(
 	ctx context.Context,
 	params api.BookNFTsByAccountParams,
 ) (*api.BookNFTsByAccountOK, error) {
-	account, err := h.db.Account.Query().Where(account.EvmAddressEqualFold(params.EvmAddress)).Only(ctx)
-
-	if err != nil {
-		return nil, err
+	ps := model.NFTClassPagination{
+		PaginationLimit: params.PaginationLimit,
+		PaginationKey:   params.PaginationKey,
+		Reverse:         params.Reverse,
 	}
 
-	bookNFTsQ := account.QueryNftClasses()
-
-	count, err := bookNFTsQ.Count(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
-	paginatedQ := h.handleNFTClassPagination(
-		bookNFTsQ,
-		params.PaginationLimit,
-		params.PaginationKey,
-		params.Reverse,
+	metadataEQ := database.ContractLevelMetadataFilterEquatable(
+		params.ContractLevelMetadataEq.Or(api.ContractLevelMetadataEQ{}),
 	)
 
-	bookNFTs, err := paginatedQ.All(ctx)
+	metadataNEQ := database.ContractLevelMetadataFilterEquatable(
+		params.ContractLevelMetadataNeq.Or(api.ContractLevelMetadataNEQ{}),
+	)
+
+	bookNFTs, count, nextKey, err := h.nftClassRepository.QueryNFTClassesByEvmAddress(
+		ctx,
+		params.EvmAddress,
+		metadataEQ,
+		metadataNEQ,
+		ps.ToEntPagination(),
+	)
 
 	if err != nil {
 		return nil, err
-	}
-
-	nextKey := 0
-
-	if len(bookNFTs) > 0 {
-		nextKey = bookNFTs[len(bookNFTs)-1].ID
 	}
 
 	apiBookNFTs := make([]api.BookNFT, len(bookNFTs))
