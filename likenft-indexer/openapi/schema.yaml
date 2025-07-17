@@ -20,6 +20,8 @@ paths:
         - $ref: "#/components/parameters/PaginationRequestLimit"
         - $ref: "#/components/parameters/PaginationRequestKey"
         - $ref: "#/components/parameters/PaginationRequestReverse"
+        - $ref: "#/components/parameters/ContractLevelMetadataEQ"
+        - $ref: "#/components/parameters/ContractLevelMetadataNEQ"
       responses:
         "200":
           description: BookNFT with requested ID was found
@@ -60,6 +62,8 @@ paths:
         - $ref: "#/components/parameters/PaginationRequestLimit"
         - $ref: "#/components/parameters/PaginationRequestKey"
         - $ref: "#/components/parameters/PaginationRequestReverse"
+        - $ref: "#/components/parameters/ContractLevelMetadataEQ"
+        - $ref: "#/components/parameters/ContractLevelMetadataNEQ"
       responses:
         "200":
           description: BookNFT with requested ID was found
@@ -708,6 +712,26 @@ components:
       required: false
       schema:
         type: string
+    ContractLevelMetadataEQ:
+      name: contract_level_metadata_eq
+      in: query
+      description: contract_level_metadata_eq
+      required: false
+      schema:
+        type: object
+        additionalProperties:
+          type: string
+      explode: false
+    ContractLevelMetadataNEQ:
+      name: contract_level_metadata_neq
+      in: query
+      description: contract_level_metadata_neq
+      required: false
+      schema:
+        type: object
+        additionalProperties:
+          type: string
+      explode: false
     IndexActionAPIKeyHeader:
       name: X-Index-Action-Api-Key
       in: header
