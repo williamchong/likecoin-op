@@ -8,15 +8,23 @@ import (
 	"likenft-indexer/internal/evm/model"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"entgo.io/ent/schema/mixin"
 )
 
 // NFTClass holds the schema definition for the NFTClass entity.
 type NFTClass struct {
 	ent.Schema
+}
+
+func (NFTClass) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		nftClassAcquireBookNFTEventsMixin{},
+	}
 }
 
 // Fields of the NFTClass.
@@ -78,4 +86,37 @@ func (NFTClass) Annotations() []schema.Annotation {
 		typeutil.Uint64Annotations("deployed_block_number"),
 		typeutil.Uint64Annotations("latest_event_block_number"),
 	)
+}
+
+// --- mixins
+
+type nftClassAcquireBookNFTEventsMixin struct {
+	mixin.Schema
+}
+
+func (nftClassAcquireBookNFTEventsMixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.Float("acquire_book_nft_events_weight").Default(1).Min(0),
+		field.Time("acquire_book_nft_events_last_processed_time").Optional().Nillable(),
+		field.Float("acquire_book_nft_events_score").SchemaType(map[string]string{
+			dialect.Postgres: "numeric",
+		}).Optional().Nillable(),
+		field.Enum("acquire_book_nft_events_status").Values(
+			"enqueueing",
+			"enqueued",
+			"enqueue_failed",
+			"processing",
+			"completed",
+			"failed",
+		).Optional().Nillable(),
+		field.String("acquire_book_nft_events_failed_reason").Optional().Nillable(),
+		field.Int("acquire_book_nft_events_failed_count").Default(0),
+	}
+}
+
+func (nftClassAcquireBookNFTEventsMixin) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("acquire_book_nft_events_score"),
+		index.Fields("acquire_book_nft_events_status"),
+	}
 }
