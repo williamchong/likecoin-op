@@ -24,6 +24,16 @@ type EnvConfig struct {
 
 	EvmEventLikeProtocolInitialBlockHeight uint64 `envconfig:"EVM_EVENT_LIKE_PROTOCOL_INITIAL_BLOCK_HEIGHT" default:"1"`
 	EvmEventQueryNumberOfBlocksLimit       uint64 `envconfig:"EVM_EVENT_QUERY_NUMBER_OF_BLOCKS_LIMIT"`
+
+	TaskAcquireBookNFTEventsMaxQueueLength                             int     `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_MAX_QUEUE_LENGTH"`
+	TaskAcquireBookNFTEventsNextProcessingScoreBlockHeightContribution float64 `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_NEXT_PROCESSING_SCORE_BLOCK_HEIGHT_CONTRIBUTION"`
+	TaskAcquireBookNFTEventsNextProcessingScoreWeight0Constant         float64 `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_NEXT_PROCESSING_SCORE_WEIGHT_0_CONSTANT"`
+	TaskAcquireBookNFTEventsNextProcessingScoreWeight1Constant         float64 `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_NEXT_PROCESSING_SCORE_WEIGHT_1_CONSTANT"`
+	TaskAcquireBookNFTEventsNextProcessingScoreWeightContribution      float64 `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_NEXT_PROCESSING_SCORE_WEIGHT_CONTRIBUTION"`
+	TaskAcquireBookNFTEventsInProgressTimeoutSeconds                   int     `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_IN_PROGRESS_TIMEOUT_SECONDS"`
+	TaskAcquireBookNFTEventsRetryInitialTimeoutSeconds                 int     `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_RETRY_INITIAL_TIMEOUT_SECONDS"`
+	TaskAcquireBookNFTEventsRetryExponentialBackoffCoeff               float64 `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_RETRY_EXPONENTIAL_BACKOFF_COEFF"`
+	TaskAcquireBookNFTEventsRetryMaxTimeoutSeconds                     int     `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_RETRY_MAX_TIMEOUT_SECONDS"`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {
