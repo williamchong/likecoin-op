@@ -7,6 +7,7 @@ import (
 	"context"
 	"os"
 
+	"likenft-indexer/cmd/worker/cmd/task"
 	verbosityutil "likenft-indexer/cmd/worker/cmd/util/verbosity"
 
 	"github.com/spf13/cobra"
@@ -46,4 +47,6 @@ func init() {
 
 	// verbosity flag. Only change the log level of application logger. Won't affect loggers in library e.g. asynq
 	rootCmd.PersistentFlags().StringP("verbose", "v", string(verbosityutil.VerbosityDefault), "Verbosity of logger")
+
+	rootCmd.AddCommand(task.TaskCmd)
 }
