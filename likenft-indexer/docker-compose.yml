@@ -51,7 +51,6 @@ services:
       - "1"
       - acquire-book-nft-events
       - acquire-like-protocol-events
-      - check-book-nfts
       - check-like-protocol
       - check-received-evm-events
 
@@ -135,7 +134,6 @@ services:
       - scheduler
       - --cron
       - "*/1 * * * *"
-      - check-book-nfts
       - check-like-protocol
       - check-received-evm-events
 

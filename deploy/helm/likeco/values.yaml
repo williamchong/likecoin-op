@@ -108,7 +108,6 @@ likenftIndexer:
       all-in-one:
         cron: "*/10 * * * *"
         tasks:
-          - check-book-nfts
           - check-like-protocol
 
       evm-events:
