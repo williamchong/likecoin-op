@@ -22,6 +22,18 @@ type NFTClass struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// AcquireBookNftEventsWeight holds the value of the "acquire_book_nft_events_weight" field.
+	AcquireBookNftEventsWeight float64 `json:"acquire_book_nft_events_weight,omitempty"`
+	// AcquireBookNftEventsLastProcessedTime holds the value of the "acquire_book_nft_events_last_processed_time" field.
+	AcquireBookNftEventsLastProcessedTime *time.Time `json:"acquire_book_nft_events_last_processed_time,omitempty"`
+	// AcquireBookNftEventsScore holds the value of the "acquire_book_nft_events_score" field.
+	AcquireBookNftEventsScore *float64 `json:"acquire_book_nft_events_score,omitempty"`
+	// AcquireBookNftEventsStatus holds the value of the "acquire_book_nft_events_status" field.
+	AcquireBookNftEventsStatus *nftclass.AcquireBookNftEventsStatus `json:"acquire_book_nft_events_status,omitempty"`
+	// AcquireBookNftEventsFailedReason holds the value of the "acquire_book_nft_events_failed_reason" field.
+	AcquireBookNftEventsFailedReason *string `json:"acquire_book_nft_events_failed_reason,omitempty"`
+	// AcquireBookNftEventsFailedCount holds the value of the "acquire_book_nft_events_failed_count" field.
+	AcquireBookNftEventsFailedCount int `json:"acquire_book_nft_events_failed_count,omitempty"`
 	// Address holds the value of the "address" field.
 	Address string `json:"address,omitempty"`
 	// Name holds the value of the "name" field.
@@ -103,11 +115,13 @@ func (*NFTClass) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case nftclass.FieldDisabledForIndexing:
 			values[i] = new(sql.NullBool)
-		case nftclass.FieldID:
+		case nftclass.FieldAcquireBookNftEventsWeight, nftclass.FieldAcquireBookNftEventsScore:
+			values[i] = new(sql.NullFloat64)
+		case nftclass.FieldID, nftclass.FieldAcquireBookNftEventsFailedCount:
 			values[i] = new(sql.NullInt64)
-		case nftclass.FieldAddress, nftclass.FieldName, nftclass.FieldSymbol, nftclass.FieldOwnerAddress, nftclass.FieldBannerImage, nftclass.FieldFeaturedImage, nftclass.FieldDeployerAddress, nftclass.FieldDisabledForIndexingReason:
+		case nftclass.FieldAcquireBookNftEventsStatus, nftclass.FieldAcquireBookNftEventsFailedReason, nftclass.FieldAddress, nftclass.FieldName, nftclass.FieldSymbol, nftclass.FieldOwnerAddress, nftclass.FieldBannerImage, nftclass.FieldFeaturedImage, nftclass.FieldDeployerAddress, nftclass.FieldDisabledForIndexingReason:
 			values[i] = new(sql.NullString)
-		case nftclass.FieldMintedAt, nftclass.FieldUpdatedAt:
+		case nftclass.FieldAcquireBookNftEventsLastProcessedTime, nftclass.FieldMintedAt, nftclass.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case nftclass.FieldTotalSupply:
 			values[i] = nftclass.ValueScanner.TotalSupply.ScanValue()
@@ -140,6 +154,46 @@ func (nc *NFTClass) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			nc.ID = int(value.Int64)
+		case nftclass.FieldAcquireBookNftEventsWeight:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field acquire_book_nft_events_weight", values[i])
+			} else if value.Valid {
+				nc.AcquireBookNftEventsWeight = value.Float64
+			}
+		case nftclass.FieldAcquireBookNftEventsLastProcessedTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field acquire_book_nft_events_last_processed_time", values[i])
+			} else if value.Valid {
+				nc.AcquireBookNftEventsLastProcessedTime = new(time.Time)
+				*nc.AcquireBookNftEventsLastProcessedTime = value.Time
+			}
+		case nftclass.FieldAcquireBookNftEventsScore:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field acquire_book_nft_events_score", values[i])
+			} else if value.Valid {
+				nc.AcquireBookNftEventsScore = new(float64)
+				*nc.AcquireBookNftEventsScore = value.Float64
+			}
+		case nftclass.FieldAcquireBookNftEventsStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field acquire_book_nft_events_status", values[i])
+			} else if value.Valid {
+				nc.AcquireBookNftEventsStatus = new(nftclass.AcquireBookNftEventsStatus)
+				*nc.AcquireBookNftEventsStatus = nftclass.AcquireBookNftEventsStatus(value.String)
+			}
+		case nftclass.FieldAcquireBookNftEventsFailedReason:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field acquire_book_nft_events_failed_reason", values[i])
+			} else if value.Valid {
+				nc.AcquireBookNftEventsFailedReason = new(string)
+				*nc.AcquireBookNftEventsFailedReason = value.String
+			}
+		case nftclass.FieldAcquireBookNftEventsFailedCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field acquire_book_nft_events_failed_count", values[i])
+			} else if value.Valid {
+				nc.AcquireBookNftEventsFailedCount = int(value.Int64)
+			}
 		case nftclass.FieldAddress:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field address", values[i])
@@ -300,6 +354,32 @@ func (nc *NFTClass) String() string {
 	var builder strings.Builder
 	builder.WriteString("NFTClass(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", nc.ID))
+	builder.WriteString("acquire_book_nft_events_weight=")
+	builder.WriteString(fmt.Sprintf("%v", nc.AcquireBookNftEventsWeight))
+	builder.WriteString(", ")
+	if v := nc.AcquireBookNftEventsLastProcessedTime; v != nil {
+		builder.WriteString("acquire_book_nft_events_last_processed_time=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := nc.AcquireBookNftEventsScore; v != nil {
+		builder.WriteString("acquire_book_nft_events_score=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := nc.AcquireBookNftEventsStatus; v != nil {
+		builder.WriteString("acquire_book_nft_events_status=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := nc.AcquireBookNftEventsFailedReason; v != nil {
+		builder.WriteString("acquire_book_nft_events_failed_reason=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	builder.WriteString("acquire_book_nft_events_failed_count=")
+	builder.WriteString(fmt.Sprintf("%v", nc.AcquireBookNftEventsFailedCount))
+	builder.WriteString(", ")
 	builder.WriteString("address=")
 	builder.WriteString(nc.Address)
 	builder.WriteString(", ")
