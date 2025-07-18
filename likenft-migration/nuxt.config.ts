@@ -79,7 +79,7 @@ export default {
     '~/plugins/apiClient.ts',
     '~/plugins/likeCoinWalletConnector.ts',
     '~/plugins/likeCoinEVMWalletConnector.ts',
-    '~/plugins/crisp.ts',
+    '~/plugins/intercom.ts',
     '~/plugins/gtag.ts',
   ],
 

@@ -14,7 +14,7 @@ export const ConfigSchema = z
     authcoreRedirectUrl: z.string(),
     apiBaseURL: z.string(),
     likerlandUrlBase: z.string(),
-    crispWebsiteId: z.string(),
+    intercomAppId: z.string(),
     googleAnalyticsTagId: z.string().default(''),
   })
   .merge(ImageURLConfigSchema);

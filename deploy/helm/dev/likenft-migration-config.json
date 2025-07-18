@@ -3,7 +3,7 @@
   "isTestnet": true,
   "apiBaseURL": "https://like-migration-api.pandawork.com",
   "likerlandUrlBase": "https://rinkeby.liker.land",
-  "crispWebsiteId": "4e80ff4a-e151-4393-a09b-14e6342ad11d",
+  "intercomAppId": "j0ryap5a",
   "authcoreRedirectUrl": "https://likenft-migration.pandawork.com",
   "ipfsHTTPBaseURL": "https://w3s.link/ipfs",
   "arHTTPBaseURL": "https://gateway.irys.xyz"
