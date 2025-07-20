@@ -19,15 +19,10 @@ func (h *OpenAPIHandler) TokensByAccount(ctx context.Context, params api.TokensB
 		params.ContractLevelMetadataEq.Or(api.ContractLevelMetadataEQ{}),
 	)
 
-	contractMetadataNEQ := database.ContractLevelMetadataFilterEquatable(
-		params.ContractLevelMetadataNeq.Or(api.ContractLevelMetadataNEQ{}),
-	)
-
 	nfts, count, nextKey, err := h.nftRepository.QueryNFTsByEvmAddress(
 		ctx,
 		params.EvmAddress,
 		contractMetadataEQ,
-		contractMetadataNEQ,
 		ps.ToEntPagination(),
 	)
 

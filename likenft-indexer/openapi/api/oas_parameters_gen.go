@@ -338,8 +338,6 @@ type BookNFTsByAccountParams struct {
 	Reverse OptBool
 	// Contract_level_metadata_eq.
 	ContractLevelMetadataEq OptContractLevelMetadataEQ
-	// Contract_level_metadata_neq.
-	ContractLevelMetadataNeq OptContractLevelMetadataNEQ
 }
 
 func unpackBookNFTsByAccountParams(packed middleware.Parameters) (params BookNFTsByAccountParams) {
@@ -384,15 +382,6 @@ func unpackBookNFTsByAccountParams(packed middleware.Parameters) (params BookNFT
 		}
 		if v, ok := packed[key]; ok {
 			params.ContractLevelMetadataEq = v.(OptContractLevelMetadataEQ)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "contract_level_metadata_neq",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.ContractLevelMetadataNeq = v.(OptContractLevelMetadataNEQ)
 		}
 	}
 	return params
@@ -604,36 +593,6 @@ func decodeBookNFTsByAccountParams(args [1]string, argsEscaped bool, r *http.Req
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "contract_level_metadata_eq",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: contract_level_metadata_neq.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "contract_level_metadata_neq",
-			Style:   uri.QueryStyleForm,
-			Explode: false,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotContractLevelMetadataNeqVal ContractLevelMetadataNEQ
-				if err := func() error {
-					return paramsDotContractLevelMetadataNeqVal.DecodeURI(d)
-				}(); err != nil {
-					return err
-				}
-				params.ContractLevelMetadataNeq.SetTo(paramsDotContractLevelMetadataNeqVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "contract_level_metadata_neq",
 			In:   "query",
 			Err:  err,
 		}
@@ -3857,8 +3816,6 @@ type TokensByAccountParams struct {
 	Reverse OptBool
 	// Contract_level_metadata_eq.
 	ContractLevelMetadataEq OptContractLevelMetadataEQ
-	// Contract_level_metadata_neq.
-	ContractLevelMetadataNeq OptContractLevelMetadataNEQ
 }
 
 func unpackTokensByAccountParams(packed middleware.Parameters) (params TokensByAccountParams) {
@@ -3903,15 +3860,6 @@ func unpackTokensByAccountParams(packed middleware.Parameters) (params TokensByA
 		}
 		if v, ok := packed[key]; ok {
 			params.ContractLevelMetadataEq = v.(OptContractLevelMetadataEQ)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "contract_level_metadata_neq",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.ContractLevelMetadataNeq = v.(OptContractLevelMetadataNEQ)
 		}
 	}
 	return params
@@ -4123,36 +4071,6 @@ func decodeTokensByAccountParams(args [1]string, argsEscaped bool, r *http.Reque
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "contract_level_metadata_eq",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: contract_level_metadata_neq.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "contract_level_metadata_neq",
-			Style:   uri.QueryStyleForm,
-			Explode: false,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotContractLevelMetadataNeqVal ContractLevelMetadataNEQ
-				if err := func() error {
-					return paramsDotContractLevelMetadataNeqVal.DecodeURI(d)
-				}(); err != nil {
-					return err
-				}
-				params.ContractLevelMetadataNeq.SetTo(paramsDotContractLevelMetadataNeqVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "contract_level_metadata_neq",
 			In:   "query",
 			Err:  err,
 		}

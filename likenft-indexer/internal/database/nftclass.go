@@ -35,7 +35,6 @@ type NFTClassRepository interface {
 		ctx context.Context,
 		accountEvmAddress string,
 		contractLevelMetadataEQ ContractLevelMetadataFilterEquatable,
-		contractLevelMetadataNEQ ContractLevelMetadataFilterEquatable,
 		pagination NFTClassPagination,
 	) (nftClasses []*ent.NFTClass, count int, nextKey int, err error)
 	InsertNFTClass(
@@ -166,7 +165,6 @@ func (r *nftClassRepository) QueryNFTClassesByEvmAddress(
 	ctx context.Context,
 	accountEvmAddress string,
 	contractLevelMetadataEQ ContractLevelMetadataFilterEquatable,
-	contractLevelMetadataNEQ ContractLevelMetadataFilterEquatable,
 	pagination NFTClassPagination,
 ) (
 	nftClasses []*ent.NFTClass,
@@ -180,7 +178,6 @@ func (r *nftClassRepository) QueryNFTClassesByEvmAddress(
 		)
 
 	q = contractLevelMetadataEQ.ApplyEQ(q)
-	q = contractLevelMetadataNEQ.ApplyNEQ(q)
 
 	count, err = q.Count(ctx)
 	if err != nil {
