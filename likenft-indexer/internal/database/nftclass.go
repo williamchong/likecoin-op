@@ -31,6 +31,12 @@ type NFTClassRepository interface {
 		accountEvmAddress string,
 		pagination NFTClassPagination,
 	) (nftClasses []*ent.NFTClass, count int, nextKey int, err error)
+	QueryNFTClassesByEvmAddress(
+		ctx context.Context,
+		accountEvmAddress string,
+		contractLevelMetadataEQ ContractLevelMetadataFilterEquatable,
+		pagination NFTClassPagination,
+	) (nftClasses []*ent.NFTClass, count int, nextKey int, err error)
 	InsertNFTClass(
 		ctx context.Context,
 		address string,
@@ -134,6 +140,44 @@ func (r *nftClassRepository) QueryNFTClassesByAccountTokens(
 				nft.OwnerAddressEqualFold(accountEvmAddress),
 			),
 		)
+
+	count, err = q.Count(ctx)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	q = pagination.HandlePagination(q)
+
+	nftClasses, err = q.All(ctx)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	nextKey = 0
+	if len(nftClasses) > 0 {
+		nextKey = nftClasses[len(nftClasses)-1].ID
+	}
+
+	return nftClasses, count, nextKey, nil
+}
+
+func (r *nftClassRepository) QueryNFTClassesByEvmAddress(
+	ctx context.Context,
+	accountEvmAddress string,
+	contractLevelMetadataEQ ContractLevelMetadataFilterEquatable,
+	pagination NFTClassPagination,
+) (
+	nftClasses []*ent.NFTClass,
+	count int,
+	nextKey int,
+	err error,
+) {
+	q := r.dbService.Client().NFTClass.Query().
+		Where(
+			nftclass.OwnerAddressEqualFold(accountEvmAddress),
+		)
+
+	q = contractLevelMetadataEQ.ApplyEQ(q)
 
 	count, err = q.Count(ctx)
 	if err != nil {

@@ -12,6 +12,12 @@ import (
 )
 
 type NFTRepository interface {
+	QueryNFTsByEvmAddress(
+		ctx context.Context,
+		accountEvmAddress string,
+		contractLevelMetadataEQ ContractLevelMetadataFilterEquatable,
+		pagination NFTPagination,
+	) (nfts []*ent.NFT, count int, nextKey int, err error)
 	GetOrCreate(
 		ctx context.Context,
 		ContractAddress string,
@@ -50,6 +56,40 @@ func MakeNFTRepository(
 	return &nftRepository{
 		dbService: dbService,
 	}
+}
+
+func (r *nftRepository) QueryNFTsByEvmAddress(
+	ctx context.Context,
+	accountEvmAddress string,
+	contractLevelMetadataEQ ContractLevelMetadataFilterEquatable,
+	pagination NFTPagination,
+) (nfts []*ent.NFT, count int, nextKey int, err error) {
+	bookNFTQ := r.dbService.Client().NFTClass.Query()
+
+	bookNFTQ = contractLevelMetadataEQ.ApplyEQ(bookNFTQ)
+
+	q := bookNFTQ.QueryNfts().Where(
+		nft.OwnerAddressEqualFold(accountEvmAddress),
+	)
+
+	count, err = q.Count(ctx)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	q = pagination.HandlePagination(q)
+
+	nfts, err = q.All(ctx)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	nextKey = 0
+	if len(nfts) > 0 {
+		nextKey = nfts[len(nfts)-1].ID
+	}
+
+	return nfts, count, nextKey, nil
 }
 
 func (r *nftRepository) GetOrCreate(
