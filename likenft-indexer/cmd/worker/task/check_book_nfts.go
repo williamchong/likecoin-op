@@ -52,13 +52,13 @@ func HandleCheckBookNFTs(ctx context.Context, t *asynq.Task) error {
 		return fmt.Errorf("inspector.GetQueueInfo: %v", err)
 	}
 	currentLength := queueInfo.Pending + queueInfo.Active
-	numberOfItemsToBeFetched := config.TaskAcquireBookNFTEventsMaxQueueLength - currentLength
+	numberOfItemsToBeFetched := config.TaskAcquireBookNFTMaxQueueLength - currentLength
 
 	dbService := database.New()
 	nftClassAcquireBookNFTEventsRepository := database.MakeNFTClassAcquireBookNFTEventsRepository(dbService)
 
 	timeoutScoreFn := nftclassacquirebooknftevent.MakeCalculateTimeoutScoreFn(
-		config.TaskAcquireBookNFTEventsInProgressTimeoutSeconds,
+		config.TaskAcquireBookNFTInProgressTimeoutSeconds,
 	)
 
 	nftClasses, err := nftClassAcquireBookNFTEventsRepository.
@@ -79,16 +79,16 @@ func HandleCheckBookNFTs(ctx context.Context, t *asynq.Task) error {
 		nftClassAcquireBookNFTEventsRepository,
 		nftClasses,
 		nftclassacquirebooknftevent.MakeCalculateNextProcessingScoreFn(
-			config.TaskAcquireBookNFTEventsNextProcessingScoreBlockHeightContribution,
-			config.TaskAcquireBookNFTEventsNextProcessingScoreWeight0Constant,
-			config.TaskAcquireBookNFTEventsNextProcessingScoreWeight1Constant,
-			config.TaskAcquireBookNFTEventsNextProcessingScoreWeightContribution,
+			config.TaskAcquireBookNFTNextProcessingBlockHeightWeight,
+			config.TaskAcquireBookNFTNextProcessingTimeFloor,
+			config.TaskAcquireBookNFTNextProcessingTimeCeiling,
+			config.TaskAcquireBookNFTNextProcessingTimeWeight,
 		),
 		timeoutScoreFn,
 		nftclassacquirebooknftevent.MakeCalculateRetryScoreFn(
-			config.TaskAcquireBookNFTEventsRetryInitialTimeoutSeconds,
-			config.TaskAcquireBookNFTEventsRetryExponentialBackoffCoeff,
-			config.TaskAcquireBookNFTEventsRetryMaxTimeoutSeconds,
+			config.TaskAcquireBookNFTRetryInitialTimeoutSeconds,
+			config.TaskAcquireBookNFTRetryExponentialBackoffCoeff,
+			config.TaskAcquireBookNFTRetryMaxTimeoutSeconds,
 		),
 	)
 

@@ -12,32 +12,32 @@ import (
 func TestMakeCalculateNextProcessingScoreFn(t *testing.T) {
 	Convey("Test MakeCalculateNextProcessingScoreFn", t, func() {
 		Convey("Should create function with correct parameters", func() {
-			blockHeightContribution := 1.0
-			weight0Constant := 10.0
-			weight1Constant := 1.0
-			weightContribution := 60.0
+			blockHeightWeight := 1.0
+			timeFloor := 1.0
+			timeCeiling := 10.0
+			timeWeight := 60.0
 
 			fn := nftclassacquirebooknftevent.MakeCalculateNextProcessingScoreFn(
-				blockHeightContribution,
-				weight0Constant,
-				weight1Constant,
-				weightContribution,
+				blockHeightWeight,
+				timeFloor,
+				timeCeiling,
+				timeWeight,
 			)
 
 			So(fn, ShouldNotBeNil)
 		})
 
 		Convey("Should calculate score correctly with weight 0", func() {
-			blockHeightContribution := 1.0
-			weight0Constant := 10.0
-			weight1Constant := 1.0
-			weightContribution := 60.0
+			blockHeightWeight := 1.0
+			timeFloor := 1.0
+			timeCeiling := 10.0
+			timeWeight := 60.0
 
 			fn := nftclassacquirebooknftevent.MakeCalculateNextProcessingScoreFn(
-				blockHeightContribution,
-				weight0Constant,
-				weight1Constant,
-				weightContribution,
+				blockHeightWeight,
+				timeFloor,
+				timeCeiling,
+				timeWeight,
 			)
 
 			lastProcessedTime := time.Unix(1000, 0)
@@ -57,16 +57,16 @@ func TestMakeCalculateNextProcessingScoreFn(t *testing.T) {
 		})
 
 		Convey("Should calculate score correctly with weight 1", func() {
-			blockHeightContribution := 1.0
-			weight0Constant := 10.0
-			weight1Constant := 1.0
-			weightContribution := 60.0
+			blockHeightWeight := 1.0
+			timeFloor := 1.0
+			timeCeiling := 10.0
+			timeWeight := 60.0
 
 			fn := nftclassacquirebooknftevent.MakeCalculateNextProcessingScoreFn(
-				blockHeightContribution,
-				weight0Constant,
-				weight1Constant,
-				weightContribution,
+				blockHeightWeight,
+				timeFloor,
+				timeCeiling,
+				timeWeight,
 			)
 
 			lastProcessedTime := time.Unix(1000, 0)
@@ -86,16 +86,16 @@ func TestMakeCalculateNextProcessingScoreFn(t *testing.T) {
 		})
 
 		Convey("Should calculate score correctly with weight 0.5", func() {
-			blockHeightContribution := 1.0
-			weight0Constant := 10.0
-			weight1Constant := 1.0
-			weightContribution := 60.0
+			blockHeightWeight := 1.0
+			timeFloor := 1.0
+			timeCeiling := 10.0
+			timeWeight := 60.0
 
 			fn := nftclassacquirebooknftevent.MakeCalculateNextProcessingScoreFn(
-				blockHeightContribution,
-				weight0Constant,
-				weight1Constant,
-				weightContribution,
+				blockHeightWeight,
+				timeFloor,
+				timeCeiling,
+				timeWeight,
 			)
 
 			lastProcessedTime := time.Unix(1000, 0)
@@ -115,16 +115,16 @@ func TestMakeCalculateNextProcessingScoreFn(t *testing.T) {
 		})
 
 		Convey("Should handle different block heights correctly", func() {
-			blockHeightContribution := 2.0
-			weight0Constant := 10.0
-			weight1Constant := 1.0
-			weightContribution := 60.0
+			blockHeightWeight := 2.0
+			timeFloor := 1.0
+			timeCeiling := 10.0
+			timeWeight := 60.0
 
 			fn := nftclassacquirebooknftevent.MakeCalculateNextProcessingScoreFn(
-				blockHeightContribution,
-				weight0Constant,
-				weight1Constant,
-				weightContribution,
+				blockHeightWeight,
+				timeFloor,
+				timeCeiling,
+				timeWeight,
 			)
 
 			lastProcessedTime := time.Unix(1000, 0)
@@ -138,16 +138,16 @@ func TestMakeCalculateNextProcessingScoreFn(t *testing.T) {
 		})
 
 		Convey("Should handle different timestamps correctly", func() {
-			blockHeightContribution := 1.0
-			weight0Constant := 10.0
-			weight1Constant := 1.0
-			weightContribution := 60.0
+			blockHeightWeight := 1.0
+			timeFloor := 1.0
+			timeCeiling := 10.0
+			timeWeight := 60.0
 
 			fn := nftclassacquirebooknftevent.MakeCalculateNextProcessingScoreFn(
-				blockHeightContribution,
-				weight0Constant,
-				weight1Constant,
-				weightContribution,
+				blockHeightWeight,
+				timeFloor,
+				timeCeiling,
+				timeWeight,
 			)
 
 			blockHeight := uint64(100)
@@ -164,16 +164,16 @@ func TestMakeCalculateNextProcessingScoreFn(t *testing.T) {
 		})
 
 		Convey("Should handle edge case with zero values", func() {
-			blockHeightContribution := 0.0
-			weight0Constant := 0.0
-			weight1Constant := 0.0
-			weightContribution := 0.0
+			blockHeightWeight := 0.0
+			timeFloor := 0.0
+			timeCeiling := 0.0
+			timeWeight := 0.0
 
 			fn := nftclassacquirebooknftevent.MakeCalculateNextProcessingScoreFn(
-				blockHeightContribution,
-				weight0Constant,
-				weight1Constant,
-				weightContribution,
+				blockHeightWeight,
+				timeFloor,
+				timeCeiling,
+				timeWeight,
 			)
 
 			lastProcessedTime := time.Unix(1000, 0)

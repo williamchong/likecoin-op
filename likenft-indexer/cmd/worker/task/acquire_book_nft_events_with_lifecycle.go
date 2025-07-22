@@ -61,18 +61,18 @@ func handlerWithLifecycle(
 			nftClassAcquireBookNFTEventsRepository,
 			p.ContractAddress,
 			nftclassacquirebooknftevent.MakeCalculateNextProcessingScoreFn(
-				config.TaskAcquireBookNFTEventsNextProcessingScoreBlockHeightContribution,
-				config.TaskAcquireBookNFTEventsNextProcessingScoreWeight0Constant,
-				config.TaskAcquireBookNFTEventsNextProcessingScoreWeight1Constant,
-				config.TaskAcquireBookNFTEventsNextProcessingScoreWeightContribution,
+				config.TaskAcquireBookNFTNextProcessingBlockHeightWeight,
+				config.TaskAcquireBookNFTNextProcessingTimeFloor,
+				config.TaskAcquireBookNFTNextProcessingTimeCeiling,
+				config.TaskAcquireBookNFTNextProcessingTimeWeight,
 			),
 			nftclassacquirebooknftevent.MakeCalculateTimeoutScoreFn(
-				config.TaskAcquireBookNFTEventsInProgressTimeoutSeconds,
+				config.TaskAcquireBookNFTInProgressTimeoutSeconds,
 			),
 			nftclassacquirebooknftevent.MakeCalculateRetryScoreFn(
-				config.TaskAcquireBookNFTEventsRetryInitialTimeoutSeconds,
-				config.TaskAcquireBookNFTEventsRetryExponentialBackoffCoeff,
-				config.TaskAcquireBookNFTEventsRetryMaxTimeoutSeconds,
+				config.TaskAcquireBookNFTRetryInitialTimeoutSeconds,
+				config.TaskAcquireBookNFTRetryExponentialBackoffCoeff,
+				config.TaskAcquireBookNFTRetryMaxTimeoutSeconds,
 			),
 		)
 		if err != nil {

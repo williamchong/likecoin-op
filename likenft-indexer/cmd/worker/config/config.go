@@ -25,15 +25,21 @@ type EnvConfig struct {
 	EvmEventLikeProtocolInitialBlockHeight uint64 `envconfig:"EVM_EVENT_LIKE_PROTOCOL_INITIAL_BLOCK_HEIGHT" default:"1"`
 	EvmEventQueryNumberOfBlocksLimit       uint64 `envconfig:"EVM_EVENT_QUERY_NUMBER_OF_BLOCKS_LIMIT"`
 
-	TaskAcquireBookNFTEventsMaxQueueLength                             int     `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_MAX_QUEUE_LENGTH"`
-	TaskAcquireBookNFTEventsNextProcessingScoreBlockHeightContribution float64 `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_NEXT_PROCESSING_SCORE_BLOCK_HEIGHT_CONTRIBUTION"`
-	TaskAcquireBookNFTEventsNextProcessingScoreWeight0Constant         float64 `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_NEXT_PROCESSING_SCORE_WEIGHT_0_CONSTANT"`
-	TaskAcquireBookNFTEventsNextProcessingScoreWeight1Constant         float64 `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_NEXT_PROCESSING_SCORE_WEIGHT_1_CONSTANT"`
-	TaskAcquireBookNFTEventsNextProcessingScoreWeightContribution      float64 `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_NEXT_PROCESSING_SCORE_WEIGHT_CONTRIBUTION"`
-	TaskAcquireBookNFTEventsInProgressTimeoutSeconds                   int     `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_IN_PROGRESS_TIMEOUT_SECONDS"`
-	TaskAcquireBookNFTEventsRetryInitialTimeoutSeconds                 int     `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_RETRY_INITIAL_TIMEOUT_SECONDS"`
-	TaskAcquireBookNFTEventsRetryExponentialBackoffCoeff               float64 `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_RETRY_EXPONENTIAL_BACKOFF_COEFF"`
-	TaskAcquireBookNFTEventsRetryMaxTimeoutSeconds                     int     `envconfig:"TASK_ACQUIRE_BOOK_NFT_EVENTS_RETRY_MAX_TIMEOUT_SECONDS"`
+	TaskAcquireBookNFTMaxQueueLength int `envconfig:"TASK_ACQUIRE_BOOKNFT_MAX_QUEUE_LENGTH"`
+
+	// The block height weight is the multiplier for the block height to be added to the score
+	TaskAcquireBookNFTNextProcessingBlockHeightWeight float64 `envconfig:"TASK_ACQUIRE_BOOKNFT_NEXT_PROCESSING_BLOCK_HEIGHT_WEIGHT"`
+	// The time floor is the minimum time to be added to the score when the booknft weight is 1
+	TaskAcquireBookNFTNextProcessingTimeFloor float64 `envconfig:"TASK_ACQUIRE_BOOKNFT_NEXT_PROCESSING_TIME_FLOOR"`
+	// The time ceiling is the maximum time to be added to the score when the booknft weight is 0
+	TaskAcquireBookNFTNextProcessingTimeCeiling float64 `envconfig:"TASK_ACQUIRE_BOOKNFT_NEXT_PROCESSING_TIME_CEILING"`
+	// The time weight is the multiplier for the time (depends on the booknft weight) to be added to the score
+	TaskAcquireBookNFTNextProcessingTimeWeight float64 `envconfig:"TASK_ACQUIRE_BOOKNFT_NEXT_PROCESSING_TIME_WEIGHT"`
+
+	TaskAcquireBookNFTInProgressTimeoutSeconds     int     `envconfig:"TASK_ACQUIRE_BOOKNFT_IN_PROGRESS_TIMEOUT_SECONDS"`
+	TaskAcquireBookNFTRetryInitialTimeoutSeconds   int     `envconfig:"TASK_ACQUIRE_BOOKNFT_RETRY_INITIAL_TIMEOUT_SECONDS"`
+	TaskAcquireBookNFTRetryExponentialBackoffCoeff float64 `envconfig:"TASK_ACQUIRE_BOOKNFT_RETRY_EXPONENTIAL_BACKOFF_COEFF"`
+	TaskAcquireBookNFTRetryMaxTimeoutSeconds       int     `envconfig:"TASK_ACQUIRE_BOOKNFT_RETRY_MAX_TIMEOUT_SECONDS"`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {

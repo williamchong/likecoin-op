@@ -20,10 +20,10 @@ type CalculateNextProcessingScoreFnFactory interface {
 }
 
 type calculateNextProcessingScoreFnFactory struct {
-	blockHeightContribution float64
-	weight0Constant         float64
-	weight1Constant         float64
-	weightContribution      float64
+	blockHeightWeight float64
+	timeFloor         float64
+	timeCeiling       float64
+	timeWeight        float64
 }
 
 // Calculate score based on the following formula
@@ -45,16 +45,16 @@ type calculateNextProcessingScoreFnFactory struct {
 // The jobs are expected to have a diff of t + 60 for weight = 1, and a diff of t + 600 for weight = 0
 // when the score is re-calculated.
 func MakeCalculateNextProcessingScoreFn(
-	blockHeightContribution float64,
-	weight0Constant float64,
-	weight1Constant float64,
-	weightContribution float64,
+	blockHeightWeight float64,
+	timeFloor float64,
+	timeCeiling float64,
+	timeWeight float64,
 ) CalculateNextProcessingScoreFn {
 	factory := &calculateNextProcessingScoreFnFactory{
-		blockHeightContribution,
-		weight0Constant,
-		weight1Constant,
-		weightContribution,
+		blockHeightWeight,
+		timeFloor,
+		timeCeiling,
+		timeWeight,
 	}
 	return factory.CalculateScoreFn
 }
@@ -71,12 +71,12 @@ func (f *calculateNextProcessingScoreFnFactory) CalculateScoreFn(
 	// The slope (rate of change with respect of time delta) should decrease while weight increase
 	// i.e. w=0 => high, w=1 => low
 	lineOfWeight := func(w float64) float64 {
-		return (1-w)*f.weight0Constant + w*f.weight1Constant
+		return (1-w)*f.timeCeiling + w*f.timeFloor
 	}
 
-	return float64(blockHeight)*f.blockHeightContribution +
+	return float64(blockHeight)*f.blockHeightWeight +
 		float64(lastProcessedTime.Unix()) +
-		lineOfWeight(weight)*f.weightContribution
+		lineOfWeight(weight)*f.timeWeight
 }
 
 type CalculateTimeoutScoreFn func(
