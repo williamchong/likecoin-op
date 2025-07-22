@@ -40,7 +40,7 @@ func (util *nftClassAcquireBookNFTEventsTestUtil) makeNFTClass(
 		DisabledForIndexing:              false,
 		AcquireBookNftEventsWeight:       1.0,
 		AcquireBookNftEventsStatus:       status,
-		AcquireBookNftEventsScore:        score,
+		AcquireBookNftEventsEta:          score,
 		AcquireBookNftEventsFailedCount:  failedCount,
 		AcquireBookNftEventsFailedReason: failedReason,
 	}
@@ -126,7 +126,7 @@ func TestNFTClassAcquireBookNFTEventsRepository(t *testing.T) {
 				SetDisabledForIndexing(nc.DisabledForIndexing).
 				SetAcquireBookNftEventsWeight(nc.AcquireBookNftEventsWeight).
 				SetNillableAcquireBookNftEventsStatus(nc.AcquireBookNftEventsStatus).
-				SetNillableAcquireBookNftEventsScore(nc.AcquireBookNftEventsScore).
+				SetNillableAcquireBookNftEventsEta(nc.AcquireBookNftEventsEta).
 				SetAcquireBookNftEventsFailedCount(nc.AcquireBookNftEventsFailedCount).
 				Save(context.Background())
 			So(err, ShouldBeNil)
@@ -142,10 +142,10 @@ func TestNFTClassAcquireBookNFTEventsRepository(t *testing.T) {
 		// So order should be: nftClass1 (1.0), nftClass2 (2.0)
 		So(results[0].Address, ShouldEqual, "0xAddress1")
 		So(*results[0].AcquireBookNftEventsStatus, ShouldEqual, nftclass.AcquireBookNftEventsStatusEnqueueing)
-		So(*results[0].AcquireBookNftEventsScore, ShouldEqual, 10.0)
+		So(*results[0].AcquireBookNftEventsEta, ShouldEqual, 10.0)
 		So(results[1].Address, ShouldEqual, "0xAddress2")
 		So(*results[1].AcquireBookNftEventsStatus, ShouldEqual, nftclass.AcquireBookNftEventsStatusEnqueueing)
-		So(*results[1].AcquireBookNftEventsScore, ShouldEqual, 10.0)
+		So(*results[1].AcquireBookNftEventsEta, ShouldEqual, 10.0)
 
 		// Test requesting more than available
 		// nftClass3 has score 3.0, nftClass1 has score 10.0, nftClass2 has score 10.0
@@ -155,13 +155,13 @@ func TestNFTClassAcquireBookNFTEventsRepository(t *testing.T) {
 		So(results, ShouldHaveLength, 3)
 		So(results[0].Address, ShouldEqual, "0xAddress3")
 		So(*results[0].AcquireBookNftEventsStatus, ShouldEqual, nftclass.AcquireBookNftEventsStatusEnqueueing)
-		So(*results[0].AcquireBookNftEventsScore, ShouldEqual, 10.0)
+		So(*results[0].AcquireBookNftEventsEta, ShouldEqual, 10.0)
 		So(results[1].Address, ShouldEqual, "0xAddress1")
 		So(*results[1].AcquireBookNftEventsStatus, ShouldEqual, nftclass.AcquireBookNftEventsStatusEnqueueing)
-		So(*results[1].AcquireBookNftEventsScore, ShouldEqual, 10.0)
+		So(*results[1].AcquireBookNftEventsEta, ShouldEqual, 10.0)
 		So(results[2].Address, ShouldEqual, "0xAddress2")
 		So(*results[2].AcquireBookNftEventsStatus, ShouldEqual, nftclass.AcquireBookNftEventsStatusEnqueueing)
-		So(*results[2].AcquireBookNftEventsScore, ShouldEqual, 10.0)
+		So(*results[2].AcquireBookNftEventsEta, ShouldEqual, 10.0)
 	})
 
 	Convey("Test RequestForEnqueue with disabled items", t, func() {
@@ -198,7 +198,7 @@ func TestNFTClassAcquireBookNFTEventsRepository(t *testing.T) {
 				SetDisabledForIndexing(nc.DisabledForIndexing).
 				SetAcquireBookNftEventsWeight(nc.AcquireBookNftEventsWeight).
 				SetNillableAcquireBookNftEventsStatus(nc.AcquireBookNftEventsStatus).
-				SetNillableAcquireBookNftEventsScore(nc.AcquireBookNftEventsScore).
+				SetNillableAcquireBookNftEventsEta(nc.AcquireBookNftEventsEta).
 				SetAcquireBookNftEventsFailedCount(nc.AcquireBookNftEventsFailedCount).
 				Save(context.Background())
 			So(err, ShouldBeNil)
@@ -237,7 +237,7 @@ func TestNFTClassAcquireBookNFTEventsRepository(t *testing.T) {
 			SetDisabledForIndexing(nftClass.DisabledForIndexing).
 			SetAcquireBookNftEventsWeight(nftClass.AcquireBookNftEventsWeight).
 			SetNillableAcquireBookNftEventsStatus(nftClass.AcquireBookNftEventsStatus).
-			SetNillableAcquireBookNftEventsScore(nftClass.AcquireBookNftEventsScore).
+			SetNillableAcquireBookNftEventsEta(nftClass.AcquireBookNftEventsEta).
 			SetAcquireBookNftEventsFailedCount(nftClass.AcquireBookNftEventsFailedCount).
 			Save(context.Background())
 		So(err, ShouldBeNil)
@@ -253,7 +253,7 @@ func TestNFTClassAcquireBookNFTEventsRepository(t *testing.T) {
 			Only(context.Background())
 		So(err, ShouldBeNil)
 		So(*updated.AcquireBookNftEventsStatus, ShouldEqual, nftclass.AcquireBookNftEventsStatusEnqueued)
-		So(*updated.AcquireBookNftEventsScore, ShouldEqual, timeoutScore)
+		So(*updated.AcquireBookNftEventsEta, ShouldEqual, timeoutScore)
 	})
 
 	Convey("Test EnqueueFailed", t, func() {
@@ -281,7 +281,7 @@ func TestNFTClassAcquireBookNFTEventsRepository(t *testing.T) {
 			SetDisabledForIndexing(nftClass.DisabledForIndexing).
 			SetAcquireBookNftEventsWeight(nftClass.AcquireBookNftEventsWeight).
 			SetNillableAcquireBookNftEventsStatus(nftClass.AcquireBookNftEventsStatus).
-			SetNillableAcquireBookNftEventsScore(nftClass.AcquireBookNftEventsScore).
+			SetNillableAcquireBookNftEventsEta(nftClass.AcquireBookNftEventsEta).
 			SetAcquireBookNftEventsFailedCount(nftClass.AcquireBookNftEventsFailedCount).
 			Save(context.Background())
 		So(err, ShouldBeNil)
@@ -298,7 +298,7 @@ func TestNFTClassAcquireBookNFTEventsRepository(t *testing.T) {
 			Only(context.Background())
 		So(err, ShouldBeNil)
 		So(*updated.AcquireBookNftEventsStatus, ShouldEqual, nftclass.AcquireBookNftEventsStatusEnqueueFailed)
-		So(*updated.AcquireBookNftEventsScore, ShouldEqual, retryScore)
+		So(*updated.AcquireBookNftEventsEta, ShouldEqual, retryScore)
 		So(*updated.AcquireBookNftEventsFailedReason, ShouldEqual, testError.Error())
 		So(updated.AcquireBookNftEventsFailedCount, ShouldEqual, 1)
 	})
@@ -328,7 +328,7 @@ func TestNFTClassAcquireBookNFTEventsRepository(t *testing.T) {
 			SetDisabledForIndexing(nftClass.DisabledForIndexing).
 			SetAcquireBookNftEventsWeight(nftClass.AcquireBookNftEventsWeight).
 			SetNillableAcquireBookNftEventsStatus(nftClass.AcquireBookNftEventsStatus).
-			SetNillableAcquireBookNftEventsScore(nftClass.AcquireBookNftEventsScore).
+			SetNillableAcquireBookNftEventsEta(nftClass.AcquireBookNftEventsEta).
 			SetAcquireBookNftEventsFailedCount(nftClass.AcquireBookNftEventsFailedCount).
 			Save(context.Background())
 		So(err, ShouldBeNil)
@@ -344,7 +344,7 @@ func TestNFTClassAcquireBookNFTEventsRepository(t *testing.T) {
 			Only(context.Background())
 		So(err, ShouldBeNil)
 		So(*updated.AcquireBookNftEventsStatus, ShouldEqual, nftclass.AcquireBookNftEventsStatusProcessing)
-		So(*updated.AcquireBookNftEventsScore, ShouldEqual, timeoutScore)
+		So(*updated.AcquireBookNftEventsEta, ShouldEqual, timeoutScore)
 	})
 
 	Convey("Test Completed", t, func() {
@@ -373,7 +373,7 @@ func TestNFTClassAcquireBookNFTEventsRepository(t *testing.T) {
 			SetDisabledForIndexing(nftClass.DisabledForIndexing).
 			SetAcquireBookNftEventsWeight(nftClass.AcquireBookNftEventsWeight).
 			SetNillableAcquireBookNftEventsStatus(nftClass.AcquireBookNftEventsStatus).
-			SetNillableAcquireBookNftEventsScore(nftClass.AcquireBookNftEventsScore).
+			SetNillableAcquireBookNftEventsEta(nftClass.AcquireBookNftEventsEta).
 			SetAcquireBookNftEventsFailedCount(nftClass.AcquireBookNftEventsFailedCount).
 			SetNillableAcquireBookNftEventsFailedReason(nftClass.AcquireBookNftEventsFailedReason).
 			Save(context.Background())
@@ -391,7 +391,7 @@ func TestNFTClassAcquireBookNFTEventsRepository(t *testing.T) {
 			Only(context.Background())
 		So(err, ShouldBeNil)
 		So(*updated.AcquireBookNftEventsStatus, ShouldEqual, nftclass.AcquireBookNftEventsStatusCompleted)
-		So(*updated.AcquireBookNftEventsScore, ShouldEqual, nextProcessingScore)
+		So(*updated.AcquireBookNftEventsEta, ShouldEqual, nextProcessingScore)
 		So(updated.AcquireBookNftEventsLastProcessedTime.Unix(), ShouldEqual, lastProcessedTime.Unix())
 		So(updated.AcquireBookNftEventsFailedReason, ShouldBeNil)   // Should be cleared
 		So(updated.AcquireBookNftEventsFailedCount, ShouldEqual, 0) // Should be reset
@@ -422,7 +422,7 @@ func TestNFTClassAcquireBookNFTEventsRepository(t *testing.T) {
 			SetDisabledForIndexing(nftClass.DisabledForIndexing).
 			SetAcquireBookNftEventsWeight(nftClass.AcquireBookNftEventsWeight).
 			SetNillableAcquireBookNftEventsStatus(nftClass.AcquireBookNftEventsStatus).
-			SetNillableAcquireBookNftEventsScore(nftClass.AcquireBookNftEventsScore).
+			SetNillableAcquireBookNftEventsEta(nftClass.AcquireBookNftEventsEta).
 			SetAcquireBookNftEventsFailedCount(nftClass.AcquireBookNftEventsFailedCount).
 			Save(context.Background())
 		So(err, ShouldBeNil)
@@ -439,7 +439,7 @@ func TestNFTClassAcquireBookNFTEventsRepository(t *testing.T) {
 			Only(context.Background())
 		So(err, ShouldBeNil)
 		So(*updated.AcquireBookNftEventsStatus, ShouldEqual, nftclass.AcquireBookNftEventsStatusFailed)
-		So(*updated.AcquireBookNftEventsScore, ShouldEqual, retryScore)
+		So(*updated.AcquireBookNftEventsEta, ShouldEqual, retryScore)
 		So(*updated.AcquireBookNftEventsFailedReason, ShouldEqual, testError.Error())
 		So(updated.AcquireBookNftEventsFailedCount, ShouldEqual, 2) // Incremented from 1
 	})
@@ -481,7 +481,7 @@ func TestNFTClassAcquireBookNFTEventsRepository(t *testing.T) {
 				SetDisabledForIndexing(nc.DisabledForIndexing).
 				SetAcquireBookNftEventsWeight(nc.AcquireBookNftEventsWeight).
 				SetNillableAcquireBookNftEventsStatus(nc.AcquireBookNftEventsStatus).
-				SetNillableAcquireBookNftEventsScore(nc.AcquireBookNftEventsScore).
+				SetNillableAcquireBookNftEventsEta(nc.AcquireBookNftEventsEta).
 				SetAcquireBookNftEventsFailedCount(nc.AcquireBookNftEventsFailedCount).
 				Save(context.Background())
 			So(err, ShouldBeNil)

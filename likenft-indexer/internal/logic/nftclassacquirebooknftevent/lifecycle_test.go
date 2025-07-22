@@ -79,7 +79,7 @@ func createTestNFTClass(address string, status *nftclass.AcquireBookNftEventsSta
 		AcquireBookNftEventsWeight:            1.0,
 		DeployedBlockNumber:                   100,
 		AcquireBookNftEventsLastProcessedTime: nil,
-		AcquireBookNftEventsScore:             nil,
+		AcquireBookNftEventsEta:               nil,
 		AcquireBookNftEventsFailedReason:      nil,
 	}
 }

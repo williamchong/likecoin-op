@@ -99,7 +99,7 @@ func (r *nftClassAcquireBookNFTEventsRepository) RequestForEnqueue(
 			Where(
 				nftclass.DisabledForIndexingEQ(false),
 			).Order(
-			nftclass.ByAcquireBookNftEventsScore(sql.OrderNullsFirst(), sql.OrderAsc()),
+			nftclass.ByAcquireBookNftEventsEta(sql.OrderNullsFirst(), sql.OrderAsc()),
 		).Limit(count).
 			Select(nftclass.FieldAddress).
 			Scan(ctx, &addressRows)
@@ -120,7 +120,7 @@ func (r *nftClassAcquireBookNFTEventsRepository) RequestForEnqueue(
 
 		if err := tx.NFTClass.Update().
 			SetAcquireBookNftEventsStatus(nftclass.AcquireBookNftEventsStatusEnqueueing).
-			SetAcquireBookNftEventsScore(timeoutScore).
+			SetAcquireBookNftEventsEta(timeoutScore).
 			Where(
 				nftclass.AddressIn(addresses...),
 			).
@@ -132,7 +132,7 @@ func (r *nftClassAcquireBookNFTEventsRepository) RequestForEnqueue(
 			Where(
 				nftclass.AddressIn(addresses...),
 			).Order(
-			nftclass.ByAcquireBookNftEventsScore(sql.OrderNullsFirst(), sql.OrderAsc()),
+			nftclass.ByAcquireBookNftEventsEta(sql.OrderNullsFirst(), sql.OrderAsc()),
 		).All(ctx)
 
 		nftClassByAddress := make(map[string]*ent.NFTClass)
@@ -166,7 +166,7 @@ func (r *nftClassAcquireBookNFTEventsRepository) Enqueued(
 				nftclass.AddressEqualFold(m.Address),
 			).
 			SetAcquireBookNftEventsStatus(nftclass.AcquireBookNftEventsStatusEnqueued).
-			SetAcquireBookNftEventsScore(timeoutScore).
+			SetAcquireBookNftEventsEta(timeoutScore).
 			Exec(ctx)
 	})
 }
@@ -189,7 +189,7 @@ func (r *nftClassAcquireBookNFTEventsRepository) EnqueueFailed(
 			SetAcquireBookNftEventsFailedReason(
 				err.Error(),
 			).
-			SetAcquireBookNftEventsScore(retryScore).
+			SetAcquireBookNftEventsEta(retryScore).
 			SetAcquireBookNftEventsFailedCount(m.AcquireBookNftEventsFailedCount + 1).
 			Exec(ctx)
 	})
@@ -206,7 +206,7 @@ func (r *nftClassAcquireBookNFTEventsRepository) Processing(
 				nftclass.AddressEqualFold(m.Address),
 			).
 			SetAcquireBookNftEventsStatus(nftclass.AcquireBookNftEventsStatusProcessing).
-			SetAcquireBookNftEventsScore(timeoutScore).
+			SetAcquireBookNftEventsEta(timeoutScore).
 			Exec(ctx)
 	})
 }
@@ -224,7 +224,7 @@ func (r *nftClassAcquireBookNFTEventsRepository) Completed(
 			).
 			SetAcquireBookNftEventsStatus(nftclass.AcquireBookNftEventsStatusCompleted).
 			SetAcquireBookNftEventsLastProcessedTime(lastProcessedTime).
-			SetAcquireBookNftEventsScore(nextProcessingScore).
+			SetAcquireBookNftEventsEta(nextProcessingScore).
 			ClearAcquireBookNftEventsFailedReason().
 			SetAcquireBookNftEventsFailedCount(0).
 			Exec(ctx)
@@ -244,7 +244,7 @@ func (r *nftClassAcquireBookNFTEventsRepository) Failed(
 			).
 			SetAcquireBookNftEventsStatus(nftclass.AcquireBookNftEventsStatusFailed).
 			SetAcquireBookNftEventsFailedReason(err.Error()).
-			SetAcquireBookNftEventsScore(retryScore).
+			SetAcquireBookNftEventsEta(retryScore).
 			SetAcquireBookNftEventsFailedCount(m.AcquireBookNftEventsFailedCount + 1).
 			Exec(ctx)
 	})
