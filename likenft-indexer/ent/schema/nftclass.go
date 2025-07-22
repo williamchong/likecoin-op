@@ -98,7 +98,7 @@ func (nftClassAcquireBookNFTEventsMixin) Fields() []ent.Field {
 	return []ent.Field{
 		field.Float("acquire_book_nft_events_weight").Default(1).Min(0),
 		field.Time("acquire_book_nft_events_last_processed_time").Optional().Nillable(),
-		field.Float("acquire_book_nft_events_score").SchemaType(map[string]string{
+		field.Float("acquire_book_nft_events_eta").SchemaType(map[string]string{
 			dialect.Postgres: "numeric",
 		}).Optional().Nillable(),
 		field.Enum("acquire_book_nft_events_status").Values(
@@ -116,7 +116,7 @@ func (nftClassAcquireBookNFTEventsMixin) Fields() []ent.Field {
 
 func (nftClassAcquireBookNFTEventsMixin) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("acquire_book_nft_events_score"),
+		index.Fields("acquire_book_nft_events_eta"),
 		index.Fields("acquire_book_nft_events_status"),
 	}
 }
