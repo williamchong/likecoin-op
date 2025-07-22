@@ -21,8 +21,8 @@ const (
 	FieldAcquireBookNftEventsWeight = "acquire_book_nft_events_weight"
 	// FieldAcquireBookNftEventsLastProcessedTime holds the string denoting the acquire_book_nft_events_last_processed_time field in the database.
 	FieldAcquireBookNftEventsLastProcessedTime = "acquire_book_nft_events_last_processed_time"
-	// FieldAcquireBookNftEventsScore holds the string denoting the acquire_book_nft_events_score field in the database.
-	FieldAcquireBookNftEventsScore = "acquire_book_nft_events_score"
+	// FieldAcquireBookNftEventsEta holds the string denoting the acquire_book_nft_events_eta field in the database.
+	FieldAcquireBookNftEventsEta = "acquire_book_nft_events_eta"
 	// FieldAcquireBookNftEventsStatus holds the string denoting the acquire_book_nft_events_status field in the database.
 	FieldAcquireBookNftEventsStatus = "acquire_book_nft_events_status"
 	// FieldAcquireBookNftEventsFailedReason holds the string denoting the acquire_book_nft_events_failed_reason field in the database.
@@ -90,7 +90,7 @@ var Columns = []string{
 	FieldID,
 	FieldAcquireBookNftEventsWeight,
 	FieldAcquireBookNftEventsLastProcessedTime,
-	FieldAcquireBookNftEventsScore,
+	FieldAcquireBookNftEventsEta,
 	FieldAcquireBookNftEventsStatus,
 	FieldAcquireBookNftEventsFailedReason,
 	FieldAcquireBookNftEventsFailedCount,
@@ -203,9 +203,9 @@ func ByAcquireBookNftEventsLastProcessedTime(opts ...sql.OrderTermOption) OrderO
 	return sql.OrderByField(FieldAcquireBookNftEventsLastProcessedTime, opts...).ToFunc()
 }
 
-// ByAcquireBookNftEventsScore orders the results by the acquire_book_nft_events_score field.
-func ByAcquireBookNftEventsScore(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAcquireBookNftEventsScore, opts...).ToFunc()
+// ByAcquireBookNftEventsEta orders the results by the acquire_book_nft_events_eta field.
+func ByAcquireBookNftEventsEta(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAcquireBookNftEventsEta, opts...).ToFunc()
 }
 
 // ByAcquireBookNftEventsStatus orders the results by the acquire_book_nft_events_status field.

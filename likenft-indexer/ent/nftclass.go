@@ -26,8 +26,8 @@ type NFTClass struct {
 	AcquireBookNftEventsWeight float64 `json:"acquire_book_nft_events_weight,omitempty"`
 	// AcquireBookNftEventsLastProcessedTime holds the value of the "acquire_book_nft_events_last_processed_time" field.
 	AcquireBookNftEventsLastProcessedTime *time.Time `json:"acquire_book_nft_events_last_processed_time,omitempty"`
-	// AcquireBookNftEventsScore holds the value of the "acquire_book_nft_events_score" field.
-	AcquireBookNftEventsScore *float64 `json:"acquire_book_nft_events_score,omitempty"`
+	// AcquireBookNftEventsEta holds the value of the "acquire_book_nft_events_eta" field.
+	AcquireBookNftEventsEta *float64 `json:"acquire_book_nft_events_eta,omitempty"`
 	// AcquireBookNftEventsStatus holds the value of the "acquire_book_nft_events_status" field.
 	AcquireBookNftEventsStatus *nftclass.AcquireBookNftEventsStatus `json:"acquire_book_nft_events_status,omitempty"`
 	// AcquireBookNftEventsFailedReason holds the value of the "acquire_book_nft_events_failed_reason" field.
@@ -115,7 +115,7 @@ func (*NFTClass) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case nftclass.FieldDisabledForIndexing:
 			values[i] = new(sql.NullBool)
-		case nftclass.FieldAcquireBookNftEventsWeight, nftclass.FieldAcquireBookNftEventsScore:
+		case nftclass.FieldAcquireBookNftEventsWeight, nftclass.FieldAcquireBookNftEventsEta:
 			values[i] = new(sql.NullFloat64)
 		case nftclass.FieldID, nftclass.FieldAcquireBookNftEventsFailedCount:
 			values[i] = new(sql.NullInt64)
@@ -167,12 +167,12 @@ func (nc *NFTClass) assignValues(columns []string, values []any) error {
 				nc.AcquireBookNftEventsLastProcessedTime = new(time.Time)
 				*nc.AcquireBookNftEventsLastProcessedTime = value.Time
 			}
-		case nftclass.FieldAcquireBookNftEventsScore:
+		case nftclass.FieldAcquireBookNftEventsEta:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
-				return fmt.Errorf("unexpected type %T for field acquire_book_nft_events_score", values[i])
+				return fmt.Errorf("unexpected type %T for field acquire_book_nft_events_eta", values[i])
 			} else if value.Valid {
-				nc.AcquireBookNftEventsScore = new(float64)
-				*nc.AcquireBookNftEventsScore = value.Float64
+				nc.AcquireBookNftEventsEta = new(float64)
+				*nc.AcquireBookNftEventsEta = value.Float64
 			}
 		case nftclass.FieldAcquireBookNftEventsStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -362,8 +362,8 @@ func (nc *NFTClass) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	if v := nc.AcquireBookNftEventsScore; v != nil {
-		builder.WriteString("acquire_book_nft_events_score=")
+	if v := nc.AcquireBookNftEventsEta; v != nil {
+		builder.WriteString("acquire_book_nft_events_eta=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")

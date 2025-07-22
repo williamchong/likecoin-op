@@ -182,7 +182,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "acquire_book_nft_events_weight", Type: field.TypeFloat64, Default: 1},
 		{Name: "acquire_book_nft_events_last_processed_time", Type: field.TypeTime, Nullable: true},
-		{Name: "acquire_book_nft_events_score", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "acquire_book_nft_events_eta", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"postgres": "numeric"}},
 		{Name: "acquire_book_nft_events_status", Type: field.TypeEnum, Nullable: true, Enums: []string{"enqueueing", "enqueued", "enqueue_failed", "processing", "completed", "failed"}},
 		{Name: "acquire_book_nft_events_failed_reason", Type: field.TypeString, Nullable: true},
 		{Name: "acquire_book_nft_events_failed_count", Type: field.TypeInt, Default: 0},
@@ -220,7 +220,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "nftclass_acquire_book_nft_events_score",
+				Name:    "nftclass_acquire_book_nft_events_eta",
 				Unique:  false,
 				Columns: []*schema.Column{NftClassesColumns[3]},
 			},

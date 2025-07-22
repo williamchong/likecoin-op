@@ -75,30 +75,30 @@ func (ncu *NFTClassUpdate) ClearAcquireBookNftEventsLastProcessedTime() *NFTClas
 	return ncu
 }
 
-// SetAcquireBookNftEventsScore sets the "acquire_book_nft_events_score" field.
-func (ncu *NFTClassUpdate) SetAcquireBookNftEventsScore(f float64) *NFTClassUpdate {
-	ncu.mutation.ResetAcquireBookNftEventsScore()
-	ncu.mutation.SetAcquireBookNftEventsScore(f)
+// SetAcquireBookNftEventsEta sets the "acquire_book_nft_events_eta" field.
+func (ncu *NFTClassUpdate) SetAcquireBookNftEventsEta(f float64) *NFTClassUpdate {
+	ncu.mutation.ResetAcquireBookNftEventsEta()
+	ncu.mutation.SetAcquireBookNftEventsEta(f)
 	return ncu
 }
 
-// SetNillableAcquireBookNftEventsScore sets the "acquire_book_nft_events_score" field if the given value is not nil.
-func (ncu *NFTClassUpdate) SetNillableAcquireBookNftEventsScore(f *float64) *NFTClassUpdate {
+// SetNillableAcquireBookNftEventsEta sets the "acquire_book_nft_events_eta" field if the given value is not nil.
+func (ncu *NFTClassUpdate) SetNillableAcquireBookNftEventsEta(f *float64) *NFTClassUpdate {
 	if f != nil {
-		ncu.SetAcquireBookNftEventsScore(*f)
+		ncu.SetAcquireBookNftEventsEta(*f)
 	}
 	return ncu
 }
 
-// AddAcquireBookNftEventsScore adds f to the "acquire_book_nft_events_score" field.
-func (ncu *NFTClassUpdate) AddAcquireBookNftEventsScore(f float64) *NFTClassUpdate {
-	ncu.mutation.AddAcquireBookNftEventsScore(f)
+// AddAcquireBookNftEventsEta adds f to the "acquire_book_nft_events_eta" field.
+func (ncu *NFTClassUpdate) AddAcquireBookNftEventsEta(f float64) *NFTClassUpdate {
+	ncu.mutation.AddAcquireBookNftEventsEta(f)
 	return ncu
 }
 
-// ClearAcquireBookNftEventsScore clears the value of the "acquire_book_nft_events_score" field.
-func (ncu *NFTClassUpdate) ClearAcquireBookNftEventsScore() *NFTClassUpdate {
-	ncu.mutation.ClearAcquireBookNftEventsScore()
+// ClearAcquireBookNftEventsEta clears the value of the "acquire_book_nft_events_eta" field.
+func (ncu *NFTClassUpdate) ClearAcquireBookNftEventsEta() *NFTClassUpdate {
+	ncu.mutation.ClearAcquireBookNftEventsEta()
 	return ncu
 }
 
@@ -575,14 +575,14 @@ func (ncu *NFTClassUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if ncu.mutation.AcquireBookNftEventsLastProcessedTimeCleared() {
 		_spec.ClearField(nftclass.FieldAcquireBookNftEventsLastProcessedTime, field.TypeTime)
 	}
-	if value, ok := ncu.mutation.AcquireBookNftEventsScore(); ok {
-		_spec.SetField(nftclass.FieldAcquireBookNftEventsScore, field.TypeFloat64, value)
+	if value, ok := ncu.mutation.AcquireBookNftEventsEta(); ok {
+		_spec.SetField(nftclass.FieldAcquireBookNftEventsEta, field.TypeFloat64, value)
 	}
-	if value, ok := ncu.mutation.AddedAcquireBookNftEventsScore(); ok {
-		_spec.AddField(nftclass.FieldAcquireBookNftEventsScore, field.TypeFloat64, value)
+	if value, ok := ncu.mutation.AddedAcquireBookNftEventsEta(); ok {
+		_spec.AddField(nftclass.FieldAcquireBookNftEventsEta, field.TypeFloat64, value)
 	}
-	if ncu.mutation.AcquireBookNftEventsScoreCleared() {
-		_spec.ClearField(nftclass.FieldAcquireBookNftEventsScore, field.TypeFloat64)
+	if ncu.mutation.AcquireBookNftEventsEtaCleared() {
+		_spec.ClearField(nftclass.FieldAcquireBookNftEventsEta, field.TypeFloat64)
 	}
 	if value, ok := ncu.mutation.AcquireBookNftEventsStatus(); ok {
 		_spec.SetField(nftclass.FieldAcquireBookNftEventsStatus, field.TypeEnum, value)
@@ -842,30 +842,30 @@ func (ncuo *NFTClassUpdateOne) ClearAcquireBookNftEventsLastProcessedTime() *NFT
 	return ncuo
 }
 
-// SetAcquireBookNftEventsScore sets the "acquire_book_nft_events_score" field.
-func (ncuo *NFTClassUpdateOne) SetAcquireBookNftEventsScore(f float64) *NFTClassUpdateOne {
-	ncuo.mutation.ResetAcquireBookNftEventsScore()
-	ncuo.mutation.SetAcquireBookNftEventsScore(f)
+// SetAcquireBookNftEventsEta sets the "acquire_book_nft_events_eta" field.
+func (ncuo *NFTClassUpdateOne) SetAcquireBookNftEventsEta(f float64) *NFTClassUpdateOne {
+	ncuo.mutation.ResetAcquireBookNftEventsEta()
+	ncuo.mutation.SetAcquireBookNftEventsEta(f)
 	return ncuo
 }
 
-// SetNillableAcquireBookNftEventsScore sets the "acquire_book_nft_events_score" field if the given value is not nil.
-func (ncuo *NFTClassUpdateOne) SetNillableAcquireBookNftEventsScore(f *float64) *NFTClassUpdateOne {
+// SetNillableAcquireBookNftEventsEta sets the "acquire_book_nft_events_eta" field if the given value is not nil.
+func (ncuo *NFTClassUpdateOne) SetNillableAcquireBookNftEventsEta(f *float64) *NFTClassUpdateOne {
 	if f != nil {
-		ncuo.SetAcquireBookNftEventsScore(*f)
+		ncuo.SetAcquireBookNftEventsEta(*f)
 	}
 	return ncuo
 }
 
-// AddAcquireBookNftEventsScore adds f to the "acquire_book_nft_events_score" field.
-func (ncuo *NFTClassUpdateOne) AddAcquireBookNftEventsScore(f float64) *NFTClassUpdateOne {
-	ncuo.mutation.AddAcquireBookNftEventsScore(f)
+// AddAcquireBookNftEventsEta adds f to the "acquire_book_nft_events_eta" field.
+func (ncuo *NFTClassUpdateOne) AddAcquireBookNftEventsEta(f float64) *NFTClassUpdateOne {
+	ncuo.mutation.AddAcquireBookNftEventsEta(f)
 	return ncuo
 }
 
-// ClearAcquireBookNftEventsScore clears the value of the "acquire_book_nft_events_score" field.
-func (ncuo *NFTClassUpdateOne) ClearAcquireBookNftEventsScore() *NFTClassUpdateOne {
-	ncuo.mutation.ClearAcquireBookNftEventsScore()
+// ClearAcquireBookNftEventsEta clears the value of the "acquire_book_nft_events_eta" field.
+func (ncuo *NFTClassUpdateOne) ClearAcquireBookNftEventsEta() *NFTClassUpdateOne {
+	ncuo.mutation.ClearAcquireBookNftEventsEta()
 	return ncuo
 }
 
@@ -1372,14 +1372,14 @@ func (ncuo *NFTClassUpdateOne) sqlSave(ctx context.Context) (_node *NFTClass, er
 	if ncuo.mutation.AcquireBookNftEventsLastProcessedTimeCleared() {
 		_spec.ClearField(nftclass.FieldAcquireBookNftEventsLastProcessedTime, field.TypeTime)
 	}
-	if value, ok := ncuo.mutation.AcquireBookNftEventsScore(); ok {
-		_spec.SetField(nftclass.FieldAcquireBookNftEventsScore, field.TypeFloat64, value)
+	if value, ok := ncuo.mutation.AcquireBookNftEventsEta(); ok {
+		_spec.SetField(nftclass.FieldAcquireBookNftEventsEta, field.TypeFloat64, value)
 	}
-	if value, ok := ncuo.mutation.AddedAcquireBookNftEventsScore(); ok {
-		_spec.AddField(nftclass.FieldAcquireBookNftEventsScore, field.TypeFloat64, value)
+	if value, ok := ncuo.mutation.AddedAcquireBookNftEventsEta(); ok {
+		_spec.AddField(nftclass.FieldAcquireBookNftEventsEta, field.TypeFloat64, value)
 	}
-	if ncuo.mutation.AcquireBookNftEventsScoreCleared() {
-		_spec.ClearField(nftclass.FieldAcquireBookNftEventsScore, field.TypeFloat64)
+	if ncuo.mutation.AcquireBookNftEventsEtaCleared() {
+		_spec.ClearField(nftclass.FieldAcquireBookNftEventsEta, field.TypeFloat64)
 	}
 	if value, ok := ncuo.mutation.AcquireBookNftEventsStatus(); ok {
 		_spec.SetField(nftclass.FieldAcquireBookNftEventsStatus, field.TypeEnum, value)

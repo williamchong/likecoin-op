@@ -66,9 +66,9 @@ func AcquireBookNftEventsLastProcessedTime(v time.Time) predicate.NFTClass {
 	return predicate.NFTClass(sql.FieldEQ(FieldAcquireBookNftEventsLastProcessedTime, v))
 }
 
-// AcquireBookNftEventsScore applies equality check predicate on the "acquire_book_nft_events_score" field. It's identical to AcquireBookNftEventsScoreEQ.
-func AcquireBookNftEventsScore(v float64) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldEQ(FieldAcquireBookNftEventsScore, v))
+// AcquireBookNftEventsEta applies equality check predicate on the "acquire_book_nft_events_eta" field. It's identical to AcquireBookNftEventsEtaEQ.
+func AcquireBookNftEventsEta(v float64) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldEQ(FieldAcquireBookNftEventsEta, v))
 }
 
 // AcquireBookNftEventsFailedReason applies equality check predicate on the "acquire_book_nft_events_failed_reason" field. It's identical to AcquireBookNftEventsFailedReasonEQ.
@@ -244,54 +244,54 @@ func AcquireBookNftEventsLastProcessedTimeNotNil() predicate.NFTClass {
 	return predicate.NFTClass(sql.FieldNotNull(FieldAcquireBookNftEventsLastProcessedTime))
 }
 
-// AcquireBookNftEventsScoreEQ applies the EQ predicate on the "acquire_book_nft_events_score" field.
-func AcquireBookNftEventsScoreEQ(v float64) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldEQ(FieldAcquireBookNftEventsScore, v))
+// AcquireBookNftEventsEtaEQ applies the EQ predicate on the "acquire_book_nft_events_eta" field.
+func AcquireBookNftEventsEtaEQ(v float64) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldEQ(FieldAcquireBookNftEventsEta, v))
 }
 
-// AcquireBookNftEventsScoreNEQ applies the NEQ predicate on the "acquire_book_nft_events_score" field.
-func AcquireBookNftEventsScoreNEQ(v float64) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldNEQ(FieldAcquireBookNftEventsScore, v))
+// AcquireBookNftEventsEtaNEQ applies the NEQ predicate on the "acquire_book_nft_events_eta" field.
+func AcquireBookNftEventsEtaNEQ(v float64) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldNEQ(FieldAcquireBookNftEventsEta, v))
 }
 
-// AcquireBookNftEventsScoreIn applies the In predicate on the "acquire_book_nft_events_score" field.
-func AcquireBookNftEventsScoreIn(vs ...float64) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldIn(FieldAcquireBookNftEventsScore, vs...))
+// AcquireBookNftEventsEtaIn applies the In predicate on the "acquire_book_nft_events_eta" field.
+func AcquireBookNftEventsEtaIn(vs ...float64) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldIn(FieldAcquireBookNftEventsEta, vs...))
 }
 
-// AcquireBookNftEventsScoreNotIn applies the NotIn predicate on the "acquire_book_nft_events_score" field.
-func AcquireBookNftEventsScoreNotIn(vs ...float64) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldNotIn(FieldAcquireBookNftEventsScore, vs...))
+// AcquireBookNftEventsEtaNotIn applies the NotIn predicate on the "acquire_book_nft_events_eta" field.
+func AcquireBookNftEventsEtaNotIn(vs ...float64) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldNotIn(FieldAcquireBookNftEventsEta, vs...))
 }
 
-// AcquireBookNftEventsScoreGT applies the GT predicate on the "acquire_book_nft_events_score" field.
-func AcquireBookNftEventsScoreGT(v float64) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldGT(FieldAcquireBookNftEventsScore, v))
+// AcquireBookNftEventsEtaGT applies the GT predicate on the "acquire_book_nft_events_eta" field.
+func AcquireBookNftEventsEtaGT(v float64) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldGT(FieldAcquireBookNftEventsEta, v))
 }
 
-// AcquireBookNftEventsScoreGTE applies the GTE predicate on the "acquire_book_nft_events_score" field.
-func AcquireBookNftEventsScoreGTE(v float64) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldGTE(FieldAcquireBookNftEventsScore, v))
+// AcquireBookNftEventsEtaGTE applies the GTE predicate on the "acquire_book_nft_events_eta" field.
+func AcquireBookNftEventsEtaGTE(v float64) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldGTE(FieldAcquireBookNftEventsEta, v))
 }
 
-// AcquireBookNftEventsScoreLT applies the LT predicate on the "acquire_book_nft_events_score" field.
-func AcquireBookNftEventsScoreLT(v float64) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldLT(FieldAcquireBookNftEventsScore, v))
+// AcquireBookNftEventsEtaLT applies the LT predicate on the "acquire_book_nft_events_eta" field.
+func AcquireBookNftEventsEtaLT(v float64) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldLT(FieldAcquireBookNftEventsEta, v))
 }
 
-// AcquireBookNftEventsScoreLTE applies the LTE predicate on the "acquire_book_nft_events_score" field.
-func AcquireBookNftEventsScoreLTE(v float64) predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldLTE(FieldAcquireBookNftEventsScore, v))
+// AcquireBookNftEventsEtaLTE applies the LTE predicate on the "acquire_book_nft_events_eta" field.
+func AcquireBookNftEventsEtaLTE(v float64) predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldLTE(FieldAcquireBookNftEventsEta, v))
 }
 
-// AcquireBookNftEventsScoreIsNil applies the IsNil predicate on the "acquire_book_nft_events_score" field.
-func AcquireBookNftEventsScoreIsNil() predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldIsNull(FieldAcquireBookNftEventsScore))
+// AcquireBookNftEventsEtaIsNil applies the IsNil predicate on the "acquire_book_nft_events_eta" field.
+func AcquireBookNftEventsEtaIsNil() predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldIsNull(FieldAcquireBookNftEventsEta))
 }
 
-// AcquireBookNftEventsScoreNotNil applies the NotNil predicate on the "acquire_book_nft_events_score" field.
-func AcquireBookNftEventsScoreNotNil() predicate.NFTClass {
-	return predicate.NFTClass(sql.FieldNotNull(FieldAcquireBookNftEventsScore))
+// AcquireBookNftEventsEtaNotNil applies the NotNil predicate on the "acquire_book_nft_events_eta" field.
+func AcquireBookNftEventsEtaNotNil() predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldNotNull(FieldAcquireBookNftEventsEta))
 }
 
 // AcquireBookNftEventsStatusEQ applies the EQ predicate on the "acquire_book_nft_events_status" field.

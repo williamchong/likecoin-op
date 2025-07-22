@@ -5027,8 +5027,8 @@ type NFTClassMutation struct {
 	acquire_book_nft_events_weight              *float64
 	addacquire_book_nft_events_weight           *float64
 	acquire_book_nft_events_last_processed_time *time.Time
-	acquire_book_nft_events_score               *float64
-	addacquire_book_nft_events_score            *float64
+	acquire_book_nft_events_eta                 *float64
+	addacquire_book_nft_events_eta              *float64
 	acquire_book_nft_events_status              *nftclass.AcquireBookNftEventsStatus
 	acquire_book_nft_events_failed_reason       *string
 	acquire_book_nft_events_failed_count        *int
@@ -5268,74 +5268,74 @@ func (m *NFTClassMutation) ResetAcquireBookNftEventsLastProcessedTime() {
 	delete(m.clearedFields, nftclass.FieldAcquireBookNftEventsLastProcessedTime)
 }
 
-// SetAcquireBookNftEventsScore sets the "acquire_book_nft_events_score" field.
-func (m *NFTClassMutation) SetAcquireBookNftEventsScore(f float64) {
-	m.acquire_book_nft_events_score = &f
-	m.addacquire_book_nft_events_score = nil
+// SetAcquireBookNftEventsEta sets the "acquire_book_nft_events_eta" field.
+func (m *NFTClassMutation) SetAcquireBookNftEventsEta(f float64) {
+	m.acquire_book_nft_events_eta = &f
+	m.addacquire_book_nft_events_eta = nil
 }
 
-// AcquireBookNftEventsScore returns the value of the "acquire_book_nft_events_score" field in the mutation.
-func (m *NFTClassMutation) AcquireBookNftEventsScore() (r float64, exists bool) {
-	v := m.acquire_book_nft_events_score
+// AcquireBookNftEventsEta returns the value of the "acquire_book_nft_events_eta" field in the mutation.
+func (m *NFTClassMutation) AcquireBookNftEventsEta() (r float64, exists bool) {
+	v := m.acquire_book_nft_events_eta
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldAcquireBookNftEventsScore returns the old "acquire_book_nft_events_score" field's value of the NFTClass entity.
+// OldAcquireBookNftEventsEta returns the old "acquire_book_nft_events_eta" field's value of the NFTClass entity.
 // If the NFTClass object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NFTClassMutation) OldAcquireBookNftEventsScore(ctx context.Context) (v *float64, err error) {
+func (m *NFTClassMutation) OldAcquireBookNftEventsEta(ctx context.Context) (v *float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAcquireBookNftEventsScore is only allowed on UpdateOne operations")
+		return v, errors.New("OldAcquireBookNftEventsEta is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAcquireBookNftEventsScore requires an ID field in the mutation")
+		return v, errors.New("OldAcquireBookNftEventsEta requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAcquireBookNftEventsScore: %w", err)
+		return v, fmt.Errorf("querying old value for OldAcquireBookNftEventsEta: %w", err)
 	}
-	return oldValue.AcquireBookNftEventsScore, nil
+	return oldValue.AcquireBookNftEventsEta, nil
 }
 
-// AddAcquireBookNftEventsScore adds f to the "acquire_book_nft_events_score" field.
-func (m *NFTClassMutation) AddAcquireBookNftEventsScore(f float64) {
-	if m.addacquire_book_nft_events_score != nil {
-		*m.addacquire_book_nft_events_score += f
+// AddAcquireBookNftEventsEta adds f to the "acquire_book_nft_events_eta" field.
+func (m *NFTClassMutation) AddAcquireBookNftEventsEta(f float64) {
+	if m.addacquire_book_nft_events_eta != nil {
+		*m.addacquire_book_nft_events_eta += f
 	} else {
-		m.addacquire_book_nft_events_score = &f
+		m.addacquire_book_nft_events_eta = &f
 	}
 }
 
-// AddedAcquireBookNftEventsScore returns the value that was added to the "acquire_book_nft_events_score" field in this mutation.
-func (m *NFTClassMutation) AddedAcquireBookNftEventsScore() (r float64, exists bool) {
-	v := m.addacquire_book_nft_events_score
+// AddedAcquireBookNftEventsEta returns the value that was added to the "acquire_book_nft_events_eta" field in this mutation.
+func (m *NFTClassMutation) AddedAcquireBookNftEventsEta() (r float64, exists bool) {
+	v := m.addacquire_book_nft_events_eta
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ClearAcquireBookNftEventsScore clears the value of the "acquire_book_nft_events_score" field.
-func (m *NFTClassMutation) ClearAcquireBookNftEventsScore() {
-	m.acquire_book_nft_events_score = nil
-	m.addacquire_book_nft_events_score = nil
-	m.clearedFields[nftclass.FieldAcquireBookNftEventsScore] = struct{}{}
+// ClearAcquireBookNftEventsEta clears the value of the "acquire_book_nft_events_eta" field.
+func (m *NFTClassMutation) ClearAcquireBookNftEventsEta() {
+	m.acquire_book_nft_events_eta = nil
+	m.addacquire_book_nft_events_eta = nil
+	m.clearedFields[nftclass.FieldAcquireBookNftEventsEta] = struct{}{}
 }
 
-// AcquireBookNftEventsScoreCleared returns if the "acquire_book_nft_events_score" field was cleared in this mutation.
-func (m *NFTClassMutation) AcquireBookNftEventsScoreCleared() bool {
-	_, ok := m.clearedFields[nftclass.FieldAcquireBookNftEventsScore]
+// AcquireBookNftEventsEtaCleared returns if the "acquire_book_nft_events_eta" field was cleared in this mutation.
+func (m *NFTClassMutation) AcquireBookNftEventsEtaCleared() bool {
+	_, ok := m.clearedFields[nftclass.FieldAcquireBookNftEventsEta]
 	return ok
 }
 
-// ResetAcquireBookNftEventsScore resets all changes to the "acquire_book_nft_events_score" field.
-func (m *NFTClassMutation) ResetAcquireBookNftEventsScore() {
-	m.acquire_book_nft_events_score = nil
-	m.addacquire_book_nft_events_score = nil
-	delete(m.clearedFields, nftclass.FieldAcquireBookNftEventsScore)
+// ResetAcquireBookNftEventsEta resets all changes to the "acquire_book_nft_events_eta" field.
+func (m *NFTClassMutation) ResetAcquireBookNftEventsEta() {
+	m.acquire_book_nft_events_eta = nil
+	m.addacquire_book_nft_events_eta = nil
+	delete(m.clearedFields, nftclass.FieldAcquireBookNftEventsEta)
 }
 
 // SetAcquireBookNftEventsStatus sets the "acquire_book_nft_events_status" field.
@@ -6366,8 +6366,8 @@ func (m *NFTClassMutation) Fields() []string {
 	if m.acquire_book_nft_events_last_processed_time != nil {
 		fields = append(fields, nftclass.FieldAcquireBookNftEventsLastProcessedTime)
 	}
-	if m.acquire_book_nft_events_score != nil {
-		fields = append(fields, nftclass.FieldAcquireBookNftEventsScore)
+	if m.acquire_book_nft_events_eta != nil {
+		fields = append(fields, nftclass.FieldAcquireBookNftEventsEta)
 	}
 	if m.acquire_book_nft_events_status != nil {
 		fields = append(fields, nftclass.FieldAcquireBookNftEventsStatus)
@@ -6441,8 +6441,8 @@ func (m *NFTClassMutation) Field(name string) (ent.Value, bool) {
 		return m.AcquireBookNftEventsWeight()
 	case nftclass.FieldAcquireBookNftEventsLastProcessedTime:
 		return m.AcquireBookNftEventsLastProcessedTime()
-	case nftclass.FieldAcquireBookNftEventsScore:
-		return m.AcquireBookNftEventsScore()
+	case nftclass.FieldAcquireBookNftEventsEta:
+		return m.AcquireBookNftEventsEta()
 	case nftclass.FieldAcquireBookNftEventsStatus:
 		return m.AcquireBookNftEventsStatus()
 	case nftclass.FieldAcquireBookNftEventsFailedReason:
@@ -6496,8 +6496,8 @@ func (m *NFTClassMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldAcquireBookNftEventsWeight(ctx)
 	case nftclass.FieldAcquireBookNftEventsLastProcessedTime:
 		return m.OldAcquireBookNftEventsLastProcessedTime(ctx)
-	case nftclass.FieldAcquireBookNftEventsScore:
-		return m.OldAcquireBookNftEventsScore(ctx)
+	case nftclass.FieldAcquireBookNftEventsEta:
+		return m.OldAcquireBookNftEventsEta(ctx)
 	case nftclass.FieldAcquireBookNftEventsStatus:
 		return m.OldAcquireBookNftEventsStatus(ctx)
 	case nftclass.FieldAcquireBookNftEventsFailedReason:
@@ -6561,12 +6561,12 @@ func (m *NFTClassMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAcquireBookNftEventsLastProcessedTime(v)
 		return nil
-	case nftclass.FieldAcquireBookNftEventsScore:
+	case nftclass.FieldAcquireBookNftEventsEta:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetAcquireBookNftEventsScore(v)
+		m.SetAcquireBookNftEventsEta(v)
 		return nil
 	case nftclass.FieldAcquireBookNftEventsStatus:
 		v, ok := value.(nftclass.AcquireBookNftEventsStatus)
@@ -6719,8 +6719,8 @@ func (m *NFTClassMutation) AddedFields() []string {
 	if m.addacquire_book_nft_events_weight != nil {
 		fields = append(fields, nftclass.FieldAcquireBookNftEventsWeight)
 	}
-	if m.addacquire_book_nft_events_score != nil {
-		fields = append(fields, nftclass.FieldAcquireBookNftEventsScore)
+	if m.addacquire_book_nft_events_eta != nil {
+		fields = append(fields, nftclass.FieldAcquireBookNftEventsEta)
 	}
 	if m.addacquire_book_nft_events_failed_count != nil {
 		fields = append(fields, nftclass.FieldAcquireBookNftEventsFailedCount)
@@ -6744,8 +6744,8 @@ func (m *NFTClassMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case nftclass.FieldAcquireBookNftEventsWeight:
 		return m.AddedAcquireBookNftEventsWeight()
-	case nftclass.FieldAcquireBookNftEventsScore:
-		return m.AddedAcquireBookNftEventsScore()
+	case nftclass.FieldAcquireBookNftEventsEta:
+		return m.AddedAcquireBookNftEventsEta()
 	case nftclass.FieldAcquireBookNftEventsFailedCount:
 		return m.AddedAcquireBookNftEventsFailedCount()
 	case nftclass.FieldMaxSupply:
@@ -6770,12 +6770,12 @@ func (m *NFTClassMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddAcquireBookNftEventsWeight(v)
 		return nil
-	case nftclass.FieldAcquireBookNftEventsScore:
+	case nftclass.FieldAcquireBookNftEventsEta:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddAcquireBookNftEventsScore(v)
+		m.AddAcquireBookNftEventsEta(v)
 		return nil
 	case nftclass.FieldAcquireBookNftEventsFailedCount:
 		v, ok := value.(int)
@@ -6816,8 +6816,8 @@ func (m *NFTClassMutation) ClearedFields() []string {
 	if m.FieldCleared(nftclass.FieldAcquireBookNftEventsLastProcessedTime) {
 		fields = append(fields, nftclass.FieldAcquireBookNftEventsLastProcessedTime)
 	}
-	if m.FieldCleared(nftclass.FieldAcquireBookNftEventsScore) {
-		fields = append(fields, nftclass.FieldAcquireBookNftEventsScore)
+	if m.FieldCleared(nftclass.FieldAcquireBookNftEventsEta) {
+		fields = append(fields, nftclass.FieldAcquireBookNftEventsEta)
 	}
 	if m.FieldCleared(nftclass.FieldAcquireBookNftEventsStatus) {
 		fields = append(fields, nftclass.FieldAcquireBookNftEventsStatus)
@@ -6854,8 +6854,8 @@ func (m *NFTClassMutation) ClearField(name string) error {
 	case nftclass.FieldAcquireBookNftEventsLastProcessedTime:
 		m.ClearAcquireBookNftEventsLastProcessedTime()
 		return nil
-	case nftclass.FieldAcquireBookNftEventsScore:
-		m.ClearAcquireBookNftEventsScore()
+	case nftclass.FieldAcquireBookNftEventsEta:
+		m.ClearAcquireBookNftEventsEta()
 		return nil
 	case nftclass.FieldAcquireBookNftEventsStatus:
 		m.ClearAcquireBookNftEventsStatus()
@@ -6889,8 +6889,8 @@ func (m *NFTClassMutation) ResetField(name string) error {
 	case nftclass.FieldAcquireBookNftEventsLastProcessedTime:
 		m.ResetAcquireBookNftEventsLastProcessedTime()
 		return nil
-	case nftclass.FieldAcquireBookNftEventsScore:
-		m.ResetAcquireBookNftEventsScore()
+	case nftclass.FieldAcquireBookNftEventsEta:
+		m.ResetAcquireBookNftEventsEta()
 		return nil
 	case nftclass.FieldAcquireBookNftEventsStatus:
 		m.ResetAcquireBookNftEventsStatus()

@@ -53,16 +53,16 @@ func (ncc *NFTClassCreate) SetNillableAcquireBookNftEventsLastProcessedTime(t *t
 	return ncc
 }
 
-// SetAcquireBookNftEventsScore sets the "acquire_book_nft_events_score" field.
-func (ncc *NFTClassCreate) SetAcquireBookNftEventsScore(f float64) *NFTClassCreate {
-	ncc.mutation.SetAcquireBookNftEventsScore(f)
+// SetAcquireBookNftEventsEta sets the "acquire_book_nft_events_eta" field.
+func (ncc *NFTClassCreate) SetAcquireBookNftEventsEta(f float64) *NFTClassCreate {
+	ncc.mutation.SetAcquireBookNftEventsEta(f)
 	return ncc
 }
 
-// SetNillableAcquireBookNftEventsScore sets the "acquire_book_nft_events_score" field if the given value is not nil.
-func (ncc *NFTClassCreate) SetNillableAcquireBookNftEventsScore(f *float64) *NFTClassCreate {
+// SetNillableAcquireBookNftEventsEta sets the "acquire_book_nft_events_eta" field if the given value is not nil.
+func (ncc *NFTClassCreate) SetNillableAcquireBookNftEventsEta(f *float64) *NFTClassCreate {
 	if f != nil {
-		ncc.SetAcquireBookNftEventsScore(*f)
+		ncc.SetAcquireBookNftEventsEta(*f)
 	}
 	return ncc
 }
@@ -427,9 +427,9 @@ func (ncc *NFTClassCreate) createSpec() (*NFTClass, *sqlgraph.CreateSpec, error)
 		_spec.SetField(nftclass.FieldAcquireBookNftEventsLastProcessedTime, field.TypeTime, value)
 		_node.AcquireBookNftEventsLastProcessedTime = &value
 	}
-	if value, ok := ncc.mutation.AcquireBookNftEventsScore(); ok {
-		_spec.SetField(nftclass.FieldAcquireBookNftEventsScore, field.TypeFloat64, value)
-		_node.AcquireBookNftEventsScore = &value
+	if value, ok := ncc.mutation.AcquireBookNftEventsEta(); ok {
+		_spec.SetField(nftclass.FieldAcquireBookNftEventsEta, field.TypeFloat64, value)
+		_node.AcquireBookNftEventsEta = &value
 	}
 	if value, ok := ncc.mutation.AcquireBookNftEventsStatus(); ok {
 		_spec.SetField(nftclass.FieldAcquireBookNftEventsStatus, field.TypeEnum, value)
