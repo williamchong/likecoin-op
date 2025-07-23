@@ -11,6 +11,7 @@ import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 import {IERC1967} from "@openzeppelin/contracts/interfaces/IERC1967.sol";
+import {IERC4906} from "@openzeppelin/contracts/interfaces/IERC4906.sol";
 
 import {BookConfig} from "../types/BookConfig.sol";
 import {MsgNewBookNFT} from "../types/msgs/MsgNewBookNFT.sol";
@@ -34,7 +35,8 @@ contract BookNFT is
     OwnableUpgradeable,
     AccessControlUpgradeable,
     IERC2981,
-    IERC1967
+    IERC1967,
+    IERC4906
 {
     struct BookNFTStorage {
         string name;
@@ -156,6 +158,7 @@ contract BookNFT is
     {
         return
             interfaceId == type(IERC2981).interfaceId ||
+            interfaceId == bytes4(0x49064906) ||
             super.supportsInterface(interfaceId);
     }
 
@@ -205,6 +208,23 @@ contract BookNFT is
         $.max_supply = config.max_supply;
         $.metadata = config.metadata;
         emit ContractURIUpdated();
+    }
+
+    /**
+     * updateTokenMetadata
+     *
+     * update the metadata of a token
+     *
+     * @param tokenId - the token id to update
+     * @param metadata - the metadata to update
+     */
+    function updateTokenMetadata(
+        uint256 tokenId,
+        string calldata metadata
+    ) public onlyUpdater {
+        BookNFTStorage storage $ = _getClassStorage();
+        $.tokenURIMap[tokenId] = metadata;
+        emit MetadataUpdate(tokenId);
     }
 
     /**

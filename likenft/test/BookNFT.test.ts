@@ -81,6 +81,27 @@ describe("BookNFTClass", () => {
     );
   });
 
+  it("should support EIP 721 interface", async function () {
+    // https://eips.ethereum.org/EIPS/eip-721#specification
+    expect(await nftClassContract.supportsInterface("0x80ac58cd")).to.equal(
+      true,
+    );
+  });
+
+  it("should support EIP 2981 interface", async function () {
+    // https://eips.ethereum.org/EIPS/eip-2981#specification
+    expect(await nftClassContract.supportsInterface("0x2a55205a")).to.equal(
+      true,
+    );
+  });
+
+  it("should support EIP 4906 interface", async function () {
+    // https://eips.ethereum.org/EIPS/eip-4906#specification
+    expect(await nftClassContract.supportsInterface("0x49064906")).to.equal(
+      true,
+    );
+  });
+
   it("should not able to re-initialize", async function () {
     const bookNFTRandomSigner = bookNFTImplementation.connect(
       this.randomSigner,
