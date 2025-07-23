@@ -34,6 +34,135 @@ func (ncu *NFTClassUpdate) Where(ps ...predicate.NFTClass) *NFTClassUpdate {
 	return ncu
 }
 
+// SetAcquireBookNftEventsWeight sets the "acquire_book_nft_events_weight" field.
+func (ncu *NFTClassUpdate) SetAcquireBookNftEventsWeight(f float64) *NFTClassUpdate {
+	ncu.mutation.ResetAcquireBookNftEventsWeight()
+	ncu.mutation.SetAcquireBookNftEventsWeight(f)
+	return ncu
+}
+
+// SetNillableAcquireBookNftEventsWeight sets the "acquire_book_nft_events_weight" field if the given value is not nil.
+func (ncu *NFTClassUpdate) SetNillableAcquireBookNftEventsWeight(f *float64) *NFTClassUpdate {
+	if f != nil {
+		ncu.SetAcquireBookNftEventsWeight(*f)
+	}
+	return ncu
+}
+
+// AddAcquireBookNftEventsWeight adds f to the "acquire_book_nft_events_weight" field.
+func (ncu *NFTClassUpdate) AddAcquireBookNftEventsWeight(f float64) *NFTClassUpdate {
+	ncu.mutation.AddAcquireBookNftEventsWeight(f)
+	return ncu
+}
+
+// SetAcquireBookNftEventsLastProcessedTime sets the "acquire_book_nft_events_last_processed_time" field.
+func (ncu *NFTClassUpdate) SetAcquireBookNftEventsLastProcessedTime(t time.Time) *NFTClassUpdate {
+	ncu.mutation.SetAcquireBookNftEventsLastProcessedTime(t)
+	return ncu
+}
+
+// SetNillableAcquireBookNftEventsLastProcessedTime sets the "acquire_book_nft_events_last_processed_time" field if the given value is not nil.
+func (ncu *NFTClassUpdate) SetNillableAcquireBookNftEventsLastProcessedTime(t *time.Time) *NFTClassUpdate {
+	if t != nil {
+		ncu.SetAcquireBookNftEventsLastProcessedTime(*t)
+	}
+	return ncu
+}
+
+// ClearAcquireBookNftEventsLastProcessedTime clears the value of the "acquire_book_nft_events_last_processed_time" field.
+func (ncu *NFTClassUpdate) ClearAcquireBookNftEventsLastProcessedTime() *NFTClassUpdate {
+	ncu.mutation.ClearAcquireBookNftEventsLastProcessedTime()
+	return ncu
+}
+
+// SetAcquireBookNftEventsEta sets the "acquire_book_nft_events_eta" field.
+func (ncu *NFTClassUpdate) SetAcquireBookNftEventsEta(f float64) *NFTClassUpdate {
+	ncu.mutation.ResetAcquireBookNftEventsEta()
+	ncu.mutation.SetAcquireBookNftEventsEta(f)
+	return ncu
+}
+
+// SetNillableAcquireBookNftEventsEta sets the "acquire_book_nft_events_eta" field if the given value is not nil.
+func (ncu *NFTClassUpdate) SetNillableAcquireBookNftEventsEta(f *float64) *NFTClassUpdate {
+	if f != nil {
+		ncu.SetAcquireBookNftEventsEta(*f)
+	}
+	return ncu
+}
+
+// AddAcquireBookNftEventsEta adds f to the "acquire_book_nft_events_eta" field.
+func (ncu *NFTClassUpdate) AddAcquireBookNftEventsEta(f float64) *NFTClassUpdate {
+	ncu.mutation.AddAcquireBookNftEventsEta(f)
+	return ncu
+}
+
+// ClearAcquireBookNftEventsEta clears the value of the "acquire_book_nft_events_eta" field.
+func (ncu *NFTClassUpdate) ClearAcquireBookNftEventsEta() *NFTClassUpdate {
+	ncu.mutation.ClearAcquireBookNftEventsEta()
+	return ncu
+}
+
+// SetAcquireBookNftEventsStatus sets the "acquire_book_nft_events_status" field.
+func (ncu *NFTClassUpdate) SetAcquireBookNftEventsStatus(nbnes nftclass.AcquireBookNftEventsStatus) *NFTClassUpdate {
+	ncu.mutation.SetAcquireBookNftEventsStatus(nbnes)
+	return ncu
+}
+
+// SetNillableAcquireBookNftEventsStatus sets the "acquire_book_nft_events_status" field if the given value is not nil.
+func (ncu *NFTClassUpdate) SetNillableAcquireBookNftEventsStatus(nbnes *nftclass.AcquireBookNftEventsStatus) *NFTClassUpdate {
+	if nbnes != nil {
+		ncu.SetAcquireBookNftEventsStatus(*nbnes)
+	}
+	return ncu
+}
+
+// ClearAcquireBookNftEventsStatus clears the value of the "acquire_book_nft_events_status" field.
+func (ncu *NFTClassUpdate) ClearAcquireBookNftEventsStatus() *NFTClassUpdate {
+	ncu.mutation.ClearAcquireBookNftEventsStatus()
+	return ncu
+}
+
+// SetAcquireBookNftEventsFailedReason sets the "acquire_book_nft_events_failed_reason" field.
+func (ncu *NFTClassUpdate) SetAcquireBookNftEventsFailedReason(s string) *NFTClassUpdate {
+	ncu.mutation.SetAcquireBookNftEventsFailedReason(s)
+	return ncu
+}
+
+// SetNillableAcquireBookNftEventsFailedReason sets the "acquire_book_nft_events_failed_reason" field if the given value is not nil.
+func (ncu *NFTClassUpdate) SetNillableAcquireBookNftEventsFailedReason(s *string) *NFTClassUpdate {
+	if s != nil {
+		ncu.SetAcquireBookNftEventsFailedReason(*s)
+	}
+	return ncu
+}
+
+// ClearAcquireBookNftEventsFailedReason clears the value of the "acquire_book_nft_events_failed_reason" field.
+func (ncu *NFTClassUpdate) ClearAcquireBookNftEventsFailedReason() *NFTClassUpdate {
+	ncu.mutation.ClearAcquireBookNftEventsFailedReason()
+	return ncu
+}
+
+// SetAcquireBookNftEventsFailedCount sets the "acquire_book_nft_events_failed_count" field.
+func (ncu *NFTClassUpdate) SetAcquireBookNftEventsFailedCount(i int) *NFTClassUpdate {
+	ncu.mutation.ResetAcquireBookNftEventsFailedCount()
+	ncu.mutation.SetAcquireBookNftEventsFailedCount(i)
+	return ncu
+}
+
+// SetNillableAcquireBookNftEventsFailedCount sets the "acquire_book_nft_events_failed_count" field if the given value is not nil.
+func (ncu *NFTClassUpdate) SetNillableAcquireBookNftEventsFailedCount(i *int) *NFTClassUpdate {
+	if i != nil {
+		ncu.SetAcquireBookNftEventsFailedCount(*i)
+	}
+	return ncu
+}
+
+// AddAcquireBookNftEventsFailedCount adds i to the "acquire_book_nft_events_failed_count" field.
+func (ncu *NFTClassUpdate) AddAcquireBookNftEventsFailedCount(i int) *NFTClassUpdate {
+	ncu.mutation.AddAcquireBookNftEventsFailedCount(i)
+	return ncu
+}
+
 // SetAddress sets the "address" field.
 func (ncu *NFTClassUpdate) SetAddress(s string) *NFTClassUpdate {
 	ncu.mutation.SetAddress(s)
@@ -394,6 +523,16 @@ func (ncu *NFTClassUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ncu *NFTClassUpdate) check() error {
+	if v, ok := ncu.mutation.AcquireBookNftEventsWeight(); ok {
+		if err := nftclass.AcquireBookNftEventsWeightValidator(v); err != nil {
+			return &ValidationError{Name: "acquire_book_nft_events_weight", err: fmt.Errorf(`ent: validator failed for field "NFTClass.acquire_book_nft_events_weight": %w`, err)}
+		}
+	}
+	if v, ok := ncu.mutation.AcquireBookNftEventsStatus(); ok {
+		if err := nftclass.AcquireBookNftEventsStatusValidator(v); err != nil {
+			return &ValidationError{Name: "acquire_book_nft_events_status", err: fmt.Errorf(`ent: validator failed for field "NFTClass.acquire_book_nft_events_status": %w`, err)}
+		}
+	}
 	if v, ok := ncu.mutation.Name(); ok {
 		if err := nftclass.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "NFTClass.name": %w`, err)}
@@ -423,6 +562,45 @@ func (ncu *NFTClassUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := ncu.mutation.AcquireBookNftEventsWeight(); ok {
+		_spec.SetField(nftclass.FieldAcquireBookNftEventsWeight, field.TypeFloat64, value)
+	}
+	if value, ok := ncu.mutation.AddedAcquireBookNftEventsWeight(); ok {
+		_spec.AddField(nftclass.FieldAcquireBookNftEventsWeight, field.TypeFloat64, value)
+	}
+	if value, ok := ncu.mutation.AcquireBookNftEventsLastProcessedTime(); ok {
+		_spec.SetField(nftclass.FieldAcquireBookNftEventsLastProcessedTime, field.TypeTime, value)
+	}
+	if ncu.mutation.AcquireBookNftEventsLastProcessedTimeCleared() {
+		_spec.ClearField(nftclass.FieldAcquireBookNftEventsLastProcessedTime, field.TypeTime)
+	}
+	if value, ok := ncu.mutation.AcquireBookNftEventsEta(); ok {
+		_spec.SetField(nftclass.FieldAcquireBookNftEventsEta, field.TypeFloat64, value)
+	}
+	if value, ok := ncu.mutation.AddedAcquireBookNftEventsEta(); ok {
+		_spec.AddField(nftclass.FieldAcquireBookNftEventsEta, field.TypeFloat64, value)
+	}
+	if ncu.mutation.AcquireBookNftEventsEtaCleared() {
+		_spec.ClearField(nftclass.FieldAcquireBookNftEventsEta, field.TypeFloat64)
+	}
+	if value, ok := ncu.mutation.AcquireBookNftEventsStatus(); ok {
+		_spec.SetField(nftclass.FieldAcquireBookNftEventsStatus, field.TypeEnum, value)
+	}
+	if ncu.mutation.AcquireBookNftEventsStatusCleared() {
+		_spec.ClearField(nftclass.FieldAcquireBookNftEventsStatus, field.TypeEnum)
+	}
+	if value, ok := ncu.mutation.AcquireBookNftEventsFailedReason(); ok {
+		_spec.SetField(nftclass.FieldAcquireBookNftEventsFailedReason, field.TypeString, value)
+	}
+	if ncu.mutation.AcquireBookNftEventsFailedReasonCleared() {
+		_spec.ClearField(nftclass.FieldAcquireBookNftEventsFailedReason, field.TypeString)
+	}
+	if value, ok := ncu.mutation.AcquireBookNftEventsFailedCount(); ok {
+		_spec.SetField(nftclass.FieldAcquireBookNftEventsFailedCount, field.TypeInt, value)
+	}
+	if value, ok := ncu.mutation.AddedAcquireBookNftEventsFailedCount(); ok {
+		_spec.AddField(nftclass.FieldAcquireBookNftEventsFailedCount, field.TypeInt, value)
 	}
 	if value, ok := ncu.mutation.Address(); ok {
 		_spec.SetField(nftclass.FieldAddress, field.TypeString, value)
@@ -621,6 +799,135 @@ type NFTClassUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *NFTClassMutation
+}
+
+// SetAcquireBookNftEventsWeight sets the "acquire_book_nft_events_weight" field.
+func (ncuo *NFTClassUpdateOne) SetAcquireBookNftEventsWeight(f float64) *NFTClassUpdateOne {
+	ncuo.mutation.ResetAcquireBookNftEventsWeight()
+	ncuo.mutation.SetAcquireBookNftEventsWeight(f)
+	return ncuo
+}
+
+// SetNillableAcquireBookNftEventsWeight sets the "acquire_book_nft_events_weight" field if the given value is not nil.
+func (ncuo *NFTClassUpdateOne) SetNillableAcquireBookNftEventsWeight(f *float64) *NFTClassUpdateOne {
+	if f != nil {
+		ncuo.SetAcquireBookNftEventsWeight(*f)
+	}
+	return ncuo
+}
+
+// AddAcquireBookNftEventsWeight adds f to the "acquire_book_nft_events_weight" field.
+func (ncuo *NFTClassUpdateOne) AddAcquireBookNftEventsWeight(f float64) *NFTClassUpdateOne {
+	ncuo.mutation.AddAcquireBookNftEventsWeight(f)
+	return ncuo
+}
+
+// SetAcquireBookNftEventsLastProcessedTime sets the "acquire_book_nft_events_last_processed_time" field.
+func (ncuo *NFTClassUpdateOne) SetAcquireBookNftEventsLastProcessedTime(t time.Time) *NFTClassUpdateOne {
+	ncuo.mutation.SetAcquireBookNftEventsLastProcessedTime(t)
+	return ncuo
+}
+
+// SetNillableAcquireBookNftEventsLastProcessedTime sets the "acquire_book_nft_events_last_processed_time" field if the given value is not nil.
+func (ncuo *NFTClassUpdateOne) SetNillableAcquireBookNftEventsLastProcessedTime(t *time.Time) *NFTClassUpdateOne {
+	if t != nil {
+		ncuo.SetAcquireBookNftEventsLastProcessedTime(*t)
+	}
+	return ncuo
+}
+
+// ClearAcquireBookNftEventsLastProcessedTime clears the value of the "acquire_book_nft_events_last_processed_time" field.
+func (ncuo *NFTClassUpdateOne) ClearAcquireBookNftEventsLastProcessedTime() *NFTClassUpdateOne {
+	ncuo.mutation.ClearAcquireBookNftEventsLastProcessedTime()
+	return ncuo
+}
+
+// SetAcquireBookNftEventsEta sets the "acquire_book_nft_events_eta" field.
+func (ncuo *NFTClassUpdateOne) SetAcquireBookNftEventsEta(f float64) *NFTClassUpdateOne {
+	ncuo.mutation.ResetAcquireBookNftEventsEta()
+	ncuo.mutation.SetAcquireBookNftEventsEta(f)
+	return ncuo
+}
+
+// SetNillableAcquireBookNftEventsEta sets the "acquire_book_nft_events_eta" field if the given value is not nil.
+func (ncuo *NFTClassUpdateOne) SetNillableAcquireBookNftEventsEta(f *float64) *NFTClassUpdateOne {
+	if f != nil {
+		ncuo.SetAcquireBookNftEventsEta(*f)
+	}
+	return ncuo
+}
+
+// AddAcquireBookNftEventsEta adds f to the "acquire_book_nft_events_eta" field.
+func (ncuo *NFTClassUpdateOne) AddAcquireBookNftEventsEta(f float64) *NFTClassUpdateOne {
+	ncuo.mutation.AddAcquireBookNftEventsEta(f)
+	return ncuo
+}
+
+// ClearAcquireBookNftEventsEta clears the value of the "acquire_book_nft_events_eta" field.
+func (ncuo *NFTClassUpdateOne) ClearAcquireBookNftEventsEta() *NFTClassUpdateOne {
+	ncuo.mutation.ClearAcquireBookNftEventsEta()
+	return ncuo
+}
+
+// SetAcquireBookNftEventsStatus sets the "acquire_book_nft_events_status" field.
+func (ncuo *NFTClassUpdateOne) SetAcquireBookNftEventsStatus(nbnes nftclass.AcquireBookNftEventsStatus) *NFTClassUpdateOne {
+	ncuo.mutation.SetAcquireBookNftEventsStatus(nbnes)
+	return ncuo
+}
+
+// SetNillableAcquireBookNftEventsStatus sets the "acquire_book_nft_events_status" field if the given value is not nil.
+func (ncuo *NFTClassUpdateOne) SetNillableAcquireBookNftEventsStatus(nbnes *nftclass.AcquireBookNftEventsStatus) *NFTClassUpdateOne {
+	if nbnes != nil {
+		ncuo.SetAcquireBookNftEventsStatus(*nbnes)
+	}
+	return ncuo
+}
+
+// ClearAcquireBookNftEventsStatus clears the value of the "acquire_book_nft_events_status" field.
+func (ncuo *NFTClassUpdateOne) ClearAcquireBookNftEventsStatus() *NFTClassUpdateOne {
+	ncuo.mutation.ClearAcquireBookNftEventsStatus()
+	return ncuo
+}
+
+// SetAcquireBookNftEventsFailedReason sets the "acquire_book_nft_events_failed_reason" field.
+func (ncuo *NFTClassUpdateOne) SetAcquireBookNftEventsFailedReason(s string) *NFTClassUpdateOne {
+	ncuo.mutation.SetAcquireBookNftEventsFailedReason(s)
+	return ncuo
+}
+
+// SetNillableAcquireBookNftEventsFailedReason sets the "acquire_book_nft_events_failed_reason" field if the given value is not nil.
+func (ncuo *NFTClassUpdateOne) SetNillableAcquireBookNftEventsFailedReason(s *string) *NFTClassUpdateOne {
+	if s != nil {
+		ncuo.SetAcquireBookNftEventsFailedReason(*s)
+	}
+	return ncuo
+}
+
+// ClearAcquireBookNftEventsFailedReason clears the value of the "acquire_book_nft_events_failed_reason" field.
+func (ncuo *NFTClassUpdateOne) ClearAcquireBookNftEventsFailedReason() *NFTClassUpdateOne {
+	ncuo.mutation.ClearAcquireBookNftEventsFailedReason()
+	return ncuo
+}
+
+// SetAcquireBookNftEventsFailedCount sets the "acquire_book_nft_events_failed_count" field.
+func (ncuo *NFTClassUpdateOne) SetAcquireBookNftEventsFailedCount(i int) *NFTClassUpdateOne {
+	ncuo.mutation.ResetAcquireBookNftEventsFailedCount()
+	ncuo.mutation.SetAcquireBookNftEventsFailedCount(i)
+	return ncuo
+}
+
+// SetNillableAcquireBookNftEventsFailedCount sets the "acquire_book_nft_events_failed_count" field if the given value is not nil.
+func (ncuo *NFTClassUpdateOne) SetNillableAcquireBookNftEventsFailedCount(i *int) *NFTClassUpdateOne {
+	if i != nil {
+		ncuo.SetAcquireBookNftEventsFailedCount(*i)
+	}
+	return ncuo
+}
+
+// AddAcquireBookNftEventsFailedCount adds i to the "acquire_book_nft_events_failed_count" field.
+func (ncuo *NFTClassUpdateOne) AddAcquireBookNftEventsFailedCount(i int) *NFTClassUpdateOne {
+	ncuo.mutation.AddAcquireBookNftEventsFailedCount(i)
+	return ncuo
 }
 
 // SetAddress sets the "address" field.
@@ -996,6 +1303,16 @@ func (ncuo *NFTClassUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ncuo *NFTClassUpdateOne) check() error {
+	if v, ok := ncuo.mutation.AcquireBookNftEventsWeight(); ok {
+		if err := nftclass.AcquireBookNftEventsWeightValidator(v); err != nil {
+			return &ValidationError{Name: "acquire_book_nft_events_weight", err: fmt.Errorf(`ent: validator failed for field "NFTClass.acquire_book_nft_events_weight": %w`, err)}
+		}
+	}
+	if v, ok := ncuo.mutation.AcquireBookNftEventsStatus(); ok {
+		if err := nftclass.AcquireBookNftEventsStatusValidator(v); err != nil {
+			return &ValidationError{Name: "acquire_book_nft_events_status", err: fmt.Errorf(`ent: validator failed for field "NFTClass.acquire_book_nft_events_status": %w`, err)}
+		}
+	}
 	if v, ok := ncuo.mutation.Name(); ok {
 		if err := nftclass.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "NFTClass.name": %w`, err)}
@@ -1042,6 +1359,45 @@ func (ncuo *NFTClassUpdateOne) sqlSave(ctx context.Context) (_node *NFTClass, er
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := ncuo.mutation.AcquireBookNftEventsWeight(); ok {
+		_spec.SetField(nftclass.FieldAcquireBookNftEventsWeight, field.TypeFloat64, value)
+	}
+	if value, ok := ncuo.mutation.AddedAcquireBookNftEventsWeight(); ok {
+		_spec.AddField(nftclass.FieldAcquireBookNftEventsWeight, field.TypeFloat64, value)
+	}
+	if value, ok := ncuo.mutation.AcquireBookNftEventsLastProcessedTime(); ok {
+		_spec.SetField(nftclass.FieldAcquireBookNftEventsLastProcessedTime, field.TypeTime, value)
+	}
+	if ncuo.mutation.AcquireBookNftEventsLastProcessedTimeCleared() {
+		_spec.ClearField(nftclass.FieldAcquireBookNftEventsLastProcessedTime, field.TypeTime)
+	}
+	if value, ok := ncuo.mutation.AcquireBookNftEventsEta(); ok {
+		_spec.SetField(nftclass.FieldAcquireBookNftEventsEta, field.TypeFloat64, value)
+	}
+	if value, ok := ncuo.mutation.AddedAcquireBookNftEventsEta(); ok {
+		_spec.AddField(nftclass.FieldAcquireBookNftEventsEta, field.TypeFloat64, value)
+	}
+	if ncuo.mutation.AcquireBookNftEventsEtaCleared() {
+		_spec.ClearField(nftclass.FieldAcquireBookNftEventsEta, field.TypeFloat64)
+	}
+	if value, ok := ncuo.mutation.AcquireBookNftEventsStatus(); ok {
+		_spec.SetField(nftclass.FieldAcquireBookNftEventsStatus, field.TypeEnum, value)
+	}
+	if ncuo.mutation.AcquireBookNftEventsStatusCleared() {
+		_spec.ClearField(nftclass.FieldAcquireBookNftEventsStatus, field.TypeEnum)
+	}
+	if value, ok := ncuo.mutation.AcquireBookNftEventsFailedReason(); ok {
+		_spec.SetField(nftclass.FieldAcquireBookNftEventsFailedReason, field.TypeString, value)
+	}
+	if ncuo.mutation.AcquireBookNftEventsFailedReasonCleared() {
+		_spec.ClearField(nftclass.FieldAcquireBookNftEventsFailedReason, field.TypeString)
+	}
+	if value, ok := ncuo.mutation.AcquireBookNftEventsFailedCount(); ok {
+		_spec.SetField(nftclass.FieldAcquireBookNftEventsFailedCount, field.TypeInt, value)
+	}
+	if value, ok := ncuo.mutation.AddedAcquireBookNftEventsFailedCount(); ok {
+		_spec.AddField(nftclass.FieldAcquireBookNftEventsFailedCount, field.TypeInt, value)
 	}
 	if value, ok := ncuo.mutation.Address(); ok {
 		_spec.SetField(nftclass.FieldAddress, field.TypeString, value)

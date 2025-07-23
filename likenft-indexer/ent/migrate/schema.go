@@ -180,6 +180,12 @@ var (
 	// NftClassesColumns holds the columns for the "nft_classes" table.
 	NftClassesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "acquire_book_nft_events_weight", Type: field.TypeFloat64, Default: 1},
+		{Name: "acquire_book_nft_events_last_processed_time", Type: field.TypeTime, Nullable: true},
+		{Name: "acquire_book_nft_events_eta", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "acquire_book_nft_events_status", Type: field.TypeEnum, Nullable: true, Enums: []string{"enqueueing", "enqueued", "enqueue_failed", "processing", "completed", "failed"}},
+		{Name: "acquire_book_nft_events_failed_reason", Type: field.TypeString, Nullable: true},
+		{Name: "acquire_book_nft_events_failed_count", Type: field.TypeInt, Default: 0},
 		{Name: "address", Type: field.TypeString, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "symbol", Type: field.TypeString},
@@ -207,21 +213,31 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "nft_classes_accounts_nft_classes",
-				Columns:    []*schema.Column{NftClassesColumns[18]},
+				Columns:    []*schema.Column{NftClassesColumns[24]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "nftclass_owner_address",
+				Name:    "nftclass_acquire_book_nft_events_eta",
+				Unique:  false,
+				Columns: []*schema.Column{NftClassesColumns[3]},
+			},
+			{
+				Name:    "nftclass_acquire_book_nft_events_status",
 				Unique:  false,
 				Columns: []*schema.Column{NftClassesColumns[4]},
 			},
 			{
+				Name:    "nftclass_owner_address",
+				Unique:  false,
+				Columns: []*schema.Column{NftClassesColumns[10]},
+			},
+			{
 				Name:    "nftclass_deployer_address",
 				Unique:  false,
-				Columns: []*schema.Column{NftClassesColumns[11]},
+				Columns: []*schema.Column{NftClassesColumns[17]},
 			},
 		},
 	}

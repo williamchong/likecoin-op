@@ -43,6 +43,7 @@ var workerCmd = &cobra.Command{
 
 		envCfg := context.ConfigFromContext(cmd.Context())
 		asynqClient := context.AsynqClientFromContext(cmd.Context())
+		asynqInspector := context.AsynqInspectorFromContext(cmd.Context())
 		evmQueryClient := context.EvmQueryClientFromContext(cmd.Context())
 		evmClient := context.EvmClientFromContext(cmd.Context())
 
@@ -90,6 +91,7 @@ var workerCmd = &cobra.Command{
 		mux.Use(context.AsynqMiddlewareWithConfigContext(envCfg))
 		mux.Use(context.AsynqMiddlewareWithLoggerContext(logger))
 		mux.Use(context.AsynqMiddlewareWithAsynqClientContext(asynqClient))
+		mux.Use(context.AsynqMiddlewareWithAsynqInspectorContext(asynqInspector))
 		mux.Use(context.AsynqMiddlewareWithEvmQueryClientContext(evmQueryClient))
 		mux.Use(context.AsynqMiddlewareWithEvmClientContext(evmClient))
 		mux.Use(middleware.MakeSentryMiddleware(hub).Handle)

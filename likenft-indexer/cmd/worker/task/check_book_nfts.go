@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log/slog"
+	"time"
 
 	appcontext "likenft-indexer/cmd/worker/context"
 	"likenft-indexer/ent"
 	"likenft-indexer/internal/database"
+	"likenft-indexer/internal/logic/nftclassacquirebooknftevent"
 	"likenft-indexer/internal/worker/task"
 
 	"github.com/hibiken/asynq"
@@ -33,7 +34,8 @@ func NewCheckBookNFTsTask() (*asynq.Task, error) {
 
 func HandleCheckBookNFTs(ctx context.Context, t *asynq.Task) error {
 	logger := appcontext.LoggerFromContext(ctx)
-	asynqClient := appcontext.AsynqClientFromContext(ctx)
+	config := appcontext.ConfigFromContext(ctx)
+	inspector := appcontext.AsynqInspectorFromContext(ctx)
 
 	mylogger := logger.WithGroup("HandleCheckBookNFTs")
 
@@ -42,57 +44,79 @@ func HandleCheckBookNFTs(ctx context.Context, t *asynq.Task) error {
 
 	var p CheckBookNFTsPayload
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
-		mylogger.Error("json.Unmarshal CheckBookNFTsPayload", "err", err)
-		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
+		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
+
+	queueInfo, err := inspector.GetQueueInfo(TypeAcquireBookNFTEventsTaskPayload)
+	if err != nil {
+		return fmt.Errorf("inspector.GetQueueInfo: %v", err)
+	}
+	currentLength := queueInfo.Pending + queueInfo.Active
+	numberOfItemsToBeFetched := config.TaskAcquireBookNFTMaxQueueLength - currentLength
 
 	dbService := database.New()
+	nftClassAcquireBookNFTEventsRepository := database.MakeNFTClassAcquireBookNFTEventsRepository(dbService)
 
-	nftClassRepository := database.MakeNFTClassRepository(dbService)
+	timeoutScoreFn := nftclassacquirebooknftevent.MakeCalculateTimeoutScoreFn(
+		config.TaskAcquireBookNFTInProgressTimeoutSeconds,
+	)
 
-	nftClasses, err := nftClassRepository.QueryAllNFTClassesOfLowestEventBlockHeight(ctx, true)
+	nftClasses, err := nftClassAcquireBookNFTEventsRepository.
+		RequestForEnqueue(
+			ctx,
+			numberOfItemsToBeFetched,
+			timeoutScoreFn(time.Now().UTC()),
+		)
 
 	if err != nil {
-		mylogger.Error("nftClassRepository.QueryAllNFTClasses", "err", err)
-		return err
+		return fmt.Errorf("nftClassAcquireBookNFTEventsRepository.RequestForEnqueue: %v", err)
 	}
 
-	mylogger.Info(fmt.Sprintf("%d nft classes found", len(nftClasses)))
+	myLogger := logger.With("batchSize", len(nftClasses))
+	mylogger.Info("nft classes found")
 
-	err = handleCheckBookNFTs_enqueueAcquireBookNFTEvents(mylogger, asynqClient, nftClasses)
-	if err != nil {
-		mylogger.Error("handleCheckBookNFTs_enqueueAcquireBookNFTEvents", "err", err)
+	lifecycleObjects := nftclassacquirebooknftevent.MakeNFTClassAcquireBookNFTEventLifecycles(
+		nftClassAcquireBookNFTEventsRepository,
+		nftClasses,
+		nftclassacquirebooknftevent.MakeCalculateNextProcessingScoreFn(
+			config.TaskAcquireBookNFTNextProcessingBlockHeightWeight,
+			config.TaskAcquireBookNFTNextProcessingTimeFloor,
+			config.TaskAcquireBookNFTNextProcessingTimeCeiling,
+			config.TaskAcquireBookNFTNextProcessingTimeWeight,
+		),
+		timeoutScoreFn,
+		nftclassacquirebooknftevent.MakeCalculateRetryScoreFn(
+			config.TaskAcquireBookNFTRetryInitialTimeoutSeconds,
+			config.TaskAcquireBookNFTRetryExponentialBackoffCoeff,
+			config.TaskAcquireBookNFTRetryMaxTimeoutSeconds,
+		),
+	)
+
+	myLogger.Info("Enqueueing EnqueueAcquireBookNFTTask tasks...")
+	for _, lifecycleObject := range lifecycleObjects {
+		if _, err := lifecycleObject.WithEnqueueing(ctx, func(nftClass *ent.NFTClass) (*asynq.TaskInfo, error) {
+			return EnqueueAcquireBookNFTTask(ctx, nftClass.Address)
+		}); err != nil {
+			myLogger.ErrorContext(ctx, "lifecycleObject.WithEnqueueing", "err", err)
+		}
 	}
 
 	return nil
 }
 
-func handleCheckBookNFTs_enqueueAcquireBookNFTEvents(
-	logger *slog.Logger, asynqClient *asynq.Client, nftClasses []*ent.NFTClass,
-) error {
+func EnqueueAcquireBookNFTTask(ctx context.Context, contractAddress string) (*asynq.TaskInfo, error) {
+	asynqClient := appcontext.AsynqClientFromContext(ctx)
 
-	var addresses = make([]string, len(nftClasses))
-	for i, nftClass := range nftClasses {
-		addresses[i] = nftClass.Address
+	t, err := NewTypeAcquireBookNFTEventsTaskPayloadWithLifecycle(contractAddress)
+	if err != nil {
+		return nil, err
 	}
 
-	myLogger := logger.With("batchSize", len(addresses))
-	myLogger.Info("Enqueueing AcquireBookNFTEvents tasks...")
-	for _, address := range addresses {
-		mylogger := myLogger.With("address", address)
-		t, err := NewAcquireBookNFTEventsTask([]string{address})
-		if err != nil {
-			mylogger.Error("Cannot create task", "err", err)
-			continue
-		}
-		taskInfo, err := asynqClient.Enqueue(t, asynq.MaxRetry(0))
-		if err != nil {
-			mylogger.Error("Cannot enqueue task", "err", err)
-			continue
-		}
-		mylogger.Debug("task enqueued", "taskId", taskInfo.ID)
+	taskInfo, err := asynqClient.Enqueue(t, asynq.MaxRetry(0))
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return taskInfo, nil
 }
 
 func init() {

@@ -155,9 +155,13 @@ likenftIndexer:
         tasks:
           - acquire-book-nft-events
           - acquire-like-protocol-events
-          - check-book-nfts
           - check-like-protocol
           - check-received-evm-events
+      check-book-nfts:
+        resources: {}
+        tasks:
+          - check-book-nfts
+          - acquire-book-nft-events-with-lifecycle
       process-evm-event:
         resources: {}
         tasks:

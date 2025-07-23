@@ -51,6 +51,7 @@ func main() {
 
 	asynqClient := asynq.NewClient(redisClientOpt)
 	asynqScheduler := asynq.NewScheduler(redisClientOpt, nil)
+	asynqInspector := asynq.NewInspector(redisClientOpt)
 
 	evmQueryClient, err := evm.NewEvmQueryClient(envCfg.EthNetworkEventRPCURL)
 
@@ -67,6 +68,7 @@ func main() {
 	ctx = appcontext.WithConfigContext(ctx, envCfg)
 	ctx = appcontext.WithAsynqClientContext(ctx, asynqClient)
 	ctx = appcontext.WithAsynqSchedulerContext(ctx, asynqScheduler)
+	ctx = appcontext.WithAsynqInspectorContext(ctx, asynqInspector)
 	ctx = appcontext.WithLoggerContext(ctx, logger)
 	ctx = appcontext.WithEvmQueryClient(ctx, evmQueryClient)
 	ctx = appcontext.WithEvmClient(ctx, evmClient)
