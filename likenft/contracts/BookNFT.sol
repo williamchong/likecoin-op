@@ -77,6 +77,19 @@ contract BookNFT is
     );
     // End Events
 
+    // Permission control
+
+    // This contract don't use the AccessControlUpgradeable adminRole feature.
+    // Owner can grant and revoke roles to any address.
+    function ownerGrantRole(bytes32 role, address account) public onlyOwner {
+        _grantRole(role, account);
+    }
+
+    function ownerRevokeRole(bytes32 role, address account) public onlyOwner {
+        _revokeRole(role, account);
+    }
+
+    // Permission modifiers
     modifier onlyMinter() {
         if (!hasRole(MINTER_ROLE, _msgSender())) {
             revert ErrUnauthorized();
@@ -98,6 +111,7 @@ contract BookNFT is
         }
         _;
     }
+    // End Permission control
 
     function initialize(MsgNewBookNFT memory msgNewBookNFT) public initializer {
         __ERC721_init(msgNewBookNFT.config.name, msgNewBookNFT.config.symbol);
