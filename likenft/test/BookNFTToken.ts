@@ -3,7 +3,7 @@ import { EventLog } from "ethers";
 import { ethers, upgrades } from "hardhat";
 import { BaseContract } from "ethers";
 
-import { BookConfigLoader } from "./BookConfigLoader";
+import { BookConfigLoader, BookTokenConfigLoader } from "./BookConfigLoader";
 import { createProtocol } from "./ProtocolFactory";
 
 describe("BookNFTToken", () => {
@@ -70,31 +70,55 @@ describe("BookNFTToken", () => {
     nftClassContract = await ethers.getContractAt("BookNFT", nftClassId);
 
     const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    const tokenConfig0 = BookTokenConfigLoader.load(
+      "./test/fixtures/TokenConfig0.json",
+    );
     await likeNFTClassOwnerSigner
-      .mint(
-        this.classOwner,
-        ["_mint1"],
-        [
-          JSON.stringify({
-            image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-            image_data: "",
-            external_url: "https://www.google.com",
-            description: "#0001 Description",
-            name: "#0001",
-            attributes: [
-              {
-                trait_type: "ISCN ID",
-                value:
-                  "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-              },
-            ],
-            background_color: "",
-            animation_url: "",
-            youtube_url: "",
-          }),
-        ],
-      )
+      .mint(this.classOwner, ["_mint1"], [tokenConfig0])
       .then((tx) => tx.wait());
+  });
+
+  it("should allow updater to update token metadata", async function () {
+    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    const likeNFTClassUpdaterSigner = nftClassContract.connect(this.likerLand);
+    const TokenConfig0 = BookTokenConfigLoader.load(
+      "./test/fixtures/TokenConfig0.json",
+    );
+    const tokenConfig1 = BookTokenConfigLoader.load(
+      "./test/fixtures/TokenConfig1.json",
+    );
+    expect(await likeNFTClassOwnerSigner.tokenURI(0)).to.equal(
+      `data:application/json;base64,${Buffer.from(TokenConfig0).toString("base64")}`,
+    );
+    await likeNFTClassUpdaterSigner
+      .updateTokenMetadata(0, tokenConfig1)
+      .then((tx) => tx.wait());
+    expect(await likeNFTClassOwnerSigner.tokenURI(0)).to.equal(
+      `data:application/json;base64,${Buffer.from(tokenConfig1).toString("base64")}`,
+    );
+  });
+
+  it("should not allow random signer to update token metadata", async function () {
+    const likeNFTClassRandomSigner = nftClassContract.connect(
+      this.randomSigner,
+    );
+    const TokenConfig0 = BookTokenConfigLoader.load(
+      "./test/fixtures/TokenConfig0.json",
+    );
+    const tokenConfig1 = BookTokenConfigLoader.load(
+      "./test/fixtures/TokenConfig1.json",
+    );
+    expect(await likeNFTClassRandomSigner.tokenURI(0)).to.equal(
+      `data:application/json;base64,${Buffer.from(TokenConfig0).toString("base64")}`,
+    );
+    await expect(
+      likeNFTClassRandomSigner
+        .updateTokenMetadata(0, tokenConfig1)
+        .then((tx) => tx.wait()),
+    ).to.be.rejectedWith(/ErrUnauthorized()/);
+    expect(await likeNFTClassRandomSigner.tokenURI(0)).to.equal(
+      `data:application/json;base64,${Buffer.from(TokenConfig0).toString("base64")}`,
+    );
   });
 
   it("owner should be able to send once", async function () {
