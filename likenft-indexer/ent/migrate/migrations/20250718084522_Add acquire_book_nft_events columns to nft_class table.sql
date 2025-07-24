@@ -5,7 +5,7 @@ ALTER TABLE "nft_classes"
     ADD COLUMN "acquire_book_nft_events_score" numeric NULL,
     ADD COLUMN "acquire_book_nft_events_status" character varying NULL,
     ADD COLUMN "acquire_book_nft_events_failed_reason" character varying NULL,
-    ADD COLUMN "acquire_book_nft_events_failed_count" bigint NOT NULL;
+    ADD COLUMN "acquire_book_nft_events_failed_count" bigint NOT NULL DEFAULT 0;
 -- Create index "nftclass_acquire_book_nft_events_score" to table: "nft_classes"
 CREATE INDEX "nftclass_acquire_book_nft_events_score" ON "nft_classes" ("acquire_book_nft_events_score");
 -- Create index "nftclass_acquire_book_nft_events_status" to table: "nft_classes"
