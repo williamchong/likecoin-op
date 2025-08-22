@@ -18,9 +18,6 @@ async function main() {
   await likeProtocol.upgradeToAndCall(
     newImplementationAddress,
     upgradeToAndCallData,
-    {
-      gasLimit: 1500000,
-    },
   );
 
   const protocolImplementationAddress =
