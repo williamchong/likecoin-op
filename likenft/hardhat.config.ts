@@ -65,21 +65,21 @@ const config: HardhatUserConfig = {
   },
   networks: {
     localhost: {
-      url: "http://127.0.0.1:8545",
+      url: `${process.env.JSON_RPC_URL}`,
       ledgerAccounts: ["0xB0318A8f049b625dA5DdD184FfFF668Aa6E96261"],
     },
     optimism: {
-      url: `${process.env.OPTIMISM_BLOCKSCOUT_URL}`,
+      url: `${process.env.JSON_RPC_URL}`,
       chainId: 10,
       ledgerAccounts: ["0xB0318A8f049b625dA5DdD184FfFF668Aa6E96261"],
     },
     "optimism-sepolia": {
-      url: "https://sepolia.optimism.io",
+      url: `${process.env.JSON_RPC_URL}`,
       chainId: 11155420,
       accounts: [signerKey],
     },
     sepolia: {
-      url: "https://sepolia.drpc.org",
+      url: `${process.env.JSON_RPC_URL}`,
       chainId: 11155111,
       accounts: [signerKey],
     },
