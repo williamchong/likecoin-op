@@ -81,6 +81,11 @@ services:
     env_file: ./deploy/env.operator
     ports:
       - "8545:8545"
+    healthcheck:
+      test: "curl --silent --fail-with-body http://localhost:8545 -H \"Content-Type: application/json\" -d \"{\\\"jsonrpc\\\":\\\"2.0\\\",\\\"method\\\":\\\"eth_blockNumber\\\",\\\"params\\\":[],\\\"id\\\":1}\""
+      interval: 1s
+      timeout: 1s
+      retries: 30
     command: /bin/sh -c "npm install && npx hardhat node"
 
   db-migration-backend:
