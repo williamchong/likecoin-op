@@ -56,11 +56,11 @@ export class GasEstimationLoggerInterceptor extends BaseGasEstimationInterceptor
   }
 
   onGasEstimate(gasEstimation: GasEstimation) {
-    console.log(this.operation, "Gas estimation:", gasEstimation);
+    console.log(`Operation '${this.operation}', Gas estimation:,`, gasEstimation);
   }
 
   onCallArgs(...args: any[]) {
-    console.log(this.operation, "Call args:", args);
+    console.log(`Operation '${this.operation}' to be call with args:`, args);
   }
 }
 
@@ -69,27 +69,27 @@ export class GasEstimationConfirmationInterceptor extends BaseGasEstimationInter
     sigint: true,
   });
 
-  onGasEstimate(gasEstimation: GasEstimation) {
-    this.p("Confirm gas estimation");
-  }
-
   onCallArgs(...args: any[]) {
-    this.p("Confirm call args");
+    this.p("Confirm call args and bumped gas estimation");
   }
 }
 
 export class GasEstimationAdjustmentInterceptor extends BaseGasEstimationInterceptor {
-  private increment: number;
+  private limitBump: number;
+  private feeIncrement: number;
 
-  constructor(increment: number) {
+  constructor(limitBump: number, feeIncrement: number) {
     super();
-    this.increment = increment;
+    this.limitBump = limitBump
+    this.feeIncrement = feeIncrement;
   }
 
   transformGasEstimation(gasEstimation: GasEstimation) {
     return {
       ...gasEstimation,
-      gasLimit: gasEstimation.gasLimit + BigInt(this.increment),
+      maxFeePerGas: gasEstimation.maxFeePerGas + BigInt(this.feeIncrement),
+      maxPriorityFeePerGas: gasEstimation.maxPriorityFeePerGas + BigInt(this.feeIncrement), 
+      gasLimit: gasEstimation.gasLimit + BigInt(this.limitBump),
     };
   }
 }
@@ -107,12 +107,13 @@ export class GasEstimationPickParamsInterceptor extends BaseGasEstimationInterce
 
 function makeDefaultInterceptors(
   operation: string,
-  adjustment: number,
+  limitBump: number,
+  feeIncrement: number = 0,
   confirmation: boolean = true,
 ) {
   const interceptors = new GasEstimationInterceptors(
     new GasEstimationLoggerInterceptor(operation),
-    new GasEstimationAdjustmentInterceptor(adjustment),
+    new GasEstimationAdjustmentInterceptor(limitBump, feeIncrement),
     new GasEstimationPickParamsInterceptor(),
   );
 
