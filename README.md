@@ -23,11 +23,41 @@ make setup
 make start
 ```
 
+The infra will be setup with the following services
+
+- migration-backend
+- migration-backend-worker
+- migration-backend-scheduler
+- signer-backend
+- eth-node
+    - The contract will also be deployed
+- db-migration-backend
+- db-signer-backend
+- redis
+
 The console will stream the backend logs
 
 To deploy the smartcontract locally, run following in another console
 ```
 make local-contracts
 ```
+
+To stop services,
+
+```
+$ make stop
+```
+
+> Please note that the `eth-node` have no mechanism to persist state.
+> To prevent stucking at nonce inconsistent, after restarting the eth-node for any reason,
+> the dbs related to transactions should also be reset.
+>
+> ```
+> $ make clean-transaction-volumes
+> ```
+>
+> The stop command above has included this command
+
+## Setup on frontends
 
 For respective frontend, `likenft-migration`, `likecoin-migration` and `migration-admin`, please naigate to respective folder and follow instruction there.
