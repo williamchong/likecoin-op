@@ -55,7 +55,10 @@ async function main() {
     "Run following to verify after block-explorer catch the deployment",
   );
   console.log(`
-BOOKNFT_ADDRESS=${newImplementationAddress} \\\n\
+VERIFY=etherscan BOOKNFT_ADDRESS=${newImplementationAddress} \\\n\
+    npm run script:${hardhat.network.name} scripts/verifyBookNFT.ts`);
+  console.log(`
+VERIFY=blockscout BOOKNFT_ADDRESS=${newImplementationAddress} \\\n\
     npm run script:${hardhat.network.name} scripts/verifyBookNFT.ts`);
 }
 
