@@ -63,6 +63,11 @@ const config: HardhatUserConfig = {
       },
     ],
   },
+  sourcify: {
+    enabled: true,
+    apiUrl: "https://sourcify.dev/server",
+    browserUrl: "https://repo.sourcify.dev",
+  },
   networks: {
     localhost: {
       url: "http://127.0.0.1:8545",
