@@ -37,13 +37,25 @@ setup:
 
 .PHONY: start
 start:
-	docker compose up -d
+	docker compose up -d --wait
+	$(MAKE) run-migrations
+	$(MAKE) local-contracts
+	$(MAKE) follow-logs
+
+.PHONE: follow-logs
+follow-logs:
 	docker compose logs -f
 
 .PHONY: stop
 stop:
 	docker compose stop
 	docker compose rm -f
+	$(MAKE) clean-transaction-volumes
+
+.PHONY: clean-transaction-volumes
+clean-transaction-volumes:
+	docker volume ls | grep 'likecoin-30_db_data_migration_backend' | awk '{ print $$2 }' | xargs docker volume rm
+	docker volume ls | grep 'likecoin-30_db_data_signer_backend' | awk '{ print $$2 }' | xargs docker volume rm
 
 .PHONY: clean-docker-volumes
 clean-docker-volumes:
