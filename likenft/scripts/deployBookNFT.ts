@@ -1,5 +1,10 @@
 import "@openzeppelin/hardhat-upgrades";
 import hardhat, { ethers } from "hardhat";
+import {
+  callWithGasEstimation,
+  deployWithGasEstimation,
+} from "../utils/estimateGas/estimateGas";
+import makeDefaultInterceptors from "../utils/estimateGas/interceptors";
 
 async function main() {
   const BookNFT = await ethers.getContractFactory("BookNFT");
@@ -7,19 +12,37 @@ async function main() {
   console.log("Deployer:", deployer.address);
   const initOwner = process.env.INITIAL_OWNER_ADDRESS!;
   console.log("Deploying with initial owner with:", initOwner);
+  const gasBump = parseInt(process.env.GAS_BUMP) || 300000;
+  console.log("Deploying with gas limit bump", gasBump);
+  const feeIncrement = parseInt(process.env.FEE_BUMP) || 0;
+  console.log("Deploying with fee per gas bump", feeIncrement);
 
-  const bookNFT = await BookNFT.deploy();
-  await bookNFT.initialize({
-    creator: initOwner,
-    updaters: [],
-    minters: [],
-    config: {
-      name: "BookNFT Implementation",
-      symbol: "BOOKNFTV0",
-      metadata: "{}",
-      max_supply: 1n,
-    },
+  const bookNFT = await deployWithGasEstimation(hardhat, BookNFT, [], {
+    deployer,
+    interceptor: makeDefaultInterceptors("deploy", gasBump, feeIncrement),
   });
+
+  await callWithGasEstimation(
+    hardhat,
+    bookNFT.initialize,
+    [
+      {
+        creator: initOwner,
+        updaters: [],
+        minters: [],
+        config: {
+          name: "BookNFT Implementation",
+          symbol: "BOOKNFTV0",
+          metadata: "{}",
+          max_supply: 1n,
+        },
+      },
+    ],
+    {
+      deployer,
+      interceptor: makeDefaultInterceptors("initialize", gasBump, feeIncrement),
+    },
+  );
 
   const newImplementationAddress = await bookNFT.getAddress();
   console.log(

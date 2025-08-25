@@ -63,13 +63,10 @@ async function main() {
   await likeProtocol.upgradeToAndCall(
     newImplementationAddress,
     upgradeToAndCallData,
-    {
-      gasLimit: 1500000,
-    },
   );
 
   const protocolImplementationAddress =
-    await upgrades.erc1967.getImplementationAddress(proxyAddress);
+    await upgrades.erc1967.getImplementationAddress(protocolAddress);
   console.log(
     "New onchain LikeProtocol Implementation address:",
     protocolImplementationAddress,
