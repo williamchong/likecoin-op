@@ -1,5 +1,10 @@
 import "@openzeppelin/hardhat-upgrades";
 import hardhat, { ethers, upgrades } from "hardhat";
+import {
+  callWithGasEstimation,
+  deployWithGasEstimation,
+} from "../utils/estimateGas/estimateGas";
+import makeDefaultInterceptors from "../utils/estimateGas/interceptors";
 
 async function main() {
   console.log("Deploying LikeProtocol... Network:", hardhat.network.name);
@@ -16,18 +21,32 @@ async function main() {
 
   console.log("Expecting Proxy Address:", process.env.ERC721_PROXY_ADDRESS);
 
-  const bookNFT = await BookNFT.deploy();
-  await bookNFT.initialize({
-    creator: initOwner,
-    updaters: [],
-    minters: [],
-    config: {
-      name: "BookNFT Implementation",
-      symbol: "BOOKNFTV0",
-      metadata: "{}",
-      max_supply: 1n,
-    },
+  const bookNFT = await deployWithGasEstimation(hardhat, BookNFT, [], {
+    deployer,
+    interceptor: makeDefaultInterceptors("deploy", 100000, false),
   });
+
+  await callWithGasEstimation(
+    hardhat,
+    bookNFT.initialize,
+    [
+      {
+        creator: initOwner,
+        updaters: [],
+        minters: [],
+        config: {
+          name: "BookNFT Implementation",
+          symbol: "BOOKNFTV0",
+          metadata: "{}",
+          max_supply: 1n,
+        },
+      },
+    ],
+    {
+      deployer,
+      interceptor: makeDefaultInterceptors("initialize", 100000, false),
+    },
+  );
 
   const bookNFTAddress = await bookNFT.getAddress();
   console.log("BookNFT implementation is deployed to:", bookNFTAddress);
