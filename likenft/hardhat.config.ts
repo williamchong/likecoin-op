@@ -79,13 +79,15 @@ const blockscoutConfig: Partial<EtherscanConfig> = {
   ],
 };
 
-function selectEtherscanConfig(): Partial<EtherscanConfig> | undefined {
-  if (process.env.VERIFY === "etherscan") {
-    return etherscanConfig;
-  } else if (process.env.VERIFY === "blockscout") {
-    return blockscoutConfig;
+function selectEtherscanConfig(): Partial<EtherscanConfig> {
+  switch (process.env.VERIFY) {
+    case "etherscan":
+      return etherscanConfig;
+    case "blockscout":
+      return blockscoutConfig;
+    default:
+      return blockscoutConfig;
   }
-  return undefined;
 }
 
 const config: HardhatUserConfig = {
