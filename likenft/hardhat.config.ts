@@ -12,6 +12,7 @@ let signerKey =
   process.env.DEPLOY_WALLET_PRIVATE_KEY ||
   "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 signerKey = `0x${signerKey}`;
+const jsonRPCURL = process.env.JSON_RPC_URL;
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -65,21 +66,21 @@ const config: HardhatUserConfig = {
   },
   networks: {
     localhost: {
-      url: `${process.env.JSON_RPC_URL}`,
+      url: jsonRPCURL || "http://127.0.0.1:8545",
       ledgerAccounts: ["0xB0318A8f049b625dA5DdD184FfFF668Aa6E96261"],
     },
     optimism: {
-      url: `${process.env.JSON_RPC_URL}`,
+      url: jsonRPCURL || "https://mainnet.optimism.io",
       chainId: 10,
       ledgerAccounts: ["0xB0318A8f049b625dA5DdD184FfFF668Aa6E96261"],
     },
     "optimism-sepolia": {
-      url: `${process.env.JSON_RPC_URL}`,
+      url: jsonRPCURL || "https://sepolia.optimism.io",
       chainId: 11155420,
       accounts: [signerKey],
     },
     sepolia: {
-      url: `${process.env.JSON_RPC_URL}`,
+      url: jsonRPCURL || "https://sepolia.drpc.org",
       chainId: 11155111,
       accounts: [signerKey],
     },
