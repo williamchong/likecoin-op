@@ -46,8 +46,7 @@ const etherscanConfig: Partial<EtherscanConfig> = {
 
 const blockscoutConfig: Partial<EtherscanConfig> = {
   apiKey: {
-    "optimism-sepolia":
-      "Is not required by blockscout. Can be any non-empty string",
+    "optimism-sepolia": `${process.env.OPTIMISM_BLOCKSCOUT_KEY}`,
     sepolia: "Is not required by blockscout. Can be any non-empty string",
     optimism: `${process.env.OPTIMISM_BLOCKSCOUT_KEY}`, // From rickmak.eth account
   },
@@ -72,8 +71,8 @@ const blockscoutConfig: Partial<EtherscanConfig> = {
       network: "optimism-sepolia",
       chainId: 11155420,
       urls: {
-        apiURL: "https://optimism-sepolia.blockscout.com/api",
-        browserURL: "https://optimism-sepolia.blockscout.com/",
+        apiURL: "https://testnet-explorer.optimism.io/api",
+        browserURL: "https://testnet-explorer.optimism.io/",
       },
     },
   ],
