@@ -56,7 +56,10 @@ export class GasEstimationLoggerInterceptor extends BaseGasEstimationInterceptor
   }
 
   onGasEstimate(gasEstimation: GasEstimation) {
-    console.log(`Operation '${this.operation}', Gas estimation:,`, gasEstimation);
+    console.log(
+      `Operation '${this.operation}', Gas estimation:,`,
+      gasEstimation,
+    );
   }
 
   onCallArgs(...args: any[]) {
@@ -80,7 +83,7 @@ export class GasEstimationAdjustmentInterceptor extends BaseGasEstimationInterce
 
   constructor(limitBump: number, feeIncrement: number) {
     super();
-    this.limitBump = limitBump
+    this.limitBump = limitBump;
     this.feeIncrement = feeIncrement;
   }
 
@@ -88,7 +91,8 @@ export class GasEstimationAdjustmentInterceptor extends BaseGasEstimationInterce
     return {
       ...gasEstimation,
       maxFeePerGas: gasEstimation.maxFeePerGas + BigInt(this.feeIncrement),
-      maxPriorityFeePerGas: gasEstimation.maxPriorityFeePerGas + BigInt(this.feeIncrement), 
+      maxPriorityFeePerGas:
+        gasEstimation.maxPriorityFeePerGas + BigInt(this.feeIncrement),
       gasLimit: gasEstimation.gasLimit + BigInt(this.limitBump),
     };
   }
