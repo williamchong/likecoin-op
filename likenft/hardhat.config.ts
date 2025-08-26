@@ -1,4 +1,5 @@
 import "@nomicfoundation/hardhat-toolbox-viem";
+import { EtherscanConfig } from "@nomicfoundation/hardhat-verify/types";
 import type { HardhatUserConfig } from "hardhat/config";
 
 import "@nomicfoundation/hardhat-ethers";
@@ -12,6 +13,81 @@ let signerKey =
   process.env.DEPLOY_WALLET_PRIVATE_KEY ||
   "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 signerKey = `0x${signerKey}`;
+
+const etherscanConfig: Partial<EtherscanConfig> = {
+  apiKey: `${process.env.ETHERSCAN_API_KEY}`,
+  customChains: [
+    {
+      network: "optimism",
+      chainId: 10,
+      urls: {
+        apiURL: "https://api.etherscan.io/v2/api",
+        browserURL: "https://optimism.etherscan.io/",
+      },
+    },
+    {
+      network: "sepolia",
+      chainId: 11155111,
+      urls: {
+        apiURL: "https://api.etherscan.io/v2/api",
+        browserURL: "https://sepolia.etherscan.io/",
+      },
+    },
+    {
+      network: "optimism-sepolia",
+      chainId: 11155420,
+      urls: {
+        apiURL: "https://api.etherscan.io/v2/api",
+        browserURL: "https://sepolia-optimism.etherscan.io/",
+      },
+    },
+  ],
+};
+
+const blockscoutConfig: Partial<EtherscanConfig> = {
+  apiKey: {
+    "optimism-sepolia": `${process.env.OPTIMISM_BLOCKSCOUT_KEY}`,
+    sepolia: "Is not required by blockscout. Can be any non-empty string",
+    optimism: `${process.env.OPTIMISM_BLOCKSCOUT_KEY}`, // From rickmak.eth account
+  },
+  customChains: [
+    {
+      network: "optimism",
+      chainId: 10,
+      urls: {
+        apiURL: "https://optimism.blockscout.com/api",
+        browserURL: "https://optimism.blockscout.com/",
+      },
+    },
+    {
+      network: "sepolia",
+      chainId: 11155111,
+      urls: {
+        apiURL: "https://eth-sepolia.blockscout.com/api",
+        browserURL: "https://eth-sepolia.blockscout.com/",
+      },
+    },
+    {
+      network: "optimism-sepolia",
+      chainId: 11155420,
+      urls: {
+        apiURL: "https://testnet-explorer.optimism.io/api",
+        browserURL: "https://testnet-explorer.optimism.io/",
+      },
+    },
+  ],
+};
+
+function selectEtherscanConfig(): Partial<EtherscanConfig> {
+  switch (process.env.VERIFY) {
+    case "etherscan":
+      return etherscanConfig;
+    case "blockscout":
+      return blockscoutConfig;
+    default:
+      return blockscoutConfig;
+  }
+}
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -29,39 +105,11 @@ const config: HardhatUserConfig = {
       viaIR: true,
     },
   },
-  etherscan: {
-    apiKey: {
-      "optimism-sepolia":
-        "Is not required by blockscout. Can be any non-empty string",
-      sepolia: "Is not required by blockscout. Can be any non-empty string",
-      optimism: `${process.env.OPTIMISM_BLOCKSCOUT_KEY}`, // From rickmak.eth account
-    },
-    customChains: [
-      {
-        network: "optimism",
-        chainId: 10,
-        urls: {
-          apiURL: "https://optimism.blockscout.com/api",
-          browserURL: "https://optimism.blockscout.com/",
-        },
-      },
-      {
-        network: "sepolia",
-        chainId: 11155111,
-        urls: {
-          apiURL: "https://eth-sepolia.blockscout.com/api",
-          browserURL: "https://eth-sepolia.blockscout.com/",
-        },
-      },
-      {
-        network: "optimism-sepolia",
-        chainId: 11155420,
-        urls: {
-          apiURL: "https://optimism-sepolia.blockscout.com/api",
-          browserURL: "https://optimism-sepolia.blockscout.com/",
-        },
-      },
-    ],
+  etherscan: selectEtherscanConfig(),
+  sourcify: {
+    enabled: true,
+    apiUrl: "https://sourcify.dev/server",
+    browserUrl: "https://repo.sourcify.dev",
   },
   networks: {
     localhost: {
