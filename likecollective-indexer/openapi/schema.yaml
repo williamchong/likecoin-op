@@ -1,0 +1,1168 @@
+openapi: 3.0.3
+info:
+  title: LikeNFT Indexer API
+  version: 0.1.0
+
+paths:
+  /stakings:
+    get:
+      tags:
+        - Staking
+      summary: Get stakings
+      parameters:
+        - $ref: "#/components/parameters/PaginationRequestKey"
+        - name: pagination.limit
+          in: query
+          description: The number of items to return.
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - $ref: "#/components/parameters/PaginationRequestReverse"
+        - $ref: "#/components/parameters/FilterBookNFTIn"
+        - $ref: "#/components/parameters/FilterAccountIn"
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/PaginationResponse"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Staking"
+
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /accounts:
+    get:
+      tags:
+        - Account
+      summary: Get accounts
+      parameters:
+        - $ref: "#/components/parameters/PaginationRequestKey"
+        - name: pagination.limit
+          in: query
+          description: |-
+            The number of items to return.
+            When filter.account_in is provided, the limit will be ignored.
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - $ref: "#/components/parameters/PaginationRequestReverse"
+        - $ref: "#/components/parameters/FilterAccountIn"
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/PaginationResponse"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Account"
+
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /accounts/{evm_address}:
+    get:
+      tags:
+        - Account
+      summary: Get an account
+      parameters:
+        - name: evm_address
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/EvmAddress"
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /account/{evm_address}/stakings:
+    get:
+      tags:
+        - Staking
+      summary: Get staking information for an account
+      parameters:
+        - name: evm_address
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/EvmAddress"
+        - $ref: "#/components/parameters/PaginationRequestKey"
+        - name: pagination.limit
+          in: query
+          description: Optional limit for paginated use cases.
+          required: false
+          schema:
+            type: integer
+            nullable: true
+            minimum: 1
+            maximum: 100
+        - $ref: "#/components/parameters/PaginationRequestReverse"
+        - $ref: "#/components/parameters/FilterBookNFTIn"
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/PaginationResponse"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Staking"
+
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /account/{evm_address}/book-nfts:
+    get:
+      tags:
+        - BookNFT
+      summary: Get book NFTs for an account
+      parameters:
+        - name: evm_address
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/EvmAddress"
+        - $ref: "#/components/parameters/PaginationRequestKey"
+        - name: pagination.limit
+          in: query
+          description: Optional limit for paginated use cases.
+          required: false
+          schema:
+            type: integer
+            nullable: true
+            minimum: 1
+            maximum: 100
+        - $ref: "#/components/parameters/PaginationRequestReverse"
+        - $ref: "#/components/parameters/AccountBookNFTsRequestSortBy"
+        - $ref: "#/components/parameters/AccountBookNFTsRequestSortOrder"
+        - $ref: "#/components/parameters/FilterBookNFTIn"
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/PaginationResponse"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AccountBookNFT"
+
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /account/{evm_address}/staking-events/{event_type}:
+    get:
+      tags:
+        - Staking Event
+      summary: Get staking events for an account
+      parameters:
+        - name: evm_address
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/EvmAddress"
+        - name: event_type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - staked
+              - unstaked
+              - reward-added
+              - reward-claimed
+              - reward-deposited
+              - all
+        - $ref: "#/components/parameters/PaginationRequestKey"
+        - name: pagination.limit
+          in: query
+          description: Number of items to return.
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - $ref: "#/components/parameters/PaginationRequestReverse"
+        - $ref: "#/components/parameters/StakingEventsRequestFilterDatetimeFrom"
+        - $ref: "#/components/parameters/StakingEventsRequestFilterDatetimeTo"
+        - $ref: "#/components/parameters/FilterBookNFTIn"
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/PaginationResponse"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/StakingEvent"
+
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /book-nfts:
+    get:
+      tags:
+        - BookNFT
+      summary: Get book NFTs
+      parameters:
+        - $ref: "#/components/parameters/PaginationRequestKey"
+        - name: pagination.limit
+          in: query
+          description: |-
+            The number of items to return.
+            When filter.book_nft_in is provided, the limit will be ignored.
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - $ref: "#/components/parameters/PaginationRequestReverse"
+        - $ref: "#/components/parameters/BookNFTsRequestSortOrderTimeFrame"
+        - $ref: "#/components/parameters/BookNFTsRequestTimeFrameSortBy"
+        - $ref: "#/components/parameters/BookNFTsRequestTimeFrameSortOrder"
+        - $ref: "#/components/parameters/FilterBookNFTIn"
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/PaginationResponse"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/BookNFT"
+
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /book-nft/{evm_address}:
+    get:
+      tags:
+        - BookNFT
+      summary: Get a book NFT
+      parameters:
+        - name: evm_address
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/EvmAddress"
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookNFT"
+
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /book-nft/{evm_address}/stakings:
+    get:
+      tags:
+        - Staking
+      summary: Get staking information for a book NFT
+      parameters:
+        - name: evm_address
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/EvmAddress"
+        - $ref: "#/components/parameters/PaginationRequestKey"
+        - name: pagination.limit
+          in: query
+          description: pagination.limit
+          required: false
+          schema:
+            type: integer
+            nullable: true
+            minimum: 1
+            maximum: 100
+        - $ref: "#/components/parameters/PaginationRequestReverse"
+        - $ref: "#/components/parameters/FilterAccountIn"
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/PaginationResponse"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Staking"
+
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /book-nft/{evm_address}/staking-events/{event_type}:
+    get:
+      tags:
+        - Staking Event
+      summary: Get staking events for a book NFT
+      parameters:
+        - name: evm_address
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/EvmAddress"
+        - name: event_type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - staked
+              - unstaked
+              - reward-added
+              - reward-claimed
+              - reward-deposited
+              - all
+        - $ref: "#/components/parameters/PaginationRequestKey"
+        - name: pagination.limit
+          in: query
+          description: Number of items to return.
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - $ref: "#/components/parameters/PaginationRequestReverse"
+        - $ref: "#/components/parameters/StakingEventsRequestFilterDatetimeFrom"
+        - $ref: "#/components/parameters/StakingEventsRequestFilterDatetimeTo"
+        - $ref: "#/components/parameters/FilterAccountIn"
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: "#/components/schemas/PaginationResponse"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/StakingEvent"
+                required:
+                  - pagination
+                  - data
+
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /events:
+    get:
+      tags:
+        - Event
+      summary: Query events
+      description: Query events
+      operationId: events
+      parameters:
+        - $ref: "#/components/parameters/EventPaginationRequestLimit"
+        - $ref: "#/components/parameters/EventPaginationRequestPage"
+        - $ref: "#/components/parameters/EventSortRequestSortBy"
+        - $ref: "#/components/parameters/EventSortRequestSortOrder"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestamp"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampGte"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampGt"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampLte"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampLt"
+        - $ref: "#/components/parameters/EventFilterRequestTopic1"
+        - $ref: "#/components/parameters/EventFilterRequestTopic2"
+        - $ref: "#/components/parameters/EventFilterRequestTopic3"
+        - $ref: "#/components/parameters/EventFilterRequestTopic0"
+      responses:
+        "200":
+          description: Events found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/EventQueryMetadata"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Event"
+                required:
+                  - meta
+                  - data
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /events/{address}:
+    get:
+      tags:
+        - Event
+      summary: Query events
+      description: Query events
+      operationId: eventsByAddress
+      parameters:
+        - name: address
+          in: path
+          description: contract address
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/EventPaginationRequestLimit"
+        - $ref: "#/components/parameters/EventPaginationRequestPage"
+        - $ref: "#/components/parameters/EventSortRequestSortBy"
+        - $ref: "#/components/parameters/EventSortRequestSortOrder"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestamp"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampGte"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampGt"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampLte"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampLt"
+        - $ref: "#/components/parameters/EventFilterRequestTopic1"
+        - $ref: "#/components/parameters/EventFilterRequestTopic2"
+        - $ref: "#/components/parameters/EventFilterRequestTopic3"
+        - $ref: "#/components/parameters/EventFilterRequestTopic0"
+
+      responses:
+        "200":
+          description: Events found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/EventQueryMetadata"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Event"
+                required:
+                  - meta
+                  - data
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /events/{address}/{signature}:
+    get:
+      tags:
+        - Event
+      summary: Query events
+      description: Query events
+      operationId: eventsByAddressAndSignature
+      parameters:
+        - name: address
+          in: path
+          description: contract address
+          required: true
+          schema:
+            type: string
+        - name: signature
+          in: path
+          description: event signature
+          required: true
+          example: NewBookNFT(address,(string,string,string,uint64))
+          schema:
+            type: string
+        - $ref: "#/components/parameters/EventPaginationRequestLimit"
+        - $ref: "#/components/parameters/EventPaginationRequestPage"
+        - $ref: "#/components/parameters/EventSortRequestSortBy"
+        - $ref: "#/components/parameters/EventSortRequestSortOrder"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestamp"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampGte"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampGt"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampLte"
+        - $ref: "#/components/parameters/EventFilterRequestBlockTimestampLt"
+        - $ref: "#/components/parameters/EventFilterRequestTopic1"
+        - $ref: "#/components/parameters/EventFilterRequestTopic2"
+        - $ref: "#/components/parameters/EventFilterRequestTopic3"
+        - $ref: "#/components/parameters/EventFilterRequestTopic0"
+      responses:
+        "200":
+          description: Events found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/EventQueryMetadata"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Event"
+                required:
+                  - meta
+                  - data
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  parameters:
+    PaginationRequestKey:
+      name: pagination.key
+      in: query
+      description: pagination.key
+      required: false
+      schema:
+        type: integer
+
+    PaginationRequestReverse:
+      name: reverse
+      in: query
+      description: reverse
+      required: false
+      schema:
+        type: boolean
+        default: false
+
+    BookNFTsRequestTimeFrameSortBy:
+      name: time_frame_sort_by
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - staked_amount
+          - last_staked_at
+          - number_of_stakers
+
+    BookNFTsRequestTimeFrameSortOrder:
+      name: time_frame_sort_order
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: desc
+
+    BookNFTsRequestSortOrderTimeFrame:
+      name: time_frame
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - 7d
+          - 30d
+          - 1y
+          - all
+        default: all
+
+    AccountBookNFTsRequestSortBy:
+      name: sort_by
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - pool_share
+          - staked_amount
+          - pending_reward_amount
+        default: staked_amount
+
+    AccountBookNFTsRequestSortOrder:
+      name: sort_order
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: desc
+
+    StakingEventsRequestFilterDatetimeFrom:
+      name: filter_datetime_from
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+
+    StakingEventsRequestFilterDatetimeTo:
+      name: filter_datetime_to
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+
+    FilterBookNFTIn:
+      name: filter_book_nft_in
+      in: query
+      required: false
+      schema:
+        type: array
+        items:
+          $ref: "#/components/schemas/EvmAddress"
+
+    FilterAccountIn:
+      name: filter_account_in
+      in: query
+      required: false
+      schema:
+        type: array
+        items:
+          $ref: "#/components/schemas/EvmAddress"
+
+    EventPaginationRequestLimit:
+      name: limit
+      in: query
+      description: limit
+      required: false
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+
+    EventPaginationRequestPage:
+      name: page
+      in: query
+      description: page
+      required: false
+      schema:
+        type: integer
+        default: 0
+
+    EventSortRequestSortBy:
+      name: sort_by
+      in: query
+      description: sort_by
+      required: false
+      schema:
+        type: string
+        enum:
+          - block_number
+          - block_timestamp
+        default: block_number
+
+    EventSortRequestSortOrder:
+      name: sort_order
+      in: query
+      description: sort_order
+      required: false
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: asc
+
+    EventFilterRequestBlockTimestamp:
+      name: filter_block_timestamp
+      in: query
+      description: filter_block_timestamp
+      required: false
+      schema:
+        type: string
+
+    EventFilterRequestBlockTimestampGte:
+      name: filter_block_timestamp_gte
+      in: query
+      description: filter_block_timestamp_gte
+      required: false
+      schema:
+        type: string
+
+    EventFilterRequestBlockTimestampGt:
+      name: filter_block_timestamp_gt
+      in: query
+      description: filter_block_timestamp_gt
+      required: false
+      schema:
+        type: string
+
+    EventFilterRequestBlockTimestampLte:
+      name: filter_block_timestamp_lte
+      in: query
+      description: filter_block_timestamp_lte
+      required: false
+      schema:
+        type: string
+
+    EventFilterRequestBlockTimestampLt:
+      name: filter_block_timestamp_lt
+      in: query
+      description: filter_block_timestamp_lt
+      required: false
+      schema:
+        type: string
+
+    EventFilterRequestTopic1:
+      name: filter_topic_1
+      in: query
+      description: filter_topic_1
+      required: false
+      schema:
+        type: string
+
+    EventFilterRequestTopic2:
+      name: filter_topic_2
+      in: query
+      description: filter_topic_2
+      required: false
+      schema:
+        type: string
+
+    EventFilterRequestTopic3:
+      name: filter_topic_3
+      in: query
+      description: filter_topic_3
+      required: false
+      schema:
+        type: string
+
+    EventFilterRequestTopic0:
+      name: filter_topic_0
+      in: query
+      description: filter_topic_0
+      required: false
+      schema:
+        type: string
+
+  schemas:
+    Staking:
+      type: object
+      properties:
+        book_nft:
+          $ref: "#/components/schemas/EvmAddress"
+        account:
+          $ref: "#/components/schemas/EvmAddress"
+        staked_amount:
+          $ref: "#/components/schemas/Uint256"
+        pending_reward_amount:
+          $ref: "#/components/schemas/Uint256"
+        claimed_reward_amount:
+          $ref: "#/components/schemas/Uint256"
+      required:
+        - book_nft
+        - account
+        - staked_amount
+        - pending_reward_amount
+        - claimed_reward_amount
+
+    StakingEvent:
+      oneOf:
+        - $ref: "#/components/schemas/StakingEventStaked"
+        - $ref: "#/components/schemas/StakingEventUnstaked"
+        - $ref: "#/components/schemas/StakingEventRewardAdded"
+        - $ref: "#/components/schemas/StakingEventRewardClaimed"
+        - $ref: "#/components/schemas/StakingEventRewardDeposited"
+        - $ref: "#/components/schemas/StakingEventAllRewardsClaimed"
+
+    StakingEventStaked:
+      type: object
+      properties:
+        event_type:
+          type: string
+          enum:
+            - staked
+        book_nft:
+          $ref: "#/components/schemas/EvmAddress"
+        amount:
+          $ref: "#/components/schemas/Uint256"
+        datetime:
+          type: string
+          format: date-time
+      required:
+        - event_type
+        - book_nft
+        - amount
+        - datetime
+
+    StakingEventUnstaked:
+      type: object
+      properties:
+        event_type:
+          type: string
+          enum:
+            - unstaked
+        book_nft:
+          $ref: "#/components/schemas/EvmAddress"
+        amount:
+          $ref: "#/components/schemas/Uint256"
+        datetime:
+          type: string
+          format: date-time
+      required:
+        - event_type
+        - book_nft
+        - amount
+        - datetime
+
+    StakingEventRewardAdded:
+      type: object
+      properties:
+        event_type:
+          type: string
+          enum:
+            - reward-added
+        book_nft:
+          $ref: "#/components/schemas/EvmAddress"
+        amount:
+          $ref: "#/components/schemas/Uint256"
+        datetime:
+          type: string
+          format: date-time
+      required:
+        - event_type
+        - book_nft
+        - amount
+        - datetime
+
+    StakingEventRewardClaimed:
+      type: object
+      properties:
+        event_type:
+          type: string
+          enum:
+            - reward-claimed
+        book_nft:
+          $ref: "#/components/schemas/EvmAddress"
+        amount:
+          $ref: "#/components/schemas/Uint256"
+        datetime:
+          type: string
+          format: date-time
+      required:
+        - event_type
+        - book_nft
+        - amount
+        - datetime
+
+    StakingEventRewardDeposited:
+      type: object
+      properties:
+        event_type:
+          type: string
+          enum:
+            - reward-deposited
+        book_nft:
+          $ref: "#/components/schemas/EvmAddress"
+        amount:
+          $ref: "#/components/schemas/Uint256"
+        datetime:
+          type: string
+          format: date-time
+      required:
+        - event_type
+        - book_nft
+        - amount
+        - datetime
+
+    StakingEventAllRewardsClaimed:
+      type: object
+      properties:
+        event_type:
+          type: string
+          enum:
+            - all-rewards-claimed
+        claimed_amount_list:
+          type: array
+          items:
+            type: object
+            properties:
+              book_nft:
+                $ref: "#/components/schemas/EvmAddress"
+              amount:
+                $ref: "#/components/schemas/Uint256"
+              datetime:
+                type: string
+                format: date-time
+      required:
+        - event_type
+        - claimed_amount_list
+        - datetime
+
+    BookNFT:
+      type: object
+      properties:
+        evm_address:
+          $ref: "#/components/schemas/EvmAddress"
+        staked_amount:
+          $ref: "#/components/schemas/Uint256"
+        last_staked_at:
+          type: string
+          format: date-time
+          nullable: true
+        number_of_stakers:
+          type: integer
+      required:
+        - evm_address
+        - staked_amount
+        - last_staked_at
+        - number_of_stakers
+
+    Account:
+      type: object
+      properties:
+        evm_address:
+          $ref: "#/components/schemas/EvmAddress"
+        staked_amount:
+          $ref: "#/components/schemas/Uint256"
+        pending_reward_amount:
+          $ref: "#/components/schemas/Uint256"
+        claimed_reward_amount:
+          $ref: "#/components/schemas/Uint256"
+      required:
+        - evm_address
+        - staked_amount
+        - pending_reward_amount
+        - claimed_reward_amount
+
+    AccountBookNFT:
+      type: object
+      properties:
+        evm_address:
+          $ref: "#/components/schemas/EvmAddress"
+        pool_share:
+          type: number
+          nullable: false
+        staked_amount:
+          $ref: "#/components/schemas/Uint256"
+        pending_reward_amount:
+          $ref: "#/components/schemas/Uint256"
+        claimed_reward_amount:
+          $ref: "#/components/schemas/Uint256"
+      required:
+        - evm_address
+        - pool_share
+        - staked_amount
+        - pending_reward_amount
+        - claimed_reward_amount
+
+    EventQueryMetadata:
+      type: object
+      description: Metadata for event query
+      properties:
+        chain_ids:
+          type: array
+          items:
+            type: integer
+        address:
+          type: string
+        signature:
+          type: string
+        page:
+          type: integer
+        limit_per_chain:
+          type: integer
+        total_items:
+          type: integer
+        total_pages:
+          type: integer
+      required:
+        - chain_ids
+        - address
+        - signature
+        - page
+        - limit_per_chain
+        - total_items
+        - total_pages
+
+    Event:
+      type: object
+      properties:
+        chain_id:
+          type: integer
+        block_number:
+          type: string
+        block_hash:
+          type: string
+        block_timestamp:
+          type: string
+        transaction_hash:
+          type: string
+        transaction_index:
+          type: integer
+        log_index:
+          type: integer
+        address:
+          type: string
+        data:
+          type: string
+        topics:
+          type: array
+          items:
+            type: string
+        decoded:
+          type: object
+          properties:
+            name:
+              type: string
+            signature:
+              type: string
+            indexed_params:
+              type: object
+              additionalProperties: true
+            non_indexed_params:
+              type: object
+              additionalProperties: true
+          required:
+            - name
+            - signature
+            - indexed_params
+            - non_indexed_params
+      required:
+        - chain_id
+        - block_number
+        - block_hash
+        - block_timestamp
+        - transaction_hash
+        - transaction_index
+        - log_index
+        - address
+        - data
+        - topics
+        - decoded
+
+    PaginationResponse:
+      type: object
+      properties:
+        next_key:
+          type: integer
+        count:
+          type: integer
+      required:
+        - next_key
+        - count
+
+    EvmAddress:
+      type: string
+      pattern: "^0x[a-fA-F0-9]{40}$"
+      example: "0x1234567890123456789012345678901234567890"
+
+    Uint256:
+      type: string
+      pattern: "^[0-9]+$"
+      example: "1"
+
+    Error:
+      description: Represents error object
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+          default: 500
+        message:
+          type: string
+        sentry_error_id:
+          type: string
+      required:
+        - code
+        - message
