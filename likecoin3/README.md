@@ -21,12 +21,12 @@ To run all the tests in the project, execute the following command:
 npm run test
 ```
 
-Try running some of the following tasks:
+### Local superchain development
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat ignition deploy ./ignition/modules/Lock.ts
 ```
+docker compose up
+```
+
+To tail individual chain logs, run something like: `docker compose exec -it superism tail -f /tmp/anvil-chain-902-{timestamp}`
+
+Make deployment to superism: `npx hardhat ignition deploy --network superism2 ignition/modules/Lock.ts`
