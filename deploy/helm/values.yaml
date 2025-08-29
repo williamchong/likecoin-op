@@ -189,6 +189,29 @@ likenftIndexer:
           - check-received-evm-events
         resources: {}
 
+likecollectiveIndexer:
+  name: likecollective-indexer
+
+  container:
+    imageRepository: likecoin/likecollective-indexer
+    imagePullPolicy: IfNotPresent
+
+  api:
+    name: likecollective-indexer-api
+
+    container:
+      port: 8091
+
+    service:
+      port: 80
+
+    ingress:
+      prefix: /
+      tls:
+        secretName: tls-likecollective-indexer
+
+    resources: {}
+
 redis:
   name: redis
   container:

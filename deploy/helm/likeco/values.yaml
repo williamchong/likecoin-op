@@ -114,3 +114,23 @@ likenftIndexer:
         cron: "*/1 * * * *"
         tasks:
           - check-received-evm-events
+
+likecollectiveIndexer:
+  container:
+    imageRepository: likecoin/likecollective-indexer
+
+  env:
+    SENTRY_DSN: ""
+    SENTRY_DEBUG: "true"
+    ROUTE_PREFIX: ""
+    PORT: "8091"
+
+  api:
+    ingress:
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /$2
+      prefix: /likecollective-indexer(/|$)(.*)
+      host: api.v3.like.co
+      tls:
+        secretName: tls-api.v3.like.co
+        host: api.v3.like.co

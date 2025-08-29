@@ -101,3 +101,20 @@ likenftIndexer:
     deployments:
       all-in-one:
         cron: "*/15 * * * *"
+
+likecollectiveIndexer:
+  container:
+    imageRepository: oursky/likecollective-indexer
+
+  env:
+    SENTRY_DSN: ""
+    SENTRY_DEBUG: "true"
+    ROUTE_PREFIX: ""
+    PORT: "8091"
+
+  api:
+    ingress:
+      host: likecollective-indexer.pandawork.com
+      tls:
+        secretName: likecollective-indexer.pandawork.com
+        host: likecollective-indexer.pandawork.com
