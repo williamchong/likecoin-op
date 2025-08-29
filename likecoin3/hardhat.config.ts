@@ -18,6 +18,13 @@ const config: HardhatUserConfig = {
       url: "http://localhost:9546",
     },
   },
+  ignition: {
+    strategyConfig: {
+      create2: {
+        salt: "0x0000000000000000000000000000000000000000000000000000000000000001",
+      },
+    },
+  },
 };
 
 export default config;
