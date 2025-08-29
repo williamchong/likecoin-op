@@ -115,3 +115,19 @@ jobs:
       - run: make -C migration-admin setup
 
       - run: make -C migration-admin ci
+
+  likecollective-indexer:
+    runs-on: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.23.x
+
+      - run: make -C likecollective-indexer vendor
+
+      - run: make -C likecollective-indexer ci
+
