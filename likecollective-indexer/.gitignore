@@ -25,5 +25,8 @@ tmp/
 # .env file
 .env
 
+# Project build
+likecollective-indexer-api
+
 # OS X generated file
 .DS_Store
