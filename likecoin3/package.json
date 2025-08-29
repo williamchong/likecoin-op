@@ -1,6 +1,19 @@
 {
+  "name": "likecoin3",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "hardhat compile",
+    "check-format": "prettier -l .",
+    "format": "prettier . --write",
+    "lint": "solhint contracts/**/*.sol; eslint './**/*.{js,mjs,ts}'",
+    "test": "hardhat test"
+  },
   "devDependencies": {
+    "@eslint/js": "^9.34.0",
     "@nomicfoundation/hardhat-toolbox-viem": "^4.1.0",
-    "hardhat": "^2.26.3"
+    "hardhat": "^2.26.3",
+    "prettier": "^3.6.2",
+    "prettier-plugin-solidity": "^2.1.0",
+    "solhint": "^6.0.1"
   }
 }
