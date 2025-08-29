@@ -1,3 +1,9 @@
+GIT_SHORT_HASH ?= $(shell git rev-parse --short=8 HEAD)
+TAG ?= $(GIT_SHORT_HASH)
+DOCKER_REGISTRY ?= likecoin
+DEPLOY_DEV_DOCKER_IMAGE_NAME ?= $(DOCKER_REGISTRY)/likecollective-indexer
+DOCKER_BUILD_ARGS ?=
+
 -include .env
 export
 
@@ -75,3 +81,11 @@ build: $(PROJECT_NAME)-api
 
 clean:
 	rm -f $(API_ARTIFACT)
+
+.PHONY: docker-image
+docker-image:
+	docker buildx build --platform linux/amd64 . \
+		--build-arg 'BUILD_TAG=$(TAG)' \
+		-t '$(DEPLOY_DEV_DOCKER_IMAGE_NAME):latest' \
+		-t '$(DEPLOY_DEV_DOCKER_IMAGE_NAME):$(TAG)' \
+		$(DOCKER_BUILD_ARGS)
