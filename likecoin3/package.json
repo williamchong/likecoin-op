@@ -6,7 +6,8 @@
     "check-format": "prettier -l .",
     "format": "prettier . --write",
     "lint": "solhint contracts/**/*.sol; eslint './**/*.{js,mjs,ts}'",
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "deploy": "hardhat ignition deploy ignition/modules/Likecoin.ts --strategy create2 --parameters ignition/parameters.json"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",

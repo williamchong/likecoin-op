@@ -29,4 +29,12 @@ docker compose up
 
 To tail individual chain logs, run something like: `docker compose exec -it superism tail -f /tmp/anvil-chain-902-{timestamp}`
 
-Make deployment to superism: `npx hardhat ignition deploy --network superism2 ignition/modules/Likecoin.ts --parameters ignition/parameters.json`
+
+### Deployment
+
+Make deployment to superism: 
+
+```
+npm run deploy -- --network superism1
+npm run deploy -- --network superism2
+```
