@@ -16,14 +16,17 @@ const config: HardhatUserConfig = {
     localhost: {
       url: "http://localhost:8545",
       chainId: 900,
+      accounts: [signerKey],
     },
     superism1: {
       chainId: 901,
       url: "http://localhost:9545",
+      accounts: [signerKey],
     },
     superism2: {
       chainId: 902,
       url: "http://localhost:9546",
+      accounts: [signerKey],
     },
     mainnet: {
       chainId: 1,
@@ -41,6 +44,7 @@ const config: HardhatUserConfig = {
       accounts: [signerKey],
     },
     optimismSepolia: {
+      chainId: 11155420,
       url: `https://opt-sepolia.g.alchemy.com/v2/${alchemyApiKey}`,
       accounts: [signerKey],
     },
@@ -50,7 +54,7 @@ const config: HardhatUserConfig = {
       accounts: [signerKey],
     },
     baseSepolia: {
-      chainId: 84531,
+      chainId: 84532,
       url: `https://base-sepolia.g.alchemy.com/v2/${alchemyApiKey}`,
       accounts: [signerKey],
     },

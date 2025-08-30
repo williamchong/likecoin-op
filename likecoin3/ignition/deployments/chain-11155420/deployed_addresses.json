@@ -1,0 +1,5 @@
+{
+  "LikecoinModule#LikecoinImpl": "0x39D9f28FD9da20548c74aFAF47B9A8F150d7339F",
+  "LikecoinModule#ERC1967Proxy": "0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf",
+  "LikecoinModule#Likecoin": "0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf"
+}
