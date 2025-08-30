@@ -31,6 +31,10 @@ contract Likecoin is Initializable, ERC20Upgradeable, ERC20BridgeableUpgradeable
         __UUPSUpgradeable_init();
     }
 
+    function decimals() public view virtual override returns (uint8) {
+        return 6;
+    }
+
     /**
      * @dev Checks if the caller is the predeployed SuperchainTokenBridge. Reverts otherwise.
      *

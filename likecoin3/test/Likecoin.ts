@@ -36,9 +36,9 @@ describe("Likecoin", async function () {
   }
 
   describe("Basic ERC20 functionality", async function () {
-    it("should have 18 decimals", async function () {
+    it("should have 6 decimals", async function () {
       const { likecoin } = await loadFixture(deployToken);
-      expect(await likecoin.read.decimals()).to.equal(18);
+      expect(await likecoin.read.decimals()).to.equal(6);
     });
 
     it("should belong to the deployer", async function () {
@@ -78,28 +78,30 @@ describe("Likecoin", async function () {
     it("Should transfer tokens between accounts", async function () {
       const { likecoin, rick, bob } = await loadFixture(deployToken);
       const amount = parseEther("100");
+      const halfAmount = amount / 2n;
 
       await likecoin.write.mint([rick.account.address, amount]);
 
-      await likecoin.write.transfer([bob.account.address, parseEther("50")], {
+      await likecoin.write.transfer([bob.account.address, halfAmount], {
         account: rick.account,
       });
 
       expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
-        parseEther("50"),
+        halfAmount,
       );
       expect(await likecoin.read.balanceOf([bob.account.address])).to.equal(
-        parseEther("50"),
+        halfAmount,
       );
     });
 
     it("Should handle approvals and transferFrom", async function () {
       const { likecoin, rick, bob } = await loadFixture(deployToken);
       const amount = parseEther("100");
+      const halfAmount = amount / 2n;
 
       await likecoin.write.mint([rick.account.address, amount]);
 
-      await likecoin.write.approve([bob.account.address, parseEther("50")], {
+      await likecoin.write.approve([bob.account.address, halfAmount], {
         account: rick.account,
       });
 
@@ -108,70 +110,75 @@ describe("Likecoin", async function () {
           rick.account.address,
           bob.account.address,
         ]),
-      ).to.equal(parseEther("50"));
+      ).to.equal(halfAmount);
 
       await likecoin.write.transferFrom(
-        [rick.account.address, bob.account.address, parseEther("30")],
+        [rick.account.address, bob.account.address, halfAmount],
         { account: bob.account },
       );
 
       expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
-        parseEther("70"),
+        halfAmount,
       );
       expect(await likecoin.read.balanceOf([bob.account.address])).to.equal(
-        parseEther("30"),
+        halfAmount,
       );
       expect(
         await likecoin.read.allowance([
           rick.account.address,
           bob.account.address,
         ]),
-      ).to.equal(parseEther("20"));
+      ).to.equal(0n);
     });
 
     it("Should burn tokens correctly", async function () {
       const { likecoin, rick } = await loadFixture(deployToken);
       const amount = parseEther("100");
+      const quarterAmount = amount / 4n;
+      const threeQuartersAmount = amount - quarterAmount;
 
       await likecoin.write.mint([rick.account.address, amount]);
 
-      await likecoin.write.burn([parseEther("30")], {
+      await likecoin.write.burn([quarterAmount], {
         account: rick.account,
       });
 
       expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
-        parseEther("70"),
+        threeQuartersAmount,
       );
     });
 
     it("Should fail when transferring more than balance", async function () {
       const { likecoin, rick, bob } = await loadFixture(deployToken);
       const amount = parseEther("100");
+      const doubleAmount = amount * 2n;
 
       await likecoin.write.mint([rick.account.address, amount]);
 
       await expect(
-        likecoin.write.transfer([bob.account.address, parseEther("150")], {
+        likecoin.write.transfer([bob.account.address, doubleAmount], {
           account: rick.account,
         }),
-      );
+      ).to.be.rejectedWith("ERC20InsufficientBalance");
     });
 
     it("Should fail when transferring with insufficient allowance", async function () {
       const { likecoin, rick, bob } = await loadFixture(deployToken);
-      const amount = parseEther("100");
+      const amount = parseEther("100")
+      const halfAmount = amount / 2n;
+      const quarterAmount = amount / 4n;
 
       await likecoin.write.mint([rick.account.address, amount]);
-      await likecoin.write.approve([bob.account.address, parseEther("20")], {
+      await likecoin.write.approve([bob.account.address, quarterAmount], {
         account: rick.account,
       });
 
       await expect(
         likecoin.write.transferFrom(
-          [rick.account.address, bob.account.address, parseEther("50")],
+          [rick.account.address, bob.account.address, halfAmount],
           { account: bob.account },
         ),
-      );
+      ).to.be.rejectedWith("ERC20InsufficientAllowance");
     });
   });
 });
