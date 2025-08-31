@@ -36,7 +36,7 @@ Make deployment to superism & testnet/mainnet:
 
 ```
 npm run deploy:noverify -- --network superism1
-npm run deploy -- --network baseSepolia
+DOTENV_CONFIG_PATH=.env npm run deploy -- --network baseSepolia
 ```
 
 #### Verification
