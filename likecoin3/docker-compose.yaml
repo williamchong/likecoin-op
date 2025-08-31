@@ -1,0 +1,7 @@
+services:
+  superism:
+    # Build command: docker build -t oursky/supersim . --build-arg BASE_IMAGE=golang:1.25
+    image: oursky/supersim:go1.25-0.1.0-alpha.59
+    command: ["--interop.autorelay"]
+    tty: true
+    network_mode: host
