@@ -1,10 +1,12 @@
 import type { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox-viem";
 import "@openzeppelin/hardhat-upgrades";
+import "@nomicfoundation/hardhat-verify";
 
 import dotenv from "dotenv";
 dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || ".env.local" });
 const alchemyApiKey = process.env.ALCHEMY_API_KEY;
+const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
 let signerKey = process.env.DEPLOY_WALLET_PRIVATE_KEY ||
   "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 signerKey = `0x${signerKey}`;
@@ -68,6 +70,14 @@ const config: HardhatUserConfig = {
       url: `https://unichain-sepolia.g.alchemy.com/v2/${alchemyApiKey}`,
       accounts: [signerKey],
     },
+  },
+  etherscan: {
+    apiKey: etherscanApiKey,
+  },
+  sourcify: {
+    enabled: true,
+    apiUrl: "https://sourcify.dev/server",
+    browserUrl: "https://repo.sourcify.dev",
   },
   ignition: {
     strategyConfig: {

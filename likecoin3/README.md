@@ -32,9 +32,13 @@ To tail individual chain logs, run something like: `docker compose exec -it supe
 
 ### Deployment
 
-Make deployment to superism: 
+Make deployment to superism & testnet/mainnet: 
 
 ```
-npm run deploy -- --network superism1
-npm run deploy -- --network superism2
+npm run deploy:noverify -- --network superism1
+npm run deploy -- --network baseSepolia
 ```
+
+#### Verification
+
+ignition should verify the contract on etherscan & sourcify. In case the request fails (like rate limit), run `DOTENV_CONFIG_PATH=.env npx hardhat verify --network sepolia 0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf`, in some testnet, etherscan will fail while sourcify will success.
