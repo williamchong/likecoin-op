@@ -310,6 +310,7 @@ paths:
         - $ref: "#/components/parameters/BookNFTsRequestTimeFrameSortBy"
         - $ref: "#/components/parameters/BookNFTsRequestTimeFrameSortOrder"
         - $ref: "#/components/parameters/FilterBookNFTIn"
+        - $ref: "#/components/parameters/FilterAccountIn"
 
       responses:
         "200":
@@ -347,6 +348,7 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/EvmAddress"
+        - $ref: "#/components/parameters/FilterAccountIn"
 
       responses:
         "200":
