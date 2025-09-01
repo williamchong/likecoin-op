@@ -863,6 +863,15 @@ components:
         - $ref: "#/components/schemas/StakingEventRewardClaimed"
         - $ref: "#/components/schemas/StakingEventRewardDeposited"
         - $ref: "#/components/schemas/StakingEventAllRewardsClaimed"
+      discriminator:
+        propertyName: event_type
+        mapping:
+          staked: '#/components/schemas/StakingEventStaked'
+          unstaked: '#/components/schemas/StakingEventUnstaked'
+          reward-added: '#/components/schemas/StakingEventRewardAdded'
+          reward-claimed: '#/components/schemas/StakingEventRewardClaimed'
+          reward-deposited: '#/components/schemas/StakingEventRewardDeposited'
+          all-rewards-claimed: '#/components/schemas/StakingEventAllRewardsClaimed'
 
     StakingEventStaked:
       type: object
