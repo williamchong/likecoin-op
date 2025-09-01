@@ -21,4 +21,7 @@ COPY --from=builder /src/Makefile /app
 # App
 COPY --from=builder /src/likecollective-indexer-api /usr/local/bin/
 
+# DB Mock data
+COPY --from=builder /src/dbmockdata /app/dbmockdata
+
 CMD ["likecollective-indexer-api"]
