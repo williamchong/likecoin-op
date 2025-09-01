@@ -68,6 +68,7 @@ paths:
             minimum: 1
             maximum: 100
         - $ref: "#/components/parameters/PaginationRequestReverse"
+        - $ref: "#/components/parameters/FilterBookNFTIn"
         - $ref: "#/components/parameters/FilterAccountIn"
 
       responses:
@@ -106,6 +107,7 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/EvmAddress"
+        - $ref: "#/components/parameters/FilterBookNFTIn"
 
       responses:
         "200":
