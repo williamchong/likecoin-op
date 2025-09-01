@@ -6,12 +6,15 @@ import (
 	"net/http"
 	"time"
 
+	"likecollective-indexer/internal/database"
 	"likecollective-indexer/internal/server/middleware"
 	"likecollective-indexer/internal/util/sentry"
 )
 
 type Server struct {
 	port int
+
+	db database.Service
 }
 
 func NewServer() *http.Server {
@@ -29,6 +32,8 @@ func NewServer() *http.Server {
 
 	NewServer := &Server{
 		port: cfg.Port,
+
+		db: database.New(),
 	}
 
 	applyMiddlewares := middleware.MakeApplyMiddlewares(
