@@ -38,6 +38,9 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Staking"
+                required:
+                  - pagination
+                  - data
 
         default:
           description: General Error
@@ -81,6 +84,9 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Account"
+                required:
+                  - pagination
+                  - data
 
         default:
           description: General Error
@@ -89,7 +95,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
-  /accounts/{evm_address}:
+  /account/{evm_address}:
     get:
       tags:
         - Account
@@ -154,6 +160,9 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Staking"
+                required:
+                  - pagination
+                  - data
 
         default:
           description: General Error
@@ -202,6 +211,9 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/AccountBookNFT"
+                required:
+                  - pagination
+                  - data
 
         default:
           description: General Error
@@ -262,6 +274,9 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/StakingEvent"
+                required:
+                  - pagination
+                  - data
 
         default:
           description: General Error
@@ -308,6 +323,9 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/BookNFT"
+                required:
+                  - pagination
+                  - data
 
         default:
           description: General Error
@@ -381,6 +399,9 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Staking"
+                required:
+                  - pagination
+                  - data
 
         default:
           description: General Error
@@ -458,7 +479,6 @@ paths:
         - Event
       summary: Query events
       description: Query events
-      operationId: events
       parameters:
         - $ref: "#/components/parameters/EventPaginationRequestLimit"
         - $ref: "#/components/parameters/EventPaginationRequestPage"
@@ -503,7 +523,6 @@ paths:
         - Event
       summary: Query events
       description: Query events
-      operationId: eventsByAddress
       parameters:
         - name: address
           in: path
@@ -555,7 +574,6 @@ paths:
         - Event
       summary: Query events
       description: Query events
-      operationId: eventsByAddressAndSignature
       parameters:
         - name: address
           in: path
