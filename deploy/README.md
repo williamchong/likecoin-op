@@ -12,22 +12,17 @@ Current encrypted operator wallet: `0xC71fe89e4C0e5458a793fc6548EF6B392417A7Fb` 
 
 Production
 LikeProtocol proxy: `0x526237a676444A67bc79E9009756df128Ca9a619`
-LikeCoin proxy: `pending`
 
 Optimism-sepolia
 LikeProtocol proxy: `0xfF79df388742f248c61A633938710559c61faEF1`
-EkilCoin proxy: `pending`
 
 Once the initial deployment is done, we should updated the expected proxy address in the `env.operator` file for reference. On new L2 chain launch, we should operate the following steps to obtain same proxy address.
 
 0. Checkout a specific commit
 1. Someone sends ETH to the operator's wallet (!!failed operation becasue of lack of fund will make the address different from the expected one)
-2. Use operator's wallet to run the deployment on `likenft` and `likecoin` (!! Order matters)
-   - 2.1. `likenft` come second, itself as the owner.
-   - 2.2. (Pending on production)`likenft` transfer owner come second, simulating transfer to community wallet.
-   - 2.3. (Pending on production)`likecoin` should run first, with itself as the owner and minter
-3. Upgrade the implementation to latest implementation
-4. Update the owner and minter accordingly
+2. Use operator's wallet to run the deployment on `likenft`
+   - 2.1. Deploy `likenft` first, itself as the owner.
+   - 2.2. `likenft` transfer owner to community wallet (0x91093818ef6A195fb9b453F8335a25Bd930DF4bd).
 
 Formula refs:
 - newAddressCREATE = `keccak256(deployingAddress ++ nonce)[12:]`
