@@ -864,6 +864,8 @@ components:
           $ref: "#/components/schemas/EvmAddress"
         account:
           $ref: "#/components/schemas/EvmAddress"
+        pool_share:
+          $ref: "#/components/schemas/Percentage"
         staked_amount:
           $ref: "#/components/schemas/Uint256"
         pending_reward_amount:
@@ -873,6 +875,7 @@ components:
       required:
         - book_nft
         - account
+        - pool_share
         - staked_amount
         - pending_reward_amount
         - claimed_reward_amount
@@ -1014,6 +1017,12 @@ components:
               datetime:
                 type: string
                 format: date-time
+            required:
+              - book_nft
+              - amount
+        datetime:
+          type: string
+          format: date-time
       required:
         - event_type
         - claimed_amount_list
@@ -1181,6 +1190,11 @@ components:
       type: string
       pattern: "^[0-9]+$"
       example: "1"
+
+    Percentage:
+      type: string
+      pattern: "^[0-9](\\.[0-9]+)?$"
+      example: "0.1234567890"
 
     Error:
       description: Represents error object

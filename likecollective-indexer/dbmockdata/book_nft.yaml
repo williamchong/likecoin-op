@@ -1,0 +1,35 @@
+__name: Zero-G Rogue
+evmaddress: '0xb001c12345678901234567890123456789010001'
+stakedamount: '95000000000'
+laststakedat: 2025-06-30T16:00:00Z
+numberofstakers: 1
+---
+__name: The Silicon Heart
+evmaddress: '0xb001c12345678901234567890123456789010002'
+stakedamount: '75000000000'
+laststakedat: 2025-06-29T16:00:00Z
+numberofstakers: 2
+---
+__name: Chronicles of Dust
+evmaddress: '0xb001c12345678901234567890123456789010003'
+stakedamount: '62000000000'
+laststakedat: 2025-06-28T16:00:00Z
+numberofstakers: 3
+---
+__name: Ocean of Echoes
+evmaddress: '0xb001c12345678901234567890123456789010004'
+stakedamount: '48000000000'
+laststakedat: 2025-06-27T16:00:00Z
+numberofstakers: 10
+---
+__name: The Last Library
+evmaddress: '0xb001c12345678901234567890123456789010005'
+stakedamount: '21000000000'
+laststakedat: 2025-07-01T16:00:00Z
+numberofstakers: 6
+---
+__name: Quantum Dreams
+evmaddress: '0xb001c12345678901234567890123456789010006'
+stakedamount: '15000000000'
+laststakedat: 2025-07-02T16:00:00Z
+numberofstakers: 5

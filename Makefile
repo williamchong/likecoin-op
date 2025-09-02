@@ -73,6 +73,7 @@ docker-images:
 	DOCKER_BUILD_ARGS=--push make -C migration-backend docker-image
 	DOCKER_BUILD_ARGS=--push make -C signer-backend docker-image
 	DOCKER_BUILD_ARGS=--push make -C likenft-indexer docker-image
+	DOCKER_BUILD_ARGS=--push make -C likecollective-indexer docker-image
 	DOCKER_BUILD_ARGS=--push make -C likenft-migration docker-image
 	DOCKER_BUILD_ARGS=--push make -C likecoin-migration docker-image
 	DOCKER_BUILD_ARGS=--push make -C migration-admin docker-image

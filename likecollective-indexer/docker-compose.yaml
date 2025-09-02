@@ -1,0 +1,18 @@
+services:
+  api:
+    profiles: [api]
+    image: golang:1.23.5
+    working_dir: /src
+    volumes:
+      - .:/src
+      - go-build-cache:/root/.cache
+      - go-mod-cache:/go/pkg/mod
+    ports:
+      - "8091:8091"
+    command: go run ./cmd/api
+
+volumes:
+  go-build-cache:
+    driver: local
+  go-mod-cache:
+    driver: local
