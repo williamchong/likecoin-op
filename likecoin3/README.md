@@ -29,10 +29,9 @@ docker compose up
 
 To tail individual chain logs, run something like: `docker compose exec -it superism tail -f /tmp/anvil-chain-902-{timestamp}`
 
-
 ### Deployment
 
-Make deployment to superism & testnet/mainnet: 
+Make deployment to superism & testnet/mainnet:
 
 ```
 npm run deploy:noverify -- --network superism1

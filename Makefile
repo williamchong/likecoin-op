@@ -4,28 +4,28 @@ decrypt-everything:
 
 .PHONY: operator-key-link
 operator-key-link:
-	ln -s ../deploy/env.operator likecoin/.env
 	ln -s ../deploy/env.operator likenft/.env
 
 .PHONY: remove-operator-key-link
 remove-operator-key-link:
-	rm -f likecoin/.env
 	rm -f likenft/.env
 
 .PHONY: local-contracts
 local-contracts:
 	(sleep 1 && make -C operation init-local-state) &
-	(sleep 2 && make -C likenft deploy-local) &
-	(sleep 7 && make -C likecoin deploy-local)
+	(sleep 2 && make -C likenft deploy-local)
 
 .PHONY: abigen
 abigen:
 	make -C likenft build
-	make -C likecoin build
+	make -C likecoin3 build
 	mkdir -p abi
 	cp likenft/artifacts/contracts/LikeProtocol.sol/LikeProtocol.json abi/
+	jq '.abi' likenft/artifacts/contracts/LikeProtocol.sol/LikeProtocol.json > abi/LikeProtocol.abi.json
 	cp likenft/artifacts/contracts/BookNFT.sol/BookNFT.json abi/
-	cp likecoin/artifacts/contracts/EkilCoin.sol/EkilCoin.json abi/
+	jq '.abi' likenft/artifacts/contracts/BookNFT.sol/BookNFT.json > abi/BookNFT.abi.json
+	cp likecoin3/artifacts/contracts/Likecoin.sol/Likecoin.json abi/
+	jq '.abi' likecoin3/artifacts/contracts/Likecoin.sol/Likecoin.json > abi/Likecoin.abi.json
 	make -C likenft-indexer abigen
 	make -C migration-backend abigen
 
