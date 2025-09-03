@@ -115,16 +115,6 @@ signerBackend:
 
   resources: {}
 
-  worker:
-    name: signer-backend-worker
-
-    resources: {}
-
-  scheduler:
-    name: signer-backend-scheduler
-
-    resources: {}
-
 likenftIndexer:
   name: likenft-indexer
 
