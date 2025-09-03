@@ -57,7 +57,7 @@ migrationBackendOp:
     COSMOS_NODE_URL: https://node.testnet.like.co
     COSMOS_NODE_HTTP_TIMEOUT_SECONDS: "60"
     ROUTE_PREFIX: ""
-    ETH_SIGNER_BASE_URL: http://signer-backend
+    ETH_SIGNER_BASE_URL: http://signer-backend-op
     ETH_TOKEN_ADDRESS: "0x0FE55BE56FDDafD0A6Eaf6D28e7F26ACFf1C51f0"
     ETH_LIKENFT_CONTRACT_ADDRESS: "0x67BCd74981c33E95E5e306085754DD0A721183F1"
     LIKECOIN_API_URL_BASE: https://api.rinkeby.like.co
@@ -72,7 +72,7 @@ migrationBackendOp:
     ERC721_METADATA_EXTERNAL_URL_BASE_3OOK: "https://sepolia.3ook.com/store"
     LIKECOIN_BURNING_COSMOS_ADDRESS: "like155s3xuruk2vnynda9gq6x9e7uzvut74654mc4d"
 
-signerBackend:
+signerBackendOp:
   container:
     imageRepository: oursky/like-signer-backend
   env:

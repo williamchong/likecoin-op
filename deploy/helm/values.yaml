@@ -99,8 +99,8 @@ migrationBackendOp:
 
     resources: {}
 
-signerBackend:
-  name: signer-backend
+signerBackendOp:
+  name: signer-backend-op
 
   migrate:
     backoffLimit: {}

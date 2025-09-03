@@ -60,7 +60,7 @@ migrationBackendOp:
     COSMOS_NODE_HTTP_TIMEOUT_SECONDS: "60"
     ROUTE_PREFIX: ""
     ETH_NETWORK_PUBLIC_RPC_URL: https://mainnet.optimism.io
-    ETH_SIGNER_BASE_URL: http://signer-backend
+    ETH_SIGNER_BASE_URL: http://signer-backend-op
     ETH_TOKEN_ADDRESS: ""
     ETH_LIKENFT_CONTRACT_ADDRESS: "0x526237a676444A67bc79E9009756df128Ca9a619"
     LIKECOIN_API_URL_BASE: https://api.like.co
@@ -79,7 +79,7 @@ migrationBackendOp:
     prefix: /migrate(/|$)(.*)
     adminPrefix: /migrate/admin(/|$)(.*)
 
-signerBackend:
+signerBackendOp:
   container:
     imageRepository: likecoin/like-signer-backend
   env:
