@@ -21,9 +21,9 @@ jobs:
         with:
           node-version: 20
 
-      - run: make -C likecoin setup
+      - run: make -C likecoin3 setup
 
-      - run: make -C likecoin ci
+      - run: make -C likecoin3 ci
 
   likenft:
     runs-on: [ubuntu-latest]

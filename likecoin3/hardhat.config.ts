@@ -7,10 +7,13 @@ import dotenv from "dotenv";
 dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || ".env.local" });
 const alchemyApiKey = process.env.ALCHEMY_API_KEY;
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
-let signerKey = process.env.DEPLOY_WALLET_PRIVATE_KEY ||
+let signerKey =
+  process.env.DEPLOY_WALLET_PRIVATE_KEY ||
   "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 signerKey = `0x${signerKey}`;
-const create2Salt = process.env.CREATE2_SALT || "0x0000000000000000000000000000000000000000000000000000000000000000"
+const create2Salt =
+  process.env.CREATE2_SALT ||
+  "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 const config: HardhatUserConfig = {
   solidity: "0.8.28",

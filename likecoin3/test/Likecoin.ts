@@ -164,7 +164,7 @@ describe("Likecoin", async function () {
 
     it("Should fail when transferring with insufficient allowance", async function () {
       const { likecoin, rick, bob } = await loadFixture(deployToken);
-      const amount = parseEther("100")
+      const amount = parseEther("100");
       const halfAmount = amount / 2n;
       const quarterAmount = amount / 4n;
 
