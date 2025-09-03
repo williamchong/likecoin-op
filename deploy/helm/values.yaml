@@ -115,6 +115,22 @@ signerBackendOp:
 
   resources: {}
 
+signerBackendBase:
+  name: signer-backend-base
+
+  migrate:
+    backoffLimit: {}
+
+  container:
+    imageRepository: likecoin/like-signer-backend
+    imagePullPolicy: IfNotPresent
+    port: 8091
+
+  service:
+    port: 80
+
+  resources: {}
+
 likenftIndexer:
   name: likenft-indexer
 

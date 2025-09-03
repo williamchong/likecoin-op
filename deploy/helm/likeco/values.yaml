@@ -86,6 +86,12 @@ signerBackendOp:
     ROUTE_PREFIX: ""
     ETH_NETWORK_PUBLIC_RPC_URL: https://mainnet.optimism.io
 
+signerBackendBase:
+  container:
+    imageRepository: likecoin/like-signer-backend
+  env:
+    ROUTE_PREFIX: ""
+
 likenftIndexer:
   container:
     imageRepository: likecoin/likenft-indexer

@@ -80,6 +80,14 @@ signerBackendOp:
     SENTRY_DEBUG: "true"
     ROUTE_PREFIX: ""
 
+signerBackendBase:
+  container:
+    imageRepository: oursky/like-signer-backend
+  env:
+    SENTRY_DSN: https://09eb616dbe039a14c95a24f84003493a@o21224.ingest.us.sentry.io/4509349425905664
+    SENTRY_DEBUG: "true"
+    ROUTE_PREFIX: ""
+
 likenftIndexer:
   container:
     imageRepository: oursky/likenft-indexer
