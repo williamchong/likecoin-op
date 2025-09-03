@@ -61,7 +61,12 @@ migrationAdmin:
   resources: {}
 
 migrationBackend:
-  name: migration-backend
+  ingress:
+    tls:
+      secretName: tls-migration-backend
+
+migrationBackendOp:
+  name: migration-backend-op
   env:
     BATCH_MINT_ITEM_PER_PAGE: "10"
     CLASS_MIGRATION_ESTIMATED_DURATION_SECONDS: "2"
@@ -81,18 +86,16 @@ migrationBackend:
   ingress:
     prefix: /
     adminPrefix: /admin
-    tls:
-      secretName: tls-migration-backend
 
   resources: {}
 
   worker:
-    name: migration-backend-worker
+    name: migration-backend-worker-op
 
     resources: {}
 
   scheduler:
-    name: migration-backend-scheduler
+    name: migration-backend-scheduler-op
 
     resources: {}
 

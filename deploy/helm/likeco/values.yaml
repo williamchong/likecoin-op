@@ -44,6 +44,15 @@ migrationAdmin:
       host: admin.api.v3.like.co
 
 migrationBackend:
+  ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    host: api.v3.like.co
+    tls:
+      secretName: tls-api.v3.like.co
+      host: api.v3.like.co
+
+migrationBackendOp:
   container:
     imageRepository: likecoin/like-migration-backend
   env:
@@ -67,14 +76,8 @@ migrationBackend:
     LIKECOIN_BURNING_COSMOS_ADDRESS: "like1vme35swrp4t04q90406070y8zy54awyl7nag3v"
 
   ingress:
-    annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: /$2
     prefix: /migrate(/|$)(.*)
     adminPrefix: /migrate/admin(/|$)(.*)
-    host: api.v3.like.co
-    tls:
-      secretName: tls-api.v3.like.co
-      host: api.v3.like.co
 
 signerBackend:
   container:
