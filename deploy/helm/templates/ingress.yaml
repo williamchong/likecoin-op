@@ -99,6 +99,13 @@ spec:
                 name: {{ .Values.migrationBackendOp.name }}
                 port:
                   number: {{ .Values.migrationBackendOp.service.port }}
+          - path: {{ .Values.migrationBackendBase.ingress.adminPrefix }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.migrationBackendBase.name }}
+                port:
+                  number: {{ .Values.migrationBackendBase.service.port }}
           - path: /likenft/migration
             pathType: ImplementationSpecific
             backend:
@@ -116,6 +123,14 @@ spec:
                 name: {{ .Values.migrationBackendOp.name }}
                 port:
                   number: {{ .Values.migrationBackendOp.service.port }}
+        paths:
+          - path: {{ .Values.migrationBackendBase.ingress.adminPrefix }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.migrationBackendBase.name }}
+                port:
+                  number: {{ .Values.migrationBackendBase.service.port }}
   tls:
     - hosts:
         - {{ .Values.migrationAdmin.ingress.tls.host }}
@@ -152,6 +167,13 @@ spec:
                 name: {{ .Values.migrationBackendOp.name }}
                 port:
                   number: {{ .Values.migrationBackendOp.service.port }}
+          - path: {{ .Values.migrationBackendBase.ingress.prefix }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.migrationBackendBase.name }}
+                port:
+                  number: {{ .Values.migrationBackendBase.service.port }}
   tls:
     - hosts:
         - {{ .Values.migrationBackend.ingress.tls.host }}

@@ -72,6 +72,34 @@ migrationBackendOp:
     ERC721_METADATA_EXTERNAL_URL_BASE_3OOK: "https://sepolia.3ook.com/store"
     LIKECOIN_BURNING_COSMOS_ADDRESS: "like155s3xuruk2vnynda9gq6x9e7uzvut74654mc4d"
 
+migrationBackendBase:
+  container:
+    imageRepository: oursky/like-migration-backend
+  env:
+    SENTRY_DSN: https://42c026a5b18a5546d1eff10d29ec01f9@o21224.ingest.us.sentry.io/4509349416534016
+    SENTRY_DEBUG: "true"
+    COSMOS_NODE_URL: https://node.testnet.like.co
+    COSMOS_NODE_HTTP_TIMEOUT_SECONDS: "60"
+    ROUTE_PREFIX: ""
+    ETH_SIGNER_BASE_URL: http://signer-backend-base
+    ETH_TOKEN_ADDRESS: "0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf"
+    ETH_LIKENFT_CONTRACT_ADDRESS: "0x67BCd74981c33E95E5e306085754DD0A721183F1"
+    LIKECOIN_API_URL_BASE: https://api.rinkeby.like.co
+    LIKECOIN_API_HTTP_TIMEOUT_SECONDS: "60"
+    WORKER_CONCURRENCY: "1"
+    INITIAL_NEW_CLASS_OWNER: "0xA515ffD6A6889f2CCCb576cEcA2a33f60129eBFD"
+    INITIAL_NEW_CLASS_MINTERS: "0xA515ffD6A6889f2CCCb576cEcA2a33f60129eBFD,0xaaAC16B7c910f9e5236DC12eF8Db72Abc90D62c4"
+    INITIAL_NEW_CLASS_UPDATERS: "0xA515ffD6A6889f2CCCb576cEcA2a33f60129eBFD,0xaaAC16B7c910f9e5236DC12eF8Db72Abc90D62c4"
+    INITIAL_BATCH_MINT_NFTS_OWNER: "0xA515ffD6A6889f2CCCb576cEcA2a33f60129eBFD"
+    DEFAULT_ROYALTY_FRACTION: "500"
+    BATCH_MINT_ITEM_PER_PAGE: "10"
+    ERC721_METADATA_EXTERNAL_URL_BASE_3OOK: "https://sepolia.3ook.com/store"
+    LIKECOIN_BURNING_COSMOS_ADDRESS: "like155s3xuruk2vnynda9gq6x9e7uzvut74654mc4d"
+
+  ingress:
+    prefix: /likecoin
+    adminPrefix: /admin/likecoin
+
 signerBackendOp:
   container:
     imageRepository: oursky/like-signer-backend
