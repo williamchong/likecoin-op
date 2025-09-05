@@ -26,6 +26,11 @@ type NFTClassRepository interface {
 		ctx context.Context,
 		addresses []string,
 	) ([]*ent.NFTClass, error)
+	QueryNFTClasses(
+		ctx context.Context,
+		contractLevelMetadataEQ ContractLevelMetadataFilterEquatable,
+		pagination NFTClassPagination,
+	) (nftClasses []*ent.NFTClass, count int, nextKey int, err error)
 	QueryNFTClassesByAccountTokens(
 		ctx context.Context,
 		accountEvmAddress string,
@@ -127,6 +132,35 @@ func (r *nftClassRepository) QueryNFTClassesByAddressesExact(
 	}
 
 	return res, nil
+}
+
+func (r *nftClassRepository) QueryNFTClasses(
+	ctx context.Context,
+	contractLevelMetadataEQ ContractLevelMetadataFilterEquatable,
+	pagination NFTClassPagination,
+) (nftClasses []*ent.NFTClass, count int, nextKey int, err error) {
+	q := r.dbService.Client().NFTClass.Query()
+
+	q = contractLevelMetadataEQ.ApplyEQ(q)
+
+	count, err = q.Count(ctx)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	q = pagination.HandlePagination(q)
+
+	nftClasses, err = q.All(ctx)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	nextKey = 0
+	if len(nftClasses) > 0 {
+		nextKey = nftClasses[len(nftClasses)-1].ID
+	}
+
+	return nftClasses, count, nextKey, nil
 }
 
 func (r *nftClassRepository) QueryNFTClassesByAccountTokens(
