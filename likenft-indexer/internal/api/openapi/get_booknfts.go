@@ -4,40 +4,34 @@ import (
 	"context"
 
 	"likenft-indexer/internal/api/openapi/model"
+	"likenft-indexer/internal/database"
 	"likenft-indexer/openapi/api"
 )
 
 func (h *OpenAPIHandler) BookNFTs(ctx context.Context, params api.BookNFTsParams) (*api.BookNFTsOK, error) {
-	bookNFTsQ := h.db.NFTClass.Query()
-
-	count, err := bookNFTsQ.Count(ctx)
-
-	if err != nil {
-		return nil, err
+	ps := model.NFTClassPagination{
+		PaginationLimit: params.PaginationLimit,
+		PaginationKey:   params.PaginationKey,
+		Reverse:         params.Reverse,
 	}
 
-	paginatedBookNFTsQ := h.handleNFTClassPagination(
-		bookNFTsQ,
-		params.PaginationLimit,
-		params.PaginationKey,
-		params.Reverse,
+	metadataEQ := database.ContractLevelMetadataFilterEquatable(
+		params.ContractLevelMetadataEq.Or(api.ContractLevelMetadataEQ{}),
 	)
 
-	dbBookNFTs, err := paginatedBookNFTsQ.All(ctx)
+	bookNFTs, count, nextKey, err := h.nftClassRepository.QueryNFTClasses(
+		ctx,
+		metadataEQ,
+		ps.ToEntPagination(),
+	)
 
 	if err != nil {
 		return nil, err
 	}
 
-	nextKey := 0
+	apiBookNFTs := make([]api.BookNFT, len(bookNFTs))
 
-	if len(dbBookNFTs) > 0 {
-		nextKey = dbBookNFTs[len(dbBookNFTs)-1].ID
-	}
-
-	apiBookNFTs := make([]api.BookNFT, len(dbBookNFTs))
-
-	for i, n := range dbBookNFTs {
+	for i, n := range bookNFTs {
 		apin, err := model.MakeNFTClass(n)
 
 		if err != nil {
