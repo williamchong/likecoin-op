@@ -19,9 +19,14 @@ func (h *OpenAPIHandler) BookNFTs(ctx context.Context, params api.BookNFTsParams
 		params.ContractLevelMetadataEq.Or(api.ContractLevelMetadataEQ{}),
 	)
 
+	metadataNEQ := database.ContractLevelMetadataFilterEquatable(
+		params.ContractLevelMetadataNeq.Or(api.ContractLevelMetadataNEQ{}),
+	)
+
 	bookNFTs, count, nextKey, err := h.nftClassRepository.QueryNFTClasses(
 		ctx,
 		metadataEQ,
+		metadataNEQ,
 		ps.ToEntPagination(),
 	)
 
