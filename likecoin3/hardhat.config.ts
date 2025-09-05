@@ -23,7 +23,7 @@ const config: HardhatUserConfig = {
   networks: {
     localhost: {
       url: "http://localhost:8545",
-      chainId: 900,
+      chainId: 31337,
       accounts: [signerKey],
     },
     superism1: {
