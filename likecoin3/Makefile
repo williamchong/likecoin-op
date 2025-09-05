@@ -15,3 +15,11 @@ ci:
 	npm run check-format
 	npm run lint
 	npm run test
+
+.PHONY: deploy-local
+deploy-local:
+	DOTENV_CONFIG_PATH=.env npm run deploy:local
+
+.PHONY: mint-local
+mint-local:
+	npx hardhat mint --network localhost --amount $(AMOUNT) --to $(TO)
