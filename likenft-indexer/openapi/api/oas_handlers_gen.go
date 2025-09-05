@@ -438,6 +438,10 @@ func (s *Server) handleBookNFTsRequest(args [0]string, argsEscaped bool, w http.
 					Name: "contract_level_metadata_eq",
 					In:   "query",
 				}: params.ContractLevelMetadataEq,
+				{
+					Name: "contract_level_metadata_neq",
+					In:   "query",
+				}: params.ContractLevelMetadataNeq,
 			},
 			Raw: r,
 		}
@@ -603,6 +607,10 @@ func (s *Server) handleBookNFTsByAccountRequest(args [1]string, argsEscaped bool
 					Name: "contract_level_metadata_eq",
 					In:   "query",
 				}: params.ContractLevelMetadataEq,
+				{
+					Name: "contract_level_metadata_neq",
+					In:   "query",
+				}: params.ContractLevelMetadataNeq,
 			},
 			Raw: r,
 		}
@@ -2421,6 +2429,10 @@ func (s *Server) handleTokensByAccountRequest(args [1]string, argsEscaped bool, 
 					Name: "contract_level_metadata_eq",
 					In:   "query",
 				}: params.ContractLevelMetadataEq,
+				{
+					Name: "contract_level_metadata_neq",
+					In:   "query",
+				}: params.ContractLevelMetadataNeq,
 			},
 			Raw: r,
 		}
