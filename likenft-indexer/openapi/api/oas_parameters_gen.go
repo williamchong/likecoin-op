@@ -155,6 +155,8 @@ type BookNFTsParams struct {
 	PaginationKey OptInt
 	// Reverse.
 	Reverse OptBool
+	// Contract_level_metadata_eq.
+	ContractLevelMetadataEq OptContractLevelMetadataEQ
 }
 
 func unpackBookNFTsParams(packed middleware.Parameters) (params BookNFTsParams) {
@@ -183,6 +185,15 @@ func unpackBookNFTsParams(packed middleware.Parameters) (params BookNFTsParams) 
 		}
 		if v, ok := packed[key]; ok {
 			params.Reverse = v.(OptBool)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "contract_level_metadata_eq",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.ContractLevelMetadataEq = v.(OptContractLevelMetadataEQ)
 		}
 	}
 	return params
@@ -319,6 +330,36 @@ func decodeBookNFTsParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "reverse",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: contract_level_metadata_eq.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "contract_level_metadata_eq",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotContractLevelMetadataEqVal ContractLevelMetadataEQ
+				if err := func() error {
+					return paramsDotContractLevelMetadataEqVal.DecodeURI(d)
+				}(); err != nil {
+					return err
+				}
+				params.ContractLevelMetadataEq.SetTo(paramsDotContractLevelMetadataEqVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "contract_level_metadata_eq",
 			In:   "query",
 			Err:  err,
 		}

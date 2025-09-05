@@ -434,6 +434,10 @@ func (s *Server) handleBookNFTsRequest(args [0]string, argsEscaped bool, w http.
 					Name: "reverse",
 					In:   "query",
 				}: params.Reverse,
+				{
+					Name: "contract_level_metadata_eq",
+					In:   "query",
+				}: params.ContractLevelMetadataEq,
 			},
 			Raw: r,
 		}
