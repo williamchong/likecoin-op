@@ -86,7 +86,7 @@ migrationBackendBase:
     COSMOS_NODE_URL: https://mainnet-node.like.co
     COSMOS_NODE_HTTP_TIMEOUT_SECONDS: "60"
     ROUTE_PREFIX: ""
-    ETH_NETWORK_PUBLIC_RPC_URL: https://mainnet.optimism.io
+    ETH_NETWORK_PUBLIC_RPC_URL: https://mainnet.base.org
     ETH_SIGNER_BASE_URL: http://signer-backend-base
     ETH_TOKEN_ADDRESS: "0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf"
     ETH_LIKENFT_CONTRACT_ADDRESS: "0x526237a676444A67bc79E9009756df128Ca9a619"
