@@ -8,7 +8,7 @@ import {
   Pending,
   Polling,
 } from '~/apis/models/likeCoinMigration';
-import { ChainCoin } from '~/models/cosmosNetworkConfig';
+import { ChainCoin, ViewCoin } from '~/models/cosmosNetworkConfig';
 
 export interface StepStateStep1 {
   step: 1;
@@ -92,6 +92,34 @@ export interface StepStateStep2GasEstimated {
   estimatedBalance: ChainCoin;
 }
 
+export interface StepStateStep2EvmPoolBalanceSufficient {
+  step: 2;
+  state: 'EvmPoolBalanceSufficient';
+  cosmosAddress: string;
+  connection: LikeCoinWalletConnectorConnectionResult;
+  avatar: string | null;
+  likerId: string | null;
+  signingStargateClient: SigningStargateClient;
+  gasEstimation: number;
+  currentBalance: ChainCoin;
+  estimatedBalance: ChainCoin;
+  poolBalance: ViewCoin;
+}
+
+export interface StepStateStep2EvmPoolBalanceInsufficient {
+  step: 2;
+  state: 'EvmPoolBalanceInsufficient';
+  cosmosAddress: string;
+  connection: LikeCoinWalletConnectorConnectionResult;
+  avatar: string | null;
+  likerId: string | null;
+  signingStargateClient: SigningStargateClient;
+  gasEstimation: number;
+  currentBalance: ChainCoin;
+  estimatedBalance: ChainCoin;
+  insufficientPoolBalance: ViewCoin;
+}
+
 export interface StepStateStep3AwaitSignature {
   step: 3;
   state: 'AwaitSignature';
@@ -105,6 +133,7 @@ export interface StepStateStep3AwaitSignature {
   gasEstimation: number;
   currentBalance: ChainCoin;
   estimatedBalance: ChainCoin;
+  poolBalance: ViewCoin;
 }
 
 export interface StepStateStep4Pending {
@@ -195,6 +224,8 @@ export type StepState =
   | EitherEthConnected<StepStateStep2CosmosConnected>
   | EitherEthConnected<StepStateStep2LikerIdResolved>
   | EitherEthConnected<StepStateStep2GasEstimated>
+  | EitherEthConnected<StepStateStep2EvmPoolBalanceSufficient>
+  | EitherEthConnected<StepStateStep2EvmPoolBalanceInsufficient>
   | StepStateStep3AwaitSignature
   | StepStateStep4Pending
   | StepStateStep4Polling
@@ -307,8 +338,55 @@ export function gasEstimated(
   }));
 }
 
+export function evmPoolBalanceSufficient(
+  prev: EitherEthConnected<StepStateStep2GasEstimated>,
+  poolBalance: ViewCoin
+): EitherEthConnected<StepStateStep2EvmPoolBalanceSufficient> {
+  return applyEitherEthConnected(prev, (prev) => ({
+    step: 2,
+    state: 'EvmPoolBalanceSufficient',
+    cosmosAddress: prev.cosmosAddress,
+    connection: prev.connection,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    signingStargateClient: prev.signingStargateClient,
+    gasEstimation: prev.gasEstimation,
+    currentBalance: prev.currentBalance,
+    estimatedBalance: prev.estimatedBalance,
+    poolBalance,
+  }));
+}
+
+export function evmPoolBalanceInsufficient(
+  prev: EitherEthConnected<StepStateStep2GasEstimated>,
+  insufficientPoolBalance: ViewCoin
+): EitherEthConnected<StepStateStep2EvmPoolBalanceInsufficient> {
+  return applyEitherEthConnected(prev, (prev) => ({
+    step: 2,
+    state: 'EvmPoolBalanceInsufficient',
+    cosmosAddress: prev.cosmosAddress,
+    connection: prev.connection,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    signingStargateClient: prev.signingStargateClient,
+    gasEstimation: prev.gasEstimation,
+    currentBalance: prev.currentBalance,
+    estimatedBalance: prev.estimatedBalance,
+    insufficientPoolBalance,
+  }));
+}
+
+export function evmPoolBalanceInsufficientRetried(
+  prev: EitherEthConnected<StepStateStep2EvmPoolBalanceInsufficient>
+): EitherEthConnected<StepStateStep2Init> {
+  return applyEitherEthConnected(prev, () => ({
+    step: 2,
+    state: 'Init',
+  }));
+}
+
 export function ethSignConfirming(
-  prev: EthConnected<StepStateStep2GasEstimated>,
+  prev: EthConnected<StepStateStep2EvmPoolBalanceSufficient>,
   ethSigningMessage: string
 ): StepStateStep3AwaitSignature {
   return {
@@ -324,6 +402,7 @@ export function ethSignConfirming(
     currentBalance: prev.currentBalance,
     gasEstimation: prev.gasEstimation,
     estimatedBalance: prev.estimatedBalance,
+    poolBalance: prev.poolBalance,
   };
 }
 
