@@ -1,6 +1,5 @@
 deploy/env.operator
 deploy/helm/dev/auth
-deploy/helm/dev/signer-private-key.env
 deploy/helm/dev/values.secret.yaml
 likenft/.env.optimism
 migration-backend/.env.dev
