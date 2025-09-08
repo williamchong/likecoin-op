@@ -55,6 +55,10 @@
       "likecoin-wallet": "LikeCoin 錢包",
       "liker-id": "Liker ID",
       "migration-wallet": "轉換對應錢包"
+    },
+    "wallet-connect-error": {
+      "pool-balance-insufficient": "抱歉，我們沒有足夠的餘額來完成您的請求。請聯繫支援。",
+      "retry": "連接其他錢包"
     }
   }
 }

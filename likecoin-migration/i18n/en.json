@@ -55,6 +55,10 @@
       "likecoin-wallet": "LikeCoin Wallet",
       "liker-id": "Liker ID",
       "migration-wallet": "Migration Wallet"
+    },
+    "wallet-connect-error": {
+      "pool-balance-insufficient": "Sorry, we don't have sufficient balance to complete your request. Please contact support.",
+      "retry": "Connect Another Wallet"
     }
   }
 }

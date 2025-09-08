@@ -68,6 +68,20 @@
               @likeCoinWalletConnected="handleLikeCoinWalletConnected"
               @likeCoinEVMWalletConnected="handleLikeCoinEVMWalletConnected"
             />
+            <SectionErrorRow
+              v-if="
+                currentStep.step === 2 &&
+                currentStep.state === 'EvmPoolBalanceInsufficient'
+              "
+              :class="['mt-2.5', 'mb-4']"
+              :error-message="
+                $t('section.wallet-connect-error.pool-balance-insufficient')
+              "
+              :retry-button-text="$t('section.wallet-connect-error.retry')"
+              @retryClick="
+                handleEvmPoolBalanceInsufficientRetryClick(currentStep)
+              "
+            />
           </template>
           <template #past>
             <SectionWalletConnect
@@ -235,6 +249,10 @@ import {
   makeCreateLikeCoinMigrationAPI,
 } from '~/apis/createLikeCoinMigration';
 import {
+  GetEvmPoolBalance,
+  getEvmPoolBalanceAPI,
+} from '~/apis/getEvmPoolBalance';
+import {
   GetLatestLikeCoinMigration,
   makeGetLatestLikeCoinMigrationAPI,
 } from '~/apis/getLatestLikeCoinMigration';
@@ -252,6 +270,7 @@ import {
 } from '~/apis/updateLikeCoinMigrationCosmosTxHash';
 import {
   ChainCoin,
+  convertChainCoinToViewCoin,
   convertViewCoinToChainCoin,
   isChainCoin,
   isViewCoin,
@@ -264,6 +283,9 @@ import {
   EthConnected,
   ethSignConfirming,
   evmConnected,
+  evmPoolBalanceInsufficient,
+  evmPoolBalanceInsufficientRetried,
+  evmPoolBalanceSufficient,
   failedMigrationResolved,
   gasEstimated,
   initCosmosConnected,
@@ -279,6 +301,8 @@ import {
   StepState,
   StepStateStep2AuthcoreRedirected,
   StepStateStep2CosmosConnected,
+  StepStateStep2EvmPoolBalanceInsufficient,
+  StepStateStep2EvmPoolBalanceSufficient,
   StepStateStep2GasEstimated,
   StepStateStep2Init,
   StepStateStep2LikerIdResolved,
@@ -436,6 +460,9 @@ export default Vue.extend({
     updateLikeCoinMigrationCosmosTxHash(): UpdateLikeCoinMigrationCosmosTxHash {
       return makeUpdateLikeCoinMigrationCosmosTxHash(this.$apiClient);
     },
+    getEvmPoolBalance(): GetEvmPoolBalance {
+      return getEvmPoolBalanceAPI(this.$apiClient);
+    },
   },
 
   watch: {
@@ -516,7 +543,17 @@ export default Vue.extend({
 
       if (
         this.currentStep.step === 2 &&
-        this.currentStep.state === 'GasEstimated' &&
+        this.currentStep.state === 'GasEstimated'
+      ) {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          this._checkPoolBalance
+        );
+      }
+
+      if (
+        this.currentStep.step === 2 &&
+        this.currentStep.state === 'EvmPoolBalanceSufficient' &&
         isEthConnected(this.currentStep)
       ) {
         this.currentStep = await this._asyncStateTransition(
@@ -564,7 +601,17 @@ export default Vue.extend({
 
       if (
         this.currentStep.step === 2 &&
-        this.currentStep.state === 'GasEstimated' &&
+        this.currentStep.state === 'GasEstimated'
+      ) {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          this._checkPoolBalance
+        );
+      }
+
+      if (
+        this.currentStep.step === 2 &&
+        this.currentStep.state === 'EvmPoolBalanceSufficient' &&
         isEthConnected(this.currentStep)
       ) {
         this.currentStep = await this._asyncStateTransition(
@@ -588,7 +635,17 @@ export default Vue.extend({
 
       if (
         this.currentStep.step === 2 &&
-        this.currentStep.state === 'GasEstimated' &&
+        this.currentStep.state === 'GasEstimated'
+      ) {
+        this.currentStep = await this._asyncStateTransition(
+          this.currentStep,
+          this._checkPoolBalance
+        );
+      }
+
+      if (
+        this.currentStep.step === 2 &&
+        this.currentStep.state === 'EvmPoolBalanceSufficient' &&
         isEthConnected(this.currentStep)
       ) {
         this.currentStep = await this._asyncStateTransition(
@@ -596,6 +653,12 @@ export default Vue.extend({
           this._resolveEvmSigningMessage
         );
       }
+    },
+
+    handleEvmPoolBalanceInsufficientRetryClick(
+      s: EitherEthConnected<StepStateStep2EvmPoolBalanceInsufficient>
+    ) {
+      this.currentStep = evmPoolBalanceInsufficientRetried(s);
     },
 
     async handleEvmSigned(signature: string) {
@@ -637,6 +700,16 @@ export default Vue.extend({
           this.currentStep,
           (s) => this._estimateBalance(s)
         );
+
+        if (
+          this.currentStep.step === 2 &&
+          this.currentStep.state === 'GasEstimated'
+        ) {
+          this.currentStep = await this._asyncStateTransition(
+            this.currentStep,
+            this._checkPoolBalance
+          );
+        }
       }
     },
 
@@ -810,8 +883,28 @@ export default Vue.extend({
       }
     },
 
+    async _checkPoolBalance(
+      prev: EitherEthConnected<StepStateStep2GasEstimated>
+    ): Promise<
+      EitherEthConnected<
+        | StepStateStep2EvmPoolBalanceSufficient
+        | StepStateStep2EvmPoolBalanceInsufficient
+      >
+    > {
+      const poolBalance = await this.getEvmPoolBalance();
+      const viewCoin = convertChainCoinToViewCoin(
+        prev.estimatedBalance,
+        this.$cosmosNetworkConfig
+      );
+      return new Decimal(poolBalance.amount).greaterThanOrEqualTo(
+        viewCoin.amount
+      )
+        ? evmPoolBalanceSufficient(prev, poolBalance)
+        : evmPoolBalanceInsufficient(prev, poolBalance);
+    },
+
     async _resolveEvmSigningMessage(
-      prev: EthConnected<StepStateStep2GasEstimated>
+      prev: EthConnected<StepStateStep2EvmPoolBalanceSufficient>
     ): Promise<StepStateStep3AwaitSignature> {
       const m = await this.createEthSigningMessage({
         amount: prev.estimatedBalance,
