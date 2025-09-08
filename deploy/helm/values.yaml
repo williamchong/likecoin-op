@@ -61,7 +61,12 @@ migrationAdmin:
   resources: {}
 
 migrationBackend:
-  name: migration-backend
+  ingress:
+    tls:
+      secretName: tls-migration-backend
+
+migrationBackendOp:
+  name: migration-backend-op
   env:
     BATCH_MINT_ITEM_PER_PAGE: "10"
     CLASS_MIGRATION_ESTIMATED_DURATION_SECONDS: "2"
@@ -81,23 +86,55 @@ migrationBackend:
   ingress:
     prefix: /
     adminPrefix: /admin
-    tls:
-      secretName: tls-migration-backend
 
   resources: {}
 
   worker:
-    name: migration-backend-worker
+    name: migration-backend-worker-op
 
     resources: {}
 
   scheduler:
-    name: migration-backend-scheduler
+    name: migration-backend-scheduler-op
 
     resources: {}
 
-signerBackend:
-  name: signer-backend
+migrationBackendBase:
+  name: migration-backend-base
+  env:
+    BATCH_MINT_ITEM_PER_PAGE: "10"
+    CLASS_MIGRATION_ESTIMATED_DURATION_SECONDS: "2"
+    NFT_MIGRATION_ESTIMATED_DURATION_SECONDS: "2"
+    SHOULD_PREMINT_ALL_NFTS_WHEN_NEW_CLASS: "true"
+    PREMINT_ALL_NFTS_WHEN_NEW_CLASS_SHOULD_PREMINT_ARBITRARY_NFTIDS: "false"
+
+  container:
+    imageRepository: likecoin/like-migration-backend
+    imagePullPolicy: IfNotPresent
+    port: 8091
+
+  migrate: {}
+
+  service:
+    port: 80
+  ingress:
+    prefix: /
+    adminPrefix: /admin
+
+  resources: {}
+
+  worker:
+    name: migration-backend-worker-base
+
+    resources: {}
+
+  scheduler:
+    name: migration-backend-scheduler-base
+
+    resources: {}
+
+signerBackendOp:
+  name: signer-backend-op
 
   migrate:
     backoffLimit: {}
@@ -112,15 +149,21 @@ signerBackend:
 
   resources: {}
 
-  worker:
-    name: signer-backend-worker
+signerBackendBase:
+  name: signer-backend-base
 
-    resources: {}
+  migrate:
+    backoffLimit: {}
 
-  scheduler:
-    name: signer-backend-scheduler
+  container:
+    imageRepository: likecoin/like-signer-backend
+    imagePullPolicy: IfNotPresent
+    port: 8091
 
-    resources: {}
+  service:
+    port: 80
+
+  resources: {}
 
 likenftIndexer:
   name: likenft-indexer

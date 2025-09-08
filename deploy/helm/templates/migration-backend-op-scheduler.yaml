@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: {{ .Values.migrationBackendOp.scheduler.name }}
+  name: {{ .Values.migrationBackendOp.scheduler.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: {{ .Values.migrationBackendOp.scheduler.name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: {{ .Values.migrationBackendOp.scheduler.name }}
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: {{ .Values.migrationBackendOp.scheduler.name }}
+        image: {{ .Values.migrationBackendOp.container.imageRepository }}:{{ .Values.appVersion }}
+        imagePullPolicy: {{ .Values.migrationBackendOp.container.imagePullPolicy}}
+        command: ["like-migration-backend-worker-cli", "scheduler"]
+        envFrom:
+          - secretRef:
+              name: {{ .Values.migrationBackendOp.name }}
+        resources:
+          {{- toYaml .Values.migrationBackendOp.scheduler.resources | nindent 12 }}

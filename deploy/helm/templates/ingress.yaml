@@ -92,30 +92,45 @@ spec:
                 name: {{ .Values.migrationAdmin.name }}
                 port:
                   number: {{ .Values.migrationAdmin.service.port }}
-          - path: {{ .Values.migrationAdmin.ingress.adminPrefix }}
+          - path: {{ .Values.migrationBackendOp.ingress.adminPrefix }}
             pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ .Values.migrationBackend.name }}
+                name: {{ .Values.migrationBackendOp.name }}
                 port:
-                  number: {{ .Values.migrationBackend.service.port }}
+                  number: {{ .Values.migrationBackendOp.service.port }}
+          - path: {{ .Values.migrationBackendBase.ingress.adminPrefix }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.migrationBackendBase.name }}
+                port:
+                  number: {{ .Values.migrationBackendBase.service.port }}
           - path: /likenft/migration
             pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ .Values.migrationBackend.name }}
+                name: {{ .Values.migrationBackendOp.name }}
                 port:
-                  number: {{ .Values.migrationBackend.service.port }}
+                  number: {{ .Values.migrationBackendOp.service.port }}
     - host: {{ .Values.migrationBackend.ingress.host }}
       http:
         paths:
-          - path: {{ .Values.migrationBackend.ingress.adminPrefix }}
+          - path: {{ .Values.migrationBackendOp.ingress.adminPrefix }}
             pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ .Values.migrationBackend.name }}
+                name: {{ .Values.migrationBackendOp.name }}
                 port:
-                  number: {{ .Values.migrationBackend.service.port }}
+                  number: {{ .Values.migrationBackendOp.service.port }}
+        paths:
+          - path: {{ .Values.migrationBackendBase.ingress.adminPrefix }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.migrationBackendBase.name }}
+                port:
+                  number: {{ .Values.migrationBackendBase.service.port }}
   tls:
     - hosts:
         - {{ .Values.migrationAdmin.ingress.tls.host }}
@@ -145,13 +160,20 @@ spec:
     - host: {{ .Values.migrationBackend.ingress.host }}
       http:
         paths:
-          - path: {{ .Values.migrationBackend.ingress.prefix }}
+          - path: {{ .Values.migrationBackendOp.ingress.prefix }}
             pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ .Values.migrationBackend.name }}
+                name: {{ .Values.migrationBackendOp.name }}
                 port:
-                  number: {{ .Values.migrationBackend.service.port }}
+                  number: {{ .Values.migrationBackendOp.service.port }}
+          - path: {{ .Values.migrationBackendBase.ingress.prefix }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.migrationBackendBase.name }}
+                port:
+                  number: {{ .Values.migrationBackendBase.service.port }}
   tls:
     - hosts:
         - {{ .Values.migrationBackend.ingress.tls.host }}

@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ .Values.migrationBackendBase.name }}
+  name: {{ .Values.migrationBackendBase.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app.kubernetes.io/component: {{ .Values.migrationBackendBase.name }}
+  ports:
+  - protocol: TCP
+    port: {{ .Values.migrationBackendBase.service.port }}
+    targetPort: {{ .Values.migrationBackendBase.container.port }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: {{ .Values.migrationBackendBase.name }}
+  name: {{ .Values.migrationBackendBase.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: {{ .Values.migrationBackendBase.name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: {{ .Values.migrationBackendBase.name }}
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: {{ .Values.migrationBackendBase.name }}
+        image: {{ .Values.migrationBackendBase.container.imageRepository }}:{{ .Values.appVersion }}
+        imagePullPolicy: {{ .Values.migrationBackendBase.container.imagePullPolicy}}
+        envFrom:
+          - secretRef:
+              name: {{ .Values.migrationBackendBase.name }}
+        env:
+          - name: COSMOS_LIKECOIN_NETWORK_CONFIG_PATH
+            value: "/app/cosmos-likecoin-network.json"
+        ports:
+        - containerPort: {{ .Values.migrationBackendBase.container.port }}
+        volumeMounts:
+          - name: cosmos-likecoin-network-config
+            mountPath: /app/cosmos-likecoin-network.json
+            subPath: cosmos-likecoin-network.json
+        resources:
+          {{- toYaml .Values.migrationBackendBase.resources | nindent 12 }}
+      volumes:
+        - name: cosmos-likecoin-network-config
+          configMap:
+            name: {{ .Values.cosmosLikeCoinNetworkConfig.name }}
