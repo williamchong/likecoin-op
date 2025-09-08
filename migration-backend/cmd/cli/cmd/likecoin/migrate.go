@@ -87,12 +87,15 @@ var migrateCmd = &cobra.Command{
 		)
 
 		contractAddress := common.HexToAddress(envCfg.EthTokenAddress)
-		likeCoinClient := evm.NewLikeCoin(
+		likeCoinClient, err := evm.NewLikeCoin(
 			logger,
 			ethClient,
 			signer,
 			contractAddress,
 		)
+		if err != nil {
+			panic(err)
+		}
 
 		migration, err := likecoin.DoMintLikeCoinByCosmosAddress(
 			ctx,

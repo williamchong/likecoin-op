@@ -78,12 +78,15 @@ func HandleMigrateLikeCoinTask(ctx context.Context, t *asynq.Task) error {
 	)
 
 	contractAddress := common.HexToAddress(envCfg.EthTokenAddress)
-	likeCoinClient := evm.NewLikeCoin(
+	likeCoinClient, err := evm.NewLikeCoin(
 		logger,
 		ethClient,
 		signer,
 		contractAddress,
 	)
+	if err != nil {
+		return err
+	}
 
 	mylogger.Info("running migrate likecoin")
 
