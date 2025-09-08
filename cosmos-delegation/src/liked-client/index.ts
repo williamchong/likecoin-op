@@ -85,7 +85,7 @@ class CmdLikedClient implements LikedClient {
    **/
 
   private getQueryStakingValidatorCmd(validatorAddress: string): string {
-    return `${this.cli} query staking validator ${validatorAddress} ${this.cliFlags}`;
+    return `${this.cli} query staking validator ${validatorAddress} -o json ${this.cliFlags}`;
   }
 
   async queryStakingValidator(
@@ -121,7 +121,7 @@ class CmdLikedClient implements LikedClient {
   }
 
   private getQueryBankTotalCmd(): string {
-    return `${this.cli} query bank total ${this.cliFlags}`;
+    return `${this.cli} query bank total -o json ${this.cliFlags}`;
   }
 
   async queryBankTotal(denom: string): Promise<ChainCoin | null> {
@@ -139,7 +139,7 @@ class CmdLikedClient implements LikedClient {
   }
 
   private getQueryBankBalancesCmd(address: string): string {
-    return `${this.cli} query bank balances ${address} ${this.cliFlags}`;
+    return `${this.cli} query bank balances ${address} -o json ${this.cliFlags}`;
   }
 
   async queryBankBalances(
@@ -167,7 +167,7 @@ class CmdLikedClient implements LikedClient {
     amount: bigint,
     denom: string,
   ): string {
-    return `${this.cli} tx staking delegate ${validatorAddress} ${amount}${denom} --from ${delegatorAddress} ${this.cliFlags}`;
+    return `${this.cli} tx staking delegate ${validatorAddress} ${amount}${denom} --from ${delegatorAddress} -o json ${this.cliFlags}`;
   }
 }
 
