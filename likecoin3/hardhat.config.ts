@@ -5,6 +5,9 @@ import "@nomicfoundation/hardhat-verify";
 
 import dotenv from "dotenv";
 dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || ".env.local" });
+
+import "./tasks";
+
 const alchemyApiKey = process.env.ALCHEMY_API_KEY;
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
 let signerKey =
@@ -20,7 +23,7 @@ const config: HardhatUserConfig = {
   networks: {
     localhost: {
       url: "http://localhost:8545",
-      chainId: 900,
+      chainId: 31337,
       accounts: [signerKey],
     },
     superism1: {

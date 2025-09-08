@@ -11,6 +11,9 @@
     "connect-wallet": {
       "title": "Connect Wallet"
     },
+    "error-row": {
+      "retry": "Retry"
+    },
     "introduction": {
       "confirm": "Confirm",
       "text": "LikeCoin 已經升級 v3，同步遷移至以太坊 OP Mainnet。請盡早升級你於 v2 的 LikeCoin、電子書及 Writing NFT，以免被遺落。",
@@ -52,6 +55,10 @@
       "likecoin-wallet": "LikeCoin Wallet",
       "liker-id": "Liker ID",
       "migration-wallet": "Migration Wallet"
+    },
+    "wallet-connect-error": {
+      "pool-balance-insufficient": "Sorry, we don't have sufficient balance to complete your request. Please contact support.",
+      "retry": "Connect Another Wallet"
     }
   }
 }

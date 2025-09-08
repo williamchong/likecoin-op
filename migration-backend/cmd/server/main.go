@@ -10,6 +10,8 @@ import (
 
 	"database/sql"
 
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/go-redis/redis"
 	"github.com/hibiken/asynq"
 	"github.com/joho/godotenv"
@@ -24,6 +26,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/handler/likenft"
 	"github.com/likecoin/like-migration-backend/pkg/handler/user"
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
+	"github.com/likecoin/like-migration-backend/pkg/likecoin/evm"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/middleware"
 	"github.com/likecoin/like-migration-backend/pkg/signer"
@@ -81,6 +84,11 @@ func main() {
 		TLSConfig:    opt.TLSConfig,
 	})
 
+	ethClient, err := ethclient.Dial(envCfg.EthNetworkPublicRPCURL)
+	if err != nil {
+		panic(err)
+	}
+
 	signer := signer.NewSignerClient(
 		&http.Client{
 			Timeout: 10 * time.Second,
@@ -88,6 +96,17 @@ func main() {
 		envCfg.EthSignerBaseUrl,
 		envCfg.EthSignerAPIKey,
 	)
+
+	evmLikeCoinClient, err := evm.NewLikeCoin(
+		logger,
+		ethClient,
+		signer,
+		common.HexToAddress(envCfg.EthTokenAddress),
+	)
+
+	if err != nil {
+		panic(err)
+	}
 
 	cosmosAPI := api.NewCosmosAPI(
 		envCfg.CosmosNodeUrl,
@@ -119,6 +138,7 @@ func main() {
 		Db:                           db,
 		AsynqClient:                  asynqClient,
 		Signer:                       signer,
+		EvmLikeCoinClient:            evmLikeCoinClient,
 		LikecoinBurningCosmosAddress: envCfg.LikecoinBurningCosmosAddress,
 	}
 	mainMux.Handle("/likecoin/", http.StripPrefix("/likecoin", likeCoinRouter.Router()))
