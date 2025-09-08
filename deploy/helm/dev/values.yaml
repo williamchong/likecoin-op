@@ -151,7 +151,10 @@ likecollectiveIndexer:
 
   api:
     ingress:
-      host: likecollective-indexer.pandawork.com
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /$2
+      prefix: /indexer/collective(/|$)(.*)
+      host: likenft-indexer.pandawork.com
       tls:
-        secretName: likecollective-indexer.pandawork.com
-        host: likecollective-indexer.pandawork.com
+        secretName: likenft-indexer.pandawork.com
+        host: likenft-indexer.pandawork.com

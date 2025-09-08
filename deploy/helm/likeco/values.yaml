@@ -165,7 +165,7 @@ likecollectiveIndexer:
     ingress:
       annotations:
         nginx.ingress.kubernetes.io/rewrite-target: /$2
-      prefix: /likecollective-indexer(/|$)(.*)
+      prefix: /indexer/collective(/|$)(.*)
       host: api.v3.like.co
       tls:
         secretName: tls-api.v3.like.co
