@@ -2,8 +2,6 @@
 /.blackbox/pubring.kbx~
 /.blackbox/secring.gpg
 /deploy/env.operator
-/deploy/helm/dev/values.secret.yaml
 /migration-backend/.env.dev
 /likenft/.env.optimism
-/deploy/helm/dev/signer-private-key.env
 /deploy/helm/dev/auth
