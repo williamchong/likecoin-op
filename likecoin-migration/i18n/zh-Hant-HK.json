@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "LikeCoin 區塊鏈 to Optimism"
+    "title": "LikeCoin 區塊鏈 to Base Chain"
   },
   "section": {
     "confirm-by-signing": {
@@ -16,7 +16,7 @@
     },
     "introduction": {
       "confirm": "確認",
-      "text": "LikeCoin 已經升級 v3，同步遷移至以太坊 OP Mainnet。請盡早升級你於 v2 的 LikeCoin、電子書及 Writing NFT，以免被遺落。",
+      "text": "LikeCoin 已經升級 v3，同步遷移至以太坊 Base Chain。請盡早升級你於 v2 的 LikeCoin、電子書及 Writing NFT，以免被遺落。",
       "title": "簡介"
     },
     "migration-completed": {
@@ -25,7 +25,7 @@
     "migration-progress": {
       "balance-remaining-message": "尚有餘額，您要重新開始轉換嗎？",
       "minting": {
-        "description": "在 OP 網絡上轉移等值的代幣",
+        "description": "在 Base Chain上轉移等值的代幣",
         "title": "鑄造中"
       },
       "pending": {
@@ -41,7 +41,7 @@
       "status": "狀態",
       "title": "轉換進度",
       "verified": {
-        "description": "已在 Optimism 鏈上完成轉換",
+        "description": "已在 Base Chain 鏈上完成轉換",
         "title": "已驗證"
       }
     },
