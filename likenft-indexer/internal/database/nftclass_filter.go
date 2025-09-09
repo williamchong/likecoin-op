@@ -57,3 +57,26 @@ func (f ContractLevelMetadataFilterEquatable) ApplyEQ(
 		s.Where(sql.And(predicates...))
 	})
 }
+
+func (f ContractLevelMetadataFilterEquatable) ApplyNEQ(
+	q *ent.NFTClassQuery,
+) *ent.NFTClassQuery {
+	if len(f) == 0 {
+		return q
+	}
+	predicates := make([]*sql.Predicate, 0)
+	for key, value := range f {
+		predicates = append(
+			predicates,
+			sql.Or(
+				// Simply using sqljson.ValueNEQ returns false if the key is not found
+				// so we also include records that don't have the key
+				sql.Not(sqljson.HasKey(nftclass.FieldMetadata, sqljson.DotPath(key))),
+				sqljson.ValueNEQ(nftclass.FieldMetadata, value, sqljson.DotPath(key)),
+			),
+		)
+	}
+	return q.Where(func(s *sql.Selector) {
+		s.Where(sql.And(predicates...))
+	})
+}

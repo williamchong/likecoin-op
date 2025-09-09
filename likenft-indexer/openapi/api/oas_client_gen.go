@@ -453,6 +453,40 @@ func (c *Client) sendBookNFTs(ctx context.Context, params BookNFTsParams) (res *
 			return res, errors.Wrap(err, "encode query")
 		}
 	}
+	{
+		// Encode "contract_level_metadata_eq" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "contract_level_metadata_eq",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.ContractLevelMetadataEq.Get(); ok {
+				return val.EncodeURI(e)
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "contract_level_metadata_neq" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "contract_level_metadata_neq",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.ContractLevelMetadataNeq.Get(); ok {
+				return val.EncodeURI(e)
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
 	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"
@@ -609,6 +643,23 @@ func (c *Client) sendBookNFTsByAccount(ctx context.Context, params BookNFTsByAcc
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			if val, ok := params.ContractLevelMetadataEq.Get(); ok {
+				return val.EncodeURI(e)
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "contract_level_metadata_neq" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "contract_level_metadata_neq",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.ContractLevelMetadataNeq.Get(); ok {
 				return val.EncodeURI(e)
 			}
 			return nil
@@ -2469,6 +2520,23 @@ func (c *Client) sendTokensByAccount(ctx context.Context, params TokensByAccount
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			if val, ok := params.ContractLevelMetadataEq.Get(); ok {
+				return val.EncodeURI(e)
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "contract_level_metadata_neq" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "contract_level_metadata_neq",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.ContractLevelMetadataNeq.Get(); ok {
 				return val.EncodeURI(e)
 			}
 			return nil
