@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
@@ -88,6 +89,7 @@ func DoMintLikeCoin(
 ) (*model.LikeCoinMigration, error) {
 	mylogger := logger.
 		WithGroup("DoMintLikeCoin")
+	txLogger := logger.WithGroup("TxLog")
 
 	txResponse, err := cosmosAPI.QueryTransaction(*a.CosmosTxHash)
 	if err != nil {
@@ -125,6 +127,18 @@ func DoMintLikeCoin(
 	if !strings.EqualFold(*mintingEthAddressStr, a.MintingEthAddress) {
 		mylogger.Error("minting eth address not match", "err", ErrMintingEthPrivateKeyNotMatchMintingEthAddress)
 		return nil, doMintLikeCoinFailed(db, a, ErrMintingEthPrivateKeyNotMatchMintingEthAddress)
+	}
+
+	txLogger = txLogger.With(
+		"FromSignerAddress", *mintingEthAddressStr,
+		"ToUserAddress", a.UserEthAddress,
+	)
+
+	beforeBalance, err := evmLikeCoinClient.BalanceOf(ctx, common.HexToAddress(*mintingEthAddressStr))
+	if err != nil {
+		txLogger = txLogger.With("BeforeBalance", fmt.Sprintf("(err: %+v)", err))
+	} else {
+		txLogger = txLogger.With("BeforeBalance", beforeBalance.String())
 	}
 
 	cosmosCoinMemo := memo.Amount
@@ -165,6 +179,13 @@ func DoMintLikeCoin(
 	evmAmount, err := util.ConvertAmountByDecimals(
 		cosmosCoinDb.Amount, oldDecimals, newDecimals)
 
+	txLogger = txLogger.With(
+		"cosmosCoin", cosmosCoinDb.String(),
+		"oldDecimals", oldDecimals,
+		"newDecimals", newDecimals,
+		"evmAmount", evmAmount.String(),
+	)
+
 	mylogger.Info(
 		"Coin conversion info",
 		"cosmosCoin", cosmosCoinDb.String(),
@@ -187,6 +208,15 @@ func DoMintLikeCoin(
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
+	txLogger = txLogger.With("EvmTxHash", tx.Hash().Hex())
+
+	afterBalance, err := evmLikeCoinClient.BalanceOf(ctx, common.HexToAddress(*mintingEthAddressStr))
+	if err != nil {
+		txLogger = txLogger.With("AfterBalance", fmt.Sprintf("(err: %+v)", err))
+	} else {
+		txLogger = txLogger.With("AfterBalance", afterBalance.String())
+	}
+
 	evmTxHash := hexutil.Encode(tx.Hash().Bytes())
 	a.EvmTxHash = &evmTxHash
 	a.Status = model.LikeCoinMigrationStatusCompleted
@@ -195,6 +225,8 @@ func DoMintLikeCoin(
 	if err != nil {
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
+
+	txLogger.Info("likecoin transfer completed")
 
 	return a, nil
 }

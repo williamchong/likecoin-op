@@ -8,6 +8,10 @@ type EnvConfig struct {
 	SentryDsn   string `envconfig:"SENTRY_DSN" default:""`
 	SentryDebug bool   `envconfig:"SENTRY_DEBUG" default:"false"`
 
+	LogLikecoinTxSlackWebhookUrl string `envconfig:"LOG_LIKECOIN_TX_SLACK_WEBHOOK_URL" default:""`
+	LogLikecoinTxSlackChannel    string `envconfig:"LOG_LIKECOIN_TX_SLACK_CHANNEL" default:""`
+	LogLikecoinTxSlackMatchGroup string `envconfig:"LOG_LIKECOIN_TX_SLACK_MATCH_GROUP" default:"TxLog"`
+
 	DbConnectionStr                 string `envconfig:"DB_CONNECTION_STR"`
 	RedisDsn                        string `envconfig:"REDIS_DSN" default:"redis://127.0.0.1:6379"`
 	Concurrency                     int    `envconfig:"WORKER_CONCURRENCY" default:"1"`
