@@ -70,7 +70,7 @@ migrationBackendOp:
     DEFAULT_ROYALTY_FRACTION: "500"
     BATCH_MINT_ITEM_PER_PAGE: "10"
     ERC721_METADATA_EXTERNAL_URL_BASE_3OOK: "https://sepolia.3ook.com/store"
-    LIKECOIN_BURNING_COSMOS_ADDRESS: "like155s3xuruk2vnynda9gq6x9e7uzvut74654mc4d"
+    LIKECOIN_BURNING_COSMOS_ADDRESS: "like15aef08e9skf5stlahddntsn87uuwuvqf4ngr6s"
 
 migrationBackendBase:
   container:
@@ -94,7 +94,7 @@ migrationBackendBase:
     DEFAULT_ROYALTY_FRACTION: "500"
     BATCH_MINT_ITEM_PER_PAGE: "10"
     ERC721_METADATA_EXTERNAL_URL_BASE_3OOK: "https://sepolia.3ook.com/store"
-    LIKECOIN_BURNING_COSMOS_ADDRESS: "like155s3xuruk2vnynda9gq6x9e7uzvut74654mc4d"
+    LIKECOIN_BURNING_COSMOS_ADDRESS: "like15aef08e9skf5stlahddntsn87uuwuvqf4ngr6s"
 
   ingress:
     prefix: /likecoin
