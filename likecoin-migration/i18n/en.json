@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "LikeCoin chain to Optimism"
+    "title": "LikeCoin chain to Base Chain"
   },
   "section": {
     "confirm-by-signing": {
@@ -16,7 +16,7 @@
     },
     "introduction": {
       "confirm": "Confirm",
-      "text": "LikeCoin 已經升級 v3，同步遷移至以太坊 OP Mainnet。請盡早升級你於 v2 的 LikeCoin、電子書及 Writing NFT，以免被遺落。",
+      "text": "LikeCoin has upgraded to v3 and migrated to Ethereum Base Chain. Please upgrade your v2 LikeCoin, BookNFTs, and Writing NFTs as soon as possible to avoid being left behind.",
       "title": "Introduction"
     },
     "migration-completed": {
@@ -25,7 +25,7 @@
     "migration-progress": {
       "balance-remaining-message": "There are still balance left, do you want to restart the migration?",
       "minting": {
-        "description": "Transferring equivalent tokens on OP network",
+        "description": "Transferring equivalent tokens on Base network",
         "title": "Minting"
       },
       "pending": {
@@ -41,7 +41,7 @@
       "status": "Status",
       "title": "Migration in Progress",
       "verified": {
-        "description": "Migration completed on Optimism chain",
+        "description": "Migration completed on Base Chain",
         "title": "Verified"
       }
     },
