@@ -11,7 +11,7 @@ func (h *openAPIHandler) BookNftEvmAddressGet(
 	ctx context.Context,
 	params api.BookNftEvmAddressGetParams,
 ) (*api.BookNFT, error) {
-	bookNFT, err := h.bookNFTRepository.QueryBookNFT(ctx, string(params.EvmAddress))
+	bookNFT, err := h.nftClassRepository.QueryNFTClass(ctx, string(params.EvmAddress))
 	if err != nil {
 		return nil, err
 	}

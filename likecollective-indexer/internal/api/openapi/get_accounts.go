@@ -11,8 +11,18 @@ func (h *openAPIHandler) AccountsGet(
 	ctx context.Context,
 	params api.AccountsGetParams,
 ) (*api.AccountsGetOK, error) {
+	pagination := model.AccountPagination{
+		PaginationKey:   params.PaginationKey,
+		PaginationLimit: params.PaginationLimit,
+		Reverse:         params.Reverse,
+	}
 
-	accounts, count, nextKey, err := h.accountRepository.QueryAccounts(ctx)
+	filterParams := model.AccountFilterParams{
+		FilterBookNFTIn: params.FilterBookNftIn,
+		FilterAccountIn: params.FilterAccountIn,
+	}
+
+	accounts, count, nextKey, err := h.accountRepository.QueryAccounts(ctx, pagination.ToEntPagination(), filterParams.ToEntFilter())
 	if err != nil {
 		return nil, err
 	}

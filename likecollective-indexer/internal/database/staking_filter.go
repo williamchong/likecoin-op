@@ -1,10 +1,43 @@
 package database
 
 import (
-	"slices"
-
 	"likecollective-indexer/ent"
+	"likecollective-indexer/ent/account"
+	"likecollective-indexer/ent/nftclass"
+	"likecollective-indexer/ent/staking"
+
+	"entgo.io/ent/dialect/sql"
 )
+
+type StakingPagination struct {
+	Limit   *int
+	Key     *int
+	Reverse *bool
+}
+
+func (f *StakingPagination) HandlePagination(q *ent.StakingQuery) *ent.StakingQuery {
+	if f.Reverse != nil && *f.Reverse {
+		q = q.Order(sql.OrderByField("id", sql.OrderDesc()).ToFunc())
+	} else {
+		q = q.Order(sql.OrderByField("id", sql.OrderAsc()).ToFunc())
+	}
+
+	if f.Limit != nil {
+		q = q.Limit(*f.Limit)
+	} else {
+		q = q.Limit(100)
+	}
+
+	if f.Key != nil {
+		if f.Reverse != nil && *f.Reverse {
+			q = q.Where(sql.FieldLT("id", *f.Key))
+		} else {
+			q = q.Where(sql.FieldGT("id", *f.Key))
+		}
+	}
+
+	return q
+}
 
 type QueryStakingsFilter struct {
 	FilterBookNFTIn *[]string
@@ -22,30 +55,13 @@ func NewStakingFilter(
 }
 
 func (f *QueryStakingsFilter) HandleFilter(
-	stakings []*ent.Staking,
-) []*ent.Staking {
-
-	filter := func(staking *ent.Staking) bool {
-		if f.FilterBookNFTIn != nil {
-			if !slices.Contains(*f.FilterBookNFTIn, staking.BookNFT) {
-				return false
-			}
-		}
-		if f.FilterAccountIn != nil {
-			if !slices.Contains(*f.FilterAccountIn, staking.Account) {
-				return false
-			}
-		}
-		return true
+	q *ent.StakingQuery,
+) *ent.StakingQuery {
+	if f.FilterBookNFTIn != nil {
+		q = q.Where(staking.HasNftClassWith(nftclass.AddressIn(*f.FilterBookNFTIn...)))
 	}
-
-	filteredStakings := make([]*ent.Staking, 0)
-
-	for _, staking := range stakings {
-		if filter(staking) {
-			filteredStakings = append(filteredStakings, staking)
-		}
+	if f.FilterAccountIn != nil {
+		q = q.Where(staking.HasAccountWith(account.EvmAddressIn(*f.FilterAccountIn...)))
 	}
-
-	return filteredStakings
+	return q
 }

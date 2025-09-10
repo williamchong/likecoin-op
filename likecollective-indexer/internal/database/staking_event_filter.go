@@ -1,10 +1,43 @@
 package database
 
 import (
-	"slices"
-
 	"likecollective-indexer/ent"
+	"likecollective-indexer/ent/account"
+	"likecollective-indexer/ent/nftclass"
+	"likecollective-indexer/ent/stakingevent"
+
+	"entgo.io/ent/dialect/sql"
 )
+
+type StakingEventPagination struct {
+	Limit   *int
+	Key     *int
+	Reverse *bool
+}
+
+func (f *StakingEventPagination) HandlePagination(q *ent.StakingEventQuery) *ent.StakingEventQuery {
+	if f.Reverse != nil && *f.Reverse {
+		q = q.Order(sql.OrderByField("id", sql.OrderDesc()).ToFunc())
+	} else {
+		q = q.Order(sql.OrderByField("id", sql.OrderAsc()).ToFunc())
+	}
+
+	if f.Limit != nil {
+		q = q.Limit(*f.Limit)
+	} else {
+		q = q.Limit(100)
+	}
+
+	if f.Key != nil {
+		if f.Reverse != nil && *f.Reverse {
+			q = q.Where(sql.FieldLT("id", *f.Key))
+		} else {
+			q = q.Where(sql.FieldGT("id", *f.Key))
+		}
+	}
+
+	return q
+}
 
 type QueryStakingEventsFilter struct {
 	BookNFTIn *[]string
@@ -25,33 +58,16 @@ func NewQueryStakingEventsFilter(
 }
 
 func (f *QueryStakingEventsFilter) HandleFilter(
-	stakingEvents []*ent.StakingEvent,
-) []*ent.StakingEvent {
-	filter := func(stakingEvent *ent.StakingEvent) bool {
-		if f.BookNFTIn != nil && !slices.Contains(*f.BookNFTIn, stakingEvent.BookNFT) {
-			return false
-		}
-		if f.AccountIn != nil && !slices.Contains(*f.AccountIn, stakingEvent.Account) {
-			return false
-		}
-		if f.EventType != nil {
-			if *f.EventType == "all" {
-				return true
-			}
-			if *f.EventType == string(stakingEvent.EventType) {
-				return true
-			}
-			return false
-		}
-		return true
+	q *ent.StakingEventQuery,
+) *ent.StakingEventQuery {
+	if f.BookNFTIn != nil {
+		q = q.Where(stakingevent.HasNftClassWith(nftclass.AddressIn(*f.BookNFTIn...)))
 	}
-
-	filteredStakingEvents := make([]*ent.StakingEvent, 0)
-	for _, stakingEvent := range stakingEvents {
-		if filter(stakingEvent) {
-			filteredStakingEvents = append(filteredStakingEvents, stakingEvent)
-		}
+	if f.AccountIn != nil {
+		q = q.Where(stakingevent.HasAccountWith(account.EvmAddressIn(*f.AccountIn...)))
 	}
-
-	return filteredStakingEvents
+	if f.EventType != nil && *f.EventType != "all" {
+		q = q.Where(stakingevent.EventTypeEQ(stakingevent.EventType(*f.EventType)))
+	}
+	return q
 }

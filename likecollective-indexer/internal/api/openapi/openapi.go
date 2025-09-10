@@ -14,7 +14,7 @@ type openAPIHandler struct {
 
 	stakingRepository      database.StakingRepository
 	accountRepository      database.AccountRepository
-	bookNFTRepository      database.BookNFTRepository
+	nftClassRepository     database.NFTClassRepository
 	stakingEventRepository database.StakingEventRepository
 }
 
@@ -26,7 +26,7 @@ func NewOpenAPIHandler(db database.Service) http.Handler {
 
 		stakingRepository:      database.MakeStakingRepository(db),
 		accountRepository:      database.MakeAccountRepository(db),
-		bookNFTRepository:      database.MakeBookNFTRepository(db),
+		nftClassRepository:     database.MakeNFTClassRepository(db),
 		stakingEventRepository: database.MakeStakingEventRepository(db),
 	}
 

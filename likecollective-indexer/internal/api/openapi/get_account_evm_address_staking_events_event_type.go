@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"likecollective-indexer/internal/api/openapi/model"
-	"likecollective-indexer/internal/database"
 	"likecollective-indexer/openapi/api"
 )
 
@@ -12,18 +11,20 @@ func (h *openAPIHandler) AccountEvmAddressStakingEventsEventTypeGet(
 	ctx context.Context,
 	params api.AccountEvmAddressStakingEventsEventTypeGetParams,
 ) (*api.AccountEvmAddressStakingEventsEventTypeGetOK, error) {
-	eventType := string(params.EventType)
-	filterAccountIn := []string{string(params.EvmAddress)}
-	var FilterBookNftIn *[]string
-	if len(params.FilterBookNftIn) > 0 {
-		_filterAccountIn := make([]string, len(params.FilterBookNftIn))
-		for _, account := range params.FilterBookNftIn {
-			_filterAccountIn = append(_filterAccountIn, string(account))
-		}
-		FilterBookNftIn = &_filterAccountIn
+	filterParams := model.StakingEventFilterParams{
+		FilterNFTClassIn: params.FilterBookNftIn,
+		FilterAccountIn:  []api.EvmAddress{params.EvmAddress},
+		FilterEventType:  (*api.StakingEventType)(&params.EventType),
 	}
+
+	pagination := model.StakingEventPagination{
+		PaginationKey:   params.PaginationKey,
+		PaginationLimit: params.PaginationLimit,
+		Reverse:         params.Reverse,
+	}
+
 	stakingEvents, count, nextKey, err := h.stakingEventRepository.QueryStakingEvents(
-		ctx, database.NewQueryStakingEventsFilter(FilterBookNftIn, &filterAccountIn, &eventType),
+		ctx, filterParams.ToEntFilter(), pagination.ToEntPagination(),
 	)
 	if err != nil {
 		return nil, err

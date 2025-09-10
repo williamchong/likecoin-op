@@ -2,13 +2,13 @@ package database
 
 import (
 	"context"
-	"errors"
 
 	"likecollective-indexer/ent"
+	"likecollective-indexer/ent/account"
 )
 
 type AccountRepository interface {
-	QueryAccounts(ctx context.Context) (accounts []*ent.Account, count int, nextKey int, err error)
+	QueryAccounts(ctx context.Context, pagination AccountPagination, filter QueryAccountsFilter) (accounts []*ent.Account, count int, nextKey int, err error)
 	QueryAccount(ctx context.Context, evmAddress string) (*ent.Account, error)
 }
 
@@ -22,16 +22,32 @@ func MakeAccountRepository(dbService Service) AccountRepository {
 
 func (r *accountRepository) QueryAccounts(
 	ctx context.Context,
+	pagination AccountPagination,
+	filter QueryAccountsFilter,
 ) (
 	accounts []*ent.Account,
 	count int,
 	nextKey int,
 	err error,
 ) {
-	accounts, err = r.dbService.Client().Account.Query()
+	q := r.dbService.Client().Account.Query()
+	q = filter.HandleFilter(q)
 
+	count, err = q.Count(ctx)
 	if err != nil {
 		return nil, 0, 0, err
+	}
+
+	q = pagination.HandlePagination(q)
+
+	accounts, err = q.All(ctx)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	nextKey = 0
+	if len(accounts) > 0 {
+		nextKey = accounts[len(accounts)-1].ID
 	}
 
 	return accounts, len(accounts), 0, nil
@@ -41,16 +57,11 @@ func (r *accountRepository) QueryAccount(
 	ctx context.Context,
 	evmAddress string,
 ) (*ent.Account, error) {
-	accounts, err := r.dbService.Client().Account.Query()
+	account, err := r.dbService.Client().Account.Query().Where(
+		account.EvmAddressEqualFold(evmAddress),
+	).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
-
-	for _, account := range accounts {
-		if account.EvmAddress == evmAddress {
-			return account, nil
-		}
-	}
-
-	return nil, errors.New("account not found")
+	return account, nil
 }
