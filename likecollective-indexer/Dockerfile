@@ -1,4 +1,7 @@
 FROM golang:1.23.5-alpine AS builder
+RUN apk add curl
+RUN curl https://atlasgo.sh -o atlasgo.sh
+RUN sh atlasgo.sh -y
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
@@ -21,7 +24,8 @@ COPY --from=builder /src/Makefile /app
 # App
 COPY --from=builder /src/likecollective-indexer-api /usr/local/bin/
 
-# DB Mock data
-COPY --from=builder /src/dbmockdata /app/dbmockdata
+# Migration
+COPY --from=stage1 /usr/local/bin/atlas /usr/local/bin/
+COPY --from=stage1 /src/ent/migrate/migrations /app/ent/migrate/migrations
 
 CMD ["likecollective-indexer-api"]
