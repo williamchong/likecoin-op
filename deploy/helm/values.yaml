@@ -239,6 +239,8 @@ likecollectiveIndexer:
     imageRepository: likecoin/likecollective-indexer
     imagePullPolicy: IfNotPresent
 
+  migrate: {}
+
   api:
     name: likecollective-indexer-api
 
