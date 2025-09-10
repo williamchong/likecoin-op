@@ -66,6 +66,73 @@ func (s *Account) Validate() error {
 	return nil
 }
 
+func (s *AccountBookNFT) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.EvmAddress.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "evm_address",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := (validate.Float{}).Validate(float64(s.PoolShare)); err != nil {
+			return errors.Wrap(err, "float")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "pool_share",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.StakedAmount.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "staked_amount",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.PendingRewardAmount.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "pending_reward_amount",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.ClaimedRewardAmount.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "claimed_reward_amount",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s AccountBookNFTsRequestSortBy) Validate() error {
 	switch s {
 	case "pool_share":
@@ -867,6 +934,17 @@ func (s *StakingEventAllRewardsClaimed) Validate() error {
 		})
 	}
 	if err := func() error {
+		if err := s.Account.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "account",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if s.ClaimedAmountList == nil {
 			return errors.New("nil is invalid value")
 		}
@@ -972,6 +1050,17 @@ func (s *StakingEventRewardAdded) Validate() error {
 		})
 	}
 	if err := func() error {
+		if err := s.Account.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "account",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if err := s.Amount.Validate(); err != nil {
 			return err
 		}
@@ -1022,6 +1111,17 @@ func (s *StakingEventRewardClaimed) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "book_nft",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Account.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "account",
 			Error: err,
 		})
 	}
@@ -1080,6 +1180,17 @@ func (s *StakingEventRewardDeposited) Validate() error {
 		})
 	}
 	if err := func() error {
+		if err := s.Account.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "account",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if err := s.Amount.Validate(); err != nil {
 			return err
 		}
@@ -1134,6 +1245,17 @@ func (s *StakingEventStaked) Validate() error {
 		})
 	}
 	if err := func() error {
+		if err := s.Account.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "account",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if err := s.Amount.Validate(); err != nil {
 			return err
 		}
@@ -1184,6 +1306,17 @@ func (s *StakingEventUnstaked) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "book_nft",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Account.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "account",
 			Error: err,
 		})
 	}

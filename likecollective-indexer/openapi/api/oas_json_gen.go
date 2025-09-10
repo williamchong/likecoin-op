@@ -154,6 +154,162 @@ func (s *Account) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *AccountBookNFT) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *AccountBookNFT) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("evm_address")
+		s.EvmAddress.Encode(e)
+	}
+	{
+		e.FieldStart("pool_share")
+		e.Float64(s.PoolShare)
+	}
+	{
+		e.FieldStart("staked_amount")
+		s.StakedAmount.Encode(e)
+	}
+	{
+		e.FieldStart("pending_reward_amount")
+		s.PendingRewardAmount.Encode(e)
+	}
+	{
+		e.FieldStart("claimed_reward_amount")
+		s.ClaimedRewardAmount.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfAccountBookNFT = [5]string{
+	0: "evm_address",
+	1: "pool_share",
+	2: "staked_amount",
+	3: "pending_reward_amount",
+	4: "claimed_reward_amount",
+}
+
+// Decode decodes AccountBookNFT from json.
+func (s *AccountBookNFT) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AccountBookNFT to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "evm_address":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.EvmAddress.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"evm_address\"")
+			}
+		case "pool_share":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Float64()
+				s.PoolShare = float64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pool_share\"")
+			}
+		case "staked_amount":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.StakedAmount.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"staked_amount\"")
+			}
+		case "pending_reward_amount":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.PendingRewardAmount.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pending_reward_amount\"")
+			}
+		case "claimed_reward_amount":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				if err := s.ClaimedRewardAmount.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"claimed_reward_amount\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode AccountBookNFT")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00011111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfAccountBookNFT) {
+					name = jsonFieldsNameOfAccountBookNFT[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *AccountBookNFT) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AccountBookNFT) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *AccountEvmAddressBookNftsGetOK) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -203,9 +359,9 @@ func (s *AccountEvmAddressBookNftsGetOK) Decode(d *jx.Decoder) error {
 		case "data":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				s.Data = make([]Staking, 0)
+				s.Data = make([]AccountBookNFT, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem Staking
+					var elem AccountBookNFT
 					if err := elem.Decode(d); err != nil {
 						return err
 					}
@@ -2467,6 +2623,41 @@ func (s *NilDateTime) UnmarshalJSON(data []byte) error {
 	return s.Decode(d, json.DecodeDateTime)
 }
 
+// Encode encodes time.Time as json.
+func (o OptDateTime) Encode(e *jx.Encoder, format func(*jx.Encoder, time.Time)) {
+	if !o.Set {
+		return
+	}
+	format(e, o.Value)
+}
+
+// Decode decodes time.Time from json.
+func (o *OptDateTime) Decode(d *jx.Decoder, format func(*jx.Decoder) (time.Time, error)) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptDateTime to nil")
+	}
+	o.Set = true
+	v, err := format(d)
+	if err != nil {
+		return err
+	}
+	o.Value = v
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptDateTime) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e, json.EncodeDateTime)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptDateTime) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d, json.DecodeDateTime)
+}
+
 // Encode encodes string as json.
 func (o OptString) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -2843,6 +3034,10 @@ func (s StakingEvent) encodeFields(e *jx.Encoder) {
 				s.BookNft.Encode(e)
 			}
 			{
+				e.FieldStart("account")
+				s.Account.Encode(e)
+			}
+			{
 				e.FieldStart("amount")
 				s.Amount.Encode(e)
 			}
@@ -2859,6 +3054,10 @@ func (s StakingEvent) encodeFields(e *jx.Encoder) {
 			{
 				e.FieldStart("book_nft")
 				s.BookNft.Encode(e)
+			}
+			{
+				e.FieldStart("account")
+				s.Account.Encode(e)
 			}
 			{
 				e.FieldStart("amount")
@@ -2879,6 +3078,10 @@ func (s StakingEvent) encodeFields(e *jx.Encoder) {
 				s.BookNft.Encode(e)
 			}
 			{
+				e.FieldStart("account")
+				s.Account.Encode(e)
+			}
+			{
 				e.FieldStart("amount")
 				s.Amount.Encode(e)
 			}
@@ -2895,6 +3098,10 @@ func (s StakingEvent) encodeFields(e *jx.Encoder) {
 			{
 				e.FieldStart("book_nft")
 				s.BookNft.Encode(e)
+			}
+			{
+				e.FieldStart("account")
+				s.Account.Encode(e)
 			}
 			{
 				e.FieldStart("amount")
@@ -2915,6 +3122,10 @@ func (s StakingEvent) encodeFields(e *jx.Encoder) {
 				s.BookNft.Encode(e)
 			}
 			{
+				e.FieldStart("account")
+				s.Account.Encode(e)
+			}
+			{
 				e.FieldStart("amount")
 				s.Amount.Encode(e)
 			}
@@ -2928,6 +3139,10 @@ func (s StakingEvent) encodeFields(e *jx.Encoder) {
 		e.Str("all-rewards-claimed")
 		{
 			s := s.StakingEventAllRewardsClaimed
+			{
+				e.FieldStart("account")
+				s.Account.Encode(e)
+			}
 			{
 				e.FieldStart("claimed_amount_list")
 				e.ArrStart()
@@ -3056,6 +3271,10 @@ func (s *StakingEventAllRewardsClaimed) encodeFields(e *jx.Encoder) {
 		s.EventType.Encode(e)
 	}
 	{
+		e.FieldStart("account")
+		s.Account.Encode(e)
+	}
+	{
 		e.FieldStart("claimed_amount_list")
 		e.ArrStart()
 		for _, elem := range s.ClaimedAmountList {
@@ -3069,10 +3288,11 @@ func (s *StakingEventAllRewardsClaimed) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfStakingEventAllRewardsClaimed = [3]string{
+var jsonFieldsNameOfStakingEventAllRewardsClaimed = [4]string{
 	0: "event_type",
-	1: "claimed_amount_list",
-	2: "datetime",
+	1: "account",
+	2: "claimed_amount_list",
+	3: "datetime",
 }
 
 // Decode decodes StakingEventAllRewardsClaimed from json.
@@ -3094,8 +3314,18 @@ func (s *StakingEventAllRewardsClaimed) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"event_type\"")
 			}
-		case "claimed_amount_list":
+		case "account":
 			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Account.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"account\"")
+			}
+		case "claimed_amount_list":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				s.ClaimedAmountList = make([]StakingEventAllRewardsClaimedClaimedAmountListItem, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -3113,7 +3343,7 @@ func (s *StakingEventAllRewardsClaimed) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"claimed_amount_list\"")
 			}
 		case "datetime":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.Datetime = v
@@ -3134,7 +3364,7 @@ func (s *StakingEventAllRewardsClaimed) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -3197,11 +3427,18 @@ func (s *StakingEventAllRewardsClaimedClaimedAmountListItem) encodeFields(e *jx.
 		e.FieldStart("amount")
 		s.Amount.Encode(e)
 	}
+	{
+		if s.Datetime.Set {
+			e.FieldStart("datetime")
+			s.Datetime.Encode(e, json.EncodeDateTime)
+		}
+	}
 }
 
-var jsonFieldsNameOfStakingEventAllRewardsClaimedClaimedAmountListItem = [2]string{
+var jsonFieldsNameOfStakingEventAllRewardsClaimedClaimedAmountListItem = [3]string{
 	0: "book_nft",
 	1: "amount",
+	2: "datetime",
 }
 
 // Decode decodes StakingEventAllRewardsClaimedClaimedAmountListItem from json.
@@ -3232,6 +3469,16 @@ func (s *StakingEventAllRewardsClaimedClaimedAmountListItem) Decode(d *jx.Decode
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"amount\"")
+			}
+		case "datetime":
+			if err := func() error {
+				s.Datetime.Reset()
+				if err := s.Datetime.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"datetime\"")
 			}
 		default:
 			return d.Skip()
@@ -3345,6 +3592,10 @@ func (s *StakingEventRewardAdded) encodeFields(e *jx.Encoder) {
 		s.BookNft.Encode(e)
 	}
 	{
+		e.FieldStart("account")
+		s.Account.Encode(e)
+	}
+	{
 		e.FieldStart("amount")
 		s.Amount.Encode(e)
 	}
@@ -3354,11 +3605,12 @@ func (s *StakingEventRewardAdded) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfStakingEventRewardAdded = [4]string{
+var jsonFieldsNameOfStakingEventRewardAdded = [5]string{
 	0: "event_type",
 	1: "book_nft",
-	2: "amount",
-	3: "datetime",
+	2: "account",
+	3: "amount",
+	4: "datetime",
 }
 
 // Decode decodes StakingEventRewardAdded from json.
@@ -3390,8 +3642,18 @@ func (s *StakingEventRewardAdded) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"book_nft\"")
 			}
-		case "amount":
+		case "account":
 			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Account.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"account\"")
+			}
+		case "amount":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.Amount.Decode(d); err != nil {
 					return err
@@ -3401,7 +3663,7 @@ func (s *StakingEventRewardAdded) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"amount\"")
 			}
 		case "datetime":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.Datetime = v
@@ -3422,7 +3684,7 @@ func (s *StakingEventRewardAdded) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00011111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -3524,6 +3786,10 @@ func (s *StakingEventRewardClaimed) encodeFields(e *jx.Encoder) {
 		s.BookNft.Encode(e)
 	}
 	{
+		e.FieldStart("account")
+		s.Account.Encode(e)
+	}
+	{
 		e.FieldStart("amount")
 		s.Amount.Encode(e)
 	}
@@ -3533,11 +3799,12 @@ func (s *StakingEventRewardClaimed) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfStakingEventRewardClaimed = [4]string{
+var jsonFieldsNameOfStakingEventRewardClaimed = [5]string{
 	0: "event_type",
 	1: "book_nft",
-	2: "amount",
-	3: "datetime",
+	2: "account",
+	3: "amount",
+	4: "datetime",
 }
 
 // Decode decodes StakingEventRewardClaimed from json.
@@ -3569,8 +3836,18 @@ func (s *StakingEventRewardClaimed) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"book_nft\"")
 			}
-		case "amount":
+		case "account":
 			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Account.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"account\"")
+			}
+		case "amount":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.Amount.Decode(d); err != nil {
 					return err
@@ -3580,7 +3857,7 @@ func (s *StakingEventRewardClaimed) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"amount\"")
 			}
 		case "datetime":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.Datetime = v
@@ -3601,7 +3878,7 @@ func (s *StakingEventRewardClaimed) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00011111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -3703,6 +3980,10 @@ func (s *StakingEventRewardDeposited) encodeFields(e *jx.Encoder) {
 		s.BookNft.Encode(e)
 	}
 	{
+		e.FieldStart("account")
+		s.Account.Encode(e)
+	}
+	{
 		e.FieldStart("amount")
 		s.Amount.Encode(e)
 	}
@@ -3712,11 +3993,12 @@ func (s *StakingEventRewardDeposited) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfStakingEventRewardDeposited = [4]string{
+var jsonFieldsNameOfStakingEventRewardDeposited = [5]string{
 	0: "event_type",
 	1: "book_nft",
-	2: "amount",
-	3: "datetime",
+	2: "account",
+	3: "amount",
+	4: "datetime",
 }
 
 // Decode decodes StakingEventRewardDeposited from json.
@@ -3748,8 +4030,18 @@ func (s *StakingEventRewardDeposited) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"book_nft\"")
 			}
-		case "amount":
+		case "account":
 			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Account.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"account\"")
+			}
+		case "amount":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.Amount.Decode(d); err != nil {
 					return err
@@ -3759,7 +4051,7 @@ func (s *StakingEventRewardDeposited) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"amount\"")
 			}
 		case "datetime":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.Datetime = v
@@ -3780,7 +4072,7 @@ func (s *StakingEventRewardDeposited) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00011111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -3882,6 +4174,10 @@ func (s *StakingEventStaked) encodeFields(e *jx.Encoder) {
 		s.BookNft.Encode(e)
 	}
 	{
+		e.FieldStart("account")
+		s.Account.Encode(e)
+	}
+	{
 		e.FieldStart("amount")
 		s.Amount.Encode(e)
 	}
@@ -3891,11 +4187,12 @@ func (s *StakingEventStaked) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfStakingEventStaked = [4]string{
+var jsonFieldsNameOfStakingEventStaked = [5]string{
 	0: "event_type",
 	1: "book_nft",
-	2: "amount",
-	3: "datetime",
+	2: "account",
+	3: "amount",
+	4: "datetime",
 }
 
 // Decode decodes StakingEventStaked from json.
@@ -3927,8 +4224,18 @@ func (s *StakingEventStaked) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"book_nft\"")
 			}
-		case "amount":
+		case "account":
 			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Account.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"account\"")
+			}
+		case "amount":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.Amount.Decode(d); err != nil {
 					return err
@@ -3938,7 +4245,7 @@ func (s *StakingEventStaked) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"amount\"")
 			}
 		case "datetime":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.Datetime = v
@@ -3959,7 +4266,7 @@ func (s *StakingEventStaked) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00011111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -4061,6 +4368,10 @@ func (s *StakingEventUnstaked) encodeFields(e *jx.Encoder) {
 		s.BookNft.Encode(e)
 	}
 	{
+		e.FieldStart("account")
+		s.Account.Encode(e)
+	}
+	{
 		e.FieldStart("amount")
 		s.Amount.Encode(e)
 	}
@@ -4070,11 +4381,12 @@ func (s *StakingEventUnstaked) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfStakingEventUnstaked = [4]string{
+var jsonFieldsNameOfStakingEventUnstaked = [5]string{
 	0: "event_type",
 	1: "book_nft",
-	2: "amount",
-	3: "datetime",
+	2: "account",
+	3: "amount",
+	4: "datetime",
 }
 
 // Decode decodes StakingEventUnstaked from json.
@@ -4106,8 +4418,18 @@ func (s *StakingEventUnstaked) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"book_nft\"")
 			}
-		case "amount":
+		case "account":
 			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Account.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"account\"")
+			}
+		case "amount":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.Amount.Decode(d); err != nil {
 					return err
@@ -4117,7 +4439,7 @@ func (s *StakingEventUnstaked) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"amount\"")
 			}
 		case "datetime":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.Datetime = v
@@ -4138,7 +4460,7 @@ func (s *StakingEventUnstaked) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00011111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
