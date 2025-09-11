@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"likecollective-indexer/internal/database"
+	"likecollective-indexer/internal/evm/like_collective"
+	"likecollective-indexer/internal/evm/util/logconverter"
 	"likecollective-indexer/internal/server/middleware"
 	"likecollective-indexer/internal/util/sentry"
 )
@@ -14,7 +16,10 @@ import (
 type Server struct {
 	port int
 
-	db database.Service
+	db                         database.Service
+	likeCollectiveLogConverter *logconverter.LogConverter
+
+	alchemyLikeCollectiveEthLogWebhookSigningKey string
 }
 
 func NewServer() *http.Server {
@@ -30,10 +35,20 @@ func NewServer() *http.Server {
 		panic(err)
 	}
 
+	likeCollectiveAbi, err := like_collective.LikeCollectiveMetaData.GetAbi()
+	if err != nil {
+		panic(err)
+	}
+
+	likeCollectiveLogConverter := logconverter.NewLogConverter(likeCollectiveAbi)
+
 	NewServer := &Server{
 		port: cfg.Port,
 
-		db: database.New(),
+		db:                         database.New(),
+		likeCollectiveLogConverter: likeCollectiveLogConverter,
+
+		alchemyLikeCollectiveEthLogWebhookSigningKey: cfg.AlchemyLikeCollectiveEthLogWebhookSigningKey,
 	}
 
 	applyMiddlewares := middleware.MakeApplyMiddlewares(
