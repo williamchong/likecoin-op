@@ -1,0 +1,23 @@
+{
+  block {
+    hash,
+    number,
+    timestamp,
+    logs(filter: {addresses: ["{address}"]}) {
+      # Account is the account which generated this log - this will always be a contract account.
+      account {
+        address,
+      },
+      # Topics is a list of 0-4 indexed topics for the log.
+      topics,
+      # Data is unindexed data for this log.
+      data,
+      # Transaction is the transaction that generated this log entry.
+      transaction {
+        hash,
+        index,
+      },
+      index,
+    }
+  }
+}
