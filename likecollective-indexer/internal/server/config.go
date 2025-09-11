@@ -12,6 +12,8 @@ type EnvConfig struct {
 
 	SentryDsn   string `envconfig:"SENTRY_DSN" default:""`
 	SentryDebug bool   `envconfig:"SENTRY_DEBUG" default:"false"`
+
+	AlchemyLikeCollectiveEthLogWebhookSigningKey string `envconfig:"ALCHEMY_LIKE_COLLECTIVE_ETH_LOG_WEBHOOK_SIGNING_KEY" default:""`
 }
 
 func NewEnvConfig() (*EnvConfig, error) {
