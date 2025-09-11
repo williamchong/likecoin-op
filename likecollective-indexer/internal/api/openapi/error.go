@@ -2,8 +2,8 @@ package openapi
 
 import (
 	"context"
-	"fmt"
 
+	"likecollective-indexer/ent"
 	"likecollective-indexer/internal/api/openapi/model"
 	"likecollective-indexer/openapi/api"
 
@@ -13,7 +13,15 @@ import (
 func (h *openAPIHandler) NewError(ctx context.Context, err error) *api.ErrorStatusCode {
 	hub := sentry.GetHubFromContext(ctx)
 
-	fmt.Printf("Error: %v\n", err)
+	if ent.IsNotFound(err) {
+		return &api.ErrorStatusCode{
+			StatusCode: 404,
+			Response: api.Error{
+				Code:    404,
+				Message: "not found",
+			},
+		}
+	}
 
 	return &api.ErrorStatusCode{
 		StatusCode: 500,
