@@ -9,7 +9,7 @@
     "test": "hardhat test",
     "deploy": "hardhat ignition deploy ignition/modules/Likecoin.ts --verify --strategy create2 --parameters ignition/parameters.json",
     "deploy:noverify": "hardhat ignition deploy ignition/modules/Likecoin.ts --strategy create2 --parameters ignition/parameters.json",
-    "deploy:local": "hardhat ignition deploy ignition/modules/Likecoin.ts --strategy create2 --parameters ignition/parameters.local.json --network localhost"
+    "deploy:local": "hardhat ignition deploy ignition/modules/Likecoin.ts --strategy create2 --parameters ignition/parameters.local.json"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",

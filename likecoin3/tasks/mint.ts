@@ -2,39 +2,23 @@ import { task } from "hardhat/config";
 import fs from "fs";
 
 task("mint", "Mint tokens")
+  .addParam("likecoin", "The address of the likecoin contract")
   .addParam("amount", "The amount of tokens to mint")
   .addParam("to", "The address to mint tokens to")
-  .setAction(async ({ amount, to }, { ethers, network }) => {
+  .setAction(async ({ likecoin, amount, to }, { ethers, network }) => {
     const [operator] = await ethers.getSigners();
     console.log("Operator:", operator.address);
+    console.log("Likecoin address:", likecoin);
 
-    let likecoinAddress = "";
-    if (
-      fs.existsSync(
-        `ignition/deployments/chain-${network.config.chainId}/deployed_addresses.json`,
-      )
-    ) {
-      const deployedAddresses = JSON.parse(
-        fs.readFileSync(
-          `ignition/deployments/chain-${network.config.chainId}/deployed_addresses.json`,
-          "utf8",
-        ),
-      );
-      likecoinAddress = deployedAddresses["LikecoinModule#Likecoin"];
-    } else {
-      throw new Error(
-        `Deployed addresses not found for chain ${network.config.chainId}`,
-      );
-    }
+    const LikecoinContract = await ethers.getContractAt("Likecoin", likecoin);
+    const likecoinContract = LikecoinContract.connect(operator);
 
-    console.log("Likecoin address:", likecoinAddress);
-
-    const Likecoin = await ethers.getContractAt("Likecoin", likecoinAddress);
-    const likecoin = Likecoin.connect(operator);
-
-    const mintAmount = ethers.parseUnits(amount, await likecoin.decimals());
+    const mintAmount = ethers.parseUnits(
+      amount,
+      await likecoinContract.decimals(),
+    );
     console.log("Mint amount:", mintAmount);
 
-    const tx = await likecoin.mint(to, mintAmount);
+    const tx = await likecoinContract.mint(to, mintAmount);
     await tx.wait();
   });
