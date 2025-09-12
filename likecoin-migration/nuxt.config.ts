@@ -50,6 +50,7 @@ export default {
     '~/plugins/config.ts',
     '~/plugins/apiClient.ts',
     '~/plugins/cosmosNetworkConfig.ts',
+    '~/plugins/evmChainConfig.ts',
     '~/plugins/likeCoinWalletConnector.ts',
     '~/plugins/likeCoinEVMWalletConnector.ts',
     '~/plugins/gtag.ts',
