@@ -87,11 +87,11 @@ abigen:
 	mkdir -p pkg/likenft/evm/book_nft
 	mkdir -p pkg/likecoin/evm/likecoin
 	go run github.com/ethereum/go-ethereum/cmd/abigen@latest \
-		--abi=<(cat ../abi/LikeProtocol.abi.json') \
+		--abi=<(cat ../abi/LikeProtocol.abi.json) \
 		--pkg=like_protocol \
 		--out=pkg/likenft/evm/like_protocol/like_protocol.go
 	go run github.com/ethereum/go-ethereum/cmd/abigen@latest \
-		--abi=<(cat ../abi/BookNFT.abi.json') \
+		--abi=<(cat ../abi/BookNFT.abi.json) \
 		--pkg=book_nft \
 		--out=pkg/likenft/evm/book_nft/book_nft.go
 
