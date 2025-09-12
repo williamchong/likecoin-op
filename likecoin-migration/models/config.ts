@@ -6,6 +6,7 @@ export const ConfigSchema = z.object({
   authcoreRedirectUrl: z.string(),
   apiBaseURL: z.string(),
   cosmosDepositAddress: z.string(),
+  evmTokenAddress: z.string(),
   cosmosExplorerBaseURL: z.string(),
   evmExplorerBaseURL: z.string(),
   cosmosLikeCoinNetworkConfigPath: z.string(),
