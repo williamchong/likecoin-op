@@ -101,6 +101,7 @@ export default {
       '@likecoin/wallet-connector',
       'libsodium',
       'web3',
+      'ethers',
     ],
   },
 };
