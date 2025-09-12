@@ -1,6 +1,7 @@
 <template>
-  <div>
+  <div :class="['flex', 'flex-col', 'gap-2']">
     <MiscellaneousActionsAddChains />
+    <MiscellaneousActionsAddTokens />
   </div>
 </template>
 
