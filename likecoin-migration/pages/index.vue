@@ -215,6 +215,7 @@
           >
             {{ $t('section.migration-completed.title') }}
           </h2>
+          <MiscellaneousActions v-if="!isFuture()" :class="['mt-2.5']" />
         </StepSection>
       </div>
     </div>
