@@ -9,6 +9,7 @@ export const ConfigSchema = z.object({
   cosmosExplorerBaseURL: z.string(),
   evmExplorerBaseURL: z.string(),
   cosmosLikeCoinNetworkConfigPath: z.string(),
+  evmLikeCoinChainConfigPath: z.string(),
   googleAnalyticsTagId: z.string().default(''),
 });
 
