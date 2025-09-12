@@ -3,6 +3,7 @@
   "isTestnet": true,
   "apiBaseURL": "https://like-migration-api.pandawork.com",
   "cosmosLikeCoinNetworkConfigPath": "/cosmos-network-config.json",
+  "evmLikeCoinChainConfigPath": "/evm-likecoin-chain.json",
   "cosmosDepositAddress": "like155s3xuruk2vnynda9gq6x9e7uzvut74654mc4d",
   "cosmosExplorerBaseURL": "https://node.testnet.like.co/",
   "evmExplorerBaseURL": "https://sepolia.basescan.org/",
