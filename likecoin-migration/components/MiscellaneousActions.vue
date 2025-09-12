@@ -1,5 +1,7 @@
 <template>
-  <div></div>
+  <div>
+    <MiscellaneousActionsAddChains />
+  </div>
 </template>
 
 <script lang="ts">

@@ -2,6 +2,14 @@
   "app": {
     "title": "LikeCoin 區塊鏈 to Base Chain"
   },
+  "miscellaneous-actions": {
+    "add-chain": {
+      "metamask": {
+        "add-chain": "添加",
+        "description": "要在 MetaMask 上查看 LikeCoin，您需要將 {chainName} ({chainId}) 添加到 MetaMask。"
+      }
+    }
+  },
   "section": {
     "confirm-by-signing": {
       "message": "請檢查您 ETH 錢包的簽署訊息",
