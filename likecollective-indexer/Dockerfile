@@ -25,7 +25,7 @@ COPY --from=builder /src/Makefile /app
 COPY --from=builder /src/likecollective-indexer-api /usr/local/bin/
 
 # Migration
-COPY --from=stage1 /usr/local/bin/atlas /usr/local/bin/
-COPY --from=stage1 /src/ent/migrate/migrations /app/ent/migrate/migrations
+COPY --from=builder /usr/local/bin/atlas /usr/local/bin/
+COPY --from=builder /src/ent/migrate/migrations /app/ent/migrate/migrations
 
 CMD ["likecollective-indexer-api"]
