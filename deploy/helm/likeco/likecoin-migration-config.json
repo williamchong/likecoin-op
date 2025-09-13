@@ -7,5 +7,6 @@
   "cosmosExplorerBaseURL": "https://mainnet-node.like.co/",
   "evmExplorerBaseURL": "https://optimistic.etherscan.io",
   "authcoreRedirectUrl": "https://v3-token-migration.like.co",
-  "googleAnalyticsTagId": "G-NKE5KHQPM6"
+  "googleAnalyticsTagId": "G-NKE5KHQPM6",
+  "intercomAppId": "eupcse57"
 }

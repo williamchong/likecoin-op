@@ -52,6 +52,7 @@ export default {
     '~/plugins/cosmosNetworkConfig.ts',
     '~/plugins/likeCoinWalletConnector.ts',
     '~/plugins/likeCoinEVMWalletConnector.ts',
+    '~/plugins/intercom.ts',
     '~/plugins/gtag.ts',
   ],
 

@@ -10,6 +10,7 @@ export const ConfigSchema = z.object({
   evmExplorerBaseURL: z.string(),
   cosmosLikeCoinNetworkConfigPath: z.string(),
   googleAnalyticsTagId: z.string().default(''),
+  intercomAppId: z.string(),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
