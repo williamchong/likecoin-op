@@ -36,7 +36,9 @@
         }}</AppButton>
       </div>
     </div>
-    <div :class="['bg-likecoin-lightergrey', 'p-8', 'rounded', 'mt-2.5']">
+    <div
+      :class="['bg-likecoin-lightergrey', 'p-8', 'rounded', 'mt-2.5', 'mb-5']"
+    >
       <div :class="['flex', 'flex-col', 'gap-2.5']">
         <h3 :class="['text-base', 'font-semibold', 'text-likecoin-darkgreen']">
           {{ $t('section.migration-progress.status') }}

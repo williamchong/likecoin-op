@@ -1,5 +1,10 @@
 <template>
-  <a v-if="href" :href="href" :class="outerClass" v-on="$listeners">
+  <div v-if="disabled" :class="outerClass">
+    <div :class="innerClass">
+      <slot />
+    </div>
+  </div>
+  <a v-else-if="href" :href="href" :class="outerClass" v-on="$listeners">
     <div :class="innerClass">
       <slot />
     </div>
@@ -35,13 +40,20 @@ export default Vue.extend({
       type: String as PropType<ButtonType>,
       default: 'primary',
     },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     outerClass() {
       switch (this.variant) {
         case 'secondary':
           return [
-            'bg-likecoin-white',
+            {
+              'bg-likecoin-white': !this.disabled,
+              'bg-likecoin-grey': this.disabled,
+            },
             'text-likecoin-black',
             'h-44px',
             'rounded-[10px]',
@@ -55,8 +67,12 @@ export default Vue.extend({
           ];
         default:
           return [
-            'bg-like-cyan-light',
-            'text-like-green',
+            {
+              'bg-like-cyan-light': !this.disabled,
+              'bg-likecoin-grey': this.disabled,
+              'text-like-green': !this.disabled,
+              'text-likecoin-black': this.disabled,
+            },
             'h-44px',
             'rounded-[10px]',
             'flex',
@@ -81,15 +97,19 @@ export default Vue.extend({
             'h-full',
             'text-center',
             'whitespace-nowrap',
-            'hover:bg-white',
-            'hover:bg-opacity-30',
-            'active:bg-opacity-20',
-            'transition duration-200',
-            'active:bg-like-green',
             'px-[16px]',
             'py-[10px]',
             'w-full',
             'font-semibold',
+            ...(!this.disabled
+              ? [
+                  'hover:bg-white',
+                  'hover:bg-opacity-30',
+                  'active:bg-opacity-20',
+                  'transition duration-200',
+                  'active:bg-like-green',
+                ]
+              : []),
           ];
         default:
           return [
@@ -101,15 +121,19 @@ export default Vue.extend({
             'h-full',
             'text-center',
             'whitespace-nowrap',
-            'hover:bg-white',
-            'hover:bg-opacity-30',
-            'active:bg-opacity-20',
-            'transition duration-200',
-            'active:bg-like-green',
             'px-[16px]',
             'py-[10px]',
             'w-full',
             'font-semibold',
+            ...(!this.disabled
+              ? [
+                  'hover:bg-white',
+                  'hover:bg-opacity-30',
+                  'active:bg-opacity-20',
+                  'transition duration-200',
+                  'active:bg-like-green',
+                ]
+              : []),
           ];
       }
     },

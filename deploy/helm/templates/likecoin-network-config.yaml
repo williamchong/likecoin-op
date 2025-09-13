@@ -5,3 +5,11 @@ metadata:
 data:
   cosmos-likecoin-network.json: |-
 {{ .Files.Get .Values.cosmosLikeCoinNetworkConfig.path | indent 4 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.evmLikeCoinChainConfig.name }}
+data:
+  evm-likecoin-chain.json: |-
+{{ .Files.Get .Values.evmLikeCoinChainConfig.path | indent 4 }}

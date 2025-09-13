@@ -50,6 +50,7 @@ export default {
     '~/plugins/config.ts',
     '~/plugins/apiClient.ts',
     '~/plugins/cosmosNetworkConfig.ts',
+    '~/plugins/evmChainConfig.ts',
     '~/plugins/likeCoinWalletConnector.ts',
     '~/plugins/likeCoinEVMWalletConnector.ts',
     '~/plugins/intercom.ts',
@@ -101,6 +102,7 @@ export default {
       '@likecoin/wallet-connector',
       'libsodium',
       'web3',
+      'ethers',
     ],
   },
 };

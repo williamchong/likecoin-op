@@ -2,6 +2,22 @@
   "app": {
     "title": "LikeCoin 區塊鏈 to Base Chain"
   },
+  "miscellaneous-actions": {
+    "add-chain": {
+      "metamask": {
+        "add-chain": "添加",
+        "description": "要在 MetaMask 上查看 LikeCoin，您需要將 {chainName} ({chainId}) 添加到 MetaMask。"
+      }
+    },
+    "add-tokens": {
+      "likecoin": {
+        "add": "添加",
+        "chain-not-added": "請將 {chainName} ({chainId}) 添加到您的 MetaMask。",
+        "description": "要在您的以太坊錢包上查看 LikeCoin，您需要將 LikeCoin 代幣添加到您的錢包。",
+        "view-on-block-explorer": "在區塊瀏覽器上查看"
+      }
+    }
+  },
   "section": {
     "confirm-by-signing": {
       "message": "請檢查您 ETH 錢包的簽署訊息",

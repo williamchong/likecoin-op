@@ -2,6 +2,22 @@
   "app": {
     "title": "LikeCoin chain to Base Chain"
   },
+  "miscellaneous-actions": {
+    "add-chain": {
+      "metamask": {
+        "add-chain": "Add Chain",
+        "description": "To view LikeCoin on your Metamask, you need to add the {chainName} ({chainId}) to your Metamask."
+      }
+    },
+    "add-tokens": {
+      "likecoin": {
+        "add": "Add",
+        "chain-not-added": "Please add the {chainName} ({chainId}) to your Metamask.",
+        "description": "To view LikeCoin on your Ethereum wallet, you need to add the LikeCoin token to your wallet.",
+        "view-on-block-explorer": "View on Block Explorer"
+      }
+    }
+  },
   "section": {
     "confirm-by-signing": {
       "message": "Please review the sign message from your ETH wallet",

@@ -1,6 +1,9 @@
 cosmosLikeCoinNetworkConfig:
   path: "likeco/cosmos-likecoin-network.json"
 
+evmLikeCoinChainConfig:
+  path: "likeco/evm-likecoin-chain.json"
+
 likecoinMigration:
   container:
     imageRepository: likecoin/likecoin-migration

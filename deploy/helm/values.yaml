@@ -1,6 +1,9 @@
 cosmosLikeCoinNetworkConfig:
   name: likecoin-network
 
+evmLikeCoinChainConfig:
+  name: evm-likecoin-chain
+
 likecoinMigration:
   name: likecoin-migration
 
