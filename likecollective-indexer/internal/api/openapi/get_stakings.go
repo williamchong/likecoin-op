@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"likecollective-indexer/internal/api/openapi/model"
-	"likecollective-indexer/internal/database"
 	"likecollective-indexer/openapi/api"
 )
 
@@ -12,26 +11,21 @@ func (h *openAPIHandler) StakingsGet(
 	ctx context.Context,
 	params api.StakingsGetParams,
 ) (*api.StakingsGetOK, error) {
-	var filterBookNFTIn *[]string
-	var filterAccountIn *[]string
-	if len(params.FilterBookNftIn) > 0 {
-		_filterBookNFTIn := make([]string, len(params.FilterBookNftIn))
-		for _, bookNFT := range params.FilterBookNftIn {
-			_filterBookNFTIn = append(_filterBookNFTIn, string(bookNFT))
-		}
-		filterBookNFTIn = &_filterBookNFTIn
+	filterParams := model.StakingFilterParams{
+		FilterNFTClassIn: params.FilterBookNftIn,
+		FilterAccountIn:  params.FilterAccountIn,
 	}
-	if len(params.FilterAccountIn) > 0 {
-		_filterAccountIn := make([]string, len(params.FilterAccountIn))
-		for _, account := range params.FilterAccountIn {
-			_filterAccountIn = append(_filterAccountIn, string(account))
-		}
-		filterAccountIn = &_filterAccountIn
+
+	pagination := model.StakingPagination{
+		PaginationKey:   params.PaginationKey,
+		PaginationLimit: params.PaginationLimit,
+		Reverse:         params.Reverse,
 	}
 
 	stakings, count, nextKey, err := h.stakingRepository.QueryStakings(
 		ctx,
-		database.NewStakingFilter(filterBookNFTIn, filterAccountIn),
+		filterParams.ToEntFilter(),
+		pagination.ToEntPagination(),
 	)
 
 	if err != nil {

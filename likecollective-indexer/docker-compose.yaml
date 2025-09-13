@@ -1,4 +1,21 @@
 services:
+  psql_bp:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+    healthcheck:
+      test: pg_isready -d ${DB_DATABASE} -U ${DB_USERNAME} -p 5432 -h localhost
+      interval: 1s
+      timeout: 1s
+      retries: 30
+    volumes:
+      - psql_volume_bp:/var/lib/postgresql/data
+
   api:
     profiles: [api]
     image: golang:1.23.5
@@ -12,6 +29,7 @@ services:
     command: go run ./cmd/api
 
 volumes:
+  psql_volume_bp:
   go-build-cache:
     driver: local
   go-mod-cache:

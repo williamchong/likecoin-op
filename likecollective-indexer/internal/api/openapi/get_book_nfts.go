@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"likecollective-indexer/internal/api/openapi/model"
-	"likecollective-indexer/internal/database"
 	"likecollective-indexer/openapi/api"
 )
 
@@ -12,29 +11,30 @@ func (h *openAPIHandler) BookNftsGet(
 	ctx context.Context,
 	params api.BookNftsGetParams,
 ) (*api.BookNftsGetOK, error) {
-	var timeFrameSortBy *database.BookNFTsRequestTimeFrameSortBy
-	var timeFrameSortOrder *database.BookNFTsRequestTimeFrameSortOrder
-	if params.TimeFrameSortBy.IsSet() {
-		_timeFrameSortBy := database.BookNFTsRequestTimeFrameSortBy(params.TimeFrameSortBy.Value)
-		timeFrameSortBy = &_timeFrameSortBy
+	filterParams := model.NFTClassFilterParams{
+		TimeFrame:          params.TimeFrame,
+		TimeFrameSortBy:    params.TimeFrameSortBy,
+		TimeFrameSortOrder: params.TimeFrameSortOrder,
+		FilterBookNftIn:    params.FilterBookNftIn,
+		FilterAccountIn:    params.FilterAccountIn,
 	}
-	if params.TimeFrameSortOrder.IsSet() {
-		_timeFrameSortOrder := database.BookNFTsRequestTimeFrameSortOrder(params.TimeFrameSortOrder.Value)
-		timeFrameSortOrder = &_timeFrameSortOrder
+
+	pagination := model.NFTClassPagination{
+		PaginationKey:   params.PaginationKey,
+		PaginationLimit: params.PaginationLimit,
+		Reverse:         params.Reverse,
 	}
-	bookNFTs, count, nextKey, err := h.bookNFTRepository.QueryBookNFTs(
-		ctx, database.NewQueryBookNFTsFilter(
-			timeFrameSortBy,
-			timeFrameSortOrder,
-		),
+
+	nftClasses, count, nextKey, err := h.nftClassRepository.QueryNFTClasses(
+		ctx, filterParams.ToEntFilter(), pagination.ToEntPagination(),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	apiBookNFTs := make([]api.BookNFT, 0, len(bookNFTs))
-	for _, bookNFT := range bookNFTs {
-		apiBookNFTs = append(apiBookNFTs, model.MakeBookNFT(bookNFT))
+	apiBookNFTs := make([]api.BookNFT, 0, len(nftClasses))
+	for _, nftClass := range nftClasses {
+		apiBookNFTs = append(apiBookNFTs, model.MakeBookNFT(nftClass))
 	}
 
 	return &api.BookNftsGetOK{

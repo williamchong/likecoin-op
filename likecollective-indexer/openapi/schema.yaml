@@ -142,7 +142,6 @@ paths:
           required: false
           schema:
             type: integer
-            nullable: true
             minimum: 1
             maximum: 100
         - $ref: "#/components/parameters/PaginationRequestReverse"
@@ -191,7 +190,6 @@ paths:
           required: false
           schema:
             type: integer
-            nullable: true
             minimum: 1
             maximum: 100
         - $ref: "#/components/parameters/PaginationRequestReverse"
@@ -383,7 +381,6 @@ paths:
           required: false
           schema:
             type: integer
-            nullable: true
             minimum: 1
             maximum: 100
         - $ref: "#/components/parameters/PaginationRequestReverse"
@@ -907,6 +904,8 @@ components:
             - staked
         book_nft:
           $ref: "#/components/schemas/EvmAddress"
+        account:
+          $ref: "#/components/schemas/EvmAddress"
         amount:
           $ref: "#/components/schemas/Uint256"
         datetime:
@@ -915,6 +914,7 @@ components:
       required:
         - event_type
         - book_nft
+        - account
         - amount
         - datetime
 
@@ -927,6 +927,8 @@ components:
             - unstaked
         book_nft:
           $ref: "#/components/schemas/EvmAddress"
+        account:
+          $ref: "#/components/schemas/EvmAddress"
         amount:
           $ref: "#/components/schemas/Uint256"
         datetime:
@@ -935,6 +937,7 @@ components:
       required:
         - event_type
         - book_nft
+        - account
         - amount
         - datetime
 
@@ -947,6 +950,8 @@ components:
             - reward-added
         book_nft:
           $ref: "#/components/schemas/EvmAddress"
+        account:
+          $ref: "#/components/schemas/EvmAddress"
         amount:
           $ref: "#/components/schemas/Uint256"
         datetime:
@@ -955,6 +960,7 @@ components:
       required:
         - event_type
         - book_nft
+        - account
         - amount
         - datetime
 
@@ -967,6 +973,8 @@ components:
             - reward-claimed
         book_nft:
           $ref: "#/components/schemas/EvmAddress"
+        account:
+          $ref: "#/components/schemas/EvmAddress"
         amount:
           $ref: "#/components/schemas/Uint256"
         datetime:
@@ -974,6 +982,7 @@ components:
           format: date-time
       required:
         - event_type
+        - account
         - book_nft
         - amount
         - datetime
@@ -987,6 +996,8 @@ components:
             - reward-deposited
         book_nft:
           $ref: "#/components/schemas/EvmAddress"
+        account:
+          $ref: "#/components/schemas/EvmAddress"
         amount:
           $ref: "#/components/schemas/Uint256"
         datetime:
@@ -995,6 +1006,7 @@ components:
       required:
         - event_type
         - book_nft
+        - account
         - amount
         - datetime
 
@@ -1005,6 +1017,8 @@ components:
           type: string
           enum:
             - all-rewards-claimed
+        account:
+          $ref: "#/components/schemas/EvmAddress"
         claimed_amount_list:
           type: array
           items:
@@ -1025,6 +1039,7 @@ components:
           format: date-time
       required:
         - event_type
+        - account
         - claimed_amount_list
         - datetime
 

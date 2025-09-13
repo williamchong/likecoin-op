@@ -10,6 +10,7 @@ type StakingRepository interface {
 	QueryStakings(
 		ctx context.Context,
 		filter QueryStakingsFilter,
+		pagination StakingPagination,
 	) (stakings []*ent.Staking, count int, nextKey int, err error)
 }
 
@@ -28,18 +29,33 @@ func MakeStakingRepository(
 func (r *stakingRepository) QueryStakings(
 	ctx context.Context,
 	filter QueryStakingsFilter,
+	pagination StakingPagination,
 ) (
 	stakings []*ent.Staking,
 	count int,
 	nextKey int,
 	err error,
 ) {
-	stakings, err = r.dbService.Client().Staking.Query()
+	q := r.dbService.Client().Staking.Query().
+		WithAccount().
+		WithNftClass()
+	q = filter.HandleFilter(q)
+
+	count, err = q.Count(ctx)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+	q = pagination.HandlePagination(q)
+
+	stakings, err = q.All(ctx)
 	if err != nil {
 		return nil, 0, 0, err
 	}
 
-	stakings = filter.HandleFilter(stakings)
+	nextKey = 0
+	if len(stakings) > 0 {
+		nextKey = stakings[len(stakings)-1].ID
+	}
 
-	return stakings, len(stakings), 0, nil
+	return stakings, len(stakings), nextKey, nil
 }

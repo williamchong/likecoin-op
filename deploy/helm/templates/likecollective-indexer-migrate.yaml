@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.name }}
+  name: {{ .Values.likecollectiveIndexer.name }}-migrate
+  namespace: {{ .Values.namespace }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+type: Opaque
+data:
+  DB_DATABASE: {{ .Values.likecollectiveIndexer.env.DB_DATABASE | b64enc | toYaml }}
+  DB_PASSWORD: {{ .Values.likecollectiveIndexer.env.DB_PASSWORD | b64enc | toYaml }}
+  DB_USERNAME: {{ .Values.likecollectiveIndexer.env.DB_USERNAME | b64enc | toYaml }}
+  DB_PORT: {{ .Values.likecollectiveIndexer.env.DB_PORT | b64enc | toYaml }}
+  DB_HOST: {{ .Values.likecollectiveIndexer.env.DB_HOST | b64enc | toYaml }}
+  DB_SCHEMA: {{ .Values.likecollectiveIndexer.env.DB_SCHEMA | b64enc | toYaml }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.name }}
+  name: {{ .Values.likecollectiveIndexer.name }}-migrate
+  namespace: {{ .Values.namespace }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{ .Values.likecollectiveIndexer.name }}
+        image: {{ .Values.likecollectiveIndexer.container.imageRepository }}:{{ .Values.appVersion }}
+        imagePullPolicy: {{ .Values.likecollectiveIndexer.container.imagePullPolicy}}
+        command: ['make', 'migrate-up']
+        envFrom:
+          - secretRef:
+              name: {{ .Values.likecollectiveIndexer.name }}-migrate
+        resources:
+          {{- toYaml .Values.likecollectiveIndexer.resources | nindent 12 }}
+      restartPolicy: "{{ .Values.likecollectiveIndexer.migrate.restartPolicy | default "Never" }}"
+  backoffLimit: {{ .Values.likecollectiveIndexer.migrate.backoffLimit | default 1 }}

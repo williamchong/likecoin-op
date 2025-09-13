@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"likecollective-indexer/internal/api/openapi/model"
-	"likecollective-indexer/internal/database"
 	"likecollective-indexer/openapi/api"
 )
 
@@ -12,28 +11,36 @@ func (h *openAPIHandler) AccountEvmAddressBookNftsGet(
 	ctx context.Context,
 	params api.AccountEvmAddressBookNftsGetParams,
 ) (*api.AccountEvmAddressBookNftsGetOK, error) {
-	var filterBookNFTIn *[]string
-	filterAccountIn := []string{string(params.EvmAddress)}
-	if len(params.FilterBookNftIn) > 0 {
-		_filterBookNFTIn := make([]string, len(params.FilterBookNftIn))
-		for _, bookNFT := range params.FilterBookNftIn {
-			_filterBookNFTIn = append(_filterBookNFTIn, string(bookNFT))
-		}
-		filterBookNFTIn = &_filterBookNFTIn
+	filterParams := model.StakingFilterParams{
+		FilterNFTClassIn: params.FilterBookNftIn,
+		FilterAccountIn:  []api.EvmAddress{params.EvmAddress},
 	}
+
+	pagination := model.StakingPagination{
+		PaginationKey:   params.PaginationKey,
+		PaginationLimit: params.PaginationLimit,
+		Reverse:         params.Reverse,
+	}
+
+	dbFilter := filterParams.ToEntFilter()
 
 	stakings, count, nextKey, err := h.stakingRepository.QueryStakings(
 		ctx,
-		database.NewStakingFilter(filterBookNFTIn, &filterAccountIn),
+		dbFilter,
+		pagination.ToEntPagination(),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	apiStakings := make([]api.Staking, 0, len(stakings))
+	apiStakings := make([]api.AccountBookNFT, 0, len(stakings))
 
 	for _, staking := range stakings {
-		apiStakings = append(apiStakings, model.MakeStaking(staking))
+		apiStaking, err := model.MakeAccountBookNFT(staking)
+		if err != nil {
+			return nil, err
+		}
+		apiStakings = append(apiStakings, apiStaking)
 	}
 
 	return &api.AccountEvmAddressBookNftsGetOK{

@@ -62,6 +62,65 @@ func (s *Account) SetClaimedRewardAmount(val Uint256) {
 	s.ClaimedRewardAmount = val
 }
 
+// Ref: #/components/schemas/AccountBookNFT
+type AccountBookNFT struct {
+	EvmAddress          EvmAddress `json:"evm_address"`
+	PoolShare           float64    `json:"pool_share"`
+	StakedAmount        Uint256    `json:"staked_amount"`
+	PendingRewardAmount Uint256    `json:"pending_reward_amount"`
+	ClaimedRewardAmount Uint256    `json:"claimed_reward_amount"`
+}
+
+// GetEvmAddress returns the value of EvmAddress.
+func (s *AccountBookNFT) GetEvmAddress() EvmAddress {
+	return s.EvmAddress
+}
+
+// GetPoolShare returns the value of PoolShare.
+func (s *AccountBookNFT) GetPoolShare() float64 {
+	return s.PoolShare
+}
+
+// GetStakedAmount returns the value of StakedAmount.
+func (s *AccountBookNFT) GetStakedAmount() Uint256 {
+	return s.StakedAmount
+}
+
+// GetPendingRewardAmount returns the value of PendingRewardAmount.
+func (s *AccountBookNFT) GetPendingRewardAmount() Uint256 {
+	return s.PendingRewardAmount
+}
+
+// GetClaimedRewardAmount returns the value of ClaimedRewardAmount.
+func (s *AccountBookNFT) GetClaimedRewardAmount() Uint256 {
+	return s.ClaimedRewardAmount
+}
+
+// SetEvmAddress sets the value of EvmAddress.
+func (s *AccountBookNFT) SetEvmAddress(val EvmAddress) {
+	s.EvmAddress = val
+}
+
+// SetPoolShare sets the value of PoolShare.
+func (s *AccountBookNFT) SetPoolShare(val float64) {
+	s.PoolShare = val
+}
+
+// SetStakedAmount sets the value of StakedAmount.
+func (s *AccountBookNFT) SetStakedAmount(val Uint256) {
+	s.StakedAmount = val
+}
+
+// SetPendingRewardAmount sets the value of PendingRewardAmount.
+func (s *AccountBookNFT) SetPendingRewardAmount(val Uint256) {
+	s.PendingRewardAmount = val
+}
+
+// SetClaimedRewardAmount sets the value of ClaimedRewardAmount.
+func (s *AccountBookNFT) SetClaimedRewardAmount(val Uint256) {
+	s.ClaimedRewardAmount = val
+}
+
 type AccountBookNFTsRequestSortBy string
 
 const (
@@ -153,7 +212,7 @@ func (s *AccountBookNFTsRequestSortOrder) UnmarshalText(data []byte) error {
 
 type AccountEvmAddressBookNftsGetOK struct {
 	Pagination PaginationResponse `json:"pagination"`
-	Data       []Staking          `json:"data"`
+	Data       []AccountBookNFT   `json:"data"`
 }
 
 // GetPagination returns the value of Pagination.
@@ -162,7 +221,7 @@ func (s *AccountEvmAddressBookNftsGetOK) GetPagination() PaginationResponse {
 }
 
 // GetData returns the value of Data.
-func (s *AccountEvmAddressBookNftsGetOK) GetData() []Staking {
+func (s *AccountEvmAddressBookNftsGetOK) GetData() []AccountBookNFT {
 	return s.Data
 }
 
@@ -172,7 +231,7 @@ func (s *AccountEvmAddressBookNftsGetOK) SetPagination(val PaginationResponse) {
 }
 
 // SetData sets the value of Data.
-func (s *AccountEvmAddressBookNftsGetOK) SetData(val []Staking) {
+func (s *AccountEvmAddressBookNftsGetOK) SetData(val []AccountBookNFT) {
 	s.Data = val
 }
 
@@ -1660,69 +1719,6 @@ func (o OptInt) Or(d int) int {
 	return d
 }
 
-// NewOptNilInt returns new OptNilInt with value set to v.
-func NewOptNilInt(v int) OptNilInt {
-	return OptNilInt{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptNilInt is optional nullable int.
-type OptNilInt struct {
-	Value int
-	Set   bool
-	Null  bool
-}
-
-// IsSet returns true if OptNilInt was set.
-func (o OptNilInt) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptNilInt) Reset() {
-	var v int
-	o.Value = v
-	o.Set = false
-	o.Null = false
-}
-
-// SetTo sets value to v.
-func (o *OptNilInt) SetTo(v int) {
-	o.Set = true
-	o.Null = false
-	o.Value = v
-}
-
-// IsNull returns true if value is Null.
-func (o OptNilInt) IsNull() bool { return o.Null }
-
-// SetToNull sets value to null.
-func (o *OptNilInt) SetToNull() {
-	o.Set = true
-	o.Null = true
-	var v int
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptNilInt) Get() (v int, ok bool) {
-	if o.Null {
-		return v, false
-	}
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptNilInt) Or(d int) int {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptString returns new OptString with value set to v.
 func NewOptString(v string) OptString {
 	return OptString{
@@ -2049,6 +2045,7 @@ func NewStakingEventAllRewardsClaimedStakingEvent(v StakingEventAllRewardsClaime
 // Ref: #/components/schemas/StakingEventAllRewardsClaimed
 type StakingEventAllRewardsClaimed struct {
 	EventType         StakingEventAllRewardsClaimedEventType               `json:"event_type"`
+	Account           EvmAddress                                           `json:"account"`
 	ClaimedAmountList []StakingEventAllRewardsClaimedClaimedAmountListItem `json:"claimed_amount_list"`
 	Datetime          time.Time                                            `json:"datetime"`
 }
@@ -2056,6 +2053,11 @@ type StakingEventAllRewardsClaimed struct {
 // GetEventType returns the value of EventType.
 func (s *StakingEventAllRewardsClaimed) GetEventType() StakingEventAllRewardsClaimedEventType {
 	return s.EventType
+}
+
+// GetAccount returns the value of Account.
+func (s *StakingEventAllRewardsClaimed) GetAccount() EvmAddress {
+	return s.Account
 }
 
 // GetClaimedAmountList returns the value of ClaimedAmountList.
@@ -2073,6 +2075,11 @@ func (s *StakingEventAllRewardsClaimed) SetEventType(val StakingEventAllRewardsC
 	s.EventType = val
 }
 
+// SetAccount sets the value of Account.
+func (s *StakingEventAllRewardsClaimed) SetAccount(val EvmAddress) {
+	s.Account = val
+}
+
 // SetClaimedAmountList sets the value of ClaimedAmountList.
 func (s *StakingEventAllRewardsClaimed) SetClaimedAmountList(val []StakingEventAllRewardsClaimedClaimedAmountListItem) {
 	s.ClaimedAmountList = val
@@ -2084,8 +2091,9 @@ func (s *StakingEventAllRewardsClaimed) SetDatetime(val time.Time) {
 }
 
 type StakingEventAllRewardsClaimedClaimedAmountListItem struct {
-	BookNft EvmAddress `json:"book_nft"`
-	Amount  Uint256    `json:"amount"`
+	BookNft  EvmAddress  `json:"book_nft"`
+	Amount   Uint256     `json:"amount"`
+	Datetime OptDateTime `json:"datetime"`
 }
 
 // GetBookNft returns the value of BookNft.
@@ -2098,6 +2106,11 @@ func (s *StakingEventAllRewardsClaimedClaimedAmountListItem) GetAmount() Uint256
 	return s.Amount
 }
 
+// GetDatetime returns the value of Datetime.
+func (s *StakingEventAllRewardsClaimedClaimedAmountListItem) GetDatetime() OptDateTime {
+	return s.Datetime
+}
+
 // SetBookNft sets the value of BookNft.
 func (s *StakingEventAllRewardsClaimedClaimedAmountListItem) SetBookNft(val EvmAddress) {
 	s.BookNft = val
@@ -2106,6 +2119,11 @@ func (s *StakingEventAllRewardsClaimedClaimedAmountListItem) SetBookNft(val EvmA
 // SetAmount sets the value of Amount.
 func (s *StakingEventAllRewardsClaimedClaimedAmountListItem) SetAmount(val Uint256) {
 	s.Amount = val
+}
+
+// SetDatetime sets the value of Datetime.
+func (s *StakingEventAllRewardsClaimedClaimedAmountListItem) SetDatetime(val OptDateTime) {
+	s.Datetime = val
 }
 
 type StakingEventAllRewardsClaimedEventType string
@@ -2146,6 +2164,7 @@ func (s *StakingEventAllRewardsClaimedEventType) UnmarshalText(data []byte) erro
 type StakingEventRewardAdded struct {
 	EventType StakingEventRewardAddedEventType `json:"event_type"`
 	BookNft   EvmAddress                       `json:"book_nft"`
+	Account   EvmAddress                       `json:"account"`
 	Amount    Uint256                          `json:"amount"`
 	Datetime  time.Time                        `json:"datetime"`
 }
@@ -2158,6 +2177,11 @@ func (s *StakingEventRewardAdded) GetEventType() StakingEventRewardAddedEventTyp
 // GetBookNft returns the value of BookNft.
 func (s *StakingEventRewardAdded) GetBookNft() EvmAddress {
 	return s.BookNft
+}
+
+// GetAccount returns the value of Account.
+func (s *StakingEventRewardAdded) GetAccount() EvmAddress {
+	return s.Account
 }
 
 // GetAmount returns the value of Amount.
@@ -2178,6 +2202,11 @@ func (s *StakingEventRewardAdded) SetEventType(val StakingEventRewardAddedEventT
 // SetBookNft sets the value of BookNft.
 func (s *StakingEventRewardAdded) SetBookNft(val EvmAddress) {
 	s.BookNft = val
+}
+
+// SetAccount sets the value of Account.
+func (s *StakingEventRewardAdded) SetAccount(val EvmAddress) {
+	s.Account = val
 }
 
 // SetAmount sets the value of Amount.
@@ -2228,6 +2257,7 @@ func (s *StakingEventRewardAddedEventType) UnmarshalText(data []byte) error {
 type StakingEventRewardClaimed struct {
 	EventType StakingEventRewardClaimedEventType `json:"event_type"`
 	BookNft   EvmAddress                         `json:"book_nft"`
+	Account   EvmAddress                         `json:"account"`
 	Amount    Uint256                            `json:"amount"`
 	Datetime  time.Time                          `json:"datetime"`
 }
@@ -2240,6 +2270,11 @@ func (s *StakingEventRewardClaimed) GetEventType() StakingEventRewardClaimedEven
 // GetBookNft returns the value of BookNft.
 func (s *StakingEventRewardClaimed) GetBookNft() EvmAddress {
 	return s.BookNft
+}
+
+// GetAccount returns the value of Account.
+func (s *StakingEventRewardClaimed) GetAccount() EvmAddress {
+	return s.Account
 }
 
 // GetAmount returns the value of Amount.
@@ -2260,6 +2295,11 @@ func (s *StakingEventRewardClaimed) SetEventType(val StakingEventRewardClaimedEv
 // SetBookNft sets the value of BookNft.
 func (s *StakingEventRewardClaimed) SetBookNft(val EvmAddress) {
 	s.BookNft = val
+}
+
+// SetAccount sets the value of Account.
+func (s *StakingEventRewardClaimed) SetAccount(val EvmAddress) {
+	s.Account = val
 }
 
 // SetAmount sets the value of Amount.
@@ -2310,6 +2350,7 @@ func (s *StakingEventRewardClaimedEventType) UnmarshalText(data []byte) error {
 type StakingEventRewardDeposited struct {
 	EventType StakingEventRewardDepositedEventType `json:"event_type"`
 	BookNft   EvmAddress                           `json:"book_nft"`
+	Account   EvmAddress                           `json:"account"`
 	Amount    Uint256                              `json:"amount"`
 	Datetime  time.Time                            `json:"datetime"`
 }
@@ -2322,6 +2363,11 @@ func (s *StakingEventRewardDeposited) GetEventType() StakingEventRewardDeposited
 // GetBookNft returns the value of BookNft.
 func (s *StakingEventRewardDeposited) GetBookNft() EvmAddress {
 	return s.BookNft
+}
+
+// GetAccount returns the value of Account.
+func (s *StakingEventRewardDeposited) GetAccount() EvmAddress {
+	return s.Account
 }
 
 // GetAmount returns the value of Amount.
@@ -2342,6 +2388,11 @@ func (s *StakingEventRewardDeposited) SetEventType(val StakingEventRewardDeposit
 // SetBookNft sets the value of BookNft.
 func (s *StakingEventRewardDeposited) SetBookNft(val EvmAddress) {
 	s.BookNft = val
+}
+
+// SetAccount sets the value of Account.
+func (s *StakingEventRewardDeposited) SetAccount(val EvmAddress) {
+	s.Account = val
 }
 
 // SetAmount sets the value of Amount.
@@ -2392,6 +2443,7 @@ func (s *StakingEventRewardDepositedEventType) UnmarshalText(data []byte) error 
 type StakingEventStaked struct {
 	EventType StakingEventStakedEventType `json:"event_type"`
 	BookNft   EvmAddress                  `json:"book_nft"`
+	Account   EvmAddress                  `json:"account"`
 	Amount    Uint256                     `json:"amount"`
 	Datetime  time.Time                   `json:"datetime"`
 }
@@ -2404,6 +2456,11 @@ func (s *StakingEventStaked) GetEventType() StakingEventStakedEventType {
 // GetBookNft returns the value of BookNft.
 func (s *StakingEventStaked) GetBookNft() EvmAddress {
 	return s.BookNft
+}
+
+// GetAccount returns the value of Account.
+func (s *StakingEventStaked) GetAccount() EvmAddress {
+	return s.Account
 }
 
 // GetAmount returns the value of Amount.
@@ -2424,6 +2481,11 @@ func (s *StakingEventStaked) SetEventType(val StakingEventStakedEventType) {
 // SetBookNft sets the value of BookNft.
 func (s *StakingEventStaked) SetBookNft(val EvmAddress) {
 	s.BookNft = val
+}
+
+// SetAccount sets the value of Account.
+func (s *StakingEventStaked) SetAccount(val EvmAddress) {
+	s.Account = val
 }
 
 // SetAmount sets the value of Amount.
@@ -2474,6 +2536,7 @@ func (s *StakingEventStakedEventType) UnmarshalText(data []byte) error {
 type StakingEventUnstaked struct {
 	EventType StakingEventUnstakedEventType `json:"event_type"`
 	BookNft   EvmAddress                    `json:"book_nft"`
+	Account   EvmAddress                    `json:"account"`
 	Amount    Uint256                       `json:"amount"`
 	Datetime  time.Time                     `json:"datetime"`
 }
@@ -2486,6 +2549,11 @@ func (s *StakingEventUnstaked) GetEventType() StakingEventUnstakedEventType {
 // GetBookNft returns the value of BookNft.
 func (s *StakingEventUnstaked) GetBookNft() EvmAddress {
 	return s.BookNft
+}
+
+// GetAccount returns the value of Account.
+func (s *StakingEventUnstaked) GetAccount() EvmAddress {
+	return s.Account
 }
 
 // GetAmount returns the value of Amount.
@@ -2506,6 +2574,11 @@ func (s *StakingEventUnstaked) SetEventType(val StakingEventUnstakedEventType) {
 // SetBookNft sets the value of BookNft.
 func (s *StakingEventUnstaked) SetBookNft(val EvmAddress) {
 	s.BookNft = val
+}
+
+// SetAccount sets the value of Account.
+func (s *StakingEventUnstaked) SetAccount(val EvmAddress) {
+	s.Account = val
 }
 
 // SetAmount sets the value of Amount.

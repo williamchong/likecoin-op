@@ -23,7 +23,7 @@ type AccountEvmAddressBookNftsGetParams struct {
 	// Pagination.key.
 	PaginationKey OptInt
 	// Optional limit for paginated use cases.
-	PaginationLimit OptNilInt
+	PaginationLimit OptInt
 	// Reverse.
 	Reverse         OptBool
 	SortBy          OptAccountBookNFTsRequestSortBy
@@ -54,7 +54,7 @@ func unpackAccountEvmAddressBookNftsGetParams(packed middleware.Parameters) (par
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.PaginationLimit = v.(OptNilInt)
+			params.PaginationLimit = v.(OptInt)
 		}
 	}
 	{
@@ -1192,7 +1192,7 @@ type AccountEvmAddressStakingsGetParams struct {
 	// Pagination.key.
 	PaginationKey OptInt
 	// Optional limit for paginated use cases.
-	PaginationLimit OptNilInt
+	PaginationLimit OptInt
 	// Reverse.
 	Reverse         OptBool
 	FilterBookNftIn []EvmAddress
@@ -1221,7 +1221,7 @@ func unpackAccountEvmAddressStakingsGetParams(packed middleware.Parameters) (par
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.PaginationLimit = v.(OptNilInt)
+			params.PaginationLimit = v.(OptInt)
 		}
 	}
 	{
@@ -2587,7 +2587,7 @@ type BookNftEvmAddressStakingsGetParams struct {
 	// Pagination.key.
 	PaginationKey OptInt
 	// Pagination.limit.
-	PaginationLimit OptNilInt
+	PaginationLimit OptInt
 	// Reverse.
 	Reverse         OptBool
 	FilterAccountIn []EvmAddress
@@ -2616,7 +2616,7 @@ func unpackBookNftEvmAddressStakingsGetParams(packed middleware.Parameters) (par
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.PaginationLimit = v.(OptNilInt)
+			params.PaginationLimit = v.(OptInt)
 		}
 	}
 	{
