@@ -18,6 +18,7 @@ import (
 	cosmosmodel "github.com/likecoin/like-migration-backend/pkg/likenft/cosmos/model"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm/like_protocol"
+	"github.com/likecoin/like-migration-backend/pkg/likenftindexer"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
@@ -28,6 +29,7 @@ func DoNewClassAction(
 	db *sql.DB,
 	c *cosmos.LikeNFTCosmosClient,
 	likecoinAPI *likecoin_api.LikecoinAPI,
+	likenftIndexer likenftindexer.LikeNFTIndexerClient,
 	n *evm.LikeProtocol,
 	a *model.LikeNFTMigrationActionNewClass,
 ) (*model.LikeNFTMigrationActionNewClass, error) {
@@ -140,6 +142,11 @@ func DoNewClassAction(
 	err = appdb.UpdateLikeNFTMigrationActionNewClass(db, a)
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)
+	}
+
+	_, err = likenftIndexer.IndexLikeProtocol(ctx)
+	if err != nil {
+		mylogger.Error("failed to index like protocol", "error", err)
 	}
 
 	go SubmitEvmBookMigrated(
