@@ -78,7 +78,7 @@ migrationBackendOp:
     LIKECOIN_BURNING_COSMOS_ADDRESS: "like15aef08e9skf5stlahddntsn87uuwuvqf4ngr6s"
 
   ingress:
-    prefix: /likenft
+    prefix: /likenft/(.+)
     adminPrefix: /admin/likenft
 
 migrationBackendBase:
@@ -106,7 +106,7 @@ migrationBackendBase:
     LIKECOIN_BURNING_COSMOS_ADDRESS: "like15aef08e9skf5stlahddntsn87uuwuvqf4ngr6s"
 
   ingress:
-    prefix: /likecoin
+    prefix: /likecoin/(.+)
     adminPrefix: /admin/likecoin
 
 signerBackendOp:
