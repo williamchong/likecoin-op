@@ -41,6 +41,8 @@ func HandleIndexActionCheckLikeProtocol(ctx context.Context, t *asynq.Task) erro
 	evmQueryClient := appcontext.EvmQueryClientFromContext(ctx)
 	evmClient := appcontext.EvmClientFromContext(ctx)
 
+	evmClient.InvalidateBlockNumberCache()
+
 	dbService := database.New()
 	likeProtocolRepository := database.MakeLikeProtocolRepository(dbService)
 	evmEventRepository := database.MakeEVMEventRepository(dbService)
