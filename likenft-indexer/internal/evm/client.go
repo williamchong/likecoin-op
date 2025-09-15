@@ -144,3 +144,7 @@ func (c *EvmClient) BlockNumber(ctx context.Context) (uint64, error) {
 	c.blockNumberCache.Set("blockNumber", blockNumber, ttlcache.DefaultTTL)
 	return blockNumber, nil
 }
+
+func (c *EvmClient) InvalidateBlockNumberCache() {
+	c.blockNumberCache.Delete("blockNumber")
+}
