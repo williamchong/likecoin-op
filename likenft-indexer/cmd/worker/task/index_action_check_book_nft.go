@@ -41,6 +41,8 @@ func HandleIndexActionCheckBookNFT(ctx context.Context, t *asynq.Task) error {
 	evmQueryClient := appcontext.EvmQueryClientFromContext(ctx)
 	evmClient := appcontext.EvmClientFromContext(ctx)
 
+	evmClient.InvalidateBlockNumberCache()
+
 	dbService := database.New()
 	nftClassRepository := database.MakeNFTClassRepository(dbService)
 	evmEventRepository := database.MakeEVMEventRepository(dbService)

@@ -12,6 +12,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/cosmosnftidclassifier"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
+	"github.com/likecoin/like-migration-backend/pkg/likenftindexer"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
@@ -30,6 +31,7 @@ func DoPremintAllNFTsActionIfNeeded(
 	likecoinAPI *likecoin_api.LikecoinAPI,
 	likeProtocolEvmClient *evm.LikeProtocol,
 	bookNFTEvmClient *evm.BookNFT,
+	likenftIndexer likenftindexer.LikeNFTIndexerClient,
 	cosmosNFTIDClassifier cosmosnftidclassifier.CosmosNFTIDClassifier,
 	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
@@ -89,6 +91,7 @@ func DoPremintAllNFTsActionIfNeeded(
 				bookNFTEvmClient,
 				likecoinAPI,
 				likenftCosmosClient,
+				likenftIndexer,
 				erc721ExternalURLBuilder,
 				*newClassAction.EvmClassId,
 				expectedSupply,
@@ -133,6 +136,7 @@ func DoPremintAllNFTsActionIfNeeded(
 					likeProtocolEvmClient,
 					bookNFTEvmClient,
 					likenftCosmosClient,
+					likenftIndexer,
 					erc721ExternalURLBuilder,
 					mintNFTAction,
 				)

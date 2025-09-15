@@ -20,6 +20,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/cosmosnftidclassifier"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
+	"github.com/likecoin/like-migration-backend/pkg/likenftindexer"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likenft"
 	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
@@ -110,6 +111,11 @@ var migrateClassByCosmosClassIdCmd = &cobra.Command{
 			envCfg.EthSignerAPIKey,
 		)
 
+		likenftIndexer := likenftindexer.NewLikeNFTIndexerClient(
+			envCfg.LikeNFTIndexerBaseURL,
+			envCfg.LikeNFTIndexerAPIKey,
+		)
+
 		contractAddress := common.HexToAddress(envCfg.EthLikeNFTContractAddress)
 
 		evmLikeNFTClient := evm.NewLikeProtocol(
@@ -150,6 +156,7 @@ var migrateClassByCosmosClassIdCmd = &cobra.Command{
 			likecoinAPI,
 			&evmLikeNFTClient,
 			&evmLikeNFTClassClient,
+			likenftIndexer,
 			cosmosNFTIdClassifier,
 			erc721ExternalURLBuilder,
 			premintAllNFTs,

@@ -15,6 +15,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/cosmostoevmnftmirror"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
+	"github.com/likecoin/like-migration-backend/pkg/likenftindexer"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 	"github.com/likecoin/like-migration-backend/pkg/util/actionlifecycle"
 )
@@ -24,6 +25,9 @@ type BatchMintNFTsFromCosmosAction interface {
 }
 
 type batchMintNFTsFromCosmosAction struct {
+	logger *slog.Logger
+
+	likenftIndexer         likenftindexer.LikeNFTIndexerClient
 	mirror                 cosmostoevmnftmirror.CosmosToEVMNFTMirror
 	cosmosClassIDRetriever CosmosClassIDRetriever
 
@@ -37,6 +41,8 @@ type batchMintNFTsFromCosmosAction struct {
 }
 
 func MakeBatchMintNFTsFromCosmosAction(
+	logger *slog.Logger,
+	likenftIndexer likenftindexer.LikeNFTIndexerClient,
 	mirror cosmostoevmnftmirror.CosmosToEVMNFTMirror,
 	cosmosClassIDRetriever CosmosClassIDRetriever,
 	db *sql.DB,
@@ -47,6 +53,8 @@ func MakeBatchMintNFTsFromCosmosAction(
 	initialBatchMintOwner string,
 ) BatchMintNFTsFromCosmosAction {
 	return &batchMintNFTsFromCosmosAction{
+		logger:                 logger,
+		likenftIndexer:         likenftIndexer,
 		mirror:                 mirror,
 		cosmosClassIDRetriever: cosmosClassIDRetriever,
 		db:                     db,
@@ -100,7 +108,16 @@ func (a *batchMintNFTsFromCosmosAction) Act(ctx context.Context) error {
 		},
 	)
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	_, err = a.likenftIndexer.IndexBookNFT(ctx, a.evmClassId)
+	if err != nil {
+		a.logger.Error("failed to index book nft", "error", err)
+	}
+
+	return nil
 }
 
 func DoBatchMintNFTsFromCosmosAction(
@@ -112,6 +129,7 @@ func DoBatchMintNFTsFromCosmosAction(
 	bookNFTEvmClient *evm.BookNFT,
 	likecoinAPI *likecoin_api.LikecoinAPI,
 	likeNFTCosmosClient *cosmos.LikeNFTCosmosClient,
+	likenftIndexer likenftindexer.LikeNFTIndexerClient,
 	externalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
 	evmClassId string,
@@ -125,6 +143,8 @@ func DoBatchMintNFTsFromCosmosAction(
 	}
 
 	doAction := MakeBatchMintNFTsFromCosmosAction(
+		logger,
+		likenftIndexer,
 		cosmostoevmnftmirror.MakeCosmosToEVMNFTMirror(
 			logger,
 			nftidmatcher.MakeNFTIDMatcher(),

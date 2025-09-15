@@ -18,6 +18,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/event"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
+	"github.com/likecoin/like-migration-backend/pkg/likenftindexer"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
@@ -29,6 +30,7 @@ func DoMintNFTAction(
 	p *evm.LikeProtocol,
 	c *evm.BookNFT,
 	m *cosmos.LikeNFTCosmosClient,
+	likenftIndexer likenftindexer.LikeNFTIndexerClient,
 	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
 	a *model.LikeNFTMigrationActionMintNFT,
@@ -157,6 +159,10 @@ func DoMintNFTAction(
 	err = appdb.UpdateLikeNFTMigrationActionMintNFT(db, a)
 	if err != nil {
 		return nil, doMintNFTActionFailed(db, a, err)
+	}
+	_, err = likenftIndexer.IndexBookNFT(ctx, a.EvmClassId)
+	if err != nil {
+		mylogger.Error("failed to index book nft", "error", err)
 	}
 	return a, nil
 }

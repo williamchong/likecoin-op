@@ -12,6 +12,7 @@ import (
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/evm"
+	"github.com/likecoin/like-migration-backend/pkg/likenftindexer"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
@@ -22,6 +23,7 @@ func DoTransferClassAction(
 	db *sql.DB,
 	c *cosmos.LikeNFTCosmosClient,
 	n *evm.BookNFT,
+	likenftIndexer likenftindexer.LikeNFTIndexerClient,
 	a *model.LikeNFTMigrationActionTransferClass,
 ) (*model.LikeNFTMigrationActionTransferClass, error) {
 	mylogger := logger.
@@ -59,6 +61,10 @@ func DoTransferClassAction(
 	err = appdb.UpdateLikeNFTMigrationActionTransferClass(db, a)
 	if err != nil {
 		return nil, doTransferClassActionFailed(db, a, err)
+	}
+	_, err = likenftIndexer.IndexBookNFT(ctx, a.EvmClassId)
+	if err != nil {
+		mylogger.Error("failed to index book nft", "error", err)
 	}
 	return a, nil
 }

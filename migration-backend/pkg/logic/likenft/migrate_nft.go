@@ -15,6 +15,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/cosmosnftidclassifier"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/erc721externalurl"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/util/nftidmatcher"
+	"github.com/likecoin/like-migration-backend/pkg/likenftindexer"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 )
 
@@ -27,6 +28,7 @@ func MigrateNFTFromAssetMigration(
 	likecoinAPI *likecoin_api.LikecoinAPI,
 	p *evm.LikeProtocol,
 	n *evm.BookNFT,
+	likenftIndexer likenftindexer.LikeNFTIndexerClient,
 	cosmosNFTIDClassifier cosmosnftidclassifier.CosmosNFTIDClassifier,
 	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
@@ -71,6 +73,7 @@ func MigrateNFTFromAssetMigration(
 		likecoinAPI,
 		p,
 		n,
+		likenftIndexer,
 		cosmosNFTIDClassifier,
 		erc721ExternalURLBuilder,
 		shouldPremintAllNFTs,
@@ -112,6 +115,7 @@ func MigrateNFT(
 	likecoinAPI *likecoin_api.LikecoinAPI,
 	p *evm.LikeProtocol,
 	n *evm.BookNFT,
+	likenftIndexer likenftindexer.LikeNFTIndexerClient,
 	cosmosNFTIDClassifier cosmosnftidclassifier.CosmosNFTIDClassifier,
 	erc721ExternalURLBuilder erc721externalurl.ERC721ExternalURLBuilder,
 
@@ -174,6 +178,7 @@ func MigrateNFT(
 		db,
 		c,
 		likecoinAPI,
+		likenftIndexer,
 		p,
 		newClassAction,
 	)
@@ -189,6 +194,7 @@ func MigrateNFT(
 		likecoinAPI,
 		p,
 		n,
+		likenftIndexer,
 		cosmosNFTIDClassifier,
 		erc721ExternalURLBuilder,
 		premintAllNFTsShouldPremintArbitraryNFTIDs,
@@ -214,6 +220,7 @@ func MigrateNFT(
 			n,
 			likecoinAPI,
 			c,
+			likenftIndexer,
 			erc721ExternalURLBuilder,
 			*newClassAction.EvmClassId,
 			expectedSupply,
@@ -244,6 +251,7 @@ func MigrateNFT(
 		p,
 		n,
 		c,
+		likenftIndexer,
 		erc721ExternalURLBuilder,
 		mintNFTAction,
 	)
