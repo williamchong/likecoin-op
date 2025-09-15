@@ -92,6 +92,13 @@ spec:
                 name: {{ .Values.migrationAdmin.name }}
                 port:
                   number: {{ .Values.migrationAdmin.service.port }}
+          - path: {{ .Values.migrationBackendOp.ingress.prefix }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.migrationBackendOp.name }}
+                port:
+                  number: {{ .Values.migrationBackendOp.service.port }}
           - path: {{ .Values.migrationBackendOp.ingress.adminPrefix }}
             pathType: ImplementationSpecific
             backend:
@@ -99,6 +106,13 @@ spec:
                 name: {{ .Values.migrationBackendOp.name }}
                 port:
                   number: {{ .Values.migrationBackendOp.service.port }}
+          - path: {{ .Values.migrationBackendBase.ingress.prefix }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.migrationBackendBase.name }}
+                port:
+                  number: {{ .Values.migrationBackendBase.service.port }}
           - path: {{ .Values.migrationBackendBase.ingress.adminPrefix }}
             pathType: ImplementationSpecific
             backend:
@@ -106,31 +120,17 @@ spec:
                 name: {{ .Values.migrationBackendBase.name }}
                 port:
                   number: {{ .Values.migrationBackendBase.service.port }}
-          - path: /likenft/migration
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ .Values.migrationBackendOp.name }}
-                port:
-                  number: {{ .Values.migrationBackendOp.service.port }}
     - host: {{ .Values.migrationBackend.ingress.host }}
+      # This is for permission control of /admin API of api domain used
       http:
         paths:
-          - path: {{ .Values.migrationBackendOp.ingress.adminPrefix }}
+          - path: {{ .Values.migrationBackend.ingress.adminPrefix }}
             pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.migrationBackendOp.name }}
                 port:
                   number: {{ .Values.migrationBackendOp.service.port }}
-        paths:
-          - path: {{ .Values.migrationBackendBase.ingress.adminPrefix }}
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ .Values.migrationBackendBase.name }}
-                port:
-                  number: {{ .Values.migrationBackendBase.service.port }}
   tls:
     - hosts:
         - {{ .Values.migrationAdmin.ingress.tls.host }}
@@ -160,6 +160,14 @@ spec:
     - host: {{ .Values.migrationBackend.ingress.host }}
       http:
         paths:
+          # Default to use OP backend for user related migration.
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.migrationBackendOp.name }}
+                port:
+                  number: {{ .Values.migrationBackendOp.service.port }}
           - path: {{ .Values.migrationBackendOp.ingress.prefix }}
             pathType: ImplementationSpecific
             backend:

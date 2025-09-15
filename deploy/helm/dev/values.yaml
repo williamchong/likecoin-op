@@ -50,6 +50,7 @@ migrationBackend:
     tls:
       secretName: like-migration-api.pandawork.com
       host: like-migration-api.pandawork.com
+    adminPrefix: /admin
 
 migrationBackendOp:
   container:
@@ -76,6 +77,10 @@ migrationBackendOp:
     ERC721_METADATA_EXTERNAL_URL_BASE_3OOK: "https://sepolia.3ook.com/store"
     LIKECOIN_BURNING_COSMOS_ADDRESS: "like15aef08e9skf5stlahddntsn87uuwuvqf4ngr6s"
 
+  ingress:
+    prefix: /likenft
+    adminPrefix: /admin/likenft
+
 migrationBackendBase:
   container:
     imageRepository: oursky/like-migration-backend
@@ -90,7 +95,6 @@ migrationBackendBase:
     ETH_LIKENFT_CONTRACT_ADDRESS: "0x67BCd74981c33E95E5e306085754DD0A721183F1"
     LIKECOIN_API_URL_BASE: https://api.rinkeby.like.co
     LIKECOIN_API_HTTP_TIMEOUT_SECONDS: "60"
-    LIKENFT_INDEXER_BASE_URL: http://likenft-indexer
     WORKER_CONCURRENCY: "1"
     INITIAL_NEW_CLASS_OWNER: "0xA515ffD6A6889f2CCCb576cEcA2a33f60129eBFD"
     INITIAL_NEW_CLASS_MINTERS: "0xA515ffD6A6889f2CCCb576cEcA2a33f60129eBFD,0xaaAC16B7c910f9e5236DC12eF8Db72Abc90D62c4"
