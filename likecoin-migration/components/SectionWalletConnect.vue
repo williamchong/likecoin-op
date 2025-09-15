@@ -12,12 +12,7 @@
     <div :class="['flex-1']">
       <div v-if="cosmosAddress == null">
         <h3
-          :class="[
-            'text-base',
-            'font-semibold',
-            'text-likecoin-votecolor-yes',
-            'mb-3',
-          ]"
+          :class="['text-base', 'font-semibold', 'text-likecoin-black', 'mb-3']"
         >
           {{ $t('section.wallet-connect.likecoin-wallet') }}
         </h3>
@@ -102,12 +97,7 @@
     <div :class="['flex-1']">
       <div v-if="ethAddress == null">
         <h3
-          :class="[
-            'text-base',
-            'font-semibold',
-            'text-likecoin-votecolor-yes',
-            'mb-3',
-          ]"
+          :class="['text-base', 'font-semibold', 'text-likecoin-black', 'mb-3']"
         >
           {{ $t('section.wallet-connect.migration-wallet') }}
         </h3>

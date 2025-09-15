@@ -123,7 +123,11 @@
               </span>
             </div>
             <p :class="['mt-1', 'text-sm', 'text-likecoin-darkgrey']">
-              {{ $t('section.migration-progress.receiving.description') }}
+              {{
+                $t('section.migration-progress.receiving.description', {
+                  amount: migrationAmountViewCoin.amount,
+                })
+              }}
             </p>
             <div
               :class="['flex', 'flex-row', 'items-center', 'mt-2', 'gap-2.5']"
@@ -177,7 +181,11 @@
               </span>
             </div>
             <p :class="['mt-1', 'text-sm', 'text-likecoin-darkgrey']">
-              {{ $t('section.migration-progress.minting.description') }}
+              {{
+                $t('section.migration-progress.minting.description', {
+                  amount: migrationAmountViewCoin.amount,
+                })
+              }}
             </p>
             <div
               :class="['flex', 'flex-row', 'items-center', 'mt-2', 'gap-2.5']"
@@ -246,7 +254,11 @@
 import Vue, { PropType } from 'vue';
 
 import { LikeCoinMigrationStatus } from '~/apis/models/likeCoinMigration';
-import { ChainCoin } from '~/models/cosmosNetworkConfig';
+import {
+  ChainCoin,
+  convertChainCoinToViewCoin,
+  ViewCoin,
+} from '~/models/cosmosNetworkConfig';
 import { SupportedIcon } from '~/models/faIcon';
 
 type StepState = 'pending' | 'success' | 'failed';
@@ -325,6 +337,10 @@ export default Vue.extend({
       type: String as PropType<LikeCoinMigrationStatus>,
       required: true,
     },
+    migrationAmount: {
+      type: Object as PropType<ChainCoin>,
+      required: true,
+    },
     cosmosTxHash: {
       type: String as PropType<string | null>,
       default: null,
@@ -362,6 +378,13 @@ export default Vue.extend({
             ? 'circle-xmark'
             : 'circle-check',
       };
+    },
+
+    migrationAmountViewCoin(): ViewCoin {
+      return convertChainCoinToViewCoin(
+        this.migrationAmount,
+        this.$cosmosNetworkConfig
+      );
     },
 
     completedAndHasEstimatedBalance() {

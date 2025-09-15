@@ -7,7 +7,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/getsentry/sentry-go"
 	"github.com/likecoin/like-migration-backend/pkg/handler"
+	"github.com/likecoin/like-migration-backend/pkg/likecoin/cosmos"
+	"github.com/likecoin/like-migration-backend/pkg/likecoin/evm"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likecoin"
+	"github.com/shopspring/decimal"
 )
 
 type CreateSigningMessageRequestBody struct {
@@ -19,6 +22,8 @@ type CreateSigningMessageResponseBody struct {
 }
 
 type CreateEthSigningMessageHandler struct {
+	EvmLikeCoinClient    *evm.LikeCoin
+	CosmosLikcCoinClient *cosmos.LikeCoin
 }
 
 func (h *CreateEthSigningMessageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -53,5 +58,13 @@ func (h *CreateEthSigningMessageHandler) handle(req *CreateSigningMessageRequest
 	if err != nil {
 		return "", err
 	}
-	return likecoin.GetEthSigningMessage(amount), nil
+	oldDecimals, err := h.CosmosLikcCoinClient.Decimals()
+
+	if err != nil {
+		return "", err
+	}
+
+	evmAmountDecimal := decimal.NewFromBigInt(amount.Amount.BigInt(), -int32(oldDecimals))
+
+	return likecoin.GetEthSigningMessage(evmAmountDecimal), nil
 }

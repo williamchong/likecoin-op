@@ -26,6 +26,8 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/handler/likenft"
 	"github.com/likecoin/like-migration-backend/pkg/handler/user"
 	likecoin_api "github.com/likecoin/like-migration-backend/pkg/likecoin/api"
+	cosmoslikecoin "github.com/likecoin/like-migration-backend/pkg/likecoin/cosmos"
+	"github.com/likecoin/like-migration-backend/pkg/likecoin/cosmos/model"
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/evm"
 	"github.com/likecoin/like-migration-backend/pkg/likenft/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/middleware"
@@ -97,6 +99,27 @@ func main() {
 		envCfg.EthSignerAPIKey,
 	)
 
+	cosmosLikeCoinNetworkConfigData, err := os.ReadFile(
+		envCfg.CosmosLikeCoinNetworkConfigPath,
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	cosmosLikeCoinNetworkConfig, err := model.LoadNetworkConfig(
+		cosmosLikeCoinNetworkConfigData,
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	cosmosLikeCoinClient := cosmoslikecoin.NewLikeCoin(
+		logger,
+		cosmosLikeCoinNetworkConfig,
+	)
+
 	evmLikeCoinClient, err := evm.NewLikeCoin(
 		logger,
 		ethClient,
@@ -139,6 +162,7 @@ func main() {
 		AsynqClient:                  asynqClient,
 		Signer:                       signer,
 		EvmLikeCoinClient:            evmLikeCoinClient,
+		CosmosLikcCoinClient:         cosmosLikeCoinClient,
 		LikecoinBurningCosmosAddress: envCfg.LikecoinBurningCosmosAddress,
 	}
 	mainMux.Handle("/likecoin/", http.StripPrefix("/likecoin", likeCoinRouter.Router()))
