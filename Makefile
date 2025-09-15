@@ -29,8 +29,11 @@ abigen:
 	jq '.abi' likenft/artifacts/contracts/BookNFT.sol/BookNFT.json > abi/BookNFT.abi.json
 	cp likecoin3/artifacts/contracts/Likecoin.sol/Likecoin.json abi/
 	jq '.abi' likecoin3/artifacts/contracts/Likecoin.sol/Likecoin.json > abi/Likecoin.abi.json
+	cp likecoin3/artifacts/contracts/LikeCollective.sol/LikeCollective.json abi/
+	jq '.abi' likecoin3/artifacts/contracts/LikeCollective.sol/LikeCollective.json > abi/LikeCollective.abi.json
 	make -C likenft-indexer abigen
 	make -C migration-backend abigen
+	make -C likecollective-indexer abigen
 
 .PHONY: setup
 setup:
