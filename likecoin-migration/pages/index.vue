@@ -54,7 +54,7 @@
               {{ $t('section.connect-wallet.title') }}
             </h2>
           </template>
-          <template #current>
+          <template v-if="currentStep.step === 2" #current>
             <SectionWalletConnect
               :class="['mt-2.5', 'mb-4']"
               :liker-id="likerId"
@@ -69,10 +69,7 @@
               @likeCoinEVMWalletConnected="handleLikeCoinEVMWalletConnected"
             />
             <SectionErrorRow
-              v-if="
-                currentStep.step === 2 &&
-                currentStep.state === 'EvmPoolBalanceInsufficient'
-              "
+              v-if="currentStep.state === 'EvmPoolBalanceInsufficient'"
               :class="['mt-2.5', 'mb-4']"
               :error-message="
                 $t('section.wallet-connect-error.pool-balance-insufficient')
@@ -80,6 +77,30 @@
               :retry-button-text="$t('section.wallet-connect-error.retry')"
               @retryClick="
                 handleEvmPoolBalanceInsufficientRetryClick(currentStep)
+              "
+            />
+            <SectionErrorRow
+              v-if="currentStep.state === 'InsufficientCurrentBalance'"
+              :class="['mt-2.5', 'mb-4']"
+              :error-message="
+                $t('section.wallet-connect-error.insufficient-current-balance')
+              "
+              :retry-button-text="$t('section.wallet-connect-error.retry')"
+              @retryClick="
+                handleInsufficientCurrentBalanceRetryClick(currentStep)
+              "
+            />
+            <SectionErrorRow
+              v-if="currentStep.state === 'InsufficientEstimatedBalance'"
+              :class="['mt-2.5', 'mb-4']"
+              :error-message="
+                $t(
+                  'section.wallet-connect-error.insufficient-estimated-balance'
+                )
+              "
+              :retry-button-text="$t('section.wallet-connect-error.retry')"
+              @retryClick="
+                handleInsufficientEstimatedBalanceRetryClick(currentStep)
               "
             />
           </template>
@@ -280,7 +301,9 @@ import {
   authcoreRedirected,
   authcoreRedirectionFailed,
   completedMigrationResolved,
+  currentBalanceInsufficient,
   EitherEthConnected,
+  estimatedBalanceInsufficient,
   EthConnected,
   ethSignConfirming,
   evmConnected,
@@ -290,6 +313,8 @@ import {
   failedMigrationResolved,
   gasEstimated,
   initCosmosConnected,
+  insufficientCurrentBalanceRetried,
+  insufficientEstimatedBalanceRetried,
   introductionConfirmed,
   isEthConnected,
   likerIdResolved,
@@ -306,6 +331,8 @@ import {
   StepStateStep2EvmPoolBalanceSufficient,
   StepStateStep2GasEstimated,
   StepStateStep2Init,
+  StepStateStep2InsufficientCurrentBalance,
+  StepStateStep2InsufficientEstimatedBalance,
   StepStateStep2LikerIdResolved,
   StepStateStep3AwaitSignature,
   StepStateStep4Failed,
@@ -535,7 +562,11 @@ export default Vue.extend({
         );
       }
 
-      if (this.currentStep.state === 'GasEstimated') {
+      if (
+        this.currentStep.state === 'GasEstimated' ||
+        this.currentStep.state === 'InsufficientCurrentBalance' ||
+        this.currentStep.state === 'InsufficientEstimatedBalance'
+      ) {
         this.currentStep = await this._asyncStateTransition(
           this.currentStep,
           this._getLatestMigration
@@ -593,7 +624,11 @@ export default Vue.extend({
         );
       }
 
-      if (this.currentStep.state === 'GasEstimated') {
+      if (
+        this.currentStep.state === 'GasEstimated' ||
+        this.currentStep.state === 'InsufficientCurrentBalance' ||
+        this.currentStep.state === 'InsufficientEstimatedBalance'
+      ) {
         this.currentStep = await this._asyncStateTransition(
           this.currentStep,
           this._getLatestMigration
@@ -660,6 +695,18 @@ export default Vue.extend({
       s: EitherEthConnected<StepStateStep2EvmPoolBalanceInsufficient>
     ) {
       this.currentStep = evmPoolBalanceInsufficientRetried(s);
+    },
+
+    handleInsufficientCurrentBalanceRetryClick(
+      s: EitherEthConnected<StepStateStep2InsufficientCurrentBalance>
+    ) {
+      this.currentStep = insufficientCurrentBalanceRetried(s);
+    },
+
+    handleInsufficientEstimatedBalanceRetryClick(
+      s: EitherEthConnected<StepStateStep2InsufficientEstimatedBalance>
+    ) {
+      this.currentStep = insufficientEstimatedBalanceRetried(s);
     },
 
     async handleEvmSigned(signature: string) {
@@ -807,7 +854,11 @@ export default Vue.extend({
 
     async _estimateBalance(
       s: EitherEthConnected<StepStateStep2LikerIdResolved>
-    ): Promise<EitherEthConnected<StepStateStep2GasEstimated>> {
+    ): Promise<
+      | EitherEthConnected<StepStateStep2InsufficientCurrentBalance>
+      | EitherEthConnected<StepStateStep2InsufficientEstimatedBalance>
+      | EitherEthConnected<StepStateStep2GasEstimated>
+    > {
       const { offlineSigner } = s.connection;
       const client = await SigningStargateClient.connectWithSigner(
         this.$likeCoinWalletConnector.options.rpcURL,
@@ -821,6 +872,10 @@ export default Vue.extend({
               s.cosmosAddress,
               this.$cosmosNetworkConfig.coinLookup[0].chainDenom
             )) as unknown as ChainCoin);
+
+      if (Decimal(balance.amount).equals(Decimal(0))) {
+        return currentBalanceInsufficient(s, client, balance);
+      }
 
       const cosmosMemoData = await this.createCosmosMemoData({
         ethAddress: isEthConnected(s) ? s.ethAddress : `0x${'0'.repeat(40)}`,
@@ -857,13 +912,28 @@ export default Vue.extend({
         ).toString(),
       };
 
+      if (Decimal(estimatedBalance.amount).equals(Decimal(0))) {
+        return estimatedBalanceInsufficient(
+          s,
+          client,
+          balance,
+          estimatedBalance,
+          gasEstimation
+        );
+      }
+
       return gasEstimated(s, client, balance, gasEstimation, estimatedBalance);
     },
 
     async _getLatestMigration(
-      prev: EitherEthConnected<StepStateStep2GasEstimated>
+      prev:
+        | EitherEthConnected<StepStateStep2GasEstimated>
+        | EitherEthConnected<StepStateStep2InsufficientCurrentBalance>
+        | EitherEthConnected<StepStateStep2InsufficientEstimatedBalance>
     ): Promise<
       | EitherEthConnected<StepStateStep2GasEstimated>
+      | EitherEthConnected<StepStateStep2InsufficientCurrentBalance>
+      | EitherEthConnected<StepStateStep2InsufficientEstimatedBalance>
       | StepStateStep4Pending
       | StepStateStep4Polling
       | StepStateStep4Failed
@@ -989,6 +1059,8 @@ export default Vue.extend({
     _resolveMigration(
       prev:
         | EitherEthConnected<StepStateStep2GasEstimated>
+        | EitherEthConnected<StepStateStep2InsufficientCurrentBalance>
+        | EitherEthConnected<StepStateStep2InsufficientEstimatedBalance>
         | StepStateStep3AwaitSignature
         | StepStateStep4Pending
         | StepStateStep4Polling,

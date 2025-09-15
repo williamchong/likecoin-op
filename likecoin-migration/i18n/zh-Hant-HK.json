@@ -73,6 +73,8 @@
       "migration-wallet": "轉換對應錢包"
     },
     "wallet-connect-error": {
+      "insufficient-current-balance": "錢包中沒有 LikeCoin v2 token",
+      "insufficient-estimated-balance": "不會收到 LikeCoin v3 token",
       "pool-balance-insufficient": "抱歉，我們沒有足夠的餘額來完成您的請求。請聯繫支援。",
       "retry": "連接其他錢包"
     }

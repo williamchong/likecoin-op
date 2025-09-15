@@ -73,6 +73,8 @@
       "migration-wallet": "Migration Wallet"
     },
     "wallet-connect-error": {
+      "insufficient-current-balance": "No LikeCoin v2 token in the wallet",
+      "insufficient-estimated-balance": "No LikeCoin v3 token will be received",
       "pool-balance-insufficient": "Sorry, we don't have sufficient balance to complete your request. Please contact support.",
       "retry": "Connect Another Wallet"
     }
