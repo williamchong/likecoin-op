@@ -36,6 +36,10 @@
       "title": "簡介"
     },
     "migration-completed": {
+      "messages": {
+        "p1": "恭喜，你的 LikeCoin 已經升級至 v3。",
+        "p2": "請到 {link} 質押 LikeCoin 到你支持的書目，讓優秀的作品傳得更遠，同時賺取利潤。"
+      },
       "title": "升級完成"
     },
     "migration-progress": {

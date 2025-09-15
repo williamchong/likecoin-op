@@ -238,6 +238,23 @@
           >
             {{ $t('section.migration-completed.title') }}
           </h2>
+          <div
+            v-if="!isFuture()"
+            :class="['flex', 'flex-col', 'gap-2.5', 'mt-2.5']"
+          >
+            <p :class="['text-sm', 'text-likecoin-darkgrey']">
+              {{ $t('section.migration-completed.messages.p1') }}
+            </p>
+            <i18n
+              path="section.migration-completed.messages.p2"
+              tag="p"
+              :class="['text-sm', 'text-likecoin-darkgrey']"
+            >
+              <a place="link" href="https://stake.3ook.com" target="_blank">
+                https://stake.3ook.com
+              </a>
+            </i18n>
+          </div>
           <MiscellaneousActions v-if="!isFuture()" :class="['mt-2.5']" />
         </StepSection>
       </div>

@@ -36,6 +36,10 @@
       "title": "Introduction"
     },
     "migration-completed": {
+      "messages": {
+        "p1": "Congratulations, your LikeCoin has been upgraded to v3.",
+        "p2": "Please stake LikeCoin at {link} to support your favorite books and earn profits."
+      },
       "title": "Migration Completed"
     },
     "migration-progress": {
