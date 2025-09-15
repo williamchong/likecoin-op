@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "LikeCoin 區塊鏈 to Base Chain"
+    "title": "LikeCoin v3 Token 升級程式"
   },
   "miscellaneous-actions": {
     "add-chain": {
@@ -31,34 +31,34 @@
       "retry": "重試"
     },
     "introduction": {
-      "confirm": "確認",
-      "text": "LikeCoin 已經升級 v3，同步遷移至以太坊 Base Chain。請盡早升級你於 v2 的 LikeCoin、電子書及 Writing NFT，以免被遺落。",
+      "confirm": "下一步",
+      "text": "LikeCoin 已經升級 v3 並遷移至以太坊 Base 鏈。請於 2025 年 12 月 31 日前升級你於 LikeCoin v2 token、以免招至損失。",
       "title": "簡介"
     },
     "migration-completed": {
-      "title": "轉換完成"
+      "title": "升級完成"
     },
     "migration-progress": {
       "balance-remaining-message": "尚有餘額，您要重新開始轉換嗎？",
       "minting": {
-        "description": "在 Base Chain上轉移等值的代幣",
-        "title": "鑄造中"
+        "description": "發送 {amount} LikeCoin v3 tokens",
+        "title": "發送中"
       },
       "pending": {
         "description": "已收到請求，等待簽署",
         "title": "等待中"
       },
       "receiving": {
-        "description": "驗證轉換合約中的餘額",
+        "description": "接收 {amount} LikeCoin v2 token",
         "title": "接收中"
       },
       "restart": "重新開始",
       "retry": "重試",
       "status": "狀態",
-      "title": "轉換進度",
+      "title": "升級進度",
       "verified": {
         "description": "已在 Base Chain 鏈上完成轉換",
-        "title": "已驗證"
+        "title": "完成"
       }
     },
     "wallet-connect": {
@@ -68,9 +68,9 @@
       "current-balance": "目前餘額",
       "estimated-balance": "預估餘額",
       "eth-address": "ETH 地址",
-      "likecoin-wallet": "LikeCoin 錢包",
+      "likecoin-wallet": "v2",
       "liker-id": "Liker ID",
-      "migration-wallet": "轉換對應錢包"
+      "migration-wallet": "v3"
     },
     "wallet-connect-error": {
       "insufficient-current-balance": "錢包中沒有 LikeCoin v2 token",

@@ -15,7 +15,7 @@
           :class="[
             'text-base',
             'font-semibold',
-            'text-likecoin-votecolor-yes',
+            'text-likecoin-black',
             'mb-3',
           ]"
         >
@@ -105,7 +105,7 @@
           :class="[
             'text-base',
             'font-semibold',
-            'text-likecoin-votecolor-yes',
+            'text-likecoin-black',
             'mb-3',
           ]"
         >

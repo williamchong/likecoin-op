@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "LikeCoin chain to Base Chain"
+    "title": "LikeCoin v3 Token Migration"
   },
   "miscellaneous-actions": {
     "add-chain": {
@@ -31,8 +31,8 @@
       "retry": "Retry"
     },
     "introduction": {
-      "confirm": "Confirm",
-      "text": "LikeCoin has upgraded to v3 and migrated to Ethereum Base Chain. Please upgrade your v2 LikeCoin, BookNFTs, and Writing NFTs as soon as possible to avoid being left behind.",
+      "confirm": "Next",
+      "text": "LikeCoin token has upgraded to v3 and launched on Base chain of Ethereum. Please upgrade your LikeCoin v2 token before Dec 31, 2025 avoid loss of fund.",
       "title": "Introduction"
     },
     "migration-completed": {
@@ -41,7 +41,7 @@
     "migration-progress": {
       "balance-remaining-message": "There are still balance left, do you want to restart the migration?",
       "minting": {
-        "description": "Transferring equivalent tokens on Base network",
+        "description": "Sending {amount} LikeCoin v3 tokens",
         "title": "Minting"
       },
       "pending": {
@@ -49,7 +49,7 @@
         "title": "Pending"
       },
       "receiving": {
-        "description": "Verifying balance at migration contract",
+        "description": "Receiving {amount} LikeCoin v2 token",
         "title": "Receiving"
       },
       "restart": "Restart",
@@ -68,9 +68,9 @@
       "current-balance": "Current Balance",
       "estimated-balance": "Estimated Balance",
       "eth-address": "ETH Address",
-      "likecoin-wallet": "LikeCoin Wallet",
+      "likecoin-wallet": "v2",
       "liker-id": "Liker ID",
-      "migration-wallet": "Migration Wallet"
+      "migration-wallet": "v3"
     },
     "wallet-connect-error": {
       "insufficient-current-balance": "No LikeCoin v2 token in the wallet",
