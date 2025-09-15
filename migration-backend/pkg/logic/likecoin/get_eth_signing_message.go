@@ -3,11 +3,12 @@ package likecoin
 import (
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/types"
+	"github.com/shopspring/decimal"
 )
 
-func GetEthSigningMessage(amount types.Coin) string {
-	return fmt.Sprintf(`You are going to deposit %v to migration program.
-
-This sign make sure the address is correct.`, amount.String())
+func GetEthSigningMessage(evmAmountDecimal decimal.Decimal) string {
+	return fmt.Sprintf(
+		"This is the wallet I shall use to hold %v LikeCoin v3 tokens after migration.",
+		evmAmountDecimal.String(),
+	)
 }

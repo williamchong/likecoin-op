@@ -6,6 +6,7 @@ import (
 
 	"github.com/hibiken/asynq"
 
+	"github.com/likecoin/like-migration-backend/pkg/likecoin/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/evm"
 	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
@@ -15,6 +16,7 @@ type MigrationRouter struct {
 	AsynqClient                  *asynq.Client
 	Signer                       *signer.SignerClient
 	EvmLikeCoinClient            *evm.LikeCoin
+	CosmosLikcCoinClient         *cosmos.LikeCoin
 	LikecoinBurningCosmosAddress string
 }
 
@@ -27,7 +29,10 @@ func (h *MigrationRouter) Router() *http.ServeMux {
 		EvmLikeCoinClient: h.EvmLikeCoinClient,
 	})
 
-	router.Handle("POST /migration/eth-signing-message", &CreateEthSigningMessageHandler{})
+	router.Handle("POST /migration/eth-signing-message", &CreateEthSigningMessageHandler{
+		EvmLikeCoinClient:    h.EvmLikeCoinClient,
+		CosmosLikcCoinClient: h.CosmosLikcCoinClient,
+	})
 	router.Handle("POST /migration/cosmos-memo-data", &CreateCosmosMemoDataHandler{})
 	router.Handle("GET /migration/{cosmosWalletAddress}", &GetLatestLikeCoinMigrationHandler{
 		Db: h.Db,

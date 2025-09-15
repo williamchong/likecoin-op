@@ -19,6 +19,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/evm"
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/util"
 	"github.com/likecoin/like-migration-backend/pkg/model"
+	"github.com/shopspring/decimal"
 )
 
 var ErrAlreadyInProgress = fmt.Errorf("err already in progress")
@@ -103,7 +104,30 @@ func DoMintLikeCoin(
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
-	message := GetEthSigningMessage(memo.Amount)
+	cosmosCoinDb, err := types.ParseCoinNormalized(a.Amount)
+
+	if err != nil {
+		mylogger.Error("types.ParseCoinNormalized(a.Amount)", "err", err)
+		return nil, doMintLikeCoinFailed(db, a, err)
+	}
+
+	cosmosCoinMemo := memo.Amount
+
+	if cosmosCoinMemo.Amount != cosmosCoinDb.Amount && cosmosCoinMemo.Denom != cosmosCoinDb.Denom {
+		mylogger.Error("coin not matched", "err", ErrAmountNotMatch)
+		return nil, doMintLikeCoinFailed(db, a, ErrAmountNotMatch)
+	}
+
+	oldDecimals, err := cosmosLikcCoinClient.Decimals()
+
+	if err != nil {
+		mylogger.Error("cosmosLikcCoinClient.Decimal", "err", err)
+		return nil, doMintLikeCoinFailed(db, a, err)
+	}
+
+	evmAmountDecimal := decimal.NewFromBigInt(cosmosCoinMemo.Amount.BigInt(), -int32(oldDecimals))
+
+	message := GetEthSigningMessage(evmAmountDecimal)
 
 	recoveredAddr, err := ethereum.RecoverAddress(memo.Signature, []byte(message))
 	if err != nil {
@@ -141,31 +165,11 @@ func DoMintLikeCoin(
 		txLogger = txLogger.With("BeforeBalance", beforeBalance.String())
 	}
 
-	cosmosCoinMemo := memo.Amount
-	cosmosCoinDb, err := types.ParseCoinNormalized(a.Amount)
-
-	if err != nil {
-		mylogger.Error("types.ParseCoinNormalized(a.Amount)", "err", err)
-		return nil, doMintLikeCoinFailed(db, a, err)
-	}
-
-	if cosmosCoinMemo.Amount != cosmosCoinDb.Amount && cosmosCoinMemo.Denom != cosmosCoinDb.Denom {
-		mylogger.Error("coin not matched", "err", ErrAmountNotMatch)
-		return nil, doMintLikeCoinFailed(db, a, ErrAmountNotMatch)
-	}
-
 	a.Status = model.LikeCoinMigrationStatusEvmMinting
 	err = appdb.UpdateLikeCoinMigration(db, a)
 
 	if err != nil {
 		mylogger.Error("appdb.UpdateLikeCoinMigration", "err", err)
-		return nil, doMintLikeCoinFailed(db, a, err)
-	}
-
-	oldDecimals, err := cosmosLikcCoinClient.Decimals()
-
-	if err != nil {
-		mylogger.Error("cosmosLikcCoinClient.Decimal", "err", err)
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
@@ -178,6 +182,11 @@ func DoMintLikeCoin(
 
 	evmAmount, err := util.ConvertAmountByDecimals(
 		cosmosCoinDb.Amount, oldDecimals, newDecimals)
+
+	if err != nil {
+		mylogger.Error("util.ConvertAmountByDecimals", "err", err)
+		return nil, doMintLikeCoinFailed(db, a, err)
+	}
 
 	txLogger = txLogger.With(
 		"cosmosCoin", cosmosCoinDb.String(),
@@ -193,11 +202,6 @@ func DoMintLikeCoin(
 		"newDecimals", newDecimals,
 		"evmAmount", evmAmount.String(),
 	)
-
-	if err != nil {
-		mylogger.Error("util.ConvertAmountByDecimals", "err", err)
-		return nil, doMintLikeCoinFailed(db, a, err)
-	}
 
 	tx, _, err := evmLikeCoinClient.TransferTo(
 		ctx, mylogger, *recoveredAddr, evmAmount,
