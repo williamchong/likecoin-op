@@ -15,12 +15,7 @@ func (h *OpenAPIHandler) IndexActionBookNftBooknftIDPost(
 	ctx context.Context,
 	params api.IndexActionBookNftBooknftIDPostParams,
 ) (*api.IndexActionBookNftBooknftIDPostOK, error) {
-	nftClass, err := h.nftClassRepository.QueryNFTClassByAddress(ctx, params.BooknftID)
-	if err != nil {
-		return nil, err
-	}
-
-	task, err := task.NewIndexActionCheckBookNFTTask(nftClass.Address)
+	task, err := task.NewIndexActionCheckBookNFTTask(params.BooknftID)
 	if err != nil {
 		return nil, err
 	}
