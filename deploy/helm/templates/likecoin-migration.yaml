@@ -63,6 +63,9 @@ spec:
           - name: cosmos-likecoin-network-config
             mountPath: /usr/share/nginx/html/cosmos-likecoin-network.json
             subPath: cosmos-likecoin-network.json
+          - name: evm-likecoin-network-config
+            mountPath: /usr/share/nginx/html/evm-likecoin-chain.json
+            subPath: evm-likecoin-chain.json
         resources:
           {{- toYaml .Values.likecoinMigration.resources | nindent 12 }}
       volumes:
@@ -75,3 +78,6 @@ spec:
         - name: cosmos-likecoin-network-config
           configMap:
             name: {{ .Values.cosmosLikeCoinNetworkConfig.name }}
+        - name: evm-likecoin-network-config
+          configMap:
+            name: {{ .Values.evmLikeCoinChainConfig.name }}
