@@ -19,7 +19,8 @@ type NFTClass struct {
 func (NFTClass) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("address").NotEmpty().Immutable(),
-		field.Uint64("staked_amount").GoType(typeutil.Typ).
+		field.Uint64("staked_amount").
+			GoType(typeutil.Uint256Type).
 			SchemaType(typeutil.Uint256SchemaType).
 			ValueScanner(typeutil.Uint256ValueScanner).
 			Annotations(typeutil.Uint256Annotations("staked_amount")...),
@@ -34,9 +35,6 @@ func (NFTClass) Edges() []ent.Edge {
 		edge.From("accounts", Account.Type).
 			Through("stakings", Staking.Type).
 			Ref("nft_classes").
-			Immutable(),
-		edge.From("staking_events", StakingEvent.Type).
-			Ref("nft_class").
 			Immutable(),
 	}
 }

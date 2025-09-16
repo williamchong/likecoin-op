@@ -4,6 +4,7 @@ import (
 	"likecollective-indexer/ent/schema/typeutil"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -19,16 +20,20 @@ func (Staking) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("nft_class_id").Immutable(),
 		field.Int("account_id").Immutable(),
-		field.String("pool_share").NotEmpty(),
-		field.Uint64("staked_amount").GoType(typeutil.Typ).
+		field.String("pool_share").Optional().
+			Annotations(entsql.Annotation{Default: "0"}),
+		field.Uint64("staked_amount").
+			GoType(typeutil.Uint256Type).
 			SchemaType(typeutil.Uint256SchemaType).
 			ValueScanner(typeutil.Uint256ValueScanner).
 			Annotations(typeutil.Uint256Annotations("staked_amount")...),
-		field.Uint64("pending_reward_amount").GoType(typeutil.Typ).
+		field.Uint64("pending_reward_amount").
+			GoType(typeutil.Uint256Type).
 			SchemaType(typeutil.Uint256SchemaType).
 			ValueScanner(typeutil.Uint256ValueScanner).
 			Annotations(typeutil.Uint256Annotations("pending_reward_amount")...),
-		field.Uint64("claimed_reward_amount").GoType(typeutil.Typ).
+		field.Uint64("claimed_reward_amount").
+			GoType(typeutil.Uint256Type).
 			SchemaType(typeutil.Uint256SchemaType).
 			ValueScanner(typeutil.Uint256ValueScanner).
 			Annotations(typeutil.Uint256Annotations("claimed_reward_amount")...),
