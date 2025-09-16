@@ -120,6 +120,12 @@ contract LikeCollective is
         CollectiveData storage $ = _getCollectiveData();
         $.likeStakePosition = LikeStakePosition(likeStakePosition);
     }
+
+    function _authorizeUpgrade(
+        address _newImplementation
+    ) internal override onlyOwner {
+        // TODO: Add any additional authorization logic if needed
+    }
     // End Admin functions
 
     // Private View functions
@@ -238,6 +244,44 @@ contract LikeCollective is
         emit AllRewardClaimed(_msgSender(), rewards);
     }
 
+    function restakeRewardPosition(
+        uint256 tokenId
+    ) external whenNotPaused nonReentrant {
+        CollectiveData storage $ = _getCollectiveData();
+        address owner = $.likeStakePosition.ownerOf(tokenId);
+        if (owner != _msgSender()) revert ErrInvalidOwner();
+
+        LikeStakePosition.Position memory position = $
+            .likeStakePosition
+            .getPosition(tokenId);
+        uint256 pendingRewards = _pendingRewardsOf(tokenId);
+        address bookNFT = position.bookNFT;
+        PoolData storage pool = $.pools[bookNFT];
+
+        pool.rewardPending -= pendingRewards;
+        pool.totalRewarded += pendingRewards;
+        pool.rewardIndexes[tokenId] = pool.rewardIndex;
+        $.likeStakePosition.updatePosition(
+            tokenId,
+            position.stakedAmount + pendingRewards,
+            pool.rewardIndex
+        );
+
+        emit RewardClaimed(bookNFT, _msgSender(), pendingRewards);
+        emit Staked(bookNFT, _msgSender(), pendingRewards);
+    }
+
+    function depositReward(
+        address bookNFT,
+        uint256 amount
+    ) external whenNotPaused {
+        CollectiveData storage $ = _getCollectiveData();
+        $.likecoin.transferFrom(_msgSender(), address(this), amount);
+        PoolData storage pool = $.pools[bookNFT];
+        pool.rewardPending += amount;
+        pool.rewardIndex += (amount * ACC_REWARD_PRECISION) / pool.totalStaked;
+        emit RewardDeposited(bookNFT, _msgSender(), amount);
+    }
     function getStakeForUser(
         address user,
         address bookNFT
@@ -289,33 +333,4 @@ contract LikeCollective is
     }
 
     // solhint-enable no-unused-vars
-
-    function depositReward(
-        address bookNFT,
-        uint256 amount
-    ) external whenNotPaused {
-        CollectiveData storage $ = _getCollectiveData();
-        $.likecoin.transferFrom(_msgSender(), address(this), amount);
-        PoolData storage pool = $.pools[bookNFT];
-        pool.rewardPending += amount;
-        pool.rewardIndex += (amount * ACC_REWARD_PRECISION) / pool.totalStaked;
-        emit RewardDeposited(bookNFT, _msgSender(), amount);
-    }
-
-    function restakeReward(
-        address bookNFT
-    ) external whenNotPaused nonReentrant {
-        // TODO: Implement restake reward logic
-        // - Calculate pending rewards
-        // - Add rewards to user's stake
-        // - Update pending rewards
-        // - Emit Staked event for restaked amount
-        emit Staked(bookNFT, _msgSender(), 0);
-    }
-
-    function _authorizeUpgrade(
-        address _newImplementation
-    ) internal override onlyOwner {
-        // TODO: Add any additional authorization logic if needed
-    }
 }

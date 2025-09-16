@@ -484,4 +484,74 @@ describe("LikeCollective", async function () {
       );
     });
   });
+
+  describe("Restake reward", async function () {
+    it("should allow to restake reward", async function () {
+      const { likeCollective, rick, bob, likeStakePosition, likecoin, kin } =
+        await loadFixture(deployCollective);
+      const mockBookNFT = "0x1234567890123456789012345678901245678901";
+      const amount = 2000n * 10n ** 6n;
+      const reward = 1000n * 10n ** 6n;
+
+      const nextTokenId = await likeStakePosition.read.getNextTokenId();
+      await likecoin.write.approve([likeCollective.address, amount], {
+        account: rick.account,
+      });
+      await likeCollective.write.stake([mockBookNFT, amount], {
+        account: rick.account,
+      });
+
+      await likecoin.write.approve([likeCollective.address, reward], {
+        account: kin.account,
+      });
+      await likeCollective.write.depositReward([mockBookNFT, reward], {
+        account: kin.account,
+      });
+
+      await likeCollective.write.restakeRewardPosition([nextTokenId], {
+        account: rick.account,
+      });
+      expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
+        8000n * 10n ** 6n,
+      );
+      expect(
+        await likeCollective.read.pendingRewardsOf([nextTokenId]),
+      ).to.equal(0n);
+      expect(
+        await likeCollective.read.getStakeForUser([
+          rick.account.address,
+          mockBookNFT,
+        ]),
+      ).to.equal(amount + reward);
+    });
+
+    it("should not allow to restake reward for non-owner", async function () {
+      const { likeCollective, rick, bob, likeStakePosition, likecoin, kin } =
+        await loadFixture(deployCollective);
+      const mockBookNFT = "0x1234567890123456789012345678901245678901";
+      const amount = 2000n * 10n ** 6n;
+      const reward = 1000n * 10n ** 6n;
+
+      const nextTokenId = await likeStakePosition.read.getNextTokenId();
+      await likecoin.write.approve([likeCollective.address, amount], {
+        account: rick.account,
+      });
+      await likeCollective.write.stake([mockBookNFT, amount], {
+        account: rick.account,
+      });
+
+      await likecoin.write.approve([likeCollective.address, reward], {
+        account: kin.account,
+      });
+      await likeCollective.write.depositReward([mockBookNFT, reward], {
+        account: kin.account,
+      });
+
+      await expect(
+        likeCollective.write.restakeRewardPosition([nextTokenId], {
+          account: bob.account,
+        }),
+      ).to.be.rejectedWith("ErrInvalidOwner()");
+    });
+  });
 });
