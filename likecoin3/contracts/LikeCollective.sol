@@ -194,21 +194,6 @@ contract LikeCollective is
         emit Unstaked(bookNFT, _msgSender(), amount);
     }
 
-    function unstake(
-        address bookNFT,
-        uint256 amount
-    ) external whenNotPaused nonReentrant {
-        // TODO: Implement unstake logic
-        // - Validate bookNFT and sufficient stake
-        // - Update user stakes and total stakes
-        // - Transfer tokens back to user
-        // - Emit Unstaked event
-        CollectiveData storage $ = _getCollectiveData();
-        // $.likeStakePosition.burnPosition(tokenId);
-        $.likecoin.transfer(_msgSender(), amount);
-        emit Unstaked(bookNFT, _msgSender(), amount);
-    }
-
     function claimRewards(address bookNFT) external whenNotPaused nonReentrant {
         CollectiveData storage $ = _getCollectiveData();
         uint256[] memory positions = $
@@ -227,14 +212,29 @@ contract LikeCollective is
         }
     }
 
-    // solhint-disable no-unused-vars
-    function claimAllRewards() external whenNotPaused nonReentrant {
-        // TODO: Implement claim all rewards logic
-        // - Iterate through all bookNFTs user has stakes in
-        // - Calculate and claim rewards for each
-        // - Emit AllRewardClaimed event
-        RewardData[] memory rewards = new RewardData[](1);
-        rewards[0] = RewardData({bookNFT: address(0), rewardedAmount: 0});
+    function claimAllRewards(address user) external whenNotPaused nonReentrant {
+        if (user != _msgSender()) revert ErrInvalidOwner();
+        CollectiveData storage $ = _getCollectiveData();
+        uint256[] memory positions = $.likeStakePosition.getUserPositions(user);
+        uint256 totalRewards = 0;
+        RewardData[] memory rewards = new RewardData[](positions.length);
+        for (uint256 i = 0; i < positions.length; ++i) {
+            uint256 p = positions[i];
+            uint256 pendingRewards = _pendingRewardsOf(p);
+            address bookNFT = $.likeStakePosition.getPosition(p).bookNFT;
+
+            PoolData storage pool = $.pools[bookNFT];
+            pool.rewardPending -= pendingRewards;
+            pool.totalRewarded += pendingRewards;
+            pool.rewardIndexes[p] = pool.rewardIndex;
+            $.likeStakePosition.updatePositionRewardIndex(p, pool.rewardIndex);
+            rewards[i] = RewardData({
+                bookNFT: bookNFT,
+                rewardedAmount: pendingRewards
+            });
+            totalRewards += pendingRewards;
+        }
+        $.likecoin.transfer(_msgSender(), totalRewards);
         emit AllRewardClaimed(_msgSender(), rewards);
     }
 

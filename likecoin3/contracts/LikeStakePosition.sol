@@ -208,6 +208,7 @@ contract LikeStakePosition is
         address user
     ) external view returns (uint256[] memory positions) {
         uint256 balance = balanceOf(user);
+        positions = new uint256[](balance);
         for (uint256 i = 0; i < balance; ++i) {
             positions[i] = tokenOfOwnerByIndex(user, i);
         }

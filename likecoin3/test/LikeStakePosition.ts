@@ -179,6 +179,103 @@ describe("LikeStakePosition", async function () {
       });
       await expect(likeStakePosition.read.ownerOf([1n])).to.be.rejected; // token no longer exists
     });
+
+    it("should track user positions correctly", async function () {
+      const { likeStakePosition, deployer, rick } =
+        await loadFixture(deployLSP);
+      const mockBookNFT = "0x1234567890123456789012345678901234567890";
+
+      await likeStakePosition.write.setManager([deployer.account.address], {
+        account: deployer.account,
+      });
+      await likeStakePosition.write.mintPosition(
+        [rick.account.address, mockBookNFT, 42n, 0n],
+        { account: deployer.account },
+      );
+      await likeStakePosition.write.mintPosition(
+        [rick.account.address, mockBookNFT, 42n, 0n],
+        { account: deployer.account },
+      );
+      await likeStakePosition.write.mintPosition(
+        [rick.account.address, mockBookNFT, 42n, 0n],
+        { account: deployer.account },
+      );
+
+      const balanceOf = await likeStakePosition.read.balanceOf([
+        rick.account.address,
+      ]);
+      expect(balanceOf).to.equal(3n);
+      const firsttokenId = await likeStakePosition.read.tokenOfOwnerByIndex([
+        rick.account.address,
+        0n,
+      ]);
+      expect(firsttokenId).to.equal(1n);
+      const secondtokenId = await likeStakePosition.read.tokenOfOwnerByIndex([
+        rick.account.address,
+        1n,
+      ]);
+      expect(secondtokenId).to.equal(2n);
+      const thirdtokenId = await likeStakePosition.read.tokenOfOwnerByIndex([
+        rick.account.address,
+        2n,
+      ]);
+      expect(thirdtokenId).to.equal(3n);
+
+      const positions = await likeStakePosition.read.getUserPositions([
+        rick.account.address,
+      ]);
+      expect(positions.length).to.equal(3);
+      expect(positions[0]).to.equal(1n);
+      expect(positions[1]).to.equal(2n);
+      expect(positions[2]).to.equal(3n);
+    });
+
+    it("should track user positions correct even after transfer", async function () {
+      const { likeStakePosition, deployer, rick, kin } =
+        await loadFixture(deployLSP);
+      const mockBookNFT = "0x1234567890123456789012345678901234567890";
+
+      await likeStakePosition.write.setManager([deployer.account.address], {
+        account: deployer.account,
+      });
+      await likeStakePosition.write.mintPosition(
+        [rick.account.address, mockBookNFT, 42n, 0n],
+        { account: deployer.account },
+      );
+      await likeStakePosition.write.mintPosition(
+        [rick.account.address, mockBookNFT, 42n, 0n],
+        { account: deployer.account },
+      );
+      await likeStakePosition.write.mintPosition(
+        [rick.account.address, mockBookNFT, 42n, 0n],
+        { account: deployer.account },
+      );
+
+      expect(
+        await likeStakePosition.read.balanceOf([rick.account.address]),
+      ).to.equal(3n);
+      await likeStakePosition.write.transferFrom(
+        [rick.account.address, kin.account.address, 1n],
+        { account: rick.account },
+      );
+      expect(
+        await likeStakePosition.read.balanceOf([rick.account.address]),
+      ).to.equal(2n);
+      expect(
+        await likeStakePosition.read.balanceOf([kin.account.address]),
+      ).to.equal(1n);
+
+      const positions = await likeStakePosition.read.getUserPositions([
+        rick.account.address,
+      ]);
+      expect(positions.length).to.equal(2);
+
+      const positionsBob = await likeStakePosition.read.getUserPositions([
+        kin.account.address,
+      ]);
+      expect(positionsBob.length).to.equal(1);
+      expect(positionsBob[0]).to.equal(1n);
+    });
   });
 
   describe("Token URI behavior", async function () {
