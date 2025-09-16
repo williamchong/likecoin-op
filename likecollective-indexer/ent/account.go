@@ -35,13 +35,11 @@ type Account struct {
 type AccountEdges struct {
 	// NftClasses holds the value of the nft_classes edge.
 	NftClasses []*NFTClass `json:"nft_classes,omitempty"`
-	// StakingEvents holds the value of the staking_events edge.
-	StakingEvents []*StakingEvent `json:"staking_events,omitempty"`
 	// Stakings holds the value of the stakings edge.
 	Stakings []*Staking `json:"stakings,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [2]bool
 }
 
 // NftClassesOrErr returns the NftClasses value or an error if the edge
@@ -53,19 +51,10 @@ func (e AccountEdges) NftClassesOrErr() ([]*NFTClass, error) {
 	return nil, &NotLoadedError{edge: "nft_classes"}
 }
 
-// StakingEventsOrErr returns the StakingEvents value or an error if the edge
-// was not loaded in eager-loading.
-func (e AccountEdges) StakingEventsOrErr() ([]*StakingEvent, error) {
-	if e.loadedTypes[1] {
-		return e.StakingEvents, nil
-	}
-	return nil, &NotLoadedError{edge: "staking_events"}
-}
-
 // StakingsOrErr returns the Stakings value or an error if the edge
 // was not loaded in eager-loading.
 func (e AccountEdges) StakingsOrErr() ([]*Staking, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[1] {
 		return e.Stakings, nil
 	}
 	return nil, &NotLoadedError{edge: "stakings"}
@@ -147,11 +136,6 @@ func (_m *Account) Value(name string) (ent.Value, error) {
 // QueryNftClasses queries the "nft_classes" edge of the Account entity.
 func (_m *Account) QueryNftClasses() *NFTClassQuery {
 	return NewAccountClient(_m.config).QueryNftClasses(_m)
-}
-
-// QueryStakingEvents queries the "staking_events" edge of the Account entity.
-func (_m *Account) QueryStakingEvents() *StakingEventQuery {
-	return NewAccountClient(_m.config).QueryStakingEvents(_m)
 }
 
 // QueryStakings queries the "stakings" edge of the Account entity.

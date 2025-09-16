@@ -50,9 +50,6 @@ type AccountMutation struct {
 	nft_classes           map[int]struct{}
 	removednft_classes    map[int]struct{}
 	clearednft_classes    bool
-	staking_events        map[int]struct{}
-	removedstaking_events map[int]struct{}
-	clearedstaking_events bool
 	stakings              map[int]struct{}
 	removedstakings       map[int]struct{}
 	clearedstakings       bool
@@ -357,60 +354,6 @@ func (m *AccountMutation) ResetNftClasses() {
 	m.removednft_classes = nil
 }
 
-// AddStakingEventIDs adds the "staking_events" edge to the StakingEvent entity by ids.
-func (m *AccountMutation) AddStakingEventIDs(ids ...int) {
-	if m.staking_events == nil {
-		m.staking_events = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.staking_events[ids[i]] = struct{}{}
-	}
-}
-
-// ClearStakingEvents clears the "staking_events" edge to the StakingEvent entity.
-func (m *AccountMutation) ClearStakingEvents() {
-	m.clearedstaking_events = true
-}
-
-// StakingEventsCleared reports if the "staking_events" edge to the StakingEvent entity was cleared.
-func (m *AccountMutation) StakingEventsCleared() bool {
-	return m.clearedstaking_events
-}
-
-// RemoveStakingEventIDs removes the "staking_events" edge to the StakingEvent entity by IDs.
-func (m *AccountMutation) RemoveStakingEventIDs(ids ...int) {
-	if m.removedstaking_events == nil {
-		m.removedstaking_events = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.staking_events, ids[i])
-		m.removedstaking_events[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedStakingEvents returns the removed IDs of the "staking_events" edge to the StakingEvent entity.
-func (m *AccountMutation) RemovedStakingEventsIDs() (ids []int) {
-	for id := range m.removedstaking_events {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// StakingEventsIDs returns the "staking_events" edge IDs in the mutation.
-func (m *AccountMutation) StakingEventsIDs() (ids []int) {
-	for id := range m.staking_events {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetStakingEvents resets all changes to the "staking_events" edge.
-func (m *AccountMutation) ResetStakingEvents() {
-	m.staking_events = nil
-	m.clearedstaking_events = false
-	m.removedstaking_events = nil
-}
-
 // AddStakingIDs adds the "stakings" edge to the Staking entity by ids.
 func (m *AccountMutation) AddStakingIDs(ids ...int) {
 	if m.stakings == nil {
@@ -652,12 +595,9 @@ func (m *AccountMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *AccountMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.nft_classes != nil {
 		edges = append(edges, account.EdgeNftClasses)
-	}
-	if m.staking_events != nil {
-		edges = append(edges, account.EdgeStakingEvents)
 	}
 	if m.stakings != nil {
 		edges = append(edges, account.EdgeStakings)
@@ -675,12 +615,6 @@ func (m *AccountMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case account.EdgeStakingEvents:
-		ids := make([]ent.Value, 0, len(m.staking_events))
-		for id := range m.staking_events {
-			ids = append(ids, id)
-		}
-		return ids
 	case account.EdgeStakings:
 		ids := make([]ent.Value, 0, len(m.stakings))
 		for id := range m.stakings {
@@ -693,12 +627,9 @@ func (m *AccountMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *AccountMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.removednft_classes != nil {
 		edges = append(edges, account.EdgeNftClasses)
-	}
-	if m.removedstaking_events != nil {
-		edges = append(edges, account.EdgeStakingEvents)
 	}
 	if m.removedstakings != nil {
 		edges = append(edges, account.EdgeStakings)
@@ -716,12 +647,6 @@ func (m *AccountMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case account.EdgeStakingEvents:
-		ids := make([]ent.Value, 0, len(m.removedstaking_events))
-		for id := range m.removedstaking_events {
-			ids = append(ids, id)
-		}
-		return ids
 	case account.EdgeStakings:
 		ids := make([]ent.Value, 0, len(m.removedstakings))
 		for id := range m.removedstakings {
@@ -734,12 +659,9 @@ func (m *AccountMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *AccountMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.clearednft_classes {
 		edges = append(edges, account.EdgeNftClasses)
-	}
-	if m.clearedstaking_events {
-		edges = append(edges, account.EdgeStakingEvents)
 	}
 	if m.clearedstakings {
 		edges = append(edges, account.EdgeStakings)
@@ -753,8 +675,6 @@ func (m *AccountMutation) EdgeCleared(name string) bool {
 	switch name {
 	case account.EdgeNftClasses:
 		return m.clearednft_classes
-	case account.EdgeStakingEvents:
-		return m.clearedstaking_events
 	case account.EdgeStakings:
 		return m.clearedstakings
 	}
@@ -775,9 +695,6 @@ func (m *AccountMutation) ResetEdge(name string) error {
 	switch name {
 	case account.EdgeNftClasses:
 		m.ResetNftClasses()
-		return nil
-	case account.EdgeStakingEvents:
-		m.ResetStakingEvents()
 		return nil
 	case account.EdgeStakings:
 		m.ResetStakings()
@@ -2720,27 +2637,24 @@ func (m *EVMEventMutation) ResetEdge(name string) error {
 // NFTClassMutation represents an operation that mutates the NFTClass nodes in the graph.
 type NFTClassMutation struct {
 	config
-	op                    Op
-	typ                   string
-	id                    *int
-	address               *string
-	staked_amount         *typeutil.Uint256
-	last_staked_at        *time.Time
-	number_of_stakers     *uint64
-	addnumber_of_stakers  *int64
-	clearedFields         map[string]struct{}
-	accounts              map[int]struct{}
-	removedaccounts       map[int]struct{}
-	clearedaccounts       bool
-	staking_events        map[int]struct{}
-	removedstaking_events map[int]struct{}
-	clearedstaking_events bool
-	stakings              map[int]struct{}
-	removedstakings       map[int]struct{}
-	clearedstakings       bool
-	done                  bool
-	oldValue              func(context.Context) (*NFTClass, error)
-	predicates            []predicate.NFTClass
+	op                   Op
+	typ                  string
+	id                   *int
+	address              *string
+	staked_amount        *typeutil.Uint256
+	last_staked_at       *time.Time
+	number_of_stakers    *uint64
+	addnumber_of_stakers *int64
+	clearedFields        map[string]struct{}
+	accounts             map[int]struct{}
+	removedaccounts      map[int]struct{}
+	clearedaccounts      bool
+	stakings             map[int]struct{}
+	removedstakings      map[int]struct{}
+	clearedstakings      bool
+	done                 bool
+	oldValue             func(context.Context) (*NFTClass, error)
+	predicates           []predicate.NFTClass
 }
 
 var _ ent.Mutation = (*NFTClassMutation)(nil)
@@ -3059,60 +2973,6 @@ func (m *NFTClassMutation) ResetAccounts() {
 	m.removedaccounts = nil
 }
 
-// AddStakingEventIDs adds the "staking_events" edge to the StakingEvent entity by ids.
-func (m *NFTClassMutation) AddStakingEventIDs(ids ...int) {
-	if m.staking_events == nil {
-		m.staking_events = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.staking_events[ids[i]] = struct{}{}
-	}
-}
-
-// ClearStakingEvents clears the "staking_events" edge to the StakingEvent entity.
-func (m *NFTClassMutation) ClearStakingEvents() {
-	m.clearedstaking_events = true
-}
-
-// StakingEventsCleared reports if the "staking_events" edge to the StakingEvent entity was cleared.
-func (m *NFTClassMutation) StakingEventsCleared() bool {
-	return m.clearedstaking_events
-}
-
-// RemoveStakingEventIDs removes the "staking_events" edge to the StakingEvent entity by IDs.
-func (m *NFTClassMutation) RemoveStakingEventIDs(ids ...int) {
-	if m.removedstaking_events == nil {
-		m.removedstaking_events = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.staking_events, ids[i])
-		m.removedstaking_events[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedStakingEvents returns the removed IDs of the "staking_events" edge to the StakingEvent entity.
-func (m *NFTClassMutation) RemovedStakingEventsIDs() (ids []int) {
-	for id := range m.removedstaking_events {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// StakingEventsIDs returns the "staking_events" edge IDs in the mutation.
-func (m *NFTClassMutation) StakingEventsIDs() (ids []int) {
-	for id := range m.staking_events {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetStakingEvents resets all changes to the "staking_events" edge.
-func (m *NFTClassMutation) ResetStakingEvents() {
-	m.staking_events = nil
-	m.clearedstaking_events = false
-	m.removedstaking_events = nil
-}
-
 // AddStakingIDs adds the "stakings" edge to the Staking entity by ids.
 func (m *NFTClassMutation) AddStakingIDs(ids ...int) {
 	if m.stakings == nil {
@@ -3366,12 +3226,9 @@ func (m *NFTClassMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *NFTClassMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.accounts != nil {
 		edges = append(edges, nftclass.EdgeAccounts)
-	}
-	if m.staking_events != nil {
-		edges = append(edges, nftclass.EdgeStakingEvents)
 	}
 	if m.stakings != nil {
 		edges = append(edges, nftclass.EdgeStakings)
@@ -3389,12 +3246,6 @@ func (m *NFTClassMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case nftclass.EdgeStakingEvents:
-		ids := make([]ent.Value, 0, len(m.staking_events))
-		for id := range m.staking_events {
-			ids = append(ids, id)
-		}
-		return ids
 	case nftclass.EdgeStakings:
 		ids := make([]ent.Value, 0, len(m.stakings))
 		for id := range m.stakings {
@@ -3407,12 +3258,9 @@ func (m *NFTClassMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *NFTClassMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.removedaccounts != nil {
 		edges = append(edges, nftclass.EdgeAccounts)
-	}
-	if m.removedstaking_events != nil {
-		edges = append(edges, nftclass.EdgeStakingEvents)
 	}
 	if m.removedstakings != nil {
 		edges = append(edges, nftclass.EdgeStakings)
@@ -3430,12 +3278,6 @@ func (m *NFTClassMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case nftclass.EdgeStakingEvents:
-		ids := make([]ent.Value, 0, len(m.removedstaking_events))
-		for id := range m.removedstaking_events {
-			ids = append(ids, id)
-		}
-		return ids
 	case nftclass.EdgeStakings:
 		ids := make([]ent.Value, 0, len(m.removedstakings))
 		for id := range m.removedstakings {
@@ -3448,12 +3290,9 @@ func (m *NFTClassMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *NFTClassMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.clearedaccounts {
 		edges = append(edges, nftclass.EdgeAccounts)
-	}
-	if m.clearedstaking_events {
-		edges = append(edges, nftclass.EdgeStakingEvents)
 	}
 	if m.clearedstakings {
 		edges = append(edges, nftclass.EdgeStakings)
@@ -3467,8 +3306,6 @@ func (m *NFTClassMutation) EdgeCleared(name string) bool {
 	switch name {
 	case nftclass.EdgeAccounts:
 		return m.clearedaccounts
-	case nftclass.EdgeStakingEvents:
-		return m.clearedstaking_events
 	case nftclass.EdgeStakings:
 		return m.clearedstakings
 	}
@@ -3489,9 +3326,6 @@ func (m *NFTClassMutation) ResetEdge(name string) error {
 	switch name {
 	case nftclass.EdgeAccounts:
 		m.ResetAccounts()
-		return nil
-	case nftclass.EdgeStakingEvents:
-		m.ResetStakingEvents()
 		return nil
 	case nftclass.EdgeStakings:
 		m.ResetStakings()
@@ -3721,9 +3555,22 @@ func (m *StakingMutation) OldPoolShare(ctx context.Context) (v string, err error
 	return oldValue.PoolShare, nil
 }
 
+// ClearPoolShare clears the value of the "pool_share" field.
+func (m *StakingMutation) ClearPoolShare() {
+	m.pool_share = nil
+	m.clearedFields[staking.FieldPoolShare] = struct{}{}
+}
+
+// PoolShareCleared returns if the "pool_share" field was cleared in this mutation.
+func (m *StakingMutation) PoolShareCleared() bool {
+	_, ok := m.clearedFields[staking.FieldPoolShare]
+	return ok
+}
+
 // ResetPoolShare resets all changes to the "pool_share" field.
 func (m *StakingMutation) ResetPoolShare() {
 	m.pool_share = nil
+	delete(m.clearedFields, staking.FieldPoolShare)
 }
 
 // SetStakedAmount sets the "staked_amount" field.
@@ -4065,7 +3912,11 @@ func (m *StakingMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *StakingMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(staking.FieldPoolShare) {
+		fields = append(fields, staking.FieldPoolShare)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -4078,6 +3929,11 @@ func (m *StakingMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *StakingMutation) ClearField(name string) error {
+	switch name {
+	case staking.FieldPoolShare:
+		m.ClearPoolShare()
+		return nil
+	}
 	return fmt.Errorf("unknown Staking nullable field %s", name)
 }
 
@@ -4202,23 +4058,30 @@ func (m *StakingMutation) ResetEdge(name string) error {
 // StakingEventMutation represents an operation that mutates the StakingEvent nodes in the graph.
 type StakingEventMutation struct {
 	config
-	op                    Op
-	typ                   string
-	id                    *int
-	event_type            *stakingevent.EventType
-	staked_amount_added   *typeutil.Uint256
-	staked_amount_removed *typeutil.Uint256
-	reward_amount_added   *typeutil.Uint256
-	reward_amount_removed *typeutil.Uint256
-	datetime              *time.Time
-	clearedFields         map[string]struct{}
-	account               *int
-	clearedaccount        bool
-	nft_class             *int
-	clearednft_class      bool
-	done                  bool
-	oldValue              func(context.Context) (*StakingEvent, error)
-	predicates            []predicate.StakingEvent
+	op                            Op
+	typ                           string
+	id                            *int
+	transaction_hash              *string
+	transaction_index             *uint
+	addtransaction_index          *int
+	block_number                  *typeutil.Uint64
+	addblock_number               *typeutil.Uint64
+	log_index                     *uint
+	addlog_index                  *int
+	event_type                    *stakingevent.EventType
+	nft_class_address             *string
+	account_evm_address           *string
+	staked_amount_added           *typeutil.Uint256
+	staked_amount_removed         *typeutil.Uint256
+	pending_reward_amount_added   *typeutil.Uint256
+	pending_reward_amount_removed *typeutil.Uint256
+	claimed_reward_amount_added   *typeutil.Uint256
+	claimed_reward_amount_removed *typeutil.Uint256
+	datetime                      *time.Time
+	clearedFields                 map[string]struct{}
+	done                          bool
+	oldValue                      func(context.Context) (*StakingEvent, error)
+	predicates                    []predicate.StakingEvent
 }
 
 var _ ent.Mutation = (*StakingEventMutation)(nil)
@@ -4319,6 +4182,210 @@ func (m *StakingEventMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetTransactionHash sets the "transaction_hash" field.
+func (m *StakingEventMutation) SetTransactionHash(s string) {
+	m.transaction_hash = &s
+}
+
+// TransactionHash returns the value of the "transaction_hash" field in the mutation.
+func (m *StakingEventMutation) TransactionHash() (r string, exists bool) {
+	v := m.transaction_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTransactionHash returns the old "transaction_hash" field's value of the StakingEvent entity.
+// If the StakingEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventMutation) OldTransactionHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTransactionHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTransactionHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTransactionHash: %w", err)
+	}
+	return oldValue.TransactionHash, nil
+}
+
+// ResetTransactionHash resets all changes to the "transaction_hash" field.
+func (m *StakingEventMutation) ResetTransactionHash() {
+	m.transaction_hash = nil
+}
+
+// SetTransactionIndex sets the "transaction_index" field.
+func (m *StakingEventMutation) SetTransactionIndex(u uint) {
+	m.transaction_index = &u
+	m.addtransaction_index = nil
+}
+
+// TransactionIndex returns the value of the "transaction_index" field in the mutation.
+func (m *StakingEventMutation) TransactionIndex() (r uint, exists bool) {
+	v := m.transaction_index
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTransactionIndex returns the old "transaction_index" field's value of the StakingEvent entity.
+// If the StakingEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventMutation) OldTransactionIndex(ctx context.Context) (v uint, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTransactionIndex is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTransactionIndex requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTransactionIndex: %w", err)
+	}
+	return oldValue.TransactionIndex, nil
+}
+
+// AddTransactionIndex adds u to the "transaction_index" field.
+func (m *StakingEventMutation) AddTransactionIndex(u int) {
+	if m.addtransaction_index != nil {
+		*m.addtransaction_index += u
+	} else {
+		m.addtransaction_index = &u
+	}
+}
+
+// AddedTransactionIndex returns the value that was added to the "transaction_index" field in this mutation.
+func (m *StakingEventMutation) AddedTransactionIndex() (r int, exists bool) {
+	v := m.addtransaction_index
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTransactionIndex resets all changes to the "transaction_index" field.
+func (m *StakingEventMutation) ResetTransactionIndex() {
+	m.transaction_index = nil
+	m.addtransaction_index = nil
+}
+
+// SetBlockNumber sets the "block_number" field.
+func (m *StakingEventMutation) SetBlockNumber(t typeutil.Uint64) {
+	m.block_number = &t
+	m.addblock_number = nil
+}
+
+// BlockNumber returns the value of the "block_number" field in the mutation.
+func (m *StakingEventMutation) BlockNumber() (r typeutil.Uint64, exists bool) {
+	v := m.block_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBlockNumber returns the old "block_number" field's value of the StakingEvent entity.
+// If the StakingEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventMutation) OldBlockNumber(ctx context.Context) (v typeutil.Uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBlockNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBlockNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBlockNumber: %w", err)
+	}
+	return oldValue.BlockNumber, nil
+}
+
+// AddBlockNumber adds t to the "block_number" field.
+func (m *StakingEventMutation) AddBlockNumber(t typeutil.Uint64) {
+	if m.addblock_number != nil {
+		*m.addblock_number += t
+	} else {
+		m.addblock_number = &t
+	}
+}
+
+// AddedBlockNumber returns the value that was added to the "block_number" field in this mutation.
+func (m *StakingEventMutation) AddedBlockNumber() (r typeutil.Uint64, exists bool) {
+	v := m.addblock_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBlockNumber resets all changes to the "block_number" field.
+func (m *StakingEventMutation) ResetBlockNumber() {
+	m.block_number = nil
+	m.addblock_number = nil
+}
+
+// SetLogIndex sets the "log_index" field.
+func (m *StakingEventMutation) SetLogIndex(u uint) {
+	m.log_index = &u
+	m.addlog_index = nil
+}
+
+// LogIndex returns the value of the "log_index" field in the mutation.
+func (m *StakingEventMutation) LogIndex() (r uint, exists bool) {
+	v := m.log_index
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLogIndex returns the old "log_index" field's value of the StakingEvent entity.
+// If the StakingEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventMutation) OldLogIndex(ctx context.Context) (v uint, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLogIndex is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLogIndex requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLogIndex: %w", err)
+	}
+	return oldValue.LogIndex, nil
+}
+
+// AddLogIndex adds u to the "log_index" field.
+func (m *StakingEventMutation) AddLogIndex(u int) {
+	if m.addlog_index != nil {
+		*m.addlog_index += u
+	} else {
+		m.addlog_index = &u
+	}
+}
+
+// AddedLogIndex returns the value that was added to the "log_index" field in this mutation.
+func (m *StakingEventMutation) AddedLogIndex() (r int, exists bool) {
+	v := m.addlog_index
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetLogIndex resets all changes to the "log_index" field.
+func (m *StakingEventMutation) ResetLogIndex() {
+	m.log_index = nil
+	m.addlog_index = nil
+}
+
 // SetEventType sets the "event_type" field.
 func (m *StakingEventMutation) SetEventType(st stakingevent.EventType) {
 	m.event_type = &st
@@ -4355,76 +4422,76 @@ func (m *StakingEventMutation) ResetEventType() {
 	m.event_type = nil
 }
 
-// SetNftClassID sets the "nft_class_id" field.
-func (m *StakingEventMutation) SetNftClassID(i int) {
-	m.nft_class = &i
+// SetNftClassAddress sets the "nft_class_address" field.
+func (m *StakingEventMutation) SetNftClassAddress(s string) {
+	m.nft_class_address = &s
 }
 
-// NftClassID returns the value of the "nft_class_id" field in the mutation.
-func (m *StakingEventMutation) NftClassID() (r int, exists bool) {
-	v := m.nft_class
+// NftClassAddress returns the value of the "nft_class_address" field in the mutation.
+func (m *StakingEventMutation) NftClassAddress() (r string, exists bool) {
+	v := m.nft_class_address
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldNftClassID returns the old "nft_class_id" field's value of the StakingEvent entity.
+// OldNftClassAddress returns the old "nft_class_address" field's value of the StakingEvent entity.
 // If the StakingEvent object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StakingEventMutation) OldNftClassID(ctx context.Context) (v int, err error) {
+func (m *StakingEventMutation) OldNftClassAddress(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldNftClassID is only allowed on UpdateOne operations")
+		return v, errors.New("OldNftClassAddress is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldNftClassID requires an ID field in the mutation")
+		return v, errors.New("OldNftClassAddress requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldNftClassID: %w", err)
+		return v, fmt.Errorf("querying old value for OldNftClassAddress: %w", err)
 	}
-	return oldValue.NftClassID, nil
+	return oldValue.NftClassAddress, nil
 }
 
-// ResetNftClassID resets all changes to the "nft_class_id" field.
-func (m *StakingEventMutation) ResetNftClassID() {
-	m.nft_class = nil
+// ResetNftClassAddress resets all changes to the "nft_class_address" field.
+func (m *StakingEventMutation) ResetNftClassAddress() {
+	m.nft_class_address = nil
 }
 
-// SetAccountID sets the "account_id" field.
-func (m *StakingEventMutation) SetAccountID(i int) {
-	m.account = &i
+// SetAccountEvmAddress sets the "account_evm_address" field.
+func (m *StakingEventMutation) SetAccountEvmAddress(s string) {
+	m.account_evm_address = &s
 }
 
-// AccountID returns the value of the "account_id" field in the mutation.
-func (m *StakingEventMutation) AccountID() (r int, exists bool) {
-	v := m.account
+// AccountEvmAddress returns the value of the "account_evm_address" field in the mutation.
+func (m *StakingEventMutation) AccountEvmAddress() (r string, exists bool) {
+	v := m.account_evm_address
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldAccountID returns the old "account_id" field's value of the StakingEvent entity.
+// OldAccountEvmAddress returns the old "account_evm_address" field's value of the StakingEvent entity.
 // If the StakingEvent object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StakingEventMutation) OldAccountID(ctx context.Context) (v int, err error) {
+func (m *StakingEventMutation) OldAccountEvmAddress(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+		return v, errors.New("OldAccountEvmAddress is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAccountID requires an ID field in the mutation")
+		return v, errors.New("OldAccountEvmAddress requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+		return v, fmt.Errorf("querying old value for OldAccountEvmAddress: %w", err)
 	}
-	return oldValue.AccountID, nil
+	return oldValue.AccountEvmAddress, nil
 }
 
-// ResetAccountID resets all changes to the "account_id" field.
-func (m *StakingEventMutation) ResetAccountID() {
-	m.account = nil
+// ResetAccountEvmAddress resets all changes to the "account_evm_address" field.
+func (m *StakingEventMutation) ResetAccountEvmAddress() {
+	m.account_evm_address = nil
 }
 
 // SetStakedAmountAdded sets the "staked_amount_added" field.
@@ -4499,76 +4566,148 @@ func (m *StakingEventMutation) ResetStakedAmountRemoved() {
 	m.staked_amount_removed = nil
 }
 
-// SetRewardAmountAdded sets the "reward_amount_added" field.
-func (m *StakingEventMutation) SetRewardAmountAdded(t typeutil.Uint256) {
-	m.reward_amount_added = &t
+// SetPendingRewardAmountAdded sets the "pending_reward_amount_added" field.
+func (m *StakingEventMutation) SetPendingRewardAmountAdded(t typeutil.Uint256) {
+	m.pending_reward_amount_added = &t
 }
 
-// RewardAmountAdded returns the value of the "reward_amount_added" field in the mutation.
-func (m *StakingEventMutation) RewardAmountAdded() (r typeutil.Uint256, exists bool) {
-	v := m.reward_amount_added
+// PendingRewardAmountAdded returns the value of the "pending_reward_amount_added" field in the mutation.
+func (m *StakingEventMutation) PendingRewardAmountAdded() (r typeutil.Uint256, exists bool) {
+	v := m.pending_reward_amount_added
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldRewardAmountAdded returns the old "reward_amount_added" field's value of the StakingEvent entity.
+// OldPendingRewardAmountAdded returns the old "pending_reward_amount_added" field's value of the StakingEvent entity.
 // If the StakingEvent object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StakingEventMutation) OldRewardAmountAdded(ctx context.Context) (v typeutil.Uint256, err error) {
+func (m *StakingEventMutation) OldPendingRewardAmountAdded(ctx context.Context) (v typeutil.Uint256, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRewardAmountAdded is only allowed on UpdateOne operations")
+		return v, errors.New("OldPendingRewardAmountAdded is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRewardAmountAdded requires an ID field in the mutation")
+		return v, errors.New("OldPendingRewardAmountAdded requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRewardAmountAdded: %w", err)
+		return v, fmt.Errorf("querying old value for OldPendingRewardAmountAdded: %w", err)
 	}
-	return oldValue.RewardAmountAdded, nil
+	return oldValue.PendingRewardAmountAdded, nil
 }
 
-// ResetRewardAmountAdded resets all changes to the "reward_amount_added" field.
-func (m *StakingEventMutation) ResetRewardAmountAdded() {
-	m.reward_amount_added = nil
+// ResetPendingRewardAmountAdded resets all changes to the "pending_reward_amount_added" field.
+func (m *StakingEventMutation) ResetPendingRewardAmountAdded() {
+	m.pending_reward_amount_added = nil
 }
 
-// SetRewardAmountRemoved sets the "reward_amount_removed" field.
-func (m *StakingEventMutation) SetRewardAmountRemoved(t typeutil.Uint256) {
-	m.reward_amount_removed = &t
+// SetPendingRewardAmountRemoved sets the "pending_reward_amount_removed" field.
+func (m *StakingEventMutation) SetPendingRewardAmountRemoved(t typeutil.Uint256) {
+	m.pending_reward_amount_removed = &t
 }
 
-// RewardAmountRemoved returns the value of the "reward_amount_removed" field in the mutation.
-func (m *StakingEventMutation) RewardAmountRemoved() (r typeutil.Uint256, exists bool) {
-	v := m.reward_amount_removed
+// PendingRewardAmountRemoved returns the value of the "pending_reward_amount_removed" field in the mutation.
+func (m *StakingEventMutation) PendingRewardAmountRemoved() (r typeutil.Uint256, exists bool) {
+	v := m.pending_reward_amount_removed
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldRewardAmountRemoved returns the old "reward_amount_removed" field's value of the StakingEvent entity.
+// OldPendingRewardAmountRemoved returns the old "pending_reward_amount_removed" field's value of the StakingEvent entity.
 // If the StakingEvent object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StakingEventMutation) OldRewardAmountRemoved(ctx context.Context) (v typeutil.Uint256, err error) {
+func (m *StakingEventMutation) OldPendingRewardAmountRemoved(ctx context.Context) (v typeutil.Uint256, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRewardAmountRemoved is only allowed on UpdateOne operations")
+		return v, errors.New("OldPendingRewardAmountRemoved is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRewardAmountRemoved requires an ID field in the mutation")
+		return v, errors.New("OldPendingRewardAmountRemoved requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRewardAmountRemoved: %w", err)
+		return v, fmt.Errorf("querying old value for OldPendingRewardAmountRemoved: %w", err)
 	}
-	return oldValue.RewardAmountRemoved, nil
+	return oldValue.PendingRewardAmountRemoved, nil
 }
 
-// ResetRewardAmountRemoved resets all changes to the "reward_amount_removed" field.
-func (m *StakingEventMutation) ResetRewardAmountRemoved() {
-	m.reward_amount_removed = nil
+// ResetPendingRewardAmountRemoved resets all changes to the "pending_reward_amount_removed" field.
+func (m *StakingEventMutation) ResetPendingRewardAmountRemoved() {
+	m.pending_reward_amount_removed = nil
+}
+
+// SetClaimedRewardAmountAdded sets the "claimed_reward_amount_added" field.
+func (m *StakingEventMutation) SetClaimedRewardAmountAdded(t typeutil.Uint256) {
+	m.claimed_reward_amount_added = &t
+}
+
+// ClaimedRewardAmountAdded returns the value of the "claimed_reward_amount_added" field in the mutation.
+func (m *StakingEventMutation) ClaimedRewardAmountAdded() (r typeutil.Uint256, exists bool) {
+	v := m.claimed_reward_amount_added
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClaimedRewardAmountAdded returns the old "claimed_reward_amount_added" field's value of the StakingEvent entity.
+// If the StakingEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventMutation) OldClaimedRewardAmountAdded(ctx context.Context) (v typeutil.Uint256, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClaimedRewardAmountAdded is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClaimedRewardAmountAdded requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClaimedRewardAmountAdded: %w", err)
+	}
+	return oldValue.ClaimedRewardAmountAdded, nil
+}
+
+// ResetClaimedRewardAmountAdded resets all changes to the "claimed_reward_amount_added" field.
+func (m *StakingEventMutation) ResetClaimedRewardAmountAdded() {
+	m.claimed_reward_amount_added = nil
+}
+
+// SetClaimedRewardAmountRemoved sets the "claimed_reward_amount_removed" field.
+func (m *StakingEventMutation) SetClaimedRewardAmountRemoved(t typeutil.Uint256) {
+	m.claimed_reward_amount_removed = &t
+}
+
+// ClaimedRewardAmountRemoved returns the value of the "claimed_reward_amount_removed" field in the mutation.
+func (m *StakingEventMutation) ClaimedRewardAmountRemoved() (r typeutil.Uint256, exists bool) {
+	v := m.claimed_reward_amount_removed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClaimedRewardAmountRemoved returns the old "claimed_reward_amount_removed" field's value of the StakingEvent entity.
+// If the StakingEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventMutation) OldClaimedRewardAmountRemoved(ctx context.Context) (v typeutil.Uint256, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClaimedRewardAmountRemoved is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClaimedRewardAmountRemoved requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClaimedRewardAmountRemoved: %w", err)
+	}
+	return oldValue.ClaimedRewardAmountRemoved, nil
+}
+
+// ResetClaimedRewardAmountRemoved resets all changes to the "claimed_reward_amount_removed" field.
+func (m *StakingEventMutation) ResetClaimedRewardAmountRemoved() {
+	m.claimed_reward_amount_removed = nil
 }
 
 // SetDatetime sets the "datetime" field.
@@ -4607,60 +4746,6 @@ func (m *StakingEventMutation) ResetDatetime() {
 	m.datetime = nil
 }
 
-// ClearAccount clears the "account" edge to the Account entity.
-func (m *StakingEventMutation) ClearAccount() {
-	m.clearedaccount = true
-	m.clearedFields[stakingevent.FieldAccountID] = struct{}{}
-}
-
-// AccountCleared reports if the "account" edge to the Account entity was cleared.
-func (m *StakingEventMutation) AccountCleared() bool {
-	return m.clearedaccount
-}
-
-// AccountIDs returns the "account" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// AccountID instead. It exists only for internal usage by the builders.
-func (m *StakingEventMutation) AccountIDs() (ids []int) {
-	if id := m.account; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetAccount resets all changes to the "account" edge.
-func (m *StakingEventMutation) ResetAccount() {
-	m.account = nil
-	m.clearedaccount = false
-}
-
-// ClearNftClass clears the "nft_class" edge to the NFTClass entity.
-func (m *StakingEventMutation) ClearNftClass() {
-	m.clearednft_class = true
-	m.clearedFields[stakingevent.FieldNftClassID] = struct{}{}
-}
-
-// NftClassCleared reports if the "nft_class" edge to the NFTClass entity was cleared.
-func (m *StakingEventMutation) NftClassCleared() bool {
-	return m.clearednft_class
-}
-
-// NftClassIDs returns the "nft_class" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// NftClassID instead. It exists only for internal usage by the builders.
-func (m *StakingEventMutation) NftClassIDs() (ids []int) {
-	if id := m.nft_class; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetNftClass resets all changes to the "nft_class" edge.
-func (m *StakingEventMutation) ResetNftClass() {
-	m.nft_class = nil
-	m.clearednft_class = false
-}
-
 // Where appends a list predicates to the StakingEventMutation builder.
 func (m *StakingEventMutation) Where(ps ...predicate.StakingEvent) {
 	m.predicates = append(m.predicates, ps...)
@@ -4695,15 +4780,27 @@ func (m *StakingEventMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StakingEventMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 14)
+	if m.transaction_hash != nil {
+		fields = append(fields, stakingevent.FieldTransactionHash)
+	}
+	if m.transaction_index != nil {
+		fields = append(fields, stakingevent.FieldTransactionIndex)
+	}
+	if m.block_number != nil {
+		fields = append(fields, stakingevent.FieldBlockNumber)
+	}
+	if m.log_index != nil {
+		fields = append(fields, stakingevent.FieldLogIndex)
+	}
 	if m.event_type != nil {
 		fields = append(fields, stakingevent.FieldEventType)
 	}
-	if m.nft_class != nil {
-		fields = append(fields, stakingevent.FieldNftClassID)
+	if m.nft_class_address != nil {
+		fields = append(fields, stakingevent.FieldNftClassAddress)
 	}
-	if m.account != nil {
-		fields = append(fields, stakingevent.FieldAccountID)
+	if m.account_evm_address != nil {
+		fields = append(fields, stakingevent.FieldAccountEvmAddress)
 	}
 	if m.staked_amount_added != nil {
 		fields = append(fields, stakingevent.FieldStakedAmountAdded)
@@ -4711,11 +4808,17 @@ func (m *StakingEventMutation) Fields() []string {
 	if m.staked_amount_removed != nil {
 		fields = append(fields, stakingevent.FieldStakedAmountRemoved)
 	}
-	if m.reward_amount_added != nil {
-		fields = append(fields, stakingevent.FieldRewardAmountAdded)
+	if m.pending_reward_amount_added != nil {
+		fields = append(fields, stakingevent.FieldPendingRewardAmountAdded)
 	}
-	if m.reward_amount_removed != nil {
-		fields = append(fields, stakingevent.FieldRewardAmountRemoved)
+	if m.pending_reward_amount_removed != nil {
+		fields = append(fields, stakingevent.FieldPendingRewardAmountRemoved)
+	}
+	if m.claimed_reward_amount_added != nil {
+		fields = append(fields, stakingevent.FieldClaimedRewardAmountAdded)
+	}
+	if m.claimed_reward_amount_removed != nil {
+		fields = append(fields, stakingevent.FieldClaimedRewardAmountRemoved)
 	}
 	if m.datetime != nil {
 		fields = append(fields, stakingevent.FieldDatetime)
@@ -4728,20 +4831,32 @@ func (m *StakingEventMutation) Fields() []string {
 // schema.
 func (m *StakingEventMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case stakingevent.FieldTransactionHash:
+		return m.TransactionHash()
+	case stakingevent.FieldTransactionIndex:
+		return m.TransactionIndex()
+	case stakingevent.FieldBlockNumber:
+		return m.BlockNumber()
+	case stakingevent.FieldLogIndex:
+		return m.LogIndex()
 	case stakingevent.FieldEventType:
 		return m.EventType()
-	case stakingevent.FieldNftClassID:
-		return m.NftClassID()
-	case stakingevent.FieldAccountID:
-		return m.AccountID()
+	case stakingevent.FieldNftClassAddress:
+		return m.NftClassAddress()
+	case stakingevent.FieldAccountEvmAddress:
+		return m.AccountEvmAddress()
 	case stakingevent.FieldStakedAmountAdded:
 		return m.StakedAmountAdded()
 	case stakingevent.FieldStakedAmountRemoved:
 		return m.StakedAmountRemoved()
-	case stakingevent.FieldRewardAmountAdded:
-		return m.RewardAmountAdded()
-	case stakingevent.FieldRewardAmountRemoved:
-		return m.RewardAmountRemoved()
+	case stakingevent.FieldPendingRewardAmountAdded:
+		return m.PendingRewardAmountAdded()
+	case stakingevent.FieldPendingRewardAmountRemoved:
+		return m.PendingRewardAmountRemoved()
+	case stakingevent.FieldClaimedRewardAmountAdded:
+		return m.ClaimedRewardAmountAdded()
+	case stakingevent.FieldClaimedRewardAmountRemoved:
+		return m.ClaimedRewardAmountRemoved()
 	case stakingevent.FieldDatetime:
 		return m.Datetime()
 	}
@@ -4753,20 +4868,32 @@ func (m *StakingEventMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *StakingEventMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case stakingevent.FieldTransactionHash:
+		return m.OldTransactionHash(ctx)
+	case stakingevent.FieldTransactionIndex:
+		return m.OldTransactionIndex(ctx)
+	case stakingevent.FieldBlockNumber:
+		return m.OldBlockNumber(ctx)
+	case stakingevent.FieldLogIndex:
+		return m.OldLogIndex(ctx)
 	case stakingevent.FieldEventType:
 		return m.OldEventType(ctx)
-	case stakingevent.FieldNftClassID:
-		return m.OldNftClassID(ctx)
-	case stakingevent.FieldAccountID:
-		return m.OldAccountID(ctx)
+	case stakingevent.FieldNftClassAddress:
+		return m.OldNftClassAddress(ctx)
+	case stakingevent.FieldAccountEvmAddress:
+		return m.OldAccountEvmAddress(ctx)
 	case stakingevent.FieldStakedAmountAdded:
 		return m.OldStakedAmountAdded(ctx)
 	case stakingevent.FieldStakedAmountRemoved:
 		return m.OldStakedAmountRemoved(ctx)
-	case stakingevent.FieldRewardAmountAdded:
-		return m.OldRewardAmountAdded(ctx)
-	case stakingevent.FieldRewardAmountRemoved:
-		return m.OldRewardAmountRemoved(ctx)
+	case stakingevent.FieldPendingRewardAmountAdded:
+		return m.OldPendingRewardAmountAdded(ctx)
+	case stakingevent.FieldPendingRewardAmountRemoved:
+		return m.OldPendingRewardAmountRemoved(ctx)
+	case stakingevent.FieldClaimedRewardAmountAdded:
+		return m.OldClaimedRewardAmountAdded(ctx)
+	case stakingevent.FieldClaimedRewardAmountRemoved:
+		return m.OldClaimedRewardAmountRemoved(ctx)
 	case stakingevent.FieldDatetime:
 		return m.OldDatetime(ctx)
 	}
@@ -4778,6 +4905,34 @@ func (m *StakingEventMutation) OldField(ctx context.Context, name string) (ent.V
 // type.
 func (m *StakingEventMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case stakingevent.FieldTransactionHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTransactionHash(v)
+		return nil
+	case stakingevent.FieldTransactionIndex:
+		v, ok := value.(uint)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTransactionIndex(v)
+		return nil
+	case stakingevent.FieldBlockNumber:
+		v, ok := value.(typeutil.Uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBlockNumber(v)
+		return nil
+	case stakingevent.FieldLogIndex:
+		v, ok := value.(uint)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLogIndex(v)
+		return nil
 	case stakingevent.FieldEventType:
 		v, ok := value.(stakingevent.EventType)
 		if !ok {
@@ -4785,19 +4940,19 @@ func (m *StakingEventMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetEventType(v)
 		return nil
-	case stakingevent.FieldNftClassID:
-		v, ok := value.(int)
+	case stakingevent.FieldNftClassAddress:
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetNftClassID(v)
+		m.SetNftClassAddress(v)
 		return nil
-	case stakingevent.FieldAccountID:
-		v, ok := value.(int)
+	case stakingevent.FieldAccountEvmAddress:
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetAccountID(v)
+		m.SetAccountEvmAddress(v)
 		return nil
 	case stakingevent.FieldStakedAmountAdded:
 		v, ok := value.(typeutil.Uint256)
@@ -4813,19 +4968,33 @@ func (m *StakingEventMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStakedAmountRemoved(v)
 		return nil
-	case stakingevent.FieldRewardAmountAdded:
+	case stakingevent.FieldPendingRewardAmountAdded:
 		v, ok := value.(typeutil.Uint256)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetRewardAmountAdded(v)
+		m.SetPendingRewardAmountAdded(v)
 		return nil
-	case stakingevent.FieldRewardAmountRemoved:
+	case stakingevent.FieldPendingRewardAmountRemoved:
 		v, ok := value.(typeutil.Uint256)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetRewardAmountRemoved(v)
+		m.SetPendingRewardAmountRemoved(v)
+		return nil
+	case stakingevent.FieldClaimedRewardAmountAdded:
+		v, ok := value.(typeutil.Uint256)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClaimedRewardAmountAdded(v)
+		return nil
+	case stakingevent.FieldClaimedRewardAmountRemoved:
+		v, ok := value.(typeutil.Uint256)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClaimedRewardAmountRemoved(v)
 		return nil
 	case stakingevent.FieldDatetime:
 		v, ok := value.(time.Time)
@@ -4842,6 +5011,15 @@ func (m *StakingEventMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *StakingEventMutation) AddedFields() []string {
 	var fields []string
+	if m.addtransaction_index != nil {
+		fields = append(fields, stakingevent.FieldTransactionIndex)
+	}
+	if m.addblock_number != nil {
+		fields = append(fields, stakingevent.FieldBlockNumber)
+	}
+	if m.addlog_index != nil {
+		fields = append(fields, stakingevent.FieldLogIndex)
+	}
 	return fields
 }
 
@@ -4850,6 +5028,12 @@ func (m *StakingEventMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *StakingEventMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case stakingevent.FieldTransactionIndex:
+		return m.AddedTransactionIndex()
+	case stakingevent.FieldBlockNumber:
+		return m.AddedBlockNumber()
+	case stakingevent.FieldLogIndex:
+		return m.AddedLogIndex()
 	}
 	return nil, false
 }
@@ -4859,6 +5043,27 @@ func (m *StakingEventMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *StakingEventMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case stakingevent.FieldTransactionIndex:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTransactionIndex(v)
+		return nil
+	case stakingevent.FieldBlockNumber:
+		v, ok := value.(typeutil.Uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBlockNumber(v)
+		return nil
+	case stakingevent.FieldLogIndex:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLogIndex(v)
+		return nil
 	}
 	return fmt.Errorf("unknown StakingEvent numeric field %s", name)
 }
@@ -4886,14 +5091,26 @@ func (m *StakingEventMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *StakingEventMutation) ResetField(name string) error {
 	switch name {
+	case stakingevent.FieldTransactionHash:
+		m.ResetTransactionHash()
+		return nil
+	case stakingevent.FieldTransactionIndex:
+		m.ResetTransactionIndex()
+		return nil
+	case stakingevent.FieldBlockNumber:
+		m.ResetBlockNumber()
+		return nil
+	case stakingevent.FieldLogIndex:
+		m.ResetLogIndex()
+		return nil
 	case stakingevent.FieldEventType:
 		m.ResetEventType()
 		return nil
-	case stakingevent.FieldNftClassID:
-		m.ResetNftClassID()
+	case stakingevent.FieldNftClassAddress:
+		m.ResetNftClassAddress()
 		return nil
-	case stakingevent.FieldAccountID:
-		m.ResetAccountID()
+	case stakingevent.FieldAccountEvmAddress:
+		m.ResetAccountEvmAddress()
 		return nil
 	case stakingevent.FieldStakedAmountAdded:
 		m.ResetStakedAmountAdded()
@@ -4901,11 +5118,17 @@ func (m *StakingEventMutation) ResetField(name string) error {
 	case stakingevent.FieldStakedAmountRemoved:
 		m.ResetStakedAmountRemoved()
 		return nil
-	case stakingevent.FieldRewardAmountAdded:
-		m.ResetRewardAmountAdded()
+	case stakingevent.FieldPendingRewardAmountAdded:
+		m.ResetPendingRewardAmountAdded()
 		return nil
-	case stakingevent.FieldRewardAmountRemoved:
-		m.ResetRewardAmountRemoved()
+	case stakingevent.FieldPendingRewardAmountRemoved:
+		m.ResetPendingRewardAmountRemoved()
+		return nil
+	case stakingevent.FieldClaimedRewardAmountAdded:
+		m.ResetClaimedRewardAmountAdded()
+		return nil
+	case stakingevent.FieldClaimedRewardAmountRemoved:
+		m.ResetClaimedRewardAmountRemoved()
 		return nil
 	case stakingevent.FieldDatetime:
 		m.ResetDatetime()
@@ -4916,35 +5139,19 @@ func (m *StakingEventMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *StakingEventMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.account != nil {
-		edges = append(edges, stakingevent.EdgeAccount)
-	}
-	if m.nft_class != nil {
-		edges = append(edges, stakingevent.EdgeNftClass)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *StakingEventMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case stakingevent.EdgeAccount:
-		if id := m.account; id != nil {
-			return []ent.Value{*id}
-		}
-	case stakingevent.EdgeNftClass:
-		if id := m.nft_class; id != nil {
-			return []ent.Value{*id}
-		}
-	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *StakingEventMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 0)
 	return edges
 }
 
@@ -4956,52 +5163,24 @@ func (m *StakingEventMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *StakingEventMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedaccount {
-		edges = append(edges, stakingevent.EdgeAccount)
-	}
-	if m.clearednft_class {
-		edges = append(edges, stakingevent.EdgeNftClass)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *StakingEventMutation) EdgeCleared(name string) bool {
-	switch name {
-	case stakingevent.EdgeAccount:
-		return m.clearedaccount
-	case stakingevent.EdgeNftClass:
-		return m.clearednft_class
-	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *StakingEventMutation) ClearEdge(name string) error {
-	switch name {
-	case stakingevent.EdgeAccount:
-		m.ClearAccount()
-		return nil
-	case stakingevent.EdgeNftClass:
-		m.ClearNftClass()
-		return nil
-	}
 	return fmt.Errorf("unknown StakingEvent unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *StakingEventMutation) ResetEdge(name string) error {
-	switch name {
-	case stakingevent.EdgeAccount:
-		m.ResetAccount()
-		return nil
-	case stakingevent.EdgeNftClass:
-		m.ResetNftClass()
-		return nil
-	}
 	return fmt.Errorf("unknown StakingEvent edge %s", name)
 }

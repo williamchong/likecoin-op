@@ -25,8 +25,6 @@ const (
 	FieldClaimedRewardAmount = "claimed_reward_amount"
 	// EdgeNftClasses holds the string denoting the nft_classes edge name in mutations.
 	EdgeNftClasses = "nft_classes"
-	// EdgeStakingEvents holds the string denoting the staking_events edge name in mutations.
-	EdgeStakingEvents = "staking_events"
 	// EdgeStakings holds the string denoting the stakings edge name in mutations.
 	EdgeStakings = "stakings"
 	// Table holds the table name of the account in the database.
@@ -36,13 +34,6 @@ const (
 	// NftClassesInverseTable is the table name for the NFTClass entity.
 	// It exists in this package in order to avoid circular dependency with the "nftclass" package.
 	NftClassesInverseTable = "nft_classes"
-	// StakingEventsTable is the table that holds the staking_events relation/edge.
-	StakingEventsTable = "staking_events"
-	// StakingEventsInverseTable is the table name for the StakingEvent entity.
-	// It exists in this package in order to avoid circular dependency with the "stakingevent" package.
-	StakingEventsInverseTable = "staking_events"
-	// StakingEventsColumn is the table column denoting the staking_events relation/edge.
-	StakingEventsColumn = "account_id"
 	// StakingsTable is the table that holds the stakings relation/edge.
 	StakingsTable = "stakings"
 	// StakingsInverseTable is the table name for the Staking entity.
@@ -130,20 +121,6 @@ func ByNftClasses(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByStakingEventsCount orders the results by staking_events count.
-func ByStakingEventsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newStakingEventsStep(), opts...)
-	}
-}
-
-// ByStakingEvents orders the results by staking_events terms.
-func ByStakingEvents(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newStakingEventsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByStakingsCount orders the results by stakings count.
 func ByStakingsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -162,13 +139,6 @@ func newNftClassesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(NftClassesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, false, NftClassesTable, NftClassesPrimaryKey...),
-	)
-}
-func newStakingEventsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(StakingEventsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, StakingEventsTable, StakingEventsColumn),
 	)
 }
 func newStakingsStep() *sqlgraph.Step {

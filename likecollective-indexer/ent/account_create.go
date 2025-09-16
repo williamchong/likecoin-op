@@ -10,7 +10,6 @@ import (
 	"likecollective-indexer/ent/nftclass"
 	"likecollective-indexer/ent/schema/typeutil"
 	"likecollective-indexer/ent/staking"
-	"likecollective-indexer/ent/stakingevent"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -60,21 +59,6 @@ func (_c *AccountCreate) AddNftClasses(v ...*NFTClass) *AccountCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddNftClassIDs(ids...)
-}
-
-// AddStakingEventIDs adds the "staking_events" edge to the StakingEvent entity by IDs.
-func (_c *AccountCreate) AddStakingEventIDs(ids ...int) *AccountCreate {
-	_c.mutation.AddStakingEventIDs(ids...)
-	return _c
-}
-
-// AddStakingEvents adds the "staking_events" edges to the StakingEvent entity.
-func (_c *AccountCreate) AddStakingEvents(v ...*StakingEvent) *AccountCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddStakingEventIDs(ids...)
 }
 
 // AddStakingIDs adds the "stakings" edge to the Staking entity by IDs.
@@ -209,22 +193,6 @@ func (_c *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(nftclass.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.StakingEventsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   account.StakingEventsTable,
-			Columns: []string{account.StakingEventsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(stakingevent.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

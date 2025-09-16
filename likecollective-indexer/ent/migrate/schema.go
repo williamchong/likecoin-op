@@ -12,9 +12,9 @@ var (
 	AccountsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "evm_address", Type: field.TypeString},
-		{Name: "staked_amount", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
-		{Name: "pending_reward_amount", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
-		{Name: "claimed_reward_amount", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "staked_amount", Type: field.TypeUint64, Default: "0", SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "pending_reward_amount", Type: field.TypeUint64, Default: "0", SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "claimed_reward_amount", Type: field.TypeUint64, Default: "0", SchemaType: map[string]string{"postgres": "numeric"}},
 	}
 	// AccountsTable holds the schema information for the "accounts" table.
 	AccountsTable = &schema.Table{
@@ -95,7 +95,7 @@ var (
 	NftClassesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "address", Type: field.TypeString},
-		{Name: "staked_amount", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "staked_amount", Type: field.TypeUint64, Default: "0", SchemaType: map[string]string{"postgres": "numeric"}},
 		{Name: "last_staked_at", Type: field.TypeTime},
 		{Name: "number_of_stakers", Type: field.TypeUint64, Default: 0},
 	}
@@ -115,10 +115,10 @@ var (
 	// StakingsColumns holds the columns for the "stakings" table.
 	StakingsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "pool_share", Type: field.TypeString},
-		{Name: "staked_amount", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
-		{Name: "pending_reward_amount", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
-		{Name: "claimed_reward_amount", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "pool_share", Type: field.TypeString, Nullable: true, Default: "0"},
+		{Name: "staked_amount", Type: field.TypeUint64, Default: "0", SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "pending_reward_amount", Type: field.TypeUint64, Default: "0", SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "claimed_reward_amount", Type: field.TypeUint64, Default: "0", SchemaType: map[string]string{"postgres": "numeric"}},
 		{Name: "account_id", Type: field.TypeInt},
 		{Name: "nft_class_id", Type: field.TypeInt},
 	}
@@ -152,39 +152,31 @@ var (
 	// StakingEventsColumns holds the columns for the "staking_events" table.
 	StakingEventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "event_type", Type: field.TypeEnum, Enums: []string{"staked", "unstaked", "reward_added", "reward_claimed", "reward_deposited", "all_rewards_claimed"}, Default: "staked"},
-		{Name: "staked_amount_added", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
-		{Name: "staked_amount_removed", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
-		{Name: "reward_amount_added", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
-		{Name: "reward_amount_removed", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "transaction_hash", Type: field.TypeString},
+		{Name: "transaction_index", Type: field.TypeUint},
+		{Name: "block_number", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "log_index", Type: field.TypeUint},
+		{Name: "event_type", Type: field.TypeEnum, Enums: []string{"staked", "unstaked", "reward_claimed", "reward_deposited", "all_rewards_claimed"}, Default: "staked"},
+		{Name: "nft_class_address", Type: field.TypeString},
+		{Name: "account_evm_address", Type: field.TypeString},
+		{Name: "staked_amount_added", Type: field.TypeUint64, Default: "0", SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "staked_amount_removed", Type: field.TypeUint64, Default: "0", SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "pending_reward_amount_added", Type: field.TypeUint64, Default: "0", SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "pending_reward_amount_removed", Type: field.TypeUint64, Default: "0", SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "claimed_reward_amount_added", Type: field.TypeUint64, Default: "0", SchemaType: map[string]string{"postgres": "numeric"}},
+		{Name: "claimed_reward_amount_removed", Type: field.TypeUint64, Default: "0", SchemaType: map[string]string{"postgres": "numeric"}},
 		{Name: "datetime", Type: field.TypeTime},
-		{Name: "account_id", Type: field.TypeInt},
-		{Name: "nft_class_id", Type: field.TypeInt},
 	}
 	// StakingEventsTable holds the schema information for the "staking_events" table.
 	StakingEventsTable = &schema.Table{
 		Name:       "staking_events",
 		Columns:    StakingEventsColumns,
 		PrimaryKey: []*schema.Column{StakingEventsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "staking_events_accounts_account",
-				Columns:    []*schema.Column{StakingEventsColumns[7]},
-				RefColumns: []*schema.Column{AccountsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "staking_events_nft_classes_nft_class",
-				Columns:    []*schema.Column{StakingEventsColumns[8]},
-				RefColumns: []*schema.Column{NftClassesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "stakingevent_event_type",
 				Unique:  false,
-				Columns: []*schema.Column{StakingEventsColumns[1]},
+				Columns: []*schema.Column{StakingEventsColumns[5]},
 			},
 		},
 	}
@@ -201,6 +193,4 @@ var (
 func init() {
 	StakingsTable.ForeignKeys[0].RefTable = AccountsTable
 	StakingsTable.ForeignKeys[1].RefTable = NftClassesTable
-	StakingEventsTable.ForeignKeys[0].RefTable = AccountsTable
-	StakingEventsTable.ForeignKeys[1].RefTable = NftClassesTable
 }

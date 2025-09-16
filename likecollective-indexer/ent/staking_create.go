@@ -40,6 +40,14 @@ func (_c *StakingCreate) SetPoolShare(v string) *StakingCreate {
 	return _c
 }
 
+// SetNillablePoolShare sets the "pool_share" field if the given value is not nil.
+func (_c *StakingCreate) SetNillablePoolShare(v *string) *StakingCreate {
+	if v != nil {
+		_c.SetPoolShare(*v)
+	}
+	return _c
+}
+
 // SetStakedAmount sets the "staked_amount" field.
 func (_c *StakingCreate) SetStakedAmount(v typeutil.Uint256) *StakingCreate {
 	_c.mutation.SetStakedAmount(v)
@@ -107,14 +115,6 @@ func (_c *StakingCreate) check() error {
 	}
 	if _, ok := _c.mutation.AccountID(); !ok {
 		return &ValidationError{Name: "account_id", err: errors.New(`ent: missing required field "Staking.account_id"`)}
-	}
-	if _, ok := _c.mutation.PoolShare(); !ok {
-		return &ValidationError{Name: "pool_share", err: errors.New(`ent: missing required field "Staking.pool_share"`)}
-	}
-	if v, ok := _c.mutation.PoolShare(); ok {
-		if err := staking.PoolShareValidator(v); err != nil {
-			return &ValidationError{Name: "pool_share", err: fmt.Errorf(`ent: validator failed for field "Staking.pool_share": %w`, err)}
-		}
 	}
 	if _, ok := _c.mutation.StakedAmount(); !ok {
 		return &ValidationError{Name: "staked_amount", err: errors.New(`ent: missing required field "Staking.staked_amount"`)}

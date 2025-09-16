@@ -42,6 +42,12 @@ func (_u *StakingUpdate) SetNillablePoolShare(v *string) *StakingUpdate {
 	return _u
 }
 
+// ClearPoolShare clears the value of the "pool_share" field.
+func (_u *StakingUpdate) ClearPoolShare() *StakingUpdate {
+	_u.mutation.ClearPoolShare()
+	return _u
+}
+
 // SetStakedAmount sets the "staked_amount" field.
 func (_u *StakingUpdate) SetStakedAmount(v typeutil.Uint256) *StakingUpdate {
 	_u.mutation.SetStakedAmount(v)
@@ -94,11 +100,6 @@ func (_u *StakingUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *StakingUpdate) check() error {
-	if v, ok := _u.mutation.PoolShare(); ok {
-		if err := staking.PoolShareValidator(v); err != nil {
-			return &ValidationError{Name: "pool_share", err: fmt.Errorf(`ent: validator failed for field "Staking.pool_share": %w`, err)}
-		}
-	}
 	if _u.mutation.AccountCleared() && len(_u.mutation.AccountIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Staking.account"`)
 	}
@@ -122,6 +123,9 @@ func (_u *StakingUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.PoolShare(); ok {
 		_spec.SetField(staking.FieldPoolShare, field.TypeString, value)
+	}
+	if _u.mutation.PoolShareCleared() {
+		_spec.ClearField(staking.FieldPoolShare, field.TypeString)
 	}
 	if value, ok := _u.mutation.StakedAmount(); ok {
 		vv, err := staking.ValueScanner.StakedAmount.Value(value)
@@ -175,6 +179,12 @@ func (_u *StakingUpdateOne) SetNillablePoolShare(v *string) *StakingUpdateOne {
 	if v != nil {
 		_u.SetPoolShare(*v)
 	}
+	return _u
+}
+
+// ClearPoolShare clears the value of the "pool_share" field.
+func (_u *StakingUpdateOne) ClearPoolShare() *StakingUpdateOne {
+	_u.mutation.ClearPoolShare()
 	return _u
 }
 
@@ -243,11 +253,6 @@ func (_u *StakingUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *StakingUpdateOne) check() error {
-	if v, ok := _u.mutation.PoolShare(); ok {
-		if err := staking.PoolShareValidator(v); err != nil {
-			return &ValidationError{Name: "pool_share", err: fmt.Errorf(`ent: validator failed for field "Staking.pool_share": %w`, err)}
-		}
-	}
 	if _u.mutation.AccountCleared() && len(_u.mutation.AccountIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Staking.account"`)
 	}
@@ -288,6 +293,9 @@ func (_u *StakingUpdateOne) sqlSave(ctx context.Context) (_node *Staking, err er
 	}
 	if value, ok := _u.mutation.PoolShare(); ok {
 		_spec.SetField(staking.FieldPoolShare, field.TypeString, value)
+	}
+	if _u.mutation.PoolShareCleared() {
+		_spec.ClearField(staking.FieldPoolShare, field.TypeString)
 	}
 	if value, ok := _u.mutation.StakedAmount(); ok {
 		vv, err := staking.ValueScanner.StakedAmount.Value(value)

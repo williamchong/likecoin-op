@@ -41,6 +41,26 @@ func (_u *EVMEventUpdate) SetNillableStatus(v *evmevent.Status) *EVMEventUpdate 
 	return _u
 }
 
+// SetFailedReason sets the "failed_reason" field.
+func (_u *EVMEventUpdate) SetFailedReason(v string) *EVMEventUpdate {
+	_u.mutation.SetFailedReason(v)
+	return _u
+}
+
+// SetNillableFailedReason sets the "failed_reason" field if the given value is not nil.
+func (_u *EVMEventUpdate) SetNillableFailedReason(v *string) *EVMEventUpdate {
+	if v != nil {
+		_u.SetFailedReason(*v)
+	}
+	return _u
+}
+
+// ClearFailedReason clears the value of the "failed_reason" field.
+func (_u *EVMEventUpdate) ClearFailedReason() *EVMEventUpdate {
+	_u.mutation.ClearFailedReason()
+	return _u
+}
+
 // Mutation returns the EVMEventMutation object of the builder.
 func (_u *EVMEventUpdate) Mutation() *EVMEventMutation {
 	return _u.mutation
@@ -122,6 +142,9 @@ func (_u *EVMEventUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(evmevent.FieldStatus, field.TypeEnum, value)
 	}
+	if value, ok := _u.mutation.FailedReason(); ok {
+		_spec.SetField(evmevent.FieldFailedReason, field.TypeString, value)
+	}
 	if _u.mutation.FailedReasonCleared() {
 		_spec.ClearField(evmevent.FieldFailedReason, field.TypeString)
 	}
@@ -156,6 +179,26 @@ func (_u *EVMEventUpdateOne) SetNillableStatus(v *evmevent.Status) *EVMEventUpda
 	if v != nil {
 		_u.SetStatus(*v)
 	}
+	return _u
+}
+
+// SetFailedReason sets the "failed_reason" field.
+func (_u *EVMEventUpdateOne) SetFailedReason(v string) *EVMEventUpdateOne {
+	_u.mutation.SetFailedReason(v)
+	return _u
+}
+
+// SetNillableFailedReason sets the "failed_reason" field if the given value is not nil.
+func (_u *EVMEventUpdateOne) SetNillableFailedReason(v *string) *EVMEventUpdateOne {
+	if v != nil {
+		_u.SetFailedReason(*v)
+	}
+	return _u
+}
+
+// ClearFailedReason clears the value of the "failed_reason" field.
+func (_u *EVMEventUpdateOne) ClearFailedReason() *EVMEventUpdateOne {
+	_u.mutation.ClearFailedReason()
 	return _u
 }
 
@@ -269,6 +312,9 @@ func (_u *EVMEventUpdateOne) sqlSave(ctx context.Context) (_node *EVMEvent, err 
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(evmevent.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.FailedReason(); ok {
+		_spec.SetField(evmevent.FieldFailedReason, field.TypeString, value)
 	}
 	if _u.mutation.FailedReasonCleared() {
 		_spec.ClearField(evmevent.FieldFailedReason, field.TypeString)

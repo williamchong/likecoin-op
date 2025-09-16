@@ -164,6 +164,16 @@ func PoolShareHasSuffix(v string) predicate.Staking {
 	return predicate.Staking(sql.FieldHasSuffix(FieldPoolShare, v))
 }
 
+// PoolShareIsNil applies the IsNil predicate on the "pool_share" field.
+func PoolShareIsNil() predicate.Staking {
+	return predicate.Staking(sql.FieldIsNull(FieldPoolShare))
+}
+
+// PoolShareNotNil applies the NotNil predicate on the "pool_share" field.
+func PoolShareNotNil() predicate.Staking {
+	return predicate.Staking(sql.FieldNotNull(FieldPoolShare))
+}
+
 // PoolShareEqualFold applies the EqualFold predicate on the "pool_share" field.
 func PoolShareEqualFold(v string) predicate.Staking {
 	return predicate.Staking(sql.FieldEqualFold(FieldPoolShare, v))

@@ -59,21 +59,7 @@ func (_u *StakingEventUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_u *StakingEventUpdate) check() error {
-	if _u.mutation.AccountCleared() && len(_u.mutation.AccountIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "StakingEvent.account"`)
-	}
-	if _u.mutation.NftClassCleared() && len(_u.mutation.NftClassIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "StakingEvent.nft_class"`)
-	}
-	return nil
-}
-
 func (_u *StakingEventUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	if err := _u.check(); err != nil {
-		return _node, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(stakingevent.Table, stakingevent.Columns, sqlgraph.NewFieldSpec(stakingevent.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -147,21 +133,7 @@ func (_u *StakingEventUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_u *StakingEventUpdateOne) check() error {
-	if _u.mutation.AccountCleared() && len(_u.mutation.AccountIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "StakingEvent.account"`)
-	}
-	if _u.mutation.NftClassCleared() && len(_u.mutation.NftClassIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "StakingEvent.nft_class"`)
-	}
-	return nil
-}
-
 func (_u *StakingEventUpdateOne) sqlSave(ctx context.Context) (_node *StakingEvent, err error) {
-	if err := _u.check(); err != nil {
-		return _node, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(stakingevent.Table, stakingevent.Columns, sqlgraph.NewFieldSpec(stakingevent.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
