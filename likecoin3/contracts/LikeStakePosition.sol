@@ -60,8 +60,18 @@ contract LikeStakePosition is
     // Events
     event ManagerUpdated(address indexed manager);
     event BaseURIUpdated(string baseURI);
-    event PositionMinted(uint256 indexed tokenId, address indexed to, address indexed bookNFT, uint256 amount, uint256 rewardIndex);
-    event PositionUpdated(uint256 indexed tokenId, uint256 amount, uint256 rewardIndex);
+    event PositionMinted(
+        uint256 indexed tokenId,
+        address indexed to,
+        address indexed bookNFT,
+        uint256 amount,
+        uint256 rewardIndex
+    );
+    event PositionUpdated(
+        uint256 indexed tokenId,
+        uint256 amount,
+        uint256 rewardIndex
+    );
     event PositionBurned(uint256 indexed tokenId);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -95,8 +105,12 @@ contract LikeStakePosition is
         emit BaseURIUpdated(baseURI_);
     }
 
-    function pause() external onlyOwner { _pause(); }
-    function unpause() external onlyOwner { _unpause(); }
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     // Manager-only modifiers
     modifier onlyManager() {
@@ -110,11 +124,17 @@ contract LikeStakePosition is
         address bookNFT,
         uint256 stakedAmount,
         uint256 rewardIndex
-    ) external whenNotPaused nonReentrant onlyManager returns (uint256 tokenId) {
+    )
+        external
+        whenNotPaused
+        nonReentrant
+        onlyManager
+        returns (uint256 tokenId)
+    {
         if (to == address(0) || bookNFT == address(0)) revert ErrZeroAddress();
         ContractData storage $ = _getStorage();
         tokenId = $.nextTokenId;
-        $.nextTokenId++;
+        ++$.nextTokenId;
         _safeMint(to, tokenId);
         $.positions[tokenId] = Position({
             bookNFT: bookNFT,
@@ -125,7 +145,9 @@ contract LikeStakePosition is
         emit PositionMinted(tokenId, to, bookNFT, stakedAmount, rewardIndex);
     }
 
-    function burnPosition(uint256 tokenId) external whenNotPaused nonReentrant onlyManager {
+    function burnPosition(
+        uint256 tokenId
+    ) external whenNotPaused nonReentrant onlyManager {
         _burn(tokenId);
         delete _getStorage().positions[tokenId];
         emit PositionBurned(tokenId);
@@ -145,7 +167,7 @@ contract LikeStakePosition is
         emit PositionUpdated(tokenId, newStakedAmount, newRewardIndex);
         emit MetadataUpdate(tokenId);
     }
-    
+
     function updatePositionRewardIndex(
         uint256 tokenId,
         uint256 newRewardIndex
@@ -162,7 +184,9 @@ contract LikeStakePosition is
         return _getStorage().nextTokenId;
     }
 
-    function getPosition(uint256 tokenId) external view returns (Position memory) {
+    function getPosition(
+        uint256 tokenId
+    ) external view returns (Position memory) {
         return _getStorage().positions[tokenId];
     }
 
@@ -170,7 +194,9 @@ contract LikeStakePosition is
         return _getStorage().manager;
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyOwner {}
 
     // ERC721 metadata base URI
     function _baseURI() internal view override returns (string memory) {
@@ -178,43 +204,61 @@ contract LikeStakePosition is
     }
 
     // View functions
-    function getUserPositions(address user) external view returns (uint256[] memory positions) {
+    function getUserPositions(
+        address user
+    ) external view returns (uint256[] memory positions) {
         uint256 balance = balanceOf(user);
-        for (uint256 i = 0; i < balance; i++) {
+        for (uint256 i = 0; i < balance; ++i) {
             positions[i] = tokenOfOwnerByIndex(user, i);
         }
         return positions;
     }
 
-    function getUserPositionByBookNFT(address user, address bookNFT) external view returns (uint256[] memory) {
+    function getUserPositionByBookNFT(
+        address user,
+        address bookNFT
+    ) external view returns (uint256[] memory) {
         uint256 balance = balanceOf(user);
         uint256[] memory positions = new uint256[](balance);
         uint256 index = 0;
-        for (uint256 i = 0; i < balance; i++) {
+        for (uint256 i = 0; i < balance; ++i) {
             uint256 tokenId = tokenOfOwnerByIndex(user, i);
             if (_getStorage().positions[tokenId].bookNFT == bookNFT) {
                 positions[index] = tokenId;
-                index++;
+                ++index;
             }
         }
         return positions;
     }
 
-    function tokenURI(uint256 tokenId) public view override(ERC721Upgradeable, ERC721URIStorageUpgradeable) returns (string memory) {
+    function tokenURI(
+        uint256 tokenId
+    )
+        public
+        view
+        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
+        returns (string memory)
+    {
         Position memory position = _getStorage().positions[tokenId];
         string memory baseURI = _baseURI();
-        string memory tokenURL = Base64.encode(abi.encodePacked(
-            position.bookNFT,
-            position.stakedAmount,
-            position.rewardIndex,
-            position.initialStaker
-        ));
+        string memory tokenURL = Base64.encode(
+            abi.encodePacked(
+                position.bookNFT,
+                position.stakedAmount,
+                position.rewardIndex,
+                position.initialStaker
+            )
+        );
         return string.concat(baseURI, tokenURL);
     }
 
     // The following functions are overrides required by Solidity.
 
-        function _update(address to, uint256 tokenId, address auth)
+    function _update(
+        address to,
+        uint256 tokenId,
+        address auth
+    )
         internal
         override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
         returns (address)
@@ -222,21 +266,25 @@ contract LikeStakePosition is
         return super._update(to, tokenId, auth);
     }
 
-    function _increaseBalance(address account, uint128 value)
-        internal
-        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
-    {
+    function _increaseBalance(
+        address account,
+        uint128 value
+    ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
         super._increaseBalance(account, value);
     }
 
-    function supportsInterface(bytes4 interfaceId)
+    function supportsInterface(
+        bytes4 interfaceId
+    )
         public
         view
-        override(ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable)
+        override(
+            ERC721Upgradeable,
+            ERC721EnumerableUpgradeable,
+            ERC721URIStorageUpgradeable
+        )
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
     }
 }
-
-
