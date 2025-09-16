@@ -16,11 +16,35 @@ import (
 )
 
 type EVMEventRepository interface {
+	GetEvmEventById(ctx context.Context, id int) (*ent.EVMEvent, error)
+
+	GetEVMEventsByStatus(ctx context.Context, status evmevent.Status) ([]*ent.EVMEvent, error)
+
+	QueryStakingEvmEvents(
+		ctx context.Context,
+		status evmevent.Status,
+	) ([]*ent.EVMEvent, error)
+
 	InsertEvmEventsIfNeeded(
 		ctx context.Context,
 
 		evmEvents []*ent.EVMEvent,
 	) ([]*ent.EVMEvent, error)
+
+	UpdateEvmEventStatus(
+		ctx context.Context,
+
+		evmEvent *ent.EVMEvent,
+		newStatus evmevent.Status,
+		failedReason *string,
+	) (*ent.EVMEvent, error)
+
+	BatchUpdateEvmEventStatusByIds(
+		ctx context.Context,
+
+		evmEventIds []int,
+		newStatus evmevent.Status,
+	) error
 }
 
 type evmEventRepository struct {
@@ -43,6 +67,31 @@ func (s *evmEventRepository) BaseQuery(q *ent.EVMEventQuery) *ent.EVMEventQuery 
 		evmevent.ByTransactionIndex(sql.OrderAsc()),
 		evmevent.ByLogIndex(sql.OrderAsc()),
 	)
+}
+
+func (s *evmEventRepository) GetEvmEventById(ctx context.Context, id int) (*ent.EVMEvent, error) {
+	return s.dbService.Client().EVMEvent.Get(ctx, id)
+}
+
+func (s *evmEventRepository) GetEVMEventsByStatus(ctx context.Context, status evmevent.Status) ([]*ent.EVMEvent, error) {
+	return s.BaseQuery(s.dbService.Client().EVMEvent.Query()).
+		Where(evmevent.StatusEQ(status)).All(ctx)
+}
+
+func (s *evmEventRepository) QueryStakingEvmEvents(
+	ctx context.Context,
+	status evmevent.Status,
+) ([]*ent.EVMEvent, error) {
+	return s.BaseQuery(
+		s.dbService.Client().EVMEvent.Query(),
+	).Where(evmevent.NameIn(
+		"Staked",
+		"Unstaked",
+		"RewardAdded",
+		"RewardClaimed",
+		"RewardDeposited",
+		"AllRewardsClaimed",
+	)).Where(evmevent.StatusEQ(status)).All(ctx)
 }
 
 func (s *evmEventRepository) InsertEvmEventsIfNeeded(
@@ -156,4 +205,45 @@ func (s *evmEventRepository) InsertEvmEventsIfNeeded(
 	}
 	results := <-resChan
 	return results, nil
+}
+
+func (s *evmEventRepository) UpdateEvmEventStatus(
+	ctx context.Context,
+
+	evmEvent *ent.EVMEvent,
+	newStatus evmevent.Status,
+	failedReason *string,
+) (*ent.EVMEvent, error) {
+	updatedRecordChan := make(chan *ent.EVMEvent, 1)
+	err := WithTx(ctx, s.dbService.Client(), func(tx *ent.Tx) error {
+		updatedEvmEvent, err := tx.EVMEvent.UpdateOne(evmEvent).
+			SetStatus(newStatus).
+			SetNillableFailedReason(failedReason).
+			Save(ctx)
+
+		if err != nil {
+			return err
+		}
+
+		updatedRecordChan <- updatedEvmEvent
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return <-updatedRecordChan, nil
+}
+
+func (s *evmEventRepository) BatchUpdateEvmEventStatusByIds(
+	ctx context.Context,
+
+	evmEventIds []int,
+	newStatus evmevent.Status,
+) error {
+	return s.dbService.Client().EVMEvent.Update().
+		SetStatus(newStatus).
+		ClearFailedReason().
+		Where(evmevent.IDIn(evmEventIds...)).
+		Exec(ctx)
 }
