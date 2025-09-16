@@ -8,6 +8,7 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {ERC721URIStorageUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import {ERC721EnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 
@@ -21,6 +22,7 @@ contract LikeStakePosition is
     PausableUpgradeable,
     ReentrancyGuardUpgradeable,
     ERC721Upgradeable,
+    ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable
 {
     using Strings for uint256;
@@ -68,12 +70,15 @@ contract LikeStakePosition is
     }
 
     function initialize(address initialOwner) public initializer {
+        __ERC721_init("LikeStakePosition", "LIKESP");
+        __ERC721Enumerable_init();
+        __ERC721URIStorage_init();
         __UUPSUpgradeable_init();
         __Ownable_init(initialOwner);
         __Pausable_init();
         __ReentrancyGuard_init();
-        __ERC721_init("LikeStakePosition", "LIKESP");
-        __ERC721URIStorage_init();
+
+        _getStorage().nextTokenId = 1;
     }
 
     // Ownership / Admin
@@ -95,7 +100,7 @@ contract LikeStakePosition is
 
     // Manager-only modifiers
     modifier onlyManager() {
-        if (msg.sender != _getStorage().manager) revert ErrNotManager();
+        if (_msgSender() != _getStorage().manager) revert ErrNotManager();
         _;
     }
 
@@ -108,7 +113,8 @@ contract LikeStakePosition is
     ) external whenNotPaused nonReentrant onlyManager returns (uint256 tokenId) {
         if (to == address(0) || bookNFT == address(0)) revert ErrZeroAddress();
         ContractData storage $ = _getStorage();
-        tokenId = ++$.nextTokenId;
+        tokenId = $.nextTokenId;
+        $.nextTokenId++;
         _safeMint(to, tokenId);
         $.positions[tokenId] = Position({
             bookNFT: bookNFT,
@@ -139,8 +145,23 @@ contract LikeStakePosition is
         emit PositionUpdated(tokenId, newStakedAmount, newRewardIndex);
         emit MetadataUpdate(tokenId);
     }
+    
+    function updatePositionRewardIndex(
+        uint256 tokenId,
+        uint256 newRewardIndex
+    ) external whenNotPaused nonReentrant onlyManager {
+        ContractData storage $ = _getStorage();
+        Position storage p = $.positions[tokenId];
+        p.rewardIndex = newRewardIndex;
+        emit PositionUpdated(tokenId, p.stakedAmount, newRewardIndex);
+        emit MetadataUpdate(tokenId);
+    }
 
     // Views
+    function getNextTokenId() external view returns (uint256) {
+        return _getStorage().nextTokenId;
+    }
+
     function getPosition(uint256 tokenId) external view returns (Position memory) {
         return _getStorage().positions[tokenId];
     }
@@ -156,6 +177,29 @@ contract LikeStakePosition is
         return _getStorage().baseURI;
     }
 
+    // View functions
+    function getUserPositions(address user) external view returns (uint256[] memory positions) {
+        uint256 balance = balanceOf(user);
+        for (uint256 i = 0; i < balance; i++) {
+            positions[i] = tokenOfOwnerByIndex(user, i);
+        }
+        return positions;
+    }
+
+    function getUserPositionByBookNFT(address user, address bookNFT) external view returns (uint256[] memory) {
+        uint256 balance = balanceOf(user);
+        uint256[] memory positions = new uint256[](balance);
+        uint256 index = 0;
+        for (uint256 i = 0; i < balance; i++) {
+            uint256 tokenId = tokenOfOwnerByIndex(user, i);
+            if (_getStorage().positions[tokenId].bookNFT == bookNFT) {
+                positions[index] = tokenId;
+                index++;
+            }
+        }
+        return positions;
+    }
+
     function tokenURI(uint256 tokenId) public view override(ERC721Upgradeable, ERC721URIStorageUpgradeable) returns (string memory) {
         Position memory position = _getStorage().positions[tokenId];
         string memory baseURI = _baseURI();
@@ -168,10 +212,27 @@ contract LikeStakePosition is
         return string.concat(baseURI, tokenURL);
     }
 
+    // The following functions are overrides required by Solidity.
+
+        function _update(address to, uint256 tokenId, address auth)
+        internal
+        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
+        returns (address)
+    {
+        return super._update(to, tokenId, auth);
+    }
+
+    function _increaseBalance(address account, uint128 value)
+        internal
+        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
+    {
+        super._increaseBalance(account, value);
+    }
+
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
+        override(ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

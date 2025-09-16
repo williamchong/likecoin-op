@@ -5,12 +5,27 @@ import {
 import { expect } from "chai";
 import { viem, ignition } from "hardhat";
 import { parseEther } from "viem";
+import LikecoinModule from "../ignition/modules/Likecoin";
 import LikeCollectiveModule from "../ignition/modules/LikeCollective";
+import LikeStakePositionModule from "../ignition/modules/LikeStakePosition";
 
 describe("LikeCollective", async function () {
   async function deployCollective() {
     const [deployer, rick, kin, bob] = await viem.getWalletClients();
     const publicClient = await viem.getPublicClient();
+
+    const { likecoin, likecoinImpl, likecoinProxy } = await ignition.deploy(
+      LikecoinModule,
+      {
+        parameters: {
+          LikecoinModule: {
+            initOwner: deployer.account.address,
+          },
+        },
+        defaultSender: deployer.account.address,
+      },
+    );
+
     const { likeCollective, likeCollectiveImpl, likeCollectiveProxy } =
       await ignition.deploy(LikeCollectiveModule, {
         parameters: {
@@ -20,11 +35,51 @@ describe("LikeCollective", async function () {
         },
         defaultSender: deployer.account.address,
       });
+    const { likeStakePosition, likeStakePositionImpl, likeStakePositionProxy } =
+      await ignition.deploy(LikeStakePositionModule, {
+        parameters: {
+          LikeStakePositionModule: {
+            initOwner: deployer.account.address,
+          },
+        },
+        defaultSender: deployer.account.address,
+      });
+
+    // Setup relationships
+    await likeCollective.write.setLikeStakePosition(
+      [likeStakePosition.address],
+      {
+        account: deployer.account.address,
+      },
+    );
+    await likeCollective.write.setLikecoin([likecoin.address], {
+      account: deployer.account.address,
+    });
+    await likeStakePosition.write.setManager([likeCollective.address], {
+      account: deployer.account.address,
+    });
+
+    // Mint some LIKE tokens
+    for (const a of [
+      rick.account.address,
+      kin.account.address,
+      bob.account.address,
+    ]) {
+      await likecoin.write.mint([a, 10000n * 10n ** 6n], {
+        account: deployer.account.address,
+      });
+    }
 
     return {
+      likecoin,
+      likecoinImpl,
+      likecoinProxy,
       likeCollective,
       likeCollectiveImpl,
       likeCollectiveProxy,
+      likeStakePosition,
+      likeStakePositionImpl,
+      likeStakePositionProxy,
       deployer,
       rick,
       kin,
@@ -120,6 +175,203 @@ describe("LikeCollective", async function () {
           account: rick.account,
         }),
       ).to.be.rejectedWith("EnforcedPause");
+    });
+  });
+
+  describe("Stake and unstake", async function () {
+    it("should allow staking and unstaking", async function () {
+      const { likeCollective, rick, likeStakePosition, likecoin } =
+        await loadFixture(deployCollective);
+      const mockBookNFT = "0x1234567890123456789012345678901234567890";
+
+      const nextTokenId = await likeStakePosition.read.getNextTokenId();
+
+      expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
+        10000n * 10n ** 6n,
+      );
+      await likecoin.write.approve(
+        [likeCollective.address, 6000n * 10n ** 6n],
+        {
+          account: rick.account,
+        },
+      );
+      await likeCollective.write.stake([mockBookNFT, 6000n * 10n ** 6n], {
+        account: rick.account,
+      });
+      expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
+        4000n * 10n ** 6n,
+      );
+      const tokenOwner = await likeStakePosition.read.ownerOf([nextTokenId]);
+      expect(tokenOwner.toLowerCase()).to.equal(
+        rick.account.address.toLowerCase(),
+      );
+      await likeCollective.write.unstake([mockBookNFT, 6000n * 10n ** 6n], {
+        account: rick.account,
+      });
+      expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
+        10000n * 10n ** 6n,
+      );
+    });
+
+    it("should correctly allow claiming new rewards and unstaking for one user", async function () {
+      const { likeCollective, rick, likeStakePosition, likecoin, kin } =
+        await loadFixture(deployCollective);
+      const mockBookNFT = "0x1234567890123456789012345678901234567890";
+      const amount = 8000n * 10n ** 6n;
+      const reward = 1000n * 10n ** 6n;
+
+      const nextTokenId = await likeStakePosition.read.getNextTokenId();
+      await likecoin.write.approve([likeCollective.address, amount], {
+        account: rick.account,
+      });
+
+      await likeCollective.write.stake([mockBookNFT, amount], {
+        account: rick.account,
+      });
+      expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
+        2000n * 10n ** 6n,
+      );
+      const owner = await likeStakePosition.read.ownerOf([nextTokenId]);
+      expect(owner.toLowerCase()).to.equal(rick.account.address.toLowerCase());
+      expect(
+        await likeCollective.read.pendingRewardsOf([nextTokenId]),
+      ).to.equal(0n);
+      expect(
+        await likeCollective.read.getStakeForUser([
+          rick.account.address,
+          mockBookNFT,
+        ]),
+      ).to.equal(amount);
+
+      await likeCollective.write.claimRewards([mockBookNFT], {
+        account: rick.account,
+      });
+      // No operation as no reard deposited
+      expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
+        2000n * 10n ** 6n,
+      );
+
+      // Deposit reward
+      await likecoin.write.approve([likeCollective.address, reward], {
+        account: kin.account,
+      });
+      await likeCollective.write.depositReward([mockBookNFT, reward], {
+        account: kin.account,
+      });
+      expect(
+        await likeCollective.read.pendingRewardsOf([nextTokenId]),
+      ).to.equal(reward);
+
+      // Claim rewards
+      await likeCollective.write.claimRewards([mockBookNFT], {
+        account: rick.account,
+      });
+      expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
+        3000n * 10n ** 6n,
+      );
+
+      await likeCollective.write.unstakePosition([nextTokenId], {
+        account: rick.account,
+      });
+      expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
+        11000n * 10n ** 6n,
+      );
+      await expect(
+        likeStakePosition.read.ownerOf([nextTokenId]),
+      ).to.be.rejectedWith("ERC721NonexistentToken");
+    });
+
+    it("should not allow random user to unstake position", async function () {
+      const { likeCollective, rick, likeStakePosition, likecoin, kin } =
+        await loadFixture(deployCollective);
+      const mockBookNFT = "0x1234567890123456789012345678901234567890";
+      const amount = 2000n * 10n ** 6n;
+
+      const nextTokenId = await likeStakePosition.read.getNextTokenId();
+      await likecoin.write.approve([likeCollective.address, amount], {
+        account: rick.account,
+      });
+
+      await likeCollective.write.stake([mockBookNFT, amount], {
+        account: rick.account,
+      });
+      const owner = await likeStakePosition.read.ownerOf([nextTokenId]);
+      expect(owner.toLowerCase()).to.equal(rick.account.address.toLowerCase());
+
+      await expect(
+        likeCollective.write.unstakePosition([nextTokenId], {
+          account: kin.account,
+        }),
+      ).to.be.rejectedWith("ErrInvalidOwner()");
+    });
+
+    it("should auto claim on unstake position", async function () {
+      const { likeCollective, rick, likeStakePosition, likecoin, kin } =
+        await loadFixture(deployCollective);
+      const mockBookNFT = "0x1234567890123456789012345678901234567890";
+      const amount = 2000n * 10n ** 6n;
+      const reward = 1000n * 10n ** 6n;
+
+      const nextTokenId = await likeStakePosition.read.getNextTokenId();
+      await likecoin.write.approve([likeCollective.address, 4n * amount], {
+        account: rick.account,
+      });
+
+      await likeCollective.write.stake([mockBookNFT, 4n * amount], {
+        account: rick.account,
+      });
+
+      // Reward
+      await likecoin.write.approve([likeCollective.address, reward], {
+        account: kin.account,
+      });
+      await likeCollective.write.depositReward([mockBookNFT, reward], {
+        account: kin.account,
+      });
+
+      // Claim rewards
+      await likeCollective.write.unstakePosition([nextTokenId], {
+        account: rick.account,
+      });
+      expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
+        11000n * 10n ** 6n,
+      );
+    });
+
+    it("should correctly allow claiming new rewards and unstaking for multiple users", async function () {
+      const { likeCollective, rick, bob, likeStakePosition, likecoin, kin } =
+        await loadFixture(deployCollective);
+      const mockBookNFT = "0x1234567890123456789012345678901234567890";
+      const amount = 2000n * 10n ** 6n;
+      const reward = 1000n * 10n ** 6n;
+
+      const nextTokenId = await likeStakePosition.read.getNextTokenId();
+      await likecoin.write.approve([likeCollective.address, 4n * amount], {
+        account: rick.account,
+      });
+      await likecoin.write.approve([likeCollective.address, amount], {
+        account: bob.account,
+      });
+
+      await likeCollective.write.stake([mockBookNFT, 4n * amount], {
+        account: rick.account,
+      });
+      await likeCollective.write.stake([mockBookNFT, amount], {
+        account: bob.account,
+      });
+
+      // Reward
+      await likecoin.write.approve([likeCollective.address, reward], {
+        account: kin.account,
+      });
+      await likeCollective.write.depositReward([mockBookNFT, reward], {
+        account: kin.account,
+      });
+
+      // Claim rewards
+      await likeCollective.write.unstakePosition([nextTokenId], {
+        account: rick.account,
+      });
     });
   });
 });
