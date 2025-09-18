@@ -16,8 +16,8 @@ func MakeStakingEvent(stakingEvent *ent.StakingEvent) api.StakingEvent {
 			Type: api.StakingEventStakedStakingEvent,
 			StakingEventStaked: api.StakingEventStaked{
 				EventType: api.StakingEventStakedEventTypeStaked,
-				BookNft:   api.EvmAddress(stakingEvent.Edges.NftClass.Address),
-				Account:   api.EvmAddress(stakingEvent.Edges.Account.EvmAddress),
+				BookNft:   api.EvmAddress(stakingEvent.NftClassAddress),
+				Account:   api.EvmAddress(stakingEvent.AccountEvmAddress),
 				Amount:    api.Uint256((*uint256.Int)(stakingEvent.StakedAmountAdded).String()),
 				Datetime:  stakingEvent.Datetime,
 			},
@@ -27,20 +27,9 @@ func MakeStakingEvent(stakingEvent *ent.StakingEvent) api.StakingEvent {
 			Type: api.StakingEventUnstakedStakingEvent,
 			StakingEventUnstaked: api.StakingEventUnstaked{
 				EventType: api.StakingEventUnstakedEventTypeUnstaked,
-				BookNft:   api.EvmAddress(stakingEvent.Edges.NftClass.Address),
-				Account:   api.EvmAddress(stakingEvent.Edges.Account.EvmAddress),
+				BookNft:   api.EvmAddress(stakingEvent.NftClassAddress),
+				Account:   api.EvmAddress(stakingEvent.AccountEvmAddress),
 				Amount:    api.Uint256((*uint256.Int)(stakingEvent.StakedAmountRemoved).String()),
-				Datetime:  stakingEvent.Datetime,
-			},
-		}
-	case stakingevent.EventTypeRewardAdded:
-		return api.StakingEvent{
-			Type: api.StakingEventRewardAddedStakingEvent,
-			StakingEventRewardAdded: api.StakingEventRewardAdded{
-				EventType: api.StakingEventRewardAddedEventTypeRewardAdded,
-				BookNft:   api.EvmAddress(stakingEvent.Edges.NftClass.Address),
-				Account:   api.EvmAddress(stakingEvent.Edges.Account.EvmAddress),
-				Amount:    api.Uint256((*uint256.Int)(stakingEvent.RewardAmountAdded).String()),
 				Datetime:  stakingEvent.Datetime,
 			},
 		}
@@ -49,9 +38,9 @@ func MakeStakingEvent(stakingEvent *ent.StakingEvent) api.StakingEvent {
 			Type: api.StakingEventRewardClaimedStakingEvent,
 			StakingEventRewardClaimed: api.StakingEventRewardClaimed{
 				EventType: api.StakingEventRewardClaimedEventTypeRewardClaimed,
-				BookNft:   api.EvmAddress(stakingEvent.Edges.NftClass.Address),
-				Account:   api.EvmAddress(stakingEvent.Edges.Account.EvmAddress),
-				Amount:    api.Uint256((*uint256.Int)(stakingEvent.RewardAmountRemoved).String()),
+				BookNft:   api.EvmAddress(stakingEvent.NftClassAddress),
+				Account:   api.EvmAddress(stakingEvent.AccountEvmAddress),
+				Amount:    api.Uint256((*uint256.Int)(stakingEvent.PendingRewardAmountRemoved).String()),
 				Datetime:  stakingEvent.Datetime,
 			},
 		}
@@ -60,9 +49,9 @@ func MakeStakingEvent(stakingEvent *ent.StakingEvent) api.StakingEvent {
 			Type: api.StakingEventRewardDepositedStakingEvent,
 			StakingEventRewardDeposited: api.StakingEventRewardDeposited{
 				EventType: api.StakingEventRewardDepositedEventTypeRewardDeposited,
-				BookNft:   api.EvmAddress(stakingEvent.Edges.NftClass.Address),
-				Account:   api.EvmAddress(stakingEvent.Edges.Account.EvmAddress),
-				Amount:    api.Uint256((*uint256.Int)(stakingEvent.StakedAmountAdded).String()),
+				BookNft:   api.EvmAddress(stakingEvent.NftClassAddress),
+				Account:   api.EvmAddress(stakingEvent.AccountEvmAddress),
+				Amount:    api.Uint256((*uint256.Int)(stakingEvent.PendingRewardAmountAdded).String()),
 				Datetime:  stakingEvent.Datetime,
 			},
 		}
@@ -71,11 +60,11 @@ func MakeStakingEvent(stakingEvent *ent.StakingEvent) api.StakingEvent {
 			Type: api.StakingEventAllRewardsClaimedStakingEvent,
 			StakingEventAllRewardsClaimed: api.StakingEventAllRewardsClaimed{
 				EventType: api.StakingEventAllRewardsClaimedEventTypeAllRewardsClaimed,
-				Account:   api.EvmAddress(stakingEvent.Edges.Account.EvmAddress),
+				Account:   api.EvmAddress(stakingEvent.AccountEvmAddress),
 				ClaimedAmountList: []api.StakingEventAllRewardsClaimedClaimedAmountListItem{
 					{
-						BookNft: api.EvmAddress(stakingEvent.Edges.NftClass.Address),
-						Amount:  api.Uint256((*uint256.Int)(stakingEvent.RewardAmountRemoved).String()),
+						BookNft: api.EvmAddress(stakingEvent.NftClassAddress),
+						Amount:  api.Uint256((*uint256.Int)(stakingEvent.PendingRewardAmountRemoved).String()),
 					},
 				},
 				Datetime: stakingEvent.Datetime,
