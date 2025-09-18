@@ -18,7 +18,7 @@ ci:
 
 .PHONY: deploy-local
 deploy-local:
-	DOTENV_CONFIG_PATH=.env npm run deploy:local
+	DOTENV_CONFIG_PATH=.env npm run deploy:local -- --network localhost
 
 .PHONY: mint-local
 mint-local:

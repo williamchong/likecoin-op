@@ -6,6 +6,7 @@
     "avoid-sha3": "warn",
     "use-natspec": "off",
     "no-empty-blocks": "off",
+    "gas-indexed-events": "off",
     "func-visibility": ["warn", { "ignoreConstructors": true }]
   }
 }
