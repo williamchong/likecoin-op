@@ -234,7 +234,7 @@ describe("LikeCollective", async function () {
       const owner = await likeStakePosition.read.ownerOf([nextTokenId]);
       expect(owner.toLowerCase()).to.equal(rick.account.address.toLowerCase());
       expect(
-        await likeCollective.read.pendingRewardsOf([nextTokenId]),
+        await likeCollective.read.getRewardsOfPosition([nextTokenId]),
       ).to.equal(0n);
       expect(
         await likeCollective.read.getStakeForUser([
@@ -243,7 +243,7 @@ describe("LikeCollective", async function () {
         ]),
       ).to.equal(amount);
 
-      await likeCollective.write.claimRewards([mockBookNFT], {
+      await likeCollective.write.claimRewards([nextTokenId], {
         account: rick.account,
       });
       // No operation as no reard deposited
@@ -259,11 +259,11 @@ describe("LikeCollective", async function () {
         account: kin.account,
       });
       expect(
-        await likeCollective.read.pendingRewardsOf([nextTokenId]),
+        await likeCollective.read.getRewardsOfPosition([nextTokenId]),
       ).to.equal(reward);
 
       // Claim rewards
-      await likeCollective.write.claimRewards([mockBookNFT], {
+      await likeCollective.write.claimRewards([nextTokenId], {
         account: rick.account,
       });
       expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
@@ -376,6 +376,84 @@ describe("LikeCollective", async function () {
   });
 
   describe("Reward", async function () {
+    it("should correctly correlate to get total stake for a bookNFT", async function () {
+      const { likeCollective, rick, bob, likeStakePosition, likecoin, kin } =
+        await loadFixture(deployCollective);
+      const mockBookNFT = "0x1234567890123456789012345678901234567890";
+      const amount = 2000n * 10n ** 6n;
+      const reward = 500n * 10n ** 6n;
+
+      const nextTokenId = await likeStakePosition.read.getNextTokenId();
+      await likecoin.write.approve([likeCollective.address, 2n * amount], {
+        account: rick.account,
+      });
+      await likeCollective.write.stake([mockBookNFT, amount], {
+        account: rick.account,
+      });
+
+      await likecoin.write.approve([likeCollective.address, 2n * reward], {
+        account: kin.account,
+      });
+      await likeCollective.write.depositReward([mockBookNFT, reward], {
+        account: kin.account,
+      });
+
+      expect(await likeCollective.read.getTotalStake([mockBookNFT])).to.equal(
+        amount,
+      );
+      expect(
+        await likeCollective.read.getRewardsOfPosition([nextTokenId]),
+      ).to.equal(reward);
+      expect(
+        await likeCollective.read.getPendingRewardsForUser([
+          rick.account.address,
+          mockBookNFT,
+        ]),
+      ).to.equal(reward);
+
+      await likeCollective.write.stake([mockBookNFT, amount], {
+        account: rick.account,
+      });
+      await likecoin.write.approve([likeCollective.address, amount], {
+        account: bob.account,
+      });
+      await likeCollective.write.stake([mockBookNFT, amount], {
+        account: bob.account,
+      });
+      await likeCollective.write.depositReward([mockBookNFT, reward], {
+        account: kin.account,
+      });
+
+      expect(await likeCollective.read.getTotalStake([mockBookNFT])).to.equal(
+        3n * amount,
+      );
+      expect(
+        await likeCollective.read.getPendingRewardsPool([mockBookNFT]),
+      ).to.equal(2n * reward);
+      expect(
+        await likeCollective.read.getRewardsOfPosition([nextTokenId]),
+      ).to.equal(reward + reward / 3n);
+      expect(
+        await likeCollective.read.getPendingRewardsForUser([
+          rick.account.address,
+          mockBookNFT,
+        ]),
+      ).to.equal(reward + (2n * reward) / 3n - 1n);
+
+      await likeCollective.write.unstakePosition([nextTokenId], {
+        account: rick.account,
+      });
+      expect(
+        await likeCollective.read.getPendingRewardsPool([mockBookNFT]),
+      ).to.equal((2n * reward) / 3n + 1n);
+      expect(
+        await likeCollective.read.getPendingRewardsForUser([
+          rick.account.address,
+          mockBookNFT,
+        ]),
+      ).to.equal(reward / 3n);
+    });
+
     it("should allow to claim single reward for a user", async function () {
       const { likeCollective, rick, bob, likeStakePosition, likecoin, kin } =
         await loadFixture(deployCollective);
@@ -383,6 +461,7 @@ describe("LikeCollective", async function () {
       const amount = 2000n * 10n ** 6n;
       const reward = 500n * 10n ** 6n;
 
+      const nextTokenId = await likeStakePosition.read.getNextTokenId();
       await likecoin.write.approve([likeCollective.address, amount], {
         account: rick.account,
       });
@@ -397,7 +476,7 @@ describe("LikeCollective", async function () {
         account: kin.account,
       });
 
-      await likeCollective.write.claimRewards([mockBookNFT], {
+      await likeCollective.write.claimRewards([nextTokenId], {
         account: rick.account,
       });
       expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
@@ -412,6 +491,7 @@ describe("LikeCollective", async function () {
       const amount = 2000n * 10n ** 6n;
       const reward = 500n * 10n ** 6n;
 
+      const nextTokenId = await likeStakePosition.read.getNextTokenId();
       await likecoin.write.approve([likeCollective.address, 2n * amount], {
         account: rick.account,
       });
@@ -429,7 +509,7 @@ describe("LikeCollective", async function () {
         account: kin.account,
       });
 
-      await likeCollective.write.claimRewards([mockBookNFT], {
+      await likeCollective.write.claimAllRewards([rick.account.address], {
         account: rick.account,
       });
       expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
@@ -466,10 +546,10 @@ describe("LikeCollective", async function () {
         account: kin.account,
       });
 
-      const pendingRewards = await likeCollective.read.pendingRewardsOf([
+      const pendingRewards = await likeCollective.read.getRewardsOfPosition([
         nextTokenId,
       ]);
-      const pendingRewards2 = await likeCollective.read.pendingRewardsOf([
+      const pendingRewards2 = await likeCollective.read.getRewardsOfPosition([
         nextTokenId + 1n,
       ]);
       expect(pendingRewards).to.equal(reward);
@@ -515,7 +595,7 @@ describe("LikeCollective", async function () {
         8000n * 10n ** 6n,
       );
       expect(
-        await likeCollective.read.pendingRewardsOf([nextTokenId]),
+        await likeCollective.read.getRewardsOfPosition([nextTokenId]),
       ).to.equal(0n);
       expect(
         await likeCollective.read.getStakeForUser([
