@@ -67,6 +67,15 @@ ci:
 	$(MAKE) lint
 	$(MAKE) test
 
+.PHONY: abigen
+abigen: SHELL=/bin/bash
+abigen:
+	mkdir -p internal/evm/like_collective
+	go run github.com/ethereum/go-ethereum/cmd/abigen@latest \
+		--abi=<(cat ../abi/LikeCollective.abi.json) \
+		--pkg=like_collective \
+		--out=internal/evm/like_collective/like_collective.go
+
 .PHONY: start-api
 start-api:
 	docker compose --profile api up -d && docker compose --profile api logs -f

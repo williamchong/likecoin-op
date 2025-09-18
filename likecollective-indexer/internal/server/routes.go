@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"likecollective-indexer/internal/api/openapi"
+	"likecollective-indexer/internal/server/routes/alchemy"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -15,6 +16,16 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	// Register routes
 	mux.Handle("/api/", http.StripPrefix("/api", openapiHandler))
+	if s.alchemyLikeCollectiveEthLogWebhookSigningKey != "" {
+		mux.Handle("/alchemy/", http.StripPrefix(
+			"/alchemy",
+			alchemy.NewAlchemyHandler(
+				s.alchemyLikeCollectiveEthLogWebhookSigningKey,
+				s.db,
+				s.likeCollectiveLogConverter,
+			),
+		))
+	}
 	mux.HandleFunc("/", s.HelloWorldHandler)
 
 	return mux
