@@ -136,15 +136,19 @@ migrate-down:
 		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}?sslmode=disable&search_path=${DB_SCHEMA}"
 
 API_ARTIFACT := $(PROJECT_NAME)-api
+WORKER_CLI_ARTIFACT := $(PROJECT_NAME)-worker-cli
 
 $(API_ARTIFACT):
 	go build -o $(API_ARTIFACT) ./cmd/api
 
+$(WORKER_CLI_ARTIFACT):
+	go build -o $(WORKER_CLI_ARTIFACT) ./cmd/worker
+
 .PHONY: build
-build: $(PROJECT_NAME)-api
+build: $(API_ARTIFACT) $(WORKER_CLI_ARTIFACT)
 
 clean:
-	rm -f $(API_ARTIFACT)
+	rm -f $(API_ARTIFACT) $(WORKER_CLI_ARTIFACT)
 
 .PHONY: docker-image
 docker-image:

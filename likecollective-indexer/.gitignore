@@ -27,6 +27,7 @@ tmp/
 
 # Project build
 likecollective-indexer-api
+likecollective-indexer-worker-cli
 
 # OS X generated file
 .DS_Store
