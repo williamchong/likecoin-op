@@ -70,7 +70,7 @@ func (r *accountRepository) QueryAccounts(
 		nextKey = accounts[len(accounts)-1].ID
 	}
 
-	return accounts, len(accounts), 0, nil
+	return accounts, count, 0, nil
 }
 
 func (r *accountRepository) QueryAccount(

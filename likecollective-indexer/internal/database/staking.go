@@ -108,7 +108,7 @@ func (r *stakingRepository) QueryStakings(
 		nextKey = stakings[len(stakings)-1].ID
 	}
 
-	return stakings, len(stakings), nextKey, nil
+	return stakings, count, nextKey, nil
 }
 
 func (r *stakingRepository) QueryStakingsByKeys(

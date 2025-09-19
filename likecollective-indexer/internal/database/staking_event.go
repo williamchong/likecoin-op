@@ -74,7 +74,7 @@ func (r *stakingEventRepository) QueryStakingEvents(
 		nextKey = stakingEvents[len(stakingEvents)-1].ID
 	}
 
-	return stakingEvents, len(stakingEvents), nextKey, nil
+	return stakingEvents, count, nextKey, nil
 }
 
 func (s *stakingEventRepository) InsertStakingEventsIfNeeded(
