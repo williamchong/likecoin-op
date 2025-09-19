@@ -8,6 +8,7 @@ RUN go mod download
 COPY . .
 RUN apk add --no-cache make
 RUN make likecollective-indexer-api
+RUN make likecollective-indexer-worker-cli
 
 FROM ubuntu:noble
 WORKDIR /app
@@ -23,6 +24,7 @@ COPY --from=builder /src/Makefile /app
 
 # App
 COPY --from=builder /src/likecollective-indexer-api /usr/local/bin/
+COPY --from=builder /src/likecollective-indexer-worker-cli /usr/local/bin/
 
 # Migration
 COPY --from=builder /usr/local/bin/atlas /usr/local/bin/
