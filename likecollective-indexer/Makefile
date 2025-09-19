@@ -84,6 +84,35 @@ start-api:
 stop-api:
 	docker compose --profile api stop && docker compose --profile api rm -f
 
+.PHONY: start-scheduler
+start-scheduler:
+	docker compose --profile scheduler up -d
+
+.PHONY: stop-scheduler
+stop-scheduler:
+	docker compose --profile scheduler stop
+	docker compose --profile scheduler rm -f
+
+.PHONY: start-worker
+start-worker:
+	docker compose --profile worker up -d
+
+.PHONY: stop-worker
+stop-worker:
+	docker compose --profile worker stop
+	docker compose --profile worker rm -f
+
+.PHONY: start-and-logs-workers-and-schedulers
+start-and-logs-workers-and-schedulers:
+	$(MAKE) start-worker
+	$(MAKE) start-scheduler
+	docker compose --profile worker --profile scheduler logs -f
+
+.PHONY: stop-workers-and-schedulers
+stop-workers-and-schedulers:
+	$(MAKE) stop-worker
+	$(MAKE) stop-scheduler
+
 .PHONY: migration
 migration:
 	atlas migrate diff "${MIGRATION_NAME}" \
