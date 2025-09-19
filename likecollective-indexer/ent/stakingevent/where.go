@@ -4,10 +4,10 @@ package stakingevent
 
 import (
 	"likecollective-indexer/ent/predicate"
+	"likecollective-indexer/ent/schema/typeutil"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their ID field.
@@ -55,19 +55,249 @@ func IDLTE(id int) predicate.StakingEvent {
 	return predicate.StakingEvent(sql.FieldLTE(FieldID, id))
 }
 
-// NftClassID applies equality check predicate on the "nft_class_id" field. It's identical to NftClassIDEQ.
-func NftClassID(v int) predicate.StakingEvent {
-	return predicate.StakingEvent(sql.FieldEQ(FieldNftClassID, v))
+// TransactionHash applies equality check predicate on the "transaction_hash" field. It's identical to TransactionHashEQ.
+func TransactionHash(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldEQ(FieldTransactionHash, v))
 }
 
-// AccountID applies equality check predicate on the "account_id" field. It's identical to AccountIDEQ.
-func AccountID(v int) predicate.StakingEvent {
-	return predicate.StakingEvent(sql.FieldEQ(FieldAccountID, v))
+// TransactionIndex applies equality check predicate on the "transaction_index" field. It's identical to TransactionIndexEQ.
+func TransactionIndex(v uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldEQ(FieldTransactionIndex, v))
+}
+
+// BlockNumber applies equality check predicate on the "block_number" field. It's identical to BlockNumberEQ.
+func BlockNumber(v typeutil.Uint64) predicate.StakingEvent {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.StakingEventOrErr(sql.FieldEQ(FieldBlockNumber, vc), err)
+}
+
+// LogIndex applies equality check predicate on the "log_index" field. It's identical to LogIndexEQ.
+func LogIndex(v uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldEQ(FieldLogIndex, v))
+}
+
+// NftClassAddress applies equality check predicate on the "nft_class_address" field. It's identical to NftClassAddressEQ.
+func NftClassAddress(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldEQ(FieldNftClassAddress, v))
+}
+
+// AccountEvmAddress applies equality check predicate on the "account_evm_address" field. It's identical to AccountEvmAddressEQ.
+func AccountEvmAddress(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldEQ(FieldAccountEvmAddress, v))
 }
 
 // Datetime applies equality check predicate on the "datetime" field. It's identical to DatetimeEQ.
 func Datetime(v time.Time) predicate.StakingEvent {
 	return predicate.StakingEvent(sql.FieldEQ(FieldDatetime, v))
+}
+
+// TransactionHashEQ applies the EQ predicate on the "transaction_hash" field.
+func TransactionHashEQ(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldEQ(FieldTransactionHash, v))
+}
+
+// TransactionHashNEQ applies the NEQ predicate on the "transaction_hash" field.
+func TransactionHashNEQ(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldNEQ(FieldTransactionHash, v))
+}
+
+// TransactionHashIn applies the In predicate on the "transaction_hash" field.
+func TransactionHashIn(vs ...string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldIn(FieldTransactionHash, vs...))
+}
+
+// TransactionHashNotIn applies the NotIn predicate on the "transaction_hash" field.
+func TransactionHashNotIn(vs ...string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldNotIn(FieldTransactionHash, vs...))
+}
+
+// TransactionHashGT applies the GT predicate on the "transaction_hash" field.
+func TransactionHashGT(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldGT(FieldTransactionHash, v))
+}
+
+// TransactionHashGTE applies the GTE predicate on the "transaction_hash" field.
+func TransactionHashGTE(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldGTE(FieldTransactionHash, v))
+}
+
+// TransactionHashLT applies the LT predicate on the "transaction_hash" field.
+func TransactionHashLT(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldLT(FieldTransactionHash, v))
+}
+
+// TransactionHashLTE applies the LTE predicate on the "transaction_hash" field.
+func TransactionHashLTE(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldLTE(FieldTransactionHash, v))
+}
+
+// TransactionHashContains applies the Contains predicate on the "transaction_hash" field.
+func TransactionHashContains(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldContains(FieldTransactionHash, v))
+}
+
+// TransactionHashHasPrefix applies the HasPrefix predicate on the "transaction_hash" field.
+func TransactionHashHasPrefix(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldHasPrefix(FieldTransactionHash, v))
+}
+
+// TransactionHashHasSuffix applies the HasSuffix predicate on the "transaction_hash" field.
+func TransactionHashHasSuffix(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldHasSuffix(FieldTransactionHash, v))
+}
+
+// TransactionHashEqualFold applies the EqualFold predicate on the "transaction_hash" field.
+func TransactionHashEqualFold(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldEqualFold(FieldTransactionHash, v))
+}
+
+// TransactionHashContainsFold applies the ContainsFold predicate on the "transaction_hash" field.
+func TransactionHashContainsFold(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldContainsFold(FieldTransactionHash, v))
+}
+
+// TransactionIndexEQ applies the EQ predicate on the "transaction_index" field.
+func TransactionIndexEQ(v uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldEQ(FieldTransactionIndex, v))
+}
+
+// TransactionIndexNEQ applies the NEQ predicate on the "transaction_index" field.
+func TransactionIndexNEQ(v uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldNEQ(FieldTransactionIndex, v))
+}
+
+// TransactionIndexIn applies the In predicate on the "transaction_index" field.
+func TransactionIndexIn(vs ...uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldIn(FieldTransactionIndex, vs...))
+}
+
+// TransactionIndexNotIn applies the NotIn predicate on the "transaction_index" field.
+func TransactionIndexNotIn(vs ...uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldNotIn(FieldTransactionIndex, vs...))
+}
+
+// TransactionIndexGT applies the GT predicate on the "transaction_index" field.
+func TransactionIndexGT(v uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldGT(FieldTransactionIndex, v))
+}
+
+// TransactionIndexGTE applies the GTE predicate on the "transaction_index" field.
+func TransactionIndexGTE(v uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldGTE(FieldTransactionIndex, v))
+}
+
+// TransactionIndexLT applies the LT predicate on the "transaction_index" field.
+func TransactionIndexLT(v uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldLT(FieldTransactionIndex, v))
+}
+
+// TransactionIndexLTE applies the LTE predicate on the "transaction_index" field.
+func TransactionIndexLTE(v uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldLTE(FieldTransactionIndex, v))
+}
+
+// BlockNumberEQ applies the EQ predicate on the "block_number" field.
+func BlockNumberEQ(v typeutil.Uint64) predicate.StakingEvent {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.StakingEventOrErr(sql.FieldEQ(FieldBlockNumber, vc), err)
+}
+
+// BlockNumberNEQ applies the NEQ predicate on the "block_number" field.
+func BlockNumberNEQ(v typeutil.Uint64) predicate.StakingEvent {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.StakingEventOrErr(sql.FieldNEQ(FieldBlockNumber, vc), err)
+}
+
+// BlockNumberIn applies the In predicate on the "block_number" field.
+func BlockNumberIn(vs ...typeutil.Uint64) predicate.StakingEvent {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.BlockNumber.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.StakingEventOrErr(sql.FieldIn(FieldBlockNumber, v...), err)
+}
+
+// BlockNumberNotIn applies the NotIn predicate on the "block_number" field.
+func BlockNumberNotIn(vs ...typeutil.Uint64) predicate.StakingEvent {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.BlockNumber.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.StakingEventOrErr(sql.FieldNotIn(FieldBlockNumber, v...), err)
+}
+
+// BlockNumberGT applies the GT predicate on the "block_number" field.
+func BlockNumberGT(v typeutil.Uint64) predicate.StakingEvent {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.StakingEventOrErr(sql.FieldGT(FieldBlockNumber, vc), err)
+}
+
+// BlockNumberGTE applies the GTE predicate on the "block_number" field.
+func BlockNumberGTE(v typeutil.Uint64) predicate.StakingEvent {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.StakingEventOrErr(sql.FieldGTE(FieldBlockNumber, vc), err)
+}
+
+// BlockNumberLT applies the LT predicate on the "block_number" field.
+func BlockNumberLT(v typeutil.Uint64) predicate.StakingEvent {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.StakingEventOrErr(sql.FieldLT(FieldBlockNumber, vc), err)
+}
+
+// BlockNumberLTE applies the LTE predicate on the "block_number" field.
+func BlockNumberLTE(v typeutil.Uint64) predicate.StakingEvent {
+	vc, err := ValueScanner.BlockNumber.Value(v)
+	return predicate.StakingEventOrErr(sql.FieldLTE(FieldBlockNumber, vc), err)
+}
+
+// LogIndexEQ applies the EQ predicate on the "log_index" field.
+func LogIndexEQ(v uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldEQ(FieldLogIndex, v))
+}
+
+// LogIndexNEQ applies the NEQ predicate on the "log_index" field.
+func LogIndexNEQ(v uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldNEQ(FieldLogIndex, v))
+}
+
+// LogIndexIn applies the In predicate on the "log_index" field.
+func LogIndexIn(vs ...uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldIn(FieldLogIndex, vs...))
+}
+
+// LogIndexNotIn applies the NotIn predicate on the "log_index" field.
+func LogIndexNotIn(vs ...uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldNotIn(FieldLogIndex, vs...))
+}
+
+// LogIndexGT applies the GT predicate on the "log_index" field.
+func LogIndexGT(v uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldGT(FieldLogIndex, v))
+}
+
+// LogIndexGTE applies the GTE predicate on the "log_index" field.
+func LogIndexGTE(v uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldGTE(FieldLogIndex, v))
+}
+
+// LogIndexLT applies the LT predicate on the "log_index" field.
+func LogIndexLT(v uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldLT(FieldLogIndex, v))
+}
+
+// LogIndexLTE applies the LTE predicate on the "log_index" field.
+func LogIndexLTE(v uint) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldLTE(FieldLogIndex, v))
 }
 
 // EventTypeEQ applies the EQ predicate on the "event_type" field.
@@ -90,44 +320,134 @@ func EventTypeNotIn(vs ...EventType) predicate.StakingEvent {
 	return predicate.StakingEvent(sql.FieldNotIn(FieldEventType, vs...))
 }
 
-// NftClassIDEQ applies the EQ predicate on the "nft_class_id" field.
-func NftClassIDEQ(v int) predicate.StakingEvent {
-	return predicate.StakingEvent(sql.FieldEQ(FieldNftClassID, v))
+// NftClassAddressEQ applies the EQ predicate on the "nft_class_address" field.
+func NftClassAddressEQ(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldEQ(FieldNftClassAddress, v))
 }
 
-// NftClassIDNEQ applies the NEQ predicate on the "nft_class_id" field.
-func NftClassIDNEQ(v int) predicate.StakingEvent {
-	return predicate.StakingEvent(sql.FieldNEQ(FieldNftClassID, v))
+// NftClassAddressNEQ applies the NEQ predicate on the "nft_class_address" field.
+func NftClassAddressNEQ(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldNEQ(FieldNftClassAddress, v))
 }
 
-// NftClassIDIn applies the In predicate on the "nft_class_id" field.
-func NftClassIDIn(vs ...int) predicate.StakingEvent {
-	return predicate.StakingEvent(sql.FieldIn(FieldNftClassID, vs...))
+// NftClassAddressIn applies the In predicate on the "nft_class_address" field.
+func NftClassAddressIn(vs ...string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldIn(FieldNftClassAddress, vs...))
 }
 
-// NftClassIDNotIn applies the NotIn predicate on the "nft_class_id" field.
-func NftClassIDNotIn(vs ...int) predicate.StakingEvent {
-	return predicate.StakingEvent(sql.FieldNotIn(FieldNftClassID, vs...))
+// NftClassAddressNotIn applies the NotIn predicate on the "nft_class_address" field.
+func NftClassAddressNotIn(vs ...string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldNotIn(FieldNftClassAddress, vs...))
 }
 
-// AccountIDEQ applies the EQ predicate on the "account_id" field.
-func AccountIDEQ(v int) predicate.StakingEvent {
-	return predicate.StakingEvent(sql.FieldEQ(FieldAccountID, v))
+// NftClassAddressGT applies the GT predicate on the "nft_class_address" field.
+func NftClassAddressGT(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldGT(FieldNftClassAddress, v))
 }
 
-// AccountIDNEQ applies the NEQ predicate on the "account_id" field.
-func AccountIDNEQ(v int) predicate.StakingEvent {
-	return predicate.StakingEvent(sql.FieldNEQ(FieldAccountID, v))
+// NftClassAddressGTE applies the GTE predicate on the "nft_class_address" field.
+func NftClassAddressGTE(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldGTE(FieldNftClassAddress, v))
 }
 
-// AccountIDIn applies the In predicate on the "account_id" field.
-func AccountIDIn(vs ...int) predicate.StakingEvent {
-	return predicate.StakingEvent(sql.FieldIn(FieldAccountID, vs...))
+// NftClassAddressLT applies the LT predicate on the "nft_class_address" field.
+func NftClassAddressLT(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldLT(FieldNftClassAddress, v))
 }
 
-// AccountIDNotIn applies the NotIn predicate on the "account_id" field.
-func AccountIDNotIn(vs ...int) predicate.StakingEvent {
-	return predicate.StakingEvent(sql.FieldNotIn(FieldAccountID, vs...))
+// NftClassAddressLTE applies the LTE predicate on the "nft_class_address" field.
+func NftClassAddressLTE(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldLTE(FieldNftClassAddress, v))
+}
+
+// NftClassAddressContains applies the Contains predicate on the "nft_class_address" field.
+func NftClassAddressContains(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldContains(FieldNftClassAddress, v))
+}
+
+// NftClassAddressHasPrefix applies the HasPrefix predicate on the "nft_class_address" field.
+func NftClassAddressHasPrefix(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldHasPrefix(FieldNftClassAddress, v))
+}
+
+// NftClassAddressHasSuffix applies the HasSuffix predicate on the "nft_class_address" field.
+func NftClassAddressHasSuffix(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldHasSuffix(FieldNftClassAddress, v))
+}
+
+// NftClassAddressEqualFold applies the EqualFold predicate on the "nft_class_address" field.
+func NftClassAddressEqualFold(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldEqualFold(FieldNftClassAddress, v))
+}
+
+// NftClassAddressContainsFold applies the ContainsFold predicate on the "nft_class_address" field.
+func NftClassAddressContainsFold(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldContainsFold(FieldNftClassAddress, v))
+}
+
+// AccountEvmAddressEQ applies the EQ predicate on the "account_evm_address" field.
+func AccountEvmAddressEQ(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldEQ(FieldAccountEvmAddress, v))
+}
+
+// AccountEvmAddressNEQ applies the NEQ predicate on the "account_evm_address" field.
+func AccountEvmAddressNEQ(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldNEQ(FieldAccountEvmAddress, v))
+}
+
+// AccountEvmAddressIn applies the In predicate on the "account_evm_address" field.
+func AccountEvmAddressIn(vs ...string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldIn(FieldAccountEvmAddress, vs...))
+}
+
+// AccountEvmAddressNotIn applies the NotIn predicate on the "account_evm_address" field.
+func AccountEvmAddressNotIn(vs ...string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldNotIn(FieldAccountEvmAddress, vs...))
+}
+
+// AccountEvmAddressGT applies the GT predicate on the "account_evm_address" field.
+func AccountEvmAddressGT(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldGT(FieldAccountEvmAddress, v))
+}
+
+// AccountEvmAddressGTE applies the GTE predicate on the "account_evm_address" field.
+func AccountEvmAddressGTE(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldGTE(FieldAccountEvmAddress, v))
+}
+
+// AccountEvmAddressLT applies the LT predicate on the "account_evm_address" field.
+func AccountEvmAddressLT(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldLT(FieldAccountEvmAddress, v))
+}
+
+// AccountEvmAddressLTE applies the LTE predicate on the "account_evm_address" field.
+func AccountEvmAddressLTE(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldLTE(FieldAccountEvmAddress, v))
+}
+
+// AccountEvmAddressContains applies the Contains predicate on the "account_evm_address" field.
+func AccountEvmAddressContains(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldContains(FieldAccountEvmAddress, v))
+}
+
+// AccountEvmAddressHasPrefix applies the HasPrefix predicate on the "account_evm_address" field.
+func AccountEvmAddressHasPrefix(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldHasPrefix(FieldAccountEvmAddress, v))
+}
+
+// AccountEvmAddressHasSuffix applies the HasSuffix predicate on the "account_evm_address" field.
+func AccountEvmAddressHasSuffix(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldHasSuffix(FieldAccountEvmAddress, v))
+}
+
+// AccountEvmAddressEqualFold applies the EqualFold predicate on the "account_evm_address" field.
+func AccountEvmAddressEqualFold(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldEqualFold(FieldAccountEvmAddress, v))
+}
+
+// AccountEvmAddressContainsFold applies the ContainsFold predicate on the "account_evm_address" field.
+func AccountEvmAddressContainsFold(v string) predicate.StakingEvent {
+	return predicate.StakingEvent(sql.FieldContainsFold(FieldAccountEvmAddress, v))
 }
 
 // DatetimeEQ applies the EQ predicate on the "datetime" field.
@@ -168,52 +488,6 @@ func DatetimeLT(v time.Time) predicate.StakingEvent {
 // DatetimeLTE applies the LTE predicate on the "datetime" field.
 func DatetimeLTE(v time.Time) predicate.StakingEvent {
 	return predicate.StakingEvent(sql.FieldLTE(FieldDatetime, v))
-}
-
-// HasAccount applies the HasEdge predicate on the "account" edge.
-func HasAccount() predicate.StakingEvent {
-	return predicate.StakingEvent(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, AccountTable, AccountColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasAccountWith applies the HasEdge predicate on the "account" edge with a given conditions (other predicates).
-func HasAccountWith(preds ...predicate.Account) predicate.StakingEvent {
-	return predicate.StakingEvent(func(s *sql.Selector) {
-		step := newAccountStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasNftClass applies the HasEdge predicate on the "nft_class" edge.
-func HasNftClass() predicate.StakingEvent {
-	return predicate.StakingEvent(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, NftClassTable, NftClassColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasNftClassWith applies the HasEdge predicate on the "nft_class" edge with a given conditions (other predicates).
-func HasNftClassWith(preds ...predicate.NFTClass) predicate.StakingEvent {
-	return predicate.StakingEvent(func(s *sql.Selector) {
-		step := newNftClassStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

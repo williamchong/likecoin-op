@@ -1,0 +1,62 @@
+name: unstaked
+
+parameters:
+  snapshottedAccounts:
+    - address: 0x1234123412341234123412341234123412341234
+      stakedAmount: 100
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+  snapshottedNftClasses:
+    - address: 0x2345234523452345234523452345234523452345
+      stakedAmount: 100
+  snapshottedStakings:
+    - accountAddress: 0x1234123412341234123412341234123412341234
+      bookNFTAddress: 0x2345234523452345234523452345234523452345
+      stakedAmount: 100
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+
+steps:
+  - events:
+    - type: unstaked
+      unstakedEventData:
+        bookNFT: 0x2345234523452345234523452345234523452345
+        account: 0x1234123412341234123412341234123412341234
+        stakedAmount: 100
+    stakingstate:
+      accounts:
+        0x1234123412341234123412341234123412341234:
+          address: 0x1234123412341234123412341234123412341234
+          stakedAmount: 0
+          pendingRewardAmount: 0
+          claimedRewardAmount: 0
+      nftClasses:
+        0x2345234523452345234523452345234523452345:
+          address: 0x2345234523452345234523452345234523452345
+          stakedAmount: 0
+      stakings:
+        0x1234123412341234123412341234123412341234:
+          0x2345234523452345234523452345234523452345:
+            accountAddress: 0x1234123412341234123412341234123412341234
+            bookNFTAddress: 0x2345234523452345234523452345234523452345
+            stakedAmount: 0
+            pendingRewardAmount: 0
+            claimedRewardAmount: 0
+
+---
+
+name: unstaked-less-than-staked-amount
+
+parameters:
+  snapshottedAccounts: []
+  snapshottedNftClasses: []
+  snapshottedStakings: []
+
+steps:
+  - events:
+    - type: unstaked
+      unstakedEventData:
+        bookNFT: 0x2345234523452345234523452345234523452345
+        account: 0x1234123412341234123412341234123412341234
+        stakedAmount: 100
+    error: staked amount is less than staked amount

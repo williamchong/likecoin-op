@@ -238,29 +238,6 @@ func HasAccountsWith(preds ...predicate.Account) predicate.NFTClass {
 	})
 }
 
-// HasStakingEvents applies the HasEdge predicate on the "staking_events" edge.
-func HasStakingEvents() predicate.NFTClass {
-	return predicate.NFTClass(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, StakingEventsTable, StakingEventsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasStakingEventsWith applies the HasEdge predicate on the "staking_events" edge with a given conditions (other predicates).
-func HasStakingEventsWith(preds ...predicate.StakingEvent) predicate.NFTClass {
-	return predicate.NFTClass(func(s *sql.Selector) {
-		step := newStakingEventsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasStakings applies the HasEdge predicate on the "stakings" edge.
 func HasStakings() predicate.NFTClass {
 	return predicate.NFTClass(func(s *sql.Selector) {

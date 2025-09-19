@@ -4,8 +4,6 @@ package ent
 
 import (
 	"fmt"
-	"likecollective-indexer/ent/account"
-	"likecollective-indexer/ent/nftclass"
 	"likecollective-indexer/ent/schema/typeutil"
 	"likecollective-indexer/ent/stakingevent"
 	"strings"
@@ -20,59 +18,35 @@ type StakingEvent struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// TransactionHash holds the value of the "transaction_hash" field.
+	TransactionHash string `json:"transaction_hash,omitempty"`
+	// TransactionIndex holds the value of the "transaction_index" field.
+	TransactionIndex uint `json:"transaction_index,omitempty"`
+	// BlockNumber holds the value of the "block_number" field.
+	BlockNumber typeutil.Uint64 `json:"block_number,omitempty"`
+	// LogIndex holds the value of the "log_index" field.
+	LogIndex uint `json:"log_index,omitempty"`
 	// EventType holds the value of the "event_type" field.
 	EventType stakingevent.EventType `json:"event_type,omitempty"`
-	// NftClassID holds the value of the "nft_class_id" field.
-	NftClassID int `json:"nft_class_id,omitempty"`
-	// AccountID holds the value of the "account_id" field.
-	AccountID int `json:"account_id,omitempty"`
+	// NftClassAddress holds the value of the "nft_class_address" field.
+	NftClassAddress string `json:"nft_class_address,omitempty"`
+	// AccountEvmAddress holds the value of the "account_evm_address" field.
+	AccountEvmAddress string `json:"account_evm_address,omitempty"`
 	// StakedAmountAdded holds the value of the "staked_amount_added" field.
 	StakedAmountAdded typeutil.Uint256 `json:"staked_amount_added,omitempty"`
 	// StakedAmountRemoved holds the value of the "staked_amount_removed" field.
 	StakedAmountRemoved typeutil.Uint256 `json:"staked_amount_removed,omitempty"`
-	// RewardAmountAdded holds the value of the "reward_amount_added" field.
-	RewardAmountAdded typeutil.Uint256 `json:"reward_amount_added,omitempty"`
-	// RewardAmountRemoved holds the value of the "reward_amount_removed" field.
-	RewardAmountRemoved typeutil.Uint256 `json:"reward_amount_removed,omitempty"`
+	// PendingRewardAmountAdded holds the value of the "pending_reward_amount_added" field.
+	PendingRewardAmountAdded typeutil.Uint256 `json:"pending_reward_amount_added,omitempty"`
+	// PendingRewardAmountRemoved holds the value of the "pending_reward_amount_removed" field.
+	PendingRewardAmountRemoved typeutil.Uint256 `json:"pending_reward_amount_removed,omitempty"`
+	// ClaimedRewardAmountAdded holds the value of the "claimed_reward_amount_added" field.
+	ClaimedRewardAmountAdded typeutil.Uint256 `json:"claimed_reward_amount_added,omitempty"`
+	// ClaimedRewardAmountRemoved holds the value of the "claimed_reward_amount_removed" field.
+	ClaimedRewardAmountRemoved typeutil.Uint256 `json:"claimed_reward_amount_removed,omitempty"`
 	// Datetime holds the value of the "datetime" field.
-	Datetime time.Time `json:"datetime,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the StakingEventQuery when eager-loading is set.
-	Edges        StakingEventEdges `json:"edges"`
+	Datetime     time.Time `json:"datetime,omitempty"`
 	selectValues sql.SelectValues
-}
-
-// StakingEventEdges holds the relations/edges for other nodes in the graph.
-type StakingEventEdges struct {
-	// Account holds the value of the account edge.
-	Account *Account `json:"account,omitempty"`
-	// NftClass holds the value of the nft_class edge.
-	NftClass *NFTClass `json:"nft_class,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
-}
-
-// AccountOrErr returns the Account value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e StakingEventEdges) AccountOrErr() (*Account, error) {
-	if e.Account != nil {
-		return e.Account, nil
-	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: account.Label}
-	}
-	return nil, &NotLoadedError{edge: "account"}
-}
-
-// NftClassOrErr returns the NftClass value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e StakingEventEdges) NftClassOrErr() (*NFTClass, error) {
-	if e.NftClass != nil {
-		return e.NftClass, nil
-	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: nftclass.Label}
-	}
-	return nil, &NotLoadedError{edge: "nft_class"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -80,20 +54,26 @@ func (*StakingEvent) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case stakingevent.FieldID, stakingevent.FieldNftClassID, stakingevent.FieldAccountID:
+		case stakingevent.FieldID, stakingevent.FieldTransactionIndex, stakingevent.FieldLogIndex:
 			values[i] = new(sql.NullInt64)
-		case stakingevent.FieldEventType:
+		case stakingevent.FieldTransactionHash, stakingevent.FieldEventType, stakingevent.FieldNftClassAddress, stakingevent.FieldAccountEvmAddress:
 			values[i] = new(sql.NullString)
 		case stakingevent.FieldDatetime:
 			values[i] = new(sql.NullTime)
+		case stakingevent.FieldBlockNumber:
+			values[i] = stakingevent.ValueScanner.BlockNumber.ScanValue()
 		case stakingevent.FieldStakedAmountAdded:
 			values[i] = stakingevent.ValueScanner.StakedAmountAdded.ScanValue()
 		case stakingevent.FieldStakedAmountRemoved:
 			values[i] = stakingevent.ValueScanner.StakedAmountRemoved.ScanValue()
-		case stakingevent.FieldRewardAmountAdded:
-			values[i] = stakingevent.ValueScanner.RewardAmountAdded.ScanValue()
-		case stakingevent.FieldRewardAmountRemoved:
-			values[i] = stakingevent.ValueScanner.RewardAmountRemoved.ScanValue()
+		case stakingevent.FieldPendingRewardAmountAdded:
+			values[i] = stakingevent.ValueScanner.PendingRewardAmountAdded.ScanValue()
+		case stakingevent.FieldPendingRewardAmountRemoved:
+			values[i] = stakingevent.ValueScanner.PendingRewardAmountRemoved.ScanValue()
+		case stakingevent.FieldClaimedRewardAmountAdded:
+			values[i] = stakingevent.ValueScanner.ClaimedRewardAmountAdded.ScanValue()
+		case stakingevent.FieldClaimedRewardAmountRemoved:
+			values[i] = stakingevent.ValueScanner.ClaimedRewardAmountRemoved.ScanValue()
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -115,23 +95,47 @@ func (_m *StakingEvent) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
+		case stakingevent.FieldTransactionHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field transaction_hash", values[i])
+			} else if value.Valid {
+				_m.TransactionHash = value.String
+			}
+		case stakingevent.FieldTransactionIndex:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field transaction_index", values[i])
+			} else if value.Valid {
+				_m.TransactionIndex = uint(value.Int64)
+			}
+		case stakingevent.FieldBlockNumber:
+			if value, err := stakingevent.ValueScanner.BlockNumber.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				_m.BlockNumber = value
+			}
+		case stakingevent.FieldLogIndex:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field log_index", values[i])
+			} else if value.Valid {
+				_m.LogIndex = uint(value.Int64)
+			}
 		case stakingevent.FieldEventType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field event_type", values[i])
 			} else if value.Valid {
 				_m.EventType = stakingevent.EventType(value.String)
 			}
-		case stakingevent.FieldNftClassID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field nft_class_id", values[i])
+		case stakingevent.FieldNftClassAddress:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field nft_class_address", values[i])
 			} else if value.Valid {
-				_m.NftClassID = int(value.Int64)
+				_m.NftClassAddress = value.String
 			}
-		case stakingevent.FieldAccountID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field account_id", values[i])
+		case stakingevent.FieldAccountEvmAddress:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field account_evm_address", values[i])
 			} else if value.Valid {
-				_m.AccountID = int(value.Int64)
+				_m.AccountEvmAddress = value.String
 			}
 		case stakingevent.FieldStakedAmountAdded:
 			if value, err := stakingevent.ValueScanner.StakedAmountAdded.FromValue(values[i]); err != nil {
@@ -145,17 +149,29 @@ func (_m *StakingEvent) assignValues(columns []string, values []any) error {
 			} else {
 				_m.StakedAmountRemoved = value
 			}
-		case stakingevent.FieldRewardAmountAdded:
-			if value, err := stakingevent.ValueScanner.RewardAmountAdded.FromValue(values[i]); err != nil {
+		case stakingevent.FieldPendingRewardAmountAdded:
+			if value, err := stakingevent.ValueScanner.PendingRewardAmountAdded.FromValue(values[i]); err != nil {
 				return err
 			} else {
-				_m.RewardAmountAdded = value
+				_m.PendingRewardAmountAdded = value
 			}
-		case stakingevent.FieldRewardAmountRemoved:
-			if value, err := stakingevent.ValueScanner.RewardAmountRemoved.FromValue(values[i]); err != nil {
+		case stakingevent.FieldPendingRewardAmountRemoved:
+			if value, err := stakingevent.ValueScanner.PendingRewardAmountRemoved.FromValue(values[i]); err != nil {
 				return err
 			} else {
-				_m.RewardAmountRemoved = value
+				_m.PendingRewardAmountRemoved = value
+			}
+		case stakingevent.FieldClaimedRewardAmountAdded:
+			if value, err := stakingevent.ValueScanner.ClaimedRewardAmountAdded.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				_m.ClaimedRewardAmountAdded = value
+			}
+		case stakingevent.FieldClaimedRewardAmountRemoved:
+			if value, err := stakingevent.ValueScanner.ClaimedRewardAmountRemoved.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				_m.ClaimedRewardAmountRemoved = value
 			}
 		case stakingevent.FieldDatetime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -174,16 +190,6 @@ func (_m *StakingEvent) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *StakingEvent) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
-}
-
-// QueryAccount queries the "account" edge of the StakingEvent entity.
-func (_m *StakingEvent) QueryAccount() *AccountQuery {
-	return NewStakingEventClient(_m.config).QueryAccount(_m)
-}
-
-// QueryNftClass queries the "nft_class" edge of the StakingEvent entity.
-func (_m *StakingEvent) QueryNftClass() *NFTClassQuery {
-	return NewStakingEventClient(_m.config).QueryNftClass(_m)
 }
 
 // Update returns a builder for updating this StakingEvent.
@@ -209,14 +215,26 @@ func (_m *StakingEvent) String() string {
 	var builder strings.Builder
 	builder.WriteString("StakingEvent(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("transaction_hash=")
+	builder.WriteString(_m.TransactionHash)
+	builder.WriteString(", ")
+	builder.WriteString("transaction_index=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TransactionIndex))
+	builder.WriteString(", ")
+	builder.WriteString("block_number=")
+	builder.WriteString(fmt.Sprintf("%v", _m.BlockNumber))
+	builder.WriteString(", ")
+	builder.WriteString("log_index=")
+	builder.WriteString(fmt.Sprintf("%v", _m.LogIndex))
+	builder.WriteString(", ")
 	builder.WriteString("event_type=")
 	builder.WriteString(fmt.Sprintf("%v", _m.EventType))
 	builder.WriteString(", ")
-	builder.WriteString("nft_class_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.NftClassID))
+	builder.WriteString("nft_class_address=")
+	builder.WriteString(_m.NftClassAddress)
 	builder.WriteString(", ")
-	builder.WriteString("account_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.AccountID))
+	builder.WriteString("account_evm_address=")
+	builder.WriteString(_m.AccountEvmAddress)
 	builder.WriteString(", ")
 	builder.WriteString("staked_amount_added=")
 	builder.WriteString(fmt.Sprintf("%v", _m.StakedAmountAdded))
@@ -224,11 +242,17 @@ func (_m *StakingEvent) String() string {
 	builder.WriteString("staked_amount_removed=")
 	builder.WriteString(fmt.Sprintf("%v", _m.StakedAmountRemoved))
 	builder.WriteString(", ")
-	builder.WriteString("reward_amount_added=")
-	builder.WriteString(fmt.Sprintf("%v", _m.RewardAmountAdded))
+	builder.WriteString("pending_reward_amount_added=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PendingRewardAmountAdded))
 	builder.WriteString(", ")
-	builder.WriteString("reward_amount_removed=")
-	builder.WriteString(fmt.Sprintf("%v", _m.RewardAmountRemoved))
+	builder.WriteString("pending_reward_amount_removed=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PendingRewardAmountRemoved))
+	builder.WriteString(", ")
+	builder.WriteString("claimed_reward_amount_added=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ClaimedRewardAmountAdded))
+	builder.WriteString(", ")
+	builder.WriteString("claimed_reward_amount_removed=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ClaimedRewardAmountRemoved))
 	builder.WriteString(", ")
 	builder.WriteString("datetime=")
 	builder.WriteString(_m.Datetime.Format(time.ANSIC))

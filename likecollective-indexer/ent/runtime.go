@@ -81,10 +81,6 @@ func init() {
 	nftclass.DefaultNumberOfStakers = nftclassDescNumberOfStakers.Default.(uint64)
 	stakingFields := schema.Staking{}.Fields()
 	_ = stakingFields
-	// stakingDescPoolShare is the schema descriptor for pool_share field.
-	stakingDescPoolShare := stakingFields[2].Descriptor()
-	// staking.PoolShareValidator is a validator for the "pool_share" field. It is called by the builders before save.
-	staking.PoolShareValidator = stakingDescPoolShare.Validators[0].(func(string) error)
 	// stakingDescStakedAmount is the schema descriptor for staked_amount field.
 	stakingDescStakedAmount := stakingFields[3].Descriptor()
 	staking.ValueScanner.StakedAmount = stakingDescStakedAmount.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
@@ -96,20 +92,41 @@ func init() {
 	staking.ValueScanner.ClaimedRewardAmount = stakingDescClaimedRewardAmount.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
 	stakingeventFields := schema.StakingEvent{}.Fields()
 	_ = stakingeventFields
+	// stakingeventDescTransactionHash is the schema descriptor for transaction_hash field.
+	stakingeventDescTransactionHash := stakingeventFields[0].Descriptor()
+	// stakingevent.TransactionHashValidator is a validator for the "transaction_hash" field. It is called by the builders before save.
+	stakingevent.TransactionHashValidator = stakingeventDescTransactionHash.Validators[0].(func(string) error)
+	// stakingeventDescBlockNumber is the schema descriptor for block_number field.
+	stakingeventDescBlockNumber := stakingeventFields[2].Descriptor()
+	stakingevent.ValueScanner.BlockNumber = stakingeventDescBlockNumber.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
+	// stakingeventDescNftClassAddress is the schema descriptor for nft_class_address field.
+	stakingeventDescNftClassAddress := stakingeventFields[5].Descriptor()
+	// stakingevent.NftClassAddressValidator is a validator for the "nft_class_address" field. It is called by the builders before save.
+	stakingevent.NftClassAddressValidator = stakingeventDescNftClassAddress.Validators[0].(func(string) error)
+	// stakingeventDescAccountEvmAddress is the schema descriptor for account_evm_address field.
+	stakingeventDescAccountEvmAddress := stakingeventFields[6].Descriptor()
+	// stakingevent.AccountEvmAddressValidator is a validator for the "account_evm_address" field. It is called by the builders before save.
+	stakingevent.AccountEvmAddressValidator = stakingeventDescAccountEvmAddress.Validators[0].(func(string) error)
 	// stakingeventDescStakedAmountAdded is the schema descriptor for staked_amount_added field.
-	stakingeventDescStakedAmountAdded := stakingeventFields[3].Descriptor()
+	stakingeventDescStakedAmountAdded := stakingeventFields[7].Descriptor()
 	stakingevent.ValueScanner.StakedAmountAdded = stakingeventDescStakedAmountAdded.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
 	// stakingeventDescStakedAmountRemoved is the schema descriptor for staked_amount_removed field.
-	stakingeventDescStakedAmountRemoved := stakingeventFields[4].Descriptor()
+	stakingeventDescStakedAmountRemoved := stakingeventFields[8].Descriptor()
 	stakingevent.ValueScanner.StakedAmountRemoved = stakingeventDescStakedAmountRemoved.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
-	// stakingeventDescRewardAmountAdded is the schema descriptor for reward_amount_added field.
-	stakingeventDescRewardAmountAdded := stakingeventFields[5].Descriptor()
-	stakingevent.ValueScanner.RewardAmountAdded = stakingeventDescRewardAmountAdded.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
-	// stakingeventDescRewardAmountRemoved is the schema descriptor for reward_amount_removed field.
-	stakingeventDescRewardAmountRemoved := stakingeventFields[6].Descriptor()
-	stakingevent.ValueScanner.RewardAmountRemoved = stakingeventDescRewardAmountRemoved.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
+	// stakingeventDescPendingRewardAmountAdded is the schema descriptor for pending_reward_amount_added field.
+	stakingeventDescPendingRewardAmountAdded := stakingeventFields[9].Descriptor()
+	stakingevent.ValueScanner.PendingRewardAmountAdded = stakingeventDescPendingRewardAmountAdded.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
+	// stakingeventDescPendingRewardAmountRemoved is the schema descriptor for pending_reward_amount_removed field.
+	stakingeventDescPendingRewardAmountRemoved := stakingeventFields[10].Descriptor()
+	stakingevent.ValueScanner.PendingRewardAmountRemoved = stakingeventDescPendingRewardAmountRemoved.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
+	// stakingeventDescClaimedRewardAmountAdded is the schema descriptor for claimed_reward_amount_added field.
+	stakingeventDescClaimedRewardAmountAdded := stakingeventFields[11].Descriptor()
+	stakingevent.ValueScanner.ClaimedRewardAmountAdded = stakingeventDescClaimedRewardAmountAdded.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
+	// stakingeventDescClaimedRewardAmountRemoved is the schema descriptor for claimed_reward_amount_removed field.
+	stakingeventDescClaimedRewardAmountRemoved := stakingeventFields[12].Descriptor()
+	stakingevent.ValueScanner.ClaimedRewardAmountRemoved = stakingeventDescClaimedRewardAmountRemoved.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
 	// stakingeventDescDatetime is the schema descriptor for datetime field.
-	stakingeventDescDatetime := stakingeventFields[7].Descriptor()
+	stakingeventDescDatetime := stakingeventFields[13].Descriptor()
 	// stakingevent.DefaultDatetime holds the default value on creation for the datetime field.
 	stakingevent.DefaultDatetime = stakingeventDescDatetime.Default.(time.Time)
 }

@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"entgo.io/ent"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -18,40 +17,70 @@ type StakingEvent struct {
 // Fields of the StakingEvent.
 func (StakingEvent) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("transaction_hash").
+			NotEmpty().
+			Immutable(),
+		field.Uint("transaction_index").
+			Immutable(),
+		field.Uint64("block_number").
+			GoType(typeutil.Uint64(0)).
+			SchemaType(typeutil.Uint64SchemaType).
+			ValueScanner(typeutil.Uint64ValueScanner).
+			Annotations(typeutil.Uint64Annotations("block_number")...).
+			Immutable(),
+		field.Uint("log_index").
+			Immutable(),
 		field.Enum("event_type").
 			Values(
 				"staked",
 				"unstaked",
-				"reward_added",
 				"reward_claimed",
 				"reward_deposited",
 				"all_rewards_claimed",
 			).
 			Default("staked").
 			Immutable(),
-		field.Int("nft_class_id").
+		field.String("nft_class_address").
+			NotEmpty().
 			Immutable(),
-		field.Int("account_id").
+		field.String("account_evm_address").
+			NotEmpty().
 			Immutable(),
-		field.Uint64("staked_amount_added").GoType(typeutil.Typ).
+		field.Uint64("staked_amount_added").
+			GoType(typeutil.Uint256Type).
 			SchemaType(typeutil.Uint256SchemaType).
 			ValueScanner(typeutil.Uint256ValueScanner).
 			Annotations(typeutil.Uint256Annotations("staked_amount_added")...).
 			Immutable(),
-		field.Uint64("staked_amount_removed").GoType(typeutil.Typ).
+		field.Uint64("staked_amount_removed").
+			GoType(typeutil.Uint256Type).
 			SchemaType(typeutil.Uint256SchemaType).
 			ValueScanner(typeutil.Uint256ValueScanner).
 			Annotations(typeutil.Uint256Annotations("staked_amount_removed")...).
 			Immutable(),
-		field.Uint64("reward_amount_added").GoType(typeutil.Typ).
+		field.Uint64("pending_reward_amount_added").
+			GoType(typeutil.Uint256Type).
 			SchemaType(typeutil.Uint256SchemaType).
 			ValueScanner(typeutil.Uint256ValueScanner).
-			Annotations(typeutil.Uint256Annotations("reward_amount_added")...).
+			Annotations(typeutil.Uint256Annotations("pending_reward_amount_added")...).
 			Immutable(),
-		field.Uint64("reward_amount_removed").GoType(typeutil.Typ).
+		field.Uint64("pending_reward_amount_removed").
+			GoType(typeutil.Uint256Type).
 			SchemaType(typeutil.Uint256SchemaType).
 			ValueScanner(typeutil.Uint256ValueScanner).
-			Annotations(typeutil.Uint256Annotations("reward_amount_removed")...).
+			Annotations(typeutil.Uint256Annotations("pending_reward_amount_removed")...).
+			Immutable(),
+		field.Uint64("claimed_reward_amount_added").
+			GoType(typeutil.Uint256Type).
+			SchemaType(typeutil.Uint256SchemaType).
+			ValueScanner(typeutil.Uint256ValueScanner).
+			Annotations(typeutil.Uint256Annotations("claimed_reward_amount_added")...).
+			Immutable(),
+		field.Uint64("claimed_reward_amount_removed").
+			GoType(typeutil.Uint256Type).
+			SchemaType(typeutil.Uint256SchemaType).
+			ValueScanner(typeutil.Uint256ValueScanner).
+			Annotations(typeutil.Uint256Annotations("claimed_reward_amount_removed")...).
 			Immutable(),
 		field.Time("datetime").Default(time.Now()).
 			Immutable(),
@@ -60,18 +89,7 @@ func (StakingEvent) Fields() []ent.Field {
 
 // Edges of the StakingEvent.
 func (StakingEvent) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.To("account", Account.Type).
-			Field("account_id").
-			Unique().
-			Required().
-			Immutable(),
-		edge.To("nft_class", NFTClass.Type).
-			Field("nft_class_id").
-			Unique().
-			Required().
-			Immutable(),
-	}
+	return nil
 }
 
 func (StakingEvent) Indexes() []ent.Index {

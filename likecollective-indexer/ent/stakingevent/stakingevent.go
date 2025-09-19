@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 )
 
@@ -17,54 +16,54 @@ const (
 	Label = "staking_event"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldTransactionHash holds the string denoting the transaction_hash field in the database.
+	FieldTransactionHash = "transaction_hash"
+	// FieldTransactionIndex holds the string denoting the transaction_index field in the database.
+	FieldTransactionIndex = "transaction_index"
+	// FieldBlockNumber holds the string denoting the block_number field in the database.
+	FieldBlockNumber = "block_number"
+	// FieldLogIndex holds the string denoting the log_index field in the database.
+	FieldLogIndex = "log_index"
 	// FieldEventType holds the string denoting the event_type field in the database.
 	FieldEventType = "event_type"
-	// FieldNftClassID holds the string denoting the nft_class_id field in the database.
-	FieldNftClassID = "nft_class_id"
-	// FieldAccountID holds the string denoting the account_id field in the database.
-	FieldAccountID = "account_id"
+	// FieldNftClassAddress holds the string denoting the nft_class_address field in the database.
+	FieldNftClassAddress = "nft_class_address"
+	// FieldAccountEvmAddress holds the string denoting the account_evm_address field in the database.
+	FieldAccountEvmAddress = "account_evm_address"
 	// FieldStakedAmountAdded holds the string denoting the staked_amount_added field in the database.
 	FieldStakedAmountAdded = "staked_amount_added"
 	// FieldStakedAmountRemoved holds the string denoting the staked_amount_removed field in the database.
 	FieldStakedAmountRemoved = "staked_amount_removed"
-	// FieldRewardAmountAdded holds the string denoting the reward_amount_added field in the database.
-	FieldRewardAmountAdded = "reward_amount_added"
-	// FieldRewardAmountRemoved holds the string denoting the reward_amount_removed field in the database.
-	FieldRewardAmountRemoved = "reward_amount_removed"
+	// FieldPendingRewardAmountAdded holds the string denoting the pending_reward_amount_added field in the database.
+	FieldPendingRewardAmountAdded = "pending_reward_amount_added"
+	// FieldPendingRewardAmountRemoved holds the string denoting the pending_reward_amount_removed field in the database.
+	FieldPendingRewardAmountRemoved = "pending_reward_amount_removed"
+	// FieldClaimedRewardAmountAdded holds the string denoting the claimed_reward_amount_added field in the database.
+	FieldClaimedRewardAmountAdded = "claimed_reward_amount_added"
+	// FieldClaimedRewardAmountRemoved holds the string denoting the claimed_reward_amount_removed field in the database.
+	FieldClaimedRewardAmountRemoved = "claimed_reward_amount_removed"
 	// FieldDatetime holds the string denoting the datetime field in the database.
 	FieldDatetime = "datetime"
-	// EdgeAccount holds the string denoting the account edge name in mutations.
-	EdgeAccount = "account"
-	// EdgeNftClass holds the string denoting the nft_class edge name in mutations.
-	EdgeNftClass = "nft_class"
 	// Table holds the table name of the stakingevent in the database.
 	Table = "staking_events"
-	// AccountTable is the table that holds the account relation/edge.
-	AccountTable = "staking_events"
-	// AccountInverseTable is the table name for the Account entity.
-	// It exists in this package in order to avoid circular dependency with the "account" package.
-	AccountInverseTable = "accounts"
-	// AccountColumn is the table column denoting the account relation/edge.
-	AccountColumn = "account_id"
-	// NftClassTable is the table that holds the nft_class relation/edge.
-	NftClassTable = "staking_events"
-	// NftClassInverseTable is the table name for the NFTClass entity.
-	// It exists in this package in order to avoid circular dependency with the "nftclass" package.
-	NftClassInverseTable = "nft_classes"
-	// NftClassColumn is the table column denoting the nft_class relation/edge.
-	NftClassColumn = "nft_class_id"
 )
 
 // Columns holds all SQL columns for stakingevent fields.
 var Columns = []string{
 	FieldID,
+	FieldTransactionHash,
+	FieldTransactionIndex,
+	FieldBlockNumber,
+	FieldLogIndex,
 	FieldEventType,
-	FieldNftClassID,
-	FieldAccountID,
+	FieldNftClassAddress,
+	FieldAccountEvmAddress,
 	FieldStakedAmountAdded,
 	FieldStakedAmountRemoved,
-	FieldRewardAmountAdded,
-	FieldRewardAmountRemoved,
+	FieldPendingRewardAmountAdded,
+	FieldPendingRewardAmountRemoved,
+	FieldClaimedRewardAmountAdded,
+	FieldClaimedRewardAmountRemoved,
 	FieldDatetime,
 }
 
@@ -79,14 +78,23 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// TransactionHashValidator is a validator for the "transaction_hash" field. It is called by the builders before save.
+	TransactionHashValidator func(string) error
+	// NftClassAddressValidator is a validator for the "nft_class_address" field. It is called by the builders before save.
+	NftClassAddressValidator func(string) error
+	// AccountEvmAddressValidator is a validator for the "account_evm_address" field. It is called by the builders before save.
+	AccountEvmAddressValidator func(string) error
 	// DefaultDatetime holds the default value on creation for the "datetime" field.
 	DefaultDatetime time.Time
 	// ValueScanner of all StakingEvent fields.
 	ValueScanner struct {
-		StakedAmountAdded   field.TypeValueScanner[typeutil.Uint256]
-		StakedAmountRemoved field.TypeValueScanner[typeutil.Uint256]
-		RewardAmountAdded   field.TypeValueScanner[typeutil.Uint256]
-		RewardAmountRemoved field.TypeValueScanner[typeutil.Uint256]
+		BlockNumber                field.TypeValueScanner[typeutil.Uint64]
+		StakedAmountAdded          field.TypeValueScanner[typeutil.Uint256]
+		StakedAmountRemoved        field.TypeValueScanner[typeutil.Uint256]
+		PendingRewardAmountAdded   field.TypeValueScanner[typeutil.Uint256]
+		PendingRewardAmountRemoved field.TypeValueScanner[typeutil.Uint256]
+		ClaimedRewardAmountAdded   field.TypeValueScanner[typeutil.Uint256]
+		ClaimedRewardAmountRemoved field.TypeValueScanner[typeutil.Uint256]
 	}
 )
 
@@ -100,7 +108,6 @@ const DefaultEventType = EventTypeStaked
 const (
 	EventTypeStaked            EventType = "staked"
 	EventTypeUnstaked          EventType = "unstaked"
-	EventTypeRewardAdded       EventType = "reward_added"
 	EventTypeRewardClaimed     EventType = "reward_claimed"
 	EventTypeRewardDeposited   EventType = "reward_deposited"
 	EventTypeAllRewardsClaimed EventType = "all_rewards_claimed"
@@ -113,7 +120,7 @@ func (et EventType) String() string {
 // EventTypeValidator is a validator for the "event_type" field enum values. It is called by the builders before save.
 func EventTypeValidator(et EventType) error {
 	switch et {
-	case EventTypeStaked, EventTypeUnstaked, EventTypeRewardAdded, EventTypeRewardClaimed, EventTypeRewardDeposited, EventTypeAllRewardsClaimed:
+	case EventTypeStaked, EventTypeUnstaked, EventTypeRewardClaimed, EventTypeRewardDeposited, EventTypeAllRewardsClaimed:
 		return nil
 	default:
 		return fmt.Errorf("stakingevent: invalid enum value for event_type field: %q", et)
@@ -128,19 +135,39 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByTransactionHash orders the results by the transaction_hash field.
+func ByTransactionHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTransactionHash, opts...).ToFunc()
+}
+
+// ByTransactionIndex orders the results by the transaction_index field.
+func ByTransactionIndex(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTransactionIndex, opts...).ToFunc()
+}
+
+// ByBlockNumber orders the results by the block_number field.
+func ByBlockNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBlockNumber, opts...).ToFunc()
+}
+
+// ByLogIndex orders the results by the log_index field.
+func ByLogIndex(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLogIndex, opts...).ToFunc()
+}
+
 // ByEventType orders the results by the event_type field.
 func ByEventType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEventType, opts...).ToFunc()
 }
 
-// ByNftClassID orders the results by the nft_class_id field.
-func ByNftClassID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldNftClassID, opts...).ToFunc()
+// ByNftClassAddress orders the results by the nft_class_address field.
+func ByNftClassAddress(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNftClassAddress, opts...).ToFunc()
 }
 
-// ByAccountID orders the results by the account_id field.
-func ByAccountID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAccountID, opts...).ToFunc()
+// ByAccountEvmAddress orders the results by the account_evm_address field.
+func ByAccountEvmAddress(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAccountEvmAddress, opts...).ToFunc()
 }
 
 // ByStakedAmountAdded orders the results by the staked_amount_added field.
@@ -153,45 +180,27 @@ func ByStakedAmountRemoved(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStakedAmountRemoved, opts...).ToFunc()
 }
 
-// ByRewardAmountAdded orders the results by the reward_amount_added field.
-func ByRewardAmountAdded(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRewardAmountAdded, opts...).ToFunc()
+// ByPendingRewardAmountAdded orders the results by the pending_reward_amount_added field.
+func ByPendingRewardAmountAdded(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPendingRewardAmountAdded, opts...).ToFunc()
 }
 
-// ByRewardAmountRemoved orders the results by the reward_amount_removed field.
-func ByRewardAmountRemoved(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRewardAmountRemoved, opts...).ToFunc()
+// ByPendingRewardAmountRemoved orders the results by the pending_reward_amount_removed field.
+func ByPendingRewardAmountRemoved(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPendingRewardAmountRemoved, opts...).ToFunc()
+}
+
+// ByClaimedRewardAmountAdded orders the results by the claimed_reward_amount_added field.
+func ByClaimedRewardAmountAdded(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldClaimedRewardAmountAdded, opts...).ToFunc()
+}
+
+// ByClaimedRewardAmountRemoved orders the results by the claimed_reward_amount_removed field.
+func ByClaimedRewardAmountRemoved(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldClaimedRewardAmountRemoved, opts...).ToFunc()
 }
 
 // ByDatetime orders the results by the datetime field.
 func ByDatetime(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDatetime, opts...).ToFunc()
-}
-
-// ByAccountField orders the results by account field.
-func ByAccountField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newAccountStep(), sql.OrderByField(field, opts...))
-	}
-}
-
-// ByNftClassField orders the results by nft_class field.
-func ByNftClassField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newNftClassStep(), sql.OrderByField(field, opts...))
-	}
-}
-func newAccountStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(AccountInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, AccountTable, AccountColumn),
-	)
-}
-func newNftClassStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(NftClassInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, NftClassTable, NftClassColumn),
-	)
 }

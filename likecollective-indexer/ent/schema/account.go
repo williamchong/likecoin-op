@@ -18,15 +18,18 @@ type Account struct {
 func (Account) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("evm_address").NotEmpty().Immutable(),
-		field.Uint64("staked_amount").GoType(typeutil.Typ).
+		field.Uint64("staked_amount").
+			GoType(typeutil.Uint256Type).
 			SchemaType(typeutil.Uint256SchemaType).
 			ValueScanner(typeutil.Uint256ValueScanner).
 			Annotations(typeutil.Uint256Annotations("staked_amount")...),
-		field.Uint64("pending_reward_amount").GoType(typeutil.Typ).
+		field.Uint64("pending_reward_amount").
+			GoType(typeutil.Uint256Type).
 			SchemaType(typeutil.Uint256SchemaType).
 			ValueScanner(typeutil.Uint256ValueScanner).
 			Annotations(typeutil.Uint256Annotations("pending_reward_amount")...),
-		field.Uint64("claimed_reward_amount").GoType(typeutil.Typ).
+		field.Uint64("claimed_reward_amount").
+			GoType(typeutil.Uint256Type).
 			SchemaType(typeutil.Uint256SchemaType).
 			ValueScanner(typeutil.Uint256ValueScanner).
 			Annotations(typeutil.Uint256Annotations("claimed_reward_amount")...),
@@ -38,9 +41,6 @@ func (Account) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("nft_classes", NFTClass.Type).
 			Through("stakings", Staking.Type).
-			Immutable(),
-		edge.From("staking_events", StakingEvent.Type).
-			Ref("account").
 			Immutable(),
 	}
 }

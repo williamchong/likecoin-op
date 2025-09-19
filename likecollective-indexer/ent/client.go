@@ -362,22 +362,6 @@ func (c *AccountClient) QueryNftClasses(_m *Account) *NFTClassQuery {
 	return query
 }
 
-// QueryStakingEvents queries the staking_events edge of a Account.
-func (c *AccountClient) QueryStakingEvents(_m *Account) *StakingEventQuery {
-	query := (&StakingEventClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(account.Table, account.FieldID, id),
-			sqlgraph.To(stakingevent.Table, stakingevent.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, account.StakingEventsTable, account.StakingEventsColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryStakings queries the stakings edge of a Account.
 func (c *AccountClient) QueryStakings(_m *Account) *StakingQuery {
 	query := (&StakingClient{config: c.config}).Query()
@@ -669,22 +653,6 @@ func (c *NFTClassClient) QueryAccounts(_m *NFTClass) *AccountQuery {
 			sqlgraph.From(nftclass.Table, nftclass.FieldID, id),
 			sqlgraph.To(account.Table, account.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, nftclass.AccountsTable, nftclass.AccountsPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryStakingEvents queries the staking_events edge of a NFTClass.
-func (c *NFTClassClient) QueryStakingEvents(_m *NFTClass) *StakingEventQuery {
-	query := (&StakingEventClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(nftclass.Table, nftclass.FieldID, id),
-			sqlgraph.To(stakingevent.Table, stakingevent.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, nftclass.StakingEventsTable, nftclass.StakingEventsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1004,38 +972,6 @@ func (c *StakingEventClient) GetX(ctx context.Context, id int) *StakingEvent {
 		panic(err)
 	}
 	return obj
-}
-
-// QueryAccount queries the account edge of a StakingEvent.
-func (c *StakingEventClient) QueryAccount(_m *StakingEvent) *AccountQuery {
-	query := (&AccountClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(stakingevent.Table, stakingevent.FieldID, id),
-			sqlgraph.To(account.Table, account.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, stakingevent.AccountTable, stakingevent.AccountColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryNftClass queries the nft_class edge of a StakingEvent.
-func (c *StakingEventClient) QueryNftClass(_m *StakingEvent) *NFTClassQuery {
-	query := (&NFTClassClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(stakingevent.Table, stakingevent.FieldID, id),
-			sqlgraph.To(nftclass.Table, nftclass.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, stakingevent.NftClassTable, stakingevent.NftClassColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
 }
 
 // Hooks returns the client hooks.

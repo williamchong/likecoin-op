@@ -28,8 +28,59 @@ services:
       - "8091:8091"
     command: go run ./cmd/api
 
+  process-evm-event:
+    profiles: [worker]
+    image: golang:1.23.5
+    depends_on:
+      - redis
+      - psql_bp
+    working_dir: /src
+    volumes:
+      - .:/src
+      - go-build-cache:/root/.cache
+      - go-mod-cache:/go/pkg/mod
+    command:
+      - go
+      - run
+      - ./cmd/worker
+      - worker
+      - --concurrency
+      - "1"
+      - check-received-evm-events
+      - process-evm-event
+
+  scheduler-all-in-one:
+    profiles: [scheduler]
+    image: golang:1.23.5
+    depends_on:
+      - redis
+      - psql_bp
+    working_dir: /src
+    volumes:
+      - .:/src
+      - go-build-cache:/root/.cache
+      - go-mod-cache:/go/pkg/mod
+    command:
+      - go
+      - run
+      - ./cmd/worker
+      - scheduler
+      - --cron
+      - "*/1 * * * *"
+      - check-received-evm-events
+
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - 6379
+    volumes:
+      - redis_data:/data
+
 volumes:
   psql_volume_bp:
+  redis_data:
+    driver: local
   go-build-cache:
     driver: local
   go-mod-cache:

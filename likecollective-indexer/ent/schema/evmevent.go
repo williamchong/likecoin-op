@@ -101,8 +101,7 @@ func (EVMEvent) Fields() []ent.Field {
 			Immutable(),
 		field.String("failed_reason").
 			Nillable().
-			Optional().
-			Immutable(),
+			Optional(),
 		field.Time("timestamp").
 			Immutable(),
 	}

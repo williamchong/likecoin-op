@@ -5,11 +5,31 @@ import (
 
 	"likecollective-indexer/ent"
 	"likecollective-indexer/ent/account"
+	"likecollective-indexer/ent/schema/typeutil"
+
+	"github.com/holiman/uint256"
 )
 
 type AccountRepository interface {
 	QueryAccounts(ctx context.Context, pagination AccountPagination, filter QueryAccountsFilter) (accounts []*ent.Account, count int, nextKey int, err error)
 	QueryAccount(ctx context.Context, evmAddress string) (*ent.Account, error)
+
+	QueryAccountsByEvmAddresses(ctx context.Context, evmAddresses []string) ([]*ent.Account, error)
+
+	GetOrCreateAccount(
+		ctx context.Context,
+		tx *ent.Tx,
+		evmAddress string,
+	) (*ent.Account, error)
+
+	CreateOrUpdateAccount(
+		ctx context.Context,
+		tx *ent.Tx,
+		evmAddress string,
+		stakedAmount typeutil.Uint256,
+		pendingRewardAmount typeutil.Uint256,
+		claimedRewardAmount typeutil.Uint256,
+	) (*ent.Account, error)
 }
 
 type accountRepository struct {
@@ -50,7 +70,7 @@ func (r *accountRepository) QueryAccounts(
 		nextKey = accounts[len(accounts)-1].ID
 	}
 
-	return accounts, len(accounts), 0, nil
+	return accounts, count, 0, nil
 }
 
 func (r *accountRepository) QueryAccount(
@@ -64,4 +84,64 @@ func (r *accountRepository) QueryAccount(
 		return nil, err
 	}
 	return account, nil
+}
+
+func (r *accountRepository) QueryAccountsByEvmAddresses(
+	ctx context.Context,
+	evmAddresses []string,
+) ([]*ent.Account, error) {
+	return r.dbService.Client().Account.Query().Where(
+		account.EvmAddressIn(evmAddresses...),
+	).All(ctx)
+}
+
+func (r *accountRepository) GetOrCreateAccount(
+	ctx context.Context,
+	tx *ent.Tx,
+	evmAddress string,
+) (*ent.Account, error) {
+	account, err := tx.Account.Query().
+		Where(account.EvmAddressEqualFold(evmAddress)).
+		Only(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return tx.Account.Create().
+				SetEvmAddress(evmAddress).
+				SetStakedAmount((typeutil.Uint256)(uint256.NewInt(0))).
+				SetPendingRewardAmount((typeutil.Uint256)(uint256.NewInt(0))).
+				SetClaimedRewardAmount((typeutil.Uint256)(uint256.NewInt(0))).
+				Save(ctx)
+		}
+		return nil, err
+	}
+	return account, nil
+}
+
+func (r *accountRepository) CreateOrUpdateAccount(
+	ctx context.Context,
+	tx *ent.Tx,
+	evmAddress string,
+	stakedAmount typeutil.Uint256,
+	pendingRewardAmount typeutil.Uint256,
+	claimedRewardAmount typeutil.Uint256,
+) (*ent.Account, error) {
+	account, err := tx.Account.Query().
+		Where(account.EvmAddressEqualFold(evmAddress)).
+		Only(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return tx.Account.Create().
+				SetEvmAddress(evmAddress).
+				SetStakedAmount(stakedAmount).
+				SetPendingRewardAmount(pendingRewardAmount).
+				SetClaimedRewardAmount(claimedRewardAmount).
+				Save(ctx)
+		}
+		return nil, err
+	}
+	return tx.Account.UpdateOne(account).
+		SetStakedAmount(stakedAmount).
+		SetPendingRewardAmount(pendingRewardAmount).
+		SetClaimedRewardAmount(claimedRewardAmount).
+		Save(ctx)
 }

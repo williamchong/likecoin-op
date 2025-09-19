@@ -6,8 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"likecollective-indexer/ent/account"
-	"likecollective-indexer/ent/nftclass"
 	"likecollective-indexer/ent/schema/typeutil"
 	"likecollective-indexer/ent/stakingevent"
 	"time"
@@ -21,6 +19,30 @@ type StakingEventCreate struct {
 	config
 	mutation *StakingEventMutation
 	hooks    []Hook
+}
+
+// SetTransactionHash sets the "transaction_hash" field.
+func (_c *StakingEventCreate) SetTransactionHash(v string) *StakingEventCreate {
+	_c.mutation.SetTransactionHash(v)
+	return _c
+}
+
+// SetTransactionIndex sets the "transaction_index" field.
+func (_c *StakingEventCreate) SetTransactionIndex(v uint) *StakingEventCreate {
+	_c.mutation.SetTransactionIndex(v)
+	return _c
+}
+
+// SetBlockNumber sets the "block_number" field.
+func (_c *StakingEventCreate) SetBlockNumber(v typeutil.Uint64) *StakingEventCreate {
+	_c.mutation.SetBlockNumber(v)
+	return _c
+}
+
+// SetLogIndex sets the "log_index" field.
+func (_c *StakingEventCreate) SetLogIndex(v uint) *StakingEventCreate {
+	_c.mutation.SetLogIndex(v)
+	return _c
 }
 
 // SetEventType sets the "event_type" field.
@@ -37,15 +59,15 @@ func (_c *StakingEventCreate) SetNillableEventType(v *stakingevent.EventType) *S
 	return _c
 }
 
-// SetNftClassID sets the "nft_class_id" field.
-func (_c *StakingEventCreate) SetNftClassID(v int) *StakingEventCreate {
-	_c.mutation.SetNftClassID(v)
+// SetNftClassAddress sets the "nft_class_address" field.
+func (_c *StakingEventCreate) SetNftClassAddress(v string) *StakingEventCreate {
+	_c.mutation.SetNftClassAddress(v)
 	return _c
 }
 
-// SetAccountID sets the "account_id" field.
-func (_c *StakingEventCreate) SetAccountID(v int) *StakingEventCreate {
-	_c.mutation.SetAccountID(v)
+// SetAccountEvmAddress sets the "account_evm_address" field.
+func (_c *StakingEventCreate) SetAccountEvmAddress(v string) *StakingEventCreate {
+	_c.mutation.SetAccountEvmAddress(v)
 	return _c
 }
 
@@ -61,15 +83,27 @@ func (_c *StakingEventCreate) SetStakedAmountRemoved(v typeutil.Uint256) *Stakin
 	return _c
 }
 
-// SetRewardAmountAdded sets the "reward_amount_added" field.
-func (_c *StakingEventCreate) SetRewardAmountAdded(v typeutil.Uint256) *StakingEventCreate {
-	_c.mutation.SetRewardAmountAdded(v)
+// SetPendingRewardAmountAdded sets the "pending_reward_amount_added" field.
+func (_c *StakingEventCreate) SetPendingRewardAmountAdded(v typeutil.Uint256) *StakingEventCreate {
+	_c.mutation.SetPendingRewardAmountAdded(v)
 	return _c
 }
 
-// SetRewardAmountRemoved sets the "reward_amount_removed" field.
-func (_c *StakingEventCreate) SetRewardAmountRemoved(v typeutil.Uint256) *StakingEventCreate {
-	_c.mutation.SetRewardAmountRemoved(v)
+// SetPendingRewardAmountRemoved sets the "pending_reward_amount_removed" field.
+func (_c *StakingEventCreate) SetPendingRewardAmountRemoved(v typeutil.Uint256) *StakingEventCreate {
+	_c.mutation.SetPendingRewardAmountRemoved(v)
+	return _c
+}
+
+// SetClaimedRewardAmountAdded sets the "claimed_reward_amount_added" field.
+func (_c *StakingEventCreate) SetClaimedRewardAmountAdded(v typeutil.Uint256) *StakingEventCreate {
+	_c.mutation.SetClaimedRewardAmountAdded(v)
+	return _c
+}
+
+// SetClaimedRewardAmountRemoved sets the "claimed_reward_amount_removed" field.
+func (_c *StakingEventCreate) SetClaimedRewardAmountRemoved(v typeutil.Uint256) *StakingEventCreate {
+	_c.mutation.SetClaimedRewardAmountRemoved(v)
 	return _c
 }
 
@@ -85,16 +119,6 @@ func (_c *StakingEventCreate) SetNillableDatetime(v *time.Time) *StakingEventCre
 		_c.SetDatetime(*v)
 	}
 	return _c
-}
-
-// SetAccount sets the "account" edge to the Account entity.
-func (_c *StakingEventCreate) SetAccount(v *Account) *StakingEventCreate {
-	return _c.SetAccountID(v.ID)
-}
-
-// SetNftClass sets the "nft_class" edge to the NFTClass entity.
-func (_c *StakingEventCreate) SetNftClass(v *NFTClass) *StakingEventCreate {
-	return _c.SetNftClassID(v.ID)
 }
 
 // Mutation returns the StakingEventMutation object of the builder.
@@ -144,6 +168,23 @@ func (_c *StakingEventCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *StakingEventCreate) check() error {
+	if _, ok := _c.mutation.TransactionHash(); !ok {
+		return &ValidationError{Name: "transaction_hash", err: errors.New(`ent: missing required field "StakingEvent.transaction_hash"`)}
+	}
+	if v, ok := _c.mutation.TransactionHash(); ok {
+		if err := stakingevent.TransactionHashValidator(v); err != nil {
+			return &ValidationError{Name: "transaction_hash", err: fmt.Errorf(`ent: validator failed for field "StakingEvent.transaction_hash": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.TransactionIndex(); !ok {
+		return &ValidationError{Name: "transaction_index", err: errors.New(`ent: missing required field "StakingEvent.transaction_index"`)}
+	}
+	if _, ok := _c.mutation.BlockNumber(); !ok {
+		return &ValidationError{Name: "block_number", err: errors.New(`ent: missing required field "StakingEvent.block_number"`)}
+	}
+	if _, ok := _c.mutation.LogIndex(); !ok {
+		return &ValidationError{Name: "log_index", err: errors.New(`ent: missing required field "StakingEvent.log_index"`)}
+	}
 	if _, ok := _c.mutation.EventType(); !ok {
 		return &ValidationError{Name: "event_type", err: errors.New(`ent: missing required field "StakingEvent.event_type"`)}
 	}
@@ -152,11 +193,21 @@ func (_c *StakingEventCreate) check() error {
 			return &ValidationError{Name: "event_type", err: fmt.Errorf(`ent: validator failed for field "StakingEvent.event_type": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.NftClassID(); !ok {
-		return &ValidationError{Name: "nft_class_id", err: errors.New(`ent: missing required field "StakingEvent.nft_class_id"`)}
+	if _, ok := _c.mutation.NftClassAddress(); !ok {
+		return &ValidationError{Name: "nft_class_address", err: errors.New(`ent: missing required field "StakingEvent.nft_class_address"`)}
 	}
-	if _, ok := _c.mutation.AccountID(); !ok {
-		return &ValidationError{Name: "account_id", err: errors.New(`ent: missing required field "StakingEvent.account_id"`)}
+	if v, ok := _c.mutation.NftClassAddress(); ok {
+		if err := stakingevent.NftClassAddressValidator(v); err != nil {
+			return &ValidationError{Name: "nft_class_address", err: fmt.Errorf(`ent: validator failed for field "StakingEvent.nft_class_address": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.AccountEvmAddress(); !ok {
+		return &ValidationError{Name: "account_evm_address", err: errors.New(`ent: missing required field "StakingEvent.account_evm_address"`)}
+	}
+	if v, ok := _c.mutation.AccountEvmAddress(); ok {
+		if err := stakingevent.AccountEvmAddressValidator(v); err != nil {
+			return &ValidationError{Name: "account_evm_address", err: fmt.Errorf(`ent: validator failed for field "StakingEvent.account_evm_address": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.StakedAmountAdded(); !ok {
 		return &ValidationError{Name: "staked_amount_added", err: errors.New(`ent: missing required field "StakingEvent.staked_amount_added"`)}
@@ -164,20 +215,20 @@ func (_c *StakingEventCreate) check() error {
 	if _, ok := _c.mutation.StakedAmountRemoved(); !ok {
 		return &ValidationError{Name: "staked_amount_removed", err: errors.New(`ent: missing required field "StakingEvent.staked_amount_removed"`)}
 	}
-	if _, ok := _c.mutation.RewardAmountAdded(); !ok {
-		return &ValidationError{Name: "reward_amount_added", err: errors.New(`ent: missing required field "StakingEvent.reward_amount_added"`)}
+	if _, ok := _c.mutation.PendingRewardAmountAdded(); !ok {
+		return &ValidationError{Name: "pending_reward_amount_added", err: errors.New(`ent: missing required field "StakingEvent.pending_reward_amount_added"`)}
 	}
-	if _, ok := _c.mutation.RewardAmountRemoved(); !ok {
-		return &ValidationError{Name: "reward_amount_removed", err: errors.New(`ent: missing required field "StakingEvent.reward_amount_removed"`)}
+	if _, ok := _c.mutation.PendingRewardAmountRemoved(); !ok {
+		return &ValidationError{Name: "pending_reward_amount_removed", err: errors.New(`ent: missing required field "StakingEvent.pending_reward_amount_removed"`)}
+	}
+	if _, ok := _c.mutation.ClaimedRewardAmountAdded(); !ok {
+		return &ValidationError{Name: "claimed_reward_amount_added", err: errors.New(`ent: missing required field "StakingEvent.claimed_reward_amount_added"`)}
+	}
+	if _, ok := _c.mutation.ClaimedRewardAmountRemoved(); !ok {
+		return &ValidationError{Name: "claimed_reward_amount_removed", err: errors.New(`ent: missing required field "StakingEvent.claimed_reward_amount_removed"`)}
 	}
 	if _, ok := _c.mutation.Datetime(); !ok {
 		return &ValidationError{Name: "datetime", err: errors.New(`ent: missing required field "StakingEvent.datetime"`)}
-	}
-	if len(_c.mutation.AccountIDs()) == 0 {
-		return &ValidationError{Name: "account", err: errors.New(`ent: missing required edge "StakingEvent.account"`)}
-	}
-	if len(_c.mutation.NftClassIDs()) == 0 {
-		return &ValidationError{Name: "nft_class", err: errors.New(`ent: missing required edge "StakingEvent.nft_class"`)}
 	}
 	return nil
 }
@@ -208,9 +259,37 @@ func (_c *StakingEventCreate) createSpec() (*StakingEvent, *sqlgraph.CreateSpec,
 		_node = &StakingEvent{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(stakingevent.Table, sqlgraph.NewFieldSpec(stakingevent.FieldID, field.TypeInt))
 	)
+	if value, ok := _c.mutation.TransactionHash(); ok {
+		_spec.SetField(stakingevent.FieldTransactionHash, field.TypeString, value)
+		_node.TransactionHash = value
+	}
+	if value, ok := _c.mutation.TransactionIndex(); ok {
+		_spec.SetField(stakingevent.FieldTransactionIndex, field.TypeUint, value)
+		_node.TransactionIndex = value
+	}
+	if value, ok := _c.mutation.BlockNumber(); ok {
+		vv, err := stakingevent.ValueScanner.BlockNumber.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(stakingevent.FieldBlockNumber, field.TypeUint64, vv)
+		_node.BlockNumber = value
+	}
+	if value, ok := _c.mutation.LogIndex(); ok {
+		_spec.SetField(stakingevent.FieldLogIndex, field.TypeUint, value)
+		_node.LogIndex = value
+	}
 	if value, ok := _c.mutation.EventType(); ok {
 		_spec.SetField(stakingevent.FieldEventType, field.TypeEnum, value)
 		_node.EventType = value
+	}
+	if value, ok := _c.mutation.NftClassAddress(); ok {
+		_spec.SetField(stakingevent.FieldNftClassAddress, field.TypeString, value)
+		_node.NftClassAddress = value
+	}
+	if value, ok := _c.mutation.AccountEvmAddress(); ok {
+		_spec.SetField(stakingevent.FieldAccountEvmAddress, field.TypeString, value)
+		_node.AccountEvmAddress = value
 	}
 	if value, ok := _c.mutation.StakedAmountAdded(); ok {
 		vv, err := stakingevent.ValueScanner.StakedAmountAdded.Value(value)
@@ -228,59 +307,41 @@ func (_c *StakingEventCreate) createSpec() (*StakingEvent, *sqlgraph.CreateSpec,
 		_spec.SetField(stakingevent.FieldStakedAmountRemoved, field.TypeUint64, vv)
 		_node.StakedAmountRemoved = value
 	}
-	if value, ok := _c.mutation.RewardAmountAdded(); ok {
-		vv, err := stakingevent.ValueScanner.RewardAmountAdded.Value(value)
+	if value, ok := _c.mutation.PendingRewardAmountAdded(); ok {
+		vv, err := stakingevent.ValueScanner.PendingRewardAmountAdded.Value(value)
 		if err != nil {
 			return nil, nil, err
 		}
-		_spec.SetField(stakingevent.FieldRewardAmountAdded, field.TypeUint64, vv)
-		_node.RewardAmountAdded = value
+		_spec.SetField(stakingevent.FieldPendingRewardAmountAdded, field.TypeUint64, vv)
+		_node.PendingRewardAmountAdded = value
 	}
-	if value, ok := _c.mutation.RewardAmountRemoved(); ok {
-		vv, err := stakingevent.ValueScanner.RewardAmountRemoved.Value(value)
+	if value, ok := _c.mutation.PendingRewardAmountRemoved(); ok {
+		vv, err := stakingevent.ValueScanner.PendingRewardAmountRemoved.Value(value)
 		if err != nil {
 			return nil, nil, err
 		}
-		_spec.SetField(stakingevent.FieldRewardAmountRemoved, field.TypeUint64, vv)
-		_node.RewardAmountRemoved = value
+		_spec.SetField(stakingevent.FieldPendingRewardAmountRemoved, field.TypeUint64, vv)
+		_node.PendingRewardAmountRemoved = value
+	}
+	if value, ok := _c.mutation.ClaimedRewardAmountAdded(); ok {
+		vv, err := stakingevent.ValueScanner.ClaimedRewardAmountAdded.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(stakingevent.FieldClaimedRewardAmountAdded, field.TypeUint64, vv)
+		_node.ClaimedRewardAmountAdded = value
+	}
+	if value, ok := _c.mutation.ClaimedRewardAmountRemoved(); ok {
+		vv, err := stakingevent.ValueScanner.ClaimedRewardAmountRemoved.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(stakingevent.FieldClaimedRewardAmountRemoved, field.TypeUint64, vv)
+		_node.ClaimedRewardAmountRemoved = value
 	}
 	if value, ok := _c.mutation.Datetime(); ok {
 		_spec.SetField(stakingevent.FieldDatetime, field.TypeTime, value)
 		_node.Datetime = value
-	}
-	if nodes := _c.mutation.AccountIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   stakingevent.AccountTable,
-			Columns: []string{stakingevent.AccountColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.AccountID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.NftClassIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   stakingevent.NftClassTable,
-			Columns: []string{stakingevent.NftClassColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(nftclass.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.NftClassID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec, nil
 }

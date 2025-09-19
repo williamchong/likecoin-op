@@ -10,7 +10,6 @@ import (
 	"likecollective-indexer/ent/nftclass"
 	"likecollective-indexer/ent/predicate"
 	"likecollective-indexer/ent/staking"
-	"likecollective-indexer/ent/stakingevent"
 	"math"
 
 	"entgo.io/ent"
@@ -22,13 +21,12 @@ import (
 // NFTClassQuery is the builder for querying NFTClass entities.
 type NFTClassQuery struct {
 	config
-	ctx               *QueryContext
-	order             []nftclass.OrderOption
-	inters            []Interceptor
-	predicates        []predicate.NFTClass
-	withAccounts      *AccountQuery
-	withStakingEvents *StakingEventQuery
-	withStakings      *StakingQuery
+	ctx          *QueryContext
+	order        []nftclass.OrderOption
+	inters       []Interceptor
+	predicates   []predicate.NFTClass
+	withAccounts *AccountQuery
+	withStakings *StakingQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -80,28 +78,6 @@ func (_q *NFTClassQuery) QueryAccounts() *AccountQuery {
 			sqlgraph.From(nftclass.Table, nftclass.FieldID, selector),
 			sqlgraph.To(account.Table, account.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, nftclass.AccountsTable, nftclass.AccountsPrimaryKey...),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryStakingEvents chains the current query on the "staking_events" edge.
-func (_q *NFTClassQuery) QueryStakingEvents() *StakingEventQuery {
-	query := (&StakingEventClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(nftclass.Table, nftclass.FieldID, selector),
-			sqlgraph.To(stakingevent.Table, stakingevent.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, nftclass.StakingEventsTable, nftclass.StakingEventsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -318,14 +294,13 @@ func (_q *NFTClassQuery) Clone() *NFTClassQuery {
 		return nil
 	}
 	return &NFTClassQuery{
-		config:            _q.config,
-		ctx:               _q.ctx.Clone(),
-		order:             append([]nftclass.OrderOption{}, _q.order...),
-		inters:            append([]Interceptor{}, _q.inters...),
-		predicates:        append([]predicate.NFTClass{}, _q.predicates...),
-		withAccounts:      _q.withAccounts.Clone(),
-		withStakingEvents: _q.withStakingEvents.Clone(),
-		withStakings:      _q.withStakings.Clone(),
+		config:       _q.config,
+		ctx:          _q.ctx.Clone(),
+		order:        append([]nftclass.OrderOption{}, _q.order...),
+		inters:       append([]Interceptor{}, _q.inters...),
+		predicates:   append([]predicate.NFTClass{}, _q.predicates...),
+		withAccounts: _q.withAccounts.Clone(),
+		withStakings: _q.withStakings.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -340,17 +315,6 @@ func (_q *NFTClassQuery) WithAccounts(opts ...func(*AccountQuery)) *NFTClassQuer
 		opt(query)
 	}
 	_q.withAccounts = query
-	return _q
-}
-
-// WithStakingEvents tells the query-builder to eager-load the nodes that are connected to
-// the "staking_events" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *NFTClassQuery) WithStakingEvents(opts ...func(*StakingEventQuery)) *NFTClassQuery {
-	query := (&StakingEventClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withStakingEvents = query
 	return _q
 }
 
@@ -443,9 +407,8 @@ func (_q *NFTClassQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*NFT
 	var (
 		nodes       = []*NFTClass{}
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [2]bool{
 			_q.withAccounts != nil,
-			_q.withStakingEvents != nil,
 			_q.withStakings != nil,
 		}
 	)
@@ -471,13 +434,6 @@ func (_q *NFTClassQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*NFT
 		if err := _q.loadAccounts(ctx, query, nodes,
 			func(n *NFTClass) { n.Edges.Accounts = []*Account{} },
 			func(n *NFTClass, e *Account) { n.Edges.Accounts = append(n.Edges.Accounts, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withStakingEvents; query != nil {
-		if err := _q.loadStakingEvents(ctx, query, nodes,
-			func(n *NFTClass) { n.Edges.StakingEvents = []*StakingEvent{} },
-			func(n *NFTClass, e *StakingEvent) { n.Edges.StakingEvents = append(n.Edges.StakingEvents, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -549,36 +505,6 @@ func (_q *NFTClassQuery) loadAccounts(ctx context.Context, query *AccountQuery, 
 		for kn := range nodes {
 			assign(kn, n)
 		}
-	}
-	return nil
-}
-func (_q *NFTClassQuery) loadStakingEvents(ctx context.Context, query *StakingEventQuery, nodes []*NFTClass, init func(*NFTClass), assign func(*NFTClass, *StakingEvent)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*NFTClass)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(stakingevent.FieldNftClassID)
-	}
-	query.Where(predicate.StakingEvent(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(nftclass.StakingEventsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.NftClassID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "nft_class_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
 	}
 	return nil
 }

@@ -5,6 +5,9 @@ import (
 
 	"likecollective-indexer/ent"
 	"likecollective-indexer/ent/nftclass"
+	"likecollective-indexer/ent/schema/typeutil"
+
+	"github.com/holiman/uint256"
 )
 
 type NFTClassRepository interface {
@@ -21,6 +24,24 @@ type NFTClassRepository interface {
 	QueryNFTClass(
 		ctx context.Context,
 		address string,
+	) (*ent.NFTClass, error)
+
+	QueryNFTClassesByAddresses(
+		ctx context.Context,
+		addresses []string,
+	) ([]*ent.NFTClass, error)
+
+	GetOrCreateNFTClass(
+		ctx context.Context,
+		tx *ent.Tx,
+		address string,
+	) (*ent.NFTClass, error)
+
+	CreateOrUpdateNFTClass(
+		ctx context.Context,
+		tx *ent.Tx,
+		address string,
+		stakedAmount typeutil.Uint256,
 	) (*ent.NFTClass, error)
 }
 
@@ -76,4 +97,52 @@ func (r *nftClassRepository) QueryNFTClass(
 	}
 
 	return nftClass, nil
+}
+
+func (r *nftClassRepository) QueryNFTClassesByAddresses(
+	ctx context.Context,
+	addresses []string,
+) ([]*ent.NFTClass, error) {
+	return r.dbService.Client().NFTClass.Query().Where(nftclass.AddressIn(addresses...)).All(ctx)
+}
+
+func (r *nftClassRepository) GetOrCreateNFTClass(
+	ctx context.Context,
+	tx *ent.Tx,
+	address string,
+) (*ent.NFTClass, error) {
+	nftClass, err := tx.NFTClass.Query().Where(nftclass.AddressEqualFold(address)).Only(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return tx.NFTClass.Create().
+				SetAddress(address).
+				SetStakedAmount((typeutil.Uint256)(uint256.NewInt(0))).
+				SetNumberOfStakers(0).
+				SetNillableLastStakedAt(nil).
+				Save(ctx)
+		}
+		return nil, err
+	}
+	return nftClass, nil
+}
+
+func (r *nftClassRepository) CreateOrUpdateNFTClass(
+	ctx context.Context,
+	tx *ent.Tx,
+	address string,
+	stakedAmount typeutil.Uint256,
+) (*ent.NFTClass, error) {
+	nftClass, err := tx.NFTClass.Query().Where(nftclass.AddressEqualFold(address)).Only(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return tx.NFTClass.Create().
+				SetAddress(address).
+				SetStakedAmount(stakedAmount).
+				Save(ctx)
+		}
+		return nil, err
+	}
+	return tx.NFTClass.UpdateOne(nftClass).
+		SetStakedAmount(stakedAmount).
+		Save(ctx)
 }

@@ -26,8 +26,6 @@ const (
 	FieldNumberOfStakers = "number_of_stakers"
 	// EdgeAccounts holds the string denoting the accounts edge name in mutations.
 	EdgeAccounts = "accounts"
-	// EdgeStakingEvents holds the string denoting the staking_events edge name in mutations.
-	EdgeStakingEvents = "staking_events"
 	// EdgeStakings holds the string denoting the stakings edge name in mutations.
 	EdgeStakings = "stakings"
 	// Table holds the table name of the nftclass in the database.
@@ -37,13 +35,6 @@ const (
 	// AccountsInverseTable is the table name for the Account entity.
 	// It exists in this package in order to avoid circular dependency with the "account" package.
 	AccountsInverseTable = "accounts"
-	// StakingEventsTable is the table that holds the staking_events relation/edge.
-	StakingEventsTable = "staking_events"
-	// StakingEventsInverseTable is the table name for the StakingEvent entity.
-	// It exists in this package in order to avoid circular dependency with the "stakingevent" package.
-	StakingEventsInverseTable = "staking_events"
-	// StakingEventsColumn is the table column denoting the staking_events relation/edge.
-	StakingEventsColumn = "nft_class_id"
 	// StakingsTable is the table that holds the stakings relation/edge.
 	StakingsTable = "stakings"
 	// StakingsInverseTable is the table name for the Staking entity.
@@ -133,20 +124,6 @@ func ByAccounts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByStakingEventsCount orders the results by staking_events count.
-func ByStakingEventsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newStakingEventsStep(), opts...)
-	}
-}
-
-// ByStakingEvents orders the results by staking_events terms.
-func ByStakingEvents(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newStakingEventsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByStakingsCount orders the results by stakings count.
 func ByStakingsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -165,13 +142,6 @@ func newAccountsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AccountsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, true, AccountsTable, AccountsPrimaryKey...),
-	)
-}
-func newStakingEventsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(StakingEventsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, StakingEventsTable, StakingEventsColumn),
 	)
 }
 func newStakingsStep() *sqlgraph.Step {

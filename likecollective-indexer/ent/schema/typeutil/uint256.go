@@ -20,11 +20,15 @@ import (
 // pg numeral max: 18446744073709551615
 type Uint256 *uint256.Int
 
-var Typ = Uint256(uint256.NewInt(0))
+var Uint256Type = Uint256(uint256.NewInt(0))
 
 var Uint256ValueScanner = field.ValueScannerFunc[Uint256, *sql.NullString]{
 	V: func(s Uint256) (driver.Value, error) {
-		return []byte((*uint256.Int)(s).String()), nil
+		if s == nil {
+			return "0", nil
+		}
+		v := (*uint256.Int)(s).String()
+		return v, nil
 	},
 	S: func(ns *sql.NullString) (Uint256, error) {
 		if !ns.Valid {
@@ -50,6 +54,7 @@ func Uint256Annotations(field string) []schema.Annotation {
 			Checks: map[string]string{
 				fmt.Sprintf("uint256_%s_check", field): fmt.Sprintf("%s >= 0", field),
 			},
+			Default: "0",
 		},
 	}
 }

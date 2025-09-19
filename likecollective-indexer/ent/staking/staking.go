@@ -71,8 +71,6 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// PoolShareValidator is a validator for the "pool_share" field. It is called by the builders before save.
-	PoolShareValidator func(string) error
 	// ValueScanner of all Staking fields.
 	ValueScanner struct {
 		StakedAmount        field.TypeValueScanner[typeutil.Uint256]

@@ -2,8 +2,6 @@ package database
 
 import (
 	"likecollective-indexer/ent"
-	"likecollective-indexer/ent/account"
-	"likecollective-indexer/ent/nftclass"
 	"likecollective-indexer/ent/stakingevent"
 
 	"entgo.io/ent/dialect/sql"
@@ -61,10 +59,10 @@ func (f *QueryStakingEventsFilter) HandleFilter(
 	q *ent.StakingEventQuery,
 ) *ent.StakingEventQuery {
 	if f.BookNFTIn != nil {
-		q = q.Where(stakingevent.HasNftClassWith(nftclass.AddressIn(*f.BookNFTIn...)))
+		q = q.Where(stakingevent.NftClassAddressIn(*f.BookNFTIn...))
 	}
 	if f.AccountIn != nil {
-		q = q.Where(stakingevent.HasAccountWith(account.EvmAddressIn(*f.AccountIn...)))
+		q = q.Where(stakingevent.AccountEvmAddressIn(*f.AccountIn...))
 	}
 	if f.EventType != nil && *f.EventType != "all" {
 		q = q.Where(stakingevent.EventTypeEQ(stakingevent.EventType(*f.EventType)))
