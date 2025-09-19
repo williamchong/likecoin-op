@@ -37,7 +37,7 @@ type LikeCollectiveRewardData struct {
 
 // LikeCollectiveMetaData contains all meta data concerning the LikeCollective contract.
 var LikeCollectiveMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EnforcedPause\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"required\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"available\",\"type\":\"uint256\"}],\"name\":\"ErrInsufficientStake\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ErrInvalidAmount\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"}],\"name\":\"ErrInvalidBookNFT\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ErrInvalidOwner\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ErrNoRewardsToClaim\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpectedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ReentrancyGuardReentrantCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"rewardedAmount\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"structLikeCollective.RewardData[]\",\"name\":\"rewardedAmount\",\"type\":\"tuple[]\"}],\"name\":\"AllRewardClaimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rewardedAmount\",\"type\":\"uint256\"}],\"name\":\"RewardClaimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rewardedAmount\",\"type\":\"uint256\"}],\"name\":\"RewardDeposited\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"stakedAmount\",\"type\":\"uint256\"}],\"name\":\"Staked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"stakedAmount\",\"type\":\"uint256\"}],\"name\":\"Unstaked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"ACC_REWARD_PRECISION\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"claimAllRewards\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"}],\"name\":\"claimRewards\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"depositReward\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"}],\"name\":\"getPendingRewards\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"}],\"name\":\"getStakeForUser\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"}],\"name\":\"getTotalStake\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"initialOwner\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"pendingRewardsOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"restakeRewardPosition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"likeStakePosition\",\"type\":\"address\"}],\"name\":\"setLikeStakePosition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"likecoin\",\"type\":\"address\"}],\"name\":\"setLikecoin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"stake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"unstakePosition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EnforcedPause\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"required\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"available\",\"type\":\"uint256\"}],\"name\":\"ErrInsufficientStake\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ErrInvalidAmount\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"}],\"name\":\"ErrInvalidBookNFT\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ErrInvalidOwner\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ErrNoRewardsToClaim\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpectedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ReentrancyGuardReentrantCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"rewardedAmount\",\"type\":\"uint256\"}],\"indexed\":false,\"internalType\":\"structLikeCollective.RewardData[]\",\"name\":\"rewardedAmount\",\"type\":\"tuple[]\"}],\"name\":\"AllRewardClaimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rewardedAmount\",\"type\":\"uint256\"}],\"name\":\"RewardClaimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rewardedAmount\",\"type\":\"uint256\"}],\"name\":\"RewardDeposited\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"stakedAmount\",\"type\":\"uint256\"}],\"name\":\"Staked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"stakedAmount\",\"type\":\"uint256\"}],\"name\":\"Unstaked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"ACC_REWARD_PRECISION\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"claimAllRewards\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"claimRewards\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"depositReward\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"}],\"name\":\"getPendingRewardsForUser\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"}],\"name\":\"getPendingRewardsPool\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getRewardsOfPosition\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"}],\"name\":\"getStakeForUser\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"}],\"name\":\"getTotalStake\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"initialOwner\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"restakeRewardPosition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"likeStakePosition\",\"type\":\"address\"}],\"name\":\"setLikeStakePosition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"likecoin\",\"type\":\"address\"}],\"name\":\"setLikecoin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"bookNFT\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"stake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"unstakePosition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
 }
 
 // LikeCollectiveABI is the input ABI used to generate the binding from.
@@ -248,12 +248,12 @@ func (_LikeCollective *LikeCollectiveCallerSession) UPGRADEINTERFACEVERSION() (s
 	return _LikeCollective.Contract.UPGRADEINTERFACEVERSION(&_LikeCollective.CallOpts)
 }
 
-// GetPendingRewards is a free data retrieval call binding the contract method 0x7a27db57.
+// GetPendingRewardsForUser is a free data retrieval call binding the contract method 0xbb112623.
 //
-// Solidity: function getPendingRewards(address user, address bookNFT) view returns(uint256)
-func (_LikeCollective *LikeCollectiveCaller) GetPendingRewards(opts *bind.CallOpts, user common.Address, bookNFT common.Address) (*big.Int, error) {
+// Solidity: function getPendingRewardsForUser(address user, address bookNFT) view returns(uint256)
+func (_LikeCollective *LikeCollectiveCaller) GetPendingRewardsForUser(opts *bind.CallOpts, user common.Address, bookNFT common.Address) (*big.Int, error) {
 	var out []interface{}
-	err := _LikeCollective.contract.Call(opts, &out, "getPendingRewards", user, bookNFT)
+	err := _LikeCollective.contract.Call(opts, &out, "getPendingRewardsForUser", user, bookNFT)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -265,18 +265,80 @@ func (_LikeCollective *LikeCollectiveCaller) GetPendingRewards(opts *bind.CallOp
 
 }
 
-// GetPendingRewards is a free data retrieval call binding the contract method 0x7a27db57.
+// GetPendingRewardsForUser is a free data retrieval call binding the contract method 0xbb112623.
 //
-// Solidity: function getPendingRewards(address user, address bookNFT) view returns(uint256)
-func (_LikeCollective *LikeCollectiveSession) GetPendingRewards(user common.Address, bookNFT common.Address) (*big.Int, error) {
-	return _LikeCollective.Contract.GetPendingRewards(&_LikeCollective.CallOpts, user, bookNFT)
+// Solidity: function getPendingRewardsForUser(address user, address bookNFT) view returns(uint256)
+func (_LikeCollective *LikeCollectiveSession) GetPendingRewardsForUser(user common.Address, bookNFT common.Address) (*big.Int, error) {
+	return _LikeCollective.Contract.GetPendingRewardsForUser(&_LikeCollective.CallOpts, user, bookNFT)
 }
 
-// GetPendingRewards is a free data retrieval call binding the contract method 0x7a27db57.
+// GetPendingRewardsForUser is a free data retrieval call binding the contract method 0xbb112623.
 //
-// Solidity: function getPendingRewards(address user, address bookNFT) view returns(uint256)
-func (_LikeCollective *LikeCollectiveCallerSession) GetPendingRewards(user common.Address, bookNFT common.Address) (*big.Int, error) {
-	return _LikeCollective.Contract.GetPendingRewards(&_LikeCollective.CallOpts, user, bookNFT)
+// Solidity: function getPendingRewardsForUser(address user, address bookNFT) view returns(uint256)
+func (_LikeCollective *LikeCollectiveCallerSession) GetPendingRewardsForUser(user common.Address, bookNFT common.Address) (*big.Int, error) {
+	return _LikeCollective.Contract.GetPendingRewardsForUser(&_LikeCollective.CallOpts, user, bookNFT)
+}
+
+// GetPendingRewardsPool is a free data retrieval call binding the contract method 0x77eef8f9.
+//
+// Solidity: function getPendingRewardsPool(address bookNFT) view returns(uint256)
+func (_LikeCollective *LikeCollectiveCaller) GetPendingRewardsPool(opts *bind.CallOpts, bookNFT common.Address) (*big.Int, error) {
+	var out []interface{}
+	err := _LikeCollective.contract.Call(opts, &out, "getPendingRewardsPool", bookNFT)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// GetPendingRewardsPool is a free data retrieval call binding the contract method 0x77eef8f9.
+//
+// Solidity: function getPendingRewardsPool(address bookNFT) view returns(uint256)
+func (_LikeCollective *LikeCollectiveSession) GetPendingRewardsPool(bookNFT common.Address) (*big.Int, error) {
+	return _LikeCollective.Contract.GetPendingRewardsPool(&_LikeCollective.CallOpts, bookNFT)
+}
+
+// GetPendingRewardsPool is a free data retrieval call binding the contract method 0x77eef8f9.
+//
+// Solidity: function getPendingRewardsPool(address bookNFT) view returns(uint256)
+func (_LikeCollective *LikeCollectiveCallerSession) GetPendingRewardsPool(bookNFT common.Address) (*big.Int, error) {
+	return _LikeCollective.Contract.GetPendingRewardsPool(&_LikeCollective.CallOpts, bookNFT)
+}
+
+// GetRewardsOfPosition is a free data retrieval call binding the contract method 0xc86ec26e.
+//
+// Solidity: function getRewardsOfPosition(uint256 tokenId) view returns(uint256)
+func (_LikeCollective *LikeCollectiveCaller) GetRewardsOfPosition(opts *bind.CallOpts, tokenId *big.Int) (*big.Int, error) {
+	var out []interface{}
+	err := _LikeCollective.contract.Call(opts, &out, "getRewardsOfPosition", tokenId)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// GetRewardsOfPosition is a free data retrieval call binding the contract method 0xc86ec26e.
+//
+// Solidity: function getRewardsOfPosition(uint256 tokenId) view returns(uint256)
+func (_LikeCollective *LikeCollectiveSession) GetRewardsOfPosition(tokenId *big.Int) (*big.Int, error) {
+	return _LikeCollective.Contract.GetRewardsOfPosition(&_LikeCollective.CallOpts, tokenId)
+}
+
+// GetRewardsOfPosition is a free data retrieval call binding the contract method 0xc86ec26e.
+//
+// Solidity: function getRewardsOfPosition(uint256 tokenId) view returns(uint256)
+func (_LikeCollective *LikeCollectiveCallerSession) GetRewardsOfPosition(tokenId *big.Int) (*big.Int, error) {
+	return _LikeCollective.Contract.GetRewardsOfPosition(&_LikeCollective.CallOpts, tokenId)
 }
 
 // GetStakeForUser is a free data retrieval call binding the contract method 0x4d9453c0.
@@ -403,37 +465,6 @@ func (_LikeCollective *LikeCollectiveCallerSession) Paused() (bool, error) {
 	return _LikeCollective.Contract.Paused(&_LikeCollective.CallOpts)
 }
 
-// PendingRewardsOf is a free data retrieval call binding the contract method 0x0b209af5.
-//
-// Solidity: function pendingRewardsOf(uint256 tokenId) view returns(uint256)
-func (_LikeCollective *LikeCollectiveCaller) PendingRewardsOf(opts *bind.CallOpts, tokenId *big.Int) (*big.Int, error) {
-	var out []interface{}
-	err := _LikeCollective.contract.Call(opts, &out, "pendingRewardsOf", tokenId)
-
-	if err != nil {
-		return *new(*big.Int), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
-
-	return out0, err
-
-}
-
-// PendingRewardsOf is a free data retrieval call binding the contract method 0x0b209af5.
-//
-// Solidity: function pendingRewardsOf(uint256 tokenId) view returns(uint256)
-func (_LikeCollective *LikeCollectiveSession) PendingRewardsOf(tokenId *big.Int) (*big.Int, error) {
-	return _LikeCollective.Contract.PendingRewardsOf(&_LikeCollective.CallOpts, tokenId)
-}
-
-// PendingRewardsOf is a free data retrieval call binding the contract method 0x0b209af5.
-//
-// Solidity: function pendingRewardsOf(uint256 tokenId) view returns(uint256)
-func (_LikeCollective *LikeCollectiveCallerSession) PendingRewardsOf(tokenId *big.Int) (*big.Int, error) {
-	return _LikeCollective.Contract.PendingRewardsOf(&_LikeCollective.CallOpts, tokenId)
-}
-
 // ProxiableUUID is a free data retrieval call binding the contract method 0x52d1902d.
 //
 // Solidity: function proxiableUUID() view returns(bytes32)
@@ -486,25 +517,25 @@ func (_LikeCollective *LikeCollectiveTransactorSession) ClaimAllRewards(user com
 	return _LikeCollective.Contract.ClaimAllRewards(&_LikeCollective.TransactOpts, user)
 }
 
-// ClaimRewards is a paid mutator transaction binding the contract method 0xef5cfb8c.
+// ClaimRewards is a paid mutator transaction binding the contract method 0x0962ef79.
 //
-// Solidity: function claimRewards(address bookNFT) returns()
-func (_LikeCollective *LikeCollectiveTransactor) ClaimRewards(opts *bind.TransactOpts, bookNFT common.Address) (*types.Transaction, error) {
-	return _LikeCollective.contract.Transact(opts, "claimRewards", bookNFT)
+// Solidity: function claimRewards(uint256 tokenId) returns()
+func (_LikeCollective *LikeCollectiveTransactor) ClaimRewards(opts *bind.TransactOpts, tokenId *big.Int) (*types.Transaction, error) {
+	return _LikeCollective.contract.Transact(opts, "claimRewards", tokenId)
 }
 
-// ClaimRewards is a paid mutator transaction binding the contract method 0xef5cfb8c.
+// ClaimRewards is a paid mutator transaction binding the contract method 0x0962ef79.
 //
-// Solidity: function claimRewards(address bookNFT) returns()
-func (_LikeCollective *LikeCollectiveSession) ClaimRewards(bookNFT common.Address) (*types.Transaction, error) {
-	return _LikeCollective.Contract.ClaimRewards(&_LikeCollective.TransactOpts, bookNFT)
+// Solidity: function claimRewards(uint256 tokenId) returns()
+func (_LikeCollective *LikeCollectiveSession) ClaimRewards(tokenId *big.Int) (*types.Transaction, error) {
+	return _LikeCollective.Contract.ClaimRewards(&_LikeCollective.TransactOpts, tokenId)
 }
 
-// ClaimRewards is a paid mutator transaction binding the contract method 0xef5cfb8c.
+// ClaimRewards is a paid mutator transaction binding the contract method 0x0962ef79.
 //
-// Solidity: function claimRewards(address bookNFT) returns()
-func (_LikeCollective *LikeCollectiveTransactorSession) ClaimRewards(bookNFT common.Address) (*types.Transaction, error) {
-	return _LikeCollective.Contract.ClaimRewards(&_LikeCollective.TransactOpts, bookNFT)
+// Solidity: function claimRewards(uint256 tokenId) returns()
+func (_LikeCollective *LikeCollectiveTransactorSession) ClaimRewards(tokenId *big.Int) (*types.Transaction, error) {
+	return _LikeCollective.Contract.ClaimRewards(&_LikeCollective.TransactOpts, tokenId)
 }
 
 // DepositReward is a paid mutator transaction binding the contract method 0x7db4e28f.
