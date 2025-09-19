@@ -260,6 +260,29 @@ likecollectiveIndexer:
 
     resources: {}
 
+  worker:
+    name: likecollective-indexer-worker
+
+    deployments:
+      periodic:
+        resources: {}
+        tasks:
+          - check-received-evm-events
+      process-evm-event:
+        resources: {}
+        tasks:
+          - process-evm-event
+
+  scheduler:
+    name: likecollective-indexer-scheduler
+
+    deployments:
+      all-in-one:
+        cron: "*/1 * * * *"
+        tasks:
+          - check-received-evm-events
+        resources: {}
+
 redis:
   name: redis
   container:

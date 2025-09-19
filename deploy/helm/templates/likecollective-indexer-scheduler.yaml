@@ -1,0 +1,42 @@
+{{- with .Values.likecollectiveIndexer.scheduler.deployments }}
+{{- range $name, $value := . }}
+{{- if ne (len .tasks) 0}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: {{ $.Values.likecollectiveIndexer.scheduler.name }}-{{ $name }}
+  name: {{ $.Values.likecollectiveIndexer.scheduler.name }}-{{ $name }}
+  namespace: {{ $.Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: {{ $.Values.likecollectiveIndexer.scheduler.name }}-{{ $name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: {{ $.Values.likecollectiveIndexer.scheduler.name }}-{{ $name }}
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: {{ $.Values.likecollectiveIndexer.scheduler.name }}-{{ $name }}
+        image: {{ $.Values.likecollectiveIndexer.container.imageRepository }}:{{ $.Values.appVersion }}
+        imagePullPolicy: {{ $.Values.likecollectiveIndexer.container.imagePullPolicy}}
+        command:
+          - "likecollective-indexer-worker-cli"
+          - "scheduler"
+          - "--cron"
+          - "{{ .cron }}"
+          {{- range $task := .tasks }}
+          - "{{ $task }}"
+          {{- end }}
+        envFrom:
+          - secretRef:
+              name: {{ $.Values.likecollectiveIndexer.name }}
+        resources:
+          {{- toYaml $value.resources | nindent 12 }}
+---
+{{- end }}
+{{- end }}
+{{- end }}

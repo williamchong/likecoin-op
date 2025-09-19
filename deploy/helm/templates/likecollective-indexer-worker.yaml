@@ -1,0 +1,42 @@
+{{- with .Values.likecollectiveIndexer.worker.deployments }}
+{{- range $name, $value := . }}
+{{- if ne (len .tasks) 0}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: {{ $.Values.likecollectiveIndexer.worker.name }}-{{ $name }}
+  name: {{ $.Values.likecollectiveIndexer.worker.name }}-{{ $name }}
+  namespace: {{ $.Values.namespace }}
+spec:
+  replicas: {{ $value.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: {{ $.Values.likecollectiveIndexer.worker.name }}-{{ $name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: {{ $.Values.likecollectiveIndexer.worker.name }}-{{ $name }}
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: {{ $.Values.likecollectiveIndexer.worker.name }}-{{ $name }}
+        image: {{ $.Values.likecollectiveIndexer.container.imageRepository }}:{{ $.Values.appVersion }}
+        imagePullPolicy: {{ $.Values.likecollectiveIndexer.container.imagePullPolicy}}
+        command:
+          - "likecollective-indexer-worker-cli"
+          - "worker"
+          - "--concurrency"
+          - "{{ $value.concurrency | default 1 }}"
+          {{- range $task := .tasks }}
+          - "{{ $task }}"
+          {{- end }}
+        envFrom:
+          - secretRef:
+              name: {{ $.Values.likecollectiveIndexer.name }}
+        resources:
+          {{- toYaml $value.resources | nindent 12 }}
+---
+{{- end }}
+{{- end }}
+{{- end }}
