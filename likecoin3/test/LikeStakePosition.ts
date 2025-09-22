@@ -8,10 +8,16 @@ describe("LikeStakePosition", async function () {
     const [deployer, rick, kin] = await viem.getWalletClients();
     const publicClient = await viem.getPublicClient();
 
-    const { likeStakePosition, likeStakePositionImpl, likeStakePositionProxy } =
+    const { likeStakePosition, likeStakePositionImpl } =
       await ignition.deploy(LikeStakePositionModule, {
         parameters: {
-          LikeStakePositionModule: {
+          LikecoinModule: {
+            initOwner: deployer.account.address,
+          },
+          LikeCollectiveV0Module: {
+            initOwner: deployer.account.address,
+          },
+          LikeStakePositionV0Module: {
             initOwner: deployer.account.address,
           },
         },
@@ -21,7 +27,6 @@ describe("LikeStakePosition", async function () {
     return {
       likeStakePosition,
       likeStakePositionImpl,
-      likeStakePositionProxy,
       deployer,
       rick,
       kin,

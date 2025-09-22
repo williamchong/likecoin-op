@@ -23,6 +23,8 @@ const LikeCollectiveModule = buildModule("LikeCollectiveModule", (m) => {
   return {
     likeCollectiveImpl,
     likeCollective,
+    likeStakePosition,
+    likecoin,
   };
 });
 
