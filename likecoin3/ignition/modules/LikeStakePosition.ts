@@ -1,20 +1,27 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
+import LikeStakePositionV0Module from "./LikeStakePositionV0";
 
 const LikeStakePositionModule = buildModule("LikeStakePositionModule", (m) => {
-  const initOwner = m.getParameter("initOwner");
+  const { likeStakePositionV0 } = m.useModule(LikeStakePositionV0Module);
 
-  const likeStakePositionImpl = m.contract("LikeStakePosition", [], { id: "LikeStakePositionImpl" });
+  const likeStakePositionImpl = m.contract("LikeStakePosition", [], {
+    id: "LikeStakePositionImpl",
+  });
 
-  const initData = m.encodeFunctionCall(likeStakePositionImpl, "initialize", [
-    initOwner,
+  m.call(likeStakePositionV0, "upgradeToAndCall", [
+    likeStakePositionImpl,
+    "0x",
   ]);
-  const likeStakePositionProxy = m.contract("ERC1967Proxy", [likeStakePositionImpl, initData]);
 
-  const likeStakePosition = m.contractAt("LikeStakePosition", likeStakePositionProxy);
+  const likeStakePosition = m.contractAt(
+    "LikeStakePosition",
+    likeStakePositionV0,
+  );
 
-  return { likeStakePosition, likeStakePositionImpl, likeStakePositionProxy };
+  return {
+    likeStakePositionImpl,
+    likeStakePosition,
+  };
 });
 
 export default LikeStakePositionModule;
-
-
