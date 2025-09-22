@@ -12,18 +12,8 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /// @custom:security-contact rickmak@oursky.com
-contract Likecoin is
-    Initializable,
-    ERC20Upgradeable,
-    ERC20BridgeableUpgradeable,
-    ERC20BurnableUpgradeable,
-    ERC20PausableUpgradeable,
-    OwnableUpgradeable,
-    ERC20PermitUpgradeable,
-    UUPSUpgradeable
-{
-    address internal constant SUPERCHAIN_TOKEN_BRIDGE =
-        0x4200000000000000000000000000000000000028;
+contract Likecoin is Initializable, ERC20Upgradeable, ERC20BridgeableUpgradeable, ERC20BurnableUpgradeable, ERC20PausableUpgradeable, OwnableUpgradeable, ERC20PermitUpgradeable, UUPSUpgradeable {
+    address internal constant SUPERCHAIN_TOKEN_BRIDGE = 0x4200000000000000000000000000000000000028;
     error Unauthorized();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -66,17 +56,18 @@ contract Likecoin is
         _mint(to, amount);
     }
 
-    function _authorizeUpgrade(
-        address newImplementation
-    ) internal override onlyOwner {}
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        override
+        onlyOwner
+    {}
 
     // The following functions are overrides required by Solidity.
 
-    function _update(
-        address from,
-        address to,
-        uint256 value
-    ) internal override(ERC20Upgradeable, ERC20PausableUpgradeable) {
+    function _update(address from, address to, uint256 value)
+        internal
+        override(ERC20Upgradeable, ERC20PausableUpgradeable)
+    {
         super._update(from, to, value);
     }
 }

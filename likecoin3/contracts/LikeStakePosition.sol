@@ -15,6 +15,7 @@ import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 /// @title LikeStakePosition
 /// @notice ERC721 receipt representing a user's stake position in a specific book (BookNFT)
 /// @dev Upgradeable, mint/burn/update restricted to LikeCollective (manager)
+/// @custom:security-contact rickmak@oursky.com
 contract LikeStakePosition is
     Initializable,
     OwnableUpgradeable,
@@ -90,6 +91,10 @@ contract LikeStakePosition is
 
         _getStorage().nextTokenId = 1;
     }
+
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyOwner {}
 
     // Ownership / Admin
     function setManager(address manager_) external onlyOwner {
@@ -193,10 +198,6 @@ contract LikeStakePosition is
     function manager() external view returns (address) {
         return _getStorage().manager;
     }
-
-    function _authorizeUpgrade(
-        address newImplementation
-    ) internal override onlyOwner {}
 
     // ERC721 metadata base URI
     function _baseURI() internal view override returns (string memory) {

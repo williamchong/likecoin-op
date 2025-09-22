@@ -41,3 +41,17 @@ DOTENV_CONFIG_PATH=.env npm run deploy -- --network baseSepolia
 #### Verification
 
 ignition should verify the contract on etherscan & sourcify. In case the request fails (like rate limit), run `DOTENV_CONFIG_PATH=.env npx hardhat verify --network sepolia 0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf`, in some testnet, etherscan will fail while sourcify will success.
+
+#### Upgrading the staking implementation
+
+For local superism deploy, normally you will run following
+
+```
+npm run deploy:local -- --network superism1
+```
+
+If you want to upgrade the contract, you may want to swipe the implementation future as below.
+
+```
+cat impl-future | xargs -t -L 1 npx hardhat ignition wipe chain-901
+```

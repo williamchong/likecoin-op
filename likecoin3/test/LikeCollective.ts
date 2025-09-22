@@ -14,50 +14,21 @@ describe("LikeCollective", async function () {
     const [deployer, rick, kin, bob] = await viem.getWalletClients();
     const publicClient = await viem.getPublicClient();
 
-    const { likecoin, likecoinImpl, likecoinProxy } = await ignition.deploy(
-      LikecoinModule,
-      {
+    const { likeCollective, likecoin, likeStakePosition } =
+      await ignition.deploy(LikeCollectiveModule, {
         parameters: {
           LikecoinModule: {
             initOwner: deployer.account.address,
           },
-        },
-        defaultSender: deployer.account.address,
-      },
-    );
-
-    const { likeCollective, likeCollectiveImpl, likeCollectiveProxy } =
-      await ignition.deploy(LikeCollectiveModule, {
-        parameters: {
-          LikeCollectiveModule: {
+          LikeCollectiveV0Module: {
+            initOwner: deployer.account.address,
+          },
+          LikeStakePositionV0Module: {
             initOwner: deployer.account.address,
           },
         },
         defaultSender: deployer.account.address,
       });
-    const { likeStakePosition, likeStakePositionImpl, likeStakePositionProxy } =
-      await ignition.deploy(LikeStakePositionModule, {
-        parameters: {
-          LikeStakePositionModule: {
-            initOwner: deployer.account.address,
-          },
-        },
-        defaultSender: deployer.account.address,
-      });
-
-    // Setup relationships
-    await likeCollective.write.setLikeStakePosition(
-      [likeStakePosition.address],
-      {
-        account: deployer.account.address,
-      },
-    );
-    await likeCollective.write.setLikecoin([likecoin.address], {
-      account: deployer.account.address,
-    });
-    await likeStakePosition.write.setManager([likeCollective.address], {
-      account: deployer.account.address,
-    });
 
     // Mint some LIKE tokens
     for (const a of [
@@ -72,14 +43,8 @@ describe("LikeCollective", async function () {
 
     return {
       likecoin,
-      likecoinImpl,
-      likecoinProxy,
       likeCollective,
-      likeCollectiveImpl,
-      likeCollectiveProxy,
       likeStakePosition,
-      likeStakePositionImpl,
-      likeStakePositionProxy,
       deployer,
       rick,
       kin,

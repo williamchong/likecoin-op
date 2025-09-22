@@ -1,17 +1,31 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
+import LikeCollectiveV0Module from "./LikeCollectiveV0";
+import LikeStakePositionModule from "./LikeStakePosition";
+import LikecoinModule from "./Likecoin";
 
 const LikeCollectiveModule = buildModule("LikeCollectiveModule", (m) => {
-  const initOwner = m.getParameter("initOwner");
-  const likeCollectiveImpl = m.contract("LikeCollective", [], { id: "LikeCollectiveImpl" });
+  const { likeCollectiveV0 } = m.useModule(LikeCollectiveV0Module);
+  const { likeStakePosition } = m.useModule(LikeStakePositionModule);
+  const { likecoin } = m.useModule(LikecoinModule);
 
-  const initData = m.encodeFunctionCall(likeCollectiveImpl, "initialize", [
-    initOwner,
-  ]);
-  const likeCollectiveProxy = m.contract("ERC1967Proxy", [likeCollectiveImpl, initData]);
+  const likeCollectiveImpl = m.contract("LikeCollective", [], {
+    id: "LikeCollectiveImpl",
+  });
 
-  const likeCollective = m.contractAt("LikeCollective", likeCollectiveProxy);
+  m.call(likeCollectiveV0, "upgradeToAndCall", [likeCollectiveImpl, "0x"]);
 
-  return { likeCollective, likeCollectiveImpl, likeCollectiveProxy };
+  const likeCollective = m.contractAt("LikeCollective", likeCollectiveV0);
+
+  m.call(likeCollective, "setLikeStakePosition", [likeStakePosition]);
+  m.call(likeCollective, "setLikecoin", [likecoin]);
+  m.call(likeStakePosition, "setManager", [likeCollective]);
+
+  return {
+    likeCollectiveImpl,
+    likeCollective,
+    likeStakePosition,
+    likecoin,
+  };
 });
 
 export default LikeCollectiveModule;
