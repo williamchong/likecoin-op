@@ -9,6 +9,7 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/ut
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {ERC721URIStorageUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import {ERC721EnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 /// @custom:security-contact rickmak@oursky.com
 contract LikeStakePositionV0 is
@@ -21,23 +22,7 @@ contract LikeStakePositionV0 is
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable
 {
-    // keccak256(abi.encode(uint256(keccak256("likestakeposition.storage")) - 1)) & ~bytes32(uint256(0xff))
-    bytes32 private constant CONTRACT_STORAGE_SLOT =
-        0x2c3a4a1c92b0f847cbe6b33689f93d825b12d6a2f2a7bdb9c9a6a1cf7e6bb200;
-
-    struct ContractData {
-        address manager;
-        uint256 nextTokenId;
-        string baseURI;
-    }
-
-    function _getStorage() private pure returns (ContractData storage $) {
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            $.slot := CONTRACT_STORAGE_SLOT
-        }
-    }
-
+    using Strings for uint256;
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -51,8 +36,6 @@ contract LikeStakePositionV0 is
         __Ownable_init(initialOwner);
         __Pausable_init();
         __ReentrancyGuard_init();
-
-        _getStorage().nextTokenId = 1;
     }
 
     function _authorizeUpgrade(
@@ -88,7 +71,7 @@ contract LikeStakePositionV0 is
         override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
         returns (string memory)
     {
-        return "";
+        return string.concat("LIKESP", tokenId.toString());
     }
 
     function supportsInterface(

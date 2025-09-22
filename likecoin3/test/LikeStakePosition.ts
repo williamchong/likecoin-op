@@ -8,8 +8,9 @@ describe("LikeStakePosition", async function () {
     const [deployer, rick, kin] = await viem.getWalletClients();
     const publicClient = await viem.getPublicClient();
 
-    const { likeStakePosition, likeStakePositionImpl } =
-      await ignition.deploy(LikeStakePositionModule, {
+    const { likeStakePosition, likeStakePositionImpl } = await ignition.deploy(
+      LikeStakePositionModule,
+      {
         parameters: {
           LikecoinModule: {
             initOwner: deployer.account.address,
@@ -22,7 +23,8 @@ describe("LikeStakePosition", async function () {
           },
         },
         defaultSender: deployer.account.address,
-      });
+      },
+    );
 
     return {
       likeStakePosition,
@@ -105,6 +107,7 @@ describe("LikeStakePosition", async function () {
         await loadFixture(deployLSP);
       const mockBookNFT = "0x1234567890123456789012345678901234567890";
 
+      const nextTokenId = await likeStakePosition.read.getNextTokenId();
       // set manager to deployer
       await likeStakePosition.write.setManager([deployer.account.address], {
         account: deployer.account,
@@ -126,7 +129,7 @@ describe("LikeStakePosition", async function () {
 
       // non-manager tries to update
       await expect(
-        likeStakePosition.write.updatePosition([1n, 200n, 1n], {
+        likeStakePosition.write.updatePosition([1n, 200n, nextTokenId], {
           account: rick.account,
         }),
       ).to.be.rejectedWith("ErrNotManager");
@@ -137,7 +140,7 @@ describe("LikeStakePosition", async function () {
       ).to.be.rejectedWith("ErrNotManager");
 
       // manager burns
-      await likeStakePosition.write.burnPosition([1n], {
+      await likeStakePosition.write.burnPosition([nextTokenId], {
         account: deployer.account,
       });
     });
@@ -148,6 +151,7 @@ describe("LikeStakePosition", async function () {
       const { likeStakePosition, deployer, rick } =
         await loadFixture(deployLSP);
       const mockBookNFT = "0x1234567890123456789012345678901234567890";
+      const nextTokenId = await likeStakePosition.read.getNextTokenId();
 
       await likeStakePosition.write.setManager([deployer.account.address], {
         account: deployer.account,
@@ -159,40 +163,42 @@ describe("LikeStakePosition", async function () {
         { account: deployer.account },
       );
 
-      // tokenId should be 1 for first mint; verify owner and position data
-      const tokenOwner = await likeStakePosition.read.ownerOf([1n]);
+      // tokenId should be 0 for first mint; verify owner and position data
+      const tokenOwner = await likeStakePosition.read.ownerOf([nextTokenId]);
       expect(tokenOwner.toLowerCase()).to.equal(
         rick.account.address.toLowerCase(),
       );
 
-      const pos1 = await likeStakePosition.read.getPosition([1n]);
+      const pos1 = await likeStakePosition.read.getPosition([nextTokenId]);
       expect(pos1.bookNFT.toLowerCase()).to.equal(mockBookNFT.toLowerCase());
       expect(pos1.stakedAmount).to.equal(42n);
       expect(pos1.rewardIndex).to.equal(0n);
 
       // Update
-      await likeStakePosition.write.updatePosition([1n, 84n, 3n], {
+      await likeStakePosition.write.updatePosition([nextTokenId, 84n, 3n], {
         account: deployer.account,
       });
-      const pos2 = await likeStakePosition.read.getPosition([1n]);
+      const pos2 = await likeStakePosition.read.getPosition([nextTokenId]);
       expect(pos2.stakedAmount).to.equal(84n);
       expect(pos2.rewardIndex).to.equal(3n);
 
       // Burn
-      await likeStakePosition.write.burnPosition([1n], {
+      await likeStakePosition.write.burnPosition([nextTokenId], {
         account: deployer.account,
       });
-      await expect(likeStakePosition.read.ownerOf([1n])).to.be.rejected; // token no longer exists
+      await expect(likeStakePosition.read.ownerOf([nextTokenId])).to.be
+        .rejected; // token no longer exists
     });
 
     it("should track user positions correctly", async function () {
       const { likeStakePosition, deployer, rick } =
         await loadFixture(deployLSP);
       const mockBookNFT = "0x1234567890123456789012345678901234567890";
-
+      const nextTokenId = await likeStakePosition.read.getNextTokenId();
       await likeStakePosition.write.setManager([deployer.account.address], {
         account: deployer.account,
       });
+
       await likeStakePosition.write.mintPosition(
         [rick.account.address, mockBookNFT, 42n, 0n],
         { account: deployer.account },
@@ -214,25 +220,25 @@ describe("LikeStakePosition", async function () {
         rick.account.address,
         0n,
       ]);
-      expect(firsttokenId).to.equal(1n);
+      expect(firsttokenId).to.equal(0n);
       const secondtokenId = await likeStakePosition.read.tokenOfOwnerByIndex([
         rick.account.address,
         1n,
       ]);
-      expect(secondtokenId).to.equal(2n);
+      expect(secondtokenId).to.equal(1n);
       const thirdtokenId = await likeStakePosition.read.tokenOfOwnerByIndex([
         rick.account.address,
         2n,
       ]);
-      expect(thirdtokenId).to.equal(3n);
+      expect(thirdtokenId).to.equal(2n);
 
       const positions = await likeStakePosition.read.getUserPositions([
         rick.account.address,
       ]);
       expect(positions.length).to.equal(3);
-      expect(positions[0]).to.equal(1n);
-      expect(positions[1]).to.equal(2n);
-      expect(positions[2]).to.equal(3n);
+      expect(positions[0]).to.equal(0n);
+      expect(positions[1]).to.equal(1n);
+      expect(positions[2]).to.equal(2n);
     });
 
     it("should track user positions correct even after transfer", async function () {
@@ -296,6 +302,10 @@ describe("LikeStakePosition", async function () {
         account: deployer.account,
       });
 
+      await likeStakePosition.write.mintPosition(
+        [rick.account.address, mockBookNFT, 14n, 0n],
+        { account: deployer.account },
+      );
       await likeStakePosition.write.mintPosition(
         [rick.account.address, mockBookNFT, 7n, 0n],
         { account: deployer.account },
