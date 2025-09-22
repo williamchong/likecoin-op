@@ -1,5 +1,15 @@
 {
   "LikecoinModule#LikecoinImpl": "0x39D9f28FD9da20548c74aFAF47B9A8F150d7339F",
   "LikecoinModule#ERC1967Proxy": "0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf",
-  "LikecoinModule#Likecoin": "0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf"
+  "LikecoinModule#Likecoin": "0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf",
+  "LikeCollectiveModule#LikeCollectiveImpl": "0x5A38eB0433552D2ceF7d1dEb8974d869dB6a1Ff2",
+  "LikeCollectiveV0Module#LikeCollectiveV0Impl": "0x2b6b4e3EfC3496249A9Ffb502130f9B849E72Cf3",
+  "LikeStakePositionModule#LikeStakePositionImpl": "0x724F77a0046D876a2B89379BCd8996Ff1DFEceF6",
+  "LikeStakePositionV0Module#LikeStakePositionV0Impl": "0x59559D29031BC7f67dd6E8C6259C75c3d211422d",
+  "LikeCollectiveV0Module#ERC1967Proxy": "0x4506Ac2dD1e9A470d92a3D1656E1a99C676E1c8E",
+  "LikeStakePositionV0Module#ERC1967Proxy": "0x508610D3009cda82Ac1a40D2b322Ed31932D16b1",
+  "LikeCollectiveV0Module#LikeCollectiveV0": "0x4506Ac2dD1e9A470d92a3D1656E1a99C676E1c8E",
+  "LikeStakePositionV0Module#LikeStakePositionV0": "0x508610D3009cda82Ac1a40D2b322Ed31932D16b1",
+  "LikeCollectiveModule#LikeCollective": "0x4506Ac2dD1e9A470d92a3D1656E1a99C676E1c8E",
+  "LikeStakePositionModule#LikeStakePosition": "0x508610D3009cda82Ac1a40D2b322Ed31932D16b1"
 }
