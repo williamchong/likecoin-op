@@ -120,7 +120,7 @@ describe("LikeCollective", async function () {
 
       // This should revert due to whenNotPaused modifier
       await expect(
-        likeCollective.write.stake([mockBookNFT, amount], {
+        likeCollective.write.newStakePosition([mockBookNFT, amount], {
           account: rick.account,
         }),
       ).to.be.rejectedWith("EnforcedPause");
@@ -136,7 +136,7 @@ describe("LikeCollective", async function () {
 
       // This should revert due to whenNotPaused modifier
       await expect(
-        likeCollective.write.unstakePosition([1n], {
+        likeCollective.write.removeStakePosition([1n], {
           account: rick.account,
         }),
       ).to.be.rejectedWith("EnforcedPause");
@@ -160,9 +160,12 @@ describe("LikeCollective", async function () {
           account: rick.account,
         },
       );
-      await likeCollective.write.stake([mockBookNFT, 6000n * 10n ** 6n], {
-        account: rick.account,
-      });
+      await likeCollective.write.newStakePosition(
+        [mockBookNFT, 6000n * 10n ** 6n],
+        {
+          account: rick.account,
+        },
+      );
       expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
         4000n * 10n ** 6n,
       );
@@ -170,7 +173,7 @@ describe("LikeCollective", async function () {
       expect(tokenOwner.toLowerCase()).to.equal(
         rick.account.address.toLowerCase(),
       );
-      await likeCollective.write.unstakePosition([nextTokenId], {
+      await likeCollective.write.removeStakePosition([nextTokenId], {
         account: rick.account,
       });
       expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
@@ -190,7 +193,7 @@ describe("LikeCollective", async function () {
         account: rick.account,
       });
 
-      await likeCollective.write.stake([mockBookNFT, amount], {
+      await likeCollective.write.newStakePosition([mockBookNFT, amount], {
         account: rick.account,
       });
       expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
@@ -235,7 +238,7 @@ describe("LikeCollective", async function () {
         3000n * 10n ** 6n,
       );
 
-      await likeCollective.write.unstakePosition([nextTokenId], {
+      await likeCollective.write.removeStakePosition([nextTokenId], {
         account: rick.account,
       });
       expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
@@ -257,14 +260,14 @@ describe("LikeCollective", async function () {
         account: rick.account,
       });
 
-      await likeCollective.write.stake([mockBookNFT, amount], {
+      await likeCollective.write.newStakePosition([mockBookNFT, amount], {
         account: rick.account,
       });
       const owner = await likeStakePosition.read.ownerOf([nextTokenId]);
       expect(owner.toLowerCase()).to.equal(rick.account.address.toLowerCase());
 
       await expect(
-        likeCollective.write.unstakePosition([nextTokenId], {
+        likeCollective.write.removeStakePosition([nextTokenId], {
           account: kin.account,
         }),
       ).to.be.rejectedWith("ErrInvalidOwner()");
@@ -282,7 +285,7 @@ describe("LikeCollective", async function () {
         account: rick.account,
       });
 
-      await likeCollective.write.stake([mockBookNFT, 4n * amount], {
+      await likeCollective.write.newStakePosition([mockBookNFT, 4n * amount], {
         account: rick.account,
       });
 
@@ -295,7 +298,7 @@ describe("LikeCollective", async function () {
       });
 
       // Claim rewards
-      await likeCollective.write.unstakePosition([nextTokenId], {
+      await likeCollective.write.removeStakePosition([nextTokenId], {
         account: rick.account,
       });
       expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
@@ -318,10 +321,10 @@ describe("LikeCollective", async function () {
         account: bob.account,
       });
 
-      await likeCollective.write.stake([mockBookNFT, 4n * amount], {
+      await likeCollective.write.newStakePosition([mockBookNFT, 4n * amount], {
         account: rick.account,
       });
-      await likeCollective.write.stake([mockBookNFT, amount], {
+      await likeCollective.write.newStakePosition([mockBookNFT, amount], {
         account: bob.account,
       });
 
@@ -334,7 +337,7 @@ describe("LikeCollective", async function () {
       });
 
       // Claim rewards
-      await likeCollective.write.unstakePosition([nextTokenId], {
+      await likeCollective.write.removeStakePosition([nextTokenId], {
         account: rick.account,
       });
     });
@@ -352,7 +355,7 @@ describe("LikeCollective", async function () {
       await likecoin.write.approve([likeCollective.address, 2n * amount], {
         account: rick.account,
       });
-      await likeCollective.write.stake([mockBookNFT, amount], {
+      await likeCollective.write.newStakePosition([mockBookNFT, amount], {
         account: rick.account,
       });
 
@@ -376,13 +379,13 @@ describe("LikeCollective", async function () {
         ]),
       ).to.equal(reward);
 
-      await likeCollective.write.stake([mockBookNFT, amount], {
+      await likeCollective.write.newStakePosition([mockBookNFT, amount], {
         account: rick.account,
       });
       await likecoin.write.approve([likeCollective.address, amount], {
         account: bob.account,
       });
-      await likeCollective.write.stake([mockBookNFT, amount], {
+      await likeCollective.write.newStakePosition([mockBookNFT, amount], {
         account: bob.account,
       });
       await likeCollective.write.depositReward([mockBookNFT, reward], {
@@ -405,7 +408,7 @@ describe("LikeCollective", async function () {
         ]),
       ).to.equal(reward + (2n * reward) / 3n - 1n);
 
-      await likeCollective.write.unstakePosition([nextTokenId], {
+      await likeCollective.write.removeStakePosition([nextTokenId], {
         account: rick.account,
       });
       expect(
@@ -430,7 +433,7 @@ describe("LikeCollective", async function () {
       await likecoin.write.approve([likeCollective.address, amount], {
         account: rick.account,
       });
-      await likeCollective.write.stake([mockBookNFT, amount], {
+      await likeCollective.write.newStakePosition([mockBookNFT, amount], {
         account: rick.account,
       });
 
@@ -460,10 +463,10 @@ describe("LikeCollective", async function () {
       await likecoin.write.approve([likeCollective.address, 2n * amount], {
         account: rick.account,
       });
-      await likeCollective.write.stake([mockBookNFT, amount], {
+      await likeCollective.write.newStakePosition([mockBookNFT, amount], {
         account: rick.account,
       });
-      await likeCollective.write.stake([mockBookNFT, amount], {
+      await likeCollective.write.newStakePosition([mockBookNFT, amount], {
         account: rick.account,
       });
 
@@ -494,10 +497,10 @@ describe("LikeCollective", async function () {
       await likecoin.write.approve([likeCollective.address, 8n * amount], {
         account: rick.account,
       });
-      await likeCollective.write.stake([mockBookNFT, amount], {
+      await likeCollective.write.newStakePosition([mockBookNFT, amount], {
         account: rick.account,
       });
-      await likeCollective.write.stake([mockBookNFT2, amount], {
+      await likeCollective.write.newStakePosition([mockBookNFT2, amount], {
         account: rick.account,
       });
 
@@ -542,7 +545,7 @@ describe("LikeCollective", async function () {
       await likecoin.write.approve([likeCollective.address, amount], {
         account: rick.account,
       });
-      await likeCollective.write.stake([mockBookNFT, amount], {
+      await likeCollective.write.newStakePosition([mockBookNFT, amount], {
         account: rick.account,
       });
 
@@ -581,7 +584,7 @@ describe("LikeCollective", async function () {
       await likecoin.write.approve([likeCollective.address, amount], {
         account: rick.account,
       });
-      await likeCollective.write.stake([mockBookNFT, amount], {
+      await likeCollective.write.newStakePosition([mockBookNFT, amount], {
         account: rick.account,
       });
 

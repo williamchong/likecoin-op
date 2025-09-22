@@ -155,7 +155,7 @@ contract LikeCollective is
     }
     // End Private View functions
 
-    function stake(
+    function newStakePosition(
         address bookNFT,
         uint256 amount
     ) external whenNotPaused nonReentrant {
@@ -173,7 +173,7 @@ contract LikeCollective is
         emit Staked(bookNFT, _msgSender(), amount);
     }
 
-    function unstakePosition(
+    function removeStakePosition(
         uint256 tokenId
     ) external whenNotPaused nonReentrant {
         CollectiveData storage $ = _getCollectiveData();
