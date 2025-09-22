@@ -164,9 +164,9 @@ contract LikeStakePosition is
         uint256 newRewardIndex
     ) external whenNotPaused nonReentrant onlyManager {
         ContractData storage $ = _getStorage();
-        Position storage p = $.positions[tokenId];
         // rely on ERC721 _ownerOf revert for non-existent token
         if (ownerOf(tokenId) == address(0)) revert ErrInvalidOwner();
+        Position storage p = $.positions[tokenId];
         p.stakedAmount = newStakedAmount;
         p.rewardIndex = newRewardIndex;
         emit PositionUpdated(tokenId, newStakedAmount, newRewardIndex);
