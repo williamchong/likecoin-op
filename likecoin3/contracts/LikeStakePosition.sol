@@ -205,6 +205,12 @@ contract LikeStakePosition is
     }
 
     // View functions
+    function positionInfo(
+        uint256 tokenId
+    ) external view returns (Position memory) {
+        return _getStorage().positions[tokenId];
+    }
+
     function getUserPositions(
         address user
     ) external view returns (uint256[] memory positions) {
@@ -221,14 +227,18 @@ contract LikeStakePosition is
         address bookNFT
     ) external view returns (uint256[] memory) {
         uint256 balance = balanceOf(user);
-        uint256[] memory positions = new uint256[](balance);
+        uint256[] memory _positions = new uint256[](balance);
         uint256 index = 0;
         for (uint256 i = 0; i < balance; ++i) {
             uint256 tokenId = tokenOfOwnerByIndex(user, i);
             if (_getStorage().positions[tokenId].bookNFT == bookNFT) {
-                positions[index] = tokenId;
+                _positions[index] = tokenId;
                 ++index;
             }
+        }
+        uint256[] memory positions = new uint256[](index);
+        for (uint256 i = 0; i < index; ++i) {
+            positions[i] = _positions[i];
         }
         return positions;
     }
