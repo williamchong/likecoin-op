@@ -1,0 +1,1 @@
+../../ent/schema/stakingevent.go
