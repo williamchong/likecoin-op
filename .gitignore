@@ -4,4 +4,3 @@
 /deploy/env.operator
 /migration-backend/.env.dev
 /likenft/.env.optimism
-/deploy/helm/dev/auth
