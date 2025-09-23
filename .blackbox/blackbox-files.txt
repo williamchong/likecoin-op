@@ -1,4 +1,3 @@
 deploy/env.operator
-deploy/helm/dev/auth
 likenft/.env.optimism
 migration-backend/.env.dev
