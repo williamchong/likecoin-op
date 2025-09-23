@@ -155,7 +155,7 @@ contract LikeCollective is
     }
     // End Private View functions
 
-    function stake(
+    function newStakePosition(
         address bookNFT,
         uint256 amount
     ) external whenNotPaused nonReentrant {
@@ -173,7 +173,72 @@ contract LikeCollective is
         emit Staked(bookNFT, _msgSender(), amount);
     }
 
-    function unstakePosition(
+    function increaseStakeToPosition(
+        uint256 tokenID,
+        uint256 amount
+    ) external whenNotPaused nonReentrant {
+        CollectiveData storage $ = _getCollectiveData();
+        address owner = $.likeStakePosition.ownerOf(tokenID);
+        if (owner != _msgSender()) revert ErrInvalidOwner();
+        $.likecoin.transferFrom(_msgSender(), address(this), amount);
+
+        LikeStakePosition.Position memory position = $
+            .likeStakePosition
+            .getPosition(tokenID);
+        uint256 pendingRewards = _pendingRewardsOf(tokenID);
+        uint256 newAmount = position.stakedAmount + amount + pendingRewards;
+        address bookNFT = position.bookNFT;
+
+        PoolData storage pool = $.pools[bookNFT];
+        pool.totalStaked = pool.totalStaked + amount;
+        pool.rewardPending = pool.rewardPending - pendingRewards;
+        pool.totalRewarded = pool.totalRewarded + pendingRewards;
+        pool.rewardIndexes[tokenID] = pool.rewardIndex;
+        $.likeStakePosition.updatePosition(
+            tokenID,
+            newAmount,
+            pool.rewardIndex
+        );
+
+        emit Staked(bookNFT, _msgSender(), amount);
+        emit RewardClaimed(bookNFT, _msgSender(), pendingRewards);
+    }
+
+    function decreaseStakePosition(
+        uint256 tokenID,
+        uint256 amount
+    ) external whenNotPaused nonReentrant {
+        CollectiveData storage $ = _getCollectiveData();
+        address owner = $.likeStakePosition.ownerOf(tokenID);
+        if (owner != _msgSender()) revert ErrInvalidOwner();
+
+        LikeStakePosition.Position memory position = $
+            .likeStakePosition
+            .getPosition(tokenID);
+        if (amount > position.stakedAmount) revert ErrInvalidAmount();
+
+        uint256 pendingRewards = _pendingRewardsOf(tokenID);
+        uint256 amountToTransfer = amount + pendingRewards;
+        uint256 newAmount = position.stakedAmount - amount;
+        address bookNFT = position.bookNFT;
+        PoolData storage pool = $.pools[bookNFT];
+        // Claim rewards
+        pool.totalStaked = pool.totalStaked - amount;
+        pool.rewardPending = pool.rewardPending - pendingRewards;
+        pool.totalRewarded = pool.totalRewarded + pendingRewards;
+        pool.rewardIndexes[tokenID] = pool.rewardIndex;
+        $.likeStakePosition.updatePosition(
+            tokenID,
+            newAmount,
+            pool.rewardIndex
+        );
+
+        $.likecoin.transfer(_msgSender(), amountToTransfer);
+        emit Unstaked(bookNFT, _msgSender(), amount);
+        emit RewardClaimed(bookNFT, _msgSender(), pendingRewards);
+    }
+
+    function removeStakePosition(
         uint256 tokenId
     ) external whenNotPaused nonReentrant {
         CollectiveData storage $ = _getCollectiveData();
