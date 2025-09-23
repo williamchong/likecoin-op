@@ -19,3 +19,17 @@ func StakingEventOrErr(p StakingEvent, err error) StakingEvent {
 		p(s)
 	}
 }
+
+// StakingEventsHyperTable is the predicate function for stakingeventshypertable builders.
+type StakingEventsHyperTable func(*sql.Selector)
+
+// StakingEventsHyperTableOrErr calls the predicate only if the error is not nit.
+func StakingEventsHyperTableOrErr(p StakingEventsHyperTable, err error) StakingEventsHyperTable {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}

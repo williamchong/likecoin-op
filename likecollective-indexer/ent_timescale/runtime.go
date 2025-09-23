@@ -6,6 +6,7 @@ import (
 	"likecollective-indexer/ent/schema/typeutil"
 	"likecollective-indexer/ent_timescale/schema"
 	"likecollective-indexer/ent_timescale/stakingevent"
+	"likecollective-indexer/ent_timescale/stakingeventshypertable"
 	"time"
 
 	"entgo.io/ent/schema/field"
@@ -54,4 +55,43 @@ func init() {
 	stakingeventDescDatetime := stakingeventFields[13].Descriptor()
 	// stakingevent.DefaultDatetime holds the default value on creation for the datetime field.
 	stakingevent.DefaultDatetime = stakingeventDescDatetime.Default.(time.Time)
+	stakingeventshypertableFields := schema.StakingEventsHyperTable{}.Fields()
+	_ = stakingeventshypertableFields
+	// stakingeventshypertableDescTransactionHash is the schema descriptor for transaction_hash field.
+	stakingeventshypertableDescTransactionHash := stakingeventshypertableFields[0].Descriptor()
+	// stakingeventshypertable.TransactionHashValidator is a validator for the "transaction_hash" field. It is called by the builders before save.
+	stakingeventshypertable.TransactionHashValidator = stakingeventshypertableDescTransactionHash.Validators[0].(func(string) error)
+	// stakingeventshypertableDescBlockNumber is the schema descriptor for block_number field.
+	stakingeventshypertableDescBlockNumber := stakingeventshypertableFields[2].Descriptor()
+	stakingeventshypertable.ValueScanner.BlockNumber = stakingeventshypertableDescBlockNumber.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
+	// stakingeventshypertableDescNftClassAddress is the schema descriptor for nft_class_address field.
+	stakingeventshypertableDescNftClassAddress := stakingeventshypertableFields[5].Descriptor()
+	// stakingeventshypertable.NftClassAddressValidator is a validator for the "nft_class_address" field. It is called by the builders before save.
+	stakingeventshypertable.NftClassAddressValidator = stakingeventshypertableDescNftClassAddress.Validators[0].(func(string) error)
+	// stakingeventshypertableDescAccountEvmAddress is the schema descriptor for account_evm_address field.
+	stakingeventshypertableDescAccountEvmAddress := stakingeventshypertableFields[6].Descriptor()
+	// stakingeventshypertable.AccountEvmAddressValidator is a validator for the "account_evm_address" field. It is called by the builders before save.
+	stakingeventshypertable.AccountEvmAddressValidator = stakingeventshypertableDescAccountEvmAddress.Validators[0].(func(string) error)
+	// stakingeventshypertableDescStakedAmountAdded is the schema descriptor for staked_amount_added field.
+	stakingeventshypertableDescStakedAmountAdded := stakingeventshypertableFields[7].Descriptor()
+	stakingeventshypertable.ValueScanner.StakedAmountAdded = stakingeventshypertableDescStakedAmountAdded.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
+	// stakingeventshypertableDescStakedAmountRemoved is the schema descriptor for staked_amount_removed field.
+	stakingeventshypertableDescStakedAmountRemoved := stakingeventshypertableFields[8].Descriptor()
+	stakingeventshypertable.ValueScanner.StakedAmountRemoved = stakingeventshypertableDescStakedAmountRemoved.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
+	// stakingeventshypertableDescPendingRewardAmountAdded is the schema descriptor for pending_reward_amount_added field.
+	stakingeventshypertableDescPendingRewardAmountAdded := stakingeventshypertableFields[9].Descriptor()
+	stakingeventshypertable.ValueScanner.PendingRewardAmountAdded = stakingeventshypertableDescPendingRewardAmountAdded.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
+	// stakingeventshypertableDescPendingRewardAmountRemoved is the schema descriptor for pending_reward_amount_removed field.
+	stakingeventshypertableDescPendingRewardAmountRemoved := stakingeventshypertableFields[10].Descriptor()
+	stakingeventshypertable.ValueScanner.PendingRewardAmountRemoved = stakingeventshypertableDescPendingRewardAmountRemoved.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
+	// stakingeventshypertableDescClaimedRewardAmountAdded is the schema descriptor for claimed_reward_amount_added field.
+	stakingeventshypertableDescClaimedRewardAmountAdded := stakingeventshypertableFields[11].Descriptor()
+	stakingeventshypertable.ValueScanner.ClaimedRewardAmountAdded = stakingeventshypertableDescClaimedRewardAmountAdded.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
+	// stakingeventshypertableDescClaimedRewardAmountRemoved is the schema descriptor for claimed_reward_amount_removed field.
+	stakingeventshypertableDescClaimedRewardAmountRemoved := stakingeventshypertableFields[12].Descriptor()
+	stakingeventshypertable.ValueScanner.ClaimedRewardAmountRemoved = stakingeventshypertableDescClaimedRewardAmountRemoved.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
+	// stakingeventshypertableDescDatetime is the schema descriptor for datetime field.
+	stakingeventshypertableDescDatetime := stakingeventshypertableFields[13].Descriptor()
+	// stakingeventshypertable.DefaultDatetime holds the default value on creation for the datetime field.
+	stakingeventshypertable.DefaultDatetime = stakingeventshypertableDescDatetime.Default.(time.Time)
 }

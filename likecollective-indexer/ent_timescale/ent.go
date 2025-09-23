@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"likecollective-indexer/ent_timescale/stakingevent"
+	"likecollective-indexer/ent_timescale/stakingeventshypertable"
 	"reflect"
 	"sync"
 
@@ -73,7 +74,8 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			stakingevent.Table: stakingevent.ValidColumn,
+			stakingevent.Table:            stakingevent.ValidColumn,
+			stakingeventshypertable.Table: stakingeventshypertable.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// StakingEvent is the client for interacting with the StakingEvent builders.
 	StakingEvent *StakingEventClient
+	// StakingEventsHyperTable is the client for interacting with the StakingEventsHyperTable builders.
+	StakingEventsHyperTable *StakingEventsHyperTableClient
 
 	// lazily loaded.
 	client     *Client
@@ -146,6 +148,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.StakingEvent = NewStakingEventClient(tx.config)
+	tx.StakingEventsHyperTable = NewStakingEventsHyperTableClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

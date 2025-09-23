@@ -9,6 +9,7 @@ import (
 	"likecollective-indexer/ent/schema/typeutil"
 	"likecollective-indexer/ent_timescale/predicate"
 	"likecollective-indexer/ent_timescale/stakingevent"
+	"likecollective-indexer/ent_timescale/stakingeventshypertable"
 	"sync"
 	"time"
 
@@ -25,7 +26,8 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeStakingEvent = "StakingEvent"
+	TypeStakingEvent            = "StakingEvent"
+	TypeStakingEventsHyperTable = "StakingEventsHyperTable"
 )
 
 // StakingEventMutation represents an operation that mutates the StakingEvent nodes in the graph.
@@ -1156,4 +1158,1134 @@ func (m *StakingEventMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *StakingEventMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown StakingEvent edge %s", name)
+}
+
+// StakingEventsHyperTableMutation represents an operation that mutates the StakingEventsHyperTable nodes in the graph.
+type StakingEventsHyperTableMutation struct {
+	config
+	op                            Op
+	typ                           string
+	id                            *int
+	transaction_hash              *string
+	transaction_index             *uint
+	addtransaction_index          *int
+	block_number                  *typeutil.Uint64
+	addblock_number               *typeutil.Uint64
+	log_index                     *uint
+	addlog_index                  *int
+	event_type                    *stakingeventshypertable.EventType
+	nft_class_address             *string
+	account_evm_address           *string
+	staked_amount_added           *typeutil.Uint256
+	staked_amount_removed         *typeutil.Uint256
+	pending_reward_amount_added   *typeutil.Uint256
+	pending_reward_amount_removed *typeutil.Uint256
+	claimed_reward_amount_added   *typeutil.Uint256
+	claimed_reward_amount_removed *typeutil.Uint256
+	datetime                      *time.Time
+	clearedFields                 map[string]struct{}
+	done                          bool
+	oldValue                      func(context.Context) (*StakingEventsHyperTable, error)
+	predicates                    []predicate.StakingEventsHyperTable
+}
+
+var _ ent.Mutation = (*StakingEventsHyperTableMutation)(nil)
+
+// stakingeventshypertableOption allows management of the mutation configuration using functional options.
+type stakingeventshypertableOption func(*StakingEventsHyperTableMutation)
+
+// newStakingEventsHyperTableMutation creates new mutation for the StakingEventsHyperTable entity.
+func newStakingEventsHyperTableMutation(c config, op Op, opts ...stakingeventshypertableOption) *StakingEventsHyperTableMutation {
+	m := &StakingEventsHyperTableMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeStakingEventsHyperTable,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withStakingEventsHyperTableID sets the ID field of the mutation.
+func withStakingEventsHyperTableID(id int) stakingeventshypertableOption {
+	return func(m *StakingEventsHyperTableMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *StakingEventsHyperTable
+		)
+		m.oldValue = func(ctx context.Context) (*StakingEventsHyperTable, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().StakingEventsHyperTable.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withStakingEventsHyperTable sets the old StakingEventsHyperTable of the mutation.
+func withStakingEventsHyperTable(node *StakingEventsHyperTable) stakingeventshypertableOption {
+	return func(m *StakingEventsHyperTableMutation) {
+		m.oldValue = func(context.Context) (*StakingEventsHyperTable, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m StakingEventsHyperTableMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m StakingEventsHyperTableMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent_timescale: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *StakingEventsHyperTableMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *StakingEventsHyperTableMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().StakingEventsHyperTable.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetTransactionHash sets the "transaction_hash" field.
+func (m *StakingEventsHyperTableMutation) SetTransactionHash(s string) {
+	m.transaction_hash = &s
+}
+
+// TransactionHash returns the value of the "transaction_hash" field in the mutation.
+func (m *StakingEventsHyperTableMutation) TransactionHash() (r string, exists bool) {
+	v := m.transaction_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTransactionHash returns the old "transaction_hash" field's value of the StakingEventsHyperTable entity.
+// If the StakingEventsHyperTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventsHyperTableMutation) OldTransactionHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTransactionHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTransactionHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTransactionHash: %w", err)
+	}
+	return oldValue.TransactionHash, nil
+}
+
+// ResetTransactionHash resets all changes to the "transaction_hash" field.
+func (m *StakingEventsHyperTableMutation) ResetTransactionHash() {
+	m.transaction_hash = nil
+}
+
+// SetTransactionIndex sets the "transaction_index" field.
+func (m *StakingEventsHyperTableMutation) SetTransactionIndex(u uint) {
+	m.transaction_index = &u
+	m.addtransaction_index = nil
+}
+
+// TransactionIndex returns the value of the "transaction_index" field in the mutation.
+func (m *StakingEventsHyperTableMutation) TransactionIndex() (r uint, exists bool) {
+	v := m.transaction_index
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTransactionIndex returns the old "transaction_index" field's value of the StakingEventsHyperTable entity.
+// If the StakingEventsHyperTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventsHyperTableMutation) OldTransactionIndex(ctx context.Context) (v uint, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTransactionIndex is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTransactionIndex requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTransactionIndex: %w", err)
+	}
+	return oldValue.TransactionIndex, nil
+}
+
+// AddTransactionIndex adds u to the "transaction_index" field.
+func (m *StakingEventsHyperTableMutation) AddTransactionIndex(u int) {
+	if m.addtransaction_index != nil {
+		*m.addtransaction_index += u
+	} else {
+		m.addtransaction_index = &u
+	}
+}
+
+// AddedTransactionIndex returns the value that was added to the "transaction_index" field in this mutation.
+func (m *StakingEventsHyperTableMutation) AddedTransactionIndex() (r int, exists bool) {
+	v := m.addtransaction_index
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTransactionIndex resets all changes to the "transaction_index" field.
+func (m *StakingEventsHyperTableMutation) ResetTransactionIndex() {
+	m.transaction_index = nil
+	m.addtransaction_index = nil
+}
+
+// SetBlockNumber sets the "block_number" field.
+func (m *StakingEventsHyperTableMutation) SetBlockNumber(t typeutil.Uint64) {
+	m.block_number = &t
+	m.addblock_number = nil
+}
+
+// BlockNumber returns the value of the "block_number" field in the mutation.
+func (m *StakingEventsHyperTableMutation) BlockNumber() (r typeutil.Uint64, exists bool) {
+	v := m.block_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBlockNumber returns the old "block_number" field's value of the StakingEventsHyperTable entity.
+// If the StakingEventsHyperTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventsHyperTableMutation) OldBlockNumber(ctx context.Context) (v typeutil.Uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBlockNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBlockNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBlockNumber: %w", err)
+	}
+	return oldValue.BlockNumber, nil
+}
+
+// AddBlockNumber adds t to the "block_number" field.
+func (m *StakingEventsHyperTableMutation) AddBlockNumber(t typeutil.Uint64) {
+	if m.addblock_number != nil {
+		*m.addblock_number += t
+	} else {
+		m.addblock_number = &t
+	}
+}
+
+// AddedBlockNumber returns the value that was added to the "block_number" field in this mutation.
+func (m *StakingEventsHyperTableMutation) AddedBlockNumber() (r typeutil.Uint64, exists bool) {
+	v := m.addblock_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBlockNumber resets all changes to the "block_number" field.
+func (m *StakingEventsHyperTableMutation) ResetBlockNumber() {
+	m.block_number = nil
+	m.addblock_number = nil
+}
+
+// SetLogIndex sets the "log_index" field.
+func (m *StakingEventsHyperTableMutation) SetLogIndex(u uint) {
+	m.log_index = &u
+	m.addlog_index = nil
+}
+
+// LogIndex returns the value of the "log_index" field in the mutation.
+func (m *StakingEventsHyperTableMutation) LogIndex() (r uint, exists bool) {
+	v := m.log_index
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLogIndex returns the old "log_index" field's value of the StakingEventsHyperTable entity.
+// If the StakingEventsHyperTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventsHyperTableMutation) OldLogIndex(ctx context.Context) (v uint, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLogIndex is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLogIndex requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLogIndex: %w", err)
+	}
+	return oldValue.LogIndex, nil
+}
+
+// AddLogIndex adds u to the "log_index" field.
+func (m *StakingEventsHyperTableMutation) AddLogIndex(u int) {
+	if m.addlog_index != nil {
+		*m.addlog_index += u
+	} else {
+		m.addlog_index = &u
+	}
+}
+
+// AddedLogIndex returns the value that was added to the "log_index" field in this mutation.
+func (m *StakingEventsHyperTableMutation) AddedLogIndex() (r int, exists bool) {
+	v := m.addlog_index
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetLogIndex resets all changes to the "log_index" field.
+func (m *StakingEventsHyperTableMutation) ResetLogIndex() {
+	m.log_index = nil
+	m.addlog_index = nil
+}
+
+// SetEventType sets the "event_type" field.
+func (m *StakingEventsHyperTableMutation) SetEventType(st stakingeventshypertable.EventType) {
+	m.event_type = &st
+}
+
+// EventType returns the value of the "event_type" field in the mutation.
+func (m *StakingEventsHyperTableMutation) EventType() (r stakingeventshypertable.EventType, exists bool) {
+	v := m.event_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEventType returns the old "event_type" field's value of the StakingEventsHyperTable entity.
+// If the StakingEventsHyperTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventsHyperTableMutation) OldEventType(ctx context.Context) (v stakingeventshypertable.EventType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEventType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEventType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEventType: %w", err)
+	}
+	return oldValue.EventType, nil
+}
+
+// ResetEventType resets all changes to the "event_type" field.
+func (m *StakingEventsHyperTableMutation) ResetEventType() {
+	m.event_type = nil
+}
+
+// SetNftClassAddress sets the "nft_class_address" field.
+func (m *StakingEventsHyperTableMutation) SetNftClassAddress(s string) {
+	m.nft_class_address = &s
+}
+
+// NftClassAddress returns the value of the "nft_class_address" field in the mutation.
+func (m *StakingEventsHyperTableMutation) NftClassAddress() (r string, exists bool) {
+	v := m.nft_class_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNftClassAddress returns the old "nft_class_address" field's value of the StakingEventsHyperTable entity.
+// If the StakingEventsHyperTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventsHyperTableMutation) OldNftClassAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNftClassAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNftClassAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNftClassAddress: %w", err)
+	}
+	return oldValue.NftClassAddress, nil
+}
+
+// ResetNftClassAddress resets all changes to the "nft_class_address" field.
+func (m *StakingEventsHyperTableMutation) ResetNftClassAddress() {
+	m.nft_class_address = nil
+}
+
+// SetAccountEvmAddress sets the "account_evm_address" field.
+func (m *StakingEventsHyperTableMutation) SetAccountEvmAddress(s string) {
+	m.account_evm_address = &s
+}
+
+// AccountEvmAddress returns the value of the "account_evm_address" field in the mutation.
+func (m *StakingEventsHyperTableMutation) AccountEvmAddress() (r string, exists bool) {
+	v := m.account_evm_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountEvmAddress returns the old "account_evm_address" field's value of the StakingEventsHyperTable entity.
+// If the StakingEventsHyperTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventsHyperTableMutation) OldAccountEvmAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountEvmAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountEvmAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountEvmAddress: %w", err)
+	}
+	return oldValue.AccountEvmAddress, nil
+}
+
+// ResetAccountEvmAddress resets all changes to the "account_evm_address" field.
+func (m *StakingEventsHyperTableMutation) ResetAccountEvmAddress() {
+	m.account_evm_address = nil
+}
+
+// SetStakedAmountAdded sets the "staked_amount_added" field.
+func (m *StakingEventsHyperTableMutation) SetStakedAmountAdded(t typeutil.Uint256) {
+	m.staked_amount_added = &t
+}
+
+// StakedAmountAdded returns the value of the "staked_amount_added" field in the mutation.
+func (m *StakingEventsHyperTableMutation) StakedAmountAdded() (r typeutil.Uint256, exists bool) {
+	v := m.staked_amount_added
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStakedAmountAdded returns the old "staked_amount_added" field's value of the StakingEventsHyperTable entity.
+// If the StakingEventsHyperTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventsHyperTableMutation) OldStakedAmountAdded(ctx context.Context) (v typeutil.Uint256, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStakedAmountAdded is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStakedAmountAdded requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStakedAmountAdded: %w", err)
+	}
+	return oldValue.StakedAmountAdded, nil
+}
+
+// ResetStakedAmountAdded resets all changes to the "staked_amount_added" field.
+func (m *StakingEventsHyperTableMutation) ResetStakedAmountAdded() {
+	m.staked_amount_added = nil
+}
+
+// SetStakedAmountRemoved sets the "staked_amount_removed" field.
+func (m *StakingEventsHyperTableMutation) SetStakedAmountRemoved(t typeutil.Uint256) {
+	m.staked_amount_removed = &t
+}
+
+// StakedAmountRemoved returns the value of the "staked_amount_removed" field in the mutation.
+func (m *StakingEventsHyperTableMutation) StakedAmountRemoved() (r typeutil.Uint256, exists bool) {
+	v := m.staked_amount_removed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStakedAmountRemoved returns the old "staked_amount_removed" field's value of the StakingEventsHyperTable entity.
+// If the StakingEventsHyperTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventsHyperTableMutation) OldStakedAmountRemoved(ctx context.Context) (v typeutil.Uint256, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStakedAmountRemoved is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStakedAmountRemoved requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStakedAmountRemoved: %w", err)
+	}
+	return oldValue.StakedAmountRemoved, nil
+}
+
+// ResetStakedAmountRemoved resets all changes to the "staked_amount_removed" field.
+func (m *StakingEventsHyperTableMutation) ResetStakedAmountRemoved() {
+	m.staked_amount_removed = nil
+}
+
+// SetPendingRewardAmountAdded sets the "pending_reward_amount_added" field.
+func (m *StakingEventsHyperTableMutation) SetPendingRewardAmountAdded(t typeutil.Uint256) {
+	m.pending_reward_amount_added = &t
+}
+
+// PendingRewardAmountAdded returns the value of the "pending_reward_amount_added" field in the mutation.
+func (m *StakingEventsHyperTableMutation) PendingRewardAmountAdded() (r typeutil.Uint256, exists bool) {
+	v := m.pending_reward_amount_added
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPendingRewardAmountAdded returns the old "pending_reward_amount_added" field's value of the StakingEventsHyperTable entity.
+// If the StakingEventsHyperTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventsHyperTableMutation) OldPendingRewardAmountAdded(ctx context.Context) (v typeutil.Uint256, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPendingRewardAmountAdded is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPendingRewardAmountAdded requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPendingRewardAmountAdded: %w", err)
+	}
+	return oldValue.PendingRewardAmountAdded, nil
+}
+
+// ResetPendingRewardAmountAdded resets all changes to the "pending_reward_amount_added" field.
+func (m *StakingEventsHyperTableMutation) ResetPendingRewardAmountAdded() {
+	m.pending_reward_amount_added = nil
+}
+
+// SetPendingRewardAmountRemoved sets the "pending_reward_amount_removed" field.
+func (m *StakingEventsHyperTableMutation) SetPendingRewardAmountRemoved(t typeutil.Uint256) {
+	m.pending_reward_amount_removed = &t
+}
+
+// PendingRewardAmountRemoved returns the value of the "pending_reward_amount_removed" field in the mutation.
+func (m *StakingEventsHyperTableMutation) PendingRewardAmountRemoved() (r typeutil.Uint256, exists bool) {
+	v := m.pending_reward_amount_removed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPendingRewardAmountRemoved returns the old "pending_reward_amount_removed" field's value of the StakingEventsHyperTable entity.
+// If the StakingEventsHyperTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventsHyperTableMutation) OldPendingRewardAmountRemoved(ctx context.Context) (v typeutil.Uint256, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPendingRewardAmountRemoved is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPendingRewardAmountRemoved requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPendingRewardAmountRemoved: %w", err)
+	}
+	return oldValue.PendingRewardAmountRemoved, nil
+}
+
+// ResetPendingRewardAmountRemoved resets all changes to the "pending_reward_amount_removed" field.
+func (m *StakingEventsHyperTableMutation) ResetPendingRewardAmountRemoved() {
+	m.pending_reward_amount_removed = nil
+}
+
+// SetClaimedRewardAmountAdded sets the "claimed_reward_amount_added" field.
+func (m *StakingEventsHyperTableMutation) SetClaimedRewardAmountAdded(t typeutil.Uint256) {
+	m.claimed_reward_amount_added = &t
+}
+
+// ClaimedRewardAmountAdded returns the value of the "claimed_reward_amount_added" field in the mutation.
+func (m *StakingEventsHyperTableMutation) ClaimedRewardAmountAdded() (r typeutil.Uint256, exists bool) {
+	v := m.claimed_reward_amount_added
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClaimedRewardAmountAdded returns the old "claimed_reward_amount_added" field's value of the StakingEventsHyperTable entity.
+// If the StakingEventsHyperTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventsHyperTableMutation) OldClaimedRewardAmountAdded(ctx context.Context) (v typeutil.Uint256, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClaimedRewardAmountAdded is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClaimedRewardAmountAdded requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClaimedRewardAmountAdded: %w", err)
+	}
+	return oldValue.ClaimedRewardAmountAdded, nil
+}
+
+// ResetClaimedRewardAmountAdded resets all changes to the "claimed_reward_amount_added" field.
+func (m *StakingEventsHyperTableMutation) ResetClaimedRewardAmountAdded() {
+	m.claimed_reward_amount_added = nil
+}
+
+// SetClaimedRewardAmountRemoved sets the "claimed_reward_amount_removed" field.
+func (m *StakingEventsHyperTableMutation) SetClaimedRewardAmountRemoved(t typeutil.Uint256) {
+	m.claimed_reward_amount_removed = &t
+}
+
+// ClaimedRewardAmountRemoved returns the value of the "claimed_reward_amount_removed" field in the mutation.
+func (m *StakingEventsHyperTableMutation) ClaimedRewardAmountRemoved() (r typeutil.Uint256, exists bool) {
+	v := m.claimed_reward_amount_removed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClaimedRewardAmountRemoved returns the old "claimed_reward_amount_removed" field's value of the StakingEventsHyperTable entity.
+// If the StakingEventsHyperTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventsHyperTableMutation) OldClaimedRewardAmountRemoved(ctx context.Context) (v typeutil.Uint256, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClaimedRewardAmountRemoved is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClaimedRewardAmountRemoved requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClaimedRewardAmountRemoved: %w", err)
+	}
+	return oldValue.ClaimedRewardAmountRemoved, nil
+}
+
+// ResetClaimedRewardAmountRemoved resets all changes to the "claimed_reward_amount_removed" field.
+func (m *StakingEventsHyperTableMutation) ResetClaimedRewardAmountRemoved() {
+	m.claimed_reward_amount_removed = nil
+}
+
+// SetDatetime sets the "datetime" field.
+func (m *StakingEventsHyperTableMutation) SetDatetime(t time.Time) {
+	m.datetime = &t
+}
+
+// Datetime returns the value of the "datetime" field in the mutation.
+func (m *StakingEventsHyperTableMutation) Datetime() (r time.Time, exists bool) {
+	v := m.datetime
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDatetime returns the old "datetime" field's value of the StakingEventsHyperTable entity.
+// If the StakingEventsHyperTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StakingEventsHyperTableMutation) OldDatetime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDatetime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDatetime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDatetime: %w", err)
+	}
+	return oldValue.Datetime, nil
+}
+
+// ResetDatetime resets all changes to the "datetime" field.
+func (m *StakingEventsHyperTableMutation) ResetDatetime() {
+	m.datetime = nil
+}
+
+// Where appends a list predicates to the StakingEventsHyperTableMutation builder.
+func (m *StakingEventsHyperTableMutation) Where(ps ...predicate.StakingEventsHyperTable) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the StakingEventsHyperTableMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *StakingEventsHyperTableMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.StakingEventsHyperTable, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *StakingEventsHyperTableMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *StakingEventsHyperTableMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (StakingEventsHyperTable).
+func (m *StakingEventsHyperTableMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *StakingEventsHyperTableMutation) Fields() []string {
+	fields := make([]string, 0, 14)
+	if m.transaction_hash != nil {
+		fields = append(fields, stakingeventshypertable.FieldTransactionHash)
+	}
+	if m.transaction_index != nil {
+		fields = append(fields, stakingeventshypertable.FieldTransactionIndex)
+	}
+	if m.block_number != nil {
+		fields = append(fields, stakingeventshypertable.FieldBlockNumber)
+	}
+	if m.log_index != nil {
+		fields = append(fields, stakingeventshypertable.FieldLogIndex)
+	}
+	if m.event_type != nil {
+		fields = append(fields, stakingeventshypertable.FieldEventType)
+	}
+	if m.nft_class_address != nil {
+		fields = append(fields, stakingeventshypertable.FieldNftClassAddress)
+	}
+	if m.account_evm_address != nil {
+		fields = append(fields, stakingeventshypertable.FieldAccountEvmAddress)
+	}
+	if m.staked_amount_added != nil {
+		fields = append(fields, stakingeventshypertable.FieldStakedAmountAdded)
+	}
+	if m.staked_amount_removed != nil {
+		fields = append(fields, stakingeventshypertable.FieldStakedAmountRemoved)
+	}
+	if m.pending_reward_amount_added != nil {
+		fields = append(fields, stakingeventshypertable.FieldPendingRewardAmountAdded)
+	}
+	if m.pending_reward_amount_removed != nil {
+		fields = append(fields, stakingeventshypertable.FieldPendingRewardAmountRemoved)
+	}
+	if m.claimed_reward_amount_added != nil {
+		fields = append(fields, stakingeventshypertable.FieldClaimedRewardAmountAdded)
+	}
+	if m.claimed_reward_amount_removed != nil {
+		fields = append(fields, stakingeventshypertable.FieldClaimedRewardAmountRemoved)
+	}
+	if m.datetime != nil {
+		fields = append(fields, stakingeventshypertable.FieldDatetime)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *StakingEventsHyperTableMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case stakingeventshypertable.FieldTransactionHash:
+		return m.TransactionHash()
+	case stakingeventshypertable.FieldTransactionIndex:
+		return m.TransactionIndex()
+	case stakingeventshypertable.FieldBlockNumber:
+		return m.BlockNumber()
+	case stakingeventshypertable.FieldLogIndex:
+		return m.LogIndex()
+	case stakingeventshypertable.FieldEventType:
+		return m.EventType()
+	case stakingeventshypertable.FieldNftClassAddress:
+		return m.NftClassAddress()
+	case stakingeventshypertable.FieldAccountEvmAddress:
+		return m.AccountEvmAddress()
+	case stakingeventshypertable.FieldStakedAmountAdded:
+		return m.StakedAmountAdded()
+	case stakingeventshypertable.FieldStakedAmountRemoved:
+		return m.StakedAmountRemoved()
+	case stakingeventshypertable.FieldPendingRewardAmountAdded:
+		return m.PendingRewardAmountAdded()
+	case stakingeventshypertable.FieldPendingRewardAmountRemoved:
+		return m.PendingRewardAmountRemoved()
+	case stakingeventshypertable.FieldClaimedRewardAmountAdded:
+		return m.ClaimedRewardAmountAdded()
+	case stakingeventshypertable.FieldClaimedRewardAmountRemoved:
+		return m.ClaimedRewardAmountRemoved()
+	case stakingeventshypertable.FieldDatetime:
+		return m.Datetime()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *StakingEventsHyperTableMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case stakingeventshypertable.FieldTransactionHash:
+		return m.OldTransactionHash(ctx)
+	case stakingeventshypertable.FieldTransactionIndex:
+		return m.OldTransactionIndex(ctx)
+	case stakingeventshypertable.FieldBlockNumber:
+		return m.OldBlockNumber(ctx)
+	case stakingeventshypertable.FieldLogIndex:
+		return m.OldLogIndex(ctx)
+	case stakingeventshypertable.FieldEventType:
+		return m.OldEventType(ctx)
+	case stakingeventshypertable.FieldNftClassAddress:
+		return m.OldNftClassAddress(ctx)
+	case stakingeventshypertable.FieldAccountEvmAddress:
+		return m.OldAccountEvmAddress(ctx)
+	case stakingeventshypertable.FieldStakedAmountAdded:
+		return m.OldStakedAmountAdded(ctx)
+	case stakingeventshypertable.FieldStakedAmountRemoved:
+		return m.OldStakedAmountRemoved(ctx)
+	case stakingeventshypertable.FieldPendingRewardAmountAdded:
+		return m.OldPendingRewardAmountAdded(ctx)
+	case stakingeventshypertable.FieldPendingRewardAmountRemoved:
+		return m.OldPendingRewardAmountRemoved(ctx)
+	case stakingeventshypertable.FieldClaimedRewardAmountAdded:
+		return m.OldClaimedRewardAmountAdded(ctx)
+	case stakingeventshypertable.FieldClaimedRewardAmountRemoved:
+		return m.OldClaimedRewardAmountRemoved(ctx)
+	case stakingeventshypertable.FieldDatetime:
+		return m.OldDatetime(ctx)
+	}
+	return nil, fmt.Errorf("unknown StakingEventsHyperTable field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *StakingEventsHyperTableMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case stakingeventshypertable.FieldTransactionHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTransactionHash(v)
+		return nil
+	case stakingeventshypertable.FieldTransactionIndex:
+		v, ok := value.(uint)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTransactionIndex(v)
+		return nil
+	case stakingeventshypertable.FieldBlockNumber:
+		v, ok := value.(typeutil.Uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBlockNumber(v)
+		return nil
+	case stakingeventshypertable.FieldLogIndex:
+		v, ok := value.(uint)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLogIndex(v)
+		return nil
+	case stakingeventshypertable.FieldEventType:
+		v, ok := value.(stakingeventshypertable.EventType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEventType(v)
+		return nil
+	case stakingeventshypertable.FieldNftClassAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNftClassAddress(v)
+		return nil
+	case stakingeventshypertable.FieldAccountEvmAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountEvmAddress(v)
+		return nil
+	case stakingeventshypertable.FieldStakedAmountAdded:
+		v, ok := value.(typeutil.Uint256)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStakedAmountAdded(v)
+		return nil
+	case stakingeventshypertable.FieldStakedAmountRemoved:
+		v, ok := value.(typeutil.Uint256)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStakedAmountRemoved(v)
+		return nil
+	case stakingeventshypertable.FieldPendingRewardAmountAdded:
+		v, ok := value.(typeutil.Uint256)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPendingRewardAmountAdded(v)
+		return nil
+	case stakingeventshypertable.FieldPendingRewardAmountRemoved:
+		v, ok := value.(typeutil.Uint256)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPendingRewardAmountRemoved(v)
+		return nil
+	case stakingeventshypertable.FieldClaimedRewardAmountAdded:
+		v, ok := value.(typeutil.Uint256)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClaimedRewardAmountAdded(v)
+		return nil
+	case stakingeventshypertable.FieldClaimedRewardAmountRemoved:
+		v, ok := value.(typeutil.Uint256)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClaimedRewardAmountRemoved(v)
+		return nil
+	case stakingeventshypertable.FieldDatetime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDatetime(v)
+		return nil
+	}
+	return fmt.Errorf("unknown StakingEventsHyperTable field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *StakingEventsHyperTableMutation) AddedFields() []string {
+	var fields []string
+	if m.addtransaction_index != nil {
+		fields = append(fields, stakingeventshypertable.FieldTransactionIndex)
+	}
+	if m.addblock_number != nil {
+		fields = append(fields, stakingeventshypertable.FieldBlockNumber)
+	}
+	if m.addlog_index != nil {
+		fields = append(fields, stakingeventshypertable.FieldLogIndex)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *StakingEventsHyperTableMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case stakingeventshypertable.FieldTransactionIndex:
+		return m.AddedTransactionIndex()
+	case stakingeventshypertable.FieldBlockNumber:
+		return m.AddedBlockNumber()
+	case stakingeventshypertable.FieldLogIndex:
+		return m.AddedLogIndex()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *StakingEventsHyperTableMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case stakingeventshypertable.FieldTransactionIndex:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTransactionIndex(v)
+		return nil
+	case stakingeventshypertable.FieldBlockNumber:
+		v, ok := value.(typeutil.Uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBlockNumber(v)
+		return nil
+	case stakingeventshypertable.FieldLogIndex:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLogIndex(v)
+		return nil
+	}
+	return fmt.Errorf("unknown StakingEventsHyperTable numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *StakingEventsHyperTableMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *StakingEventsHyperTableMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *StakingEventsHyperTableMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown StakingEventsHyperTable nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *StakingEventsHyperTableMutation) ResetField(name string) error {
+	switch name {
+	case stakingeventshypertable.FieldTransactionHash:
+		m.ResetTransactionHash()
+		return nil
+	case stakingeventshypertable.FieldTransactionIndex:
+		m.ResetTransactionIndex()
+		return nil
+	case stakingeventshypertable.FieldBlockNumber:
+		m.ResetBlockNumber()
+		return nil
+	case stakingeventshypertable.FieldLogIndex:
+		m.ResetLogIndex()
+		return nil
+	case stakingeventshypertable.FieldEventType:
+		m.ResetEventType()
+		return nil
+	case stakingeventshypertable.FieldNftClassAddress:
+		m.ResetNftClassAddress()
+		return nil
+	case stakingeventshypertable.FieldAccountEvmAddress:
+		m.ResetAccountEvmAddress()
+		return nil
+	case stakingeventshypertable.FieldStakedAmountAdded:
+		m.ResetStakedAmountAdded()
+		return nil
+	case stakingeventshypertable.FieldStakedAmountRemoved:
+		m.ResetStakedAmountRemoved()
+		return nil
+	case stakingeventshypertable.FieldPendingRewardAmountAdded:
+		m.ResetPendingRewardAmountAdded()
+		return nil
+	case stakingeventshypertable.FieldPendingRewardAmountRemoved:
+		m.ResetPendingRewardAmountRemoved()
+		return nil
+	case stakingeventshypertable.FieldClaimedRewardAmountAdded:
+		m.ResetClaimedRewardAmountAdded()
+		return nil
+	case stakingeventshypertable.FieldClaimedRewardAmountRemoved:
+		m.ResetClaimedRewardAmountRemoved()
+		return nil
+	case stakingeventshypertable.FieldDatetime:
+		m.ResetDatetime()
+		return nil
+	}
+	return fmt.Errorf("unknown StakingEventsHyperTable field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *StakingEventsHyperTableMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *StakingEventsHyperTableMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *StakingEventsHyperTableMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *StakingEventsHyperTableMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *StakingEventsHyperTableMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *StakingEventsHyperTableMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *StakingEventsHyperTableMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown StakingEventsHyperTable unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *StakingEventsHyperTableMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown StakingEventsHyperTable edge %s", name)
 }

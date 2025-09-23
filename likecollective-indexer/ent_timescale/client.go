@@ -12,6 +12,7 @@ import (
 	"likecollective-indexer/ent_timescale/migrate"
 
 	"likecollective-indexer/ent_timescale/stakingevent"
+	"likecollective-indexer/ent_timescale/stakingeventshypertable"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -25,6 +26,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// StakingEvent is the client for interacting with the StakingEvent builders.
 	StakingEvent *StakingEventClient
+	// StakingEventsHyperTable is the client for interacting with the StakingEventsHyperTable builders.
+	StakingEventsHyperTable *StakingEventsHyperTableClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -37,6 +40,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.StakingEvent = NewStakingEventClient(c.config)
+	c.StakingEventsHyperTable = NewStakingEventsHyperTableClient(c.config)
 }
 
 type (
@@ -127,9 +131,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		StakingEvent: NewStakingEventClient(cfg),
+		ctx:                     ctx,
+		config:                  cfg,
+		StakingEvent:            NewStakingEventClient(cfg),
+		StakingEventsHyperTable: NewStakingEventsHyperTableClient(cfg),
 	}, nil
 }
 
@@ -147,9 +152,10 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		StakingEvent: NewStakingEventClient(cfg),
+		ctx:                     ctx,
+		config:                  cfg,
+		StakingEvent:            NewStakingEventClient(cfg),
+		StakingEventsHyperTable: NewStakingEventsHyperTableClient(cfg),
 	}, nil
 }
 
@@ -179,12 +185,14 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.StakingEvent.Use(hooks...)
+	c.StakingEventsHyperTable.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.StakingEvent.Intercept(interceptors...)
+	c.StakingEventsHyperTable.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -192,6 +200,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *StakingEventMutation:
 		return c.StakingEvent.mutate(ctx, m)
+	case *StakingEventsHyperTableMutation:
+		return c.StakingEventsHyperTable.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent_timescale: unknown mutation type %T", m)
 	}
@@ -330,12 +340,145 @@ func (c *StakingEventClient) mutate(ctx context.Context, m *StakingEventMutation
 	}
 }
 
+// StakingEventsHyperTableClient is a client for the StakingEventsHyperTable schema.
+type StakingEventsHyperTableClient struct {
+	config
+}
+
+// NewStakingEventsHyperTableClient returns a client for the StakingEventsHyperTable from the given config.
+func NewStakingEventsHyperTableClient(c config) *StakingEventsHyperTableClient {
+	return &StakingEventsHyperTableClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `stakingeventshypertable.Hooks(f(g(h())))`.
+func (c *StakingEventsHyperTableClient) Use(hooks ...Hook) {
+	c.hooks.StakingEventsHyperTable = append(c.hooks.StakingEventsHyperTable, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `stakingeventshypertable.Intercept(f(g(h())))`.
+func (c *StakingEventsHyperTableClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StakingEventsHyperTable = append(c.inters.StakingEventsHyperTable, interceptors...)
+}
+
+// Create returns a builder for creating a StakingEventsHyperTable entity.
+func (c *StakingEventsHyperTableClient) Create() *StakingEventsHyperTableCreate {
+	mutation := newStakingEventsHyperTableMutation(c.config, OpCreate)
+	return &StakingEventsHyperTableCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StakingEventsHyperTable entities.
+func (c *StakingEventsHyperTableClient) CreateBulk(builders ...*StakingEventsHyperTableCreate) *StakingEventsHyperTableCreateBulk {
+	return &StakingEventsHyperTableCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StakingEventsHyperTableClient) MapCreateBulk(slice any, setFunc func(*StakingEventsHyperTableCreate, int)) *StakingEventsHyperTableCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StakingEventsHyperTableCreateBulk{err: fmt.Errorf("calling to StakingEventsHyperTableClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StakingEventsHyperTableCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StakingEventsHyperTableCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StakingEventsHyperTable.
+func (c *StakingEventsHyperTableClient) Update() *StakingEventsHyperTableUpdate {
+	mutation := newStakingEventsHyperTableMutation(c.config, OpUpdate)
+	return &StakingEventsHyperTableUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StakingEventsHyperTableClient) UpdateOne(_m *StakingEventsHyperTable) *StakingEventsHyperTableUpdateOne {
+	mutation := newStakingEventsHyperTableMutation(c.config, OpUpdateOne, withStakingEventsHyperTable(_m))
+	return &StakingEventsHyperTableUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StakingEventsHyperTableClient) UpdateOneID(id int) *StakingEventsHyperTableUpdateOne {
+	mutation := newStakingEventsHyperTableMutation(c.config, OpUpdateOne, withStakingEventsHyperTableID(id))
+	return &StakingEventsHyperTableUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StakingEventsHyperTable.
+func (c *StakingEventsHyperTableClient) Delete() *StakingEventsHyperTableDelete {
+	mutation := newStakingEventsHyperTableMutation(c.config, OpDelete)
+	return &StakingEventsHyperTableDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StakingEventsHyperTableClient) DeleteOne(_m *StakingEventsHyperTable) *StakingEventsHyperTableDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StakingEventsHyperTableClient) DeleteOneID(id int) *StakingEventsHyperTableDeleteOne {
+	builder := c.Delete().Where(stakingeventshypertable.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StakingEventsHyperTableDeleteOne{builder}
+}
+
+// Query returns a query builder for StakingEventsHyperTable.
+func (c *StakingEventsHyperTableClient) Query() *StakingEventsHyperTableQuery {
+	return &StakingEventsHyperTableQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStakingEventsHyperTable},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StakingEventsHyperTable entity by its id.
+func (c *StakingEventsHyperTableClient) Get(ctx context.Context, id int) (*StakingEventsHyperTable, error) {
+	return c.Query().Where(stakingeventshypertable.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StakingEventsHyperTableClient) GetX(ctx context.Context, id int) *StakingEventsHyperTable {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *StakingEventsHyperTableClient) Hooks() []Hook {
+	return c.hooks.StakingEventsHyperTable
+}
+
+// Interceptors returns the client interceptors.
+func (c *StakingEventsHyperTableClient) Interceptors() []Interceptor {
+	return c.inters.StakingEventsHyperTable
+}
+
+func (c *StakingEventsHyperTableClient) mutate(ctx context.Context, m *StakingEventsHyperTableMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StakingEventsHyperTableCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StakingEventsHyperTableUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StakingEventsHyperTableUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StakingEventsHyperTableDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent_timescale: unknown StakingEventsHyperTable mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		StakingEvent []ent.Hook
+		StakingEvent, StakingEventsHyperTable []ent.Hook
 	}
 	inters struct {
-		StakingEvent []ent.Interceptor
+		StakingEvent, StakingEventsHyperTable []ent.Interceptor
 	}
 )

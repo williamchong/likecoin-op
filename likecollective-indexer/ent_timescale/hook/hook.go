@@ -20,6 +20,18 @@ func (f StakingEventFunc) Mutate(ctx context.Context, m ent_timescale.Mutation) 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent_timescale.StakingEventMutation", m)
 }
 
+// The StakingEventsHyperTableFunc type is an adapter to allow the use of ordinary
+// function as StakingEventsHyperTable mutator.
+type StakingEventsHyperTableFunc func(context.Context, *ent_timescale.StakingEventsHyperTableMutation) (ent_timescale.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StakingEventsHyperTableFunc) Mutate(ctx context.Context, m ent_timescale.Mutation) (ent_timescale.Value, error) {
+	if mv, ok := m.(*ent_timescale.StakingEventsHyperTableMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent_timescale.StakingEventsHyperTableMutation", m)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, ent_timescale.Mutation) bool
 
