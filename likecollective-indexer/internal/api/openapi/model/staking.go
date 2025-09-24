@@ -1,8 +1,6 @@
 package model
 
 import (
-	"strconv"
-
 	"likecollective-indexer/ent"
 	"likecollective-indexer/internal/database"
 	"likecollective-indexer/openapi/api"
@@ -18,20 +16,6 @@ func MakeStaking(staking *ent.Staking) api.Staking {
 		PendingRewardAmount: api.Uint256((*uint256.Int)(staking.PendingRewardAmount).String()),
 		ClaimedRewardAmount: api.Uint256((*uint256.Int)(staking.ClaimedRewardAmount).String()),
 	}
-}
-
-func MakeAccountBookNFT(staking *ent.Staking) (api.AccountBookNFT, error) {
-	poolShare, err := strconv.ParseFloat(staking.PoolShare, 64)
-	if err != nil {
-		return api.AccountBookNFT{}, err
-	}
-	return api.AccountBookNFT{
-		EvmAddress:          api.EvmAddress(staking.Edges.NftClass.Address),
-		PoolShare:           poolShare,
-		StakedAmount:        api.Uint256((*uint256.Int)(staking.StakedAmount).String()),
-		PendingRewardAmount: api.Uint256((*uint256.Int)(staking.PendingRewardAmount).String()),
-		ClaimedRewardAmount: api.Uint256((*uint256.Int)(staking.ClaimedRewardAmount).String()),
-	}, nil
 }
 
 type StakingFilterParams struct {

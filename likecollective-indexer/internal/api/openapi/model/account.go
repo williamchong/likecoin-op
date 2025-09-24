@@ -18,20 +18,12 @@ func MakeAccount(account *ent.Account) api.Account {
 }
 
 type AccountFilterParams struct {
-	FilterBookNFTIn []api.EvmAddress
 	FilterAccountIn []api.EvmAddress
 }
 
 func (p *AccountFilterParams) ToEntFilter() database.QueryAccountsFilter {
-	var filterBookNFTIn *[]string
 	var filterAccountIn *[]string
-	if len(p.FilterBookNFTIn) > 0 {
-		_filterBookNFTIn := make([]string, len(p.FilterBookNFTIn))
-		for i, bookNFT := range p.FilterBookNFTIn {
-			_filterBookNFTIn[i] = string(bookNFT)
-		}
-		filterBookNFTIn = &_filterBookNFTIn
-	}
+
 	if len(p.FilterAccountIn) > 0 {
 		_filterAccountIn := make([]string, len(p.FilterAccountIn))
 		for i, account := range p.FilterAccountIn {
@@ -39,7 +31,7 @@ func (p *AccountFilterParams) ToEntFilter() database.QueryAccountsFilter {
 		}
 		filterAccountIn = &_filterAccountIn
 	}
-	return database.NewQueryAccountsFilter(filterBookNFTIn, filterAccountIn)
+	return database.NewQueryAccountsFilter(filterAccountIn)
 }
 
 type AccountPagination struct {

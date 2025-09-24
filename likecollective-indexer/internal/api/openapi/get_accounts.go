@@ -18,7 +18,6 @@ func (h *openAPIHandler) AccountsGet(
 	}
 
 	filterParams := model.AccountFilterParams{
-		FilterBookNFTIn: params.FilterBookNftIn,
 		FilterAccountIn: params.FilterAccountIn,
 	}
 

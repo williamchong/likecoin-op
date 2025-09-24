@@ -2,6 +2,7 @@ package database
 
 import (
 	"likecollective-indexer/ent"
+	"likecollective-indexer/ent/account"
 	"likecollective-indexer/ent/nftclass"
 
 	"entgo.io/ent/dialect/sql"
@@ -53,38 +54,26 @@ const (
 )
 
 type QueryNFTClassesFilter struct {
-	timeFrameSortBy    *NFTClassesRequestTimeFrameSortBy
-	timeFrameSortOrder *NFTClassesRequestTimeFrameSortOrder
-	filterBookNftIn    *[]string
-	filterAccountIn    *[]string
+	filterBookNftIn *[]string
+	filterAccountIn *[]string
 }
 
 func NewQueryNFTClassesFilter(
-	timeFrameSortBy *NFTClassesRequestTimeFrameSortBy,
-	timeFrameSortOrder *NFTClassesRequestTimeFrameSortOrder,
 	filterBookNftIn *[]string,
 	filterAccountIn *[]string,
 ) QueryNFTClassesFilter {
 	return QueryNFTClassesFilter{
-		timeFrameSortBy,
-		timeFrameSortOrder,
 		filterBookNftIn,
 		filterAccountIn,
 	}
 }
 
 func (f *QueryNFTClassesFilter) HandleFilter(q *ent.NFTClassQuery) *ent.NFTClassQuery {
-	if f.timeFrameSortBy == nil {
-		return q
+	if f.filterBookNftIn != nil {
+		q = q.Where(nftclass.AddressIn(*f.filterBookNftIn...))
 	}
-	if *f.timeFrameSortBy == NFTClasssRequestTimeFrameSortByStakedAmount {
-		q = q.Order(nftclass.ByStakedAmount(sql.OrderAsc()))
-	}
-	if *f.timeFrameSortBy == NFTClasssRequestTimeFrameSortByLastStakedAt {
-		q = q.Order(nftclass.ByLastStakedAt(sql.OrderAsc()))
-	}
-	if *f.timeFrameSortBy == NFTClasssRequestTimeFrameSortByNumberOfStakers {
-		q = q.Order(nftclass.ByNumberOfStakers(sql.OrderAsc()))
+	if f.filterAccountIn != nil {
+		q = q.Where(nftclass.HasAccountsWith(account.EvmAddressIn(*f.filterAccountIn...)))
 	}
 	return q
 }

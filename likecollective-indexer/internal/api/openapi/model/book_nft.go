@@ -18,24 +18,11 @@ func MakeBookNFT(nftClass *ent.NFTClass) api.BookNFT {
 }
 
 type NFTClassFilterParams struct {
-	TimeFrame          api.OptBookNFTsRequestSortOrderTimeFrame
-	TimeFrameSortBy    api.OptBookNFTsRequestTimeFrameSortBy
-	TimeFrameSortOrder api.OptBookNFTsRequestTimeFrameSortOrder
-	FilterBookNftIn    []api.EvmAddress
-	FilterAccountIn    []api.EvmAddress
+	FilterBookNftIn []api.EvmAddress
+	FilterAccountIn []api.EvmAddress
 }
 
 func (p *NFTClassFilterParams) ToEntFilter() database.QueryNFTClassesFilter {
-	var timeFrameSortBy *database.NFTClassesRequestTimeFrameSortBy
-	var timeFrameSortOrder *database.NFTClassesRequestTimeFrameSortOrder
-	if p.TimeFrameSortBy.IsSet() {
-		_timeFrameSortBy := database.NFTClassesRequestTimeFrameSortBy(p.TimeFrameSortBy.Value)
-		timeFrameSortBy = &_timeFrameSortBy
-	}
-	if p.TimeFrameSortOrder.IsSet() {
-		_timeFrameSortOrder := database.NFTClassesRequestTimeFrameSortOrder(p.TimeFrameSortOrder.Value)
-		timeFrameSortOrder = &_timeFrameSortOrder
-	}
 
 	var filterBookNftIn *[]string
 	var filterAccountIn *[]string
@@ -54,7 +41,7 @@ func (p *NFTClassFilterParams) ToEntFilter() database.QueryNFTClassesFilter {
 		filterAccountIn = &_filterAccountIn
 	}
 
-	return database.NewQueryNFTClassesFilter(timeFrameSortBy, timeFrameSortOrder, filterBookNftIn, filterAccountIn)
+	return database.NewQueryNFTClassesFilter(filterBookNftIn, filterAccountIn)
 }
 
 type NFTClassPagination struct {
