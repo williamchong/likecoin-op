@@ -113,6 +113,9 @@ stop-workers-and-schedulers:
 	$(MAKE) stop-worker
 	$(MAKE) stop-scheduler
 
+openapi/api: openapi/schema.yaml
+	go generate ./openapi
+
 .PHONY: migration
 migration:
 	atlas migrate diff "${MIGRATION_NAME}" \

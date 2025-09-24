@@ -13,15 +13,6 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
-// AccountEvmAddressBookNftsGet implements GET /account/{evm_address}/book-nfts operation.
-//
-// Get book NFTs for an account.
-//
-// GET /account/{evm_address}/book-nfts
-func (UnimplementedHandler) AccountEvmAddressBookNftsGet(ctx context.Context, params AccountEvmAddressBookNftsGetParams) (r *AccountEvmAddressBookNftsGetOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // AccountEvmAddressGet implements GET /account/{evm_address} operation.
 //
 // Get an account.

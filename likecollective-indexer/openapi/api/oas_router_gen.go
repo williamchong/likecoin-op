@@ -103,9 +103,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/"
+					case '/': // Prefix: "/staking"
 
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						if l := len("/staking"); len(elem) >= l && elem[0:l] == "/staking" {
 							elem = elem[l:]
 						} else {
 							break
@@ -115,9 +115,41 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							break
 						}
 						switch elem[0] {
-						case 'b': // Prefix: "book-nfts"
+						case '-': // Prefix: "-events/"
 
-							if l := len("book-nfts"); len(elem) >= l && elem[0:l] == "book-nfts" {
+							if l := len("-events/"); len(elem) >= l && elem[0:l] == "-events/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "event_type"
+							// Leaf parameter, slashes are prohibited
+							idx := strings.IndexByte(elem, '/')
+							if idx >= 0 {
+								break
+							}
+							args[1] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleAccountEvmAddressStakingEventsEventTypeGetRequest([2]string{
+										args[0],
+										args[1],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+						case 's': // Prefix: "s"
+
+							if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
 								elem = elem[l:]
 							} else {
 								break
@@ -127,7 +159,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleAccountEvmAddressBookNftsGetRequest([1]string{
+									s.handleAccountEvmAddressStakingsGetRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -135,74 +167,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								}
 
 								return
-							}
-
-						case 's': // Prefix: "staking"
-
-							if l := len("staking"); len(elem) >= l && elem[0:l] == "staking" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								break
-							}
-							switch elem[0] {
-							case '-': // Prefix: "-events/"
-
-								if l := len("-events/"); len(elem) >= l && elem[0:l] == "-events/" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								// Param: "event_type"
-								// Leaf parameter, slashes are prohibited
-								idx := strings.IndexByte(elem, '/')
-								if idx >= 0 {
-									break
-								}
-								args[1] = elem
-								elem = ""
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch r.Method {
-									case "GET":
-										s.handleAccountEvmAddressStakingEventsEventTypeGetRequest([2]string{
-											args[0],
-											args[1],
-										}, elemIsEscaped, w, r)
-									default:
-										s.notAllowed(w, r, "GET")
-									}
-
-									return
-								}
-
-							case 's': // Prefix: "s"
-
-								if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch r.Method {
-									case "GET":
-										s.handleAccountEvmAddressStakingsGetRequest([1]string{
-											args[0],
-										}, elemIsEscaped, w, r)
-									default:
-										s.notAllowed(w, r, "GET")
-									}
-
-									return
-								}
-
 							}
 
 						}
@@ -608,9 +572,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/"
+					case '/': // Prefix: "/staking"
 
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						if l := len("/staking"); len(elem) >= l && elem[0:l] == "/staking" {
 							elem = elem[l:]
 						} else {
 							break
@@ -620,9 +584,42 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							break
 						}
 						switch elem[0] {
-						case 'b': // Prefix: "book-nfts"
+						case '-': // Prefix: "-events/"
 
-							if l := len("book-nfts"); len(elem) >= l && elem[0:l] == "book-nfts" {
+							if l := len("-events/"); len(elem) >= l && elem[0:l] == "-events/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "event_type"
+							// Leaf parameter, slashes are prohibited
+							idx := strings.IndexByte(elem, '/')
+							if idx >= 0 {
+								break
+							}
+							args[1] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = AccountEvmAddressStakingEventsEventTypeGetOperation
+									r.summary = "Get staking events for an account"
+									r.operationID = ""
+									r.pathPattern = "/account/{evm_address}/staking-events/{event_type}"
+									r.args = args
+									r.count = 2
+									return r, true
+								default:
+									return
+								}
+							}
+
+						case 's': // Prefix: "s"
+
+							if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
 								elem = elem[l:]
 							} else {
 								break
@@ -632,87 +629,16 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								// Leaf node.
 								switch method {
 								case "GET":
-									r.name = AccountEvmAddressBookNftsGetOperation
-									r.summary = "Get book NFTs for an account"
+									r.name = AccountEvmAddressStakingsGetOperation
+									r.summary = "Get staking information for an account"
 									r.operationID = ""
-									r.pathPattern = "/account/{evm_address}/book-nfts"
+									r.pathPattern = "/account/{evm_address}/stakings"
 									r.args = args
 									r.count = 1
 									return r, true
 								default:
 									return
 								}
-							}
-
-						case 's': // Prefix: "staking"
-
-							if l := len("staking"); len(elem) >= l && elem[0:l] == "staking" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								break
-							}
-							switch elem[0] {
-							case '-': // Prefix: "-events/"
-
-								if l := len("-events/"); len(elem) >= l && elem[0:l] == "-events/" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								// Param: "event_type"
-								// Leaf parameter, slashes are prohibited
-								idx := strings.IndexByte(elem, '/')
-								if idx >= 0 {
-									break
-								}
-								args[1] = elem
-								elem = ""
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch method {
-									case "GET":
-										r.name = AccountEvmAddressStakingEventsEventTypeGetOperation
-										r.summary = "Get staking events for an account"
-										r.operationID = ""
-										r.pathPattern = "/account/{evm_address}/staking-events/{event_type}"
-										r.args = args
-										r.count = 2
-										return r, true
-									default:
-										return
-									}
-								}
-
-							case 's': // Prefix: "s"
-
-								if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch method {
-									case "GET":
-										r.name = AccountEvmAddressStakingsGetOperation
-										r.summary = "Get staking information for an account"
-										r.operationID = ""
-										r.pathPattern = "/account/{evm_address}/stakings"
-										r.args = args
-										r.count = 1
-										return r, true
-									default:
-										return
-									}
-								}
-
 							}
 
 						}
