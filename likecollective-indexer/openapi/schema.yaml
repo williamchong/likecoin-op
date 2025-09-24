@@ -281,6 +281,85 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
+  /book-nfts/{time_frame}/delta:
+    get:
+      tags:
+        - BookNFT
+      summary: Get book NFTs
+      parameters:
+        - name: time_frame
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - 7d
+              - 30d
+              - 1y
+        - name: sort_by
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - staked_amount
+              - last_staked_at
+              - number_of_stakers
+        - name: sort_order
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+        - name: pagination.limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: pagination.page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    type: object
+                    properties:
+                      count:
+                        type: integer
+                    required:
+                      - count
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/BookNFTStakeDelta"
+                required:
+                  - pagination
+                  - data
+
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /book-nft/{evm_address}:
     get:
       tags:
@@ -799,12 +878,12 @@ components:
       discriminator:
         propertyName: event_type
         mapping:
-          staked: '#/components/schemas/StakingEventStaked'
-          unstaked: '#/components/schemas/StakingEventUnstaked'
-          reward-added: '#/components/schemas/StakingEventRewardAdded'
-          reward-claimed: '#/components/schemas/StakingEventRewardClaimed'
-          reward-deposited: '#/components/schemas/StakingEventRewardDeposited'
-          all-rewards-claimed: '#/components/schemas/StakingEventAllRewardsClaimed'
+          staked: "#/components/schemas/StakingEventStaked"
+          unstaked: "#/components/schemas/StakingEventUnstaked"
+          reward-added: "#/components/schemas/StakingEventRewardAdded"
+          reward-claimed: "#/components/schemas/StakingEventRewardClaimed"
+          reward-deposited: "#/components/schemas/StakingEventRewardDeposited"
+          all-rewards-claimed: "#/components/schemas/StakingEventAllRewardsClaimed"
 
     StakingEventStaked:
       type: object
@@ -1010,6 +1089,24 @@ components:
         - staked_amount
         - pending_reward_amount
         - claimed_reward_amount
+
+    BookNFTStakeDelta:
+      type: object
+      properties:
+        book_nft:
+          $ref: "#/components/schemas/EvmAddress"
+        staked_amount:
+          $ref: "#/components/schemas/Uint256"
+        last_staked_at:
+          type: string
+          format: date-time
+        number_of_stakers:
+          type: integer
+      required:
+        - book_nft
+        - staked_amount
+        - last_staked_at
+        - number_of_stakers
 
     EventQueryMetadata:
       type: object
