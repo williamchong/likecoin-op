@@ -13,15 +13,6 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
-// AccountEvmAddressBookNftsGet implements GET /account/{evm_address}/book-nfts operation.
-//
-// Get book NFTs for an account.
-//
-// GET /account/{evm_address}/book-nfts
-func (UnimplementedHandler) AccountEvmAddressBookNftsGet(ctx context.Context, params AccountEvmAddressBookNftsGetParams) (r *AccountEvmAddressBookNftsGetOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // AccountEvmAddressGet implements GET /account/{evm_address} operation.
 //
 // Get an account.
@@ -91,6 +82,15 @@ func (UnimplementedHandler) BookNftEvmAddressStakingsGet(ctx context.Context, pa
 //
 // GET /book-nfts
 func (UnimplementedHandler) BookNftsGet(ctx context.Context, params BookNftsGetParams) (r *BookNftsGetOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// BookNftsTimeFrameDeltaGet implements GET /book-nfts/{time_frame}/delta operation.
+//
+// Get book NFTs.
+//
+// GET /book-nfts/{time_frame}/delta
+func (UnimplementedHandler) BookNftsTimeFrameDeltaGet(ctx context.Context, params BookNftsTimeFrameDeltaGetParams) (r *BookNftsTimeFrameDeltaGetOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

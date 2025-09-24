@@ -113,6 +113,9 @@ stop-workers-and-schedulers:
 	$(MAKE) stop-worker
 	$(MAKE) stop-scheduler
 
+openapi/api: openapi/schema.yaml
+	go generate ./openapi
+
 .PHONY: migration
 migration:
 	atlas migrate diff "${MIGRATION_NAME}" \
@@ -134,6 +137,64 @@ migrate-down:
 		--dir "file://ent/migrate/migrations" \
 		--dev-url "docker://postgres/15/test?search_path=${DB_SCHEMA}" \
 		--url "postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}?sslmode=disable&search_path=${DB_SCHEMA}"
+
+# Timescale DB
+
+DB_TIMESCALE_MIGRATION_PKG := timescale
+DB_TIMESCALE_ENT_DIR := ent_${DB_TIMESCALE_MIGRATION_PKG}
+DB_TIMESCALE_ENT_TARGET := ${DB_TIMESCALE_ENT_DIR}/schema
+
+.PHONY: timescale-new-model
+timescale-new-model:
+	go run -mod=mod entgo.io/ent/cmd/ent new \
+		--target ${DB_TIMESCALE_ENT_TARGET} \
+		${MODEL_NAME}
+
+.PHONY: ent_timescale
+ent_timescale:
+	go generate ./${DB_TIMESCALE_ENT_DIR}
+
+.PHONY: timescale-migration
+timescale-migration:
+	atlas migrate diff "${MIGRATION_NAME}" \
+		--dir file://${DB_TIMESCALE_ENT_DIR}/migrate/migrations \
+		--to ent://${DB_TIMESCALE_ENT_TARGET}/ \
+		--dev-url "docker+postgres://timescale/timescaledb-ha:pg16/test?search_path=${DB_TIMESCALE_SCHEMA}"
+
+.PHONY: timescale-migration-inspection
+timescale-migration-inspection:
+	atlas migrate inspect \
+		--dir file://${DB_TIMESCALE_ENT_DIR}/migrate/migrations \
+		--dev-url "docker+postgres://timescale/timescaledb-ha:pg16/test?search_path=${DB_TIMESCALE_SCHEMA}" \
+		--format '{{ sql . }}'
+
+.PHONY: timescale-migrate-hash
+timescale-migrate-hash:
+	atlas migrate hash \
+		--dir file://${DB_TIMESCALE_ENT_DIR}/migrate/migrations
+
+.PHONY: timescale-migrate-up
+timescale-migrate-up:
+	atlas migrate apply \
+		--tx-mode none \
+		--dir file://${DB_TIMESCALE_ENT_DIR}/migrate/migrations \
+		--url "postgres://${DB_TIMESCALE_USERNAME}:${DB_TIMESCALE_PASSWORD}@${DB_TIMESCALE_HOST}:${DB_TIMESCALE_PORT}/${DB_TIMESCALE_DATABASE}?sslmode=disable&search_path=${DB_TIMESCALE_SCHEMA}"
+
+.PHONY: timescale-migrate-down-all
+timescale-migrate-down-all:
+	docker compose stop psql_bp_timescale
+	docker compose rm -f psql_bp_timescale
+	docker volume rm -f likecollective-indexer_psql_volume_bp_timescale
+	docker compose up -d psql_bp_timescale
+
+.PHONY: timescale-migrate-down
+timescale-migrate-down:
+	atlas migrate down \
+		--dir file://${DB_TIMESCALE_ENT_DIR}/migrate/migrations \
+		--dev-url "docker+postgres://timescale/timescaledb-ha:pg16/test?search_path=${DB_TIMESCALE_SCHEMA}" \
+		--url "postgres://${DB_TIMESCALE_USERNAME}:${DB_TIMESCALE_PASSWORD}@${DB_TIMESCALE_HOST}:${DB_TIMESCALE_PORT}/${DB_TIMESCALE_DATABASE}
+
+# End Timescale DB
 
 API_ARTIFACT := $(PROJECT_NAME)-api
 WORKER_CLI_ARTIFACT := $(PROJECT_NAME)-worker-cli

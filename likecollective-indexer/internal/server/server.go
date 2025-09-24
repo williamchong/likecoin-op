@@ -17,6 +17,7 @@ type Server struct {
 	port int
 
 	db                         database.Service
+	timescaleDbService         database.TimescaleService
 	likeCollectiveLogConverter *logconverter.LogConverter
 
 	alchemyLikeCollectiveEthLogWebhookSigningKey string
@@ -46,6 +47,7 @@ func NewServer() *http.Server {
 		port: cfg.Port,
 
 		db:                         database.New(),
+		timescaleDbService:         database.NewTimescaleService(),
 		likeCollectiveLogConverter: likeCollectiveLogConverter,
 
 		alchemyLikeCollectiveEthLogWebhookSigningKey: cfg.AlchemyLikeCollectiveEthLogWebhookSigningKey,

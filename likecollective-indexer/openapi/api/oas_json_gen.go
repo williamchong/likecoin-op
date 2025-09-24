@@ -154,283 +154,6 @@ func (s *Account) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *AccountBookNFT) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *AccountBookNFT) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("evm_address")
-		s.EvmAddress.Encode(e)
-	}
-	{
-		e.FieldStart("pool_share")
-		e.Float64(s.PoolShare)
-	}
-	{
-		e.FieldStart("staked_amount")
-		s.StakedAmount.Encode(e)
-	}
-	{
-		e.FieldStart("pending_reward_amount")
-		s.PendingRewardAmount.Encode(e)
-	}
-	{
-		e.FieldStart("claimed_reward_amount")
-		s.ClaimedRewardAmount.Encode(e)
-	}
-}
-
-var jsonFieldsNameOfAccountBookNFT = [5]string{
-	0: "evm_address",
-	1: "pool_share",
-	2: "staked_amount",
-	3: "pending_reward_amount",
-	4: "claimed_reward_amount",
-}
-
-// Decode decodes AccountBookNFT from json.
-func (s *AccountBookNFT) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode AccountBookNFT to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "evm_address":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				if err := s.EvmAddress.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"evm_address\"")
-			}
-		case "pool_share":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Float64()
-				s.PoolShare = float64(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"pool_share\"")
-			}
-		case "staked_amount":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				if err := s.StakedAmount.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"staked_amount\"")
-			}
-		case "pending_reward_amount":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				if err := s.PendingRewardAmount.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"pending_reward_amount\"")
-			}
-		case "claimed_reward_amount":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				if err := s.ClaimedRewardAmount.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"claimed_reward_amount\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode AccountBookNFT")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00011111,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfAccountBookNFT) {
-					name = jsonFieldsNameOfAccountBookNFT[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *AccountBookNFT) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *AccountBookNFT) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *AccountEvmAddressBookNftsGetOK) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *AccountEvmAddressBookNftsGetOK) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("pagination")
-		s.Pagination.Encode(e)
-	}
-	{
-		e.FieldStart("data")
-		e.ArrStart()
-		for _, elem := range s.Data {
-			elem.Encode(e)
-		}
-		e.ArrEnd()
-	}
-}
-
-var jsonFieldsNameOfAccountEvmAddressBookNftsGetOK = [2]string{
-	0: "pagination",
-	1: "data",
-}
-
-// Decode decodes AccountEvmAddressBookNftsGetOK from json.
-func (s *AccountEvmAddressBookNftsGetOK) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode AccountEvmAddressBookNftsGetOK to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "pagination":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				if err := s.Pagination.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"pagination\"")
-			}
-		case "data":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				s.Data = make([]AccountBookNFT, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem AccountBookNFT
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Data = append(s.Data, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"data\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode AccountEvmAddressBookNftsGetOK")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000011,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfAccountEvmAddressBookNftsGetOK) {
-					name = jsonFieldsNameOfAccountEvmAddressBookNftsGetOK[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *AccountEvmAddressBookNftsGetOK) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *AccountEvmAddressBookNftsGetOK) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
 func (s *AccountEvmAddressStakingEventsEventTypeGetOK) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -935,6 +658,149 @@ func (s *BookNFT) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *BookNFTStakeDelta) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *BookNFTStakeDelta) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("book_nft")
+		s.BookNft.Encode(e)
+	}
+	{
+		e.FieldStart("staked_amount")
+		s.StakedAmount.Encode(e)
+	}
+	{
+		e.FieldStart("last_staked_at")
+		json.EncodeDateTime(e, s.LastStakedAt)
+	}
+	{
+		e.FieldStart("number_of_stakers")
+		e.Int(s.NumberOfStakers)
+	}
+}
+
+var jsonFieldsNameOfBookNFTStakeDelta = [4]string{
+	0: "book_nft",
+	1: "staked_amount",
+	2: "last_staked_at",
+	3: "number_of_stakers",
+}
+
+// Decode decodes BookNFTStakeDelta from json.
+func (s *BookNFTStakeDelta) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode BookNFTStakeDelta to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "book_nft":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.BookNft.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"book_nft\"")
+			}
+		case "staked_amount":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.StakedAmount.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"staked_amount\"")
+			}
+		case "last_staked_at":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := json.DecodeDateTime(d)
+				s.LastStakedAt = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"last_staked_at\"")
+			}
+		case "number_of_stakers":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int()
+				s.NumberOfStakers = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"number_of_stakers\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode BookNFTStakeDelta")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00001111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfBookNFTStakeDelta) {
+					name = jsonFieldsNameOfBookNFTStakeDelta[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *BookNFTStakeDelta) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *BookNFTStakeDelta) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *BookNftEvmAddressStakingEventsEventTypeGetOK) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -1293,6 +1159,223 @@ func (s *BookNftsGetOK) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *BookNftsGetOK) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *BookNftsTimeFrameDeltaGetOK) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *BookNftsTimeFrameDeltaGetOK) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("pagination")
+		s.Pagination.Encode(e)
+	}
+	{
+		e.FieldStart("data")
+		e.ArrStart()
+		for _, elem := range s.Data {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfBookNftsTimeFrameDeltaGetOK = [2]string{
+	0: "pagination",
+	1: "data",
+}
+
+// Decode decodes BookNftsTimeFrameDeltaGetOK from json.
+func (s *BookNftsTimeFrameDeltaGetOK) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode BookNftsTimeFrameDeltaGetOK to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "pagination":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Pagination.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pagination\"")
+			}
+		case "data":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.Data = make([]BookNFTStakeDelta, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem BookNFTStakeDelta
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Data = append(s.Data, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"data\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode BookNftsTimeFrameDeltaGetOK")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfBookNftsTimeFrameDeltaGetOK) {
+					name = jsonFieldsNameOfBookNftsTimeFrameDeltaGetOK[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *BookNftsTimeFrameDeltaGetOK) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *BookNftsTimeFrameDeltaGetOK) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *BookNftsTimeFrameDeltaGetOKPagination) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *BookNftsTimeFrameDeltaGetOKPagination) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("count")
+		e.Int(s.Count)
+	}
+}
+
+var jsonFieldsNameOfBookNftsTimeFrameDeltaGetOKPagination = [1]string{
+	0: "count",
+}
+
+// Decode decodes BookNftsTimeFrameDeltaGetOKPagination from json.
+func (s *BookNftsTimeFrameDeltaGetOKPagination) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode BookNftsTimeFrameDeltaGetOKPagination to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "count":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int()
+				s.Count = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"count\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode BookNftsTimeFrameDeltaGetOKPagination")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfBookNftsTimeFrameDeltaGetOKPagination) {
+					name = jsonFieldsNameOfBookNftsTimeFrameDeltaGetOKPagination[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *BookNftsTimeFrameDeltaGetOKPagination) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *BookNftsTimeFrameDeltaGetOKPagination) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

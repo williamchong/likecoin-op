@@ -12,11 +12,8 @@ func (h *openAPIHandler) BookNftsGet(
 	params api.BookNftsGetParams,
 ) (*api.BookNftsGetOK, error) {
 	filterParams := model.NFTClassFilterParams{
-		TimeFrame:          params.TimeFrame,
-		TimeFrameSortBy:    params.TimeFrameSortBy,
-		TimeFrameSortOrder: params.TimeFrameSortOrder,
-		FilterBookNftIn:    params.FilterBookNftIn,
-		FilterAccountIn:    params.FilterAccountIn,
+		FilterBookNftIn: params.FilterBookNftIn,
+		FilterAccountIn: params.FilterAccountIn,
 	}
 
 	pagination := model.NFTClassPagination{

@@ -17,496 +17,6 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-// AccountEvmAddressBookNftsGetParams is parameters of GET /account/{evm_address}/book-nfts operation.
-type AccountEvmAddressBookNftsGetParams struct {
-	EvmAddress EvmAddress
-	// Pagination.key.
-	PaginationKey OptInt
-	// Optional limit for paginated use cases.
-	PaginationLimit OptInt
-	// Reverse.
-	Reverse         OptBool
-	SortBy          OptAccountBookNFTsRequestSortBy
-	SortOrder       OptAccountBookNFTsRequestSortOrder
-	FilterBookNftIn []EvmAddress
-}
-
-func unpackAccountEvmAddressBookNftsGetParams(packed middleware.Parameters) (params AccountEvmAddressBookNftsGetParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "evm_address",
-			In:   "path",
-		}
-		params.EvmAddress = packed[key].(EvmAddress)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "pagination.key",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.PaginationKey = v.(OptInt)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "pagination.limit",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.PaginationLimit = v.(OptInt)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "reverse",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Reverse = v.(OptBool)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "sort_by",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.SortBy = v.(OptAccountBookNFTsRequestSortBy)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "sort_order",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.SortOrder = v.(OptAccountBookNFTsRequestSortOrder)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "filter_book_nft_in",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.FilterBookNftIn = v.([]EvmAddress)
-		}
-	}
-	return params
-}
-
-func decodeAccountEvmAddressBookNftsGetParams(args [1]string, argsEscaped bool, r *http.Request) (params AccountEvmAddressBookNftsGetParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode path: evm_address.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "evm_address",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotEvmAddressVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotEvmAddressVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.EvmAddress = EvmAddress(paramsDotEvmAddressVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := params.EvmAddress.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "evm_address",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode query: pagination.key.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "pagination.key",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotPaginationKeyVal int
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotPaginationKeyVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.PaginationKey.SetTo(paramsDotPaginationKeyVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "pagination.key",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: pagination.limit.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "pagination.limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotPaginationLimitVal int
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotPaginationLimitVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.PaginationLimit.SetTo(paramsDotPaginationLimitVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-			if err := func() error {
-				if value, ok := params.PaginationLimit.Get(); ok {
-					if err := func() error {
-						if err := (validate.Int{
-							MinSet:        true,
-							Min:           1,
-							MaxSet:        true,
-							Max:           100,
-							MinExclusive:  false,
-							MaxExclusive:  false,
-							MultipleOfSet: false,
-							MultipleOf:    0,
-						}).Validate(int64(value)); err != nil {
-							return errors.Wrap(err, "int")
-						}
-						return nil
-					}(); err != nil {
-						return err
-					}
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "pagination.limit",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Set default value for query: reverse.
-	{
-		val := bool(false)
-		params.Reverse.SetTo(val)
-	}
-	// Decode query: reverse.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "reverse",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotReverseVal bool
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToBool(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotReverseVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Reverse.SetTo(paramsDotReverseVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "reverse",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Set default value for query: sort_by.
-	{
-		val := AccountBookNFTsRequestSortBy("staked_amount")
-		params.SortBy.SetTo(val)
-	}
-	// Decode query: sort_by.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "sort_by",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotSortByVal AccountBookNFTsRequestSortBy
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotSortByVal = AccountBookNFTsRequestSortBy(c)
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.SortBy.SetTo(paramsDotSortByVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-			if err := func() error {
-				if value, ok := params.SortBy.Get(); ok {
-					if err := func() error {
-						if err := value.Validate(); err != nil {
-							return err
-						}
-						return nil
-					}(); err != nil {
-						return err
-					}
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "sort_by",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Set default value for query: sort_order.
-	{
-		val := AccountBookNFTsRequestSortOrder("desc")
-		params.SortOrder.SetTo(val)
-	}
-	// Decode query: sort_order.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "sort_order",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotSortOrderVal AccountBookNFTsRequestSortOrder
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotSortOrderVal = AccountBookNFTsRequestSortOrder(c)
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.SortOrder.SetTo(paramsDotSortOrderVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-			if err := func() error {
-				if value, ok := params.SortOrder.Get(); ok {
-					if err := func() error {
-						if err := value.Validate(); err != nil {
-							return err
-						}
-						return nil
-					}(); err != nil {
-						return err
-					}
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "sort_order",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: filter_book_nft_in.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "filter_book_nft_in",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				return d.DecodeArray(func(d uri.Decoder) error {
-					var paramsDotFilterBookNftInVal EvmAddress
-					if err := func() error {
-						var paramsDotFilterBookNftInValVal string
-						if err := func() error {
-							val, err := d.DecodeValue()
-							if err != nil {
-								return err
-							}
-
-							c, err := conv.ToString(val)
-							if err != nil {
-								return err
-							}
-
-							paramsDotFilterBookNftInValVal = c
-							return nil
-						}(); err != nil {
-							return err
-						}
-						paramsDotFilterBookNftInVal = EvmAddress(paramsDotFilterBookNftInValVal)
-						return nil
-					}(); err != nil {
-						return err
-					}
-					params.FilterBookNftIn = append(params.FilterBookNftIn, paramsDotFilterBookNftInVal)
-					return nil
-				})
-			}); err != nil {
-				return err
-			}
-			if err := func() error {
-				var failures []validate.FieldError
-				for i, elem := range params.FilterBookNftIn {
-					if err := func() error {
-						if err := elem.Validate(); err != nil {
-							return err
-						}
-						return nil
-					}(); err != nil {
-						failures = append(failures, validate.FieldError{
-							Name:  fmt.Sprintf("[%d]", i),
-							Error: err,
-						})
-					}
-				}
-				if len(failures) > 0 {
-					return &validate.Error{Fields: failures}
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "filter_book_nft_in",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
 // AccountEvmAddressGetParams is parameters of GET /account/{evm_address} operation.
 type AccountEvmAddressGetParams struct {
 	EvmAddress      EvmAddress
@@ -1543,7 +1053,6 @@ type AccountsGetParams struct {
 	PaginationLimit OptInt
 	// Reverse.
 	Reverse         OptBool
-	FilterBookNftIn []EvmAddress
 	FilterAccountIn []EvmAddress
 }
 
@@ -1573,15 +1082,6 @@ func unpackAccountsGetParams(packed middleware.Parameters) (params AccountsGetPa
 		}
 		if v, ok := packed[key]; ok {
 			params.Reverse = v.(OptBool)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "filter_book_nft_in",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.FilterBookNftIn = v.([]EvmAddress)
 		}
 	}
 	{
@@ -1751,78 +1251,6 @@ func decodeAccountsGetParams(args [0]string, argsEscaped bool, r *http.Request) 
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "reverse",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: filter_book_nft_in.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "filter_book_nft_in",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				return d.DecodeArray(func(d uri.Decoder) error {
-					var paramsDotFilterBookNftInVal EvmAddress
-					if err := func() error {
-						var paramsDotFilterBookNftInValVal string
-						if err := func() error {
-							val, err := d.DecodeValue()
-							if err != nil {
-								return err
-							}
-
-							c, err := conv.ToString(val)
-							if err != nil {
-								return err
-							}
-
-							paramsDotFilterBookNftInValVal = c
-							return nil
-						}(); err != nil {
-							return err
-						}
-						paramsDotFilterBookNftInVal = EvmAddress(paramsDotFilterBookNftInValVal)
-						return nil
-					}(); err != nil {
-						return err
-					}
-					params.FilterBookNftIn = append(params.FilterBookNftIn, paramsDotFilterBookNftInVal)
-					return nil
-				})
-			}); err != nil {
-				return err
-			}
-			if err := func() error {
-				var failures []validate.FieldError
-				for i, elem := range params.FilterBookNftIn {
-					if err := func() error {
-						if err := elem.Validate(); err != nil {
-							return err
-						}
-						return nil
-					}(); err != nil {
-						failures = append(failures, validate.FieldError{
-							Name:  fmt.Sprintf("[%d]", i),
-							Error: err,
-						})
-					}
-				}
-				if len(failures) > 0 {
-					return &validate.Error{Fields: failures}
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "filter_book_nft_in",
 			In:   "query",
 			Err:  err,
 		}
@@ -2937,12 +2365,9 @@ type BookNftsGetParams struct {
 	// When filter.book_nft_in is provided, the limit will be ignored.
 	PaginationLimit OptInt
 	// Reverse.
-	Reverse            OptBool
-	TimeFrame          OptBookNFTsRequestSortOrderTimeFrame
-	TimeFrameSortBy    OptBookNFTsRequestTimeFrameSortBy
-	TimeFrameSortOrder OptBookNFTsRequestTimeFrameSortOrder
-	FilterBookNftIn    []EvmAddress
-	FilterAccountIn    []EvmAddress
+	Reverse         OptBool
+	FilterBookNftIn []EvmAddress
+	FilterAccountIn []EvmAddress
 }
 
 func unpackBookNftsGetParams(packed middleware.Parameters) (params BookNftsGetParams) {
@@ -2971,33 +2396,6 @@ func unpackBookNftsGetParams(packed middleware.Parameters) (params BookNftsGetPa
 		}
 		if v, ok := packed[key]; ok {
 			params.Reverse = v.(OptBool)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "time_frame",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.TimeFrame = v.(OptBookNFTsRequestSortOrderTimeFrame)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "time_frame_sort_by",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.TimeFrameSortBy = v.(OptBookNFTsRequestTimeFrameSortBy)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "time_frame_sort_order",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.TimeFrameSortOrder = v.(OptBookNFTsRequestTimeFrameSortOrder)
 		}
 	}
 	{
@@ -3180,184 +2578,6 @@ func decodeBookNftsGetParams(args [0]string, argsEscaped bool, r *http.Request) 
 			Err:  err,
 		}
 	}
-	// Set default value for query: time_frame.
-	{
-		val := BookNFTsRequestSortOrderTimeFrame("all")
-		params.TimeFrame.SetTo(val)
-	}
-	// Decode query: time_frame.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "time_frame",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotTimeFrameVal BookNFTsRequestSortOrderTimeFrame
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotTimeFrameVal = BookNFTsRequestSortOrderTimeFrame(c)
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.TimeFrame.SetTo(paramsDotTimeFrameVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-			if err := func() error {
-				if value, ok := params.TimeFrame.Get(); ok {
-					if err := func() error {
-						if err := value.Validate(); err != nil {
-							return err
-						}
-						return nil
-					}(); err != nil {
-						return err
-					}
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "time_frame",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: time_frame_sort_by.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "time_frame_sort_by",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotTimeFrameSortByVal BookNFTsRequestTimeFrameSortBy
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotTimeFrameSortByVal = BookNFTsRequestTimeFrameSortBy(c)
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.TimeFrameSortBy.SetTo(paramsDotTimeFrameSortByVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-			if err := func() error {
-				if value, ok := params.TimeFrameSortBy.Get(); ok {
-					if err := func() error {
-						if err := value.Validate(); err != nil {
-							return err
-						}
-						return nil
-					}(); err != nil {
-						return err
-					}
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "time_frame_sort_by",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Set default value for query: time_frame_sort_order.
-	{
-		val := BookNFTsRequestTimeFrameSortOrder("desc")
-		params.TimeFrameSortOrder.SetTo(val)
-	}
-	// Decode query: time_frame_sort_order.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "time_frame_sort_order",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotTimeFrameSortOrderVal BookNFTsRequestTimeFrameSortOrder
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotTimeFrameSortOrderVal = BookNFTsRequestTimeFrameSortOrder(c)
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.TimeFrameSortOrder.SetTo(paramsDotTimeFrameSortOrderVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-			if err := func() error {
-				if value, ok := params.TimeFrameSortOrder.Get(); ok {
-					if err := func() error {
-						if err := value.Validate(); err != nil {
-							return err
-						}
-						return nil
-					}(); err != nil {
-						return err
-					}
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "time_frame_sort_order",
-			In:   "query",
-			Err:  err,
-		}
-	}
 	// Decode query: filter_book_nft_in.
 	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
@@ -3498,6 +2718,349 @@ func decodeBookNftsGetParams(args [0]string, argsEscaped bool, r *http.Request) 
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "filter_account_in",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// BookNftsTimeFrameDeltaGetParams is parameters of GET /book-nfts/{time_frame}/delta operation.
+type BookNftsTimeFrameDeltaGetParams struct {
+	TimeFrame       BookNftsTimeFrameDeltaGetTimeFrame
+	SortBy          BookNftsTimeFrameDeltaGetSortBy
+	SortOrder       BookNftsTimeFrameDeltaGetSortOrder
+	PaginationLimit OptInt
+	PaginationPage  OptInt
+}
+
+func unpackBookNftsTimeFrameDeltaGetParams(packed middleware.Parameters) (params BookNftsTimeFrameDeltaGetParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "time_frame",
+			In:   "path",
+		}
+		params.TimeFrame = packed[key].(BookNftsTimeFrameDeltaGetTimeFrame)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "sort_by",
+			In:   "query",
+		}
+		params.SortBy = packed[key].(BookNftsTimeFrameDeltaGetSortBy)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "sort_order",
+			In:   "query",
+		}
+		params.SortOrder = packed[key].(BookNftsTimeFrameDeltaGetSortOrder)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "pagination.limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.PaginationLimit = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "pagination.page",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.PaginationPage = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeBookNftsTimeFrameDeltaGetParams(args [1]string, argsEscaped bool, r *http.Request) (params BookNftsTimeFrameDeltaGetParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: time_frame.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "time_frame",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.TimeFrame = BookNftsTimeFrameDeltaGetTimeFrame(c)
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.TimeFrame.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "time_frame",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: sort_by.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "sort_by",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.SortBy = BookNftsTimeFrameDeltaGetSortBy(c)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.SortBy.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "sort_by",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: sort_order.
+	{
+		val := BookNftsTimeFrameDeltaGetSortOrder("desc")
+		params.SortOrder = val
+	}
+	// Decode query: sort_order.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "sort_order",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.SortOrder = BookNftsTimeFrameDeltaGetSortOrder(c)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.SortOrder.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "sort_order",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: pagination.limit.
+	{
+		val := int(20)
+		params.PaginationLimit.SetTo(val)
+	}
+	// Decode query: pagination.limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "pagination.limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotPaginationLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPaginationLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.PaginationLimit.SetTo(paramsDotPaginationLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.PaginationLimit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           100,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "pagination.limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: pagination.page.
+	{
+		val := int(1)
+		params.PaginationPage.SetTo(val)
+	}
+	// Decode query: pagination.page.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "pagination.page",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotPaginationPageVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPaginationPageVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.PaginationPage.SetTo(paramsDotPaginationPageVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.PaginationPage.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        false,
+							Max:           0,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "pagination.page",
 			In:   "query",
 			Err:  err,
 		}

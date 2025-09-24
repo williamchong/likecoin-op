@@ -68,7 +68,6 @@ paths:
             minimum: 1
             maximum: 100
         - $ref: "#/components/parameters/PaginationRequestReverse"
-        - $ref: "#/components/parameters/FilterBookNFTIn"
         - $ref: "#/components/parameters/FilterAccountIn"
 
       responses:
@@ -172,56 +171,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
-  /account/{evm_address}/book-nfts:
-    get:
-      tags:
-        - BookNFT
-      summary: Get book NFTs for an account
-      parameters:
-        - name: evm_address
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/EvmAddress"
-        - $ref: "#/components/parameters/PaginationRequestKey"
-        - name: pagination.limit
-          in: query
-          description: Optional limit for paginated use cases.
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-        - $ref: "#/components/parameters/PaginationRequestReverse"
-        - $ref: "#/components/parameters/AccountBookNFTsRequestSortBy"
-        - $ref: "#/components/parameters/AccountBookNFTsRequestSortOrder"
-        - $ref: "#/components/parameters/FilterBookNFTIn"
-
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  pagination:
-                    $ref: "#/components/schemas/PaginationResponse"
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/AccountBookNFT"
-                required:
-                  - pagination
-                  - data
-
-        default:
-          description: General Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
   /account/{evm_address}/staking-events/{event_type}:
     get:
       tags:
@@ -304,9 +253,6 @@ paths:
             minimum: 1
             maximum: 100
         - $ref: "#/components/parameters/PaginationRequestReverse"
-        - $ref: "#/components/parameters/BookNFTsRequestSortOrderTimeFrame"
-        - $ref: "#/components/parameters/BookNFTsRequestTimeFrameSortBy"
-        - $ref: "#/components/parameters/BookNFTsRequestTimeFrameSortOrder"
         - $ref: "#/components/parameters/FilterBookNFTIn"
         - $ref: "#/components/parameters/FilterAccountIn"
 
@@ -324,6 +270,85 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/BookNFT"
+                required:
+                  - pagination
+                  - data
+
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /book-nfts/{time_frame}/delta:
+    get:
+      tags:
+        - BookNFT
+      summary: Get book NFTs
+      parameters:
+        - name: time_frame
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - 7d
+              - 30d
+              - 1y
+        - name: sort_by
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - staked_amount
+              - last_staked_at
+              - number_of_stakers
+        - name: sort_order
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+        - name: pagination.limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: pagination.page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    type: object
+                    properties:
+                      count:
+                        type: integer
+                    required:
+                      - count
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/BookNFTStakeDelta"
                 required:
                   - pagination
                   - data
@@ -645,41 +670,6 @@ components:
         type: boolean
         default: false
 
-    BookNFTsRequestTimeFrameSortBy:
-      name: time_frame_sort_by
-      in: query
-      required: false
-      schema:
-        type: string
-        enum:
-          - staked_amount
-          - last_staked_at
-          - number_of_stakers
-
-    BookNFTsRequestTimeFrameSortOrder:
-      name: time_frame_sort_order
-      in: query
-      required: false
-      schema:
-        type: string
-        enum:
-          - asc
-          - desc
-        default: desc
-
-    BookNFTsRequestSortOrderTimeFrame:
-      name: time_frame
-      in: query
-      required: false
-      schema:
-        type: string
-        enum:
-          - 7d
-          - 30d
-          - 1y
-          - all
-        default: all
-
     AccountBookNFTsRequestSortBy:
       name: sort_by
       in: query
@@ -888,12 +878,12 @@ components:
       discriminator:
         propertyName: event_type
         mapping:
-          staked: '#/components/schemas/StakingEventStaked'
-          unstaked: '#/components/schemas/StakingEventUnstaked'
-          reward-added: '#/components/schemas/StakingEventRewardAdded'
-          reward-claimed: '#/components/schemas/StakingEventRewardClaimed'
-          reward-deposited: '#/components/schemas/StakingEventRewardDeposited'
-          all-rewards-claimed: '#/components/schemas/StakingEventAllRewardsClaimed'
+          staked: "#/components/schemas/StakingEventStaked"
+          unstaked: "#/components/schemas/StakingEventUnstaked"
+          reward-added: "#/components/schemas/StakingEventRewardAdded"
+          reward-claimed: "#/components/schemas/StakingEventRewardClaimed"
+          reward-deposited: "#/components/schemas/StakingEventRewardDeposited"
+          all-rewards-claimed: "#/components/schemas/StakingEventAllRewardsClaimed"
 
     StakingEventStaked:
       type: object
@@ -1099,6 +1089,24 @@ components:
         - staked_amount
         - pending_reward_amount
         - claimed_reward_amount
+
+    BookNFTStakeDelta:
+      type: object
+      properties:
+        book_nft:
+          $ref: "#/components/schemas/EvmAddress"
+        staked_amount:
+          $ref: "#/components/schemas/Uint256"
+        last_staked_at:
+          type: string
+          format: date-time
+        number_of_stakers:
+          type: integer
+      required:
+        - book_nft
+        - staked_amount
+        - last_staked_at
+        - number_of_stakers
 
     EventQueryMetadata:
       type: object

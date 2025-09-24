@@ -16,11 +16,16 @@ type openAPIHandler struct {
 	accountRepository      database.AccountRepository
 	nftClassRepository     database.NFTClassRepository
 	stakingEventRepository database.StakingEventRepository
+
+	bookNFTDeltaTimeBucketRepository database.BookNFTDeltaTimeBucketRepository
 }
 
 var _ api.Handler = &openAPIHandler{}
 
-func NewOpenAPIHandler(db database.Service) http.Handler {
+func NewOpenAPIHandler(
+	db database.Service,
+	timescaleDbService database.TimescaleService,
+) http.Handler {
 	handler := &openAPIHandler{
 		db: db.Client(),
 
@@ -28,6 +33,8 @@ func NewOpenAPIHandler(db database.Service) http.Handler {
 		accountRepository:      database.MakeAccountRepository(db),
 		nftClassRepository:     database.MakeNFTClassRepository(db),
 		stakingEventRepository: database.MakeStakingEventRepository(db),
+
+		bookNFTDeltaTimeBucketRepository: database.MakeBookNFTDeltaTimeBucketRepository(timescaleDbService),
 	}
 
 	srv, err := api.NewServer(

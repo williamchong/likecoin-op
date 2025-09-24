@@ -29,5 +29,6 @@ COPY --from=builder /src/likecollective-indexer-worker-cli /usr/local/bin/
 # Migration
 COPY --from=builder /usr/local/bin/atlas /usr/local/bin/
 COPY --from=builder /src/ent/migrate/migrations /app/ent/migrate/migrations
+COPY --from=builder /src/ent_timescale/migrate/migrations /app/ent_timescale/migrate/migrations
 
 CMD ["likecollective-indexer-api"]

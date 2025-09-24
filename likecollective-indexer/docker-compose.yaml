@@ -16,6 +16,23 @@ services:
     volumes:
       - psql_volume_bp:/var/lib/postgresql/data
 
+  psql_bp_timescale:
+    image: timescale/timescaledb-ha:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_TIMESCALE_DATABASE}
+      POSTGRES_USER: ${DB_TIMESCALE_USERNAME}
+      POSTGRES_PASSWORD: ${DB_TIMESCALE_PASSWORD}
+    ports:
+      - "${DB_TIMESCALE_PORT}:5432"
+    healthcheck:
+      test: pg_isready -d ${DB_TIMESCALE_DATABASE} -U ${DB_TIMESCALE_USERNAME} -p 5432 -h localhost
+      interval: 1s
+      timeout: 1s
+      retries: 30
+    volumes:
+      - psql_volume_bp_timescale:/var/lib/postgresql/data
+
   api:
     profiles: [api]
     image: golang:1.23.5
@@ -79,6 +96,7 @@ services:
 
 volumes:
   psql_volume_bp:
+  psql_volume_bp_timescale:
   redis_data:
     driver: local
   go-build-cache:

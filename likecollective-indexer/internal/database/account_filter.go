@@ -3,7 +3,6 @@ package database
 import (
 	"likecollective-indexer/ent"
 	"likecollective-indexer/ent/account"
-	"likecollective-indexer/ent/nftclass"
 
 	"entgo.io/ent/dialect/sql"
 )
@@ -39,25 +38,19 @@ func (f *AccountPagination) HandlePagination(q *ent.AccountQuery) *ent.AccountQu
 }
 
 type QueryAccountsFilter struct {
-	FilterNFTClassIn *[]string
-	FilterAccountIn  *[]string
+	FilterAccountIn *[]string
 }
 
 func NewQueryAccountsFilter(
-	filterNFTClassIn *[]string,
 	filterAccountIn *[]string,
 ) QueryAccountsFilter {
 	return QueryAccountsFilter{
-		FilterNFTClassIn: filterNFTClassIn,
-		FilterAccountIn:  filterAccountIn,
+		FilterAccountIn: filterAccountIn,
 	}
 }
 
 func (f *QueryAccountsFilter) HandleFilter(q *ent.AccountQuery) *ent.AccountQuery {
 	// TODO: Add nftClass edges
-	if f.FilterNFTClassIn != nil {
-		q = q.Where(account.HasNftClassesWith(nftclass.AddressIn(*f.FilterNFTClassIn...)))
-	}
 	if f.FilterAccountIn != nil {
 		q = q.Where(account.EvmAddressIn(*f.FilterAccountIn...))
 	}

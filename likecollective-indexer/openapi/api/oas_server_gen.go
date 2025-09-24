@@ -8,12 +8,6 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
-	// AccountEvmAddressBookNftsGet implements GET /account/{evm_address}/book-nfts operation.
-	//
-	// Get book NFTs for an account.
-	//
-	// GET /account/{evm_address}/book-nfts
-	AccountEvmAddressBookNftsGet(ctx context.Context, params AccountEvmAddressBookNftsGetParams) (*AccountEvmAddressBookNftsGetOK, error)
 	// AccountEvmAddressGet implements GET /account/{evm_address} operation.
 	//
 	// Get an account.
@@ -62,6 +56,12 @@ type Handler interface {
 	//
 	// GET /book-nfts
 	BookNftsGet(ctx context.Context, params BookNftsGetParams) (*BookNftsGetOK, error)
+	// BookNftsTimeFrameDeltaGet implements GET /book-nfts/{time_frame}/delta operation.
+	//
+	// Get book NFTs.
+	//
+	// GET /book-nfts/{time_frame}/delta
+	BookNftsTimeFrameDeltaGet(ctx context.Context, params BookNftsTimeFrameDeltaGetParams) (*BookNftsTimeFrameDeltaGetOK, error)
 	// EventsAddressGet implements GET /events/{address} operation.
 	//
 	// Query events.

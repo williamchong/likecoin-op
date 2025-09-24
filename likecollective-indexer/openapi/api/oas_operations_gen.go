@@ -6,7 +6,6 @@ package api
 type OperationName = string
 
 const (
-	AccountEvmAddressBookNftsGetOperation               OperationName = "AccountEvmAddressBookNftsGet"
 	AccountEvmAddressGetOperation                       OperationName = "AccountEvmAddressGet"
 	AccountEvmAddressStakingEventsEventTypeGetOperation OperationName = "AccountEvmAddressStakingEventsEventTypeGet"
 	AccountEvmAddressStakingsGetOperation               OperationName = "AccountEvmAddressStakingsGet"
@@ -15,6 +14,7 @@ const (
 	BookNftEvmAddressStakingEventsEventTypeGetOperation OperationName = "BookNftEvmAddressStakingEventsEventTypeGet"
 	BookNftEvmAddressStakingsGetOperation               OperationName = "BookNftEvmAddressStakingsGet"
 	BookNftsGetOperation                                OperationName = "BookNftsGet"
+	BookNftsTimeFrameDeltaGetOperation                  OperationName = "BookNftsTimeFrameDeltaGet"
 	EventsAddressGetOperation                           OperationName = "EventsAddressGet"
 	EventsAddressSignatureGetOperation                  OperationName = "EventsAddressSignatureGet"
 	EventsGetOperation                                  OperationName = "EventsGet"

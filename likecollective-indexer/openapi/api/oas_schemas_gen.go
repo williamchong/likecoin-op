@@ -62,179 +62,6 @@ func (s *Account) SetClaimedRewardAmount(val Uint256) {
 	s.ClaimedRewardAmount = val
 }
 
-// Ref: #/components/schemas/AccountBookNFT
-type AccountBookNFT struct {
-	EvmAddress          EvmAddress `json:"evm_address"`
-	PoolShare           float64    `json:"pool_share"`
-	StakedAmount        Uint256    `json:"staked_amount"`
-	PendingRewardAmount Uint256    `json:"pending_reward_amount"`
-	ClaimedRewardAmount Uint256    `json:"claimed_reward_amount"`
-}
-
-// GetEvmAddress returns the value of EvmAddress.
-func (s *AccountBookNFT) GetEvmAddress() EvmAddress {
-	return s.EvmAddress
-}
-
-// GetPoolShare returns the value of PoolShare.
-func (s *AccountBookNFT) GetPoolShare() float64 {
-	return s.PoolShare
-}
-
-// GetStakedAmount returns the value of StakedAmount.
-func (s *AccountBookNFT) GetStakedAmount() Uint256 {
-	return s.StakedAmount
-}
-
-// GetPendingRewardAmount returns the value of PendingRewardAmount.
-func (s *AccountBookNFT) GetPendingRewardAmount() Uint256 {
-	return s.PendingRewardAmount
-}
-
-// GetClaimedRewardAmount returns the value of ClaimedRewardAmount.
-func (s *AccountBookNFT) GetClaimedRewardAmount() Uint256 {
-	return s.ClaimedRewardAmount
-}
-
-// SetEvmAddress sets the value of EvmAddress.
-func (s *AccountBookNFT) SetEvmAddress(val EvmAddress) {
-	s.EvmAddress = val
-}
-
-// SetPoolShare sets the value of PoolShare.
-func (s *AccountBookNFT) SetPoolShare(val float64) {
-	s.PoolShare = val
-}
-
-// SetStakedAmount sets the value of StakedAmount.
-func (s *AccountBookNFT) SetStakedAmount(val Uint256) {
-	s.StakedAmount = val
-}
-
-// SetPendingRewardAmount sets the value of PendingRewardAmount.
-func (s *AccountBookNFT) SetPendingRewardAmount(val Uint256) {
-	s.PendingRewardAmount = val
-}
-
-// SetClaimedRewardAmount sets the value of ClaimedRewardAmount.
-func (s *AccountBookNFT) SetClaimedRewardAmount(val Uint256) {
-	s.ClaimedRewardAmount = val
-}
-
-type AccountBookNFTsRequestSortBy string
-
-const (
-	AccountBookNFTsRequestSortByPoolShare           AccountBookNFTsRequestSortBy = "pool_share"
-	AccountBookNFTsRequestSortByStakedAmount        AccountBookNFTsRequestSortBy = "staked_amount"
-	AccountBookNFTsRequestSortByPendingRewardAmount AccountBookNFTsRequestSortBy = "pending_reward_amount"
-)
-
-// AllValues returns all AccountBookNFTsRequestSortBy values.
-func (AccountBookNFTsRequestSortBy) AllValues() []AccountBookNFTsRequestSortBy {
-	return []AccountBookNFTsRequestSortBy{
-		AccountBookNFTsRequestSortByPoolShare,
-		AccountBookNFTsRequestSortByStakedAmount,
-		AccountBookNFTsRequestSortByPendingRewardAmount,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s AccountBookNFTsRequestSortBy) MarshalText() ([]byte, error) {
-	switch s {
-	case AccountBookNFTsRequestSortByPoolShare:
-		return []byte(s), nil
-	case AccountBookNFTsRequestSortByStakedAmount:
-		return []byte(s), nil
-	case AccountBookNFTsRequestSortByPendingRewardAmount:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *AccountBookNFTsRequestSortBy) UnmarshalText(data []byte) error {
-	switch AccountBookNFTsRequestSortBy(data) {
-	case AccountBookNFTsRequestSortByPoolShare:
-		*s = AccountBookNFTsRequestSortByPoolShare
-		return nil
-	case AccountBookNFTsRequestSortByStakedAmount:
-		*s = AccountBookNFTsRequestSortByStakedAmount
-		return nil
-	case AccountBookNFTsRequestSortByPendingRewardAmount:
-		*s = AccountBookNFTsRequestSortByPendingRewardAmount
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
-
-type AccountBookNFTsRequestSortOrder string
-
-const (
-	AccountBookNFTsRequestSortOrderAsc  AccountBookNFTsRequestSortOrder = "asc"
-	AccountBookNFTsRequestSortOrderDesc AccountBookNFTsRequestSortOrder = "desc"
-)
-
-// AllValues returns all AccountBookNFTsRequestSortOrder values.
-func (AccountBookNFTsRequestSortOrder) AllValues() []AccountBookNFTsRequestSortOrder {
-	return []AccountBookNFTsRequestSortOrder{
-		AccountBookNFTsRequestSortOrderAsc,
-		AccountBookNFTsRequestSortOrderDesc,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s AccountBookNFTsRequestSortOrder) MarshalText() ([]byte, error) {
-	switch s {
-	case AccountBookNFTsRequestSortOrderAsc:
-		return []byte(s), nil
-	case AccountBookNFTsRequestSortOrderDesc:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *AccountBookNFTsRequestSortOrder) UnmarshalText(data []byte) error {
-	switch AccountBookNFTsRequestSortOrder(data) {
-	case AccountBookNFTsRequestSortOrderAsc:
-		*s = AccountBookNFTsRequestSortOrderAsc
-		return nil
-	case AccountBookNFTsRequestSortOrderDesc:
-		*s = AccountBookNFTsRequestSortOrderDesc
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
-
-type AccountEvmAddressBookNftsGetOK struct {
-	Pagination PaginationResponse `json:"pagination"`
-	Data       []AccountBookNFT   `json:"data"`
-}
-
-// GetPagination returns the value of Pagination.
-func (s *AccountEvmAddressBookNftsGetOK) GetPagination() PaginationResponse {
-	return s.Pagination
-}
-
-// GetData returns the value of Data.
-func (s *AccountEvmAddressBookNftsGetOK) GetData() []AccountBookNFT {
-	return s.Data
-}
-
-// SetPagination sets the value of Pagination.
-func (s *AccountEvmAddressBookNftsGetOK) SetPagination(val PaginationResponse) {
-	s.Pagination = val
-}
-
-// SetData sets the value of Data.
-func (s *AccountEvmAddressBookNftsGetOK) SetData(val []AccountBookNFT) {
-	s.Data = val
-}
-
 type AccountEvmAddressStakingEventsEventTypeGetEventType string
 
 const (
@@ -427,148 +254,52 @@ func (s *BookNFT) SetNumberOfStakers(val int) {
 	s.NumberOfStakers = val
 }
 
-type BookNFTsRequestSortOrderTimeFrame string
-
-const (
-	BookNFTsRequestSortOrderTimeFrame7d  BookNFTsRequestSortOrderTimeFrame = "7d"
-	BookNFTsRequestSortOrderTimeFrame30d BookNFTsRequestSortOrderTimeFrame = "30d"
-	BookNFTsRequestSortOrderTimeFrame1y  BookNFTsRequestSortOrderTimeFrame = "1y"
-	BookNFTsRequestSortOrderTimeFrameAll BookNFTsRequestSortOrderTimeFrame = "all"
-)
-
-// AllValues returns all BookNFTsRequestSortOrderTimeFrame values.
-func (BookNFTsRequestSortOrderTimeFrame) AllValues() []BookNFTsRequestSortOrderTimeFrame {
-	return []BookNFTsRequestSortOrderTimeFrame{
-		BookNFTsRequestSortOrderTimeFrame7d,
-		BookNFTsRequestSortOrderTimeFrame30d,
-		BookNFTsRequestSortOrderTimeFrame1y,
-		BookNFTsRequestSortOrderTimeFrameAll,
-	}
+// Ref: #/components/schemas/BookNFTStakeDelta
+type BookNFTStakeDelta struct {
+	BookNft         EvmAddress `json:"book_nft"`
+	StakedAmount    Uint256    `json:"staked_amount"`
+	LastStakedAt    time.Time  `json:"last_staked_at"`
+	NumberOfStakers int        `json:"number_of_stakers"`
 }
 
-// MarshalText implements encoding.TextMarshaler.
-func (s BookNFTsRequestSortOrderTimeFrame) MarshalText() ([]byte, error) {
-	switch s {
-	case BookNFTsRequestSortOrderTimeFrame7d:
-		return []byte(s), nil
-	case BookNFTsRequestSortOrderTimeFrame30d:
-		return []byte(s), nil
-	case BookNFTsRequestSortOrderTimeFrame1y:
-		return []byte(s), nil
-	case BookNFTsRequestSortOrderTimeFrameAll:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
+// GetBookNft returns the value of BookNft.
+func (s *BookNFTStakeDelta) GetBookNft() EvmAddress {
+	return s.BookNft
 }
 
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *BookNFTsRequestSortOrderTimeFrame) UnmarshalText(data []byte) error {
-	switch BookNFTsRequestSortOrderTimeFrame(data) {
-	case BookNFTsRequestSortOrderTimeFrame7d:
-		*s = BookNFTsRequestSortOrderTimeFrame7d
-		return nil
-	case BookNFTsRequestSortOrderTimeFrame30d:
-		*s = BookNFTsRequestSortOrderTimeFrame30d
-		return nil
-	case BookNFTsRequestSortOrderTimeFrame1y:
-		*s = BookNFTsRequestSortOrderTimeFrame1y
-		return nil
-	case BookNFTsRequestSortOrderTimeFrameAll:
-		*s = BookNFTsRequestSortOrderTimeFrameAll
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
+// GetStakedAmount returns the value of StakedAmount.
+func (s *BookNFTStakeDelta) GetStakedAmount() Uint256 {
+	return s.StakedAmount
 }
 
-type BookNFTsRequestTimeFrameSortBy string
-
-const (
-	BookNFTsRequestTimeFrameSortByStakedAmount    BookNFTsRequestTimeFrameSortBy = "staked_amount"
-	BookNFTsRequestTimeFrameSortByLastStakedAt    BookNFTsRequestTimeFrameSortBy = "last_staked_at"
-	BookNFTsRequestTimeFrameSortByNumberOfStakers BookNFTsRequestTimeFrameSortBy = "number_of_stakers"
-)
-
-// AllValues returns all BookNFTsRequestTimeFrameSortBy values.
-func (BookNFTsRequestTimeFrameSortBy) AllValues() []BookNFTsRequestTimeFrameSortBy {
-	return []BookNFTsRequestTimeFrameSortBy{
-		BookNFTsRequestTimeFrameSortByStakedAmount,
-		BookNFTsRequestTimeFrameSortByLastStakedAt,
-		BookNFTsRequestTimeFrameSortByNumberOfStakers,
-	}
+// GetLastStakedAt returns the value of LastStakedAt.
+func (s *BookNFTStakeDelta) GetLastStakedAt() time.Time {
+	return s.LastStakedAt
 }
 
-// MarshalText implements encoding.TextMarshaler.
-func (s BookNFTsRequestTimeFrameSortBy) MarshalText() ([]byte, error) {
-	switch s {
-	case BookNFTsRequestTimeFrameSortByStakedAmount:
-		return []byte(s), nil
-	case BookNFTsRequestTimeFrameSortByLastStakedAt:
-		return []byte(s), nil
-	case BookNFTsRequestTimeFrameSortByNumberOfStakers:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
+// GetNumberOfStakers returns the value of NumberOfStakers.
+func (s *BookNFTStakeDelta) GetNumberOfStakers() int {
+	return s.NumberOfStakers
 }
 
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *BookNFTsRequestTimeFrameSortBy) UnmarshalText(data []byte) error {
-	switch BookNFTsRequestTimeFrameSortBy(data) {
-	case BookNFTsRequestTimeFrameSortByStakedAmount:
-		*s = BookNFTsRequestTimeFrameSortByStakedAmount
-		return nil
-	case BookNFTsRequestTimeFrameSortByLastStakedAt:
-		*s = BookNFTsRequestTimeFrameSortByLastStakedAt
-		return nil
-	case BookNFTsRequestTimeFrameSortByNumberOfStakers:
-		*s = BookNFTsRequestTimeFrameSortByNumberOfStakers
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
+// SetBookNft sets the value of BookNft.
+func (s *BookNFTStakeDelta) SetBookNft(val EvmAddress) {
+	s.BookNft = val
 }
 
-type BookNFTsRequestTimeFrameSortOrder string
-
-const (
-	BookNFTsRequestTimeFrameSortOrderAsc  BookNFTsRequestTimeFrameSortOrder = "asc"
-	BookNFTsRequestTimeFrameSortOrderDesc BookNFTsRequestTimeFrameSortOrder = "desc"
-)
-
-// AllValues returns all BookNFTsRequestTimeFrameSortOrder values.
-func (BookNFTsRequestTimeFrameSortOrder) AllValues() []BookNFTsRequestTimeFrameSortOrder {
-	return []BookNFTsRequestTimeFrameSortOrder{
-		BookNFTsRequestTimeFrameSortOrderAsc,
-		BookNFTsRequestTimeFrameSortOrderDesc,
-	}
+// SetStakedAmount sets the value of StakedAmount.
+func (s *BookNFTStakeDelta) SetStakedAmount(val Uint256) {
+	s.StakedAmount = val
 }
 
-// MarshalText implements encoding.TextMarshaler.
-func (s BookNFTsRequestTimeFrameSortOrder) MarshalText() ([]byte, error) {
-	switch s {
-	case BookNFTsRequestTimeFrameSortOrderAsc:
-		return []byte(s), nil
-	case BookNFTsRequestTimeFrameSortOrderDesc:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
+// SetLastStakedAt sets the value of LastStakedAt.
+func (s *BookNFTStakeDelta) SetLastStakedAt(val time.Time) {
+	s.LastStakedAt = val
 }
 
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *BookNFTsRequestTimeFrameSortOrder) UnmarshalText(data []byte) error {
-	switch BookNFTsRequestTimeFrameSortOrder(data) {
-	case BookNFTsRequestTimeFrameSortOrderAsc:
-		*s = BookNFTsRequestTimeFrameSortOrderAsc
-		return nil
-	case BookNFTsRequestTimeFrameSortOrderDesc:
-		*s = BookNFTsRequestTimeFrameSortOrderDesc
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
+// SetNumberOfStakers sets the value of NumberOfStakers.
+func (s *BookNFTStakeDelta) SetNumberOfStakers(val int) {
+	s.NumberOfStakers = val
 }
 
 type BookNftEvmAddressStakingEventsEventTypeGetEventType string
@@ -713,6 +444,182 @@ func (s *BookNftsGetOK) SetPagination(val PaginationResponse) {
 // SetData sets the value of Data.
 func (s *BookNftsGetOK) SetData(val []BookNFT) {
 	s.Data = val
+}
+
+type BookNftsTimeFrameDeltaGetOK struct {
+	Pagination BookNftsTimeFrameDeltaGetOKPagination `json:"pagination"`
+	Data       []BookNFTStakeDelta                   `json:"data"`
+}
+
+// GetPagination returns the value of Pagination.
+func (s *BookNftsTimeFrameDeltaGetOK) GetPagination() BookNftsTimeFrameDeltaGetOKPagination {
+	return s.Pagination
+}
+
+// GetData returns the value of Data.
+func (s *BookNftsTimeFrameDeltaGetOK) GetData() []BookNFTStakeDelta {
+	return s.Data
+}
+
+// SetPagination sets the value of Pagination.
+func (s *BookNftsTimeFrameDeltaGetOK) SetPagination(val BookNftsTimeFrameDeltaGetOKPagination) {
+	s.Pagination = val
+}
+
+// SetData sets the value of Data.
+func (s *BookNftsTimeFrameDeltaGetOK) SetData(val []BookNFTStakeDelta) {
+	s.Data = val
+}
+
+type BookNftsTimeFrameDeltaGetOKPagination struct {
+	Count int `json:"count"`
+}
+
+// GetCount returns the value of Count.
+func (s *BookNftsTimeFrameDeltaGetOKPagination) GetCount() int {
+	return s.Count
+}
+
+// SetCount sets the value of Count.
+func (s *BookNftsTimeFrameDeltaGetOKPagination) SetCount(val int) {
+	s.Count = val
+}
+
+type BookNftsTimeFrameDeltaGetSortBy string
+
+const (
+	BookNftsTimeFrameDeltaGetSortByStakedAmount    BookNftsTimeFrameDeltaGetSortBy = "staked_amount"
+	BookNftsTimeFrameDeltaGetSortByLastStakedAt    BookNftsTimeFrameDeltaGetSortBy = "last_staked_at"
+	BookNftsTimeFrameDeltaGetSortByNumberOfStakers BookNftsTimeFrameDeltaGetSortBy = "number_of_stakers"
+)
+
+// AllValues returns all BookNftsTimeFrameDeltaGetSortBy values.
+func (BookNftsTimeFrameDeltaGetSortBy) AllValues() []BookNftsTimeFrameDeltaGetSortBy {
+	return []BookNftsTimeFrameDeltaGetSortBy{
+		BookNftsTimeFrameDeltaGetSortByStakedAmount,
+		BookNftsTimeFrameDeltaGetSortByLastStakedAt,
+		BookNftsTimeFrameDeltaGetSortByNumberOfStakers,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BookNftsTimeFrameDeltaGetSortBy) MarshalText() ([]byte, error) {
+	switch s {
+	case BookNftsTimeFrameDeltaGetSortByStakedAmount:
+		return []byte(s), nil
+	case BookNftsTimeFrameDeltaGetSortByLastStakedAt:
+		return []byte(s), nil
+	case BookNftsTimeFrameDeltaGetSortByNumberOfStakers:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BookNftsTimeFrameDeltaGetSortBy) UnmarshalText(data []byte) error {
+	switch BookNftsTimeFrameDeltaGetSortBy(data) {
+	case BookNftsTimeFrameDeltaGetSortByStakedAmount:
+		*s = BookNftsTimeFrameDeltaGetSortByStakedAmount
+		return nil
+	case BookNftsTimeFrameDeltaGetSortByLastStakedAt:
+		*s = BookNftsTimeFrameDeltaGetSortByLastStakedAt
+		return nil
+	case BookNftsTimeFrameDeltaGetSortByNumberOfStakers:
+		*s = BookNftsTimeFrameDeltaGetSortByNumberOfStakers
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type BookNftsTimeFrameDeltaGetSortOrder string
+
+const (
+	BookNftsTimeFrameDeltaGetSortOrderAsc  BookNftsTimeFrameDeltaGetSortOrder = "asc"
+	BookNftsTimeFrameDeltaGetSortOrderDesc BookNftsTimeFrameDeltaGetSortOrder = "desc"
+)
+
+// AllValues returns all BookNftsTimeFrameDeltaGetSortOrder values.
+func (BookNftsTimeFrameDeltaGetSortOrder) AllValues() []BookNftsTimeFrameDeltaGetSortOrder {
+	return []BookNftsTimeFrameDeltaGetSortOrder{
+		BookNftsTimeFrameDeltaGetSortOrderAsc,
+		BookNftsTimeFrameDeltaGetSortOrderDesc,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BookNftsTimeFrameDeltaGetSortOrder) MarshalText() ([]byte, error) {
+	switch s {
+	case BookNftsTimeFrameDeltaGetSortOrderAsc:
+		return []byte(s), nil
+	case BookNftsTimeFrameDeltaGetSortOrderDesc:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BookNftsTimeFrameDeltaGetSortOrder) UnmarshalText(data []byte) error {
+	switch BookNftsTimeFrameDeltaGetSortOrder(data) {
+	case BookNftsTimeFrameDeltaGetSortOrderAsc:
+		*s = BookNftsTimeFrameDeltaGetSortOrderAsc
+		return nil
+	case BookNftsTimeFrameDeltaGetSortOrderDesc:
+		*s = BookNftsTimeFrameDeltaGetSortOrderDesc
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type BookNftsTimeFrameDeltaGetTimeFrame string
+
+const (
+	BookNftsTimeFrameDeltaGetTimeFrame7d  BookNftsTimeFrameDeltaGetTimeFrame = "7d"
+	BookNftsTimeFrameDeltaGetTimeFrame30d BookNftsTimeFrameDeltaGetTimeFrame = "30d"
+	BookNftsTimeFrameDeltaGetTimeFrame1y  BookNftsTimeFrameDeltaGetTimeFrame = "1y"
+)
+
+// AllValues returns all BookNftsTimeFrameDeltaGetTimeFrame values.
+func (BookNftsTimeFrameDeltaGetTimeFrame) AllValues() []BookNftsTimeFrameDeltaGetTimeFrame {
+	return []BookNftsTimeFrameDeltaGetTimeFrame{
+		BookNftsTimeFrameDeltaGetTimeFrame7d,
+		BookNftsTimeFrameDeltaGetTimeFrame30d,
+		BookNftsTimeFrameDeltaGetTimeFrame1y,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BookNftsTimeFrameDeltaGetTimeFrame) MarshalText() ([]byte, error) {
+	switch s {
+	case BookNftsTimeFrameDeltaGetTimeFrame7d:
+		return []byte(s), nil
+	case BookNftsTimeFrameDeltaGetTimeFrame30d:
+		return []byte(s), nil
+	case BookNftsTimeFrameDeltaGetTimeFrame1y:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BookNftsTimeFrameDeltaGetTimeFrame) UnmarshalText(data []byte) error {
+	switch BookNftsTimeFrameDeltaGetTimeFrame(data) {
+	case BookNftsTimeFrameDeltaGetTimeFrame7d:
+		*s = BookNftsTimeFrameDeltaGetTimeFrame7d
+		return nil
+	case BookNftsTimeFrameDeltaGetTimeFrame30d:
+		*s = BookNftsTimeFrameDeltaGetTimeFrame30d
+		return nil
+	case BookNftsTimeFrameDeltaGetTimeFrame1y:
+		*s = BookNftsTimeFrameDeltaGetTimeFrame1y
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Represents error object.
@@ -1253,236 +1160,6 @@ func (o NilDateTime) Get() (v time.Time, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o NilDateTime) Or(d time.Time) time.Time {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptAccountBookNFTsRequestSortBy returns new OptAccountBookNFTsRequestSortBy with value set to v.
-func NewOptAccountBookNFTsRequestSortBy(v AccountBookNFTsRequestSortBy) OptAccountBookNFTsRequestSortBy {
-	return OptAccountBookNFTsRequestSortBy{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptAccountBookNFTsRequestSortBy is optional AccountBookNFTsRequestSortBy.
-type OptAccountBookNFTsRequestSortBy struct {
-	Value AccountBookNFTsRequestSortBy
-	Set   bool
-}
-
-// IsSet returns true if OptAccountBookNFTsRequestSortBy was set.
-func (o OptAccountBookNFTsRequestSortBy) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptAccountBookNFTsRequestSortBy) Reset() {
-	var v AccountBookNFTsRequestSortBy
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptAccountBookNFTsRequestSortBy) SetTo(v AccountBookNFTsRequestSortBy) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptAccountBookNFTsRequestSortBy) Get() (v AccountBookNFTsRequestSortBy, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptAccountBookNFTsRequestSortBy) Or(d AccountBookNFTsRequestSortBy) AccountBookNFTsRequestSortBy {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptAccountBookNFTsRequestSortOrder returns new OptAccountBookNFTsRequestSortOrder with value set to v.
-func NewOptAccountBookNFTsRequestSortOrder(v AccountBookNFTsRequestSortOrder) OptAccountBookNFTsRequestSortOrder {
-	return OptAccountBookNFTsRequestSortOrder{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptAccountBookNFTsRequestSortOrder is optional AccountBookNFTsRequestSortOrder.
-type OptAccountBookNFTsRequestSortOrder struct {
-	Value AccountBookNFTsRequestSortOrder
-	Set   bool
-}
-
-// IsSet returns true if OptAccountBookNFTsRequestSortOrder was set.
-func (o OptAccountBookNFTsRequestSortOrder) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptAccountBookNFTsRequestSortOrder) Reset() {
-	var v AccountBookNFTsRequestSortOrder
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptAccountBookNFTsRequestSortOrder) SetTo(v AccountBookNFTsRequestSortOrder) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptAccountBookNFTsRequestSortOrder) Get() (v AccountBookNFTsRequestSortOrder, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptAccountBookNFTsRequestSortOrder) Or(d AccountBookNFTsRequestSortOrder) AccountBookNFTsRequestSortOrder {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptBookNFTsRequestSortOrderTimeFrame returns new OptBookNFTsRequestSortOrderTimeFrame with value set to v.
-func NewOptBookNFTsRequestSortOrderTimeFrame(v BookNFTsRequestSortOrderTimeFrame) OptBookNFTsRequestSortOrderTimeFrame {
-	return OptBookNFTsRequestSortOrderTimeFrame{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptBookNFTsRequestSortOrderTimeFrame is optional BookNFTsRequestSortOrderTimeFrame.
-type OptBookNFTsRequestSortOrderTimeFrame struct {
-	Value BookNFTsRequestSortOrderTimeFrame
-	Set   bool
-}
-
-// IsSet returns true if OptBookNFTsRequestSortOrderTimeFrame was set.
-func (o OptBookNFTsRequestSortOrderTimeFrame) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptBookNFTsRequestSortOrderTimeFrame) Reset() {
-	var v BookNFTsRequestSortOrderTimeFrame
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptBookNFTsRequestSortOrderTimeFrame) SetTo(v BookNFTsRequestSortOrderTimeFrame) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptBookNFTsRequestSortOrderTimeFrame) Get() (v BookNFTsRequestSortOrderTimeFrame, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptBookNFTsRequestSortOrderTimeFrame) Or(d BookNFTsRequestSortOrderTimeFrame) BookNFTsRequestSortOrderTimeFrame {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptBookNFTsRequestTimeFrameSortBy returns new OptBookNFTsRequestTimeFrameSortBy with value set to v.
-func NewOptBookNFTsRequestTimeFrameSortBy(v BookNFTsRequestTimeFrameSortBy) OptBookNFTsRequestTimeFrameSortBy {
-	return OptBookNFTsRequestTimeFrameSortBy{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptBookNFTsRequestTimeFrameSortBy is optional BookNFTsRequestTimeFrameSortBy.
-type OptBookNFTsRequestTimeFrameSortBy struct {
-	Value BookNFTsRequestTimeFrameSortBy
-	Set   bool
-}
-
-// IsSet returns true if OptBookNFTsRequestTimeFrameSortBy was set.
-func (o OptBookNFTsRequestTimeFrameSortBy) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptBookNFTsRequestTimeFrameSortBy) Reset() {
-	var v BookNFTsRequestTimeFrameSortBy
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptBookNFTsRequestTimeFrameSortBy) SetTo(v BookNFTsRequestTimeFrameSortBy) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptBookNFTsRequestTimeFrameSortBy) Get() (v BookNFTsRequestTimeFrameSortBy, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptBookNFTsRequestTimeFrameSortBy) Or(d BookNFTsRequestTimeFrameSortBy) BookNFTsRequestTimeFrameSortBy {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptBookNFTsRequestTimeFrameSortOrder returns new OptBookNFTsRequestTimeFrameSortOrder with value set to v.
-func NewOptBookNFTsRequestTimeFrameSortOrder(v BookNFTsRequestTimeFrameSortOrder) OptBookNFTsRequestTimeFrameSortOrder {
-	return OptBookNFTsRequestTimeFrameSortOrder{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptBookNFTsRequestTimeFrameSortOrder is optional BookNFTsRequestTimeFrameSortOrder.
-type OptBookNFTsRequestTimeFrameSortOrder struct {
-	Value BookNFTsRequestTimeFrameSortOrder
-	Set   bool
-}
-
-// IsSet returns true if OptBookNFTsRequestTimeFrameSortOrder was set.
-func (o OptBookNFTsRequestTimeFrameSortOrder) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptBookNFTsRequestTimeFrameSortOrder) Reset() {
-	var v BookNFTsRequestTimeFrameSortOrder
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptBookNFTsRequestTimeFrameSortOrder) SetTo(v BookNFTsRequestTimeFrameSortOrder) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptBookNFTsRequestTimeFrameSortOrder) Get() (v BookNFTsRequestTimeFrameSortOrder, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptBookNFTsRequestTimeFrameSortOrder) Or(d BookNFTsRequestTimeFrameSortOrder) BookNFTsRequestTimeFrameSortOrder {
 	if v, ok := o.Get(); ok {
 		return v
 	}
