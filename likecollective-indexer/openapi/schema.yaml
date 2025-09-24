@@ -68,7 +68,6 @@ paths:
             minimum: 1
             maximum: 100
         - $ref: "#/components/parameters/PaginationRequestReverse"
-        - $ref: "#/components/parameters/FilterBookNFTIn"
         - $ref: "#/components/parameters/FilterAccountIn"
 
       responses:
@@ -172,56 +171,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
-  /account/{evm_address}/book-nfts:
-    get:
-      tags:
-        - BookNFT
-      summary: Get book NFTs for an account
-      parameters:
-        - name: evm_address
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/EvmAddress"
-        - $ref: "#/components/parameters/PaginationRequestKey"
-        - name: pagination.limit
-          in: query
-          description: Optional limit for paginated use cases.
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-        - $ref: "#/components/parameters/PaginationRequestReverse"
-        - $ref: "#/components/parameters/AccountBookNFTsRequestSortBy"
-        - $ref: "#/components/parameters/AccountBookNFTsRequestSortOrder"
-        - $ref: "#/components/parameters/FilterBookNFTIn"
-
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  pagination:
-                    $ref: "#/components/schemas/PaginationResponse"
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/AccountBookNFT"
-                required:
-                  - pagination
-                  - data
-
-        default:
-          description: General Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
   /account/{evm_address}/staking-events/{event_type}:
     get:
       tags:
@@ -304,9 +253,6 @@ paths:
             minimum: 1
             maximum: 100
         - $ref: "#/components/parameters/PaginationRequestReverse"
-        - $ref: "#/components/parameters/BookNFTsRequestSortOrderTimeFrame"
-        - $ref: "#/components/parameters/BookNFTsRequestTimeFrameSortBy"
-        - $ref: "#/components/parameters/BookNFTsRequestTimeFrameSortOrder"
         - $ref: "#/components/parameters/FilterBookNFTIn"
         - $ref: "#/components/parameters/FilterAccountIn"
 
@@ -644,41 +590,6 @@ components:
       schema:
         type: boolean
         default: false
-
-    BookNFTsRequestTimeFrameSortBy:
-      name: time_frame_sort_by
-      in: query
-      required: false
-      schema:
-        type: string
-        enum:
-          - staked_amount
-          - last_staked_at
-          - number_of_stakers
-
-    BookNFTsRequestTimeFrameSortOrder:
-      name: time_frame_sort_order
-      in: query
-      required: false
-      schema:
-        type: string
-        enum:
-          - asc
-          - desc
-        default: desc
-
-    BookNFTsRequestSortOrderTimeFrame:
-      name: time_frame
-      in: query
-      required: false
-      schema:
-        type: string
-        enum:
-          - 7d
-          - 30d
-          - 1y
-          - all
-        default: all
 
     AccountBookNFTsRequestSortBy:
       name: sort_by
