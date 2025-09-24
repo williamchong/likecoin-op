@@ -10,7 +10,10 @@ import (
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
-	openapiHandler := openapi.NewOpenAPIHandler(s.db)
+	openapiHandler := openapi.NewOpenAPIHandler(
+		s.db,
+		s.timescaleDbService,
+	)
 
 	mux := http.NewServeMux()
 
