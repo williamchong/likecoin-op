@@ -12,6 +12,14 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// BookNFTDeltaTimeBucket1y is the client for interacting with the BookNFTDeltaTimeBucket1y builders.
+	BookNFTDeltaTimeBucket1y *BookNFTDeltaTimeBucket1yClient
+	// BookNFTDeltaTimeBucket30d is the client for interacting with the BookNFTDeltaTimeBucket30d builders.
+	BookNFTDeltaTimeBucket30d *BookNFTDeltaTimeBucket30dClient
+	// BookNFTDeltaTimeBucket7d is the client for interacting with the BookNFTDeltaTimeBucket7d builders.
+	BookNFTDeltaTimeBucket7d *BookNFTDeltaTimeBucket7dClient
+	// BookNFTDeltaTimeBucketMixin is the client for interacting with the BookNFTDeltaTimeBucketMixin builders.
+	BookNFTDeltaTimeBucketMixin *BookNFTDeltaTimeBucketMixinClient
 	// StakingEvent is the client for interacting with the StakingEvent builders.
 	StakingEvent *StakingEventClient
 	// StakingEventsHyperTable is the client for interacting with the StakingEventsHyperTable builders.
@@ -147,6 +155,10 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.BookNFTDeltaTimeBucket1y = NewBookNFTDeltaTimeBucket1yClient(tx.config)
+	tx.BookNFTDeltaTimeBucket30d = NewBookNFTDeltaTimeBucket30dClient(tx.config)
+	tx.BookNFTDeltaTimeBucket7d = NewBookNFTDeltaTimeBucket7dClient(tx.config)
+	tx.BookNFTDeltaTimeBucketMixin = NewBookNFTDeltaTimeBucketMixinClient(tx.config)
 	tx.StakingEvent = NewStakingEventClient(tx.config)
 	tx.StakingEventsHyperTable = NewStakingEventsHyperTableClient(tx.config)
 }
@@ -158,7 +170,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: StakingEvent.QueryXXX(), the query will be executed
+// applies a query, for example: BookNFTDeltaTimeBucket1y.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

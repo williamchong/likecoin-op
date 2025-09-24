@@ -8,6 +8,54 @@ import (
 	"likecollective-indexer/ent_timescale"
 )
 
+// The BookNFTDeltaTimeBucket1yFunc type is an adapter to allow the use of ordinary
+// function as BookNFTDeltaTimeBucket1y mutator.
+type BookNFTDeltaTimeBucket1yFunc func(context.Context, *ent_timescale.BookNFTDeltaTimeBucket1yMutation) (ent_timescale.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BookNFTDeltaTimeBucket1yFunc) Mutate(ctx context.Context, m ent_timescale.Mutation) (ent_timescale.Value, error) {
+	if mv, ok := m.(*ent_timescale.BookNFTDeltaTimeBucket1yMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent_timescale.BookNFTDeltaTimeBucket1yMutation", m)
+}
+
+// The BookNFTDeltaTimeBucket30dFunc type is an adapter to allow the use of ordinary
+// function as BookNFTDeltaTimeBucket30d mutator.
+type BookNFTDeltaTimeBucket30dFunc func(context.Context, *ent_timescale.BookNFTDeltaTimeBucket30dMutation) (ent_timescale.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BookNFTDeltaTimeBucket30dFunc) Mutate(ctx context.Context, m ent_timescale.Mutation) (ent_timescale.Value, error) {
+	if mv, ok := m.(*ent_timescale.BookNFTDeltaTimeBucket30dMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent_timescale.BookNFTDeltaTimeBucket30dMutation", m)
+}
+
+// The BookNFTDeltaTimeBucket7dFunc type is an adapter to allow the use of ordinary
+// function as BookNFTDeltaTimeBucket7d mutator.
+type BookNFTDeltaTimeBucket7dFunc func(context.Context, *ent_timescale.BookNFTDeltaTimeBucket7dMutation) (ent_timescale.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BookNFTDeltaTimeBucket7dFunc) Mutate(ctx context.Context, m ent_timescale.Mutation) (ent_timescale.Value, error) {
+	if mv, ok := m.(*ent_timescale.BookNFTDeltaTimeBucket7dMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent_timescale.BookNFTDeltaTimeBucket7dMutation", m)
+}
+
+// The BookNFTDeltaTimeBucketMixinFunc type is an adapter to allow the use of ordinary
+// function as BookNFTDeltaTimeBucketMixin mutator.
+type BookNFTDeltaTimeBucketMixinFunc func(context.Context, *ent_timescale.BookNFTDeltaTimeBucketMixinMutation) (ent_timescale.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BookNFTDeltaTimeBucketMixinFunc) Mutate(ctx context.Context, m ent_timescale.Mutation) (ent_timescale.Value, error) {
+	if mv, ok := m.(*ent_timescale.BookNFTDeltaTimeBucketMixinMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent_timescale.BookNFTDeltaTimeBucketMixinMutation", m)
+}
+
 // The StakingEventFunc type is an adapter to allow the use of ordinary
 // function as StakingEvent mutator.
 type StakingEventFunc func(context.Context, *ent_timescale.StakingEventMutation) (ent_timescale.Value, error)

@@ -4,6 +4,10 @@ package ent_timescale
 
 import (
 	"likecollective-indexer/ent/schema/typeutil"
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucket1y"
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucket30d"
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucket7d"
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucketmixin"
 	"likecollective-indexer/ent_timescale/schema"
 	"likecollective-indexer/ent_timescale/stakingevent"
 	"likecollective-indexer/ent_timescale/stakingeventshypertable"
@@ -16,6 +20,67 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	booknftdeltatimebucket1yMixin := schema.BookNFTDeltaTimeBucket1y{}.Mixin()
+	booknftdeltatimebucket1yMixinFields0 := booknftdeltatimebucket1yMixin[0].Fields()
+	_ = booknftdeltatimebucket1yMixinFields0
+	booknftdeltatimebucket1yFields := schema.BookNFTDeltaTimeBucket1y{}.Fields()
+	_ = booknftdeltatimebucket1yFields
+	// booknftdeltatimebucket1yDescEvmAddress is the schema descriptor for evm_address field.
+	booknftdeltatimebucket1yDescEvmAddress := booknftdeltatimebucket1yMixinFields0[1].Descriptor()
+	// booknftdeltatimebucket1y.EvmAddressValidator is a validator for the "evm_address" field. It is called by the builders before save.
+	booknftdeltatimebucket1y.EvmAddressValidator = booknftdeltatimebucket1yDescEvmAddress.Validators[0].(func(string) error)
+	// booknftdeltatimebucket1yDescStakedAmount is the schema descriptor for staked_amount field.
+	booknftdeltatimebucket1yDescStakedAmount := booknftdeltatimebucket1yMixinFields0[3].Descriptor()
+	booknftdeltatimebucket1y.ValueScanner.StakedAmount = booknftdeltatimebucket1yDescStakedAmount.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
+	// booknftdeltatimebucket1yDescID is the schema descriptor for id field.
+	booknftdeltatimebucket1yDescID := booknftdeltatimebucket1yMixinFields0[0].Descriptor()
+	// booknftdeltatimebucket1y.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	booknftdeltatimebucket1y.IDValidator = booknftdeltatimebucket1yDescID.Validators[0].(func(string) error)
+	booknftdeltatimebucket30dMixin := schema.BookNFTDeltaTimeBucket30d{}.Mixin()
+	booknftdeltatimebucket30dMixinFields0 := booknftdeltatimebucket30dMixin[0].Fields()
+	_ = booknftdeltatimebucket30dMixinFields0
+	booknftdeltatimebucket30dFields := schema.BookNFTDeltaTimeBucket30d{}.Fields()
+	_ = booknftdeltatimebucket30dFields
+	// booknftdeltatimebucket30dDescEvmAddress is the schema descriptor for evm_address field.
+	booknftdeltatimebucket30dDescEvmAddress := booknftdeltatimebucket30dMixinFields0[1].Descriptor()
+	// booknftdeltatimebucket30d.EvmAddressValidator is a validator for the "evm_address" field. It is called by the builders before save.
+	booknftdeltatimebucket30d.EvmAddressValidator = booknftdeltatimebucket30dDescEvmAddress.Validators[0].(func(string) error)
+	// booknftdeltatimebucket30dDescStakedAmount is the schema descriptor for staked_amount field.
+	booknftdeltatimebucket30dDescStakedAmount := booknftdeltatimebucket30dMixinFields0[3].Descriptor()
+	booknftdeltatimebucket30d.ValueScanner.StakedAmount = booknftdeltatimebucket30dDescStakedAmount.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
+	// booknftdeltatimebucket30dDescID is the schema descriptor for id field.
+	booknftdeltatimebucket30dDescID := booknftdeltatimebucket30dMixinFields0[0].Descriptor()
+	// booknftdeltatimebucket30d.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	booknftdeltatimebucket30d.IDValidator = booknftdeltatimebucket30dDescID.Validators[0].(func(string) error)
+	booknftdeltatimebucket7dMixin := schema.BookNFTDeltaTimeBucket7d{}.Mixin()
+	booknftdeltatimebucket7dMixinFields0 := booknftdeltatimebucket7dMixin[0].Fields()
+	_ = booknftdeltatimebucket7dMixinFields0
+	booknftdeltatimebucket7dFields := schema.BookNFTDeltaTimeBucket7d{}.Fields()
+	_ = booknftdeltatimebucket7dFields
+	// booknftdeltatimebucket7dDescEvmAddress is the schema descriptor for evm_address field.
+	booknftdeltatimebucket7dDescEvmAddress := booknftdeltatimebucket7dMixinFields0[1].Descriptor()
+	// booknftdeltatimebucket7d.EvmAddressValidator is a validator for the "evm_address" field. It is called by the builders before save.
+	booknftdeltatimebucket7d.EvmAddressValidator = booknftdeltatimebucket7dDescEvmAddress.Validators[0].(func(string) error)
+	// booknftdeltatimebucket7dDescStakedAmount is the schema descriptor for staked_amount field.
+	booknftdeltatimebucket7dDescStakedAmount := booknftdeltatimebucket7dMixinFields0[3].Descriptor()
+	booknftdeltatimebucket7d.ValueScanner.StakedAmount = booknftdeltatimebucket7dDescStakedAmount.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
+	// booknftdeltatimebucket7dDescID is the schema descriptor for id field.
+	booknftdeltatimebucket7dDescID := booknftdeltatimebucket7dMixinFields0[0].Descriptor()
+	// booknftdeltatimebucket7d.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	booknftdeltatimebucket7d.IDValidator = booknftdeltatimebucket7dDescID.Validators[0].(func(string) error)
+	booknftdeltatimebucketmixinFields := schema.BookNFTDeltaTimeBucketMixin{}.Fields()
+	_ = booknftdeltatimebucketmixinFields
+	// booknftdeltatimebucketmixinDescEvmAddress is the schema descriptor for evm_address field.
+	booknftdeltatimebucketmixinDescEvmAddress := booknftdeltatimebucketmixinFields[1].Descriptor()
+	// booknftdeltatimebucketmixin.EvmAddressValidator is a validator for the "evm_address" field. It is called by the builders before save.
+	booknftdeltatimebucketmixin.EvmAddressValidator = booknftdeltatimebucketmixinDescEvmAddress.Validators[0].(func(string) error)
+	// booknftdeltatimebucketmixinDescStakedAmount is the schema descriptor for staked_amount field.
+	booknftdeltatimebucketmixinDescStakedAmount := booknftdeltatimebucketmixinFields[3].Descriptor()
+	booknftdeltatimebucketmixin.ValueScanner.StakedAmount = booknftdeltatimebucketmixinDescStakedAmount.ValueScanner.(field.TypeValueScanner[typeutil.Uint256])
+	// booknftdeltatimebucketmixinDescID is the schema descriptor for id field.
+	booknftdeltatimebucketmixinDescID := booknftdeltatimebucketmixinFields[0].Descriptor()
+	// booknftdeltatimebucketmixin.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	booknftdeltatimebucketmixin.IDValidator = booknftdeltatimebucketmixinDescID.Validators[0].(func(string) error)
 	stakingeventFields := schema.StakingEvent{}.Fields()
 	_ = stakingeventFields
 	// stakingeventDescTransactionHash is the schema descriptor for transaction_hash field.

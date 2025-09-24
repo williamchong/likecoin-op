@@ -7,6 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"likecollective-indexer/ent/schema/typeutil"
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucket1y"
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucket30d"
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucket7d"
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucketmixin"
 	"likecollective-indexer/ent_timescale/predicate"
 	"likecollective-indexer/ent_timescale/stakingevent"
 	"likecollective-indexer/ent_timescale/stakingeventshypertable"
@@ -26,9 +30,2349 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeStakingEvent            = "StakingEvent"
-	TypeStakingEventsHyperTable = "StakingEventsHyperTable"
+	TypeBookNFTDeltaTimeBucket1y    = "BookNFTDeltaTimeBucket1y"
+	TypeBookNFTDeltaTimeBucket30d   = "BookNFTDeltaTimeBucket30d"
+	TypeBookNFTDeltaTimeBucket7d    = "BookNFTDeltaTimeBucket7d"
+	TypeBookNFTDeltaTimeBucketMixin = "BookNFTDeltaTimeBucketMixin"
+	TypeStakingEvent                = "StakingEvent"
+	TypeStakingEventsHyperTable     = "StakingEventsHyperTable"
 )
+
+// BookNFTDeltaTimeBucket1yMutation represents an operation that mutates the BookNFTDeltaTimeBucket1y nodes in the graph.
+type BookNFTDeltaTimeBucket1yMutation struct {
+	config
+	op                   Op
+	typ                  string
+	id                   *string
+	evm_address          *string
+	bucket               *time.Time
+	staked_amount        *typeutil.Uint256
+	last_staked_at       *time.Time
+	number_of_stakers    *uint64
+	addnumber_of_stakers *int64
+	clearedFields        map[string]struct{}
+	done                 bool
+	oldValue             func(context.Context) (*BookNFTDeltaTimeBucket1y, error)
+	predicates           []predicate.BookNFTDeltaTimeBucket1y
+}
+
+var _ ent.Mutation = (*BookNFTDeltaTimeBucket1yMutation)(nil)
+
+// booknftdeltatimebucket1yOption allows management of the mutation configuration using functional options.
+type booknftdeltatimebucket1yOption func(*BookNFTDeltaTimeBucket1yMutation)
+
+// newBookNFTDeltaTimeBucket1yMutation creates new mutation for the BookNFTDeltaTimeBucket1y entity.
+func newBookNFTDeltaTimeBucket1yMutation(c config, op Op, opts ...booknftdeltatimebucket1yOption) *BookNFTDeltaTimeBucket1yMutation {
+	m := &BookNFTDeltaTimeBucket1yMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeBookNFTDeltaTimeBucket1y,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withBookNFTDeltaTimeBucket1yID sets the ID field of the mutation.
+func withBookNFTDeltaTimeBucket1yID(id string) booknftdeltatimebucket1yOption {
+	return func(m *BookNFTDeltaTimeBucket1yMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *BookNFTDeltaTimeBucket1y
+		)
+		m.oldValue = func(ctx context.Context) (*BookNFTDeltaTimeBucket1y, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().BookNFTDeltaTimeBucket1y.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withBookNFTDeltaTimeBucket1y sets the old BookNFTDeltaTimeBucket1y of the mutation.
+func withBookNFTDeltaTimeBucket1y(node *BookNFTDeltaTimeBucket1y) booknftdeltatimebucket1yOption {
+	return func(m *BookNFTDeltaTimeBucket1yMutation) {
+		m.oldValue = func(context.Context) (*BookNFTDeltaTimeBucket1y, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m BookNFTDeltaTimeBucket1yMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m BookNFTDeltaTimeBucket1yMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent_timescale: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of BookNFTDeltaTimeBucket1y entities.
+func (m *BookNFTDeltaTimeBucket1yMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *BookNFTDeltaTimeBucket1yMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().BookNFTDeltaTimeBucket1y.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetEvmAddress sets the "evm_address" field.
+func (m *BookNFTDeltaTimeBucket1yMutation) SetEvmAddress(s string) {
+	m.evm_address = &s
+}
+
+// EvmAddress returns the value of the "evm_address" field in the mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) EvmAddress() (r string, exists bool) {
+	v := m.evm_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEvmAddress returns the old "evm_address" field's value of the BookNFTDeltaTimeBucket1y entity.
+// If the BookNFTDeltaTimeBucket1y object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucket1yMutation) OldEvmAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEvmAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEvmAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEvmAddress: %w", err)
+	}
+	return oldValue.EvmAddress, nil
+}
+
+// ResetEvmAddress resets all changes to the "evm_address" field.
+func (m *BookNFTDeltaTimeBucket1yMutation) ResetEvmAddress() {
+	m.evm_address = nil
+}
+
+// SetBucket sets the "bucket" field.
+func (m *BookNFTDeltaTimeBucket1yMutation) SetBucket(t time.Time) {
+	m.bucket = &t
+}
+
+// Bucket returns the value of the "bucket" field in the mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) Bucket() (r time.Time, exists bool) {
+	v := m.bucket
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBucket returns the old "bucket" field's value of the BookNFTDeltaTimeBucket1y entity.
+// If the BookNFTDeltaTimeBucket1y object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucket1yMutation) OldBucket(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBucket is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBucket requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBucket: %w", err)
+	}
+	return oldValue.Bucket, nil
+}
+
+// ResetBucket resets all changes to the "bucket" field.
+func (m *BookNFTDeltaTimeBucket1yMutation) ResetBucket() {
+	m.bucket = nil
+}
+
+// SetStakedAmount sets the "staked_amount" field.
+func (m *BookNFTDeltaTimeBucket1yMutation) SetStakedAmount(t typeutil.Uint256) {
+	m.staked_amount = &t
+}
+
+// StakedAmount returns the value of the "staked_amount" field in the mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) StakedAmount() (r typeutil.Uint256, exists bool) {
+	v := m.staked_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStakedAmount returns the old "staked_amount" field's value of the BookNFTDeltaTimeBucket1y entity.
+// If the BookNFTDeltaTimeBucket1y object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucket1yMutation) OldStakedAmount(ctx context.Context) (v typeutil.Uint256, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStakedAmount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStakedAmount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStakedAmount: %w", err)
+	}
+	return oldValue.StakedAmount, nil
+}
+
+// ResetStakedAmount resets all changes to the "staked_amount" field.
+func (m *BookNFTDeltaTimeBucket1yMutation) ResetStakedAmount() {
+	m.staked_amount = nil
+}
+
+// SetLastStakedAt sets the "last_staked_at" field.
+func (m *BookNFTDeltaTimeBucket1yMutation) SetLastStakedAt(t time.Time) {
+	m.last_staked_at = &t
+}
+
+// LastStakedAt returns the value of the "last_staked_at" field in the mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) LastStakedAt() (r time.Time, exists bool) {
+	v := m.last_staked_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastStakedAt returns the old "last_staked_at" field's value of the BookNFTDeltaTimeBucket1y entity.
+// If the BookNFTDeltaTimeBucket1y object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucket1yMutation) OldLastStakedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastStakedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastStakedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastStakedAt: %w", err)
+	}
+	return oldValue.LastStakedAt, nil
+}
+
+// ResetLastStakedAt resets all changes to the "last_staked_at" field.
+func (m *BookNFTDeltaTimeBucket1yMutation) ResetLastStakedAt() {
+	m.last_staked_at = nil
+}
+
+// SetNumberOfStakers sets the "number_of_stakers" field.
+func (m *BookNFTDeltaTimeBucket1yMutation) SetNumberOfStakers(u uint64) {
+	m.number_of_stakers = &u
+	m.addnumber_of_stakers = nil
+}
+
+// NumberOfStakers returns the value of the "number_of_stakers" field in the mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) NumberOfStakers() (r uint64, exists bool) {
+	v := m.number_of_stakers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNumberOfStakers returns the old "number_of_stakers" field's value of the BookNFTDeltaTimeBucket1y entity.
+// If the BookNFTDeltaTimeBucket1y object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucket1yMutation) OldNumberOfStakers(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNumberOfStakers is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNumberOfStakers requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNumberOfStakers: %w", err)
+	}
+	return oldValue.NumberOfStakers, nil
+}
+
+// AddNumberOfStakers adds u to the "number_of_stakers" field.
+func (m *BookNFTDeltaTimeBucket1yMutation) AddNumberOfStakers(u int64) {
+	if m.addnumber_of_stakers != nil {
+		*m.addnumber_of_stakers += u
+	} else {
+		m.addnumber_of_stakers = &u
+	}
+}
+
+// AddedNumberOfStakers returns the value that was added to the "number_of_stakers" field in this mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) AddedNumberOfStakers() (r int64, exists bool) {
+	v := m.addnumber_of_stakers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetNumberOfStakers resets all changes to the "number_of_stakers" field.
+func (m *BookNFTDeltaTimeBucket1yMutation) ResetNumberOfStakers() {
+	m.number_of_stakers = nil
+	m.addnumber_of_stakers = nil
+}
+
+// Where appends a list predicates to the BookNFTDeltaTimeBucket1yMutation builder.
+func (m *BookNFTDeltaTimeBucket1yMutation) Where(ps ...predicate.BookNFTDeltaTimeBucket1y) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the BookNFTDeltaTimeBucket1yMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *BookNFTDeltaTimeBucket1yMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.BookNFTDeltaTimeBucket1y, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *BookNFTDeltaTimeBucket1yMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *BookNFTDeltaTimeBucket1yMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (BookNFTDeltaTimeBucket1y).
+func (m *BookNFTDeltaTimeBucket1yMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *BookNFTDeltaTimeBucket1yMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.evm_address != nil {
+		fields = append(fields, booknftdeltatimebucket1y.FieldEvmAddress)
+	}
+	if m.bucket != nil {
+		fields = append(fields, booknftdeltatimebucket1y.FieldBucket)
+	}
+	if m.staked_amount != nil {
+		fields = append(fields, booknftdeltatimebucket1y.FieldStakedAmount)
+	}
+	if m.last_staked_at != nil {
+		fields = append(fields, booknftdeltatimebucket1y.FieldLastStakedAt)
+	}
+	if m.number_of_stakers != nil {
+		fields = append(fields, booknftdeltatimebucket1y.FieldNumberOfStakers)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *BookNFTDeltaTimeBucket1yMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case booknftdeltatimebucket1y.FieldEvmAddress:
+		return m.EvmAddress()
+	case booknftdeltatimebucket1y.FieldBucket:
+		return m.Bucket()
+	case booknftdeltatimebucket1y.FieldStakedAmount:
+		return m.StakedAmount()
+	case booknftdeltatimebucket1y.FieldLastStakedAt:
+		return m.LastStakedAt()
+	case booknftdeltatimebucket1y.FieldNumberOfStakers:
+		return m.NumberOfStakers()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *BookNFTDeltaTimeBucket1yMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case booknftdeltatimebucket1y.FieldEvmAddress:
+		return m.OldEvmAddress(ctx)
+	case booknftdeltatimebucket1y.FieldBucket:
+		return m.OldBucket(ctx)
+	case booknftdeltatimebucket1y.FieldStakedAmount:
+		return m.OldStakedAmount(ctx)
+	case booknftdeltatimebucket1y.FieldLastStakedAt:
+		return m.OldLastStakedAt(ctx)
+	case booknftdeltatimebucket1y.FieldNumberOfStakers:
+		return m.OldNumberOfStakers(ctx)
+	}
+	return nil, fmt.Errorf("unknown BookNFTDeltaTimeBucket1y field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BookNFTDeltaTimeBucket1yMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case booknftdeltatimebucket1y.FieldEvmAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEvmAddress(v)
+		return nil
+	case booknftdeltatimebucket1y.FieldBucket:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBucket(v)
+		return nil
+	case booknftdeltatimebucket1y.FieldStakedAmount:
+		v, ok := value.(typeutil.Uint256)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStakedAmount(v)
+		return nil
+	case booknftdeltatimebucket1y.FieldLastStakedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastStakedAt(v)
+		return nil
+	case booknftdeltatimebucket1y.FieldNumberOfStakers:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNumberOfStakers(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket1y field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) AddedFields() []string {
+	var fields []string
+	if m.addnumber_of_stakers != nil {
+		fields = append(fields, booknftdeltatimebucket1y.FieldNumberOfStakers)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *BookNFTDeltaTimeBucket1yMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case booknftdeltatimebucket1y.FieldNumberOfStakers:
+		return m.AddedNumberOfStakers()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BookNFTDeltaTimeBucket1yMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case booknftdeltatimebucket1y.FieldNumberOfStakers:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNumberOfStakers(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket1y numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *BookNFTDeltaTimeBucket1yMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket1y nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *BookNFTDeltaTimeBucket1yMutation) ResetField(name string) error {
+	switch name {
+	case booknftdeltatimebucket1y.FieldEvmAddress:
+		m.ResetEvmAddress()
+		return nil
+	case booknftdeltatimebucket1y.FieldBucket:
+		m.ResetBucket()
+		return nil
+	case booknftdeltatimebucket1y.FieldStakedAmount:
+		m.ResetStakedAmount()
+		return nil
+	case booknftdeltatimebucket1y.FieldLastStakedAt:
+		m.ResetLastStakedAt()
+		return nil
+	case booknftdeltatimebucket1y.FieldNumberOfStakers:
+		m.ResetNumberOfStakers()
+		return nil
+	}
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket1y field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *BookNFTDeltaTimeBucket1yMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *BookNFTDeltaTimeBucket1yMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket1y unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *BookNFTDeltaTimeBucket1yMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket1y edge %s", name)
+}
+
+// BookNFTDeltaTimeBucket30dMutation represents an operation that mutates the BookNFTDeltaTimeBucket30d nodes in the graph.
+type BookNFTDeltaTimeBucket30dMutation struct {
+	config
+	op                   Op
+	typ                  string
+	id                   *string
+	evm_address          *string
+	bucket               *time.Time
+	staked_amount        *typeutil.Uint256
+	last_staked_at       *time.Time
+	number_of_stakers    *uint64
+	addnumber_of_stakers *int64
+	clearedFields        map[string]struct{}
+	done                 bool
+	oldValue             func(context.Context) (*BookNFTDeltaTimeBucket30d, error)
+	predicates           []predicate.BookNFTDeltaTimeBucket30d
+}
+
+var _ ent.Mutation = (*BookNFTDeltaTimeBucket30dMutation)(nil)
+
+// booknftdeltatimebucket30dOption allows management of the mutation configuration using functional options.
+type booknftdeltatimebucket30dOption func(*BookNFTDeltaTimeBucket30dMutation)
+
+// newBookNFTDeltaTimeBucket30dMutation creates new mutation for the BookNFTDeltaTimeBucket30d entity.
+func newBookNFTDeltaTimeBucket30dMutation(c config, op Op, opts ...booknftdeltatimebucket30dOption) *BookNFTDeltaTimeBucket30dMutation {
+	m := &BookNFTDeltaTimeBucket30dMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeBookNFTDeltaTimeBucket30d,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withBookNFTDeltaTimeBucket30dID sets the ID field of the mutation.
+func withBookNFTDeltaTimeBucket30dID(id string) booknftdeltatimebucket30dOption {
+	return func(m *BookNFTDeltaTimeBucket30dMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *BookNFTDeltaTimeBucket30d
+		)
+		m.oldValue = func(ctx context.Context) (*BookNFTDeltaTimeBucket30d, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().BookNFTDeltaTimeBucket30d.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withBookNFTDeltaTimeBucket30d sets the old BookNFTDeltaTimeBucket30d of the mutation.
+func withBookNFTDeltaTimeBucket30d(node *BookNFTDeltaTimeBucket30d) booknftdeltatimebucket30dOption {
+	return func(m *BookNFTDeltaTimeBucket30dMutation) {
+		m.oldValue = func(context.Context) (*BookNFTDeltaTimeBucket30d, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m BookNFTDeltaTimeBucket30dMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m BookNFTDeltaTimeBucket30dMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent_timescale: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of BookNFTDeltaTimeBucket30d entities.
+func (m *BookNFTDeltaTimeBucket30dMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *BookNFTDeltaTimeBucket30dMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().BookNFTDeltaTimeBucket30d.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetEvmAddress sets the "evm_address" field.
+func (m *BookNFTDeltaTimeBucket30dMutation) SetEvmAddress(s string) {
+	m.evm_address = &s
+}
+
+// EvmAddress returns the value of the "evm_address" field in the mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) EvmAddress() (r string, exists bool) {
+	v := m.evm_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEvmAddress returns the old "evm_address" field's value of the BookNFTDeltaTimeBucket30d entity.
+// If the BookNFTDeltaTimeBucket30d object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucket30dMutation) OldEvmAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEvmAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEvmAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEvmAddress: %w", err)
+	}
+	return oldValue.EvmAddress, nil
+}
+
+// ResetEvmAddress resets all changes to the "evm_address" field.
+func (m *BookNFTDeltaTimeBucket30dMutation) ResetEvmAddress() {
+	m.evm_address = nil
+}
+
+// SetBucket sets the "bucket" field.
+func (m *BookNFTDeltaTimeBucket30dMutation) SetBucket(t time.Time) {
+	m.bucket = &t
+}
+
+// Bucket returns the value of the "bucket" field in the mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) Bucket() (r time.Time, exists bool) {
+	v := m.bucket
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBucket returns the old "bucket" field's value of the BookNFTDeltaTimeBucket30d entity.
+// If the BookNFTDeltaTimeBucket30d object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucket30dMutation) OldBucket(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBucket is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBucket requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBucket: %w", err)
+	}
+	return oldValue.Bucket, nil
+}
+
+// ResetBucket resets all changes to the "bucket" field.
+func (m *BookNFTDeltaTimeBucket30dMutation) ResetBucket() {
+	m.bucket = nil
+}
+
+// SetStakedAmount sets the "staked_amount" field.
+func (m *BookNFTDeltaTimeBucket30dMutation) SetStakedAmount(t typeutil.Uint256) {
+	m.staked_amount = &t
+}
+
+// StakedAmount returns the value of the "staked_amount" field in the mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) StakedAmount() (r typeutil.Uint256, exists bool) {
+	v := m.staked_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStakedAmount returns the old "staked_amount" field's value of the BookNFTDeltaTimeBucket30d entity.
+// If the BookNFTDeltaTimeBucket30d object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucket30dMutation) OldStakedAmount(ctx context.Context) (v typeutil.Uint256, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStakedAmount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStakedAmount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStakedAmount: %w", err)
+	}
+	return oldValue.StakedAmount, nil
+}
+
+// ResetStakedAmount resets all changes to the "staked_amount" field.
+func (m *BookNFTDeltaTimeBucket30dMutation) ResetStakedAmount() {
+	m.staked_amount = nil
+}
+
+// SetLastStakedAt sets the "last_staked_at" field.
+func (m *BookNFTDeltaTimeBucket30dMutation) SetLastStakedAt(t time.Time) {
+	m.last_staked_at = &t
+}
+
+// LastStakedAt returns the value of the "last_staked_at" field in the mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) LastStakedAt() (r time.Time, exists bool) {
+	v := m.last_staked_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastStakedAt returns the old "last_staked_at" field's value of the BookNFTDeltaTimeBucket30d entity.
+// If the BookNFTDeltaTimeBucket30d object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucket30dMutation) OldLastStakedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastStakedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastStakedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastStakedAt: %w", err)
+	}
+	return oldValue.LastStakedAt, nil
+}
+
+// ResetLastStakedAt resets all changes to the "last_staked_at" field.
+func (m *BookNFTDeltaTimeBucket30dMutation) ResetLastStakedAt() {
+	m.last_staked_at = nil
+}
+
+// SetNumberOfStakers sets the "number_of_stakers" field.
+func (m *BookNFTDeltaTimeBucket30dMutation) SetNumberOfStakers(u uint64) {
+	m.number_of_stakers = &u
+	m.addnumber_of_stakers = nil
+}
+
+// NumberOfStakers returns the value of the "number_of_stakers" field in the mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) NumberOfStakers() (r uint64, exists bool) {
+	v := m.number_of_stakers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNumberOfStakers returns the old "number_of_stakers" field's value of the BookNFTDeltaTimeBucket30d entity.
+// If the BookNFTDeltaTimeBucket30d object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucket30dMutation) OldNumberOfStakers(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNumberOfStakers is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNumberOfStakers requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNumberOfStakers: %w", err)
+	}
+	return oldValue.NumberOfStakers, nil
+}
+
+// AddNumberOfStakers adds u to the "number_of_stakers" field.
+func (m *BookNFTDeltaTimeBucket30dMutation) AddNumberOfStakers(u int64) {
+	if m.addnumber_of_stakers != nil {
+		*m.addnumber_of_stakers += u
+	} else {
+		m.addnumber_of_stakers = &u
+	}
+}
+
+// AddedNumberOfStakers returns the value that was added to the "number_of_stakers" field in this mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) AddedNumberOfStakers() (r int64, exists bool) {
+	v := m.addnumber_of_stakers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetNumberOfStakers resets all changes to the "number_of_stakers" field.
+func (m *BookNFTDeltaTimeBucket30dMutation) ResetNumberOfStakers() {
+	m.number_of_stakers = nil
+	m.addnumber_of_stakers = nil
+}
+
+// Where appends a list predicates to the BookNFTDeltaTimeBucket30dMutation builder.
+func (m *BookNFTDeltaTimeBucket30dMutation) Where(ps ...predicate.BookNFTDeltaTimeBucket30d) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the BookNFTDeltaTimeBucket30dMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *BookNFTDeltaTimeBucket30dMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.BookNFTDeltaTimeBucket30d, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *BookNFTDeltaTimeBucket30dMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *BookNFTDeltaTimeBucket30dMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (BookNFTDeltaTimeBucket30d).
+func (m *BookNFTDeltaTimeBucket30dMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *BookNFTDeltaTimeBucket30dMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.evm_address != nil {
+		fields = append(fields, booknftdeltatimebucket30d.FieldEvmAddress)
+	}
+	if m.bucket != nil {
+		fields = append(fields, booknftdeltatimebucket30d.FieldBucket)
+	}
+	if m.staked_amount != nil {
+		fields = append(fields, booknftdeltatimebucket30d.FieldStakedAmount)
+	}
+	if m.last_staked_at != nil {
+		fields = append(fields, booknftdeltatimebucket30d.FieldLastStakedAt)
+	}
+	if m.number_of_stakers != nil {
+		fields = append(fields, booknftdeltatimebucket30d.FieldNumberOfStakers)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *BookNFTDeltaTimeBucket30dMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case booknftdeltatimebucket30d.FieldEvmAddress:
+		return m.EvmAddress()
+	case booknftdeltatimebucket30d.FieldBucket:
+		return m.Bucket()
+	case booknftdeltatimebucket30d.FieldStakedAmount:
+		return m.StakedAmount()
+	case booknftdeltatimebucket30d.FieldLastStakedAt:
+		return m.LastStakedAt()
+	case booknftdeltatimebucket30d.FieldNumberOfStakers:
+		return m.NumberOfStakers()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *BookNFTDeltaTimeBucket30dMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case booknftdeltatimebucket30d.FieldEvmAddress:
+		return m.OldEvmAddress(ctx)
+	case booknftdeltatimebucket30d.FieldBucket:
+		return m.OldBucket(ctx)
+	case booknftdeltatimebucket30d.FieldStakedAmount:
+		return m.OldStakedAmount(ctx)
+	case booknftdeltatimebucket30d.FieldLastStakedAt:
+		return m.OldLastStakedAt(ctx)
+	case booknftdeltatimebucket30d.FieldNumberOfStakers:
+		return m.OldNumberOfStakers(ctx)
+	}
+	return nil, fmt.Errorf("unknown BookNFTDeltaTimeBucket30d field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BookNFTDeltaTimeBucket30dMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case booknftdeltatimebucket30d.FieldEvmAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEvmAddress(v)
+		return nil
+	case booknftdeltatimebucket30d.FieldBucket:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBucket(v)
+		return nil
+	case booknftdeltatimebucket30d.FieldStakedAmount:
+		v, ok := value.(typeutil.Uint256)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStakedAmount(v)
+		return nil
+	case booknftdeltatimebucket30d.FieldLastStakedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastStakedAt(v)
+		return nil
+	case booknftdeltatimebucket30d.FieldNumberOfStakers:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNumberOfStakers(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket30d field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) AddedFields() []string {
+	var fields []string
+	if m.addnumber_of_stakers != nil {
+		fields = append(fields, booknftdeltatimebucket30d.FieldNumberOfStakers)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *BookNFTDeltaTimeBucket30dMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case booknftdeltatimebucket30d.FieldNumberOfStakers:
+		return m.AddedNumberOfStakers()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BookNFTDeltaTimeBucket30dMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case booknftdeltatimebucket30d.FieldNumberOfStakers:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNumberOfStakers(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket30d numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *BookNFTDeltaTimeBucket30dMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket30d nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *BookNFTDeltaTimeBucket30dMutation) ResetField(name string) error {
+	switch name {
+	case booknftdeltatimebucket30d.FieldEvmAddress:
+		m.ResetEvmAddress()
+		return nil
+	case booknftdeltatimebucket30d.FieldBucket:
+		m.ResetBucket()
+		return nil
+	case booknftdeltatimebucket30d.FieldStakedAmount:
+		m.ResetStakedAmount()
+		return nil
+	case booknftdeltatimebucket30d.FieldLastStakedAt:
+		m.ResetLastStakedAt()
+		return nil
+	case booknftdeltatimebucket30d.FieldNumberOfStakers:
+		m.ResetNumberOfStakers()
+		return nil
+	}
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket30d field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *BookNFTDeltaTimeBucket30dMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *BookNFTDeltaTimeBucket30dMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket30d unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *BookNFTDeltaTimeBucket30dMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket30d edge %s", name)
+}
+
+// BookNFTDeltaTimeBucket7dMutation represents an operation that mutates the BookNFTDeltaTimeBucket7d nodes in the graph.
+type BookNFTDeltaTimeBucket7dMutation struct {
+	config
+	op                   Op
+	typ                  string
+	id                   *string
+	evm_address          *string
+	bucket               *time.Time
+	staked_amount        *typeutil.Uint256
+	last_staked_at       *time.Time
+	number_of_stakers    *uint64
+	addnumber_of_stakers *int64
+	clearedFields        map[string]struct{}
+	done                 bool
+	oldValue             func(context.Context) (*BookNFTDeltaTimeBucket7d, error)
+	predicates           []predicate.BookNFTDeltaTimeBucket7d
+}
+
+var _ ent.Mutation = (*BookNFTDeltaTimeBucket7dMutation)(nil)
+
+// booknftdeltatimebucket7dOption allows management of the mutation configuration using functional options.
+type booknftdeltatimebucket7dOption func(*BookNFTDeltaTimeBucket7dMutation)
+
+// newBookNFTDeltaTimeBucket7dMutation creates new mutation for the BookNFTDeltaTimeBucket7d entity.
+func newBookNFTDeltaTimeBucket7dMutation(c config, op Op, opts ...booknftdeltatimebucket7dOption) *BookNFTDeltaTimeBucket7dMutation {
+	m := &BookNFTDeltaTimeBucket7dMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeBookNFTDeltaTimeBucket7d,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withBookNFTDeltaTimeBucket7dID sets the ID field of the mutation.
+func withBookNFTDeltaTimeBucket7dID(id string) booknftdeltatimebucket7dOption {
+	return func(m *BookNFTDeltaTimeBucket7dMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *BookNFTDeltaTimeBucket7d
+		)
+		m.oldValue = func(ctx context.Context) (*BookNFTDeltaTimeBucket7d, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().BookNFTDeltaTimeBucket7d.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withBookNFTDeltaTimeBucket7d sets the old BookNFTDeltaTimeBucket7d of the mutation.
+func withBookNFTDeltaTimeBucket7d(node *BookNFTDeltaTimeBucket7d) booknftdeltatimebucket7dOption {
+	return func(m *BookNFTDeltaTimeBucket7dMutation) {
+		m.oldValue = func(context.Context) (*BookNFTDeltaTimeBucket7d, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m BookNFTDeltaTimeBucket7dMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m BookNFTDeltaTimeBucket7dMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent_timescale: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of BookNFTDeltaTimeBucket7d entities.
+func (m *BookNFTDeltaTimeBucket7dMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *BookNFTDeltaTimeBucket7dMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().BookNFTDeltaTimeBucket7d.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetEvmAddress sets the "evm_address" field.
+func (m *BookNFTDeltaTimeBucket7dMutation) SetEvmAddress(s string) {
+	m.evm_address = &s
+}
+
+// EvmAddress returns the value of the "evm_address" field in the mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) EvmAddress() (r string, exists bool) {
+	v := m.evm_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEvmAddress returns the old "evm_address" field's value of the BookNFTDeltaTimeBucket7d entity.
+// If the BookNFTDeltaTimeBucket7d object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucket7dMutation) OldEvmAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEvmAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEvmAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEvmAddress: %w", err)
+	}
+	return oldValue.EvmAddress, nil
+}
+
+// ResetEvmAddress resets all changes to the "evm_address" field.
+func (m *BookNFTDeltaTimeBucket7dMutation) ResetEvmAddress() {
+	m.evm_address = nil
+}
+
+// SetBucket sets the "bucket" field.
+func (m *BookNFTDeltaTimeBucket7dMutation) SetBucket(t time.Time) {
+	m.bucket = &t
+}
+
+// Bucket returns the value of the "bucket" field in the mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) Bucket() (r time.Time, exists bool) {
+	v := m.bucket
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBucket returns the old "bucket" field's value of the BookNFTDeltaTimeBucket7d entity.
+// If the BookNFTDeltaTimeBucket7d object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucket7dMutation) OldBucket(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBucket is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBucket requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBucket: %w", err)
+	}
+	return oldValue.Bucket, nil
+}
+
+// ResetBucket resets all changes to the "bucket" field.
+func (m *BookNFTDeltaTimeBucket7dMutation) ResetBucket() {
+	m.bucket = nil
+}
+
+// SetStakedAmount sets the "staked_amount" field.
+func (m *BookNFTDeltaTimeBucket7dMutation) SetStakedAmount(t typeutil.Uint256) {
+	m.staked_amount = &t
+}
+
+// StakedAmount returns the value of the "staked_amount" field in the mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) StakedAmount() (r typeutil.Uint256, exists bool) {
+	v := m.staked_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStakedAmount returns the old "staked_amount" field's value of the BookNFTDeltaTimeBucket7d entity.
+// If the BookNFTDeltaTimeBucket7d object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucket7dMutation) OldStakedAmount(ctx context.Context) (v typeutil.Uint256, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStakedAmount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStakedAmount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStakedAmount: %w", err)
+	}
+	return oldValue.StakedAmount, nil
+}
+
+// ResetStakedAmount resets all changes to the "staked_amount" field.
+func (m *BookNFTDeltaTimeBucket7dMutation) ResetStakedAmount() {
+	m.staked_amount = nil
+}
+
+// SetLastStakedAt sets the "last_staked_at" field.
+func (m *BookNFTDeltaTimeBucket7dMutation) SetLastStakedAt(t time.Time) {
+	m.last_staked_at = &t
+}
+
+// LastStakedAt returns the value of the "last_staked_at" field in the mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) LastStakedAt() (r time.Time, exists bool) {
+	v := m.last_staked_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastStakedAt returns the old "last_staked_at" field's value of the BookNFTDeltaTimeBucket7d entity.
+// If the BookNFTDeltaTimeBucket7d object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucket7dMutation) OldLastStakedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastStakedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastStakedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastStakedAt: %w", err)
+	}
+	return oldValue.LastStakedAt, nil
+}
+
+// ResetLastStakedAt resets all changes to the "last_staked_at" field.
+func (m *BookNFTDeltaTimeBucket7dMutation) ResetLastStakedAt() {
+	m.last_staked_at = nil
+}
+
+// SetNumberOfStakers sets the "number_of_stakers" field.
+func (m *BookNFTDeltaTimeBucket7dMutation) SetNumberOfStakers(u uint64) {
+	m.number_of_stakers = &u
+	m.addnumber_of_stakers = nil
+}
+
+// NumberOfStakers returns the value of the "number_of_stakers" field in the mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) NumberOfStakers() (r uint64, exists bool) {
+	v := m.number_of_stakers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNumberOfStakers returns the old "number_of_stakers" field's value of the BookNFTDeltaTimeBucket7d entity.
+// If the BookNFTDeltaTimeBucket7d object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucket7dMutation) OldNumberOfStakers(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNumberOfStakers is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNumberOfStakers requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNumberOfStakers: %w", err)
+	}
+	return oldValue.NumberOfStakers, nil
+}
+
+// AddNumberOfStakers adds u to the "number_of_stakers" field.
+func (m *BookNFTDeltaTimeBucket7dMutation) AddNumberOfStakers(u int64) {
+	if m.addnumber_of_stakers != nil {
+		*m.addnumber_of_stakers += u
+	} else {
+		m.addnumber_of_stakers = &u
+	}
+}
+
+// AddedNumberOfStakers returns the value that was added to the "number_of_stakers" field in this mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) AddedNumberOfStakers() (r int64, exists bool) {
+	v := m.addnumber_of_stakers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetNumberOfStakers resets all changes to the "number_of_stakers" field.
+func (m *BookNFTDeltaTimeBucket7dMutation) ResetNumberOfStakers() {
+	m.number_of_stakers = nil
+	m.addnumber_of_stakers = nil
+}
+
+// Where appends a list predicates to the BookNFTDeltaTimeBucket7dMutation builder.
+func (m *BookNFTDeltaTimeBucket7dMutation) Where(ps ...predicate.BookNFTDeltaTimeBucket7d) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the BookNFTDeltaTimeBucket7dMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *BookNFTDeltaTimeBucket7dMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.BookNFTDeltaTimeBucket7d, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *BookNFTDeltaTimeBucket7dMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *BookNFTDeltaTimeBucket7dMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (BookNFTDeltaTimeBucket7d).
+func (m *BookNFTDeltaTimeBucket7dMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *BookNFTDeltaTimeBucket7dMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.evm_address != nil {
+		fields = append(fields, booknftdeltatimebucket7d.FieldEvmAddress)
+	}
+	if m.bucket != nil {
+		fields = append(fields, booknftdeltatimebucket7d.FieldBucket)
+	}
+	if m.staked_amount != nil {
+		fields = append(fields, booknftdeltatimebucket7d.FieldStakedAmount)
+	}
+	if m.last_staked_at != nil {
+		fields = append(fields, booknftdeltatimebucket7d.FieldLastStakedAt)
+	}
+	if m.number_of_stakers != nil {
+		fields = append(fields, booknftdeltatimebucket7d.FieldNumberOfStakers)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *BookNFTDeltaTimeBucket7dMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case booknftdeltatimebucket7d.FieldEvmAddress:
+		return m.EvmAddress()
+	case booknftdeltatimebucket7d.FieldBucket:
+		return m.Bucket()
+	case booknftdeltatimebucket7d.FieldStakedAmount:
+		return m.StakedAmount()
+	case booknftdeltatimebucket7d.FieldLastStakedAt:
+		return m.LastStakedAt()
+	case booknftdeltatimebucket7d.FieldNumberOfStakers:
+		return m.NumberOfStakers()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *BookNFTDeltaTimeBucket7dMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case booknftdeltatimebucket7d.FieldEvmAddress:
+		return m.OldEvmAddress(ctx)
+	case booknftdeltatimebucket7d.FieldBucket:
+		return m.OldBucket(ctx)
+	case booknftdeltatimebucket7d.FieldStakedAmount:
+		return m.OldStakedAmount(ctx)
+	case booknftdeltatimebucket7d.FieldLastStakedAt:
+		return m.OldLastStakedAt(ctx)
+	case booknftdeltatimebucket7d.FieldNumberOfStakers:
+		return m.OldNumberOfStakers(ctx)
+	}
+	return nil, fmt.Errorf("unknown BookNFTDeltaTimeBucket7d field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BookNFTDeltaTimeBucket7dMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case booknftdeltatimebucket7d.FieldEvmAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEvmAddress(v)
+		return nil
+	case booknftdeltatimebucket7d.FieldBucket:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBucket(v)
+		return nil
+	case booknftdeltatimebucket7d.FieldStakedAmount:
+		v, ok := value.(typeutil.Uint256)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStakedAmount(v)
+		return nil
+	case booknftdeltatimebucket7d.FieldLastStakedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastStakedAt(v)
+		return nil
+	case booknftdeltatimebucket7d.FieldNumberOfStakers:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNumberOfStakers(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket7d field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) AddedFields() []string {
+	var fields []string
+	if m.addnumber_of_stakers != nil {
+		fields = append(fields, booknftdeltatimebucket7d.FieldNumberOfStakers)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *BookNFTDeltaTimeBucket7dMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case booknftdeltatimebucket7d.FieldNumberOfStakers:
+		return m.AddedNumberOfStakers()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BookNFTDeltaTimeBucket7dMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case booknftdeltatimebucket7d.FieldNumberOfStakers:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNumberOfStakers(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket7d numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *BookNFTDeltaTimeBucket7dMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket7d nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *BookNFTDeltaTimeBucket7dMutation) ResetField(name string) error {
+	switch name {
+	case booknftdeltatimebucket7d.FieldEvmAddress:
+		m.ResetEvmAddress()
+		return nil
+	case booknftdeltatimebucket7d.FieldBucket:
+		m.ResetBucket()
+		return nil
+	case booknftdeltatimebucket7d.FieldStakedAmount:
+		m.ResetStakedAmount()
+		return nil
+	case booknftdeltatimebucket7d.FieldLastStakedAt:
+		m.ResetLastStakedAt()
+		return nil
+	case booknftdeltatimebucket7d.FieldNumberOfStakers:
+		m.ResetNumberOfStakers()
+		return nil
+	}
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket7d field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *BookNFTDeltaTimeBucket7dMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *BookNFTDeltaTimeBucket7dMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket7d unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *BookNFTDeltaTimeBucket7dMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucket7d edge %s", name)
+}
+
+// BookNFTDeltaTimeBucketMixinMutation represents an operation that mutates the BookNFTDeltaTimeBucketMixin nodes in the graph.
+type BookNFTDeltaTimeBucketMixinMutation struct {
+	config
+	op                   Op
+	typ                  string
+	id                   *string
+	evm_address          *string
+	bucket               *time.Time
+	staked_amount        *typeutil.Uint256
+	last_staked_at       *time.Time
+	number_of_stakers    *uint64
+	addnumber_of_stakers *int64
+	clearedFields        map[string]struct{}
+	done                 bool
+	oldValue             func(context.Context) (*BookNFTDeltaTimeBucketMixin, error)
+	predicates           []predicate.BookNFTDeltaTimeBucketMixin
+}
+
+var _ ent.Mutation = (*BookNFTDeltaTimeBucketMixinMutation)(nil)
+
+// booknftdeltatimebucketmixinOption allows management of the mutation configuration using functional options.
+type booknftdeltatimebucketmixinOption func(*BookNFTDeltaTimeBucketMixinMutation)
+
+// newBookNFTDeltaTimeBucketMixinMutation creates new mutation for the BookNFTDeltaTimeBucketMixin entity.
+func newBookNFTDeltaTimeBucketMixinMutation(c config, op Op, opts ...booknftdeltatimebucketmixinOption) *BookNFTDeltaTimeBucketMixinMutation {
+	m := &BookNFTDeltaTimeBucketMixinMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeBookNFTDeltaTimeBucketMixin,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withBookNFTDeltaTimeBucketMixinID sets the ID field of the mutation.
+func withBookNFTDeltaTimeBucketMixinID(id string) booknftdeltatimebucketmixinOption {
+	return func(m *BookNFTDeltaTimeBucketMixinMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *BookNFTDeltaTimeBucketMixin
+		)
+		m.oldValue = func(ctx context.Context) (*BookNFTDeltaTimeBucketMixin, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().BookNFTDeltaTimeBucketMixin.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withBookNFTDeltaTimeBucketMixin sets the old BookNFTDeltaTimeBucketMixin of the mutation.
+func withBookNFTDeltaTimeBucketMixin(node *BookNFTDeltaTimeBucketMixin) booknftdeltatimebucketmixinOption {
+	return func(m *BookNFTDeltaTimeBucketMixinMutation) {
+		m.oldValue = func(context.Context) (*BookNFTDeltaTimeBucketMixin, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m BookNFTDeltaTimeBucketMixinMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m BookNFTDeltaTimeBucketMixinMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent_timescale: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of BookNFTDeltaTimeBucketMixin entities.
+func (m *BookNFTDeltaTimeBucketMixinMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *BookNFTDeltaTimeBucketMixinMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().BookNFTDeltaTimeBucketMixin.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetEvmAddress sets the "evm_address" field.
+func (m *BookNFTDeltaTimeBucketMixinMutation) SetEvmAddress(s string) {
+	m.evm_address = &s
+}
+
+// EvmAddress returns the value of the "evm_address" field in the mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) EvmAddress() (r string, exists bool) {
+	v := m.evm_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEvmAddress returns the old "evm_address" field's value of the BookNFTDeltaTimeBucketMixin entity.
+// If the BookNFTDeltaTimeBucketMixin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucketMixinMutation) OldEvmAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEvmAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEvmAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEvmAddress: %w", err)
+	}
+	return oldValue.EvmAddress, nil
+}
+
+// ResetEvmAddress resets all changes to the "evm_address" field.
+func (m *BookNFTDeltaTimeBucketMixinMutation) ResetEvmAddress() {
+	m.evm_address = nil
+}
+
+// SetBucket sets the "bucket" field.
+func (m *BookNFTDeltaTimeBucketMixinMutation) SetBucket(t time.Time) {
+	m.bucket = &t
+}
+
+// Bucket returns the value of the "bucket" field in the mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) Bucket() (r time.Time, exists bool) {
+	v := m.bucket
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBucket returns the old "bucket" field's value of the BookNFTDeltaTimeBucketMixin entity.
+// If the BookNFTDeltaTimeBucketMixin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucketMixinMutation) OldBucket(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBucket is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBucket requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBucket: %w", err)
+	}
+	return oldValue.Bucket, nil
+}
+
+// ResetBucket resets all changes to the "bucket" field.
+func (m *BookNFTDeltaTimeBucketMixinMutation) ResetBucket() {
+	m.bucket = nil
+}
+
+// SetStakedAmount sets the "staked_amount" field.
+func (m *BookNFTDeltaTimeBucketMixinMutation) SetStakedAmount(t typeutil.Uint256) {
+	m.staked_amount = &t
+}
+
+// StakedAmount returns the value of the "staked_amount" field in the mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) StakedAmount() (r typeutil.Uint256, exists bool) {
+	v := m.staked_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStakedAmount returns the old "staked_amount" field's value of the BookNFTDeltaTimeBucketMixin entity.
+// If the BookNFTDeltaTimeBucketMixin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucketMixinMutation) OldStakedAmount(ctx context.Context) (v typeutil.Uint256, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStakedAmount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStakedAmount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStakedAmount: %w", err)
+	}
+	return oldValue.StakedAmount, nil
+}
+
+// ResetStakedAmount resets all changes to the "staked_amount" field.
+func (m *BookNFTDeltaTimeBucketMixinMutation) ResetStakedAmount() {
+	m.staked_amount = nil
+}
+
+// SetLastStakedAt sets the "last_staked_at" field.
+func (m *BookNFTDeltaTimeBucketMixinMutation) SetLastStakedAt(t time.Time) {
+	m.last_staked_at = &t
+}
+
+// LastStakedAt returns the value of the "last_staked_at" field in the mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) LastStakedAt() (r time.Time, exists bool) {
+	v := m.last_staked_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastStakedAt returns the old "last_staked_at" field's value of the BookNFTDeltaTimeBucketMixin entity.
+// If the BookNFTDeltaTimeBucketMixin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucketMixinMutation) OldLastStakedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastStakedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastStakedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastStakedAt: %w", err)
+	}
+	return oldValue.LastStakedAt, nil
+}
+
+// ResetLastStakedAt resets all changes to the "last_staked_at" field.
+func (m *BookNFTDeltaTimeBucketMixinMutation) ResetLastStakedAt() {
+	m.last_staked_at = nil
+}
+
+// SetNumberOfStakers sets the "number_of_stakers" field.
+func (m *BookNFTDeltaTimeBucketMixinMutation) SetNumberOfStakers(u uint64) {
+	m.number_of_stakers = &u
+	m.addnumber_of_stakers = nil
+}
+
+// NumberOfStakers returns the value of the "number_of_stakers" field in the mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) NumberOfStakers() (r uint64, exists bool) {
+	v := m.number_of_stakers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNumberOfStakers returns the old "number_of_stakers" field's value of the BookNFTDeltaTimeBucketMixin entity.
+// If the BookNFTDeltaTimeBucketMixin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookNFTDeltaTimeBucketMixinMutation) OldNumberOfStakers(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNumberOfStakers is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNumberOfStakers requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNumberOfStakers: %w", err)
+	}
+	return oldValue.NumberOfStakers, nil
+}
+
+// AddNumberOfStakers adds u to the "number_of_stakers" field.
+func (m *BookNFTDeltaTimeBucketMixinMutation) AddNumberOfStakers(u int64) {
+	if m.addnumber_of_stakers != nil {
+		*m.addnumber_of_stakers += u
+	} else {
+		m.addnumber_of_stakers = &u
+	}
+}
+
+// AddedNumberOfStakers returns the value that was added to the "number_of_stakers" field in this mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) AddedNumberOfStakers() (r int64, exists bool) {
+	v := m.addnumber_of_stakers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetNumberOfStakers resets all changes to the "number_of_stakers" field.
+func (m *BookNFTDeltaTimeBucketMixinMutation) ResetNumberOfStakers() {
+	m.number_of_stakers = nil
+	m.addnumber_of_stakers = nil
+}
+
+// Where appends a list predicates to the BookNFTDeltaTimeBucketMixinMutation builder.
+func (m *BookNFTDeltaTimeBucketMixinMutation) Where(ps ...predicate.BookNFTDeltaTimeBucketMixin) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the BookNFTDeltaTimeBucketMixinMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *BookNFTDeltaTimeBucketMixinMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.BookNFTDeltaTimeBucketMixin, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *BookNFTDeltaTimeBucketMixinMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (BookNFTDeltaTimeBucketMixin).
+func (m *BookNFTDeltaTimeBucketMixinMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *BookNFTDeltaTimeBucketMixinMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.evm_address != nil {
+		fields = append(fields, booknftdeltatimebucketmixin.FieldEvmAddress)
+	}
+	if m.bucket != nil {
+		fields = append(fields, booknftdeltatimebucketmixin.FieldBucket)
+	}
+	if m.staked_amount != nil {
+		fields = append(fields, booknftdeltatimebucketmixin.FieldStakedAmount)
+	}
+	if m.last_staked_at != nil {
+		fields = append(fields, booknftdeltatimebucketmixin.FieldLastStakedAt)
+	}
+	if m.number_of_stakers != nil {
+		fields = append(fields, booknftdeltatimebucketmixin.FieldNumberOfStakers)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *BookNFTDeltaTimeBucketMixinMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case booknftdeltatimebucketmixin.FieldEvmAddress:
+		return m.EvmAddress()
+	case booknftdeltatimebucketmixin.FieldBucket:
+		return m.Bucket()
+	case booknftdeltatimebucketmixin.FieldStakedAmount:
+		return m.StakedAmount()
+	case booknftdeltatimebucketmixin.FieldLastStakedAt:
+		return m.LastStakedAt()
+	case booknftdeltatimebucketmixin.FieldNumberOfStakers:
+		return m.NumberOfStakers()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *BookNFTDeltaTimeBucketMixinMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case booknftdeltatimebucketmixin.FieldEvmAddress:
+		return m.OldEvmAddress(ctx)
+	case booknftdeltatimebucketmixin.FieldBucket:
+		return m.OldBucket(ctx)
+	case booknftdeltatimebucketmixin.FieldStakedAmount:
+		return m.OldStakedAmount(ctx)
+	case booknftdeltatimebucketmixin.FieldLastStakedAt:
+		return m.OldLastStakedAt(ctx)
+	case booknftdeltatimebucketmixin.FieldNumberOfStakers:
+		return m.OldNumberOfStakers(ctx)
+	}
+	return nil, fmt.Errorf("unknown BookNFTDeltaTimeBucketMixin field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BookNFTDeltaTimeBucketMixinMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case booknftdeltatimebucketmixin.FieldEvmAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEvmAddress(v)
+		return nil
+	case booknftdeltatimebucketmixin.FieldBucket:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBucket(v)
+		return nil
+	case booknftdeltatimebucketmixin.FieldStakedAmount:
+		v, ok := value.(typeutil.Uint256)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStakedAmount(v)
+		return nil
+	case booknftdeltatimebucketmixin.FieldLastStakedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastStakedAt(v)
+		return nil
+	case booknftdeltatimebucketmixin.FieldNumberOfStakers:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNumberOfStakers(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucketMixin field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) AddedFields() []string {
+	var fields []string
+	if m.addnumber_of_stakers != nil {
+		fields = append(fields, booknftdeltatimebucketmixin.FieldNumberOfStakers)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *BookNFTDeltaTimeBucketMixinMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case booknftdeltatimebucketmixin.FieldNumberOfStakers:
+		return m.AddedNumberOfStakers()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BookNFTDeltaTimeBucketMixinMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case booknftdeltatimebucketmixin.FieldNumberOfStakers:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNumberOfStakers(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucketMixin numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *BookNFTDeltaTimeBucketMixinMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucketMixin nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *BookNFTDeltaTimeBucketMixinMutation) ResetField(name string) error {
+	switch name {
+	case booknftdeltatimebucketmixin.FieldEvmAddress:
+		m.ResetEvmAddress()
+		return nil
+	case booknftdeltatimebucketmixin.FieldBucket:
+		m.ResetBucket()
+		return nil
+	case booknftdeltatimebucketmixin.FieldStakedAmount:
+		m.ResetStakedAmount()
+		return nil
+	case booknftdeltatimebucketmixin.FieldLastStakedAt:
+		m.ResetLastStakedAt()
+		return nil
+	case booknftdeltatimebucketmixin.FieldNumberOfStakers:
+		m.ResetNumberOfStakers()
+		return nil
+	}
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucketMixin field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *BookNFTDeltaTimeBucketMixinMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *BookNFTDeltaTimeBucketMixinMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucketMixin unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *BookNFTDeltaTimeBucketMixinMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown BookNFTDeltaTimeBucketMixin edge %s", name)
+}
 
 // StakingEventMutation represents an operation that mutates the StakingEvent nodes in the graph.
 type StakingEventMutation struct {

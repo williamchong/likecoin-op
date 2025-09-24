@@ -6,6 +6,62 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// BookNFTDeltaTimeBucket1y is the predicate function for booknftdeltatimebucket1y builders.
+type BookNFTDeltaTimeBucket1y func(*sql.Selector)
+
+// BookNFTDeltaTimeBucket1yOrErr calls the predicate only if the error is not nit.
+func BookNFTDeltaTimeBucket1yOrErr(p BookNFTDeltaTimeBucket1y, err error) BookNFTDeltaTimeBucket1y {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
+
+// BookNFTDeltaTimeBucket30d is the predicate function for booknftdeltatimebucket30d builders.
+type BookNFTDeltaTimeBucket30d func(*sql.Selector)
+
+// BookNFTDeltaTimeBucket30dOrErr calls the predicate only if the error is not nit.
+func BookNFTDeltaTimeBucket30dOrErr(p BookNFTDeltaTimeBucket30d, err error) BookNFTDeltaTimeBucket30d {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
+
+// BookNFTDeltaTimeBucket7d is the predicate function for booknftdeltatimebucket7d builders.
+type BookNFTDeltaTimeBucket7d func(*sql.Selector)
+
+// BookNFTDeltaTimeBucket7dOrErr calls the predicate only if the error is not nit.
+func BookNFTDeltaTimeBucket7dOrErr(p BookNFTDeltaTimeBucket7d, err error) BookNFTDeltaTimeBucket7d {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
+
+// BookNFTDeltaTimeBucketMixin is the predicate function for booknftdeltatimebucketmixin builders.
+type BookNFTDeltaTimeBucketMixin func(*sql.Selector)
+
+// BookNFTDeltaTimeBucketMixinOrErr calls the predicate only if the error is not nit.
+func BookNFTDeltaTimeBucketMixinOrErr(p BookNFTDeltaTimeBucketMixin, err error) BookNFTDeltaTimeBucketMixin {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
+
 // StakingEvent is the predicate function for stakingevent builders.
 type StakingEvent func(*sql.Selector)
 

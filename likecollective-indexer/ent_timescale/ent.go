@@ -6,6 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucket1y"
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucket30d"
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucket7d"
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucketmixin"
 	"likecollective-indexer/ent_timescale/stakingevent"
 	"likecollective-indexer/ent_timescale/stakingeventshypertable"
 	"reflect"
@@ -74,8 +78,12 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			stakingevent.Table:            stakingevent.ValidColumn,
-			stakingeventshypertable.Table: stakingeventshypertable.ValidColumn,
+			booknftdeltatimebucket1y.Table:    booknftdeltatimebucket1y.ValidColumn,
+			booknftdeltatimebucket30d.Table:   booknftdeltatimebucket30d.ValidColumn,
+			booknftdeltatimebucket7d.Table:    booknftdeltatimebucket7d.ValidColumn,
+			booknftdeltatimebucketmixin.Table: booknftdeltatimebucketmixin.ValidColumn,
+			stakingevent.Table:                stakingevent.ValidColumn,
+			stakingeventshypertable.Table:     stakingeventshypertable.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

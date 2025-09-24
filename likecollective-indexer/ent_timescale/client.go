@@ -11,6 +11,10 @@ import (
 
 	"likecollective-indexer/ent_timescale/migrate"
 
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucket1y"
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucket30d"
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucket7d"
+	"likecollective-indexer/ent_timescale/booknftdeltatimebucketmixin"
 	"likecollective-indexer/ent_timescale/stakingevent"
 	"likecollective-indexer/ent_timescale/stakingeventshypertable"
 
@@ -24,6 +28,14 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// BookNFTDeltaTimeBucket1y is the client for interacting with the BookNFTDeltaTimeBucket1y builders.
+	BookNFTDeltaTimeBucket1y *BookNFTDeltaTimeBucket1yClient
+	// BookNFTDeltaTimeBucket30d is the client for interacting with the BookNFTDeltaTimeBucket30d builders.
+	BookNFTDeltaTimeBucket30d *BookNFTDeltaTimeBucket30dClient
+	// BookNFTDeltaTimeBucket7d is the client for interacting with the BookNFTDeltaTimeBucket7d builders.
+	BookNFTDeltaTimeBucket7d *BookNFTDeltaTimeBucket7dClient
+	// BookNFTDeltaTimeBucketMixin is the client for interacting with the BookNFTDeltaTimeBucketMixin builders.
+	BookNFTDeltaTimeBucketMixin *BookNFTDeltaTimeBucketMixinClient
 	// StakingEvent is the client for interacting with the StakingEvent builders.
 	StakingEvent *StakingEventClient
 	// StakingEventsHyperTable is the client for interacting with the StakingEventsHyperTable builders.
@@ -39,6 +51,10 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.BookNFTDeltaTimeBucket1y = NewBookNFTDeltaTimeBucket1yClient(c.config)
+	c.BookNFTDeltaTimeBucket30d = NewBookNFTDeltaTimeBucket30dClient(c.config)
+	c.BookNFTDeltaTimeBucket7d = NewBookNFTDeltaTimeBucket7dClient(c.config)
+	c.BookNFTDeltaTimeBucketMixin = NewBookNFTDeltaTimeBucketMixinClient(c.config)
 	c.StakingEvent = NewStakingEventClient(c.config)
 	c.StakingEventsHyperTable = NewStakingEventsHyperTableClient(c.config)
 }
@@ -131,10 +147,14 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                     ctx,
-		config:                  cfg,
-		StakingEvent:            NewStakingEventClient(cfg),
-		StakingEventsHyperTable: NewStakingEventsHyperTableClient(cfg),
+		ctx:                         ctx,
+		config:                      cfg,
+		BookNFTDeltaTimeBucket1y:    NewBookNFTDeltaTimeBucket1yClient(cfg),
+		BookNFTDeltaTimeBucket30d:   NewBookNFTDeltaTimeBucket30dClient(cfg),
+		BookNFTDeltaTimeBucket7d:    NewBookNFTDeltaTimeBucket7dClient(cfg),
+		BookNFTDeltaTimeBucketMixin: NewBookNFTDeltaTimeBucketMixinClient(cfg),
+		StakingEvent:                NewStakingEventClient(cfg),
+		StakingEventsHyperTable:     NewStakingEventsHyperTableClient(cfg),
 	}, nil
 }
 
@@ -152,17 +172,21 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                     ctx,
-		config:                  cfg,
-		StakingEvent:            NewStakingEventClient(cfg),
-		StakingEventsHyperTable: NewStakingEventsHyperTableClient(cfg),
+		ctx:                         ctx,
+		config:                      cfg,
+		BookNFTDeltaTimeBucket1y:    NewBookNFTDeltaTimeBucket1yClient(cfg),
+		BookNFTDeltaTimeBucket30d:   NewBookNFTDeltaTimeBucket30dClient(cfg),
+		BookNFTDeltaTimeBucket7d:    NewBookNFTDeltaTimeBucket7dClient(cfg),
+		BookNFTDeltaTimeBucketMixin: NewBookNFTDeltaTimeBucketMixinClient(cfg),
+		StakingEvent:                NewStakingEventClient(cfg),
+		StakingEventsHyperTable:     NewStakingEventsHyperTableClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		StakingEvent.
+//		BookNFTDeltaTimeBucket1y.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -184,26 +208,576 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.StakingEvent.Use(hooks...)
-	c.StakingEventsHyperTable.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.BookNFTDeltaTimeBucket1y, c.BookNFTDeltaTimeBucket30d,
+		c.BookNFTDeltaTimeBucket7d, c.BookNFTDeltaTimeBucketMixin, c.StakingEvent,
+		c.StakingEventsHyperTable,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.StakingEvent.Intercept(interceptors...)
-	c.StakingEventsHyperTable.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.BookNFTDeltaTimeBucket1y, c.BookNFTDeltaTimeBucket30d,
+		c.BookNFTDeltaTimeBucket7d, c.BookNFTDeltaTimeBucketMixin, c.StakingEvent,
+		c.StakingEventsHyperTable,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *BookNFTDeltaTimeBucket1yMutation:
+		return c.BookNFTDeltaTimeBucket1y.mutate(ctx, m)
+	case *BookNFTDeltaTimeBucket30dMutation:
+		return c.BookNFTDeltaTimeBucket30d.mutate(ctx, m)
+	case *BookNFTDeltaTimeBucket7dMutation:
+		return c.BookNFTDeltaTimeBucket7d.mutate(ctx, m)
+	case *BookNFTDeltaTimeBucketMixinMutation:
+		return c.BookNFTDeltaTimeBucketMixin.mutate(ctx, m)
 	case *StakingEventMutation:
 		return c.StakingEvent.mutate(ctx, m)
 	case *StakingEventsHyperTableMutation:
 		return c.StakingEventsHyperTable.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent_timescale: unknown mutation type %T", m)
+	}
+}
+
+// BookNFTDeltaTimeBucket1yClient is a client for the BookNFTDeltaTimeBucket1y schema.
+type BookNFTDeltaTimeBucket1yClient struct {
+	config
+}
+
+// NewBookNFTDeltaTimeBucket1yClient returns a client for the BookNFTDeltaTimeBucket1y from the given config.
+func NewBookNFTDeltaTimeBucket1yClient(c config) *BookNFTDeltaTimeBucket1yClient {
+	return &BookNFTDeltaTimeBucket1yClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `booknftdeltatimebucket1y.Hooks(f(g(h())))`.
+func (c *BookNFTDeltaTimeBucket1yClient) Use(hooks ...Hook) {
+	c.hooks.BookNFTDeltaTimeBucket1y = append(c.hooks.BookNFTDeltaTimeBucket1y, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `booknftdeltatimebucket1y.Intercept(f(g(h())))`.
+func (c *BookNFTDeltaTimeBucket1yClient) Intercept(interceptors ...Interceptor) {
+	c.inters.BookNFTDeltaTimeBucket1y = append(c.inters.BookNFTDeltaTimeBucket1y, interceptors...)
+}
+
+// Create returns a builder for creating a BookNFTDeltaTimeBucket1y entity.
+func (c *BookNFTDeltaTimeBucket1yClient) Create() *BookNFTDeltaTimeBucket1yCreate {
+	mutation := newBookNFTDeltaTimeBucket1yMutation(c.config, OpCreate)
+	return &BookNFTDeltaTimeBucket1yCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BookNFTDeltaTimeBucket1y entities.
+func (c *BookNFTDeltaTimeBucket1yClient) CreateBulk(builders ...*BookNFTDeltaTimeBucket1yCreate) *BookNFTDeltaTimeBucket1yCreateBulk {
+	return &BookNFTDeltaTimeBucket1yCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *BookNFTDeltaTimeBucket1yClient) MapCreateBulk(slice any, setFunc func(*BookNFTDeltaTimeBucket1yCreate, int)) *BookNFTDeltaTimeBucket1yCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &BookNFTDeltaTimeBucket1yCreateBulk{err: fmt.Errorf("calling to BookNFTDeltaTimeBucket1yClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*BookNFTDeltaTimeBucket1yCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &BookNFTDeltaTimeBucket1yCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BookNFTDeltaTimeBucket1y.
+func (c *BookNFTDeltaTimeBucket1yClient) Update() *BookNFTDeltaTimeBucket1yUpdate {
+	mutation := newBookNFTDeltaTimeBucket1yMutation(c.config, OpUpdate)
+	return &BookNFTDeltaTimeBucket1yUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BookNFTDeltaTimeBucket1yClient) UpdateOne(_m *BookNFTDeltaTimeBucket1y) *BookNFTDeltaTimeBucket1yUpdateOne {
+	mutation := newBookNFTDeltaTimeBucket1yMutation(c.config, OpUpdateOne, withBookNFTDeltaTimeBucket1y(_m))
+	return &BookNFTDeltaTimeBucket1yUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BookNFTDeltaTimeBucket1yClient) UpdateOneID(id string) *BookNFTDeltaTimeBucket1yUpdateOne {
+	mutation := newBookNFTDeltaTimeBucket1yMutation(c.config, OpUpdateOne, withBookNFTDeltaTimeBucket1yID(id))
+	return &BookNFTDeltaTimeBucket1yUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BookNFTDeltaTimeBucket1y.
+func (c *BookNFTDeltaTimeBucket1yClient) Delete() *BookNFTDeltaTimeBucket1yDelete {
+	mutation := newBookNFTDeltaTimeBucket1yMutation(c.config, OpDelete)
+	return &BookNFTDeltaTimeBucket1yDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *BookNFTDeltaTimeBucket1yClient) DeleteOne(_m *BookNFTDeltaTimeBucket1y) *BookNFTDeltaTimeBucket1yDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *BookNFTDeltaTimeBucket1yClient) DeleteOneID(id string) *BookNFTDeltaTimeBucket1yDeleteOne {
+	builder := c.Delete().Where(booknftdeltatimebucket1y.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BookNFTDeltaTimeBucket1yDeleteOne{builder}
+}
+
+// Query returns a query builder for BookNFTDeltaTimeBucket1y.
+func (c *BookNFTDeltaTimeBucket1yClient) Query() *BookNFTDeltaTimeBucket1yQuery {
+	return &BookNFTDeltaTimeBucket1yQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeBookNFTDeltaTimeBucket1y},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a BookNFTDeltaTimeBucket1y entity by its id.
+func (c *BookNFTDeltaTimeBucket1yClient) Get(ctx context.Context, id string) (*BookNFTDeltaTimeBucket1y, error) {
+	return c.Query().Where(booknftdeltatimebucket1y.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BookNFTDeltaTimeBucket1yClient) GetX(ctx context.Context, id string) *BookNFTDeltaTimeBucket1y {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *BookNFTDeltaTimeBucket1yClient) Hooks() []Hook {
+	return c.hooks.BookNFTDeltaTimeBucket1y
+}
+
+// Interceptors returns the client interceptors.
+func (c *BookNFTDeltaTimeBucket1yClient) Interceptors() []Interceptor {
+	return c.inters.BookNFTDeltaTimeBucket1y
+}
+
+func (c *BookNFTDeltaTimeBucket1yClient) mutate(ctx context.Context, m *BookNFTDeltaTimeBucket1yMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BookNFTDeltaTimeBucket1yCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BookNFTDeltaTimeBucket1yUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BookNFTDeltaTimeBucket1yUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BookNFTDeltaTimeBucket1yDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent_timescale: unknown BookNFTDeltaTimeBucket1y mutation op: %q", m.Op())
+	}
+}
+
+// BookNFTDeltaTimeBucket30dClient is a client for the BookNFTDeltaTimeBucket30d schema.
+type BookNFTDeltaTimeBucket30dClient struct {
+	config
+}
+
+// NewBookNFTDeltaTimeBucket30dClient returns a client for the BookNFTDeltaTimeBucket30d from the given config.
+func NewBookNFTDeltaTimeBucket30dClient(c config) *BookNFTDeltaTimeBucket30dClient {
+	return &BookNFTDeltaTimeBucket30dClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `booknftdeltatimebucket30d.Hooks(f(g(h())))`.
+func (c *BookNFTDeltaTimeBucket30dClient) Use(hooks ...Hook) {
+	c.hooks.BookNFTDeltaTimeBucket30d = append(c.hooks.BookNFTDeltaTimeBucket30d, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `booknftdeltatimebucket30d.Intercept(f(g(h())))`.
+func (c *BookNFTDeltaTimeBucket30dClient) Intercept(interceptors ...Interceptor) {
+	c.inters.BookNFTDeltaTimeBucket30d = append(c.inters.BookNFTDeltaTimeBucket30d, interceptors...)
+}
+
+// Create returns a builder for creating a BookNFTDeltaTimeBucket30d entity.
+func (c *BookNFTDeltaTimeBucket30dClient) Create() *BookNFTDeltaTimeBucket30dCreate {
+	mutation := newBookNFTDeltaTimeBucket30dMutation(c.config, OpCreate)
+	return &BookNFTDeltaTimeBucket30dCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BookNFTDeltaTimeBucket30d entities.
+func (c *BookNFTDeltaTimeBucket30dClient) CreateBulk(builders ...*BookNFTDeltaTimeBucket30dCreate) *BookNFTDeltaTimeBucket30dCreateBulk {
+	return &BookNFTDeltaTimeBucket30dCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *BookNFTDeltaTimeBucket30dClient) MapCreateBulk(slice any, setFunc func(*BookNFTDeltaTimeBucket30dCreate, int)) *BookNFTDeltaTimeBucket30dCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &BookNFTDeltaTimeBucket30dCreateBulk{err: fmt.Errorf("calling to BookNFTDeltaTimeBucket30dClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*BookNFTDeltaTimeBucket30dCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &BookNFTDeltaTimeBucket30dCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BookNFTDeltaTimeBucket30d.
+func (c *BookNFTDeltaTimeBucket30dClient) Update() *BookNFTDeltaTimeBucket30dUpdate {
+	mutation := newBookNFTDeltaTimeBucket30dMutation(c.config, OpUpdate)
+	return &BookNFTDeltaTimeBucket30dUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BookNFTDeltaTimeBucket30dClient) UpdateOne(_m *BookNFTDeltaTimeBucket30d) *BookNFTDeltaTimeBucket30dUpdateOne {
+	mutation := newBookNFTDeltaTimeBucket30dMutation(c.config, OpUpdateOne, withBookNFTDeltaTimeBucket30d(_m))
+	return &BookNFTDeltaTimeBucket30dUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BookNFTDeltaTimeBucket30dClient) UpdateOneID(id string) *BookNFTDeltaTimeBucket30dUpdateOne {
+	mutation := newBookNFTDeltaTimeBucket30dMutation(c.config, OpUpdateOne, withBookNFTDeltaTimeBucket30dID(id))
+	return &BookNFTDeltaTimeBucket30dUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BookNFTDeltaTimeBucket30d.
+func (c *BookNFTDeltaTimeBucket30dClient) Delete() *BookNFTDeltaTimeBucket30dDelete {
+	mutation := newBookNFTDeltaTimeBucket30dMutation(c.config, OpDelete)
+	return &BookNFTDeltaTimeBucket30dDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *BookNFTDeltaTimeBucket30dClient) DeleteOne(_m *BookNFTDeltaTimeBucket30d) *BookNFTDeltaTimeBucket30dDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *BookNFTDeltaTimeBucket30dClient) DeleteOneID(id string) *BookNFTDeltaTimeBucket30dDeleteOne {
+	builder := c.Delete().Where(booknftdeltatimebucket30d.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BookNFTDeltaTimeBucket30dDeleteOne{builder}
+}
+
+// Query returns a query builder for BookNFTDeltaTimeBucket30d.
+func (c *BookNFTDeltaTimeBucket30dClient) Query() *BookNFTDeltaTimeBucket30dQuery {
+	return &BookNFTDeltaTimeBucket30dQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeBookNFTDeltaTimeBucket30d},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a BookNFTDeltaTimeBucket30d entity by its id.
+func (c *BookNFTDeltaTimeBucket30dClient) Get(ctx context.Context, id string) (*BookNFTDeltaTimeBucket30d, error) {
+	return c.Query().Where(booknftdeltatimebucket30d.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BookNFTDeltaTimeBucket30dClient) GetX(ctx context.Context, id string) *BookNFTDeltaTimeBucket30d {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *BookNFTDeltaTimeBucket30dClient) Hooks() []Hook {
+	return c.hooks.BookNFTDeltaTimeBucket30d
+}
+
+// Interceptors returns the client interceptors.
+func (c *BookNFTDeltaTimeBucket30dClient) Interceptors() []Interceptor {
+	return c.inters.BookNFTDeltaTimeBucket30d
+}
+
+func (c *BookNFTDeltaTimeBucket30dClient) mutate(ctx context.Context, m *BookNFTDeltaTimeBucket30dMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BookNFTDeltaTimeBucket30dCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BookNFTDeltaTimeBucket30dUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BookNFTDeltaTimeBucket30dUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BookNFTDeltaTimeBucket30dDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent_timescale: unknown BookNFTDeltaTimeBucket30d mutation op: %q", m.Op())
+	}
+}
+
+// BookNFTDeltaTimeBucket7dClient is a client for the BookNFTDeltaTimeBucket7d schema.
+type BookNFTDeltaTimeBucket7dClient struct {
+	config
+}
+
+// NewBookNFTDeltaTimeBucket7dClient returns a client for the BookNFTDeltaTimeBucket7d from the given config.
+func NewBookNFTDeltaTimeBucket7dClient(c config) *BookNFTDeltaTimeBucket7dClient {
+	return &BookNFTDeltaTimeBucket7dClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `booknftdeltatimebucket7d.Hooks(f(g(h())))`.
+func (c *BookNFTDeltaTimeBucket7dClient) Use(hooks ...Hook) {
+	c.hooks.BookNFTDeltaTimeBucket7d = append(c.hooks.BookNFTDeltaTimeBucket7d, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `booknftdeltatimebucket7d.Intercept(f(g(h())))`.
+func (c *BookNFTDeltaTimeBucket7dClient) Intercept(interceptors ...Interceptor) {
+	c.inters.BookNFTDeltaTimeBucket7d = append(c.inters.BookNFTDeltaTimeBucket7d, interceptors...)
+}
+
+// Create returns a builder for creating a BookNFTDeltaTimeBucket7d entity.
+func (c *BookNFTDeltaTimeBucket7dClient) Create() *BookNFTDeltaTimeBucket7dCreate {
+	mutation := newBookNFTDeltaTimeBucket7dMutation(c.config, OpCreate)
+	return &BookNFTDeltaTimeBucket7dCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BookNFTDeltaTimeBucket7d entities.
+func (c *BookNFTDeltaTimeBucket7dClient) CreateBulk(builders ...*BookNFTDeltaTimeBucket7dCreate) *BookNFTDeltaTimeBucket7dCreateBulk {
+	return &BookNFTDeltaTimeBucket7dCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *BookNFTDeltaTimeBucket7dClient) MapCreateBulk(slice any, setFunc func(*BookNFTDeltaTimeBucket7dCreate, int)) *BookNFTDeltaTimeBucket7dCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &BookNFTDeltaTimeBucket7dCreateBulk{err: fmt.Errorf("calling to BookNFTDeltaTimeBucket7dClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*BookNFTDeltaTimeBucket7dCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &BookNFTDeltaTimeBucket7dCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BookNFTDeltaTimeBucket7d.
+func (c *BookNFTDeltaTimeBucket7dClient) Update() *BookNFTDeltaTimeBucket7dUpdate {
+	mutation := newBookNFTDeltaTimeBucket7dMutation(c.config, OpUpdate)
+	return &BookNFTDeltaTimeBucket7dUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BookNFTDeltaTimeBucket7dClient) UpdateOne(_m *BookNFTDeltaTimeBucket7d) *BookNFTDeltaTimeBucket7dUpdateOne {
+	mutation := newBookNFTDeltaTimeBucket7dMutation(c.config, OpUpdateOne, withBookNFTDeltaTimeBucket7d(_m))
+	return &BookNFTDeltaTimeBucket7dUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BookNFTDeltaTimeBucket7dClient) UpdateOneID(id string) *BookNFTDeltaTimeBucket7dUpdateOne {
+	mutation := newBookNFTDeltaTimeBucket7dMutation(c.config, OpUpdateOne, withBookNFTDeltaTimeBucket7dID(id))
+	return &BookNFTDeltaTimeBucket7dUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BookNFTDeltaTimeBucket7d.
+func (c *BookNFTDeltaTimeBucket7dClient) Delete() *BookNFTDeltaTimeBucket7dDelete {
+	mutation := newBookNFTDeltaTimeBucket7dMutation(c.config, OpDelete)
+	return &BookNFTDeltaTimeBucket7dDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *BookNFTDeltaTimeBucket7dClient) DeleteOne(_m *BookNFTDeltaTimeBucket7d) *BookNFTDeltaTimeBucket7dDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *BookNFTDeltaTimeBucket7dClient) DeleteOneID(id string) *BookNFTDeltaTimeBucket7dDeleteOne {
+	builder := c.Delete().Where(booknftdeltatimebucket7d.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BookNFTDeltaTimeBucket7dDeleteOne{builder}
+}
+
+// Query returns a query builder for BookNFTDeltaTimeBucket7d.
+func (c *BookNFTDeltaTimeBucket7dClient) Query() *BookNFTDeltaTimeBucket7dQuery {
+	return &BookNFTDeltaTimeBucket7dQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeBookNFTDeltaTimeBucket7d},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a BookNFTDeltaTimeBucket7d entity by its id.
+func (c *BookNFTDeltaTimeBucket7dClient) Get(ctx context.Context, id string) (*BookNFTDeltaTimeBucket7d, error) {
+	return c.Query().Where(booknftdeltatimebucket7d.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BookNFTDeltaTimeBucket7dClient) GetX(ctx context.Context, id string) *BookNFTDeltaTimeBucket7d {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *BookNFTDeltaTimeBucket7dClient) Hooks() []Hook {
+	return c.hooks.BookNFTDeltaTimeBucket7d
+}
+
+// Interceptors returns the client interceptors.
+func (c *BookNFTDeltaTimeBucket7dClient) Interceptors() []Interceptor {
+	return c.inters.BookNFTDeltaTimeBucket7d
+}
+
+func (c *BookNFTDeltaTimeBucket7dClient) mutate(ctx context.Context, m *BookNFTDeltaTimeBucket7dMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BookNFTDeltaTimeBucket7dCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BookNFTDeltaTimeBucket7dUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BookNFTDeltaTimeBucket7dUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BookNFTDeltaTimeBucket7dDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent_timescale: unknown BookNFTDeltaTimeBucket7d mutation op: %q", m.Op())
+	}
+}
+
+// BookNFTDeltaTimeBucketMixinClient is a client for the BookNFTDeltaTimeBucketMixin schema.
+type BookNFTDeltaTimeBucketMixinClient struct {
+	config
+}
+
+// NewBookNFTDeltaTimeBucketMixinClient returns a client for the BookNFTDeltaTimeBucketMixin from the given config.
+func NewBookNFTDeltaTimeBucketMixinClient(c config) *BookNFTDeltaTimeBucketMixinClient {
+	return &BookNFTDeltaTimeBucketMixinClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `booknftdeltatimebucketmixin.Hooks(f(g(h())))`.
+func (c *BookNFTDeltaTimeBucketMixinClient) Use(hooks ...Hook) {
+	c.hooks.BookNFTDeltaTimeBucketMixin = append(c.hooks.BookNFTDeltaTimeBucketMixin, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `booknftdeltatimebucketmixin.Intercept(f(g(h())))`.
+func (c *BookNFTDeltaTimeBucketMixinClient) Intercept(interceptors ...Interceptor) {
+	c.inters.BookNFTDeltaTimeBucketMixin = append(c.inters.BookNFTDeltaTimeBucketMixin, interceptors...)
+}
+
+// Create returns a builder for creating a BookNFTDeltaTimeBucketMixin entity.
+func (c *BookNFTDeltaTimeBucketMixinClient) Create() *BookNFTDeltaTimeBucketMixinCreate {
+	mutation := newBookNFTDeltaTimeBucketMixinMutation(c.config, OpCreate)
+	return &BookNFTDeltaTimeBucketMixinCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BookNFTDeltaTimeBucketMixin entities.
+func (c *BookNFTDeltaTimeBucketMixinClient) CreateBulk(builders ...*BookNFTDeltaTimeBucketMixinCreate) *BookNFTDeltaTimeBucketMixinCreateBulk {
+	return &BookNFTDeltaTimeBucketMixinCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *BookNFTDeltaTimeBucketMixinClient) MapCreateBulk(slice any, setFunc func(*BookNFTDeltaTimeBucketMixinCreate, int)) *BookNFTDeltaTimeBucketMixinCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &BookNFTDeltaTimeBucketMixinCreateBulk{err: fmt.Errorf("calling to BookNFTDeltaTimeBucketMixinClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*BookNFTDeltaTimeBucketMixinCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &BookNFTDeltaTimeBucketMixinCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BookNFTDeltaTimeBucketMixin.
+func (c *BookNFTDeltaTimeBucketMixinClient) Update() *BookNFTDeltaTimeBucketMixinUpdate {
+	mutation := newBookNFTDeltaTimeBucketMixinMutation(c.config, OpUpdate)
+	return &BookNFTDeltaTimeBucketMixinUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BookNFTDeltaTimeBucketMixinClient) UpdateOne(_m *BookNFTDeltaTimeBucketMixin) *BookNFTDeltaTimeBucketMixinUpdateOne {
+	mutation := newBookNFTDeltaTimeBucketMixinMutation(c.config, OpUpdateOne, withBookNFTDeltaTimeBucketMixin(_m))
+	return &BookNFTDeltaTimeBucketMixinUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BookNFTDeltaTimeBucketMixinClient) UpdateOneID(id string) *BookNFTDeltaTimeBucketMixinUpdateOne {
+	mutation := newBookNFTDeltaTimeBucketMixinMutation(c.config, OpUpdateOne, withBookNFTDeltaTimeBucketMixinID(id))
+	return &BookNFTDeltaTimeBucketMixinUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BookNFTDeltaTimeBucketMixin.
+func (c *BookNFTDeltaTimeBucketMixinClient) Delete() *BookNFTDeltaTimeBucketMixinDelete {
+	mutation := newBookNFTDeltaTimeBucketMixinMutation(c.config, OpDelete)
+	return &BookNFTDeltaTimeBucketMixinDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *BookNFTDeltaTimeBucketMixinClient) DeleteOne(_m *BookNFTDeltaTimeBucketMixin) *BookNFTDeltaTimeBucketMixinDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *BookNFTDeltaTimeBucketMixinClient) DeleteOneID(id string) *BookNFTDeltaTimeBucketMixinDeleteOne {
+	builder := c.Delete().Where(booknftdeltatimebucketmixin.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BookNFTDeltaTimeBucketMixinDeleteOne{builder}
+}
+
+// Query returns a query builder for BookNFTDeltaTimeBucketMixin.
+func (c *BookNFTDeltaTimeBucketMixinClient) Query() *BookNFTDeltaTimeBucketMixinQuery {
+	return &BookNFTDeltaTimeBucketMixinQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeBookNFTDeltaTimeBucketMixin},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a BookNFTDeltaTimeBucketMixin entity by its id.
+func (c *BookNFTDeltaTimeBucketMixinClient) Get(ctx context.Context, id string) (*BookNFTDeltaTimeBucketMixin, error) {
+	return c.Query().Where(booknftdeltatimebucketmixin.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BookNFTDeltaTimeBucketMixinClient) GetX(ctx context.Context, id string) *BookNFTDeltaTimeBucketMixin {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *BookNFTDeltaTimeBucketMixinClient) Hooks() []Hook {
+	return c.hooks.BookNFTDeltaTimeBucketMixin
+}
+
+// Interceptors returns the client interceptors.
+func (c *BookNFTDeltaTimeBucketMixinClient) Interceptors() []Interceptor {
+	return c.inters.BookNFTDeltaTimeBucketMixin
+}
+
+func (c *BookNFTDeltaTimeBucketMixinClient) mutate(ctx context.Context, m *BookNFTDeltaTimeBucketMixinMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BookNFTDeltaTimeBucketMixinCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BookNFTDeltaTimeBucketMixinUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BookNFTDeltaTimeBucketMixinUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BookNFTDeltaTimeBucketMixinDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent_timescale: unknown BookNFTDeltaTimeBucketMixin mutation op: %q", m.Op())
 	}
 }
 
@@ -476,9 +1050,12 @@ func (c *StakingEventsHyperTableClient) mutate(ctx context.Context, m *StakingEv
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		StakingEvent, StakingEventsHyperTable []ent.Hook
+		BookNFTDeltaTimeBucket1y, BookNFTDeltaTimeBucket30d, BookNFTDeltaTimeBucket7d,
+		BookNFTDeltaTimeBucketMixin, StakingEvent, StakingEventsHyperTable []ent.Hook
 	}
 	inters struct {
-		StakingEvent, StakingEventsHyperTable []ent.Interceptor
+		BookNFTDeltaTimeBucket1y, BookNFTDeltaTimeBucket30d, BookNFTDeltaTimeBucket7d,
+		BookNFTDeltaTimeBucketMixin, StakingEvent,
+		StakingEventsHyperTable []ent.Interceptor
 	}
 )
