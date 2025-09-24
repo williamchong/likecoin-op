@@ -5,16 +5,17 @@
   "miscellaneous-actions": {
     "add-chain": {
       "metamask": {
-        "add-chain": "Add Chain",
-        "description": "To view LikeCoin on your Metamask, you need to add the {chainName} ({chainId}) to your Metamask."
+        "add-chain": "Add {chainName} Chain",
+        "chain-added": "Added",
+        "description": "To view {chainName} ({chainId}), please add the network to MetaMask:"
       }
     },
     "add-tokens": {
       "metamask": {
-        "add": "Add",
+        "add": "Add LIKE v3",
+        "added": "Added",
         "chain-not-added": "Please add the {chainName} ({chainId}) to your Metamask.",
-        "description": "To view LikeCoin on your Ethereum wallet, you need to add the LikeCoin token to your wallet.",
-        "view-on-block-explorer": "View on Block Explorer"
+        "description": "To view LikeCoin v3, please add the ERC-20 address to MetaMask:"
       }
     }
   },
@@ -61,7 +62,7 @@
       "status": "Status",
       "title": "Migration in Progress",
       "verified": {
-        "description": "Migration completed on Base Chain",
+        "description": "Received {amount} LikeCoin v3 tokens on {chainName}",
         "title": "Verified"
       }
     },

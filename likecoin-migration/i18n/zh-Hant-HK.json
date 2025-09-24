@@ -5,16 +5,17 @@
   "miscellaneous-actions": {
     "add-chain": {
       "metamask": {
-        "add-chain": "添加",
-        "description": "要在 MetaMask 上查看 LikeCoin，您需要將 {chainName} ({chainId}) 添加到 MetaMask。"
+        "add-chain": "添加 {chainName} 鏈",
+        "chain-added": "已添加",
+        "description": "查看 {chainName} （{chainId}），請添加網絡到 MetaMask："
       }
     },
     "add-tokens": {
       "metamask": {
-        "add": "添加",
+        "add": "添加 LIKE v3",
+        "added": "已添加",
         "chain-not-added": "請將 {chainName} ({chainId}) 添加到您的 MetaMask。",
-        "description": "要在您的以太坊錢包上查看 LikeCoin，您需要將 LikeCoin 代幣添加到您的錢包。",
-        "view-on-block-explorer": "在區塊瀏覽器上查看"
+        "description": "查看 LikeCoin v3，請添加 ERC-20 地址到 MetaMask："
       }
     }
   },
@@ -61,7 +62,7 @@
       "status": "狀態",
       "title": "升級進度",
       "verified": {
-        "description": "已在 Base Chain 鏈上完成轉換",
+        "description": "已在 {chainName} 鏈收到 {amount} LikeCoin v3 tokens",
         "title": "完成"
       }
     },

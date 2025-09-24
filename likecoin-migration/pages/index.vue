@@ -250,12 +250,17 @@
               tag="p"
               :class="['text-sm', 'text-likecoin-darkgrey']"
             >
-              <a place="link" href="https://stake.3ook.com" target="_blank">
-                https://stake.3ook.com
+              <a
+                place="link"
+                href="https://stake.3ook.com"
+                target="_blank"
+                :class="['text-likecoin-votecolor-yes']"
+              >
+                stake.3ook.com
               </a>
             </i18n>
           </div>
-          <MiscellaneousActions v-if="!isFuture()" :class="['mt-2.5']" />
+          <MiscellaneousActions v-if="!isFuture()" :class="['mt-5']" />
         </StepSection>
       </div>
     </div>

@@ -3,7 +3,7 @@
     v-if="addChainState.type === 'chain-added'"
     :class="['flex', 'flex-row', 'gap-2']"
   >
-    <p :class="['flex-1', 'py-[10px]', 'text-sm', 'text-likecoin-grey']">
+    <p :class="['flex-1', 'py-[10px]', 'text-sm', 'text-likecoin-darkgrey']">
       {{
         $t('miscellaneous-actions.add-chain.metamask.description', {
           chainName,
@@ -11,15 +11,9 @@
         })
       }}
     </p>
-    <FontAwesomeIcon
-      icon="circle-check"
-      :class="[
-        'py-[10px]',
-        'text-sm',
-        'font-black',
-        'text-likecoin-votecolor-yes',
-      ]"
-    />
+    <AppButton variant="primary" :class="['self-start']" disabled>
+      {{ $t('miscellaneous-actions.add-chain.metamask.chain-added') }}
+    </AppButton>
   </div>
   <div v-else :class="['flex', 'flex-row', 'gap-2']">
     <p :class="['flex-1', 'py-[10px]', 'text-sm', 'text-likecoin-darkgrey']">
@@ -36,7 +30,11 @@
       :class="['self-start']"
       @click="handleAddChainClick(addChainState)"
     >
-      {{ $t('miscellaneous-actions.add-chain.metamask.add-chain') }}
+      {{
+        $t('miscellaneous-actions.add-chain.metamask.add-chain', {
+          chainName,
+        })
+      }}
     </AppButton>
     <AppButton v-else variant="primary" :class="['self-start']" disabled>
       <LoadingIcon :class="['w-5', 'h-5']" />

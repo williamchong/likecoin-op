@@ -238,10 +238,35 @@
                 {{ $t('section.migration-progress.verified.title') }}
               </span>
             </div>
-            <div :class="['flex', 'flex-row']">
-              <p :class="['mt-1', 'text-sm', 'text-likecoin-darkgrey']">
-                {{ $t('section.migration-progress.verified.description') }}
-              </p>
+            <p :class="['mt-1', 'text-sm', 'text-likecoin-darkgrey']">
+              {{
+                $t('section.migration-progress.verified.description', {
+                  amount: migrationAmountViewCoin.amount,
+                  chainName: $evmChainConfig.chainName,
+                })
+              }}
+            </p>
+            <div
+              :class="['flex', 'flex-row', 'items-center', 'mt-2', 'gap-2.5']"
+            >
+              <a
+                :href="tokenBlockExplorerUrl"
+                target="_blank"
+                :class="[
+                  'text-base',
+                  'text-likecoin-votecolor-yes',
+                  'overflow-hidden',
+                  'text-ellipsis',
+                ]"
+              >
+                {{ $appConfig.evmTokenAddress }}
+              </a>
+              <button
+                type="button"
+                @click="handleTxHashCopyClick($appConfig.evmTokenAddress)"
+              >
+                <FontAwesomeIcon :class="['text-base']" icon="copy" />
+              </button>
             </div>
           </li>
         </ul>
@@ -407,6 +432,14 @@ export default Vue.extend({
       return new URL(
         `/tx/${this.evmTxHash}`,
         this.$appConfig.evmExplorerBaseURL
+      ).toString();
+    },
+
+    tokenBlockExplorerUrl() {
+      const [blockExplorerUrl] = this.$evmChainConfig.blockExplorerUrls;
+      return new URL(
+        `/token/${this.$appConfig.evmTokenAddress}`,
+        blockExplorerUrl
       ).toString();
     },
   },
