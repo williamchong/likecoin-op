@@ -6,7 +6,7 @@
     <div :class="['flex-1', 'py-[10px]']">
       <p :class="['text-sm', 'text-likecoin-grey']">
         {{
-          $t('miscellaneous-actions.add-tokens.likecoin.description', {
+          $t('miscellaneous-actions.add-tokens.metamask.description', {
             tokenSymbol: addTokenRequestState.tokenInfoState.tokenSymbol,
           })
         }}
@@ -29,7 +29,7 @@
     <div :class="['flex-1', 'flex', 'flex-col', 'gap-1', 'py-[10px]']">
       <p :class="['text-sm', 'text-likecoin-darkgrey']">
         {{
-          $t('miscellaneous-actions.add-tokens.likecoin.description', {
+          $t('miscellaneous-actions.add-tokens.metamask.description', {
             tokenSymbol: tokenInfoState.tokenSymbol,
           })
         }}
@@ -39,7 +39,7 @@
         :class="['text-xs', 'text-likecoin-votecolor-no']"
       >
         {{
-          $t('miscellaneous-actions.add-tokens.likecoin.chain-not-added', {
+          $t('miscellaneous-actions.add-tokens.metamask.chain-not-added', {
             chainName,
             chainId: chainId.toString(),
           })
@@ -53,7 +53,7 @@
       target="_blank"
     >
       {{
-        $t('miscellaneous-actions.add-tokens.likecoin.view-on-block-explorer')
+        $t('miscellaneous-actions.add-tokens.metamask.view-on-block-explorer')
       }}
     </AppButton>
     <AppButton
@@ -67,7 +67,7 @@
         :class="['w-5', 'h-5']"
       />
       <span v-else>
-        {{ $t('miscellaneous-actions.add-tokens.likecoin.add') }}
+        {{ $t('miscellaneous-actions.add-tokens.metamask.add') }}
       </span>
     </AppButton>
     <AppButton
@@ -76,7 +76,7 @@
       :class="['self-start']"
       :disabled="true"
     >
-      {{ $t('miscellaneous-actions.add-tokens.likecoin.add') }}
+      {{ $t('miscellaneous-actions.add-tokens.metamask.add') }}
     </AppButton>
   </div>
 </template>
@@ -180,7 +180,7 @@ interface Data {
 }
 
 export default Vue.extend({
-  name: 'MiscellaneousActionsAddTokensLikeCoin',
+  name: 'MiscellaneousActionsAddTokensMetaMask',
 
   data(): Data {
     return {

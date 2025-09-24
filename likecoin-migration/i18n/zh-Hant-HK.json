@@ -10,7 +10,7 @@
       }
     },
     "add-tokens": {
-      "likecoin": {
+      "metamask": {
         "add": "添加",
         "chain-not-added": "請將 {chainName} ({chainId}) 添加到您的 MetaMask。",
         "description": "要在您的以太坊錢包上查看 LikeCoin，您需要將 LikeCoin 代幣添加到您的錢包。",

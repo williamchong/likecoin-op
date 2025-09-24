@@ -10,7 +10,7 @@
       }
     },
     "add-tokens": {
-      "likecoin": {
+      "metamask": {
         "add": "Add",
         "chain-not-added": "Please add the {chainName} ({chainId}) to your Metamask.",
         "description": "To view LikeCoin on your Ethereum wallet, you need to add the LikeCoin token to your wallet.",
