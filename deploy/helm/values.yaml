@@ -283,6 +283,23 @@ likecollectiveIndexer:
           - check-received-evm-events
         resources: {}
 
+  timescaleDb:
+    name: likecollective-indexer-timescale-db
+
+    container:
+      image: timescale/timescaledb-ha:pg16
+      imagePullPolicy: IfNotPresent
+      port: 5432
+
+    service:
+      port: 5432
+
+    psqlVolume:
+      storage: 30Gi
+      storageClass: standard-rwo
+
+    resources: {}
+
 redis:
   name: redis
   container:
