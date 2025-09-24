@@ -56,6 +56,12 @@ type Handler interface {
 	//
 	// GET /book-nfts
 	BookNftsGet(ctx context.Context, params BookNftsGetParams) (*BookNftsGetOK, error)
+	// BookNftsTimeFrameDeltaGet implements GET /book-nfts/{time_frame}/delta operation.
+	//
+	// Get book NFTs.
+	//
+	// GET /book-nfts/{time_frame}/delta
+	BookNftsTimeFrameDeltaGet(ctx context.Context, params BookNftsTimeFrameDeltaGetParams) (*BookNftsTimeFrameDeltaGetOK, error)
 	// EventsAddressGet implements GET /events/{address} operation.
 	//
 	// Query events.

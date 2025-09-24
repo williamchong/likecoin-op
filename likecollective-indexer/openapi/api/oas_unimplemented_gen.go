@@ -85,6 +85,15 @@ func (UnimplementedHandler) BookNftsGet(ctx context.Context, params BookNftsGetP
 	return r, ht.ErrNotImplemented
 }
 
+// BookNftsTimeFrameDeltaGet implements GET /book-nfts/{time_frame}/delta operation.
+//
+// Get book NFTs.
+//
+// GET /book-nfts/{time_frame}/delta
+func (UnimplementedHandler) BookNftsTimeFrameDeltaGet(ctx context.Context, params BookNftsTimeFrameDeltaGetParams) (r *BookNftsTimeFrameDeltaGetOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // EventsAddressGet implements GET /events/{address} operation.
 //
 // Query events.

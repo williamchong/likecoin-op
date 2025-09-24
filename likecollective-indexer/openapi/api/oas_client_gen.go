@@ -75,6 +75,12 @@ type Invoker interface {
 	//
 	// GET /book-nfts
 	BookNftsGet(ctx context.Context, params BookNftsGetParams) (*BookNftsGetOK, error)
+	// BookNftsTimeFrameDeltaGet invokes GET /book-nfts/{time_frame}/delta operation.
+	//
+	// Get book NFTs.
+	//
+	// GET /book-nfts/{time_frame}/delta
+	BookNftsTimeFrameDeltaGet(ctx context.Context, params BookNftsTimeFrameDeltaGetParams) (*BookNftsTimeFrameDeltaGetOK, error)
 	// EventsAddressGet invokes GET /events/{address} operation.
 	//
 	// Query events.
@@ -1542,6 +1548,162 @@ func (c *Client) sendBookNftsGet(ctx context.Context, params BookNftsGetParams) 
 
 	stage = "DecodeResponse"
 	result, err := decodeBookNftsGetResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// BookNftsTimeFrameDeltaGet invokes GET /book-nfts/{time_frame}/delta operation.
+//
+// Get book NFTs.
+//
+// GET /book-nfts/{time_frame}/delta
+func (c *Client) BookNftsTimeFrameDeltaGet(ctx context.Context, params BookNftsTimeFrameDeltaGetParams) (*BookNftsTimeFrameDeltaGetOK, error) {
+	res, err := c.sendBookNftsTimeFrameDeltaGet(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendBookNftsTimeFrameDeltaGet(ctx context.Context, params BookNftsTimeFrameDeltaGetParams) (res *BookNftsTimeFrameDeltaGetOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/book-nfts/{time_frame}/delta"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, BookNftsTimeFrameDeltaGetOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/book-nfts/"
+	{
+		// Encode "time_frame" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "time_frame",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(string(params.TimeFrame)))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/delta"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "sort_by" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "sort_by",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(string(params.SortBy)))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "sort_order" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "sort_order",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(string(params.SortOrder)))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "pagination.limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "pagination.limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.PaginationLimit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "pagination.page" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "pagination.page",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.PaginationPage.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeBookNftsTimeFrameDeltaGetResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

@@ -254,6 +254,54 @@ func (s *BookNFT) SetNumberOfStakers(val int) {
 	s.NumberOfStakers = val
 }
 
+// Ref: #/components/schemas/BookNFTStakeDelta
+type BookNFTStakeDelta struct {
+	BookNft         EvmAddress `json:"book_nft"`
+	StakedAmount    Uint256    `json:"staked_amount"`
+	LastStakedAt    time.Time  `json:"last_staked_at"`
+	NumberOfStakers int        `json:"number_of_stakers"`
+}
+
+// GetBookNft returns the value of BookNft.
+func (s *BookNFTStakeDelta) GetBookNft() EvmAddress {
+	return s.BookNft
+}
+
+// GetStakedAmount returns the value of StakedAmount.
+func (s *BookNFTStakeDelta) GetStakedAmount() Uint256 {
+	return s.StakedAmount
+}
+
+// GetLastStakedAt returns the value of LastStakedAt.
+func (s *BookNFTStakeDelta) GetLastStakedAt() time.Time {
+	return s.LastStakedAt
+}
+
+// GetNumberOfStakers returns the value of NumberOfStakers.
+func (s *BookNFTStakeDelta) GetNumberOfStakers() int {
+	return s.NumberOfStakers
+}
+
+// SetBookNft sets the value of BookNft.
+func (s *BookNFTStakeDelta) SetBookNft(val EvmAddress) {
+	s.BookNft = val
+}
+
+// SetStakedAmount sets the value of StakedAmount.
+func (s *BookNFTStakeDelta) SetStakedAmount(val Uint256) {
+	s.StakedAmount = val
+}
+
+// SetLastStakedAt sets the value of LastStakedAt.
+func (s *BookNFTStakeDelta) SetLastStakedAt(val time.Time) {
+	s.LastStakedAt = val
+}
+
+// SetNumberOfStakers sets the value of NumberOfStakers.
+func (s *BookNFTStakeDelta) SetNumberOfStakers(val int) {
+	s.NumberOfStakers = val
+}
+
 type BookNftEvmAddressStakingEventsEventTypeGetEventType string
 
 const (
@@ -396,6 +444,182 @@ func (s *BookNftsGetOK) SetPagination(val PaginationResponse) {
 // SetData sets the value of Data.
 func (s *BookNftsGetOK) SetData(val []BookNFT) {
 	s.Data = val
+}
+
+type BookNftsTimeFrameDeltaGetOK struct {
+	Pagination BookNftsTimeFrameDeltaGetOKPagination `json:"pagination"`
+	Data       []BookNFTStakeDelta                   `json:"data"`
+}
+
+// GetPagination returns the value of Pagination.
+func (s *BookNftsTimeFrameDeltaGetOK) GetPagination() BookNftsTimeFrameDeltaGetOKPagination {
+	return s.Pagination
+}
+
+// GetData returns the value of Data.
+func (s *BookNftsTimeFrameDeltaGetOK) GetData() []BookNFTStakeDelta {
+	return s.Data
+}
+
+// SetPagination sets the value of Pagination.
+func (s *BookNftsTimeFrameDeltaGetOK) SetPagination(val BookNftsTimeFrameDeltaGetOKPagination) {
+	s.Pagination = val
+}
+
+// SetData sets the value of Data.
+func (s *BookNftsTimeFrameDeltaGetOK) SetData(val []BookNFTStakeDelta) {
+	s.Data = val
+}
+
+type BookNftsTimeFrameDeltaGetOKPagination struct {
+	Count int `json:"count"`
+}
+
+// GetCount returns the value of Count.
+func (s *BookNftsTimeFrameDeltaGetOKPagination) GetCount() int {
+	return s.Count
+}
+
+// SetCount sets the value of Count.
+func (s *BookNftsTimeFrameDeltaGetOKPagination) SetCount(val int) {
+	s.Count = val
+}
+
+type BookNftsTimeFrameDeltaGetSortBy string
+
+const (
+	BookNftsTimeFrameDeltaGetSortByStakedAmount    BookNftsTimeFrameDeltaGetSortBy = "staked_amount"
+	BookNftsTimeFrameDeltaGetSortByLastStakedAt    BookNftsTimeFrameDeltaGetSortBy = "last_staked_at"
+	BookNftsTimeFrameDeltaGetSortByNumberOfStakers BookNftsTimeFrameDeltaGetSortBy = "number_of_stakers"
+)
+
+// AllValues returns all BookNftsTimeFrameDeltaGetSortBy values.
+func (BookNftsTimeFrameDeltaGetSortBy) AllValues() []BookNftsTimeFrameDeltaGetSortBy {
+	return []BookNftsTimeFrameDeltaGetSortBy{
+		BookNftsTimeFrameDeltaGetSortByStakedAmount,
+		BookNftsTimeFrameDeltaGetSortByLastStakedAt,
+		BookNftsTimeFrameDeltaGetSortByNumberOfStakers,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BookNftsTimeFrameDeltaGetSortBy) MarshalText() ([]byte, error) {
+	switch s {
+	case BookNftsTimeFrameDeltaGetSortByStakedAmount:
+		return []byte(s), nil
+	case BookNftsTimeFrameDeltaGetSortByLastStakedAt:
+		return []byte(s), nil
+	case BookNftsTimeFrameDeltaGetSortByNumberOfStakers:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BookNftsTimeFrameDeltaGetSortBy) UnmarshalText(data []byte) error {
+	switch BookNftsTimeFrameDeltaGetSortBy(data) {
+	case BookNftsTimeFrameDeltaGetSortByStakedAmount:
+		*s = BookNftsTimeFrameDeltaGetSortByStakedAmount
+		return nil
+	case BookNftsTimeFrameDeltaGetSortByLastStakedAt:
+		*s = BookNftsTimeFrameDeltaGetSortByLastStakedAt
+		return nil
+	case BookNftsTimeFrameDeltaGetSortByNumberOfStakers:
+		*s = BookNftsTimeFrameDeltaGetSortByNumberOfStakers
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type BookNftsTimeFrameDeltaGetSortOrder string
+
+const (
+	BookNftsTimeFrameDeltaGetSortOrderAsc  BookNftsTimeFrameDeltaGetSortOrder = "asc"
+	BookNftsTimeFrameDeltaGetSortOrderDesc BookNftsTimeFrameDeltaGetSortOrder = "desc"
+)
+
+// AllValues returns all BookNftsTimeFrameDeltaGetSortOrder values.
+func (BookNftsTimeFrameDeltaGetSortOrder) AllValues() []BookNftsTimeFrameDeltaGetSortOrder {
+	return []BookNftsTimeFrameDeltaGetSortOrder{
+		BookNftsTimeFrameDeltaGetSortOrderAsc,
+		BookNftsTimeFrameDeltaGetSortOrderDesc,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BookNftsTimeFrameDeltaGetSortOrder) MarshalText() ([]byte, error) {
+	switch s {
+	case BookNftsTimeFrameDeltaGetSortOrderAsc:
+		return []byte(s), nil
+	case BookNftsTimeFrameDeltaGetSortOrderDesc:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BookNftsTimeFrameDeltaGetSortOrder) UnmarshalText(data []byte) error {
+	switch BookNftsTimeFrameDeltaGetSortOrder(data) {
+	case BookNftsTimeFrameDeltaGetSortOrderAsc:
+		*s = BookNftsTimeFrameDeltaGetSortOrderAsc
+		return nil
+	case BookNftsTimeFrameDeltaGetSortOrderDesc:
+		*s = BookNftsTimeFrameDeltaGetSortOrderDesc
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type BookNftsTimeFrameDeltaGetTimeFrame string
+
+const (
+	BookNftsTimeFrameDeltaGetTimeFrame7d  BookNftsTimeFrameDeltaGetTimeFrame = "7d"
+	BookNftsTimeFrameDeltaGetTimeFrame30d BookNftsTimeFrameDeltaGetTimeFrame = "30d"
+	BookNftsTimeFrameDeltaGetTimeFrame1y  BookNftsTimeFrameDeltaGetTimeFrame = "1y"
+)
+
+// AllValues returns all BookNftsTimeFrameDeltaGetTimeFrame values.
+func (BookNftsTimeFrameDeltaGetTimeFrame) AllValues() []BookNftsTimeFrameDeltaGetTimeFrame {
+	return []BookNftsTimeFrameDeltaGetTimeFrame{
+		BookNftsTimeFrameDeltaGetTimeFrame7d,
+		BookNftsTimeFrameDeltaGetTimeFrame30d,
+		BookNftsTimeFrameDeltaGetTimeFrame1y,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BookNftsTimeFrameDeltaGetTimeFrame) MarshalText() ([]byte, error) {
+	switch s {
+	case BookNftsTimeFrameDeltaGetTimeFrame7d:
+		return []byte(s), nil
+	case BookNftsTimeFrameDeltaGetTimeFrame30d:
+		return []byte(s), nil
+	case BookNftsTimeFrameDeltaGetTimeFrame1y:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BookNftsTimeFrameDeltaGetTimeFrame) UnmarshalText(data []byte) error {
+	switch BookNftsTimeFrameDeltaGetTimeFrame(data) {
+	case BookNftsTimeFrameDeltaGetTimeFrame7d:
+		*s = BookNftsTimeFrameDeltaGetTimeFrame7d
+		return nil
+	case BookNftsTimeFrameDeltaGetTimeFrame30d:
+		*s = BookNftsTimeFrameDeltaGetTimeFrame30d
+		return nil
+	case BookNftsTimeFrameDeltaGetTimeFrame1y:
+		*s = BookNftsTimeFrameDeltaGetTimeFrame1y
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Represents error object.
