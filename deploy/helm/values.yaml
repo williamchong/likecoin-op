@@ -65,6 +65,7 @@ migrationAdmin:
 
 migrationBackend:
   ingress:
+    prefix: /
     tls:
       secretName: tls-migration-backend
 

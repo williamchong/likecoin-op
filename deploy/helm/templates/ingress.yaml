@@ -161,7 +161,7 @@ spec:
       http:
         paths:
           # Default to use OP backend for user related migration.
-          - path: /
+          - path: {{ .Values.migrationBackend.ingress.prefix }}
             pathType: ImplementationSpecific
             backend:
               service:
