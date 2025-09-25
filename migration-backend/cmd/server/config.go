@@ -10,6 +10,7 @@ type EnvConfig struct {
 
 	ListenAddr                      string `envconfig:"LISTEN_ADDR" default:"0.0.0.0:8091"`
 	RoutePrefix                     string `envconfig:"ROUTE_PREFIX" default:""`
+	APIResponseHeaderXChain         string `envconfig:"API_RESPONSE_HEADER_X_CHAIN" default:"undefined"`
 	CosmosNodeUrl                   string `envconfig:"COSMOS_NODE_URL"`
 	CosmosNodeHTTPTimeoutSeconds    int    `envconfig:"COSMOS_NODE_HTTP_TIMEOUT_SECONDS" default:"10"`
 	CosmosLikeCoinNetworkConfigPath string `envconfig:"COSMOS_LIKECOIN_NETWORK_CONFIG_PATH"`
