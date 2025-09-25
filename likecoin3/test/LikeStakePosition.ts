@@ -423,9 +423,8 @@ describe("LikeStakePosition", async function () {
     });
 
     it("should return correct position after ERC721 transfer", async function () {
-      const { likeStakePosition, rick, kin, bookNFT1, bookNFT2 } = await loadFixture(
-        preparePositionInfoData,
-      );
+      const { likeStakePosition, rick, kin, bookNFT1, bookNFT2 } =
+        await loadFixture(preparePositionInfoData);
       await likeStakePosition.write.transferFrom(
         [rick.account.address, kin.account.address, 1n],
         { account: rick.account },
@@ -433,7 +432,10 @@ describe("LikeStakePosition", async function () {
       const positionArray = await likeStakePosition.read.getUserPositions([
         rick.account.address,
       ]);
-      expect(positionArray.length, "Rick have 2 positions after transfer").to.equal(2);
+      expect(
+        positionArray.length,
+        "Rick have 2 positions after transfer",
+      ).to.equal(2);
       const pos1 = await likeStakePosition.read.getPosition([positionArray[0]]);
       const pos2 = await likeStakePosition.read.getPosition([positionArray[1]]);
       expect(pos1.bookNFT).to.equal(bookNFT1);
