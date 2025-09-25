@@ -4,23 +4,17 @@
     :class="['flex', 'flex-row', 'gap-2']"
   >
     <div :class="['flex-1', 'py-[10px]']">
-      <p :class="['text-sm', 'text-likecoin-grey']">
+      <p :class="['text-sm', 'text-likecoin-darkgrey']">
         {{
-          $t('miscellaneous-actions.add-tokens.likecoin.description', {
+          $t('miscellaneous-actions.add-tokens.metamask.description', {
             tokenSymbol: addTokenRequestState.tokenInfoState.tokenSymbol,
           })
         }}
       </p>
     </div>
-    <FontAwesomeIcon
-      icon="circle-check"
-      :class="[
-        'py-[10px]',
-        'text-sm',
-        'font-black',
-        'text-likecoin-votecolor-yes',
-      ]"
-    />
+    <AppButton variant="primary" :class="['self-start']" disabled>
+      {{ $t('miscellaneous-actions.add-tokens.metamask.added') }}
+    </AppButton>
   </div>
   <div
     v-else-if="tokenInfoState.type === 'resolved'"
@@ -29,7 +23,7 @@
     <div :class="['flex-1', 'flex', 'flex-col', 'gap-1', 'py-[10px]']">
       <p :class="['text-sm', 'text-likecoin-darkgrey']">
         {{
-          $t('miscellaneous-actions.add-tokens.likecoin.description', {
+          $t('miscellaneous-actions.add-tokens.metamask.description', {
             tokenSymbol: tokenInfoState.tokenSymbol,
           })
         }}
@@ -39,23 +33,13 @@
         :class="['text-xs', 'text-likecoin-votecolor-no']"
       >
         {{
-          $t('miscellaneous-actions.add-tokens.likecoin.chain-not-added', {
+          $t('miscellaneous-actions.add-tokens.metamask.chain-not-added', {
             chainName,
             chainId: chainId.toString(),
           })
         }}
       </span>
     </div>
-    <AppButton
-      variant="primary"
-      :class="['self-start']"
-      :href="tokenBlockExplorerUrl"
-      target="_blank"
-    >
-      {{
-        $t('miscellaneous-actions.add-tokens.likecoin.view-on-block-explorer')
-      }}
-    </AppButton>
     <AppButton
       v-if="chainAddedState.type === 'chain-added'"
       variant="primary"
@@ -67,7 +51,7 @@
         :class="['w-5', 'h-5']"
       />
       <span v-else>
-        {{ $t('miscellaneous-actions.add-tokens.likecoin.add') }}
+        {{ $t('miscellaneous-actions.add-tokens.metamask.add') }}
       </span>
     </AppButton>
     <AppButton
@@ -76,7 +60,7 @@
       :class="['self-start']"
       :disabled="true"
     >
-      {{ $t('miscellaneous-actions.add-tokens.likecoin.add') }}
+      {{ $t('miscellaneous-actions.add-tokens.metamask.add') }}
     </AppButton>
   </div>
 </template>
@@ -180,7 +164,7 @@ interface Data {
 }
 
 export default Vue.extend({
-  name: 'MiscellaneousActionsAddTokensLikeCoin',
+  name: 'MiscellaneousActionsAddTokensMetaMask',
 
   data(): Data {
     return {

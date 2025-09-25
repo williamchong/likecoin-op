@@ -1,7 +1,7 @@
 <template>
   <ul>
     <li>
-      <MiscellaneousActionsAddTokensLikeCoin />
+      <MiscellaneousActionsAddTokensMetaMask />
     </li>
   </ul>
 </template>
