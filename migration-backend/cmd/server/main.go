@@ -181,7 +181,13 @@ func main() {
 
 	sentryMiddleware := middleware.MakeSentryMiddleware(hub)
 
+	addChainHeaderMiddleware := middleware.MakeWithHeaderMiddleware(
+		"X-Chain",
+		envCfg.APIResponseHeaderXChain,
+	)
+
 	applyMiddlewares := middleware.MakeApplyMiddlewares(
+		addChainHeaderMiddleware,
 		c.Handler,
 		sentryMiddleware,
 	)
