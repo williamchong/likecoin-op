@@ -20,6 +20,7 @@ interface BookNFTInterface {
     function initialize(MsgNewBookNFT memory msgNewBookNFT) external;
 }
 
+/// @custom:security-contact rickmak@oursky.com
 contract LikeProtocol is
     Initializable,
     UUPSUpgradeable,
@@ -50,19 +51,16 @@ contract LikeProtocol is
     event BookNFTImplementationUpgraded(address newImplementation);
     error BookNFTInvalidImplementation(address implementation);
 
-    function initialize(
-        address initialOwner,
-        address bookNFTImplementation
-    ) public initializer {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address initialOwner) public initializer {
         __UUPSUpgradeable_init();
         __Ownable_init(initialOwner);
         __Pausable_init();
         LikeNFTStorage storage $ = _getLikeNFTStorage();
-
-        if (bookNFTImplementation.code.length == 0) {
-            revert BookNFTInvalidImplementation(bookNFTImplementation);
-        }
-        $.bookNFTImplementation = bookNFTImplementation;
         $.royaltyReceiver = initialOwner;
     }
 

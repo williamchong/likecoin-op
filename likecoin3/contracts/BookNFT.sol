@@ -28,7 +28,7 @@ error ErrTokenIdMintFails(uint256 nextTokenId);
 interface LikeProtocolInterface {
     function getRoyaltyReceiver() external view returns (address);
 }
-
+/// @custom:security-contact rickmak@oursky.com
 contract BookNFT is
     Initializable,
     ERC721EnumerableUpgradeable,
@@ -115,6 +115,11 @@ contract BookNFT is
         _;
     }
     // End Permission control
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
 
     function initialize(MsgNewBookNFT memory msgNewBookNFT) public initializer {
         __ERC721_init(msgNewBookNFT.config.name, msgNewBookNFT.config.symbol);

@@ -6,22 +6,11 @@ export async function createProtocol(ownerSigner: SignerWithAddress) {
   const LikeProtocol = await ethers.getContractFactory("LikeProtocol");
 
   const bookNFTDeployment = await BookNFT.deploy();
-  await bookNFTDeployment.initialize({
-    creator: ownerSigner.address,
-    updaters: [],
-    minters: [],
-    config: {
-      name: "BookNFT Implementation",
-      symbol: "BOOKNFTV0",
-      metadata: "{}",
-      max_supply: 1n,
-    },
-  });
   let bookNFTAddress = await bookNFTDeployment.getAddress();
 
   const likeProtocol = await upgrades.deployProxy(
     LikeProtocol,
-    [ownerSigner.address, bookNFTAddress],
+    [ownerSigner.address],
     {
       initializer: "initialize",
     },
@@ -32,6 +21,7 @@ export async function createProtocol(ownerSigner: SignerWithAddress) {
     "LikeProtocol",
     likeProtocolAddress,
   );
+  await likeProtocolContract.upgradeTo(bookNFTAddress);
 
   return {
     likeProtocol,
