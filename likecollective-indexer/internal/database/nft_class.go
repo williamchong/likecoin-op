@@ -6,7 +6,9 @@ import (
 	"likecollective-indexer/ent"
 	"likecollective-indexer/ent/nftclass"
 	"likecollective-indexer/ent/schema/typeutil"
+	"likecollective-indexer/ent/staking"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/holiman/uint256"
 )
 
@@ -42,6 +44,12 @@ type NFTClassRepository interface {
 		tx *ent.Tx,
 		address string,
 		stakedAmount typeutil.Uint256,
+	) (*ent.NFTClass, error)
+
+	RecomputeNumberOfStakersByNFTClassAddress(
+		ctx context.Context,
+		tx *ent.Tx,
+		nftClassAddress string,
 	) (*ent.NFTClass, error)
 }
 
@@ -145,4 +153,27 @@ func (r *nftClassRepository) CreateOrUpdateNFTClass(
 	return tx.NFTClass.UpdateOne(nftClass).
 		SetStakedAmount(stakedAmount).
 		Save(ctx)
+}
+
+func (r *nftClassRepository) RecomputeNumberOfStakersByNFTClassAddress(
+	ctx context.Context,
+	tx *ent.Tx,
+	nftClassAddress string,
+) (*ent.NFTClass, error) {
+	nftClass, err := tx.NFTClass.Query().Where(nftclass.AddressEqualFold(nftClassAddress)).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	c, err := tx.Staking.Query().Where(
+		staking.NftClassIDEQ(nftClass.ID),
+		func(s *sql.Selector) {
+			s.Where(sql.GT(staking.FieldStakedAmount, 0))
+		},
+	).Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return tx.NFTClass.UpdateOne(nftClass).SetNumberOfStakers(uint64(c)).Save(ctx)
 }
