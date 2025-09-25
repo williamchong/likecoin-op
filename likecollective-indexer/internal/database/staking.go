@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"math/big"
 
 	"likecollective-indexer/ent"
 	"likecollective-indexer/ent/account"
@@ -11,6 +12,7 @@ import (
 	"likecollective-indexer/ent/staking"
 
 	"github.com/holiman/uint256"
+	"github.com/shopspring/decimal"
 )
 
 type StakingKey struct {
@@ -63,6 +65,12 @@ type StakingRepository interface {
 		pendingRewardAmount typeutil.Uint256,
 		claimedRewardAmount typeutil.Uint256,
 	) (*ent.Staking, error)
+
+	RecomputePoolSharesByNFTClassAddress(
+		ctx context.Context,
+		tx *ent.Tx,
+		nftClassAddress string,
+	) error
 }
 
 type stakingRepository struct {
@@ -173,11 +181,21 @@ func (r *stakingRepository) CreateOrUpdateStaking(
 			staking.NftClassIDEQ(nftClass.ID),
 		).
 		Only(ctx)
+
+	var poolShares *big.Rat
+	if (*uint256.Int)(nftClass.StakedAmount).IsZero() {
+		poolShares = big.NewRat(0, 1)
+	} else {
+		poolShares = big.NewRat((*uint256.Int)(stakedAmount).ToBig().Int64(), (*uint256.Int)(nftClass.StakedAmount).ToBig().Int64())
+	}
+	poolSharesPercentage := decimal.NewFromBigRat(poolShares, 2)
+
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return tx.Staking.Create().
 				SetAccountID(account.ID).
 				SetNftClassID(nftClass.ID).
+				SetPoolShare(poolSharesPercentage.String()).
 				SetStakedAmount(stakedAmount).
 				SetPendingRewardAmount(pendingRewardAmount).
 				SetClaimedRewardAmount(claimedRewardAmount).
@@ -185,9 +203,41 @@ func (r *stakingRepository) CreateOrUpdateStaking(
 		}
 		return nil, err
 	}
+
 	return tx.Staking.UpdateOne(s).
 		SetStakedAmount(stakedAmount).
+		SetPoolShare(poolSharesPercentage.String()).
 		SetPendingRewardAmount(pendingRewardAmount).
 		SetClaimedRewardAmount(claimedRewardAmount).
 		Save(ctx)
+}
+
+func (r *stakingRepository) RecomputePoolSharesByNFTClassAddress(
+	ctx context.Context,
+	tx *ent.Tx,
+	nftClassAddress string,
+) error {
+	nftClass, err := tx.NFTClass.Query().Where(nftclass.AddressEqualFold(nftClassAddress)).Only(ctx)
+	if err != nil {
+		return err
+	}
+
+	stakings, err := tx.Staking.Query().Where(staking.NftClassIDEQ(nftClass.ID)).All(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, staking := range stakings {
+		var poolShares *big.Rat
+		if (*uint256.Int)(nftClass.StakedAmount).IsZero() {
+			poolShares = big.NewRat(0, 1)
+		} else {
+			poolShares = big.NewRat((*uint256.Int)(staking.StakedAmount).ToBig().Int64(), (*uint256.Int)(nftClass.StakedAmount).ToBig().Int64())
+		}
+		poolSharePercentage := decimal.NewFromBigRat(poolShares, 2)
+		if _, err = tx.Staking.UpdateOne(staking).SetPoolShare(poolSharePercentage.String()).Save(ctx); err != nil {
+			return err
+		}
+	}
+	return nil
 }
