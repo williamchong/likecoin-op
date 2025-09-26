@@ -504,101 +504,101 @@ describe("BookNFTClass", () => {
 });
 
 describe("BookNFT permission control", () => {
-  before(async function () {
-    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-    const [protocolOwner, classOwner, likerLand, randomSigner] =
-      await ethers.getSigners();
-
-    this.protocolOwner = protocolOwner;
-    this.classOwner = classOwner;
-    this.likerLand = likerLand;
-    this.randomSigner = randomSigner;
-  });
-
-  let deployment: BaseContract;
-  let contractAddress: string;
-  let protocolContract: BaseContract;
-  let nftClassId: string;
-  let nftClassContract: BaseContract;
-  beforeEach(async function () {
+  async function initPermissionControl() {
     const {
       likeProtocol,
-      likeProtocolDeployment,
-      likeProtocolAddress,
-      likeProtocolContract,
-      bookNFTDeployment,
-      bookNFTAddress,
-    } = await createProtocol(this.protocolOwner);
-
-    deployment = likeProtocolDeployment;
-    contractAddress = likeProtocolAddress;
-    protocolContract = likeProtocolContract;
-
-    const likeProtocolOwnerSigner = protocolContract.connect(
-      this.protocolOwner,
-    );
+      bookNFTImpl,
+      deployer,
+      classOwner,
+      likerLand,
+      randomSigner,
+      publicClient,
+    } = await deployProtocol();
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
-        event.removeListener();
-        resolve({ id });
+      const unwatch = likeProtocol.watchEvent.NewBookNFT({
+        onLogs: (logs) => {
+          const id = logs[0].args.bookNFT;
+          unwatch();
+          resolve(id);
+        },
       });
-
-      setTimeout(() => {
-        reject(new Error("timeout"));
-      }, 60000);
     });
 
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
 
-    likeProtocolOwnerSigner
-      .newBookNFT({
-        creator: this.classOwner,
-        updaters: [this.classOwner, this.likerLand],
-        minters: [this.classOwner, this.likerLand],
+    await likeProtocol.write.newBookNFT([
+      {
+        creator: classOwner.account.address,
+        updaters: [classOwner.account.address, likerLand.account.address],
+        minters: [classOwner.account.address, likerLand.account.address],
         config: bookConfig,
-      })
-      .then((tx) => tx.wait());
+      },
+    ]);
 
-    const newClassEvent = await NewClassEvent;
-    nftClassId = newClassEvent.id;
-    nftClassContract = await ethers.getContractAt("BookNFT", nftClassId);
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
-  });
+    const nftClassId = await NewClassEvent;
+    const nftClassContract = await viem.getContractAt("BookNFT", nftClassId);
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      classOwner.account.address,
+    );
+
+    return {
+      likeProtocol,
+      bookNFTImpl,
+      deployer,
+      classOwner,
+      likerLand,
+      randomSigner,
+      publicClient,
+      nftClassId,
+      nftClassContract,
+    };
+  }
 
   it("should not allow random address to grant/revoke role", async function () {
-    const likeClassRandomSigner = nftClassContract.connect(this.randomSigner);
+    const { nftClassContract, classOwner, randomSigner } = await loadFixture(
+      initPermissionControl,
+    );
+    const MINTER_ROLE = await nftClassContract.read.MINTER_ROLE();
+    const UPDATER_ROLE = await nftClassContract.read.UPDATER_ROLE();
+
     await expect(
-      likeClassRandomSigner.ownerGrantRole(
-        nftClassContract.MINTER_ROLE(),
-        this.classOwner.address,
+      nftClassContract.write.ownerGrantRole(
+        [MINTER_ROLE, classOwner.account.address],
+        {
+          account: randomSigner.account,
+        },
       ),
     ).to.be.rejected;
     await expect(
-      likeClassRandomSigner.ownerRevokeRole(
-        nftClassContract.UPDATER_ROLE(),
-        this.classOwner.address,
+      nftClassContract.write.ownerRevokeRole(
+        [UPDATER_ROLE, classOwner.account.address],
+        {
+          account: randomSigner.account,
+        },
       ),
     ).to.be.rejected;
 
     expect(
-      await nftClassContract.hasRole(
-        nftClassContract.MINTER_ROLE(),
-        this.classOwner.address,
-      ),
+      await nftClassContract.read.hasRole([
+        MINTER_ROLE,
+        classOwner.account.address,
+      ]),
     ).to.equal(true);
     expect(
-      await nftClassContract.hasRole(
-        nftClassContract.UPDATER_ROLE(),
-        this.classOwner.address,
-      ),
+      await nftClassContract.read.hasRole([
+        UPDATER_ROLE,
+        classOwner.account.address,
+      ]),
     ).to.equal(true);
   });
 
   it("should allow class owner with minter role to mint NFT", async function () {
-    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    const { nftClassContract, classOwner, likerLand } = await loadFixture(
+      initPermissionControl,
+    );
 
     const tokenConfig0 = BookTokenConfigLoader.load(
       "./test/fixtures/TokenConfig0.json",
@@ -606,25 +606,38 @@ describe("BookNFT permission control", () => {
     const tokenConfig1 = BookTokenConfigLoader.load(
       "./test/fixtures/TokenConfig1.json",
     );
-    const mintNFT = async () => {
-      await likeClassOwnerSigner
-        .mint(
-          this.likerLand.address,
+    const MINTER_ROLE = await nftClassContract.read.MINTER_ROLE();
+    expect(
+      await nftClassContract.read.hasRole([
+        MINTER_ROLE,
+        classOwner.account.address,
+      ]),
+    ).to.equal(true);
+    await expect(
+      nftClassContract.write.mint(
+        [
+          likerLand.account.address,
           ["_mint1", "_mint2"],
           [tokenConfig0, tokenConfig1],
-        )
-        .then((tx) => tx.wait());
-    };
-
-    await expect(mintNFT()).to.be.not.rejected;
-    await expect(await nftClassContract.totalSupply()).to.equal(2n);
-    await expect(
-      await nftClassContract.balanceOf(this.likerLand.address),
+        ],
+        {
+          account: classOwner.account,
+        },
+      ),
+    ).to.be.not.rejected;
+    expect(await nftClassContract.read.totalSupply()).to.equal(2n);
+    expect(
+      await nftClassContract.read.balanceOf([likerLand.account.address]),
     ).to.equal(2n);
+    expect(
+      await nftClassContract.read.balanceOf([classOwner.account.address]),
+    ).to.equal(0n);
   });
 
   it("should not allow random address to mint NFT", async function () {
-    const likeClassRandomSigner = nftClassContract.connect(this.randomSigner);
+    const { nftClassContract, randomSigner, likerLand } = await loadFixture(
+      initPermissionControl,
+    );
 
     const tokenConfig0 = BookTokenConfigLoader.load(
       "./test/fixtures/TokenConfig0.json",
@@ -632,88 +645,109 @@ describe("BookNFT permission control", () => {
     const tokenConfig1 = BookTokenConfigLoader.load(
       "./test/fixtures/TokenConfig1.json",
     );
-    const mintNFT = async () => {
-      await likeClassRandomSigner
-        .mint(
-          this.likerLand.address,
+    await expect(
+      nftClassContract.write.mint(
+        [
+          likerLand.account.address,
           ["_mint1", "_mint2"],
           [tokenConfig0, tokenConfig1],
-        )
-        .then((tx) => tx.wait());
-    };
+        ],
+        {
+          account: randomSigner.account,
+        },
+      ),
+    ).to.be.rejectedWith("ErrUnauthorized()");
 
-    await expect(mintNFT()).to.be.rejectedWith("ErrUnauthorized()");
-    await expect(await nftClassContract.totalSupply()).to.equal(0n);
+    await expect(await nftClassContract.read.totalSupply()).to.equal(0n);
     await expect(
-      await nftClassContract.balanceOf(this.likerLand.address),
+      await nftClassContract.read.balanceOf([likerLand.account.address]),
     ).to.equal(0n);
   });
 
   it("should not allow new owner without minter role to mint NFT", async function () {
-    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
+    const { nftClassContract, classOwner, randomSigner, likerLand } =
+      await loadFixture(initPermissionControl);
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      classOwner.account.address,
+    );
 
-    const transferOwnership = async () => {
-      await likeClassOwnerSigner
-        .transferOwnership(this.randomSigner.address)
-        .then((tx) => tx.wait());
-    };
+    await expect(
+      nftClassContract.write.transferOwnership([randomSigner.account.address], {
+        account: classOwner.account,
+      }),
+    ).to.not.be.rejected;
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      randomSigner.account.address,
+    );
 
-    await expect(transferOwnership()).to.not.be.rejected;
-    expect(await nftClassContract.owner()).to.equal(this.randomSigner.address);
-
-    const likeClassRandomSigner = nftClassContract.connect(this.randomSigner);
     const tokenConfig0 = BookTokenConfigLoader.load(
       "./test/fixtures/TokenConfig0.json",
     );
     const tokenConfig1 = BookTokenConfigLoader.load(
       "./test/fixtures/TokenConfig1.json",
     );
-    const mintNFT = async () => {
-      await likeClassRandomSigner
-        .mint(
-          this.randomSigner.address,
+    await expect(
+      nftClassContract.write.mint(
+        [
+          randomSigner.account.address,
           ["_mint1", "_mint2"],
           [tokenConfig0, tokenConfig1],
-        )
-        .then((tx) => tx.wait());
-    };
-    await expect(mintNFT()).to.be.rejectedWith("ErrUnauthorized()");
-    await expect(await nftClassContract.totalSupply()).to.equal(0n);
+        ],
+        {
+          account: randomSigner.account,
+        },
+      ),
+    ).to.be.rejectedWith("ErrUnauthorized()");
+    await expect(await nftClassContract.read.totalSupply()).to.equal(0n);
     await expect(
-      await nftClassContract.balanceOf(this.likerLand.address),
+      await nftClassContract.read.balanceOf([likerLand.account.address]),
     ).to.equal(0n);
   });
 
   it("should allow new owner to add minter role", async function () {
-    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
+    const { nftClassContract, classOwner, randomSigner, likerLand } =
+      await loadFixture(initPermissionControl);
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      classOwner.account.address,
+    );
 
-    const transferOwnership = async () => {
-      await likeClassOwnerSigner
-        .transferOwnership(this.randomSigner.address)
-        .then((tx) => tx.wait());
-    };
-
-    await expect(transferOwnership()).to.not.be.rejected;
-    expect(await nftClassContract.owner()).to.equal(this.randomSigner.address);
-
-    const likeClassRandomSigner = nftClassContract.connect(this.randomSigner);
-    const addMinter = async () => {
-      await likeClassRandomSigner
-        .ownerGrantRole(
-          nftClassContract.MINTER_ROLE(),
-          this.randomSigner.address,
-        )
-        .then((tx) => tx.wait());
-    };
-
-    await expect(addMinter()).to.not.be.rejected;
     await expect(
-      await nftClassContract.hasRole(
-        nftClassContract.MINTER_ROLE(),
-        this.randomSigner.address,
+      nftClassContract.write.transferOwnership([randomSigner.account.address], {
+        account: classOwner.account,
+      }),
+    ).to.not.be.rejected;
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      randomSigner.account.address,
+    );
+
+    const MINTER_ROLE = await nftClassContract.read.MINTER_ROLE();
+    await expect(
+      nftClassContract.write.ownerGrantRole(
+        [MINTER_ROLE, randomSigner.account.address],
+        {
+          account: randomSigner.account,
+        },
       ),
+    ).to.not.be.rejected;
+    await expect(
+      nftClassContract.write.ownerGrantRole(
+        [MINTER_ROLE, likerLand.account.address],
+        {
+          account: randomSigner.account,
+        },
+      ),
+    ).to.not.be.rejected;
+    expect(
+      await nftClassContract.read.hasRole([
+        MINTER_ROLE,
+        randomSigner.account.address,
+      ]),
+    ).to.equal(true);
+    expect(
+      await nftClassContract.read.hasRole([
+        MINTER_ROLE,
+        likerLand.account.address,
+      ]),
     ).to.equal(true);
   });
 });
