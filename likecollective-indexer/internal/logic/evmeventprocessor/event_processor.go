@@ -7,32 +7,23 @@ import (
 	"log/slog"
 
 	"likecollective-indexer/ent"
-	"likecollective-indexer/internal/database"
-	"likecollective-indexer/internal/logic/stakingstate"
+	stakingstateloader "likecollective-indexer/internal/logic/stakingstate/loader"
+	stakingstatepersistor "likecollective-indexer/internal/logic/stakingstate/persistor"
 )
 
 var UnknownEvent error = errors.New("unknown event")
 
 type eventProcessorDeps struct {
-	evmEventRepository    database.EVMEventRepository
-	accountRepository     database.AccountRepository
-	nftClassRepository    database.NFTClassRepository
-	stakingRepository     database.StakingRepository
-	stakingStatePersistor stakingstate.StakingStatePersistor
+	stakingStateLoader    stakingstateloader.StakingStateLoader
+	stakingStatePersistor stakingstatepersistor.StakingStatePersistor
 }
 
 func makeEventProcessorDeps(
-	evmEventRepository database.EVMEventRepository,
-	accountRepository database.AccountRepository,
-	nftClassRepository database.NFTClassRepository,
-	stakingRepository database.StakingRepository,
-	stakingStatePersistor stakingstate.StakingStatePersistor,
+	stakingStateLoader stakingstateloader.StakingStateLoader,
+	stakingStatePersistor stakingstatepersistor.StakingStatePersistor,
 ) *eventProcessorDeps {
 	return &eventProcessorDeps{
-		evmEventRepository,
-		accountRepository,
-		nftClassRepository,
-		stakingRepository,
+		stakingStateLoader,
 		stakingStatePersistor,
 	}
 }
