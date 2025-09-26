@@ -127,7 +127,7 @@ func GetStakingEventsFromEvent(event *ent.EVMEvent) ([]*ent.StakingEvent, error)
 		}, nil
 	}
 
-	if event.Name == "AllRewardsClaimed" {
+	if event.Name == "AllRewardClaimed" {
 		allRewardsClaimedEvent := new(like_collective.LikeCollectiveAllRewardClaimed)
 		if err := logConverter.UnpackLog(log, allRewardsClaimedEvent); err != nil {
 			return nil, err
