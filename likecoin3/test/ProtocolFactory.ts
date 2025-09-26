@@ -35,7 +35,7 @@ export async function createProtocol(ownerSigner: SignerWithAddress) {
 }
 
 export async function deployProtocol() {
-  const [deployer, classOwner, likerLand, randomSigner] =
+  const [deployer, classOwner, likerLand, randomSigner, randomSigner2] =
     await viem.getWalletClients();
   const publicClient = await viem.getPublicClient();
 
@@ -58,6 +58,7 @@ export async function deployProtocol() {
     classOwner,
     likerLand,
     randomSigner,
+    randomSigner2,
     publicClient,
   };
 }

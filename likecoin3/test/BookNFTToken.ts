@@ -1,273 +1,261 @@
 import { expect } from "chai";
-import { EventLog } from "ethers";
-import { ethers, upgrades } from "hardhat";
-import { BaseContract } from "ethers";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { viem } from "hardhat";
+import { deployProtocol } from "./ProtocolFactory";
+import "./setup";
 
 import { BookConfigLoader, BookTokenConfigLoader } from "./BookConfigLoader";
-import { createProtocol } from "./ProtocolFactory";
 
 describe("BookNFTToken", () => {
-  before(async function () {
-    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-    const [protocolOwner, classOwner, likerLand, randomSigner, randomSigner2] =
-      await ethers.getSigners();
-
-    this.protocolOwner = protocolOwner;
-    this.classOwner = classOwner;
-    this.likerLand = likerLand;
-    this.randomSigner = randomSigner;
-    this.randomSigner2 = randomSigner2;
-  });
-
-  let deployment: BaseContract;
-  let contractAddress: string;
-  let protocolContract: BaseContract;
-  let nftClassId: string;
-  let nftClassContract: BaseContract;
-  beforeEach(async function () {
+  async function initBookNFTToken() {
     const {
       likeProtocol,
-      likeProtocolDeployment,
-      likeProtocolAddress,
-      likeProtocolContract,
-      bookNFTDeployment,
-      bookNFTAddress,
-    } = await createProtocol(this.protocolOwner);
-
-    deployment = likeProtocolDeployment;
-    contractAddress = likeProtocolAddress;
-    protocolContract = likeProtocolContract;
-    const likeProtocolOwnerSigner = protocolContract.connect(
-      this.protocolOwner,
-    );
+      bookNFTImpl,
+      deployer,
+      classOwner,
+      likerLand,
+      randomSigner,
+      randomSigner2,
+      publicClient,
+    } = await deployProtocol();
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
-        event.removeListener();
-        resolve({ id });
+      const unwatch = likeProtocol.watchEvent.NewBookNFT({
+        onLogs: (logs) => {
+          const id = logs[0].args.bookNFT;
+          if (id) {
+            unwatch();
+            resolve(id);
+          }
+        },
       });
-
-      setTimeout(() => {
-        reject(new Error("timeout"));
-      }, 20000);
     });
 
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
 
-    likeProtocolOwnerSigner
-      .newBookNFT({
-        creator: this.classOwner,
-        updaters: [this.classOwner, this.likerLand],
-        minters: [this.classOwner, this.likerLand],
+    await likeProtocol.write.newBookNFT([
+      {
+        creator: classOwner.account.address,
+        updaters: [classOwner.account.address, likerLand.account.address],
+        minters: [classOwner.account.address, likerLand.account.address],
         config: bookConfig,
-      })
-      .then((tx) => tx.wait());
+      },
+    ]);
 
-    const newClassEvent = await NewClassEvent;
-    nftClassId = newClassEvent.id;
-    nftClassContract = await ethers.getContractAt("BookNFT", nftClassId);
+    const nftClassId = await NewClassEvent;
+    const nftClassContract = await viem.getContractAt("BookNFT", nftClassId);
 
-    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
     const tokenConfig0 = BookTokenConfigLoader.load(
       "./test/fixtures/TokenConfig0.json",
     );
-    await likeNFTClassOwnerSigner
-      .mint(this.classOwner, ["_mint1"], [tokenConfig0])
-      .then((tx) => tx.wait());
-  });
+    await nftClassContract.write.mint(
+      [classOwner.account.address, ["_mint1"], [tokenConfig0]],
+      {
+        account: classOwner.account,
+      },
+    );
+
+    return {
+      likeProtocol,
+      bookNFTImpl,
+      deployer,
+      classOwner,
+      likerLand,
+      randomSigner,
+      randomSigner2,
+      publicClient,
+      nftClassId,
+      nftClassContract,
+    };
+  }
 
   it("should allow updater to update token metadata", async function () {
-    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    const likeNFTClassUpdaterSigner = nftClassContract.connect(this.likerLand);
+    const { nftClassContract, classOwner, likerLand } =
+      await loadFixture(initBookNFTToken);
     const TokenConfig0 = BookTokenConfigLoader.load(
       "./test/fixtures/TokenConfig0.json",
     );
     const tokenConfig1 = BookTokenConfigLoader.load(
       "./test/fixtures/TokenConfig1.json",
     );
-    expect(await likeNFTClassOwnerSigner.tokenURI(0)).to.equal(
+    expect(await nftClassContract.read.tokenURI([0])).to.equal(
       `data:application/json;base64,${Buffer.from(TokenConfig0).toString("base64")}`,
     );
-    await likeNFTClassUpdaterSigner
-      .updateTokenMetadata(0, tokenConfig1)
-      .then((tx) => tx.wait());
-    expect(await likeNFTClassOwnerSigner.tokenURI(0)).to.equal(
+    await nftClassContract.write.updateTokenMetadata([0, tokenConfig1], {
+      account: likerLand.account,
+    });
+    expect(await nftClassContract.read.tokenURI([0])).to.equal(
       `data:application/json;base64,${Buffer.from(tokenConfig1).toString("base64")}`,
     );
   });
 
   it("should not allow random signer to update token metadata", async function () {
-    const likeNFTClassRandomSigner = nftClassContract.connect(
-      this.randomSigner,
-    );
+    const { nftClassContract, randomSigner } =
+      await loadFixture(initBookNFTToken);
     const TokenConfig0 = BookTokenConfigLoader.load(
       "./test/fixtures/TokenConfig0.json",
     );
     const tokenConfig1 = BookTokenConfigLoader.load(
       "./test/fixtures/TokenConfig1.json",
     );
-    expect(await likeNFTClassRandomSigner.tokenURI(0)).to.equal(
+    expect(await nftClassContract.read.tokenURI([0])).to.equal(
       `data:application/json;base64,${Buffer.from(TokenConfig0).toString("base64")}`,
     );
     await expect(
-      likeNFTClassRandomSigner
-        .updateTokenMetadata(0, tokenConfig1)
-        .then((tx) => tx.wait()),
+      nftClassContract.write.updateTokenMetadata([0, tokenConfig1], {
+        account: randomSigner.account,
+      }),
     ).to.be.rejectedWith(/ErrUnauthorized()/);
-    expect(await likeNFTClassRandomSigner.tokenURI(0)).to.equal(
+    expect(await nftClassContract.read.tokenURI([0])).to.equal(
       `data:application/json;base64,${Buffer.from(TokenConfig0).toString("base64")}`,
     );
   });
 
   it("owner should be able to send once", async function () {
-    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    const { nftClassContract, classOwner, randomSigner, randomSigner2 } =
+      await loadFixture(initBookNFTToken);
     await expect(
-      likeNFTClassOwnerSigner
-        .transferWithMemo(this.classOwner, this.randomSigner, 0, "memo1")
-        .then((tx) => tx.wait()),
+      nftClassContract.write.transferWithMemo(
+        [classOwner.account.address, randomSigner.account.address, 0, "memo1"],
+        {
+          account: classOwner.account,
+        },
+      ),
     ).to.be.not.rejected;
+    expect(await nftClassContract.read.ownerOf([0])).to.equalAddress(
+      randomSigner.account.address,
+    );
+    const logs1 = await nftClassContract.getEvents.TransferWithMemo();
+    expect(logs1).to.have.lengthOf(1);
+    expect(logs1[0].args.memo).to.equal("memo1");
+
     await expect(
-      likeNFTClassOwnerSigner
-        .transferWithMemo(this.classOwner, this.randomSigner2, 0, "memo1fails")
-        .then((tx) => tx.wait()),
+      nftClassContract.write.transferWithMemo(
+        [
+          classOwner.account.address,
+          randomSigner2.account.address,
+          0,
+          "memo1fails",
+        ],
+        {
+          account: classOwner.account,
+        },
+      ),
     ).to.be.rejectedWith(/ERC721InsufficientApproval/);
-
-    expect(await likeNFTClassOwnerSigner.ownerOf(0)).to.equal(
-      this.randomSigner.address,
-    );
-
-    const filters = likeNFTClassOwnerSigner.filters.TransferWithMemo(
-      null,
-      null,
-      0,
-    );
-    const logs1 = await likeNFTClassOwnerSigner.queryFilter(filters);
-    expect((logs1[1] as EventLog).args[3]).to.equal("memo1");
   });
 
   it("should not able to send with random signer", async function () {
-    const likeNFTClassRandomSigner = nftClassContract.connect(
-      this.randomSigner,
-    );
+    const { nftClassContract, classOwner, randomSigner } =
+      await loadFixture(initBookNFTToken);
     await expect(
-      likeNFTClassRandomSigner
-        .transferWithMemo(this.classOwner, this.randomSigner, 0, "memo1")
-        .then((tx) => tx.wait()),
+      nftClassContract.write.transferWithMemo(
+        [classOwner.account.address, randomSigner.account.address, 0, "memo1"],
+        {
+          account: randomSigner.account,
+        },
+      ),
     ).to.be.rejectedWith(/ERC721InsufficientApproval/);
 
-    expect(await likeNFTClassRandomSigner.ownerOf(0)).to.equal(
-      this.classOwner.address,
+    expect(await nftClassContract.read.ownerOf([0])).to.equalAddress(
+      classOwner.account.address,
     );
   });
 
   it("should be able to send with memo", async function () {
-    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    const likeNFTClassRandomSigner = nftClassContract.connect(
-      this.randomSigner,
-    );
+    const { nftClassContract, classOwner, randomSigner } =
+      await loadFixture(initBookNFTToken);
     await expect(
-      likeNFTClassOwnerSigner
-        .transferWithMemo(this.classOwner, this.randomSigner, 0, "memo1")
-        .then((tx) => tx.wait()),
+      nftClassContract.write.transferWithMemo(
+        [classOwner.account.address, randomSigner.account.address, 0, "memo1"],
+        {
+          account: classOwner.account,
+        },
+      ),
     ).to.be.not.rejected;
-    await expect(
-      likeNFTClassRandomSigner
-        .transferWithMemo(this.randomSigner, this.classOwner, 0, "memo2")
-        .then((tx) => tx.wait()),
-    ).to.be.not.rejected;
-    await expect(
-      likeNFTClassRandomSigner
-        .transferWithMemo(this.randomSigner, this.classOwner, 0, "memo2fails")
-        .then((tx) => tx.wait()),
-    ).to.be.rejectedWith(/ERC721InsufficientApproval/);
+    const logs1 = await nftClassContract.getEvents.TransferWithMemo();
+    expect(logs1).to.have.lengthOf(1);
+    expect(logs1[0].args.from).to.equalAddress(classOwner.account.address);
+    expect(logs1[0].args.to).to.equalAddress(randomSigner.account.address);
+    expect(logs1[0].args.tokenId).to.equal(0n);
+    expect(logs1[0].args.memo).to.equal("memo1");
 
-    const filters2 = likeNFTClassOwnerSigner.filters.TransferWithMemo(
-      null,
-      null,
-      0,
-    );
-    const logs2 = await likeNFTClassOwnerSigner.queryFilter(filters2);
-    expect((logs2[1] as EventLog).args[0]).to.equal(this.classOwner.address);
-    expect((logs2[1] as EventLog).args[1]).to.equal(this.randomSigner.address);
-    expect((logs2[1] as EventLog).args[2]).to.equal(0n);
-    expect((logs2[1] as EventLog).args[3]).to.equal("memo1");
-    expect((logs2[2] as EventLog).args[0]).to.equal(this.randomSigner.address);
-    expect((logs2[2] as EventLog).args[1]).to.equal(this.classOwner.address);
-    expect((logs2[2] as EventLog).args[2]).to.equal(0n);
-    expect((logs2[2] as EventLog).args[3]).to.equal("memo2");
+    await expect(
+      nftClassContract.write.transferWithMemo(
+        [randomSigner.account.address, classOwner.account.address, 0, "memo2"],
+        {
+          account: randomSigner.account,
+        },
+      ),
+    ).to.be.not.rejected;
+    const logs2 = await nftClassContract.getEvents.TransferWithMemo();
+    expect(logs2).to.have.lengthOf(1);
+    expect(logs2[0].args.from).to.equalAddress(randomSigner.account.address);
+    expect(logs2[0].args.to).to.equalAddress(classOwner.account.address);
+    expect(logs2[0].args.tokenId).to.equal(0n);
+    expect(logs2[0].args.memo).to.equal("memo2");
+
+    await expect(
+      nftClassContract.write.transferWithMemo(
+        [
+          randomSigner.account.address,
+          classOwner.account.address,
+          0,
+          "memo2fails",
+        ],
+        {
+          account: randomSigner.account,
+        },
+      ),
+    ).to.be.rejectedWith(/ERC721InsufficientApproval/);
   });
 });
 
 describe("BookNFTToken batch actions", () => {
-  before(async function () {
-    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-    const [protocolOwner, classOwner, likerLand, randomSigner, randomSigner2] =
-      await ethers.getSigners();
-
-    this.protocolOwner = protocolOwner;
-    this.classOwner = classOwner;
-    this.likerLand = likerLand;
-    this.randomSigner = randomSigner;
-    this.randomSigner2 = randomSigner2;
-  });
-
-  let deployment: BaseContract;
-  let contractAddress: string;
-  let protocolContract: BaseContract;
-  let nftClassId: string;
-  let nftClassContract: BaseContract;
-  beforeEach(async function () {
+  async function initBookNFTTokenBatch() {
     const {
       likeProtocol,
-      likeProtocolDeployment,
-      likeProtocolAddress,
-      likeProtocolContract,
-      bookNFTDeployment,
-      bookNFTAddress,
-    } = await createProtocol(this.protocolOwner);
-
-    deployment = likeProtocolDeployment;
-    contractAddress = likeProtocolAddress;
-    protocolContract = likeProtocolContract;
-
-    const likeProtocolOwnerSigner = protocolContract.connect(
-      this.protocolOwner,
-    );
+      bookNFTImpl,
+      deployer,
+      classOwner,
+      likerLand,
+      randomSigner,
+      randomSigner2,
+      publicClient,
+    } = await deployProtocol();
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
-        event.removeListener();
-        resolve({ id });
+      const unwatch = likeProtocol.watchEvent.NewBookNFT({
+        onLogs: (logs) => {
+          const id = logs[0].args.bookNFT;
+          if (id) {
+            unwatch();
+            resolve(id);
+          }
+        },
       });
-
-      setTimeout(() => {
-        reject(new Error("timeout"));
-      }, 20000);
     });
 
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
 
-    likeProtocolOwnerSigner
-      .newBookNFT({
-        creator: this.classOwner,
-        updaters: [this.classOwner, this.likerLand],
-        minters: [this.classOwner, this.likerLand],
+    await likeProtocol.write.newBookNFT([
+      {
+        creator: classOwner.account.address,
+        updaters: [classOwner.account.address, likerLand.account.address],
+        minters: [classOwner.account.address, likerLand.account.address],
         config: bookConfig,
-      })
-      .then((tx) => tx.wait());
+      },
+    ]);
 
-    const newClassEvent = await NewClassEvent;
-    nftClassId = newClassEvent.id;
-    nftClassContract = await ethers.getContractAt("BookNFT", nftClassId);
+    const nftClassId = await NewClassEvent;
+    const nftClassContract = await viem.getContractAt("BookNFT", nftClassId);
 
-    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    await likeNFTClassOwnerSigner
-      .mint(
-        this.classOwner,
+    await nftClassContract.write.mint(
+      [
+        classOwner.account.address,
         ["_mint1"],
         [
           JSON.stringify({
@@ -288,11 +276,14 @@ describe("BookNFTToken batch actions", () => {
             youtube_url: "",
           }),
         ],
-      )
-      .then((tx) => tx.wait());
-    await likeNFTClassOwnerSigner
-      .mint(
-        this.classOwner,
+      ],
+      {
+        account: classOwner.account,
+      },
+    );
+    await nftClassContract.write.mint(
+      [
+        classOwner.account.address,
         ["_mint2"],
         [
           JSON.stringify({
@@ -313,11 +304,14 @@ describe("BookNFTToken batch actions", () => {
             youtube_url: "",
           }),
         ],
-      )
-      .then((tx) => tx.wait());
-    await likeNFTClassOwnerSigner
-      .mint(
-        this.likerLand,
+      ],
+      {
+        account: classOwner.account,
+      },
+    );
+    await nftClassContract.write.mint(
+      [
+        likerLand.account.address,
         ["_mint3"],
         [
           JSON.stringify({
@@ -338,161 +332,167 @@ describe("BookNFTToken batch actions", () => {
             youtube_url: "",
           }),
         ],
-      )
-      .then((tx) => tx.wait());
-  });
+      ],
+      {
+        account: classOwner.account,
+      },
+    );
+
+    return {
+      likeProtocol,
+      bookNFTImpl,
+      deployer,
+      classOwner,
+      likerLand,
+      randomSigner,
+      randomSigner2,
+      publicClient,
+      nftClassId,
+      nftClassContract,
+    };
+  }
 
   it("owner should be able to send in batch", async function () {
-    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    const { nftClassContract, classOwner, randomSigner, randomSigner2 } =
+      await loadFixture(initBookNFTTokenBatch);
     await expect(
-      likeNFTClassOwnerSigner
-        .batchTransferWithMemo(
-          this.classOwner,
-          [this.randomSigner, this.randomSigner2],
+      nftClassContract.write.batchTransferWithMemo(
+        [
+          classOwner.account.address,
+          [randomSigner.account.address, randomSigner2.account.address],
           [0, 1],
           ["batch memo1", "batch memo2"],
-        )
-        .then((tx) => tx.wait()),
+        ],
+        {
+          account: classOwner.account,
+        },
+      ),
     ).to.be.not.rejected;
 
-    expect(await likeNFTClassOwnerSigner.ownerOf(0)).to.equal(
-      this.randomSigner.address,
+    expect(await nftClassContract.read.ownerOf([0])).to.equalAddress(
+      randomSigner.account.address,
     );
-    expect(await likeNFTClassOwnerSigner.ownerOf(1)).to.equal(
-      this.randomSigner2.address,
+    expect(await nftClassContract.read.ownerOf([1])).to.equalAddress(
+      randomSigner2.account.address,
     );
 
-    const filters = likeNFTClassOwnerSigner.filters.TransferWithMemo(
-      null,
-      null,
-      0,
-    );
-    const logs = await likeNFTClassOwnerSigner.queryFilter(filters);
-    expect((logs[1] as EventLog).args[0]).to.equal(this.classOwner.address);
-    expect((logs[1] as EventLog).args[1]).to.equal(this.randomSigner.address);
-    expect((logs[1] as EventLog).args[2]).to.equal(0n);
-    expect((logs[1] as EventLog).args[3]).to.equal("batch memo1");
+    const logs = await nftClassContract.getEvents.TransferWithMemo();
+    expect(logs).to.have.lengthOf(2);
 
-    const filters2 = likeNFTClassOwnerSigner.filters.TransferWithMemo(
-      null,
-      null,
-      1,
-    );
-    const logs2 = await likeNFTClassOwnerSigner.queryFilter(filters2);
-    expect((logs2[1] as EventLog).args[0]).to.equal(this.classOwner.address);
-    expect((logs2[1] as EventLog).args[1]).to.equal(this.randomSigner2.address);
-    expect((logs2[1] as EventLog).args[2]).to.equal(1n);
-    expect((logs2[1] as EventLog).args[3]).to.equal("batch memo2");
+    // Find the logs for each token
+    const token0Log = logs.find((log) => log.args.tokenId === 0n);
+    const token1Log = logs.find((log) => log.args.tokenId === 1n);
+
+    expect(token0Log).to.not.be.undefined;
+    expect(token0Log!.args.from).to.equalAddress(classOwner.account.address);
+    expect(token0Log!.args.to).to.equalAddress(randomSigner.account.address);
+    expect(token0Log!.args.tokenId).to.equal(0n);
+    expect(token0Log!.args.memo).to.equal("batch memo1");
+
+    expect(token1Log).to.not.be.undefined;
+    expect(token1Log!.args.from).to.equalAddress(classOwner.account.address);
+    expect(token1Log!.args.to).to.equalAddress(randomSigner2.account.address);
+    expect(token1Log!.args.tokenId).to.equal(1n);
+    expect(token1Log!.args.memo).to.equal("batch memo2");
   });
 
   it("should not able to send token owned by other", async function () {
-    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    const { nftClassContract, classOwner, randomSigner, likerLand } =
+      await loadFixture(initBookNFTTokenBatch);
     await expect(
-      likeNFTClassOwnerSigner
-        .batchTransferWithMemo(
-          this.classOwner,
-          [this.randomSigner],
+      nftClassContract.write.batchTransferWithMemo(
+        [
+          classOwner.account.address,
+          [randomSigner.account.address],
           [2],
           ["batch memo1"],
-        )
-        .then((tx) => tx.wait()),
+        ],
+        {
+          account: classOwner.account,
+        },
+      ),
     ).to.be.rejectedWith(/ERC721InsufficientApproval/);
-    expect(await likeNFTClassOwnerSigner.ownerOf(2)).to.equal(
-      this.likerLand.address,
+    expect(await nftClassContract.read.ownerOf([2])).to.equalAddress(
+      likerLand.account.address,
     );
   });
 
   it("should fails all if one fails", async function () {
-    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
+    const { nftClassContract, classOwner, randomSigner, likerLand } =
+      await loadFixture(initBookNFTTokenBatch);
     await expect(
-      likeNFTClassOwnerSigner
-        .batchTransferWithMemo(
-          this.classOwner,
-          [this.randomSigner, this.randomSigner, this.randomSigner],
+      nftClassContract.write.batchTransferWithMemo(
+        [
+          classOwner.account.address,
+          [
+            randomSigner.account.address,
+            randomSigner.account.address,
+            randomSigner.account.address,
+          ],
           [0, 1, 2],
           ["batch memo1", "batch memo2", "batch memo3"],
-        )
-        .then((tx) => tx.wait()),
+        ],
+        {
+          account: classOwner.account,
+        },
+      ),
     ).to.be.rejectedWith(/ERC721InsufficientApproval/);
-    expect(await likeNFTClassOwnerSigner.ownerOf(0)).to.equal(
-      this.classOwner.address,
+    expect(await nftClassContract.read.ownerOf([0])).to.equalAddress(
+      classOwner.account.address,
     );
-    expect(await likeNFTClassOwnerSigner.ownerOf(1)).to.equal(
-      this.classOwner.address,
+    expect(await nftClassContract.read.ownerOf([1])).to.equalAddress(
+      classOwner.account.address,
     );
-    expect(await likeNFTClassOwnerSigner.ownerOf(2)).to.equal(
-      this.likerLand.address,
+    expect(await nftClassContract.read.ownerOf([2])).to.equalAddress(
+      likerLand.account.address,
     );
   });
 });
 
 describe("BookNFTToken Burnable", () => {
-  before(async function () {
-    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-    const [protocolOwner, classOwner, likerLand, randomSigner, randomSigner2] =
-      await ethers.getSigners();
-
-    this.protocolOwner = protocolOwner;
-    this.classOwner = classOwner;
-    this.likerLand = likerLand;
-    this.randomSigner = randomSigner;
-    this.randomSigner2 = randomSigner2;
-  });
-
-  let deployment: BaseContract;
-  let contractAddress: string;
-  let protocolContract: BaseContract;
-  let nftClassId: string;
-  let nftClassContract: BaseContract;
-  beforeEach(async function () {
+  async function initBookNFTTokenBurnable() {
     const {
       likeProtocol,
-      likeProtocolDeployment,
-      likeProtocolAddress,
-      likeProtocolContract,
-      bookNFTDeployment,
-      bookNFTAddress,
-    } = await createProtocol(this.protocolOwner);
-
-    deployment = likeProtocolDeployment;
-    contractAddress = likeProtocolAddress;
-    protocolContract = likeProtocolContract;
-    const likeProtocolOwnerSigner = protocolContract.connect(
-      this.protocolOwner,
-    );
+      bookNFTImpl,
+      deployer,
+      classOwner,
+      likerLand,
+      randomSigner,
+      randomSigner2,
+      publicClient,
+    } = await deployProtocol();
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
-        event.removeListener();
-        resolve({ id });
+      const unwatch = likeProtocol.watchEvent.NewBookNFT({
+        onLogs: (logs) => {
+          const id = logs[0].args.bookNFT;
+          if (id) {
+            unwatch();
+            resolve(id);
+          }
+        },
       });
-
-      setTimeout(() => {
-        reject(new Error("timeout"));
-      }, 20000);
     });
 
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
 
-    likeProtocolOwnerSigner
-      .newBookNFT({
-        creator: this.classOwner,
-        updaters: [this.classOwner, this.likerLand],
-        minters: [this.classOwner, this.likerLand],
+    await likeProtocol.write.newBookNFT([
+      {
+        creator: classOwner.account.address,
+        updaters: [classOwner.account.address, likerLand.account.address],
+        minters: [classOwner.account.address, likerLand.account.address],
         config: bookConfig,
-      })
-      .then((tx) => tx.wait());
+      },
+    ]);
 
-    const newClassEvent = await NewClassEvent;
-    nftClassId = newClassEvent.id;
-    nftClassContract = await ethers.getContractAt("BookNFT", nftClassId);
+    const nftClassId = await NewClassEvent;
+    const nftClassContract = await viem.getContractAt("BookNFT", nftClassId);
 
-    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    await likeNFTClassOwnerSigner
-      .mint(
-        this.classOwner,
+    await nftClassContract.write.mint(
+      [
+        classOwner.account.address,
         ["_mint1"],
         [
           JSON.stringify({
@@ -513,39 +513,66 @@ describe("BookNFTToken Burnable", () => {
             youtube_url: "",
           }),
         ],
-      )
-      .then((tx) => tx.wait());
-  });
+      ],
+      {
+        account: classOwner.account,
+      },
+    );
+
+    return {
+      likeProtocol,
+      bookNFTImpl,
+      deployer,
+      classOwner,
+      likerLand,
+      randomSigner,
+      randomSigner2,
+      publicClient,
+      nftClassId,
+      nftClassContract,
+    };
+  }
 
   it("owner should be able to burn NFT", async function () {
-    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    expect(await likeNFTClassOwnerSigner.ownerOf(0)).to.equal(
-      this.classOwner.address,
+    const { nftClassContract, classOwner } = await loadFixture(
+      initBookNFTTokenBurnable,
     );
-    await expect(likeNFTClassOwnerSigner.burn(0).then((tx) => tx.wait())).to.be
-      .not.rejected;
-    await expect(likeNFTClassOwnerSigner.ownerOf(0)).to.be.rejectedWith(
+    expect(await nftClassContract.read.ownerOf([0])).to.equalAddress(
+      classOwner.account.address,
+    );
+    await expect(
+      nftClassContract.write.burn([0], {
+        account: classOwner.account,
+      }),
+    ).to.be.not.rejected;
+    await expect(nftClassContract.read.ownerOf([0])).to.be.rejectedWith(
       /ERC721NonexistentToken/,
     );
   });
 
   it("should not able to burn NFT owned by other", async function () {
-    const likeNFTClassRandomSigner = nftClassContract.connect(
-      this.randomSigner,
+    const { nftClassContract, classOwner, randomSigner } = await loadFixture(
+      initBookNFTTokenBurnable,
     );
     await expect(
-      likeNFTClassRandomSigner.burn(0).then((tx) => tx.wait()),
+      nftClassContract.write.burn([0], {
+        account: randomSigner.account,
+      }),
     ).to.be.rejectedWith(/ERC721InsufficientApproval/);
 
-    expect(await likeNFTClassRandomSigner.ownerOf(0)).to.equal(
-      this.classOwner.address,
+    expect(await nftClassContract.read.ownerOf([0])).to.equalAddress(
+      classOwner.account.address,
     );
   });
 
   it("should count the total supply correctly after burn", async function () {
-    const likeNFTClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    expect(await likeNFTClassOwnerSigner.totalSupply()).to.equal(1n);
-    await likeNFTClassOwnerSigner.burn(0);
-    expect(await likeNFTClassOwnerSigner.totalSupply()).to.equal(0n);
+    const { nftClassContract, classOwner } = await loadFixture(
+      initBookNFTTokenBurnable,
+    );
+    expect(await nftClassContract.read.totalSupply()).to.equal(1n);
+    await nftClassContract.write.burn([0], {
+      account: classOwner.account,
+    });
+    expect(await nftClassContract.read.totalSupply()).to.equal(0n);
   });
 });
