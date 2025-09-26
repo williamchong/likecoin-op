@@ -49,6 +49,11 @@ type StakingRepository interface {
 		keys []StakingKey,
 	) ([]*ent.Staking, error)
 
+	QueryStakingsByNFTClassAddresses(
+		ctx context.Context,
+		bookNFTAddresses []string,
+	) ([]*ent.Staking, error)
+
 	GetOrCreateStaking(
 		ctx context.Context,
 		tx *ent.Tx,
@@ -131,6 +136,22 @@ func (r *stakingRepository) QueryStakingsByKeys(
 		)
 	}
 	return r.dbService.Client().Staking.Query().WithAccount().WithNftClass().Where(staking.Or(keysPredicates...)).All(ctx)
+}
+
+func (r *stakingRepository) QueryStakingsByNFTClassAddresses(
+	ctx context.Context,
+	nftClassAddresses []string,
+) ([]*ent.Staking, error) {
+	if len(nftClassAddresses) == 0 {
+		return []*ent.Staking{}, nil
+	}
+
+	predicates := make([]predicate.Staking, 0)
+	for _, bookNFTAddress := range nftClassAddresses {
+		predicates = append(predicates, staking.HasNftClassWith(nftclass.AddressEqualFold(bookNFTAddress)))
+	}
+
+	return r.dbService.Client().Staking.Query().WithAccount().WithNftClass().Where(staking.Or(predicates...)).All(ctx)
 }
 
 func (r *stakingRepository) GetOrCreateStaking(
