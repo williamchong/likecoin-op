@@ -289,3 +289,25 @@ func GetStakingKeysFromEvents(events []*ent.StakingEvent) []database.StakingKey 
 	}
 	return keys
 }
+
+func MakeRewardDepositDistributedEvent(
+	stakingEvent *ent.StakingEvent,
+	accountEvmAddress string,
+	rewardedAmount *uint256.Int,
+) *ent.StakingEvent {
+	return &ent.StakingEvent{
+		TransactionHash:            stakingEvent.TransactionHash,
+		TransactionIndex:           stakingEvent.TransactionIndex,
+		BlockNumber:                stakingEvent.BlockNumber,
+		LogIndex:                   stakingEvent.LogIndex,
+		EventType:                  stakingevent.EventTypeRewardDepositDistributed,
+		NftClassAddress:            stakingEvent.NftClassAddress,
+		AccountEvmAddress:          accountEvmAddress,
+		StakedAmountAdded:          typeutil.Uint256(uint256.NewInt(0)),
+		StakedAmountRemoved:        typeutil.Uint256(uint256.NewInt(0)),
+		PendingRewardAmountAdded:   typeutil.Uint256(rewardedAmount),
+		PendingRewardAmountRemoved: typeutil.Uint256(uint256.NewInt(0)),
+		ClaimedRewardAmountAdded:   typeutil.Uint256(uint256.NewInt(0)),
+		ClaimedRewardAmountRemoved: typeutil.Uint256(uint256.NewInt(0)),
+	}
+}
