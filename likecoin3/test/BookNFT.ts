@@ -753,293 +753,318 @@ describe("BookNFT permission control", () => {
 });
 
 describe("BookNFT ownership transfer", () => {
-  before(async function () {
-    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-    const [protocolOwner, classOwner, likerLand, randomSigner] =
-      await ethers.getSigners();
-
-    this.protocolOwner = protocolOwner;
-    this.classOwner = classOwner;
-    this.likerLand = likerLand;
-    this.randomSigner = randomSigner;
-  });
-
-  let deployment: BaseContract;
-  let contractAddress: string;
-  let protocolContract: BaseContract;
-  let nftClassId: string;
-  let nftClassContract: BaseContract;
-  beforeEach(async function () {
+  async function initOwnershipTransfer() {
     const {
       likeProtocol,
-      likeProtocolDeployment,
-      likeProtocolAddress,
-      likeProtocolContract,
-      bookNFTDeployment,
-      bookNFTAddress,
-    } = await createProtocol(this.protocolOwner);
-
-    deployment = likeProtocolDeployment;
-    contractAddress = likeProtocolAddress;
-    protocolContract = likeProtocolContract;
-
-    const likeProtocolOwnerSigner = protocolContract.connect(
-      this.protocolOwner,
-    );
+      bookNFTImpl,
+      deployer,
+      classOwner,
+      likerLand,
+      randomSigner,
+      publicClient,
+    } = await deployProtocol();
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
-        event.removeListener();
-        resolve({ id });
+      const unwatch = likeProtocol.watchEvent.NewBookNFT({
+        onLogs: (logs) => {
+          const id = logs[0].args.bookNFT;
+          unwatch();
+          resolve(id);
+        },
       });
-
-      setTimeout(() => {
-        reject(new Error("timeout"));
-      }, 60000);
     });
 
-    likeProtocolOwnerSigner
-      .newBookNFT({
-        creator: this.classOwner,
-        updaters: [this.classOwner, this.likerLand],
-        minters: [this.classOwner, this.likerLand],
-        config: {
-          name: "My Book",
-          symbol: "KOOB",
-          metadata: JSON.stringify({
-            name: "Collection Name",
-            symbol: "Collection SYMB",
-            description: "Collection Description",
-            image:
-              "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-            banner_image: "",
-            featured_image: "",
-            external_link: "https://www.example.com",
-            collaborators: [],
-          }),
-          max_supply: 10,
-        },
-      })
-      .then((tx) => tx.wait());
-
-    const newClassEvent = await NewClassEvent;
-    nftClassId = newClassEvent.id;
-    nftClassContract = await ethers.getContractAt("BookNFT", nftClassId);
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
-  });
-
-  it("should allow class owner to transfer ownership", async function () {
-    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
-
-    const transferOwnership = async () => {
-      await likeClassOwnerSigner
-        .transferOwnership(this.randomSigner.address)
-        .then((tx) => tx.wait());
+    const bookConfig = {
+      name: "My Book",
+      symbol: "KOOB",
+      metadata: JSON.stringify({
+        name: "Collection Name",
+        symbol: "Collection SYMB",
+        description: "Collection Description",
+        image:
+          "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
+        banner_image: "",
+        featured_image: "",
+        external_link: "https://www.example.com",
+        collaborators: [],
+      }),
+      max_supply: 10n,
     };
 
-    await expect(transferOwnership()).to.not.be.rejected;
-    expect(await nftClassContract.owner()).to.equal(this.randomSigner.address);
+    await likeProtocol.write.newBookNFT([
+      {
+        creator: classOwner.account.address,
+        updaters: [classOwner.account.address, likerLand.account.address],
+        minters: [classOwner.account.address, likerLand.account.address],
+        config: bookConfig,
+      },
+    ]);
+
+    const nftClassId = await NewClassEvent;
+    const nftClassContract = await viem.getContractAt("BookNFT", nftClassId);
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      classOwner.account.address,
+    );
+
+    return {
+      likeProtocol,
+      bookNFTImpl,
+      deployer,
+      classOwner,
+      likerLand,
+      randomSigner,
+      publicClient,
+      nftClassId,
+      nftClassContract,
+    };
+  }
+
+  it("should allow class owner to transfer ownership", async function () {
+    const { nftClassContract, classOwner, randomSigner } = await loadFixture(
+      initOwnershipTransfer,
+    );
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      classOwner.account.address,
+    );
+
+    await expect(
+      nftClassContract.write.transferOwnership([randomSigner.account.address], {
+        account: classOwner.account,
+      }),
+    ).to.not.be.rejected;
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      randomSigner.account.address,
+    );
   });
 
   it("should not allow the original owner to transfer ownership again", async function () {
-    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
-
-    const transferOwnership = async () => {
-      await likeClassOwnerSigner
-        .transferOwnership(this.randomSigner.address)
-        .then((tx) => tx.wait());
-    };
-
-    await expect(transferOwnership()).to.not.be.rejected;
-    expect(await nftClassContract.owner()).to.equal(this.randomSigner.address);
+    const { nftClassContract, classOwner, randomSigner } = await loadFixture(
+      initOwnershipTransfer,
+    );
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      classOwner.account.address,
+    );
 
     await expect(
-      likeClassOwnerSigner.transferOwnership(this.classOwner.address),
+      nftClassContract.write.transferOwnership([randomSigner.account.address], {
+        account: classOwner.account,
+      }),
+    ).to.not.be.rejected;
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      randomSigner.account.address,
+    );
+
+    await expect(
+      nftClassContract.write.transferOwnership([classOwner.account.address], {
+        account: classOwner.account,
+      }),
     ).to.be.rejected;
-    expect(await nftClassContract.owner()).to.equal(this.randomSigner.address);
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      randomSigner.account.address,
+    );
   });
 
   it("should not allow random signer to transfer ownership", async function () {
-    const likeClassRandomSigner = nftClassContract.connect(this.randomSigner);
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
+    const { nftClassContract, classOwner, randomSigner } = await loadFixture(
+      initOwnershipTransfer,
+    );
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      classOwner.account.address,
+    );
 
     await expect(
-      likeClassRandomSigner.transferOwnership(this.randomSigner.address),
+      nftClassContract.write.transferOwnership([randomSigner.account.address], {
+        account: randomSigner.account,
+      }),
     ).to.be.rejected;
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      classOwner.account.address,
+    );
   });
 
   it("should not modify minter permission when transfer ownership", async function () {
-    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
+    const { nftClassContract, classOwner, randomSigner, likerLand } =
+      await loadFixture(initOwnershipTransfer);
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      classOwner.account.address,
+    );
 
-    const transferOwnership = async () => {
-      await likeClassOwnerSigner
-        .transferOwnership(this.randomSigner.address)
-        .then((tx) => tx.wait());
-    };
-
-    await expect(transferOwnership()).to.not.be.rejected;
-    expect(await nftClassContract.owner()).to.equal(this.randomSigner.address);
-
-    const mintNFT = async () => {
-      await likeClassOwnerSigner
-        .mint(
-          this.classOwner.address,
-          ["_mint1", "_mint2"],
-          [
-            JSON.stringify({
-              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-              image_data: "",
-              external_url: "https://www.google.com",
-              description: "202412191729 #0001 Description",
-              name: "202412191729 #0001",
-              attributes: [
-                {
-                  trait_type: "ISCN ID",
-                  value:
-                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-                },
-              ],
-              background_color: "",
-              animation_url: "",
-              youtube_url: "",
-            }),
-            JSON.stringify({
-              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-              image_data: "",
-              external_url: "https://www.google.com",
-              description: "202412191729 #0001 Description",
-              name: "202412191729 #0001",
-              attributes: [
-                {
-                  trait_type: "ISCN ID",
-                  value:
-                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-                },
-              ],
-              background_color: "",
-              animation_url: "",
-              youtube_url: "",
-            }),
-          ],
-        )
-        .then((tx) => tx.wait());
-    };
-
-    await expect(mintNFT()).to.be.not.rejected;
-    await expect(await nftClassContract.totalSupply()).to.equal(2n);
     await expect(
-      await nftClassContract.balanceOf(this.classOwner.address),
+      nftClassContract.write.transferOwnership([randomSigner.account.address], {
+        account: classOwner.account,
+      }),
+    ).to.not.be.rejected;
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      randomSigner.account.address,
+    );
+
+    const tokenMetadata = [
+      JSON.stringify({
+        image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+        image_data: "",
+        external_url: "https://www.google.com",
+        description: "202412191729 #0001 Description",
+        name: "202412191729 #0001",
+        attributes: [
+          {
+            trait_type: "ISCN ID",
+            value:
+              "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+          },
+        ],
+        background_color: "",
+        animation_url: "",
+        youtube_url: "",
+      }),
+      JSON.stringify({
+        image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+        image_data: "",
+        external_url: "https://www.google.com",
+        description: "202412191729 #0001 Description",
+        name: "202412191729 #0001",
+        attributes: [
+          {
+            trait_type: "ISCN ID",
+            value:
+              "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+          },
+        ],
+        background_color: "",
+        animation_url: "",
+        youtube_url: "",
+      }),
+    ];
+
+    await expect(
+      nftClassContract.write.mint(
+        [classOwner.account.address, ["_mint1", "_mint2"], tokenMetadata],
+        {
+          account: likerLand.account,
+        },
+      ),
+    ).to.be.not.rejected;
+    expect(await nftClassContract.read.totalSupply()).to.equal(2n);
+    expect(
+      await nftClassContract.read.balanceOf([classOwner.account.address]),
     ).to.equal(2n);
   });
 
   it("should not allow next owner to mint NFT without minter permission", async function () {
-    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
+    const { nftClassContract, classOwner, randomSigner } = await loadFixture(
+      initOwnershipTransfer,
+    );
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      classOwner.account.address,
+    );
 
-    const transferOwnership = async () => {
-      await likeClassOwnerSigner
-        .transferOwnership(this.randomSigner.address)
-        .then((tx) => tx.wait());
-    };
-
-    await expect(transferOwnership()).to.not.be.rejected;
-    expect(await nftClassContract.owner()).to.equal(this.randomSigner.address);
-
-    const likeClassRandomSigner = nftClassContract.connect(this.randomSigner);
-    const mintNFT = async () => {
-      await likeClassRandomSigner
-        .mint(
-          this.randomSigner.address,
-          ["_mint1", "_mint2"],
-          [
-            JSON.stringify({
-              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-              image_data: "",
-              external_url: "https://www.google.com",
-              description: "202412191729 #0001 Description",
-              name: "202412191729 #0001",
-              attributes: [
-                {
-                  trait_type: "ISCN ID",
-                  value:
-                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-                },
-              ],
-              background_color: "",
-              animation_url: "",
-              youtube_url: "",
-            }),
-            JSON.stringify({
-              image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
-              image_data: "",
-              external_url: "https://www.google.com",
-              description: "202412191729 #0001 Description",
-              name: "202412191729 #0001",
-              attributes: [
-                {
-                  trait_type: "ISCN ID",
-                  value:
-                    "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
-                },
-              ],
-              background_color: "",
-              animation_url: "",
-              youtube_url: "",
-            }),
-          ],
-        )
-        .then((tx) => tx.wait());
-    };
-
-    await expect(mintNFT()).to.be.rejected;
-    await expect(await nftClassContract.totalSupply()).to.equal(0n);
     await expect(
-      await nftClassContract.balanceOf(this.randomSigner.address),
+      nftClassContract.write.transferOwnership([randomSigner.account.address], {
+        account: classOwner.account,
+      }),
+    ).to.not.be.rejected;
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      randomSigner.account.address,
+    );
+
+    const tokenMetadata = [
+      JSON.stringify({
+        image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+        image_data: "",
+        external_url: "https://www.google.com",
+        description: "202412191729 #0001 Description",
+        name: "202412191729 #0001",
+        attributes: [
+          {
+            trait_type: "ISCN ID",
+            value:
+              "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+          },
+        ],
+        background_color: "",
+        animation_url: "",
+        youtube_url: "",
+      }),
+      JSON.stringify({
+        image: "ipfs://QmUEV41Hbi7qkxeYSVUtoE5xkfRFnqSd62fa5v8Naya5Ys",
+        image_data: "",
+        external_url: "https://www.google.com",
+        description: "202412191729 #0001 Description",
+        name: "202412191729 #0001",
+        attributes: [
+          {
+            trait_type: "ISCN ID",
+            value:
+              "iscn://likecoin-chain/FyZ13m_hgwzUC6UoaS3vFdYvdG6QXfajU3vcatw7X1c/1",
+          },
+        ],
+        background_color: "",
+        animation_url: "",
+        youtube_url: "",
+      }),
+    ];
+
+    await expect(
+      nftClassContract.write.mint(
+        [randomSigner.account.address, ["_mint1", "_mint2"], tokenMetadata],
+        {
+          account: randomSigner.account,
+        },
+      ),
+    ).to.be.rejected;
+    expect(await nftClassContract.read.totalSupply()).to.equal(0n);
+    expect(
+      await nftClassContract.read.balanceOf([randomSigner.account.address]),
     ).to.equal(0n);
   });
+
   it("should allow original owner to renounce its minter/updater role", async function () {
-    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
+    const { nftClassContract, classOwner, randomSigner } = await loadFixture(
+      initOwnershipTransfer,
+    );
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      classOwner.account.address,
+    );
 
-    const transferOwnership = async () => {
-      await likeClassOwnerSigner
-        .transferOwnership(this.randomSigner.address)
-        .then((tx) => tx.wait());
-    };
-
-    await expect(transferOwnership()).to.not.be.rejected;
-    expect(await nftClassContract.owner()).to.equal(this.randomSigner.address);
-
-    const renounceMinter = async () => {
-      await likeClassOwnerSigner.renounceRole(
-        nftClassContract.MINTER_ROLE(),
-        this.classOwner.address,
-      );
-    };
-    await expect(renounceMinter()).to.not.be.rejected;
     await expect(
-      await nftClassContract.hasRole(
-        nftClassContract.MINTER_ROLE(),
-        this.classOwner.address,
+      nftClassContract.write.transferOwnership([randomSigner.account.address], {
+        account: classOwner.account,
+      }),
+    ).to.not.be.rejected;
+    expect(await nftClassContract.read.owner()).to.equalAddress(
+      randomSigner.account.address,
+    );
+
+    const MINTER_ROLE = await nftClassContract.read.MINTER_ROLE();
+    const UPDATER_ROLE = await nftClassContract.read.UPDATER_ROLE();
+
+    await expect(
+      nftClassContract.write.renounceRole(
+        [MINTER_ROLE, classOwner.account.address],
+        {
+          account: classOwner.account,
+        },
       ),
+    ).to.not.be.rejected;
+    expect(
+      await nftClassContract.read.hasRole([
+        MINTER_ROLE,
+        classOwner.account.address,
+      ]),
     ).to.equal(false);
 
-    const renounceUpdater = async () => {
-      await likeClassOwnerSigner.renounceRole(
-        nftClassContract.UPDATER_ROLE(),
-        this.classOwner.address,
-      );
-    };
-    await expect(renounceUpdater()).to.not.be.rejected;
     await expect(
-      await nftClassContract.hasRole(
-        nftClassContract.MINTER_ROLE(),
-        this.classOwner.address,
+      nftClassContract.write.renounceRole(
+        [UPDATER_ROLE, classOwner.account.address],
+        {
+          account: classOwner.account,
+        },
       ),
+    ).to.not.be.rejected;
+    expect(
+      await nftClassContract.read.hasRole([
+        MINTER_ROLE,
+        classOwner.account.address,
+      ]),
     ).to.equal(false);
   });
 });
