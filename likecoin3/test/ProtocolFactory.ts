@@ -1,5 +1,6 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { ethers, upgrades } from "hardhat";
+import { ethers, upgrades, viem, ignition } from "hardhat";
+import LikeProtocolV1Module from "../ignition/modules/LikeProtocolV1";
 
 export async function createProtocol(ownerSigner: SignerWithAddress) {
   const BookNFT = await ethers.getContractFactory("BookNFT");
@@ -30,5 +31,33 @@ export async function createProtocol(ownerSigner: SignerWithAddress) {
     likeProtocolContract,
     bookNFTDeployment,
     bookNFTAddress,
+  };
+}
+
+export async function deployProtocol() {
+  const [deployer, classOwner, likerLand, randomSigner] =
+    await viem.getWalletClients();
+  const publicClient = await viem.getPublicClient();
+
+  const { likeProtocolImpl, likeProtocol, bookNFTImpl } = await ignition.deploy(
+    LikeProtocolV1Module,
+    {
+      parameters: {
+        LikeProtocolV0Module: {
+          initOwner: deployer.account.address,
+        },
+      },
+    },
+  );
+
+  return {
+    likeProtocolImpl,
+    likeProtocol,
+    bookNFTImpl,
+    deployer,
+    classOwner,
+    likerLand,
+    randomSigner,
+    publicClient,
   };
 }

@@ -1,164 +1,170 @@
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
 import { expect } from "chai";
 import { EventLog, BaseContract } from "ethers";
-import { ethers, upgrades } from "hardhat";
+import { ethers, viem } from "hardhat";
 
+import "./setup";
 import { BookConfigLoader, BookTokenConfigLoader } from "./BookConfigLoader";
-import { createProtocol } from "./ProtocolFactory";
+import { createProtocol, deployProtocol } from "./ProtocolFactory";
 
 describe("BookNFTClass", () => {
-  before(async function () {
-    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-    this.BookNFTMock = await ethers.getContractFactory("BookNFTMock");
-    const [protocolOwner, classOwner, likerLand, randomSigner] =
-      await ethers.getSigners();
-
-    this.protocolOwner = protocolOwner;
-    this.classOwner = classOwner;
-    this.likerLand = likerLand;
-    this.randomSigner = randomSigner;
-  });
-
-  let deployment: BaseContract;
-  let contractAddress: string;
-  let protocolContract: BaseContract;
-  let bookNFTImplementation: BaseContract;
-  let nftClassId: string;
-  let nftClassContract: BaseContract;
-  beforeEach(async function () {
+  async function initMint() {
     const {
+      likeProtocolImpl,
       likeProtocol,
-      likeProtocolDeployment,
-      likeProtocolAddress,
-      likeProtocolContract,
-      bookNFTDeployment,
-      bookNFTAddress,
-    } = await createProtocol(this.protocolOwner);
-
-    deployment = likeProtocolDeployment;
-    contractAddress = likeProtocolAddress;
-    protocolContract = likeProtocolContract;
-    bookNFTImplementation = bookNFTDeployment;
-
-    const likeProtocolOwnerSigner = protocolContract.connect(
-      this.protocolOwner,
-    );
-
-    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on(
-        "NewBookNFT",
-        (id: string, params: any, event: any) => {
-          event.removeListener();
-          resolve({ id });
-        },
-      );
-      setTimeout(() => {
-        reject(new Error("timeout"));
-      }, 20000);
-    });
+      bookNFTImpl,
+      deployer,
+      classOwner,
+      likerLand,
+      randomSigner,
+      publicClient,
+    } = await deployProtocol();
+    const protocolOwner = deployer;
 
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
 
-    await likeProtocolOwnerSigner.newBookNFT({
-      creator: this.classOwner,
-      updaters: [this.classOwner, this.likerLand],
-      minters: [this.classOwner, this.likerLand],
-      config: bookConfig,
+    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
+      const unwatch = likeProtocol.watchEvent.NewBookNFT({
+        onLogs: (logs) => {
+          const id = logs[0].args.bookNFT;
+          unwatch();
+          resolve(id);
+        },
+      });
     });
+    await likeProtocol.write.newBookNFT([
+      {
+        creator: classOwner.account.address,
+        updaters: [classOwner.account.address, likerLand.account.address],
+        minters: [classOwner.account.address, likerLand.account.address],
+        config: bookConfig,
+      },
+    ]);
 
-    const newClassEvent = await NewClassEvent;
-    nftClassId = newClassEvent.id;
-    nftClassContract = await ethers.getContractAt("BookNFT", nftClassId);
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
-  });
+    const nftClassId = await NewClassEvent;
+    const book0NFT = await viem.getContractAt("BookNFT", nftClassId);
+    expect(await book0NFT.read.owner()).to.equalAddress(
+      classOwner.account.address,
+    );
+    return {
+      likeProtocol,
+      bookNFTImpl,
+      deployer,
+      protocolOwner,
+      classOwner,
+      likerLand,
+      randomSigner,
+      publicClient,
+      book0NFT,
+    };
+  }
 
   it("should have the correct STORAGE_SLOT", async function () {
-    const bookNFTMockOwnerSigner = this.BookNFTMock.connect(this.protocolOwner);
-    const newBookNFT = await bookNFTMockOwnerSigner.deploy();
-    expect(await newBookNFT.bookNFTStorage()).to.equal(
+    const bookNFTMock = await viem.deployContract("BookNFTMock");
+    expect(await bookNFTMock.read.bookNFTStorage()).to.equal(
       "0x8303e9d27d04c843c8d4a08966b1e1be0214fc0b3375d79db0a8252068c41f00",
     );
   });
 
   it("should support EIP 721 interface", async function () {
+    const { book0NFT } = await loadFixture(initMint);
     // https://eips.ethereum.org/EIPS/eip-721#specification
-    expect(await nftClassContract.supportsInterface("0x80ac58cd")).to.equal(
+    expect(await book0NFT.read.supportsInterface(["0x80ac58cd"])).to.equal(
       true,
     );
   });
 
   it("should support EIP 2981 interface", async function () {
+    const { book0NFT } = await loadFixture(initMint);
     // https://eips.ethereum.org/EIPS/eip-2981#specification
-    expect(await nftClassContract.supportsInterface("0x2a55205a")).to.equal(
+    expect(await book0NFT.read.supportsInterface(["0x2a55205a"])).to.equal(
       true,
     );
   });
 
   it("should support EIP 4906 interface", async function () {
+    const { book0NFT } = await loadFixture(initMint);
     // https://eips.ethereum.org/EIPS/eip-4906#specification
-    expect(await nftClassContract.supportsInterface("0x49064906")).to.equal(
+    expect(await book0NFT.read.supportsInterface(["0x49064906"])).to.equal(
       true,
     );
   });
 
   it("should not able to re-initialize", async function () {
-    const bookNFTRandomSigner = bookNFTImplementation.connect(
-      this.randomSigner,
-    );
+    const { book0NFT, randomSigner } = await loadFixture(initMint);
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
-    const owner = await bookNFTRandomSigner.owner();
-    expect(owner).is.not.equal(this.randomSigner.address);
+    const owner = await book0NFT.read.owner();
+    expect(owner).is.not.equalAddress(randomSigner.account.address);
 
     await expect(
-      bookNFTRandomSigner.initialize({
-        creator: this.randomSigner,
-        updaters: [this.randomSigner, this.randomSigner],
-        minters: [this.randomSigner, this.randomSigner],
-        config: bookConfig,
-      }),
+      book0NFT.write.initialize(
+        [
+          {
+            creator: randomSigner.account.address,
+            updaters: [
+              randomSigner.account.address,
+              randomSigner.account.address,
+            ],
+            minters: [
+              randomSigner.account.address,
+              randomSigner.account.address,
+            ],
+            config: bookConfig,
+          },
+        ],
+        {
+          account: randomSigner.account,
+        },
+      ),
     ).to.be.rejectedWith("InvalidInitialization()");
   });
 
   it("should have the right roles assigned", async function () {
-    const MINTER_ROLE = await nftClassContract.MINTER_ROLE();
-    const UPDATER_ROLE = await nftClassContract.UPDATER_ROLE();
+    const { book0NFT, protocolOwner, classOwner, likerLand, randomSigner } =
+      await loadFixture(initMint);
+    const MINTER_ROLE = await book0NFT.read.MINTER_ROLE();
+    const UPDATER_ROLE = await book0NFT.read.UPDATER_ROLE();
     expect(
-      await nftClassContract.hasRole(MINTER_ROLE, this.protocolOwner.address),
+      await book0NFT.read.hasRole([MINTER_ROLE, protocolOwner.account.address]),
     ).to.equal(false);
     expect(
-      await nftClassContract.hasRole(MINTER_ROLE, this.classOwner.address),
+      await book0NFT.read.hasRole([MINTER_ROLE, classOwner.account.address]),
     ).to.equal(true);
     expect(
-      await nftClassContract.hasRole(MINTER_ROLE, this.likerLand.address),
+      await book0NFT.read.hasRole([MINTER_ROLE, likerLand.account.address]),
     ).to.equal(true);
     expect(
-      await nftClassContract.hasRole(MINTER_ROLE, this.randomSigner.address),
+      await book0NFT.read.hasRole([MINTER_ROLE, randomSigner.account.address]),
     ).to.equal(false);
     expect(
-      await nftClassContract.hasRole(UPDATER_ROLE, this.protocolOwner.address),
+      await book0NFT.read.hasRole([
+        UPDATER_ROLE,
+        protocolOwner.account.address,
+      ]),
     ).to.equal(false);
     expect(
-      await nftClassContract.hasRole(UPDATER_ROLE, this.classOwner.address),
+      await book0NFT.read.hasRole([UPDATER_ROLE, classOwner.account.address]),
     ).to.equal(true);
     expect(
-      await nftClassContract.hasRole(UPDATER_ROLE, this.likerLand.address),
+      await book0NFT.read.hasRole([UPDATER_ROLE, likerLand.account.address]),
     ).to.equal(true);
     expect(
-      await nftClassContract.hasRole(UPDATER_ROLE, this.randomSigner.address),
+      await book0NFT.read.hasRole([UPDATER_ROLE, randomSigner.account.address]),
     ).to.equal(false);
   });
 
   it("should return the right current index", async function () {
-    expect(await nftClassContract.getCurrentIndex()).to.equal(0n);
+    const { book0NFT, classOwner } = await loadFixture(initMint);
+    expect(await book0NFT.read.getCurrentIndex()).to.equal(0n);
 
-    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    const mintNFT = async () => {
-      await likeClassOwnerSigner
-        .mint(
-          this.classOwner.address,
+    await expect(
+      book0NFT.write.mint(
+        [
+          classOwner.account.address,
           ["_mint"],
           [
             JSON.stringify({
@@ -179,43 +185,53 @@ describe("BookNFTClass", () => {
               youtube_url: "",
             }),
           ],
-        )
-        .then((tx) => tx.wait());
-    };
+        ],
+        {
+          account: classOwner.account,
+        },
+      ),
+    ).to.be.not.rejected;
 
-    await expect(mintNFT()).to.be.not.rejected;
-    expect(await nftClassContract.getCurrentIndex()).to.equal(1n);
+    expect(await book0NFT.read.getCurrentIndex()).to.equal(1n);
   });
 
   it("should allow class owner to update class and mint NFT", async function () {
-    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
+    const { book0NFT, classOwner } = await loadFixture(initMint);
+    expect(await book0NFT.read.owner()).to.equalAddress(
+      classOwner.account.address,
+    );
 
-    const updateClass = async () => {
-      await likeClassOwnerSigner
-        .update({
-          name: "My Book updated",
-          symbol: "KOOB",
-          metadata: JSON.stringify({
-            name: "Collection Name",
-            symbol: "Collection SYMB",
-            description: "Collection Description",
-            image:
-              "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-            banner_image: "",
-            featured_image: "",
-            external_link: "https://www.example.com",
-            collaborators: [],
-          }),
-          max_supply: 20,
-        })
-        .then((tx) => tx.wait());
-    };
+    await expect(
+      book0NFT.write.update(
+        [
+          {
+            name: "My Book updated",
+            symbol: "KOOB",
+            metadata: JSON.stringify({
+              name: "Collection Name",
+              symbol: "Collection SYMB",
+              description: "Collection Description",
+              image:
+                "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
+              banner_image: "",
+              featured_image: "",
+              external_link: "https://www.example.com",
+              collaborators: [],
+            }),
+            max_supply: 20,
+          },
+        ],
+        {
+          account: classOwner.account,
+        },
+      ),
+    ).to.be.not.rejected;
+    await expect(await book0NFT.read.totalSupply()).to.equal(0n);
 
-    const mintNFT = async () => {
-      await likeClassOwnerSigner
-        .mint(
-          this.classOwner.address,
+    await expect(
+      book0NFT.write.mint(
+        [
+          classOwner.account.address,
           ["_mint"],
           [
             JSON.stringify({
@@ -236,71 +252,109 @@ describe("BookNFTClass", () => {
               youtube_url: "",
             }),
           ],
-        )
-        .then((tx) => tx.wait());
-    };
-
-    await expect(updateClass()).to.be.not.rejected;
-    await expect(await nftClassContract.totalSupply()).to.equal(0n);
-    await expect(mintNFT()).to.be.not.rejected;
-    await expect(await nftClassContract.totalSupply()).to.equal(1n);
-    await expect(updateClass()).to.be.not.rejected;
-    await expect(await nftClassContract.totalSupply()).to.equal(1n);
+        ],
+        {
+          account: classOwner.account,
+        },
+      ),
+    ).to.be.not.rejected;
+    await expect(await book0NFT.read.totalSupply()).to.equal(1n);
+    await expect(
+      book0NFT.write.update(
+        [
+          {
+            name: "My Book updated",
+            symbol: "KOOB",
+            metadata: JSON.stringify({
+              name: "Collection Name",
+              symbol: "Collection SYMB",
+              description: "Collection Description",
+              image:
+                "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
+              banner_image: "",
+              featured_image: "",
+              external_link: "https://www.example.com",
+              collaborators: [],
+            }),
+            max_supply: 20,
+          },
+        ],
+        {
+          account: classOwner.account,
+        },
+      ),
+    ).to.be.not.rejected;
+    await expect(await book0NFT.read.totalSupply()).to.equal(1n);
   });
 
   it("should reject update class with decreasing max supply", async function () {
-    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    await expect(await nftClassContract.owner()).to.equal(
-      this.classOwner.address,
+    const { book0NFT, classOwner } = await loadFixture(initMint);
+    await expect(await book0NFT.read.owner()).to.equalAddress(
+      classOwner.account.address,
     );
 
     await expect(
-      likeClassOwnerSigner.update({
-        name: "My Book",
-        symbol: "KOOB",
-        metadata: JSON.stringify({
-          name: "Collection Name",
-          symbol: "Collection SYMB",
-          description: "Collection Description",
-          image:
-            "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-          banner_image: "",
-          featured_image: "",
-          external_link: "https://www.example.com",
-          collaborators: [],
-        }),
-        max_supply: 5,
-      }),
+      book0NFT.write.update(
+        [
+          {
+            name: "My Book",
+            symbol: "KOOB",
+            metadata: JSON.stringify({
+              name: "Collection Name",
+              symbol: "Collection SYMB",
+              description: "Collection Description",
+              image:
+                "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
+              banner_image: "",
+              featured_image: "",
+              external_link: "https://www.example.com",
+              collaborators: [],
+            }),
+            max_supply: 5,
+          },
+        ],
+        {
+          account: classOwner.account,
+        },
+      ),
     ).to.be.rejectedWith("ErrSupplyDecrease");
 
-    expect(await nftClassContract.symbol()).to.equal("KOOB");
+    expect(await book0NFT.read.symbol()).to.equal("KOOB");
   });
 
   it("should not allow random address update class", async function () {
-    const likeClassSigner = nftClassContract.connect(this.randomSigner);
+    const { book0NFT, classOwner, randomSigner } = await loadFixture(initMint);
+
     await expect(
-      likeClassSigner.update({
-        name: "Hi Jack",
-        symbol: "HIJACK",
-        metadata: JSON.stringify({}),
-        config: {
-          max_supply: 0,
+      book0NFT.write.update(
+        [
+          {
+            name: "Hi Jack",
+            symbol: "HIJACK",
+            metadata: JSON.stringify({}),
+            config: {
+              max_supply: 0,
+            },
+          },
+        ],
+        {
+          account: randomSigner.account,
         },
-      }),
+      ),
     ).to.be.rejected;
-    await expect(await nftClassContract.owner()).to.equal(
-      this.classOwner.address,
+    expect(await book0NFT.read.owner()).to.equalAddress(
+      classOwner.account.address,
     );
-    await expect(await nftClassContract.symbol()).to.equal("KOOB");
+    expect(await book0NFT.read.symbol()).to.equal("KOOB");
   });
 
   it("should allow class owner to mintNFTs in batch", async function () {
-    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    await expect(await nftClassContract.totalSupply()).to.equal(0n);
-    const mintNFT = async () => {
-      await likeClassOwnerSigner
-        .batchMint(
-          [this.classOwner.address, this.classOwner.address],
+    const { book0NFT, classOwner } = await loadFixture(initMint);
+    expect(await book0NFT.read.totalSupply()).to.equal(0n);
+    await expect(
+      book0NFT.write.batchMint(
+        [
+          [classOwner.account.address, classOwner.account.address],
           ["_mint1", "_mint2"],
           [
             JSON.stringify({
@@ -338,24 +392,28 @@ describe("BookNFTClass", () => {
               youtube_url: "",
             }),
           ],
-        )
-        .then((tx) => tx.wait());
-    };
-    await expect(mintNFT()).to.be.not.rejected;
-    await expect(await nftClassContract.totalSupply()).to.equal(2n);
-    await expect(await nftClassContract.tokenURI(0n)).to.equal(
+        ],
+        {
+          account: classOwner.account,
+        },
+      ),
+    ).to.be.not.rejected;
+    expect(await book0NFT.read.totalSupply()).to.equal(2n);
+    expect(await book0NFT.read.tokenURI([0n])).to.equal(
       "data:application/json;base64,eyJpbWFnZSI6ImlwZnM6Ly9RbVVFVjQxSGJpN3FreGVZU1ZVdG9FNXhrZlJGbnFTZDYyZmE1djhOYXlhNVlzIiwiaW1hZ2VfZGF0YSI6IiIsImV4dGVybmFsX3VybCI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJkZXNjcmlwdGlvbiI6IjIwMjQxMjE5MTcyOSAjMDAwMSBEZXNjcmlwdGlvbiIsIm5hbWUiOiIyMDI0MTIxOTE3MjkgIzAwMDEiLCJhdHRyaWJ1dGVzIjpbeyJ0cmFpdF90eXBlIjoiSVNDTiBJRCIsInZhbHVlIjoiaXNjbjovL2xpa2Vjb2luLWNoYWluL0Z5WjEzbV9oZ3d6VUM2VW9hUzN2RmRZdmRHNlFYZmFqVTN2Y2F0dzdYMWMvMSJ9XSwiYmFja2dyb3VuZF9jb2xvciI6IiIsImFuaW1hdGlvbl91cmwiOiIiLCJ5b3V0dWJlX3VybCI6IiJ9",
     );
   });
 
   it("should check token id when safe mint with token id", async function () {
-    const likeClassOwnerSigner = nftClassContract.connect(this.classOwner);
-    expect(await nftClassContract.owner()).to.equal(this.classOwner.address);
+    const { book0NFT, classOwner } = await loadFixture(initMint);
+    expect(await book0NFT.read.owner()).to.equalAddress(
+      classOwner.account.address,
+    );
 
     const mintNFT = async () => {
-      await likeClassOwnerSigner
-        .mint(
-          this.classOwner.address,
+      await book0NFT.write.mint(
+        [
+          classOwner.account.address,
           ["_mint1"],
           [
             JSON.stringify({
@@ -376,15 +434,18 @@ describe("BookNFTClass", () => {
               youtube_url: "",
             }),
           ],
-        )
-        .then((tx) => tx.wait());
+        ],
+        {
+          account: classOwner.account,
+        },
+      );
     };
 
     const safeMintWithTokenId = async (fromTokenId: number) => {
-      await likeClassOwnerSigner
-        .safeMintWithTokenId(
+      await book0NFT.write.safeMintWithTokenId(
+        [
           fromTokenId,
-          [this.classOwner.address, this.classOwner.address],
+          [classOwner.account.address, classOwner.account.address],
           ["_mint1", "_mint2"],
           [
             JSON.stringify({
@@ -422,18 +483,21 @@ describe("BookNFTClass", () => {
               youtube_url: "",
             }),
           ],
-        )
-        .then((tx) => tx.wait());
+        ],
+        {
+          account: classOwner.account,
+        },
+      );
     };
 
     await expect(mintNFT()).to.be.not.rejected;
-    await expect(await nftClassContract.totalSupply()).to.equal(1n);
-    await expect(safeMintWithTokenId(0)).to.be.rejectedWith(
+    await expect(await book0NFT.read.totalSupply()).to.equal(1n);
+    await expect(safeMintWithTokenId([0])).to.be.rejectedWith(
       "ErrTokenIdMintFails(1)",
     );
     await expect(safeMintWithTokenId(1)).to.be.not.rejected;
-    await expect(await nftClassContract.totalSupply()).to.equal(3n);
-    await expect(safeMintWithTokenId(1)).to.be.rejectedWith(
+    await expect(await book0NFT.read.totalSupply()).to.equal(3n);
+    await expect(safeMintWithTokenId([1])).to.be.rejectedWith(
       "ErrTokenIdMintFails(3)",
     );
   });
