@@ -9,6 +9,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IBeacon} from "@openzeppelin/contracts/proxy/beacon/IBeacon.sol";
 import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
+import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
 
 import {MsgNewBookNFT} from "../types/MsgNewBookNFT.sol";
 import {BookConfig} from "../types/BookConfig.sol";
@@ -16,6 +17,8 @@ import {BookConfig} from "../types/BookConfig.sol";
 import {BookNFT} from "./BookNFT.sol";
 
 error ErrNftClassNotFound();
+error ErrInvalidSalt();
+error ErrBookNFTAlreadyExists();
 interface BookNFTInterface {
     function initialize(MsgNewBookNFT memory msgNewBookNFT) external;
 }
@@ -75,6 +78,60 @@ contract LikeProtocol is
     function isBookNFT(address classId) public view returns (bool) {
         LikeNFTStorage storage $ = _getLikeNFTStorage();
         return $.classIdMapping[classId];
+    }
+
+    function _guardSalt(bytes32 salt) private view {
+        // TODO: First 20 byte is msg.sender; 20-21 is Nounce; 23-32 is salt
+        if (salt == bytes32(0)) {
+            revert ErrInvalidSalt();
+        }
+        address permissionAddress = address(bytes20(salt));
+        if (permissionAddress != _msgSender()) {
+            revert ErrInvalidSalt();
+        }
+    }
+
+    function precomputeAddress(
+        bytes32 salt,
+        MsgNewBookNFT memory msgNewBookNFT
+    ) public view returns (address bookAddress) {
+        LikeNFTStorage storage $ = _getLikeNFTStorage();
+        address protocolAddress = address(this);
+        bytes memory initData = abi.encodeWithSelector(
+            BookNFTInterface.initialize.selector,
+            msgNewBookNFT
+        );
+        bytes memory proxyCreationCode = abi.encodePacked(
+            type(BeaconProxy).creationCode,
+            abi.encode(protocolAddress, initData)
+        );
+
+        bookAddress = Create2.computeAddress(
+            salt,
+            keccak256(proxyCreationCode)
+        );
+        if ($.classIdMapping[bookAddress]) revert ErrBookNFTAlreadyExists();
+    }
+
+    function create2BookNFT(
+        bytes32 salt,
+        MsgNewBookNFT memory msgNewBookNFT
+    ) public whenNotPaused returns (address bookAddress) {
+        _guardSalt(salt);
+        LikeNFTStorage storage $ = _getLikeNFTStorage();
+        address protocolAddress = address(this);
+        bytes memory initData = abi.encodeWithSelector(
+            BookNFTInterface.initialize.selector,
+            msgNewBookNFT
+        );
+        bytes memory proxyCreationCode = abi.encodePacked(
+            type(BeaconProxy).creationCode,
+            abi.encode(protocolAddress, initData)
+        );
+        bookAddress = Create2.deploy(0, salt, proxyCreationCode);
+        if (bookAddress == address(0)) revert ErrBookNFTAlreadyExists();
+        $.classIdMapping[bookAddress] = true;
+        emit NewBookNFT(bookAddress, msgNewBookNFT.config);
     }
 
     function newBookNFT(
