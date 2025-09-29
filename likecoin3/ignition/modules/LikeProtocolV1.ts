@@ -17,6 +17,9 @@ const LikeProtocolV1Module = buildModule("LikeProtocolV1Module", (m) => {
   m.call(likeProtocolV0, "upgradeToAndCall", [likeProtocolImpl, upgradeToData]);
 
   const likeProtocol = m.contractAt("LikeProtocol", likeProtocolV0);
+  m.call(likeProtocol, "setRoyaltyReceiver", [
+    initOwner,
+  ]);
 
   return {
     likeProtocolImpl,

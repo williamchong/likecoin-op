@@ -1,285 +1,285 @@
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
 import { expect } from "chai";
-import { BaseContract, EventLog } from "ethers";
-import { ethers, upgrades } from "hardhat";
+import { viem, ignition } from "hardhat";
 
+import "./setup";
 import { BookConfigLoader } from "./BookConfigLoader";
-import { createProtocol } from "./ProtocolFactory";
+import LikeProtocolV1Module from "../ignition/modules/LikeProtocolV1";
 
 describe("LikeProtocol", () => {
-  before(async function () {
-    this.BookNFT = await ethers.getContractFactory("BookNFT");
-    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-    this.LikeProtocolMock = await ethers.getContractFactory("LikeProtocolMock");
-    const [ownerSigner, randomSigner] = await ethers.getSigners();
+  async function initLikeProtocol() {
+    const [deployer, classOwner, likerLand, randomSigner, randomSigner2] =
+      await viem.getWalletClients();
+    const publicClient = await viem.getPublicClient();
 
-    this.ownerSigner = ownerSigner;
-    this.randomSigner = randomSigner;
-  });
+    const { likeProtocol, bookNFTImpl } = await ignition.deploy(
+      LikeProtocolV1Module,
+      {
+        parameters: {
+          LikeProtocolV0Module: {
+            initOwner: deployer.account.address,
+          },
+        },
+        defaultSender: deployer.account.address,
+      },
+    );
 
-  let deployment: BaseContract;
-  let contractAddress: string;
-  let contract: any;
-  let bookNFTContractAddress: string;
-  beforeEach(async function () {
-    const {
+    return {
       likeProtocol,
-      likeProtocolDeployment,
-      likeProtocolAddress,
-      likeProtocolContract,
-      bookNFT,
-      bookNFTDeployment,
-      bookNFTAddress,
-      bookNFTContract,
-    } = await createProtocol(this.ownerSigner);
-
-    deployment = likeProtocolDeployment;
-    contractAddress = likeProtocolAddress;
-    contract = likeProtocolContract;
-    bookNFTContractAddress = bookNFTAddress;
-  });
+      bookNFTImpl,
+      deployer,
+      classOwner,
+      likerLand,
+      randomSigner,
+      randomSigner2,
+      publicClient,
+    };
+  }
 
   it("should have the correct STORAGE_SLOT", async function () {
-    const likeProtocolMockOwnerSigner = this.LikeProtocolMock.connect(
-      this.ownerSigner,
-    );
-    const newLikeProtocol = await upgrades.upgradeProxy(
-      contractAddress,
-      likeProtocolMockOwnerSigner,
-    );
-    expect(await newLikeProtocol.protocolDataStorage()).to.equal(
+    const likeProtocolMock = await viem.deployContract("LikeProtocolMock");
+    expect(await likeProtocolMock.read.protocolDataStorage()).to.equal(
       "0xe3ffde652b1592025b57f85d2c64876717f9cdf4e44b57422a295c18d0719a00",
     );
   });
 
   it("should have the correct bookNFTImplementation", async function () {
-    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
-    expect(await likeProtocolOwnerSigner.implementation()).to.equal(
-      bookNFTContractAddress,
-    );
+    const { likeProtocol, bookNFTImpl } = await loadFixture(initLikeProtocol);
+    const impl = await likeProtocol.read.implementation();
+    expect(impl.toLowerCase()).to.equal(bookNFTImpl.address.toLowerCase());
   });
 
   it("should be upgradable", async function () {
-    const likeProtocolMockOwnerSigner = this.LikeProtocolMock.connect(
-      this.ownerSigner,
+    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
+    const likeProtocolMock = await viem.deployContract("LikeProtocolMock");
+    await likeProtocol.write.upgradeToAndCall([likeProtocolMock.address, "0x"], {
+      account: deployer.account,
+    });
+    const proxyAsMock = await viem.getContractAt(
+      "LikeProtocolMock",
+      likeProtocol.address,
     );
-    const newLikeProtocol = await upgrades.upgradeProxy(
-      contractAddress,
-      likeProtocolMockOwnerSigner,
-    );
-    expect(await newLikeProtocol.getAddress()).to.equal(contractAddress);
-    expect(await newLikeProtocol.owner()).to.equal(this.ownerSigner.address);
-    expect(await newLikeProtocol.version()).to.equal(2n);
+    const owner = await proxyAsMock.read.owner();
+    expect(owner.toLowerCase()).to.equal(deployer.account.address.toLowerCase());
+    expect(await proxyAsMock.read.version()).to.equal(2n);
   });
 
   it("should not be upgradable by random address", async function () {
-    const likeProtocolMockRandomSigner = this.LikeProtocolMock.connect(
-      this.randomSigner,
-    );
+    const { likeProtocol, randomSigner, deployer } =
+      await loadFixture(initLikeProtocol);
+    const likeProtocolMock = await viem.deployContract("LikeProtocolMock");
     await expect(
-      upgrades.upgradeProxy(contractAddress, likeProtocolMockRandomSigner),
+      likeProtocol.write.upgradeToAndCall([likeProtocolMock.address, "0x"], {
+        account: randomSigner.account,
+      }),
     ).to.be.rejected;
-    expect(await contract.owner()).to.equal(this.ownerSigner.address);
+    const owner = await likeProtocol.read.owner();
+    expect(owner.toLowerCase()).to.equal(deployer.account.address.toLowerCase());
   });
 
   it("should set the right owner", async function () {
-    expect(await contract.owner()).to.equal(this.ownerSigner.address);
+    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
+    const owner = await likeProtocol.read.owner();
+    expect(owner).to.equalAddress(deployer.account.address);
   });
 
   it("should allow ownership transfer", async function () {
-    await contract.transferOwnership(this.randomSigner.address);
-    expect(await contract.owner()).to.equal(this.randomSigner.address);
+    const { likeProtocol, deployer, randomSigner } =
+      await loadFixture(initLikeProtocol);
+    await likeProtocol.write.transferOwnership([randomSigner.account.address], {
+      account: deployer.account,
+    });
+    const owner = await likeProtocol.read.owner();
+    expect(owner).to.equalAddress(randomSigner.account.address);
   });
 
   it("should not allow random ownership transfer", async function () {
-    const likeProtocolSigner = contract.connect(this.randomSigner);
-    try {
-      await likeProtocolSigner.transferOwnership(this.randomSigner.address);
-    } catch (error) {
-      expect(error).to.be.instanceOf(Error);
-    }
-    expect(await contract.owner()).to.equal(this.ownerSigner.address);
+    const { likeProtocol, randomSigner, deployer } =
+      await loadFixture(initLikeProtocol);
+    await expect(
+      likeProtocol.write.transferOwnership([randomSigner.account.address], {
+        account: randomSigner.account,
+      }),
+    ).to.be.rejected;
+    const owner = await likeProtocol.read.owner();
+    expect(owner).to.equalAddress(deployer.account.address);
   });
 
   it("should not paused by random address", async function () {
-    const likeProtocolSigner = contract.connect(this.randomSigner);
-    await expect(likeProtocolSigner.pause()).to.be.rejected;
+    const { likeProtocol, randomSigner } = await loadFixture(initLikeProtocol);
+    await expect(
+      likeProtocol.write.pause({ account: randomSigner.account }),
+    ).to.be.rejected;
   });
 
   it("should be paused by owner address", async function () {
-    const likeProtocolSigner = contract.connect(this.ownerSigner);
-    await expect(likeProtocolSigner.pause()).to.be.not.rejected;
+    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
+    await expect(
+      likeProtocol.write.pause({ account: deployer.account }),
+    ).to.be.not.rejected;
   });
 
   it("should not unpaused by random address", async function () {
-    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
-    await expect(likeProtocolOwnerSigner.pause()).to.be.not.rejected;
-    const likeProtocolRandomSigner = contract.connect(this.randomSigner);
-    await expect(likeProtocolRandomSigner.unpause()).to.be.rejected;
+    const { likeProtocol, deployer, randomSigner } =
+      await loadFixture(initLikeProtocol);
+    await expect(
+      likeProtocol.write.pause({ account: deployer.account }),
+    ).to.be.not.rejected;
+    await expect(
+      likeProtocol.write.unpause({ account: randomSigner.account }),
+    ).to.be.rejected;
   });
 
   it("should be able to create new BookNFT", async function () {
-    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
-
+    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
 
-    const newClass = async () => {
-      await likeProtocolOwnerSigner
-        .newBookNFT({
-          creator: this.ownerSigner,
-          updaters: [this.ownerSigner],
-          minters: [this.ownerSigner],
-          config: bookConfig,
-        })
-        .then((tx) => tx.wait());
-    };
-
-    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
-        event.removeListener();
-        resolve({ id });
+    const NewClassEvent = new Promise<{ id: `0x${string}` }>((resolve) => {
+      const unwatch = likeProtocol.watchEvent.NewBookNFT({
+        onLogs: (logs) => {
+          const id = logs[0].args.bookNFT as `0x${string}`;
+          unwatch();
+          resolve({ id });
+        },
       });
-
-      setTimeout(() => {
-        reject(new Error("timeout"));
-      }, 20000);
     });
 
-    await expect(newClass()).to.be.not.rejected;
-    const newClassEvent = await NewClassEvent;
-    const classId = newClassEvent.id;
+    await likeProtocol.write.newBookNFT([
+      {
+        creator: deployer.account.address,
+        updaters: [deployer.account.address],
+        minters: [deployer.account.address],
+        config: bookConfig,
+      },
+    ]);
 
-    const _newNFTClass = await ethers.getContractAt("BookNFT", classId);
-    expect(await _newNFTClass.name()).to.equal("My Book");
-    expect(await _newNFTClass.symbol()).to.equal("KOOB");
-    expect(await _newNFTClass.getProtocolBeacon()).to.equal(contractAddress);
-    expect(await _newNFTClass.contractURI()).to.equal(
+    const { id: classId } = await NewClassEvent;
+    const newNFTClass = await viem.getContractAt("BookNFT", classId);
+    expect(await newNFTClass.read.name()).to.equal("My Book");
+    expect(await newNFTClass.read.symbol()).to.equal("KOOB");
+    const beacon = await newNFTClass.read.getProtocolBeacon();
+    expect(beacon.toLowerCase()).to.equal(likeProtocol.address.toLowerCase());
+    expect(await newNFTClass.read.contractURI()).to.equal(
       "data:application/json;base64,eyJuYW1lIjoiQ29sbGVjdGlvbiBOYW1lIiwic3ltYm9sIjoiQ29sbGVjdGlvbiBTWU1CIiwiZGVzY3JpcHRpb24iOiJDb2xsZWN0aW9uIERlc2NyaXB0aW9uIiwiaW1hZ2UiOiJpcGZzOi8vYmFmeWJlaWV6cTR5cW9zYzJ1NHNhYW5vdmU1YnNhM3ljaXVmd2hmZHVlbXk1ejZ2dmY2cTNjNWxuYmkiLCJiYW5uZXJfaW1hZ2UiOiIiLCJmZWF0dXJlZF9pbWFnZSI6IiIsImV4dGVybmFsX2xpbmsiOiJodHRwczovL3d3dy5leGFtcGxlLmNvbSIsImNvbGxhYm9yYXRvcnMiOltdfQ==",
     );
-    const [receiver, royaltyAmount] = await _newNFTClass.royaltyInfo(0, 1000);
-    expect(receiver).to.equal(this.ownerSigner.address);
-    expect(royaltyAmount).to.equal(0n);
+    const royalty = await newNFTClass.read.royaltyInfo([0n, 1000n]);
+    expect(royalty[0].toLowerCase()).to.equal(deployer.account.address.toLowerCase());
+    expect(royalty[1]).to.equal(0n);
   });
 
   it("should be able to create new BookNFT with royalty", async function () {
-    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
-
+    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
-    const newClass = async () => {
-      await likeProtocolOwnerSigner
-        .newBookNFTWithRoyalty(
-          {
-            creator: this.ownerSigner,
-            updaters: [this.ownerSigner],
-            minters: [this.ownerSigner],
-            config: bookConfig,
-          },
-          100,
-        )
-        .then((tx) => tx.wait());
-    };
 
-    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
-        event.removeListener();
-        resolve({ id });
+    const NewClassEvent = new Promise<{ id: `0x${string}` }>((resolve) => {
+      const unwatch = likeProtocol.watchEvent.NewBookNFT({
+        onLogs: (logs) => {
+          const id = logs[0].args.bookNFT as `0x${string}`;
+          unwatch();
+          resolve({ id });
+        },
       });
-
-      setTimeout(() => {
-        reject(new Error("timeout"));
-      }, 20000);
     });
 
-    await expect(newClass()).to.be.not.rejected;
-    const newClassEvent = await NewClassEvent;
-    const classId = newClassEvent.id;
+    await likeProtocol.write.newBookNFTWithRoyalty([
+      {
+        creator: deployer.account.address,
+        updaters: [deployer.account.address],
+        minters: [deployer.account.address],
+        config: bookConfig,
+      },
+      100n,
+    ]);
 
-    expect(classId).to.not.equal(bookNFTContractAddress);
-    const _newNFTClass = await ethers.getContractAt("BookNFT", classId);
-    const [receiver, royaltyAmount] = await _newNFTClass.royaltyInfo(0, 1000);
-    expect(receiver).to.equal(this.ownerSigner.address);
+    const { id: classId } = await NewClassEvent;
+    const newNFTClass = await viem.getContractAt("BookNFT", classId);
+    const [receiver, royaltyAmount] = await newNFTClass.read.royaltyInfo([
+      0n,
+      1000n,
+    ]);
+    expect(receiver.toLowerCase()).to.equal(deployer.account.address.toLowerCase());
     expect(royaltyAmount).to.equal(10n);
   });
 
   it("should set the right royalty receiver on initialization", async function () {
-    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
-    expect(await likeProtocolOwnerSigner.getRoyaltyReceiver()).to.equal(
-      this.ownerSigner.address,
-    );
+    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
+    const receiver = await likeProtocol.read.getRoyaltyReceiver();
+    expect(receiver.toLowerCase()).to.equal(deployer.account.address.toLowerCase());
   });
 
   it("should allow owner to set the royalty receiver", async function () {
-    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
-    await likeProtocolOwnerSigner.setRoyaltyReceiver(this.randomSigner.address);
-    expect(await likeProtocolOwnerSigner.getRoyaltyReceiver()).to.equal(
-      this.randomSigner.address,
-    );
+    const { likeProtocol, deployer, randomSigner } =
+      await loadFixture(initLikeProtocol);
+    await likeProtocol.write.setRoyaltyReceiver([randomSigner.account.address], {
+      account: deployer.account,
+    });
+    const receiver = await likeProtocol.read.getRoyaltyReceiver();
+    expect(receiver.toLowerCase()).to.equal(randomSigner.account.address.toLowerCase());
   });
 
   it("should not allow random address to set the royalty receiver", async function () {
-    const likeProtocolRandomSigner = contract.connect(this.randomSigner);
+    const { likeProtocol, randomSigner } = await loadFixture(initLikeProtocol);
     await expect(
-      likeProtocolRandomSigner.setRoyaltyReceiver(this.randomSigner.address),
+      likeProtocol.write.setRoyaltyReceiver([randomSigner.account.address], {
+        account: randomSigner.account,
+      }),
     ).to.be.rejected;
   });
 
   it("should mint a already initialized BookNFT which cant be initialized again", async function () {
-    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
-
+    const { likeProtocol, deployer, randomSigner } =
+      await loadFixture(initLikeProtocol);
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
 
-    const newClass = async () => {
-      await likeProtocolOwnerSigner
-        .newBookNFT({
-          creator: this.ownerSigner,
-          updaters: [this.ownerSigner],
-          minters: [this.ownerSigner],
-          config: bookConfig,
-        })
-        .then((tx) => tx.wait());
-    };
-
-    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
-        event.removeListener();
-        resolve({ id });
+    const NewClassEvent = new Promise<{ id: `0x${string}` }>((resolve) => {
+      const unwatch = likeProtocol.watchEvent.NewBookNFT({
+        onLogs: (logs) => {
+          const id = logs[0].args.bookNFT as `0x${string}`;
+          unwatch();
+          resolve({ id });
+        },
       });
-
-      setTimeout(() => {
-        reject(new Error("timeout"));
-      }, 20000);
     });
-
-    await expect(newClass()).to.be.not.rejected;
-    const newClassEvent = await NewClassEvent;
-    const classId = newClassEvent.id;
-
-    const _newNFTClass = await ethers.getContractAt("BookNFT", classId);
-    const bookNFTRandomSigner = _newNFTClass.connect(this.randomSigner);
-    await expect(
-      bookNFTRandomSigner.initialize({
-        creator: this.randomSigner,
-        updaters: [this.randomSigner, this.randomSigner],
-        minters: [this.randomSigner, this.randomSigner],
+    await likeProtocol.write.newBookNFT([
+      {
+        creator: deployer.account.address,
+        updaters: [deployer.account.address],
+        minters: [deployer.account.address],
         config: bookConfig,
-      }),
+      },
+    ]);
+    const { id: classId } = await NewClassEvent;
+
+    const newNFTClass = await viem.getContractAt("BookNFT", classId);
+    await expect(
+      newNFTClass.write.initialize(
+        [
+          {
+            creator: randomSigner.account.address,
+            updaters: [randomSigner.account.address, randomSigner.account.address],
+            minters: [randomSigner.account.address, randomSigner.account.address],
+            config: bookConfig,
+          },
+        ],
+        { account: randomSigner.account },
+      ),
     ).to.be.rejectedWith("InvalidInitialization()");
   });
 
   it("should not allow to create new BookNFT when paused", async function () {
-    const likeProtocolSigner = contract.connect(this.ownerSigner);
-
+    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
     const classOperation = async () => {
-      await likeProtocolSigner
-        .newBookNFT({
-          creator: this.ownerSigner,
-          updaters: [this.ownerSigner],
-          minters: [this.ownerSigner],
+      await likeProtocol.write.newBookNFT([
+        {
+          creator: deployer.account.address,
+          updaters: [deployer.account.address],
+          minters: [deployer.account.address],
           config: {
             name: "My Book",
             symbol: "KOOB",
@@ -294,240 +294,205 @@ describe("LikeProtocol", () => {
               external_link: "https://www.example.com",
               collaborators: [],
             }),
-            max_supply: 10,
+            max_supply: 10n,
           },
-        })
-        .then((tx) => tx.wait());
+        },
+      ]);
     };
 
     await expect(classOperation()).to.be.not.rejected;
-    await expect(likeProtocolSigner.pause()).to.be.not.rejected;
-    await expect(classOperation()).to.be.rejectedWith(
-      "VM Exception while processing transaction: reverted with custom error 'EnforcedPause()'",
-    );
-    await expect(likeProtocolSigner.unpause()).to.be.not.rejected;
+    await expect(
+      likeProtocol.write.pause({ account: deployer.account }),
+    ).to.be.not.rejected;
+    await expect(classOperation()).to.be.rejectedWith("EnforcedPause");
+    await expect(
+      likeProtocol.write.unpause({ account: deployer.account }),
+    ).to.be.not.rejected;
     await expect(classOperation()).to.be.not.rejected;
   });
 
   it("should be allow everyone to create new BookNFT", async function () {
-    const likeNFTSigner = contract.connect(this.randomSigner);
-
+    const { likeProtocol, randomSigner } = await loadFixture(initLikeProtocol);
     const newClass = async () => {
-      await likeNFTSigner
-        .newBookNFT({
-          creator: this.randomSigner,
-          updaters: [this.randomSigner],
-          minters: [this.randomSigner],
-          config: {
-            name: "My Book",
-            symbol: "KOOB",
-            metadata: JSON.stringify({
-              name: "Random by somone",
-              symbol: "No data",
-            }),
-            max_supply: 10,
+      await likeProtocol.write.newBookNFT(
+        [
+          {
+            creator: randomSigner.account.address,
+            updaters: [randomSigner.account.address],
+            minters: [randomSigner.account.address],
+            config: {
+              name: "My Book",
+              symbol: "KOOB",
+              metadata: JSON.stringify({
+                name: "Random by somone",
+                symbol: "No data",
+              }),
+              max_supply: 10n,
+            },
           },
-        })
-        .then((tx) => tx.wait());
+        ],
+        { account: randomSigner.account },
+      );
     };
 
     await expect(newClass()).to.be.not.rejected;
   });
 
   it("should not allow to create new BookNFT when max supply is 0", async function () {
-    const likeNFTSigner = contract.connect(this.randomSigner);
-
+    const { likeProtocol, randomSigner } = await loadFixture(initLikeProtocol);
     const newClass = async () => {
-      await likeNFTSigner
-        .newBookNFT({
-          creator: this.randomSigner,
-          updaters: [this.randomSigner],
-          minters: [this.randomSigner],
-          config: {
-            name: "My Book",
-            symbol: "KOOB",
-            metadata: JSON.stringify({
-              name: "Random by somone",
-              symbol: "No data",
-            }),
-            max_supply: 0,
+      await likeProtocol.write.newBookNFT(
+        [
+          {
+            creator: randomSigner.account.address,
+            updaters: [randomSigner.account.address],
+            minters: [randomSigner.account.address],
+            config: {
+              name: "My Book",
+              symbol: "KOOB",
+              metadata: JSON.stringify({
+                name: "Random by somone",
+                symbol: "No data",
+              }),
+              max_supply: 0n,
+            },
           },
-        })
-        .then((tx) => tx.wait());
+        ],
+        { account: randomSigner.account },
+      );
     };
 
-    await expect(newClass()).to.be.rejectedWith(
-      "VM Exception while processing transaction: reverted with custom error 'ErrMaxSupplyZero()'",
-    );
+    await expect(newClass()).to.be.rejectedWith("ErrMaxSupplyZero()");
   });
 
   it("should not allow everyone to create new BookNFT when paused", async function () {
-    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
-    const likeProtocolRandomSigner = contract.connect(this.randomSigner);
-
+    const { likeProtocol, deployer, randomSigner } =
+      await loadFixture(initLikeProtocol);
     const classOperation = async () => {
-      await likeProtocolRandomSigner
-        .newBookNFT({
-          creator: this.randomSigner,
-          updaters: [this.randomSigner],
-          minters: [this.randomSigner],
-          config: {
-            name: "My Book",
-            symbol: "KOOB",
-            metadata: JSON.stringify({
-              name: "Random by somone",
-              symbol: "No data",
-            }),
-            max_supply: 10,
+      await likeProtocol.write.newBookNFT(
+        [
+          {
+            creator: randomSigner.account.address,
+            updaters: [randomSigner.account.address],
+            minters: [randomSigner.account.address],
+            config: {
+              name: "My Book",
+              symbol: "KOOB",
+              metadata: JSON.stringify({
+                name: "Random by somone",
+                symbol: "No data",
+              }),
+              max_supply: 10n,
+            },
           },
-        })
-        .then((tx) => tx.wait());
+        ],
+        { account: randomSigner.account },
+      );
     };
 
     await expect(classOperation()).to.be.not.rejected;
-    await expect(likeProtocolOwnerSigner.pause()).to.be.not.rejected;
-    await expect(classOperation()).to.be.rejectedWith(
-      "VM Exception while processing transaction: reverted with custom error 'EnforcedPause()'",
-    );
-    await expect(likeProtocolOwnerSigner.unpause()).to.be.not.rejected;
+    await expect(
+      likeProtocol.write.pause({ account: deployer.account }),
+    ).to.be.not.rejected;
+    await expect(classOperation()).to.be.rejectedWith("EnforcedPause");
+    await expect(
+      likeProtocol.write.unpause({ account: deployer.account }),
+    ).to.be.not.rejected;
     await expect(classOperation()).to.be.not.rejected;
   });
 
   it("should retain the BookNFT paused state after upgrade", async function () {
-    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
+    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
+    expect(await likeProtocol.read.paused()).to.be.false;
+    await likeProtocol.write.pause({ account: deployer.account });
+    expect(await likeProtocol.read.paused()).to.be.true;
 
-    expect(await likeProtocolOwnerSigner.paused()).to.be.false;
-    await likeProtocolOwnerSigner.pause();
-    expect(await likeProtocolOwnerSigner.paused()).to.be.true;
-
-    const likeProtocolMockOwnerSigner = this.LikeProtocolMock.connect(
-      this.ownerSigner,
-    );
-    const newLikeProtocol = await upgrades.upgradeProxy(
-      contractAddress,
-      likeProtocolMockOwnerSigner,
-    );
-    expect(await newLikeProtocol.owner()).to.equal(this.ownerSigner.address);
-    expect(await newLikeProtocol.version()).to.equal(2n);
-
-    const proxyContract = await ethers.getContractAt(
+    const likeProtocolMock = await viem.deployContract("LikeProtocolMock");
+    await likeProtocol.write.upgradeToAndCall([likeProtocolMock.address, "0x"], {
+      account: deployer.account,
+    });
+    const proxyAsMock = await viem.getContractAt(
       "LikeProtocolMock",
-      contractAddress,
+      likeProtocol.address,
     );
-    expect(await proxyContract.version()).to.equal(2n);
+    expect(await proxyAsMock.read.version()).to.equal(2n);
 
-    expect(await likeProtocolOwnerSigner.paused()).to.be.true;
-    await likeProtocolOwnerSigner.unpause();
-    expect(await likeProtocolOwnerSigner.paused()).to.be.false;
+    expect(await likeProtocol.read.paused()).to.be.true;
+    await likeProtocol.write.unpause({ account: deployer.account });
+    expect(await likeProtocol.read.paused()).to.be.false;
   });
 
   it("should retain the BookNFT mapping after upgrade", async function () {
-    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
-    const newClass = async () => {
-      await likeProtocolOwnerSigner
-        .newBookNFT({
-          creator: this.ownerSigner,
-          updaters: [this.ownerSigner],
-          minters: [this.ownerSigner],
-          config: {
-            name: "My Book",
-            symbol: "KOOB",
-            metadata: JSON.stringify({
-              name: "Collection Name",
-              symbol: "Collection SYMB",
-              description: "Collection Description",
-              image:
-                "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-              banner_image: "",
-              featured_image: "",
-              external_link: "https://www.example.com",
-              collaborators: [],
-            }),
-            max_supply: 10,
-          },
-        })
-        .then((tx) => tx.wait());
-    };
-
-    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
-        event.removeListener();
-        resolve({ id });
+    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
+    const NewClassEvent = new Promise<{ id: `0x${string}` }>((resolve) => {
+      const unwatch = likeProtocol.watchEvent.NewBookNFT({
+        onLogs: (logs) => {
+          const id = logs[0].args.bookNFT as `0x${string}`;
+          unwatch();
+          resolve({ id });
+        },
       });
+    });
+    await likeProtocol.write.newBookNFT([
+      {
+        creator: deployer.account.address,
+        updaters: [deployer.account.address],
+        minters: [deployer.account.address],
+        config: {
+          name: "My Book",
+          symbol: "KOOB",
+          metadata: JSON.stringify({
+            name: "Collection Name",
+            symbol: "Collection SYMB",
+            description: "Collection Description",
+            image:
+              "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
+            banner_image: "",
+            featured_image: "",
+            external_link: "https://www.example.com",
+            collaborators: [],
+          }),
+          max_supply: 10n,
+        },
+      },
+    ]);
 
-      setTimeout(() => {
-        reject(new Error("timeout"));
-      }, 20000);
+    const { id: classId } = await NewClassEvent;
+    expect(await likeProtocol.read.isBookNFT([classId])).to.be.true;
+
+    const likeProtocolMock = await viem.deployContract("LikeProtocolMock");
+    await likeProtocol.write.upgradeToAndCall([likeProtocolMock.address, "0x"], {
+      account: deployer.account,
     });
 
-    await expect(newClass()).to.be.not.rejected;
-    const newClassEvent = await NewClassEvent;
-    const classId = newClassEvent.id;
-    expect(await likeProtocolOwnerSigner.isBookNFT(classId)).to.be.true;
-
-    const likeProtocolMockOwnerSigner = this.LikeProtocolMock.connect(
-      this.ownerSigner,
-    );
-    const newLikeProtocol = await upgrades.upgradeProxy(
-      contractAddress,
-      likeProtocolMockOwnerSigner,
-    );
-    expect(await newLikeProtocol.owner()).to.equal(this.ownerSigner.address);
-    expect(await newLikeProtocol.version()).to.equal(2n);
-    expect(await newLikeProtocol.isBookNFT(classId)).to.be.true;
-
-    const proxyContract = await ethers.getContractAt(
+    const proxyAsMock = await viem.getContractAt(
       "LikeProtocolMock",
-      contractAddress,
+      likeProtocol.address,
     );
-    expect(await proxyContract.isBookNFT(classId)).to.be.true;
+    expect(await proxyAsMock.read.version()).to.equal(2n);
+    expect(await proxyAsMock.read.isBookNFT([classId])).to.be.true;
   });
 });
 
 describe("LikeProtocol events", () => {
-  before(async function () {
-    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-    this.LikeProtocolMock = await ethers.getContractFactory("LikeProtocolMock");
-    this.BookNFT = await ethers.getContractFactory("BookNFT");
-    const [ownerSigner, randomSigner] = await ethers.getSigners();
+  async function initLikeProtocolEvents() {
+    const [deployer] = await viem.getWalletClients();
+    const { likeProtocol } = await ignition.deploy(LikeProtocolV1Module, {
+      parameters: {
+        LikeProtocolV0Module: {
+          initOwner: deployer.account.address,
+        },
+      },
+      defaultSender: deployer.account.address,
+    });
 
-    this.ownerSigner = ownerSigner;
-    this.randomSigner = randomSigner;
-  });
-
-  let deployment: BaseContract;
-  let contractAddress: string;
-  let contract: any;
-  beforeEach(async function () {
-    const {
-      likeProtocol,
-      likeProtocolDeployment,
-      likeProtocolAddress,
-      likeProtocolContract,
-      bookNFT,
-      bookNFTDeployment,
-      bookNFTAddress,
-      bookNFTContract,
-    } = await createProtocol(this.ownerSigner);
-
-    deployment = likeProtocolDeployment;
-    contractAddress = likeProtocolAddress;
-    contract = likeProtocolContract;
-  });
+    return { likeProtocol, deployer };
+  }
 
   it("should emit NewBookNFT event calling newBookNFT", async function () {
-    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
-
-    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      likeProtocolOwnerSigner.on("NewBookNFT", (id, params, event) => {
-        event.removeListener();
-        resolve({ id });
-      });
-
-      setTimeout(() => {
-        reject(new Error("timeout"));
-      }, 60000);
-    });
+    const { likeProtocol, deployer } = await loadFixture(
+      initLikeProtocolEvents,
+    );
 
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
@@ -535,43 +500,28 @@ describe("LikeProtocol events", () => {
     expect(bookConfig.name).to.equal("My Book");
     expect(bookConfig.symbol).to.equal("KOOB");
 
-    const newClass = async () => {
-      await likeProtocolOwnerSigner
-        .newBookNFT({
-          creator: this.ownerSigner,
-          updaters: [this.ownerSigner],
-          minters: [this.ownerSigner],
-          config: bookConfig,
-        })
-        .then((tx) => tx.wait());
-    };
+    await likeProtocol.write.newBookNFT([
+      {
+        creator: deployer.account.address,
+        updaters: [deployer.account.address],
+        minters: [deployer.account.address],
+        config: bookConfig,
+      },
+    ]);
 
-    await expect(newClass()).to.be.not.rejected;
-    const newClassEvent = await NewClassEvent;
-    const classId = newClassEvent.id;
-    expect(await likeProtocolOwnerSigner.isBookNFT(classId)).to.be.true;
+    const logs = await likeProtocol.getEvents.NewBookNFT();
+    expect(logs.length).to.equal(1);
+    const bookNFTAddress = logs[0].args.bookNFT;
+    expect(await likeProtocol.read.isBookNFT([bookNFTAddress])).to.be.true;
+    const book0 = await viem.getContractAt("BookNFT", bookNFTAddress);
+    expect(await book0.read.symbol()).to.equal(bookConfig.symbol);
+    expect(await book0.read.name()).to.equal(bookConfig.name);
   });
 
   it("should emit multiple NewBookNFT events calling newBookNFTs", async function () {
-    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
-
-    const NewClassEvent = new Promise<string[]>((resolve, reject) => {
-      const ids: string[] = [];
-      const listener = (id: string, params: any, event: any) => {
-        ids.push(id);
-        if (ids.length === 2) {
-          // We expect 2 events
-          likeProtocolOwnerSigner.off("NewBookNFT", listener);
-          resolve(ids);
-        }
-      };
-
-      likeProtocolOwnerSigner.on("NewBookNFT", listener);
-
-      setTimeout(() => {
-        reject(new Error("timeout waiting for NewBookNFT events"));
-      }, 60000); // Longer timeout just in case, but won't wait unless there's an issue
-    });
+    const { likeProtocol, deployer } = await loadFixture(
+      initLikeProtocolEvents,
+    );
 
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
@@ -579,89 +529,66 @@ describe("LikeProtocol events", () => {
     const bookConfig1 = BookConfigLoader.load(
       "./test/fixtures/BookConfig1.json",
     );
-    expect(bookConfig.name).to.equal("My Book");
-    expect(bookConfig.symbol).to.equal("KOOB");
-    expect(bookConfig1.name).to.equal("My Book 1");
-    expect(bookConfig1.symbol).to.equal("KOOB1");
 
-    const newClasses = async () => {
-      await likeProtocolOwnerSigner
-        .newBookNFTs([
-          {
-            creator: this.ownerSigner,
-            updaters: [this.ownerSigner],
-            minters: [this.ownerSigner],
-            config: bookConfig,
-          },
-          {
-            creator: this.ownerSigner,
-            updaters: [this.ownerSigner],
-            minters: [this.ownerSigner],
-            config: bookConfig1,
-          },
-        ])
-        .then((tx) => tx.wait());
-    };
+    await likeProtocol.write.newBookNFTs([
+      [
+        {
+          creator: deployer.account.address,
+          updaters: [deployer.account.address],
+          minters: [deployer.account.address],
+          config: bookConfig,
+        },
+        {
+          creator: deployer.account.address,
+          updaters: [deployer.account.address],
+          minters: [deployer.account.address],
+          config: bookConfig1,
+        },
+      ],
+    ]);
 
-    await expect(newClasses()).to.be.not.rejected;
-    const classIds = await NewClassEvent;
+    const logs = await likeProtocol.getEvents.NewBookNFT();
+    expect(logs.length).to.equal(2);
+    expect(await likeProtocol.read.isBookNFT([logs[0].args.bookNFT])).to.be.true;
+    expect(await likeProtocol.read.isBookNFT([logs[1].args.bookNFT])).to.be.true;
 
-    expect(classIds.length).to.equal(2);
-    expect(await likeProtocolOwnerSigner.isBookNFT(classIds[0])).to.be.true;
-    expect(await likeProtocolOwnerSigner.isBookNFT(classIds[1])).to.be.true;
-
-    let bookNFTOwnerSigner = this.BookNFT.connect(this.ownerSigner);
-    bookNFTOwnerSigner = bookNFTOwnerSigner.attach(classIds[0]);
-    expect(await bookNFTOwnerSigner.symbol()).to.equal(bookConfig.symbol);
-
-    bookNFTOwnerSigner = bookNFTOwnerSigner.attach(classIds[1]);
-    expect(await bookNFTOwnerSigner.symbol()).to.equal(bookConfig1.symbol);
+    const book0 = await viem.getContractAt("BookNFT", logs[0].args.bookNFT);
+    const book1 = await viem.getContractAt("BookNFT", logs[1].args.bookNFT);
+    expect(await book0.read.symbol()).to.equal(bookConfig.symbol);
+    expect(await book1.read.symbol()).to.equal(bookConfig1.symbol);
   });
 });
 
 describe("LikeProtocol as Beacon", () => {
-  before(async function () {
-    this.LikeProtocol = await ethers.getContractFactory("LikeProtocol");
-    this.LikeProtocolMock = await ethers.getContractFactory("LikeProtocolMock");
-    this.BookNFT = await ethers.getContractFactory("BookNFT");
-    this.BookNFTMock = await ethers.getContractFactory("BookNFTMock");
-    const [ownerSigner, randomSigner] = await ethers.getSigners();
+  async function initLikeProtocolBeacon() {
+    const [deployer, randomSigner] = await viem.getWalletClients();
+    const { likeProtocol } = await ignition.deploy(LikeProtocolV1Module, {
+      parameters: {
+        LikeProtocolV0Module: {
+          initOwner: deployer.account.address,
+        },
+      },
+      defaultSender: deployer.account.address,
+    });
 
-    this.ownerSigner = ownerSigner;
-    this.randomSigner = randomSigner;
-  });
-
-  let deployment: BaseContract;
-  let contractAddress: string;
-  let contract: any;
-  let bookNFTContractAddress: string;
-  let bookNFTMockContractAddress: string;
-  beforeEach(async function () {
-    const {
-      likeProtocol,
-      likeProtocolDeployment,
-      likeProtocolAddress,
-      likeProtocolContract,
-      bookNFTDeployment,
-      bookNFTAddress,
-    } = await createProtocol(this.ownerSigner);
-
-    deployment = likeProtocolDeployment;
-    contractAddress = likeProtocolAddress;
-    contract = likeProtocolContract;
-    bookNFTContractAddress = bookNFTAddress;
-
-    const bookNFTMockDeployment = await this.BookNFTMock.deploy();
-    bookNFTMockContractAddress = await bookNFTMockDeployment.getAddress();
-  });
+    const bookNFTMock = await viem.deployContract("BookNFTMock");
+    return { likeProtocol, deployer, randomSigner, bookNFTMock };
+  }
 
   it("should only owner can upgrade the implementation", async function () {
-    const likeProtocolOwnerSigner = contract.connect(this.ownerSigner);
-    const likeProtocolRandomSigner = contract.connect(this.randomSigner);
+    const { likeProtocol, deployer, randomSigner, bookNFTMock } =
+      await loadFixture(initLikeProtocolBeacon);
 
-    await expect(likeProtocolOwnerSigner.upgradeTo(bookNFTMockContractAddress))
-      .to.be.not.rejected;
-    await expect(likeProtocolRandomSigner.upgradeTo(bookNFTMockContractAddress))
-      .to.be.rejected;
+    await expect(
+      likeProtocol.write.upgradeTo([bookNFTMock.address], {
+        account: deployer.account,
+      }),
+    ).to.be.not.rejected;
+    await expect(
+      likeProtocol.write.upgradeTo([bookNFTMock.address], {
+        account: randomSigner.account,
+      }),
+    ).to.be.rejected;
+    expect(await likeProtocol.read.implementation()).to.equalAddress(bookNFTMock.address);
   });
 });
