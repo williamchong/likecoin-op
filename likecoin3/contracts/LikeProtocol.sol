@@ -239,6 +239,24 @@ contract LikeProtocol is
     }
 
     /**
+     * newBookNFTWithRoyaltySalt
+     *
+     * Proxy call to create a BookNFT with a royalty fraction and a salt
+     *
+     * @param salt - the salt to use for the BookNFT
+     * @param msgNewBookNFT - the message to create the BookNFT
+     * @param royaltyFraction - the royalty fraction to set
+     */
+    function newBookNFTWithRoyaltyAndSalt(
+        bytes32 salt,
+        MsgNewBookNFT memory msgNewBookNFT,
+        uint96 royaltyFraction
+    ) public whenNotPaused returns (address bookAddress) {
+        bookAddress = newBookNFTWithSalt(salt, msgNewBookNFT);
+        BookNFT(bookAddress).setRoyaltyFraction(royaltyFraction);
+    }
+
+    /**
      * newBookNFTs
      *
      * Proxy call to create multiple BookNFT at once
