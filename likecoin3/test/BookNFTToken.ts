@@ -17,7 +17,7 @@ describe("BookNFTToken", () => {
       randomSigner,
       randomSigner2,
       publicClient,
-    } = await deployProtocol();
+    } = await loadFixture(deployProtocol);
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
       const unwatch = likeProtocol.watchEvent.NewBookNFT({
@@ -223,7 +223,7 @@ describe("BookNFTToken batch actions", () => {
       randomSigner,
       randomSigner2,
       publicClient,
-    } = await deployProtocol();
+    } = await loadFixture(deployProtocol);
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
       const unwatch = likeProtocol.watchEvent.NewBookNFT({
@@ -460,7 +460,7 @@ describe("BookNFTToken Burnable", () => {
       randomSigner,
       randomSigner2,
       publicClient,
-    } = await deployProtocol();
+    } = await loadFixture(deployProtocol);
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
       const unwatch = likeProtocol.watchEvent.NewBookNFT({

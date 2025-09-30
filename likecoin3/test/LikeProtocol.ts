@@ -4,37 +4,19 @@ import { viem, ignition } from "hardhat";
 
 import "./setup";
 import { BookConfigLoader } from "./BookConfigLoader";
-import LikeProtocolV1Module from "../ignition/modules/LikeProtocolV1";
+import { deployProtocol } from "./ProtocolFactory";
 
 describe("LikeProtocol", () => {
-  async function initLikeProtocol() {
-    const [deployer, classOwner, likerLand, randomSigner, randomSigner2] =
-      await viem.getWalletClients();
-    const publicClient = await viem.getPublicClient();
-
-    const { likeProtocol, bookNFTImpl } = await ignition.deploy(
-      LikeProtocolV1Module,
-      {
-        parameters: {
-          LikeProtocolV0Module: {
-            initOwner: deployer.account.address,
-          },
-        },
-        defaultSender: deployer.account.address,
-      },
+  it("should have expected proxy address", async function () {
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
+    const deployerAddress = deployer.account.address;
+    expect(deployerAddress).to.equalAddress(
+      "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     );
-
-    return {
-      likeProtocol,
-      bookNFTImpl,
-      deployer,
-      classOwner,
-      likerLand,
-      randomSigner,
-      randomSigner2,
-      publicClient,
-    };
-  }
+    expect(likeProtocol.address).to.equalAddress(
+      "0x44322611140BC362972878FdEcEF335315E2c364",
+    );
+  });
 
   it("should have the correct STORAGE_SLOT", async function () {
     const likeProtocolMock = await viem.deployContract("LikeProtocolMock");
@@ -44,13 +26,13 @@ describe("LikeProtocol", () => {
   });
 
   it("should have the correct bookNFTImplementation", async function () {
-    const { likeProtocol, bookNFTImpl } = await loadFixture(initLikeProtocol);
+    const { likeProtocol, bookNFTImpl } = await loadFixture(deployProtocol);
     const impl = await likeProtocol.read.implementation();
     expect(impl.toLowerCase()).to.equal(bookNFTImpl.address.toLowerCase());
   });
 
   it("should be upgradable", async function () {
-    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     const likeProtocolMock = await viem.deployContract("LikeProtocolMock");
     await likeProtocol.write.upgradeToAndCall(
       [likeProtocolMock.address, "0x"],
@@ -71,7 +53,7 @@ describe("LikeProtocol", () => {
 
   it("should not be upgradable by random address", async function () {
     const { likeProtocol, randomSigner, deployer } =
-      await loadFixture(initLikeProtocol);
+      await loadFixture(deployProtocol);
     const likeProtocolMock = await viem.deployContract("LikeProtocolMock");
     await expect(
       likeProtocol.write.upgradeToAndCall([likeProtocolMock.address, "0x"], {
@@ -85,14 +67,14 @@ describe("LikeProtocol", () => {
   });
 
   it("should set the right owner", async function () {
-    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     const owner = await likeProtocol.read.owner();
     expect(owner).to.equalAddress(deployer.account.address);
   });
 
   it("should allow ownership transfer", async function () {
     const { likeProtocol, deployer, randomSigner } =
-      await loadFixture(initLikeProtocol);
+      await loadFixture(deployProtocol);
     await likeProtocol.write.transferOwnership([randomSigner.account.address], {
       account: deployer.account,
     });
@@ -102,7 +84,7 @@ describe("LikeProtocol", () => {
 
   it("should not allow random ownership transfer", async function () {
     const { likeProtocol, randomSigner, deployer } =
-      await loadFixture(initLikeProtocol);
+      await loadFixture(deployProtocol);
     await expect(
       likeProtocol.write.transferOwnership([randomSigner.account.address], {
         account: randomSigner.account,
@@ -113,20 +95,20 @@ describe("LikeProtocol", () => {
   });
 
   it("should not paused by random address", async function () {
-    const { likeProtocol, randomSigner } = await loadFixture(initLikeProtocol);
+    const { likeProtocol, randomSigner } = await loadFixture(deployProtocol);
     await expect(likeProtocol.write.pause({ account: randomSigner.account })).to
       .be.rejected;
   });
 
   it("should be paused by owner address", async function () {
-    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     await expect(likeProtocol.write.pause({ account: deployer.account })).to.be
       .not.rejected;
   });
 
   it("should not unpaused by random address", async function () {
     const { likeProtocol, deployer, randomSigner } =
-      await loadFixture(initLikeProtocol);
+      await loadFixture(deployProtocol);
     await expect(likeProtocol.write.pause({ account: deployer.account })).to.be
       .not.rejected;
     await expect(likeProtocol.write.unpause({ account: randomSigner.account }))
@@ -134,7 +116,7 @@ describe("LikeProtocol", () => {
   });
 
   it("should be able to create new BookNFT", async function () {
-    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
@@ -175,7 +157,7 @@ describe("LikeProtocol", () => {
   });
 
   it("should be able to create new BookNFT with royalty", async function () {
-    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
@@ -213,7 +195,7 @@ describe("LikeProtocol", () => {
   });
 
   it("should set the right royalty receiver on initialization", async function () {
-    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     const receiver = await likeProtocol.read.getRoyaltyReceiver();
     expect(receiver.toLowerCase()).to.equal(
       deployer.account.address.toLowerCase(),
@@ -222,7 +204,7 @@ describe("LikeProtocol", () => {
 
   it("should allow owner to set the royalty receiver", async function () {
     const { likeProtocol, deployer, randomSigner } =
-      await loadFixture(initLikeProtocol);
+      await loadFixture(deployProtocol);
     await likeProtocol.write.setRoyaltyReceiver(
       [randomSigner.account.address],
       {
@@ -236,7 +218,7 @@ describe("LikeProtocol", () => {
   });
 
   it("should not allow random address to set the royalty receiver", async function () {
-    const { likeProtocol, randomSigner } = await loadFixture(initLikeProtocol);
+    const { likeProtocol, randomSigner } = await loadFixture(deployProtocol);
     await expect(
       likeProtocol.write.setRoyaltyReceiver([randomSigner.account.address], {
         account: randomSigner.account,
@@ -246,7 +228,7 @@ describe("LikeProtocol", () => {
 
   it("should mint a already initialized BookNFT which cant be initialized again", async function () {
     const { likeProtocol, deployer, randomSigner } =
-      await loadFixture(initLikeProtocol);
+      await loadFixture(deployProtocol);
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
@@ -293,7 +275,7 @@ describe("LikeProtocol", () => {
   });
 
   it("should not allow to create new BookNFT when paused", async function () {
-    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     const classOperation = async () => {
       await likeProtocol.write.newBookNFT([
         {
@@ -330,7 +312,7 @@ describe("LikeProtocol", () => {
   });
 
   it("should be allow everyone to create new BookNFT", async function () {
-    const { likeProtocol, randomSigner } = await loadFixture(initLikeProtocol);
+    const { likeProtocol, randomSigner } = await loadFixture(deployProtocol);
     const newClass = async () => {
       await likeProtocol.write.newBookNFT(
         [
@@ -357,7 +339,7 @@ describe("LikeProtocol", () => {
   });
 
   it("should not allow to create new BookNFT when max supply is 0", async function () {
-    const { likeProtocol, randomSigner } = await loadFixture(initLikeProtocol);
+    const { likeProtocol, randomSigner } = await loadFixture(deployProtocol);
     const newClass = async () => {
       await likeProtocol.write.newBookNFT(
         [
@@ -385,7 +367,7 @@ describe("LikeProtocol", () => {
 
   it("should not allow everyone to create new BookNFT when paused", async function () {
     const { likeProtocol, deployer, randomSigner } =
-      await loadFixture(initLikeProtocol);
+      await loadFixture(deployProtocol);
     const classOperation = async () => {
       await likeProtocol.write.newBookNFT(
         [
@@ -418,7 +400,7 @@ describe("LikeProtocol", () => {
   });
 
   it("should retain the BookNFT paused state after upgrade", async function () {
-    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     expect(await likeProtocol.read.paused()).to.be.false;
     await likeProtocol.write.pause({ account: deployer.account });
     expect(await likeProtocol.read.paused()).to.be.true;
@@ -442,7 +424,7 @@ describe("LikeProtocol", () => {
   });
 
   it("should retain the BookNFT mapping after upgrade", async function () {
-    const { likeProtocol, deployer } = await loadFixture(initLikeProtocol);
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     const NewClassEvent = new Promise<{ id: `0x${string}` }>((resolve) => {
       const unwatch = likeProtocol.watchEvent.NewBookNFT({
         onLogs: (logs) => {
@@ -497,24 +479,8 @@ describe("LikeProtocol", () => {
 });
 
 describe("LikeProtocol events", () => {
-  async function initLikeProtocolEvents() {
-    const [deployer] = await viem.getWalletClients();
-    const { likeProtocol } = await ignition.deploy(LikeProtocolV1Module, {
-      parameters: {
-        LikeProtocolV0Module: {
-          initOwner: deployer.account.address,
-        },
-      },
-      defaultSender: deployer.account.address,
-    });
-
-    return { likeProtocol, deployer };
-  }
-
   it("should emit NewBookNFT event calling newBookNFT", async function () {
-    const { likeProtocol, deployer } = await loadFixture(
-      initLikeProtocolEvents,
-    );
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
 
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
@@ -541,9 +507,7 @@ describe("LikeProtocol events", () => {
   });
 
   it("should emit multiple NewBookNFT events calling newBookNFTs", async function () {
-    const { likeProtocol, deployer } = await loadFixture(
-      initLikeProtocolEvents,
-    );
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
 
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
@@ -584,25 +548,11 @@ describe("LikeProtocol events", () => {
 });
 
 describe("LikeProtocol as Beacon", () => {
-  async function initLikeProtocolBeacon() {
-    const [deployer, randomSigner] = await viem.getWalletClients();
-    const { likeProtocol } = await ignition.deploy(LikeProtocolV1Module, {
-      parameters: {
-        LikeProtocolV0Module: {
-          initOwner: deployer.account.address,
-        },
-      },
-      defaultSender: deployer.account.address,
-    });
+  it("should only owner can upgrade the implementation", async function () {
+    const { likeProtocol, deployer, randomSigner } =
+      await loadFixture(deployProtocol);
 
     const bookNFTMock = await viem.deployContract("BookNFTMock");
-    return { likeProtocol, deployer, randomSigner, bookNFTMock };
-  }
-
-  it("should only owner can upgrade the implementation", async function () {
-    const { likeProtocol, deployer, randomSigner, bookNFTMock } =
-      await loadFixture(initLikeProtocolBeacon);
-
     await expect(
       likeProtocol.write.upgradeTo([bookNFTMock.address], {
         account: deployer.account,

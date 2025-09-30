@@ -5,28 +5,11 @@ import { encodeFunctionData } from "viem";
 
 import "./setup";
 import { BookConfigLoader } from "./BookConfigLoader";
-import LikeProtocolV1Module from "../ignition/modules/LikeProtocolV1";
-import LikeProtocol from "../ignition/modules/LikeProtocol";
+import { deployProtocol } from "./ProtocolFactory";
 
 describe("LikeProtocol as create2 factory for BookNFT", () => {
-  async function initLikeProtocolCreate3Factory() {
-    const [deployer] = await viem.getWalletClients();
-    const { likeProtocol } = await ignition.deploy(LikeProtocolV1Module, {
-      parameters: {
-        LikeProtocolV0Module: {
-          initOwner: deployer.account.address,
-        },
-      },
-      defaultSender: deployer.account.address,
-    });
-
-    return { likeProtocol, deployer };
-  }
-
   it("should be able to create new BookNFT", async function () {
-    const { likeProtocol, deployer } = await loadFixture(
-      initLikeProtocolCreate3Factory,
-    );
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
@@ -45,9 +28,7 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
   });
 
   it("should be able to precompute address", async function () {
-    const { likeProtocol, deployer } = await loadFixture(
-      initLikeProtocolCreate3Factory,
-    );
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     // Any upgrade to openzeppelin would cause this test to fail, event comments updates
     const salt =
       "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -59,7 +40,7 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
       "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     );
     expect(likeProtocol.address).to.equalAddress(
-      "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+      "0x44322611140BC362972878FdEcEF335315E2c364",
     );
     const msgNewBookNFT = {
       creator: deployer.account.address,
@@ -72,7 +53,7 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
       msgNewBookNFT,
     ]);
     expect(targetAddress).to.equal(
-      "0x49076914E89608B826b7dF00ca0ECe5520A84019",
+      "0xe38D2EBbf228E7ACb2B60D21dA391C2973e35D2E",
     );
     const bookConfig1 = BookConfigLoader.load(
       "./test/fixtures/BookConfig1.json",
@@ -88,14 +69,12 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
       msgNewBookNFT1,
     ]);
     expect(targetAddress1).to.equalAddress(
-      "0x69FE487677C8B98E5e0a485C60C55172aaF0e031",
+      "0x230Db8fbfADEEf7300f5d04a4A322EAdDD649161",
     );
   });
 
   it("should be able to create new BookNFT with precomputed address", async function () {
-    const { likeProtocol, deployer } = await loadFixture(
-      initLikeProtocolCreate3Factory,
-    );
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     const salt = ("0x" +
       deployer.account.address.slice(2) +
       "0".repeat(24)) as `0x${string}`;
@@ -139,9 +118,7 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
   });
 
   it("should be not able to create same BookNFT with same salt", async function () {
-    const { likeProtocol, deployer } = await loadFixture(
-      initLikeProtocolCreate3Factory,
-    );
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     const salt = ("0x" +
       deployer.account.address.slice(2) +
       "0".repeat(24)) as `0x${string}`;
@@ -175,9 +152,7 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
   });
 
   it("should not alter computed address after BookNFT upgrade", async function () {
-    const { likeProtocol, deployer } = await loadFixture(
-      initLikeProtocolCreate3Factory,
-    );
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     const salt = ("0x" +
       deployer.account.address.slice(2) +
       "0".repeat(24)) as `0x${string}`;
@@ -207,9 +182,7 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
   });
 
   it("should not alter computed address after LikeProtocol upgrade", async function () {
-    const { likeProtocol, deployer } = await loadFixture(
-      initLikeProtocolCreate3Factory,
-    );
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     const salt = ("0x" +
       deployer.account.address.slice(2) +
       "0".repeat(24)) as `0x${string}`;
@@ -242,9 +215,7 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
   });
 
   it("should not alter computed address after LikeProtocol upgrade with BookNFT upgrade", async function () {
-    const { likeProtocol, deployer } = await loadFixture(
-      initLikeProtocolCreate3Factory,
-    );
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     const salt = ("0x" +
       deployer.account.address.slice(2) +
       "0".repeat(24)) as `0x${string}`;

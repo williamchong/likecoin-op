@@ -5,7 +5,7 @@ import { ethers, viem } from "hardhat";
 
 import "./setup";
 import { BookConfigLoader, BookTokenConfigLoader } from "./BookConfigLoader";
-import { createProtocol, deployProtocol } from "./ProtocolFactory";
+import { deployProtocol } from "./ProtocolFactory";
 
 describe("BookNFTClass", () => {
   async function initMint() {
@@ -18,7 +18,7 @@ describe("BookNFTClass", () => {
       likerLand,
       randomSigner,
       publicClient,
-    } = await deployProtocol();
+    } = await loadFixture(deployProtocol);
     const protocolOwner = deployer;
 
     const bookConfig = BookConfigLoader.load(
@@ -513,7 +513,7 @@ describe("BookNFT permission control", () => {
       likerLand,
       randomSigner,
       publicClient,
-    } = await deployProtocol();
+    } = await loadFixture(deployProtocol);
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
       const unwatch = likeProtocol.watchEvent.NewBookNFT({
@@ -762,7 +762,7 @@ describe("BookNFT ownership transfer", () => {
       likerLand,
       randomSigner,
       publicClient,
-    } = await deployProtocol();
+    } = await loadFixture(deployProtocol);
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
       const unwatch = likeProtocol.watchEvent.NewBookNFT({
@@ -1079,7 +1079,7 @@ describe("BookNFT config validation", () => {
       likerLand,
       randomSigner,
       publicClient,
-    } = await deployProtocol();
+    } = await loadFixture(deployProtocol);
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
       const unwatch = likeProtocol.watchEvent.NewBookNFT({
@@ -1291,7 +1291,7 @@ describe("BookNFT royalty", () => {
       likerLand,
       randomSigner,
       publicClient,
-    } = await deployProtocol();
+    } = await loadFixture(deployProtocol);
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
       const unwatch = likeProtocol.watchEvent.NewBookNFT({
@@ -1396,7 +1396,7 @@ describe("BookNFT version", () => {
       likerLand,
       randomSigner,
       publicClient,
-    } = await deployProtocol();
+    } = await loadFixture(deployProtocol);
 
     const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
       const unwatch = likeProtocol.watchEvent.NewBookNFT({
