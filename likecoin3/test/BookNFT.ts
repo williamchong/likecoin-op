@@ -103,18 +103,8 @@ describe("BookNFTClass", () => {
     await expect(
       book0NFT.write.initialize(
         [
-          {
-            creator: randomSigner.account.address,
-            updaters: [
-              randomSigner.account.address,
-              randomSigner.account.address,
-            ],
-            minters: [
-              randomSigner.account.address,
-              randomSigner.account.address,
-            ],
-            config: bookConfig,
-          },
+          bookConfig.name,
+          bookConfig.symbol,
         ],
         {
           account: randomSigner.account,
@@ -1473,12 +1463,8 @@ describe("BookNFT version", () => {
     await expect(
       beaconProxy.write.initialize(
         [
-          {
-            creator: classOwner.account.address,
-            updaters: [classOwner.account.address, likerLand.account.address],
-            minters: [classOwner.account.address, likerLand.account.address],
-            config: bookConfig,
-          },
+          bookConfig.name,
+          bookConfig.symbol,
         ],
         {
           account: classOwner.account,

@@ -15,7 +15,6 @@ import {IERC1967} from "@openzeppelin/contracts/interfaces/IERC1967.sol";
 import {IERC4906} from "@openzeppelin/contracts/interfaces/IERC4906.sol";
 
 import {BookConfig} from "../types/BookConfig.sol";
-import {MsgNewBookNFT} from "../types/MsgNewBookNFT.sol";
 
 error ErrUnauthorized();
 error ErrEmptyName();
@@ -121,29 +120,45 @@ contract BookNFT is
         _disableInitializers();
     }
 
-    function initialize(MsgNewBookNFT memory msgNewBookNFT) public initializer {
-        __ERC721_init(msgNewBookNFT.config.name, msgNewBookNFT.config.symbol);
+    function initialize(
+        string memory name_,
+        string memory symbol_
+    ) public initializer {
+        __ERC721_init(name_, symbol_);
         __ERC721Enumerable_init();
         __ERC721Burnable_init();
-        __Ownable_init(msgNewBookNFT.creator);
+        __Ownable_init(_msgSender());
         __AccessControl_init();
+        BookNFTStorage storage $ = _getClassStorage();
+        $.protocolBeacon = _msgSender();
+    }
 
-        _validateBookConfig(msgNewBookNFT.config);
+    function initConfig(
+        address creator,
+        address[] memory minters,
+        address[] memory updaters,
+        BookConfig memory config
+    ) public onlyOwner {
+        _validateBookConfig(config);
 
         BookNFTStorage storage $ = _getClassStorage();
-        $.name = msgNewBookNFT.config.name;
-        $.symbol = msgNewBookNFT.config.symbol;
-        $.max_supply = msgNewBookNFT.config.max_supply;
-        $.metadata = msgNewBookNFT.config.metadata;
+        if ($._currentIndex > 0) {
+            revert InvalidInitialization();
+        }
+
+        $.name = config.name;
+        $.symbol = config.symbol;
+        $.max_supply = config.max_supply;
+        $.metadata = config.metadata;
 
         $._currentIndex = 0;
-        $.protocolBeacon = _msgSender();
 
-        for (uint i = 0; i < msgNewBookNFT.minters.length; i++) {
-            _grantRole(MINTER_ROLE, msgNewBookNFT.minters[i]);
+        transferOwnership(creator);
+        for (uint i = 0; i < minters.length; i++) {
+            _grantRole(MINTER_ROLE, minters[i]);
         }
-        for (uint i = 0; i < msgNewBookNFT.updaters.length; i++) {
-            _grantRole(UPDATER_ROLE, msgNewBookNFT.updaters[i]);
+        for (uint i = 0; i < updaters.length; i++) {
+            _grantRole(UPDATER_ROLE, updaters[i]);
         }
     }
 

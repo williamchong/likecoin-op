@@ -254,23 +254,9 @@ describe("LikeProtocol", () => {
 
     const newNFTClass = await viem.getContractAt("BookNFT", classId);
     await expect(
-      newNFTClass.write.initialize(
-        [
-          {
-            creator: randomSigner.account.address,
-            updaters: [
-              randomSigner.account.address,
-              randomSigner.account.address,
-            ],
-            minters: [
-              randomSigner.account.address,
-              randomSigner.account.address,
-            ],
-            config: bookConfig,
-          },
-        ],
-        { account: randomSigner.account },
-      ),
+      newNFTClass.write.initialize([bookConfig.name, bookConfig.symbol], {
+        account: randomSigner.account,
+      }),
     ).to.be.rejectedWith("InvalidInitialization()");
   });
 

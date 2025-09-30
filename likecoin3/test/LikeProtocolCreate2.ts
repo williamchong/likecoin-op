@@ -53,7 +53,7 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
       msgNewBookNFT,
     ]);
     expect(targetAddress).to.equal(
-      "0xe38D2EBbf228E7ACb2B60D21dA391C2973e35D2E",
+      "0x6Ac8e809d58e17636ea4e377f3ABD9047C36F48E",
     );
     const bookConfig1 = BookConfigLoader.load(
       "./test/fixtures/BookConfig1.json",
@@ -69,7 +69,7 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
       msgNewBookNFT1,
     ]);
     expect(targetAddress1).to.equalAddress(
-      "0x230Db8fbfADEEf7300f5d04a4A322EAdDD649161",
+      "0x6243229DF8a0B0cA7e241e95071e93AEEBC56998",
     );
   });
 
@@ -92,7 +92,7 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
       msgNewBookNFT,
     ]);
 
-    await likeProtocol.write.create2BookNFT([salt, msgNewBookNFT], {
+    await likeProtocol.write.newBookNFTWithSalt([salt, msgNewBookNFT], {
       account: deployer.account,
     });
     const logs = await likeProtocol.getEvents.NewBookNFT();
@@ -136,7 +136,7 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
       msgNewBookNFT,
     ]);
 
-    await likeProtocol.write.create2BookNFT([salt, msgNewBookNFT], {
+    await likeProtocol.write.newBookNFTWithSalt([salt, msgNewBookNFT], {
       account: deployer.account,
     });
     const logs = await likeProtocol.getEvents.NewBookNFT();
@@ -145,7 +145,7 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
     expect(await likeProtocol.read.isBookNFT([actualAddress])).to.be.true;
 
     await expect(
-      likeProtocol.write.create2BookNFT([salt, msgNewBookNFT], {
+      likeProtocol.write.newBookNFTWithSalt([salt, msgNewBookNFT], {
         account: deployer.account,
       }),
     ).to.be.rejectedWith("FailedDeployment()");

@@ -20,7 +20,7 @@ error ErrNftClassNotFound();
 error ErrInvalidSalt();
 error ErrBookNFTAlreadyExists();
 interface BookNFTInterface {
-    function initialize(MsgNewBookNFT memory msgNewBookNFT) external;
+    function initialize(string memory name, string memory symbol) external;
 }
 
 /// @custom:security-contact rickmak@oursky.com
@@ -99,7 +99,8 @@ contract LikeProtocol is
         address protocolAddress = address(this);
         bytes memory initData = abi.encodeWithSelector(
             BookNFTInterface.initialize.selector,
-            msgNewBookNFT
+            msgNewBookNFT.config.name,
+            msgNewBookNFT.config.symbol
         );
         bytes memory proxyCreationCode = abi.encodePacked(
             type(BeaconProxy).creationCode,
@@ -113,7 +114,7 @@ contract LikeProtocol is
         if ($.classIdMapping[bookAddress]) revert ErrBookNFTAlreadyExists();
     }
 
-    function create2BookNFT(
+    function newBookNFTWithSalt(
         bytes32 salt,
         MsgNewBookNFT memory msgNewBookNFT
     ) public whenNotPaused returns (address bookAddress) {
@@ -122,7 +123,8 @@ contract LikeProtocol is
         address protocolAddress = address(this);
         bytes memory initData = abi.encodeWithSelector(
             BookNFTInterface.initialize.selector,
-            msgNewBookNFT
+            msgNewBookNFT.config.name,
+            msgNewBookNFT.config.symbol
         );
         bytes memory proxyCreationCode = abi.encodePacked(
             type(BeaconProxy).creationCode,
@@ -131,6 +133,12 @@ contract LikeProtocol is
         bookAddress = Create2.deploy(0, salt, proxyCreationCode);
         if (bookAddress == address(0)) revert ErrBookNFTAlreadyExists();
         $.classIdMapping[bookAddress] = true;
+        BookNFT(bookAddress).initConfig(
+            msgNewBookNFT.creator,
+            msgNewBookNFT.minters,
+            msgNewBookNFT.updaters,
+            msgNewBookNFT.config
+        );
         emit NewBookNFT(bookAddress, msgNewBookNFT.config);
     }
 
@@ -140,11 +148,18 @@ contract LikeProtocol is
         LikeNFTStorage storage $ = _getLikeNFTStorage();
         bytes memory initData = abi.encodeWithSelector(
             BookNFTInterface.initialize.selector,
-            msgNewBookNFT
+            msgNewBookNFT.config.name,
+            msgNewBookNFT.config.symbol
         );
         BeaconProxy proxy = new BeaconProxy(address(this), initData);
         bookAddress = address(proxy);
         $.classIdMapping[bookAddress] = true;
+        BookNFT(bookAddress).initConfig(
+            msgNewBookNFT.creator,
+            msgNewBookNFT.minters,
+            msgNewBookNFT.updaters,
+            msgNewBookNFT.config
+        );
         emit NewBookNFT(bookAddress, msgNewBookNFT.config);
     }
 
