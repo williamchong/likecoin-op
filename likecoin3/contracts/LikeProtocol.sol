@@ -18,7 +18,6 @@ import {BookNFT} from "./BookNFT.sol";
 
 error ErrNftClassNotFound();
 error ErrInvalidSalt();
-error ErrBookNFTAlreadyExists();
 interface BookNFTInterface {
     function initialize(string memory name, string memory symbol) external;
 }
@@ -80,8 +79,19 @@ contract LikeProtocol is
         return $.classIdMapping[classId];
     }
 
+    // Start factory methods for deterministic address deployment of BookNFT
+
+    /**
+     * _guardSalt function
+     *
+     * Guard salt as permission check. Bytes allocation:
+     * 1-20 bytes: Must be same as msg.sender, for permission control
+     * 20-21 bytes: expected to be nounce, for remint with same config
+     * 23-32 bytes: expected to be salt depends on the BookNFT config
+     *
+     * @param salt - the salt to check
+     */
     function _guardSalt(bytes32 salt) private view {
-        // TODO: First 20 byte is msg.sender; 20-21 is Nounce; 23-32 is salt
         if (salt == bytes32(0)) {
             revert ErrInvalidSalt();
         }
@@ -91,76 +101,125 @@ contract LikeProtocol is
         }
     }
 
-    function precomputeAddress(
-        bytes32 salt,
-        MsgNewBookNFT memory msgNewBookNFT
-    ) public view returns (address bookAddress) {
-        LikeNFTStorage storage $ = _getLikeNFTStorage();
+    /**
+     * _creationCode function
+     *
+     * Internal function to prepare the creation code of the BookNFT proxy
+     *
+     * @param name - the name of the BookNFT
+     * @param symbol - the symbol of the BookNFT
+     */
+    function _creationCode(
+        string memory name,
+        string memory symbol
+    ) private view returns (bytes memory) {
         address protocolAddress = address(this);
         bytes memory initData = abi.encodeWithSelector(
             BookNFTInterface.initialize.selector,
-            msgNewBookNFT.config.name,
-            msgNewBookNFT.config.symbol
+            name,
+            symbol
         );
         bytes memory proxyCreationCode = abi.encodePacked(
             type(BeaconProxy).creationCode,
             abi.encode(protocolAddress, initData)
+        );
+        return proxyCreationCode;
+    }
+
+    /**
+     * _createBookNFT function
+     *
+     * Internal function to create a BookNFT via create2, if the bookNFT already
+     * exists, it will revert with FailedDeployment()
+     *
+     * @param salt - the salt to use for the BookNFT
+     * @param msgNewBookNFT - the message to create the BookNFT
+     */
+    function _createBookNFT(
+        bytes32 salt,
+        MsgNewBookNFT memory msgNewBookNFT
+    ) private returns (address bookAddress) {
+        LikeNFTStorage storage $ = _getLikeNFTStorage();
+
+        bytes memory proxyCreationCode = _creationCode(
+            msgNewBookNFT.config.name,
+            msgNewBookNFT.config.symbol
+        );
+        bookAddress = Create2.deploy(0, salt, proxyCreationCode);
+        $.classIdMapping[bookAddress] = true;
+        BookNFT(bookAddress).initConfig(
+            msgNewBookNFT.creator,
+            msgNewBookNFT.minters,
+            msgNewBookNFT.updaters,
+            msgNewBookNFT.config
+        );
+        emit NewBookNFT(bookAddress, msgNewBookNFT.config);
+    }
+
+    /**
+     * precomputeAddress function
+     *
+     * Precompute the address of the BookNFT
+     *
+     * @param salt - the salt to use for the BookNFT
+     * @param msgNewBookNFT - the message to create the BookNFT
+     */
+    function precomputeBookNFTAddress(
+        bytes32 salt,
+        MsgNewBookNFT memory msgNewBookNFT
+    ) public view returns (address bookAddress) {
+        bytes memory proxyCreationCode = _creationCode(
+            msgNewBookNFT.config.name,
+            msgNewBookNFT.config.symbol
         );
 
         bookAddress = Create2.computeAddress(
             salt,
             keccak256(proxyCreationCode)
         );
-        if ($.classIdMapping[bookAddress]) revert ErrBookNFTAlreadyExists();
     }
 
+    /**
+     * newBookNFTWithSalt function
+     *
+     * Public fucntion for creating a BookNFT with a user controlled salt. If
+     * same salt is used, it will yield to same address and revert with
+     * FailedDeployment()
+     *
+     * @param salt - the salt to use for the BookNFT
+     * @param msgNewBookNFT - the message to create the BookNFT
+     */
     function newBookNFTWithSalt(
         bytes32 salt,
         MsgNewBookNFT memory msgNewBookNFT
     ) public whenNotPaused returns (address bookAddress) {
         _guardSalt(salt);
-        LikeNFTStorage storage $ = _getLikeNFTStorage();
-        address protocolAddress = address(this);
-        bytes memory initData = abi.encodeWithSelector(
-            BookNFTInterface.initialize.selector,
-            msgNewBookNFT.config.name,
-            msgNewBookNFT.config.symbol
-        );
-        bytes memory proxyCreationCode = abi.encodePacked(
-            type(BeaconProxy).creationCode,
-            abi.encode(protocolAddress, initData)
-        );
-        bookAddress = Create2.deploy(0, salt, proxyCreationCode);
-        if (bookAddress == address(0)) revert ErrBookNFTAlreadyExists();
-        $.classIdMapping[bookAddress] = true;
-        BookNFT(bookAddress).initConfig(
-            msgNewBookNFT.creator,
-            msgNewBookNFT.minters,
-            msgNewBookNFT.updaters,
-            msgNewBookNFT.config
-        );
-        emit NewBookNFT(bookAddress, msgNewBookNFT.config);
+        bookAddress = _createBookNFT(salt, msgNewBookNFT);
     }
 
+    /**
+     * newBookNFT function
+     *
+     * Public fucntion for creating a BookNFT without a salt.
+     * salt value is computed from msg.sender + 0x0000 + keccak256(msg.name + msg.symbol)
+     *
+     * @param msgNewBookNFT - the message to create the BookNFT
+     */
     function newBookNFT(
         MsgNewBookNFT memory msgNewBookNFT
     ) public whenNotPaused returns (address bookAddress) {
-        LikeNFTStorage storage $ = _getLikeNFTStorage();
-        bytes memory initData = abi.encodeWithSelector(
-            BookNFTInterface.initialize.selector,
-            msgNewBookNFT.config.name,
-            msgNewBookNFT.config.symbol
+        bytes32 salt = bytes32(uint256(uint160(_msgSender())));
+        salt = bytes32(
+            uint256(
+                keccak256(
+                    abi.encode(
+                        msgNewBookNFT.config.name,
+                        msgNewBookNFT.config.symbol
+                    )
+                )
+            )
         );
-        BeaconProxy proxy = new BeaconProxy(address(this), initData);
-        bookAddress = address(proxy);
-        $.classIdMapping[bookAddress] = true;
-        BookNFT(bookAddress).initConfig(
-            msgNewBookNFT.creator,
-            msgNewBookNFT.minters,
-            msgNewBookNFT.updaters,
-            msgNewBookNFT.config
-        );
-        emit NewBookNFT(bookAddress, msgNewBookNFT.config);
+        bookAddress = _createBookNFT(salt, msgNewBookNFT);
     }
 
     /**
@@ -193,6 +252,7 @@ contract LikeProtocol is
             newBookNFT(msgNewBookNFTs[i]);
         }
     }
+    // End factory methods
 
     function _authorizeUpgrade(
         address _newImplementation // solhint-disable-next-line no-empty-blocks

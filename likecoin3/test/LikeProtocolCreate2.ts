@@ -165,16 +165,15 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
       minters: [deployer.account.address],
       config: bookConfig,
     };
-    const precomputedAddress = await likeProtocol.read.precomputeAddress([
-      salt,
-      msgNewBookNFT,
-    ]);
+    const precomputedAddress = await likeProtocol.read.precomputeBookNFTAddress(
+      [salt, msgNewBookNFT],
+    );
 
     const bookNFTMock = await viem.deployContract("BookNFTMock");
     await likeProtocol.write.upgradeTo([bookNFTMock.address], {
       account: deployer.account,
     });
-    const newAddress = await likeProtocol.read.precomputeAddress([
+    const newAddress = await likeProtocol.read.precomputeBookNFTAddress([
       salt,
       msgNewBookNFT,
     ]);
@@ -195,10 +194,9 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
       minters: [deployer.account.address],
       config: bookConfig,
     };
-    const precomputedAddress = await likeProtocol.read.precomputeAddress([
-      salt,
-      msgNewBookNFT,
-    ]);
+    const precomputedAddress = await likeProtocol.read.precomputeBookNFTAddress(
+      [salt, msgNewBookNFT],
+    );
 
     const likeProtocolMock = await viem.deployContract("LikeProtocolMock");
     await likeProtocol.write.upgradeToAndCall(
@@ -207,7 +205,7 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
         account: deployer.account,
       },
     );
-    const newAddress = await likeProtocol.read.precomputeAddress([
+    const newAddress = await likeProtocol.read.precomputeBookNFTAddress([
       salt,
       msgNewBookNFT,
     ]);
@@ -228,10 +226,9 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
       minters: [deployer.account.address],
       config: bookConfig,
     };
-    const precomputedAddress = await likeProtocol.read.precomputeAddress([
-      salt,
-      msgNewBookNFT,
-    ]);
+    const precomputedAddress = await likeProtocol.read.precomputeBookNFTAddress(
+      [salt, msgNewBookNFT],
+    );
 
     const likeProtocolMock = await viem.deployContract("LikeProtocolMock");
     const bookNFTMock = await viem.deployContract("BookNFTMock");
@@ -246,7 +243,7 @@ describe("LikeProtocol as create2 factory for BookNFT", () => {
         account: deployer.account,
       },
     );
-    const newAddress = await likeProtocol.read.precomputeAddress([
+    const newAddress = await likeProtocol.read.precomputeBookNFTAddress([
       salt,
       msgNewBookNFT,
     ]);

@@ -10,7 +10,6 @@ import { deployProtocol } from "./factory";
 describe("BookNFTClass", () => {
   async function initMint() {
     const {
-      likeProtocolImpl,
       likeProtocol,
       bookNFTImpl,
       deployer,
@@ -101,16 +100,71 @@ describe("BookNFTClass", () => {
     expect(owner).is.not.equalAddress(randomSigner.account.address);
 
     await expect(
-      book0NFT.write.initialize(
-        [
-          bookConfig.name,
-          bookConfig.symbol,
-        ],
-        {
-          account: randomSigner.account,
-        },
-      ),
+      book0NFT.write.initialize([bookConfig.name, bookConfig.symbol], {
+        account: randomSigner.account,
+      }),
     ).to.be.rejectedWith("InvalidInitialization()");
+  });
+
+  it("should able to initConfig by class owner", async function () {
+    const { book0NFT, classOwner , likerLand} = await loadFixture(initMint);
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+    await expect(
+      book0NFT.write.initConfig([
+        classOwner.account.address,
+        [classOwner.account.address, likerLand.account.address],
+        [classOwner.account.address, likerLand.account.address],
+        bookConfig,
+      ], {
+        account: classOwner.account,
+      }),
+    ).to.be.not.rejected;
+  });
+
+  it("should not able to initConfig after mint", async function () {
+    const { book0NFT, classOwner , likerLand} = await loadFixture(initMint);
+    await book0NFT.write.mint([
+      classOwner.account.address,
+      ["_mint"],
+      [JSON.stringify({
+        name: "My Book",
+        symbol: "KOOB",
+      })],
+    ], {
+      account: classOwner.account,
+    });
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+    await expect(
+      book0NFT.write.initConfig([
+        classOwner.account.address,
+        [classOwner.account.address, likerLand.account.address],
+        [classOwner.account.address, likerLand.account.address],
+        bookConfig,
+      ], {
+        account: classOwner.account,
+      }),
+    ).to.be.rejectedWith("InvalidInitialization()");
+  });
+
+  it("should not able to initConfig by random signer", async function () {
+    const { book0NFT, randomSigner, classOwner, likerLand } = await loadFixture(initMint);
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+    await expect(
+      book0NFT.write.initConfig([
+        randomSigner.account.address,
+        [randomSigner.account.address, likerLand.account.address],
+        [randomSigner.account.address, likerLand.account.address],
+        bookConfig,
+      ], {
+        account: randomSigner.account,
+      }),
+    ).to.be.rejected;
   });
 
   it("should have the right roles assigned", async function () {
@@ -1461,15 +1515,9 @@ describe("BookNFT version", () => {
       "./test/fixtures/BookConfig0.json",
     );
     await expect(
-      beaconProxy.write.initialize(
-        [
-          bookConfig.name,
-          bookConfig.symbol,
-        ],
-        {
-          account: classOwner.account,
-        },
-      ),
+      beaconProxy.write.initialize([bookConfig.name, bookConfig.symbol], {
+        account: classOwner.account,
+      }),
     ).to.be.rejectedWith("InvalidInitialization()");
   });
 

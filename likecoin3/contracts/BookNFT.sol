@@ -133,6 +133,18 @@ contract BookNFT is
         $.protocolBeacon = _msgSender();
     }
 
+    /**
+     * initConfig
+     *
+     * In normal case, the initConfig should be called immediately after the
+     * BookNFT BeaconProxy is deployed by the LikeProtocol. The owner can
+     * update the config as long as there is no token minted.
+     *
+     * @param creator - the creator of the book nft
+     * @param minters - the minters of the book nft
+     * @param updaters - the updaters of the book nft
+     * @param config - the config of the book nft
+     */
     function initConfig(
         address creator,
         address[] memory minters,

@@ -260,6 +260,41 @@ describe("LikeProtocol", () => {
     ).to.be.rejectedWith("InvalidInitialization()");
   });
 
+  it("should not allow to create new BookNFT with same config", async function () {
+    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
+    const bookConfig = BookConfigLoader.load(
+      "./test/fixtures/BookConfig0.json",
+    );
+    await likeProtocol.write.newBookNFT(
+      [
+        {
+          creator: deployer.account.address,
+          updaters: [deployer.account.address],
+          minters: [deployer.account.address],
+          config: bookConfig,
+        },
+      ],
+      {
+        account: deployer.account,
+      },
+    );
+    await expect(
+      likeProtocol.write.newBookNFT(
+        [
+          {
+            creator: deployer.account.address,
+            updaters: [deployer.account.address],
+            minters: [deployer.account.address],
+            config: bookConfig,
+          },
+        ],
+        {
+          account: deployer.account,
+        },
+      ),
+    ).to.be.rejectedWith("FailedDeployment()");
+  });
+
   it("should not allow to create new BookNFT when paused", async function () {
     const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     const classOperation = async () => {
@@ -288,7 +323,6 @@ describe("LikeProtocol", () => {
       ]);
     };
 
-    await expect(classOperation()).to.be.not.rejected;
     await expect(likeProtocol.write.pause({ account: deployer.account })).to.be
       .not.rejected;
     await expect(classOperation()).to.be.rejectedWith("EnforcedPause");
@@ -376,7 +410,6 @@ describe("LikeProtocol", () => {
       );
     };
 
-    await expect(classOperation()).to.be.not.rejected;
     await expect(likeProtocol.write.pause({ account: deployer.account })).to.be
       .not.rejected;
     await expect(classOperation()).to.be.rejectedWith("EnforcedPause");
