@@ -2,7 +2,6 @@
 // Compatible with OpenZeppelin Contracts ^5.4.0
 pragma solidity ^0.8.27;
 
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -18,7 +17,7 @@ import {BookNFT} from "./BookNFT.sol";
 
 error ErrNftClassNotFound();
 error ErrInvalidSalt();
-interface BookNFTInterface {
+interface IBookNFTInterface {
     function initialize(string memory name, string memory symbol) external;
 }
 
@@ -115,7 +114,7 @@ contract LikeProtocol is
     ) private view returns (bytes memory) {
         address protocolAddress = address(this);
         bytes memory initData = abi.encodeWithSelector(
-            BookNFTInterface.initialize.selector,
+            IBookNFTInterface.initialize.selector,
             name,
             symbol
         );
@@ -266,7 +265,7 @@ contract LikeProtocol is
     function newBookNFTs(
         MsgNewBookNFT[] calldata msgNewBookNFTs
     ) public whenNotPaused {
-        for (uint i = 0; i < msgNewBookNFTs.length; i++) {
+        for (uint32 i = 0; i < msgNewBookNFTs.length; ++i) {
             newBookNFT(msgNewBookNFTs[i]);
         }
     }

@@ -336,7 +336,7 @@ describe("LikeProtocol as Beacon Factory with deterministic address", () => {
       "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     );
     expect(likeProtocol.address).to.equalAddress(
-      "0x44322611140BC362972878FdEcEF335315E2c364",
+      "0x95f846D5c646D3eefb0b56932B8Abf3995A3F9e5",
     );
     const msgNewBookNFT = {
       creator: deployer.account.address,
@@ -349,7 +349,7 @@ describe("LikeProtocol as Beacon Factory with deterministic address", () => {
       msgNewBookNFT,
     ]);
     expect(targetAddress).to.equal(
-      "0x6Ac8e809d58e17636ea4e377f3ABD9047C36F48E",
+      "0xE35E23Feb6BC683B6AADEE5D3a3249Ba584c005f",
     );
     const bookConfig1 = BookConfigLoader.load(
       "./test/fixtures/BookConfig1.json",
@@ -365,7 +365,7 @@ describe("LikeProtocol as Beacon Factory with deterministic address", () => {
       msgNewBookNFT1,
     ]);
     expect(targetAddress1).to.equalAddress(
-      "0x6243229DF8a0B0cA7e241e95071e93AEEBC56998",
+      "0x16EaCc97945f2C61E99c1f77Fc97B44D557F288e",
     );
   });
 

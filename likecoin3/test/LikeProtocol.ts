@@ -14,7 +14,7 @@ describe("LikeProtocol as Ownable and Pausable", () => {
       "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     );
     expect(likeProtocol.address).to.equalAddress(
-      "0x44322611140BC362972878FdEcEF335315E2c364",
+      "0x95f846D5c646D3eefb0b56932B8Abf3995A3F9e5",
     );
   });
 

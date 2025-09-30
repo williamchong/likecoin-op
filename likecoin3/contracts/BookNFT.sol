@@ -20,11 +20,13 @@ error ErrUnauthorized();
 error ErrEmptyName();
 error ErrInvalidSymbol();
 error ErrInvalidMetadata();
+error ErrMemoMetadataLengthMismatch();
 error ErrMaxSupplyZero();
+error ErrSupplyDecrease();
 error ErrNftNoSupply();
 error ErrTokenIdMintFails(uint256 nextTokenId);
 
-interface LikeProtocolInterface {
+interface ILikeProtocolInterface {
     function getRoyaltyReceiver() external view returns (address);
 }
 /// @custom:security-contact rickmak@oursky.com
@@ -166,10 +168,10 @@ contract BookNFT is
         $._currentIndex = 0;
 
         transferOwnership(creator);
-        for (uint i = 0; i < minters.length; i++) {
+        for (uint32 i = 0; i < minters.length; ++i) {
             _grantRole(MINTER_ROLE, minters[i]);
         }
-        for (uint i = 0; i < updaters.length; i++) {
+        for (uint32 i = 0; i < updaters.length; ++i) {
             _grantRole(UPDATER_ROLE, updaters[i]);
         }
     }
@@ -230,7 +232,9 @@ contract BookNFT is
     function update(BookConfig calldata config) public onlyUpdater {
         _validateBookConfig(config);
         BookNFTStorage storage $ = _getClassStorage();
-        require(config.max_supply >= $.max_supply, "ErrSupplyDecrease");
+        if (config.max_supply < $.max_supply) {
+            revert ErrSupplyDecrease();
+        }
         require(
             keccak256(bytes(config.symbol)) == keccak256(bytes($.symbol)),
             ErrInvalidSymbol()
@@ -273,12 +277,11 @@ contract BookNFT is
         string[] calldata memos,
         string[] calldata metadataList
     ) external onlyMinter {
-        require(
-            memos.length == metadataList.length,
-            "ErrMemoMetadataLengthMismatch"
-        );
+        if (memos.length != metadataList.length) {
+            revert ErrMemoMetadataLengthMismatch();
+        }
         _ensureEnoughSupply(metadataList.length);
-        for (uint i = 0; i < metadataList.length; i++) {
+        for (uint32 i = 0; i < metadataList.length; ++i) {
             _mintWithEvent(_msgSender(), to, memos[i], metadataList[i]);
         }
     }
@@ -298,7 +301,7 @@ contract BookNFT is
         string[] calldata metadataList
     ) external onlyMinter {
         _ensureEnoughSupply(metadataList.length);
-        for (uint i = 0; i < tos.length; i++) {
+        for (uint32 i = 0; i < tos.length; ++i) {
             _mintWithEvent(_msgSender(), tos[i], memos[i], metadataList[i]);
         }
     }
@@ -326,7 +329,7 @@ contract BookNFT is
             revert ErrTokenIdMintFails(totalSupply());
         }
         _ensureEnoughSupply(metadataList.length);
-        for (uint i = 0; i < metadataList.length; i++) {
+        for (uint32 i = 0; i < metadataList.length; ++i) {
             _mintWithEvent(_msgSender(), tos[i], memos[i], metadataList[i]);
         }
     }
@@ -338,7 +341,7 @@ contract BookNFT is
      *
      * @param quantity - the quantity of the tokens to mint
      */
-    function _ensureEnoughSupply(uint quantity) internal view {
+    function _ensureEnoughSupply(uint256 quantity) internal view {
         BookNFTStorage storage $ = _getClassStorage();
         if (totalSupply() + quantity > $.max_supply) {
             revert ErrNftNoSupply();
@@ -365,7 +368,7 @@ contract BookNFT is
         $.tokenURIMap[$._currentIndex] = metadata;
         _safeMint(to, $._currentIndex);
         emit TransferWithMemo(from, to, $._currentIndex, memo);
-        $._currentIndex++;
+        ++$._currentIndex;
     }
 
     function transferWithMemo(
@@ -398,7 +401,7 @@ contract BookNFT is
         uint256[] calldata tokenIds,
         string[] calldata memos
     ) external {
-        for (uint i = 0; i < tokenIds.length; i++) {
+        for (uint32 i = 0; i < tokenIds.length; ++i) {
             safeTransferFrom(from, tos[i], tokenIds[i]);
             emit TransferWithMemo(from, tos[i], tokenIds[i], memos[i]);
         }
@@ -438,7 +441,7 @@ contract BookNFT is
     ) external view override returns (address receiver, uint256 royaltyAmount) {
         BookNFTStorage storage $ = _getClassStorage();
         royaltyAmount = (salePrice * $.royaltyFraction) / 10000;
-        LikeProtocolInterface likeProtocol = LikeProtocolInterface(
+        ILikeProtocolInterface likeProtocol = ILikeProtocolInterface(
             getProtocolBeacon()
         );
         receiver = likeProtocol.getRoyaltyReceiver();

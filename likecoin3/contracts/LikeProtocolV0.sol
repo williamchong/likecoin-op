@@ -40,12 +40,10 @@ contract LikeProtocolV0 is
     ) internal override onlyOwner {}
 
     // Beacon implementation
-    function implementation() external view override returns (address) {
+    function implementation() external pure override returns (address) {
         return address(0);
     }
 
-    function upgradeTo(address) external onlyOwner {
-        revert("Not implemented");
-    }
+    function upgradeTo(address) external onlyOwner {}
     // End of Beacon implementation
 }
