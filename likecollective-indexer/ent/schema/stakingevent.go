@@ -36,6 +36,7 @@ func (StakingEvent) Fields() []ent.Field {
 				"unstaked",
 				"reward_claimed",
 				"reward_deposited",
+				"reward_deposit_distributed",
 				"all_rewards_claimed",
 			).
 			Default("staked").

@@ -1,6 +1,7 @@
 package stakingstate_test
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -21,11 +22,12 @@ import (
 type StakingStateTestCaseEventType string
 
 const (
-	StakingStateTestCaseEventTypeStaked            StakingStateTestCaseEventType = "staked"
-	StakingStateTestCaseEventTypeUnstaked          StakingStateTestCaseEventType = "unstaked"
-	StakingStateTestCaseEventTypeRewardDeposited   StakingStateTestCaseEventType = "rewardDeposited"
-	StakingStateTestCaseEventTypeRewardClaimed     StakingStateTestCaseEventType = "rewardClaimed"
-	StakingStateTestCaseEventTypeAllRewardsClaimed StakingStateTestCaseEventType = "allRewardsClaimed"
+	StakingStateTestCaseEventTypeStaked                   StakingStateTestCaseEventType = "staked"
+	StakingStateTestCaseEventTypeUnstaked                 StakingStateTestCaseEventType = "unstaked"
+	StakingStateTestCaseEventTypeRewardDeposited          StakingStateTestCaseEventType = "rewardDeposited"
+	StakingStateTestCaseEventTypeRewardDepositDistributed StakingStateTestCaseEventType = "rewardDepositDistributed"
+	StakingStateTestCaseEventTypeRewardClaimed            StakingStateTestCaseEventType = "rewardClaimed"
+	StakingStateTestCaseEventTypeAllRewardsClaimed        StakingStateTestCaseEventType = "allRewardsClaimed"
 )
 
 type StakingStateTestCaseEventStaked struct {
@@ -85,6 +87,25 @@ func (e *StakingStateTestCaseEventRewardDeposited) ToEnt() *ent.StakingEvent {
 	}
 }
 
+type StakingStateTestCaseEventRewardDepositDistributed struct {
+	BookNFT      string `yaml:"bookNFT"`
+	Account      string `yaml:"account"`
+	RewardAmount string `yaml:"rewardAmount"`
+}
+
+func (e *StakingStateTestCaseEventRewardDepositDistributed) ToEnt() *ent.StakingEvent {
+	rewardAmount, err := uint256.FromDecimal(e.RewardAmount)
+	if err != nil {
+		panic("failed to convert reward amount to big.Int")
+	}
+	return &ent.StakingEvent{
+		EventType:                stakingevent.EventTypeRewardDepositDistributed,
+		AccountEvmAddress:        e.Account,
+		NftClassAddress:          e.BookNFT,
+		PendingRewardAmountAdded: typeutil.Uint256(rewardAmount),
+	}
+}
+
 type StakingStateTestCaseEventRewardClaimed struct {
 	BookNFT      string `yaml:"bookNFT"`
 	Account      string `yaml:"account"`
@@ -101,6 +122,7 @@ func (e *StakingStateTestCaseEventRewardClaimed) ToEnt() *ent.StakingEvent {
 		AccountEvmAddress:          e.Account,
 		NftClassAddress:            e.BookNFT,
 		PendingRewardAmountRemoved: typeutil.Uint256(rewardAmount),
+		ClaimedRewardAmountAdded:   typeutil.Uint256(rewardAmount),
 	}
 }
 
@@ -125,12 +147,13 @@ func (e *StakingStateTestCaseEventAllRewardsClaimed) ToEnt() *ent.StakingEvent {
 }
 
 type StakingStateTestCaseEvent struct {
-	Type                       StakingStateTestCaseEventType               `yaml:"type"`
-	StakedEventData            *StakingStateTestCaseEventStaked            `yaml:"stakedEventData"`
-	UnstakedEventData          *StakingStateTestCaseEventUnstaked          `yaml:"unstakedEventData"`
-	RewardDepositedEventData   *StakingStateTestCaseEventRewardDeposited   `yaml:"rewardDepositedEventData"`
-	RewardClaimedEventData     *StakingStateTestCaseEventRewardClaimed     `yaml:"rewardClaimedEventData"`
-	AllRewardsClaimedEventData *StakingStateTestCaseEventAllRewardsClaimed `yaml:"allRewardsClaimedEventData"`
+	Type                              StakingStateTestCaseEventType                      `yaml:"type"`
+	StakedEventData                   *StakingStateTestCaseEventStaked                   `yaml:"stakedEventData"`
+	UnstakedEventData                 *StakingStateTestCaseEventUnstaked                 `yaml:"unstakedEventData"`
+	RewardDepositedEventData          *StakingStateTestCaseEventRewardDeposited          `yaml:"rewardDepositedEventData"`
+	RewardDepositDistributedEventData *StakingStateTestCaseEventRewardDepositDistributed `yaml:"rewardDepositDistributedEventData"`
+	RewardClaimedEventData            *StakingStateTestCaseEventRewardClaimed            `yaml:"rewardClaimedEventData"`
+	AllRewardsClaimedEventData        *StakingStateTestCaseEventAllRewardsClaimed        `yaml:"allRewardsClaimedEventData"`
 }
 
 func (e *StakingStateTestCaseEvent) ToStakingEvent() *ent.StakingEvent {
@@ -141,10 +164,72 @@ func (e *StakingStateTestCaseEvent) ToStakingEvent() *ent.StakingEvent {
 		return e.UnstakedEventData.ToEnt()
 	case StakingStateTestCaseEventTypeRewardDeposited:
 		return e.RewardDepositedEventData.ToEnt()
+	case StakingStateTestCaseEventTypeRewardDepositDistributed:
+		return e.RewardDepositDistributedEventData.ToEnt()
 	case StakingStateTestCaseEventTypeRewardClaimed:
 		return e.RewardClaimedEventData.ToEnt()
 	case StakingStateTestCaseEventTypeAllRewardsClaimed:
 		return e.AllRewardsClaimedEventData.ToEnt()
+	}
+	panic("unknown event type")
+}
+
+func FromEnt(stakingEvent *ent.StakingEvent) *StakingStateTestCaseEvent {
+	switch stakingEvent.EventType {
+	case stakingevent.EventTypeStaked:
+		return &StakingStateTestCaseEvent{
+			Type: StakingStateTestCaseEventTypeStaked,
+			StakedEventData: &StakingStateTestCaseEventStaked{
+				BookNFT:      stakingEvent.NftClassAddress,
+				Account:      stakingEvent.AccountEvmAddress,
+				StakedAmount: (*uint256.Int)(stakingEvent.StakedAmountAdded).String(),
+			},
+		}
+	case stakingevent.EventTypeUnstaked:
+		return &StakingStateTestCaseEvent{
+			Type: StakingStateTestCaseEventTypeUnstaked,
+			UnstakedEventData: &StakingStateTestCaseEventUnstaked{
+				BookNFT:      stakingEvent.NftClassAddress,
+				Account:      stakingEvent.AccountEvmAddress,
+				StakedAmount: (*uint256.Int)(stakingEvent.StakedAmountRemoved).String(),
+			},
+		}
+	case stakingevent.EventTypeRewardDeposited:
+		return &StakingStateTestCaseEvent{
+			Type: StakingStateTestCaseEventTypeRewardDeposited,
+			RewardDepositedEventData: &StakingStateTestCaseEventRewardDeposited{
+				BookNFT:      stakingEvent.NftClassAddress,
+				Account:      stakingEvent.AccountEvmAddress,
+				RewardAmount: (*uint256.Int)(stakingEvent.PendingRewardAmountAdded).String(),
+			},
+		}
+	case stakingevent.EventTypeRewardDepositDistributed:
+		return &StakingStateTestCaseEvent{
+			Type: StakingStateTestCaseEventTypeRewardDepositDistributed,
+			RewardDepositDistributedEventData: &StakingStateTestCaseEventRewardDepositDistributed{
+				BookNFT:      stakingEvent.NftClassAddress,
+				Account:      stakingEvent.AccountEvmAddress,
+				RewardAmount: (*uint256.Int)(stakingEvent.PendingRewardAmountAdded).String(),
+			},
+		}
+	case stakingevent.EventTypeRewardClaimed:
+		return &StakingStateTestCaseEvent{
+			Type: StakingStateTestCaseEventTypeRewardClaimed,
+			RewardClaimedEventData: &StakingStateTestCaseEventRewardClaimed{
+				BookNFT:      stakingEvent.NftClassAddress,
+				Account:      stakingEvent.AccountEvmAddress,
+				RewardAmount: (*uint256.Int)(stakingEvent.PendingRewardAmountRemoved).String(),
+			},
+		}
+	case stakingevent.EventTypeAllRewardsClaimed:
+		return &StakingStateTestCaseEvent{
+			Type: StakingStateTestCaseEventTypeAllRewardsClaimed,
+			AllRewardsClaimedEventData: &StakingStateTestCaseEventAllRewardsClaimed{
+				BookNFT:      stakingEvent.NftClassAddress,
+				Account:      stakingEvent.AccountEvmAddress,
+				RewardAmount: (*uint256.Int)(stakingEvent.PendingRewardAmountRemoved).String(),
+			},
+		}
 	}
 	panic("unknown event type")
 }
@@ -176,9 +261,11 @@ type StakingState struct {
 }
 
 type StakingStateTestCaseStep struct {
-	Events       []StakingStateTestCaseEvent `yaml:"events"`
-	StakingState *StakingState               `yaml:"stakingstate"`
-	Error        string                      `yaml:"error"`
+	Description            string                      `yaml:"description"`
+	Events                 []StakingStateTestCaseEvent `yaml:"events"`
+	StakingState           *MockStorage                `yaml:"stakingstate"`
+	ProcessedStakingEvents []StakingStateTestCaseEvent `yaml:"processedStakingEvents"`
+	Error                  string                      `yaml:"error"`
 }
 
 type StakingStateTestCaseSnapshottedAccounts struct {
@@ -304,24 +391,17 @@ func TestStakingStateFromTestData(t *testing.T) {
 					}
 
 					Convey(testCase.Name, func() {
-						snapshottedAccounts := make([]*ent.Account, 0)
-						for _, account := range testCase.Parameters.SnapshottedAccounts {
-							snapshottedAccounts = append(snapshottedAccounts, account.ToEnt())
-						}
-						snapshottedNftClasses := make([]*ent.NFTClass, 0)
-						for _, nftClass := range testCase.Parameters.SnapshottedNftClasses {
-							snapshottedNftClasses = append(snapshottedNftClasses, nftClass.ToEnt())
-						}
-						snapshottedStakings := make([]*ent.Staking, 0)
-						for _, staking := range testCase.Parameters.SnapshottedStakings {
-							snapshottedStakings = append(snapshottedStakings, staking.ToEnt())
-						}
-
-						stakingState := stakingstate.NewStakingStateFromEnt(
-							snapshottedAccounts,
-							snapshottedNftClasses,
-							snapshottedStakings,
+						loader := MakeStakingStateTestMockLoader(
+							testCase.Parameters.SnapshottedAccounts,
+							testCase.Parameters.SnapshottedNftClasses,
+							testCase.Parameters.SnapshottedStakings,
 						)
+						persistor := MakeStakingStateTestMockPersistor()
+
+						stakingState, err := stakingstate.LoadStakingState(context.Background(), loader, []*ent.StakingEvent{})
+						if err != nil {
+							t.Fatal(err)
+						}
 
 						for _, step := range testCase.Steps {
 							stakingEvents := make([]*ent.StakingEvent, 0)
@@ -329,14 +409,22 @@ func TestStakingStateFromTestData(t *testing.T) {
 								stakingEvents = append(stakingEvents, event.ToStakingEvent())
 							}
 							var err error
-							stakingState, err = stakingState.HandleStakingEvents(stakingEvents)
-							if step.Error != "" {
-								So(err, ShouldNotBeNil)
-								So(err.Error(), ShouldContainSubstring, step.Error)
-								break
+							var processedStakingEvents []*ent.StakingEvent
+							stakingState, processedStakingEvents, err = stakingState.Process(stakingEvents)
+							if err != nil {
+								if step.Error != "" {
+									So(err.Error(), ShouldContainSubstring, step.Error)
+									return
+								}
+								t.Fatal(err)
 							}
 
-							actualStakingStateBytes, err := json.Marshal(stakingState)
+							err = stakingState.Persist(context.Background(), processedStakingEvents, persistor)
+							if err != nil {
+								t.Fatal(err)
+							}
+
+							actualStakingStateBytes, err := json.Marshal(persistor.mockStorage)
 							if err != nil {
 								t.Fatal(err)
 							}
@@ -346,7 +434,30 @@ func TestStakingStateFromTestData(t *testing.T) {
 								t.Fatal(err)
 							}
 
-							require.JSONEq(t, string(expectedStakingStateBytes), string(actualStakingStateBytes))
+							processedTestCaseEvents := make([]*StakingStateTestCaseEvent, 0)
+							for _, processedStakingEvent := range processedStakingEvents {
+								processedTestCaseEvents = append(processedTestCaseEvents, FromEnt(processedStakingEvent))
+							}
+
+							actualTestCaseEventsBytes, err := json.Marshal(processedTestCaseEvents)
+							if err != nil {
+								t.Fatal(err)
+							}
+
+							expectedTestCaseEventsBytes, err := json.Marshal(step.ProcessedStakingEvents)
+							if err != nil {
+								t.Fatal(err)
+							}
+
+							if step.Description != "" {
+								Convey(step.Description, func() {
+									require.JSONEq(t, string(expectedStakingStateBytes), string(actualStakingStateBytes))
+									require.JSONEq(t, string(expectedTestCaseEventsBytes), string(actualTestCaseEventsBytes))
+								})
+							} else {
+								require.JSONEq(t, string(expectedStakingStateBytes), string(actualStakingStateBytes))
+								require.JSONEq(t, string(expectedTestCaseEventsBytes), string(actualTestCaseEventsBytes))
+							}
 						}
 					})
 				}

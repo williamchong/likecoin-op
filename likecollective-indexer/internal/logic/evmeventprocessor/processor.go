@@ -11,7 +11,8 @@ import (
 	"likecollective-indexer/ent"
 	"likecollective-indexer/ent/evmevent"
 	"likecollective-indexer/internal/database"
-	"likecollective-indexer/internal/logic/stakingstate"
+	stakingstateloader "likecollective-indexer/internal/logic/stakingstate/loader"
+	stakingstatepersistor "likecollective-indexer/internal/logic/stakingstate/persistor"
 )
 
 var ErrAlreadyProcessing = errors.New("evmevent already processing")
@@ -26,24 +27,18 @@ type EVMEventProcessor interface {
 
 type evmEventProcessor struct {
 	evmEventRepository    database.EVMEventRepository
-	accountRepository     database.AccountRepository
-	nftClassRepository    database.NFTClassRepository
-	stakingRepository     database.StakingRepository
-	stakingStatePersistor stakingstate.StakingStatePersistor
+	stakingStateLoader    stakingstateloader.StakingStateLoader
+	stakingStatePersistor stakingstatepersistor.StakingStatePersistor
 }
 
 func MakeEVMEventProcessor(
 	evmEventRepository database.EVMEventRepository,
-	accountRepository database.AccountRepository,
-	nftClassRepository database.NFTClassRepository,
-	stakingRepository database.StakingRepository,
-	stakingStatePersistor stakingstate.StakingStatePersistor,
+	stakingStateLoader stakingstateloader.StakingStateLoader,
+	stakingStatePersistor stakingstatepersistor.StakingStatePersistor,
 ) EVMEventProcessor {
 	return &evmEventProcessor{
 		evmEventRepository,
-		accountRepository,
-		nftClassRepository,
-		stakingRepository,
+		stakingStateLoader,
 		stakingStatePersistor,
 	}
 }
@@ -106,10 +101,7 @@ func (e *evmEventProcessor) Process(
 		runtime.FuncForPC(reflect.ValueOf(processorCreator).Pointer()).Name())
 
 	processor := processorCreator(makeEventProcessorDeps(
-		e.evmEventRepository,
-		e.accountRepository,
-		e.nftClassRepository,
-		e.stakingRepository,
+		e.stakingStateLoader,
 		e.stakingStatePersistor,
 	))
 

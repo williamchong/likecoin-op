@@ -106,11 +106,12 @@ const DefaultEventType = EventTypeStaked
 
 // EventType values.
 const (
-	EventTypeStaked            EventType = "staked"
-	EventTypeUnstaked          EventType = "unstaked"
-	EventTypeRewardClaimed     EventType = "reward_claimed"
-	EventTypeRewardDeposited   EventType = "reward_deposited"
-	EventTypeAllRewardsClaimed EventType = "all_rewards_claimed"
+	EventTypeStaked                   EventType = "staked"
+	EventTypeUnstaked                 EventType = "unstaked"
+	EventTypeRewardClaimed            EventType = "reward_claimed"
+	EventTypeRewardDeposited          EventType = "reward_deposited"
+	EventTypeRewardDepositDistributed EventType = "reward_deposit_distributed"
+	EventTypeAllRewardsClaimed        EventType = "all_rewards_claimed"
 )
 
 func (et EventType) String() string {
@@ -120,7 +121,7 @@ func (et EventType) String() string {
 // EventTypeValidator is a validator for the "event_type" field enum values. It is called by the builders before save.
 func EventTypeValidator(et EventType) error {
 	switch et {
-	case EventTypeStaked, EventTypeUnstaked, EventTypeRewardClaimed, EventTypeRewardDeposited, EventTypeAllRewardsClaimed:
+	case EventTypeStaked, EventTypeUnstaked, EventTypeRewardClaimed, EventTypeRewardDeposited, EventTypeRewardDepositDistributed, EventTypeAllRewardsClaimed:
 		return nil
 	default:
 		return fmt.Errorf("stakingevent: invalid enum value for event_type field: %q", et)

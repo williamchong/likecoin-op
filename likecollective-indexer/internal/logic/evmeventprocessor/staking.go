@@ -5,26 +5,21 @@ import (
 	"log/slog"
 
 	"likecollective-indexer/ent"
-	"likecollective-indexer/internal/database"
 	"likecollective-indexer/internal/logic/stakingstate"
+	stakingstateloader "likecollective-indexer/internal/logic/stakingstate/loader"
+	stakingstatepersistor "likecollective-indexer/internal/logic/stakingstate/persistor"
 )
 
 type stakingEvmEventProcessor struct {
-	evmEventRepository    database.EVMEventRepository
-	accountRepository     database.AccountRepository
-	nftClassRepository    database.NFTClassRepository
-	stakingRepository     database.StakingRepository
-	stakingStatePersistor stakingstate.StakingStatePersistor
+	stakingStateLoader    stakingstateloader.StakingStateLoader
+	stakingStatePersistor stakingstatepersistor.StakingStatePersistor
 }
 
 func MakeStakingEvmEventProcessor(
 	inj *eventProcessorDeps,
 ) eventProcessor {
 	return &stakingEvmEventProcessor{
-		inj.evmEventRepository,
-		inj.accountRepository,
-		inj.nftClassRepository,
-		inj.stakingRepository,
+		inj.stakingStateLoader,
 		inj.stakingStatePersistor,
 	}
 }
@@ -35,11 +30,8 @@ func (e *stakingEvmEventProcessor) Process(
 
 	evmEvent *ent.EVMEvent,
 ) error {
-	p := stakingstate.MakeStakingEventProcessor(
-		e.evmEventRepository,
-		e.accountRepository,
-		e.nftClassRepository,
-		e.stakingRepository,
+	p := stakingstate.MakeStakingEvmEventProcessor(
+		e.stakingStateLoader,
 		e.stakingStatePersistor,
 	)
 

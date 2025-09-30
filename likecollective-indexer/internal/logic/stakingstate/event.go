@@ -127,7 +127,7 @@ func GetStakingEventsFromEvent(event *ent.EVMEvent) ([]*ent.StakingEvent, error)
 		}, nil
 	}
 
-	if event.Name == "AllRewardsClaimed" {
+	if event.Name == "AllRewardClaimed" {
 		allRewardsClaimedEvent := new(like_collective.LikeCollectiveAllRewardClaimed)
 		if err := logConverter.UnpackLog(log, allRewardsClaimedEvent); err != nil {
 			return nil, err
@@ -163,112 +163,6 @@ func GetStakingEventsFromEvent(event *ent.EVMEvent) ([]*ent.StakingEvent, error)
 	)
 }
 
-func GetAccountKeysFromEvents(events []*ent.StakingEvent) []string {
-	accountKeys := make(map[string]struct{})
-	for _, event := range events {
-		accountKeys[event.AccountEvmAddress] = struct{}{}
-	}
-	keys := make([]string, 0)
-	for key := range accountKeys {
-		keys = append(keys, key)
-	}
-	return keys
-}
-
-func GetBookNFTKeysFromEvent(event *ent.EVMEvent) []string {
-	log := logConverter.ConvertEvmEventToLog(event)
-	stakedEvent := new(like_collective.LikeCollectiveStaked)
-	if err := logConverter.UnpackLog(log, stakedEvent); err == nil {
-		return []string{stakedEvent.BookNFT.String()}
-	}
-	unstakedEvent := new(like_collective.LikeCollectiveUnstaked)
-	if err := logConverter.UnpackLog(log, unstakedEvent); err == nil {
-		return []string{unstakedEvent.BookNFT.String()}
-	}
-	rewardClaimedEvent := new(like_collective.LikeCollectiveRewardClaimed)
-	if err := logConverter.UnpackLog(log, rewardClaimedEvent); err == nil {
-		return []string{rewardClaimedEvent.BookNFT.String()}
-	}
-	rewardDepositedEvent := new(like_collective.LikeCollectiveRewardDeposited)
-	if err := logConverter.UnpackLog(log, rewardDepositedEvent); err == nil {
-		return []string{rewardDepositedEvent.BookNFT.String()}
-	}
-	allRewardsClaimedEvent := new(like_collective.LikeCollectiveAllRewardClaimed)
-	if err := logConverter.UnpackLog(log, allRewardsClaimedEvent); err == nil {
-		bookNFTEvmAddresses := make([]string, 0)
-		for _, claimedAmount := range allRewardsClaimedEvent.RewardedAmount {
-			bookNFTEvmAddresses = append(bookNFTEvmAddresses, claimedAmount.BookNFT.String())
-		}
-		return bookNFTEvmAddresses
-	}
-	return []string{}
-}
-
-func GetBookNFTKeysFromEvents(events []*ent.StakingEvent) []string {
-	bookNFTKeys := make(map[string]struct{})
-	for _, event := range events {
-		bookNFTKeys[event.NftClassAddress] = struct{}{}
-	}
-
-	keys := make([]string, 0)
-	for key := range bookNFTKeys {
-		keys = append(keys, key)
-	}
-	return keys
-}
-
-func GetStakingKeysFromEvent(event *ent.EVMEvent) []database.StakingKey {
-	log := logConverter.ConvertEvmEventToLog(event)
-	stakedEvent := new(like_collective.LikeCollectiveStaked)
-	if err := logConverter.UnpackLog(log, stakedEvent); err == nil {
-		return []database.StakingKey{
-			database.NewStakingKey(
-				stakedEvent.Account.String(),
-				stakedEvent.BookNFT.String(),
-			),
-		}
-	}
-	unstakedEvent := new(like_collective.LikeCollectiveUnstaked)
-	if err := logConverter.UnpackLog(log, unstakedEvent); err == nil {
-		return []database.StakingKey{
-			database.NewStakingKey(
-				unstakedEvent.Account.String(),
-				unstakedEvent.BookNFT.String(),
-			),
-		}
-	}
-	rewardClaimedEvent := new(like_collective.LikeCollectiveRewardClaimed)
-	if err := logConverter.UnpackLog(log, rewardClaimedEvent); err == nil {
-		return []database.StakingKey{
-			database.NewStakingKey(
-				rewardClaimedEvent.Account.String(),
-				rewardClaimedEvent.BookNFT.String(),
-			),
-		}
-	}
-	rewardDepositedEvent := new(like_collective.LikeCollectiveRewardDeposited)
-	if err := logConverter.UnpackLog(log, rewardDepositedEvent); err == nil {
-		return []database.StakingKey{
-			database.NewStakingKey(
-				rewardDepositedEvent.Account.String(),
-				rewardDepositedEvent.BookNFT.String(),
-			),
-		}
-	}
-	allRewardsClaimedEvent := new(like_collective.LikeCollectiveAllRewardClaimed)
-	if err := logConverter.UnpackLog(log, allRewardsClaimedEvent); err == nil {
-		stakingKeys := make([]database.StakingKey, 0)
-		for _, claimedAmount := range allRewardsClaimedEvent.RewardedAmount {
-			stakingKeys = append(stakingKeys, database.NewStakingKey(
-				allRewardsClaimedEvent.Account.String(),
-				claimedAmount.BookNFT.String(),
-			))
-		}
-		return stakingKeys
-	}
-	return []database.StakingKey{}
-}
-
 func GetStakingKeysFromEvents(events []*ent.StakingEvent) []database.StakingKey {
 	stakingKeys := make(map[string]map[string]struct{})
 	for _, event := range events {
@@ -288,4 +182,26 @@ func GetStakingKeysFromEvents(events []*ent.StakingEvent) []database.StakingKey 
 		}
 	}
 	return keys
+}
+
+func MakeRewardDepositDistributedEvent(
+	stakingEvent *ent.StakingEvent,
+	accountEvmAddress string,
+	rewardedAmount *uint256.Int,
+) *ent.StakingEvent {
+	return &ent.StakingEvent{
+		TransactionHash:            stakingEvent.TransactionHash,
+		TransactionIndex:           stakingEvent.TransactionIndex,
+		BlockNumber:                stakingEvent.BlockNumber,
+		LogIndex:                   stakingEvent.LogIndex,
+		EventType:                  stakingevent.EventTypeRewardDepositDistributed,
+		NftClassAddress:            stakingEvent.NftClassAddress,
+		AccountEvmAddress:          accountEvmAddress,
+		StakedAmountAdded:          typeutil.Uint256(uint256.NewInt(0)),
+		StakedAmountRemoved:        typeutil.Uint256(uint256.NewInt(0)),
+		PendingRewardAmountAdded:   typeutil.Uint256(rewardedAmount),
+		PendingRewardAmountRemoved: typeutil.Uint256(uint256.NewInt(0)),
+		ClaimedRewardAmountAdded:   typeutil.Uint256(uint256.NewInt(0)),
+		ClaimedRewardAmountRemoved: typeutil.Uint256(uint256.NewInt(0)),
+	}
 }

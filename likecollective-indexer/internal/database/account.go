@@ -5,7 +5,10 @@ import (
 
 	"likecollective-indexer/ent"
 	"likecollective-indexer/ent/account"
+	"likecollective-indexer/ent/nftclass"
+	"likecollective-indexer/ent/predicate"
 	"likecollective-indexer/ent/schema/typeutil"
+	"likecollective-indexer/ent/staking"
 
 	"github.com/holiman/uint256"
 )
@@ -15,6 +18,7 @@ type AccountRepository interface {
 	QueryAccount(ctx context.Context, evmAddress string) (*ent.Account, error)
 
 	QueryAccountsByEvmAddresses(ctx context.Context, evmAddresses []string) ([]*ent.Account, error)
+	QueryAccountsByNFTClassAddresses(ctx context.Context, nftClassAddresses []string) ([]*ent.Account, error)
 
 	GetOrCreateAccount(
 		ctx context.Context,
@@ -93,6 +97,33 @@ func (r *accountRepository) QueryAccountsByEvmAddresses(
 	return r.dbService.Client().Account.Query().Where(
 		account.EvmAddressIn(evmAddresses...),
 	).All(ctx)
+}
+
+func (r *accountRepository) QueryAccountsByNFTClassAddresses(
+	ctx context.Context,
+	nftClassAddresses []string,
+) ([]*ent.Account, error) {
+	if len(nftClassAddresses) == 0 {
+		return []*ent.Account{}, nil
+	}
+
+	addressPredicates := make([]predicate.NFTClass, 0)
+	for _, bookNFTAddress := range nftClassAddresses {
+		addressPredicates = append(addressPredicates, nftclass.AddressEqualFold(bookNFTAddress))
+	}
+	dbStakings, err := r.dbService.Client().Staking.Query().WithAccount().WithNftClass().Where(
+		staking.HasNftClassWith(nftclass.Or(addressPredicates...)),
+	).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	accounts := make([]*ent.Account, 0)
+	for _, staking := range dbStakings {
+		accounts = append(accounts, staking.Edges.Account)
+	}
+
+	return accounts, nil
 }
 
 func (r *accountRepository) GetOrCreateAccount(

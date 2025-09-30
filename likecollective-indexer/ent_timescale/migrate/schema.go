@@ -15,7 +15,7 @@ var (
 		{Name: "transaction_index", Type: field.TypeUint},
 		{Name: "block_number", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
 		{Name: "log_index", Type: field.TypeUint},
-		{Name: "event_type", Type: field.TypeEnum, Enums: []string{"staked", "unstaked", "reward_claimed", "reward_deposited", "all_rewards_claimed"}, Default: "staked"},
+		{Name: "event_type", Type: field.TypeEnum, Enums: []string{"staked", "unstaked", "reward_claimed", "reward_deposited", "reward_deposit_distributed", "all_rewards_claimed"}, Default: "staked"},
 		{Name: "nft_class_address", Type: field.TypeString},
 		{Name: "account_evm_address", Type: field.TypeString},
 		{Name: "staked_amount_added", Type: field.TypeUint64, Default: "0", SchemaType: map[string]string{"postgres": "numeric"}},

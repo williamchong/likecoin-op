@@ -1,19 +1,21 @@
-package stakingstate
+package persistor
 
 import (
 	"context"
+	"fmt"
 
 	"likecollective-indexer/ent"
 	"likecollective-indexer/internal/database"
+	"likecollective-indexer/internal/logic/stakingstate/model"
 )
 
 type StakingStatePersistor interface {
 	Persist(
 		ctx context.Context,
 		stakingEvents []*ent.StakingEvent,
-		accounts []Account,
-		nftClasses []NFTClass,
-		stakings []Staking,
+		accounts []*model.Account,
+		nftClasses []*model.NFTClass,
+		stakings []*model.Staking,
 	) error
 }
 
@@ -44,17 +46,18 @@ func MakeStakingStatePersistor(
 func (p *latestStakingStatePersistor) Persist(
 	ctx context.Context,
 	stakingEvents []*ent.StakingEvent,
-	accounts []Account,
-	nftClasses []NFTClass,
-	stakings []Staking,
+	accounts []*model.Account,
+	nftClasses []*model.NFTClass,
+	stakings []*model.Staking,
 ) error {
 	err := database.WithTx(ctx, p.dbService.Client(), func(tx *ent.Tx) error {
 		_, err := p.stakingEventRepository.InsertStakingEventsIfNeeded(
 			ctx,
+			tx,
 			stakingEvents,
 		)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to insert staking events if needed: %w", err)
 		}
 
 		for _, account := range accounts {
@@ -67,7 +70,7 @@ func (p *latestStakingStatePersistor) Persist(
 				account.ClaimedRewardAmount,
 			)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to create or update account: %w", err)
 			}
 		}
 
@@ -79,7 +82,7 @@ func (p *latestStakingStatePersistor) Persist(
 				nftClass.StakedAmount,
 			)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to create or update nft class: %w", err)
 			}
 		}
 
@@ -94,7 +97,27 @@ func (p *latestStakingStatePersistor) Persist(
 				staking.ClaimedRewardAmount,
 			)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to create or update staking: %w", err)
+			}
+		}
+
+		for _, nftClass := range nftClasses {
+			_, err := p.nftClassRepository.RecomputeNumberOfStakersByNFTClassAddress(
+				ctx,
+				tx,
+				nftClass.EVMAddress.String(),
+			)
+			if err != nil {
+				return fmt.Errorf("failed to recompute number of stakers by nft class address: %w", err)
+			}
+
+			err = p.stakingRepository.RecomputePoolSharesByNFTClassAddress(
+				ctx,
+				tx,
+				nftClass.EVMAddress.String(),
+			)
+			if err != nil {
+				return fmt.Errorf("failed to recompute pool shares by nft class address: %w", err)
 			}
 		}
 

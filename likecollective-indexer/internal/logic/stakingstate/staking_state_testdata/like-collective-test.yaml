@@ -1,0 +1,565 @@
+name: like-collective-test
+
+parameters:
+  snapshottedAccounts: []
+  snapshottedNftClasses: []
+  snapshottedStakings: []
+
+steps:
+  - description: |-
+      * Basic staking and unstaking test
+        0x2000000000000000000000000000000000000001 (rick) stakes 6000 LIKE tokens
+        0x2000000000000000000000000000000000000001 (rick) unstakes completely
+
+    events:
+    - type: staked
+      stakedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000001
+        stakedAmount: 6000000000
+    - type: unstaked
+      unstakedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000001
+        stakedAmount: 6000000000
+
+    stakingstate:
+      accounts:
+        0x2000000000000000000000000000000000000001:
+          address: 0x2000000000000000000000000000000000000001
+          stakedAmount: 0
+          pendingRewardAmount: 0
+          claimedRewardAmount: 0
+      nftClasses:
+        0x1234567890123456789012345678901234567890:
+          address: 0x1234567890123456789012345678901234567890
+          stakedAmount: 0
+      stakings:
+        0x2000000000000000000000000000000000000001:
+          0x1234567890123456789012345678901234567890:
+            accountAddress: 0x2000000000000000000000000000000000000001
+            bookNFTAddress: 0x1234567890123456789012345678901234567890
+            stakedAmount: 0
+            pendingRewardAmount: 0
+            claimedRewardAmount: 0
+
+    processedStakingEvents:
+      - type: staked
+        stakedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          stakedAmount: 6000000000
+      - type: unstaked
+        unstakedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          stakedAmount: 6000000000
+
+  - description: |-
+      * Staking with reward deposit and claiming test
+        0x2000000000000000000000000000000000000001 (rick) stakes 8000 LIKE tokens
+        0x2999999999999999999999999999999999999999 (kin) deposits 1000 LIKE reward
+        0x2000000000000000000000000000000000000001 (rick) claims rewards
+        0x2000000000000000000000000000000000000001 (rick) unstakes completely
+
+    events:
+    - type: staked
+      stakedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000001
+        stakedAmount: 8000000000
+    - type: rewardDeposited
+      rewardDepositedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2999999999999999999999999999999999999999
+        rewardAmount: 1000000000
+    - type: rewardClaimed
+      rewardClaimedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000001
+        rewardAmount: 1000000000
+    - type: unstaked
+      unstakedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000001
+        stakedAmount: 8000000000
+
+    stakingstate:
+      accounts:
+        0x2000000000000000000000000000000000000001:
+          address: 0x2000000000000000000000000000000000000001
+          stakedAmount: 0
+          pendingRewardAmount: 0
+          claimedRewardAmount: 1000000000
+      nftClasses:
+        0x1234567890123456789012345678901234567890:
+          address: 0x1234567890123456789012345678901234567890
+          stakedAmount: 0
+      stakings:
+        0x2000000000000000000000000000000000000001:
+          0x1234567890123456789012345678901234567890:
+            accountAddress: 0x2000000000000000000000000000000000000001
+            bookNFTAddress: 0x1234567890123456789012345678901234567890
+            stakedAmount: 0
+            pendingRewardAmount: 0
+            claimedRewardAmount: 1000000000
+
+    processedStakingEvents:
+      - type: staked
+        stakedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          stakedAmount: 8000000000
+      - type: rewardDeposited
+        rewardDepositedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2999999999999999999999999999999999999999
+          rewardAmount: 1000000000
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          rewardAmount: 1000000000
+      - type: rewardClaimed
+        rewardClaimedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          rewardAmount: 1000000000
+      - type: unstaked
+        unstakedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          stakedAmount: 8000000000
+
+  - description: |-
+      * Multiple users staking test
+        0x2000000000000000000000000000000000000001 (rick) stakes 8000 LIKE tokens
+        0x2000000000000000000000000000000000000002 (bob) stakes 2000 LIKE tokens
+        0x2999999999999999999999999999999999999999 (kin) deposits 1000 LIKE reward
+        0x2000000000000000000000000000000000000001 (rick) unstakes completely
+
+    events:
+    - type: staked
+      stakedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000001
+        stakedAmount: 8000000000
+    - type: staked
+      stakedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000002
+        stakedAmount: 2000000000
+    - type: rewardDeposited
+      rewardDepositedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2999999999999999999999999999999999999999
+        rewardAmount: 1000000000
+    - type: unstaked
+      unstakedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000001
+        stakedAmount: 8000000000
+
+    stakingstate:
+      accounts:
+        0x2000000000000000000000000000000000000001:
+          address: 0x2000000000000000000000000000000000000001
+          stakedAmount: 0
+          pendingRewardAmount: 800000000
+          claimedRewardAmount: 1000000000
+        0x2000000000000000000000000000000000000002:
+          address: 0x2000000000000000000000000000000000000002
+          stakedAmount: 2000000000
+          pendingRewardAmount: 200000000
+          claimedRewardAmount: 0
+      nftClasses:
+        0x1234567890123456789012345678901234567890:
+          address: 0x1234567890123456789012345678901234567890
+          stakedAmount: 2000000000
+      stakings:
+        0x2000000000000000000000000000000000000001:
+          0x1234567890123456789012345678901234567890:
+            accountAddress: 0x2000000000000000000000000000000000000001
+            bookNFTAddress: 0x1234567890123456789012345678901234567890
+            stakedAmount: 0
+            pendingRewardAmount: 800000000
+            claimedRewardAmount: 1000000000
+        0x2000000000000000000000000000000000000002:
+          0x1234567890123456789012345678901234567890:
+            accountAddress: 0x2000000000000000000000000000000000000002
+            bookNFTAddress: 0x1234567890123456789012345678901234567890
+            stakedAmount: 2000000000
+            pendingRewardAmount: 200000000
+            claimedRewardAmount: 0
+
+    processedStakingEvents:
+      - type: staked
+        stakedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          stakedAmount: 8000000000
+      - type: staked
+        stakedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000002
+          stakedAmount: 2000000000
+      - type: rewardDeposited
+        rewardDepositedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2999999999999999999999999999999999999999
+          rewardAmount: 1000000000
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          rewardAmount: 800000000
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000002
+          rewardAmount: 200000000
+      - type: unstaked
+        unstakedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          stakedAmount: 8000000000
+
+  - description: |-
+      * Increase stake position test
+        0x2000000000000000000000000000000000000001 (rick) stakes 2000 LIKE tokens
+        0x2000000000000000000000000000000000000001 (rick) increases stake by 500 LIKE tokens
+
+    events:
+    - type: staked
+      stakedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000001
+        stakedAmount: 2000000000
+    - type: staked
+      stakedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000001
+        stakedAmount: 500000000
+
+    stakingstate:
+      accounts:
+        0x2000000000000000000000000000000000000001:
+          address: 0x2000000000000000000000000000000000000001
+          stakedAmount: 2500000000
+          pendingRewardAmount: 800000000
+          claimedRewardAmount: 1000000000
+        0x2000000000000000000000000000000000000002:
+          address: 0x2000000000000000000000000000000000000002
+          stakedAmount: 2000000000
+          pendingRewardAmount: 200000000
+          claimedRewardAmount: 0
+      nftClasses:
+        0x1234567890123456789012345678901234567890:
+          address: 0x1234567890123456789012345678901234567890
+          stakedAmount: 4500000000
+      stakings:
+        0x2000000000000000000000000000000000000001:
+          0x1234567890123456789012345678901234567890:
+            accountAddress: 0x2000000000000000000000000000000000000001
+            bookNFTAddress: 0x1234567890123456789012345678901234567890
+            stakedAmount: 2500000000
+            pendingRewardAmount: 800000000
+            claimedRewardAmount: 1000000000
+        0x2000000000000000000000000000000000000002:
+          0x1234567890123456789012345678901234567890:
+            accountAddress: 0x2000000000000000000000000000000000000002
+            bookNFTAddress: 0x1234567890123456789012345678901234567890
+            stakedAmount: 2000000000
+            pendingRewardAmount: 200000000
+            claimedRewardAmount: 0
+
+    processedStakingEvents:
+      - type: staked
+        stakedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          stakedAmount: 2000000000
+      - type: staked
+        stakedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          stakedAmount: 500000000
+
+  - description: |-
+      * Decrease stake position test
+        0x2000000000000000000000000000000000000001 (rick) stakes 4000 LIKE tokens
+        0x2000000000000000000000000000000000000001 (rick) decreases stake by 1500 LIKE tokens
+
+    events:
+    - type: staked
+      stakedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000001
+        stakedAmount: 4000000000
+    - type: unstaked
+      unstakedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000001
+        stakedAmount: 1500000000
+
+    stakingstate:
+      accounts:
+        0x2000000000000000000000000000000000000001:
+          address: 0x2000000000000000000000000000000000000001
+          stakedAmount: 5000000000
+          pendingRewardAmount: 800000000
+          claimedRewardAmount: 1000000000
+        0x2000000000000000000000000000000000000002:
+          address: 0x2000000000000000000000000000000000000002
+          stakedAmount: 2000000000
+          pendingRewardAmount: 200000000
+          claimedRewardAmount: 0
+      nftClasses:
+        0x1234567890123456789012345678901234567890:
+          address: 0x1234567890123456789012345678901234567890
+          stakedAmount: 7000000000
+      stakings:
+        0x2000000000000000000000000000000000000001:
+          0x1234567890123456789012345678901234567890:
+            accountAddress: 0x2000000000000000000000000000000000000001
+            bookNFTAddress: 0x1234567890123456789012345678901234567890
+            stakedAmount: 5000000000
+            pendingRewardAmount: 800000000
+            claimedRewardAmount: 1000000000
+        0x2000000000000000000000000000000000000002:
+          0x1234567890123456789012345678901234567890:
+            accountAddress: 0x2000000000000000000000000000000000000002
+            bookNFTAddress: 0x1234567890123456789012345678901234567890
+            stakedAmount: 2000000000
+            pendingRewardAmount: 200000000
+            claimedRewardAmount: 0
+
+    processedStakingEvents:
+      - type: staked
+        stakedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          stakedAmount: 4000000000
+      - type: unstaked
+        unstakedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          stakedAmount: 1500000000
+
+  - description: |-
+      * Restake reward test
+        0x2000000000000000000000000000000000000001 (rick) stakes 2000 LIKE tokens
+        0x2999999999999999999999999999999999999999 (kin) deposits 1000 LIKE reward
+        0x2000000000000000000000000000000000000001 (rick) restakes rewards
+
+    events:
+    - type: staked
+      stakedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000001
+        stakedAmount: 2000000000
+    - type: rewardDeposited
+      rewardDepositedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2999999999999999999999999999999999999999
+        rewardAmount: 1000000000
+    - type: rewardClaimed
+      rewardClaimedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000001
+        rewardAmount: 1000000000
+    - type: staked
+      stakedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000001
+        stakedAmount: 1000000000
+
+    stakingstate:
+      accounts:
+        0x2000000000000000000000000000000000000001:
+          address: 0x2000000000000000000000000000000000000001
+          stakedAmount: 8000000000
+          pendingRewardAmount: 577777777
+          claimedRewardAmount: 2000000000
+        0x2000000000000000000000000000000000000002:
+          address: 0x2000000000000000000000000000000000000002
+          stakedAmount: 2000000000
+          pendingRewardAmount: 422222222
+          claimedRewardAmount: 0
+      nftClasses:
+        0x1234567890123456789012345678901234567890:
+          address: 0x1234567890123456789012345678901234567890
+          stakedAmount: 10000000000
+      stakings:
+        0x2000000000000000000000000000000000000001:
+          0x1234567890123456789012345678901234567890:
+            accountAddress: 0x2000000000000000000000000000000000000001
+            bookNFTAddress: 0x1234567890123456789012345678901234567890
+            stakedAmount: 8000000000
+            pendingRewardAmount: 577777777
+            claimedRewardAmount: 2000000000
+        0x2000000000000000000000000000000000000002:
+          0x1234567890123456789012345678901234567890:
+            accountAddress: 0x2000000000000000000000000000000000000002
+            bookNFTAddress: 0x1234567890123456789012345678901234567890
+            stakedAmount: 2000000000
+            pendingRewardAmount: 422222222
+            claimedRewardAmount: 0
+
+    processedStakingEvents:
+      - type: staked
+        stakedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          stakedAmount: 2000000000
+      - type: rewardDeposited
+        rewardDepositedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2999999999999999999999999999999999999999
+          rewardAmount: 1000000000
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          rewardAmount: 777777777
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000002
+          rewardAmount: 222222222
+      - type: rewardClaimed
+        rewardClaimedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          rewardAmount: 1000000000
+      - type: staked
+        stakedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          stakedAmount: 1000000000
+
+  - description: |-
+      * Claim all rewards test
+        0x2000000000000000000000000000000000000001 (rick) stakes 2000 LIKE tokens on two different bookNFTs
+        0x2999999999999999999999999999999999999999 (kin) deposits 1000 LIKE reward on each bookNFT
+        0x2000000000000000000000000000000000000001 (rick) claims all rewards
+
+    events:
+    - type: staked
+      stakedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2000000000000000000000000000000000000001
+        stakedAmount: 2000000000
+    - type: staked
+      stakedEventData:
+        bookNFT: 0x2345678901234567890123456789012345678901
+        account: 0x2000000000000000000000000000000000000001
+        stakedAmount: 2000000000
+    - type: rewardDeposited
+      rewardDepositedEventData:
+        bookNFT: 0x1234567890123456789012345678901234567890
+        account: 0x2999999999999999999999999999999999999999
+        rewardAmount: 1000000000
+    - type: rewardDeposited
+      rewardDepositedEventData:
+        bookNFT: 0x2345678901234567890123456789012345678901
+        account: 0x2999999999999999999999999999999999999999
+        rewardAmount: 1000000000
+    - type: allRewardsClaimed
+      allRewardsClaimedEventData:
+        account: 0x2000000000000000000000000000000000000001
+        bookNFT: 0x1234567890123456789012345678901234567890
+        rewardAmount: 1411111110
+    - type: allRewardsClaimed
+      allRewardsClaimedEventData:
+        account: 0x2000000000000000000000000000000000000001
+        bookNFT: 0x2345678901234567890123456789012345678901
+        rewardAmount: 1000000000
+
+    stakingstate:
+      accounts:
+        0x2000000000000000000000000000000000000001:
+          address: 0x2000000000000000000000000000000000000001
+          stakedAmount: 12000000000
+          pendingRewardAmount: 0
+          claimedRewardAmount: 4411111110
+        0x2000000000000000000000000000000000000002:
+          address: 0x2000000000000000000000000000000000000002
+          stakedAmount: 2000000000
+          pendingRewardAmount: 588888888
+          claimedRewardAmount: 0
+      nftClasses:
+        0x1234567890123456789012345678901234567890:
+          address: 0x1234567890123456789012345678901234567890
+          stakedAmount: 12000000000
+        0x2345678901234567890123456789012345678901:
+          address: 0x2345678901234567890123456789012345678901
+          stakedAmount: 2000000000
+      stakings:
+        0x2000000000000000000000000000000000000001:
+          0x1234567890123456789012345678901234567890:
+            accountAddress: 0x2000000000000000000000000000000000000001
+            bookNFTAddress: 0x1234567890123456789012345678901234567890
+            stakedAmount: 10000000000
+            pendingRewardAmount: 0
+            claimedRewardAmount: 3411111110
+          0x2345678901234567890123456789012345678901:
+            accountAddress: 0x2000000000000000000000000000000000000001
+            bookNFTAddress: 0x2345678901234567890123456789012345678901
+            stakedAmount: 2000000000
+            pendingRewardAmount: 0
+            claimedRewardAmount: 1000000000
+        0x2000000000000000000000000000000000000002:
+          0x1234567890123456789012345678901234567890:
+            accountAddress: 0x2000000000000000000000000000000000000002
+            bookNFTAddress: 0x1234567890123456789012345678901234567890
+            stakedAmount: 2000000000
+            pendingRewardAmount: 588888888
+            claimedRewardAmount: 0
+
+    processedStakingEvents:
+      - type: staked
+        stakedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          stakedAmount: 2000000000
+      - type: staked
+        stakedEventData:
+          bookNFT: 0x2345678901234567890123456789012345678901
+          account: 0x2000000000000000000000000000000000000001
+          stakedAmount: 2000000000
+      - type: rewardDeposited
+        rewardDepositedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2999999999999999999999999999999999999999
+          rewardAmount: 1000000000
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000001
+          rewardAmount: 833333333
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x1234567890123456789012345678901234567890
+          account: 0x2000000000000000000000000000000000000002
+          rewardAmount: 166666666
+      - type: rewardDeposited
+        rewardDepositedEventData:
+          bookNFT: 0x2345678901234567890123456789012345678901
+          account: 0x2999999999999999999999999999999999999999
+          rewardAmount: 1000000000
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x2345678901234567890123456789012345678901
+          account: 0x2000000000000000000000000000000000000001
+          rewardAmount: 1000000000
+      - type: allRewardsClaimed
+        allRewardsClaimedEventData:
+          account: 0x2000000000000000000000000000000000000001
+          bookNFT: 0x1234567890123456789012345678901234567890
+          rewardAmount: 1411111110
+      - type: allRewardsClaimed
+        allRewardsClaimedEventData:
+          account: 0x2000000000000000000000000000000000000001
+          bookNFT: 0x2345678901234567890123456789012345678901
+          rewardAmount: 1000000000

@@ -8,7 +8,8 @@ import (
 	appcontext "likecollective-indexer/cmd/worker/context"
 	"likecollective-indexer/internal/database"
 	"likecollective-indexer/internal/logic/evmeventprocessor"
-	"likecollective-indexer/internal/logic/stakingstate"
+	stakingstateloader "likecollective-indexer/internal/logic/stakingstate/loader"
+	stakingstatepersistor "likecollective-indexer/internal/logic/stakingstate/persistor"
 	"likecollective-indexer/internal/worker/task"
 
 	"github.com/hibiken/asynq"
@@ -69,13 +70,17 @@ func HandleProcessEVMEvent(ctx context.Context, t *asynq.Task) error {
 	accountRepository := database.MakeAccountRepository(dbService)
 	nftClassRepository := database.MakeNFTClassRepository(dbService)
 	stakingRepository := database.MakeStakingRepository(dbService)
-	stakingStatePersistor := stakingstate.MakeStakingStatePersistor(dbService)
 
-	processor := evmeventprocessor.MakeEVMEventProcessor(
-		evmEventRepository,
+	stakingStateLoader := stakingstateloader.MakeStakingStateLoader(
 		accountRepository,
 		nftClassRepository,
 		stakingRepository,
+	)
+	stakingStatePersistor := stakingstatepersistor.MakeStakingStatePersistor(dbService)
+
+	processor := evmeventprocessor.MakeEVMEventProcessor(
+		evmEventRepository,
+		stakingStateLoader,
 		stakingStatePersistor,
 	)
 
