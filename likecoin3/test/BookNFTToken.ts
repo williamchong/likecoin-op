@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { viem } from "hardhat";
-import { deployProtocol } from "./ProtocolFactory";
+import { deployProtocol } from "./factory";
 import "./setup";
 
 import { BookConfigLoader, BookTokenConfigLoader } from "./BookConfigLoader";

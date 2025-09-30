@@ -4,7 +4,7 @@ import { viem, ignition } from "hardhat";
 
 import "./setup";
 import { BookConfigLoader } from "./BookConfigLoader";
-import { deployProtocol } from "./ProtocolFactory";
+import { deployProtocol } from "./factory";
 
 describe("LikeProtocol", () => {
   it("should have expected proxy address", async function () {

@@ -5,7 +5,7 @@ import { encodeFunctionData } from "viem";
 
 import "./setup";
 import { BookConfigLoader } from "./BookConfigLoader";
-import { deployProtocol } from "./ProtocolFactory";
+import { deployProtocol } from "./factory";
 
 describe("LikeProtocol as create2 factory for BookNFT", () => {
   it("should be able to create new BookNFT", async function () {

@@ -5,7 +5,7 @@ import { ethers, viem } from "hardhat";
 
 import "./setup";
 import { BookConfigLoader, BookTokenConfigLoader } from "./BookConfigLoader";
-import { deployProtocol } from "./ProtocolFactory";
+import { deployProtocol } from "./factory";
 
 describe("BookNFTClass", () => {
   async function initMint() {
