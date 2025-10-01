@@ -2,7 +2,7 @@
   "LikecoinModule#LikecoinImpl": "0x39D9f28FD9da20548c74aFAF47B9A8F150d7339F",
   "LikecoinModule#ERC1967Proxy": "0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf",
   "LikecoinModule#Likecoin": "0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf",
-  "LikeCollectiveModule#LikeCollectiveImpl": "0x54e33A0e7484AFeA9dbe9dfa95a6883416A92B5E",
+  "LikeCollectiveModule#LikeCollectiveImpl": "0xe067e967aF1cEBb3edF35be8390E5cCabe6926D7",
   "LikeCollectiveV0Module#LikeCollectiveV0Impl": "0x2b6b4e3EfC3496249A9Ffb502130f9B849E72Cf3",
   "LikeStakePositionModule#LikeStakePositionImpl": "0xB0ee5f06c3FD4Ec5dceDBD0cc3F8Ff80113dbbFe",
   "LikeStakePositionV0Module#LikeStakePositionV0Impl": "0x59559D29031BC7f67dd6E8C6259C75c3d211422d",
