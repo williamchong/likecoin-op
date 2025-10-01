@@ -95,14 +95,14 @@ contract BookNFT is
 
     // Permission modifiers
     modifier onlyMinter() {
-        if (!hasRole(MINTER_ROLE, _msgSender())) {
+        if (_msgSender() != owner() && !hasRole(MINTER_ROLE, _msgSender())) {
             revert ErrUnauthorized();
         }
         _;
     }
 
     modifier onlyUpdater() {
-        if (!hasRole(UPDATER_ROLE, _msgSender())) {
+        if (_msgSender() != owner() && !hasRole(UPDATER_ROLE, _msgSender())) {
             revert ErrUnauthorized();
         }
         _;
