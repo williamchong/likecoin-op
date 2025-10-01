@@ -11,5 +11,11 @@
   "LikeCollectiveV0Module#LikeCollectiveV0": "0x4506Ac2dD1e9A470d92a3D1656E1a99C676E1c8E",
   "LikeStakePositionV0Module#LikeStakePositionV0": "0x508610D3009cda82Ac1a40D2b322Ed31932D16b1",
   "LikeCollectiveModule#LikeCollective": "0x4506Ac2dD1e9A470d92a3D1656E1a99C676E1c8E",
-  "LikeStakePositionModule#LikeStakePosition": "0x508610D3009cda82Ac1a40D2b322Ed31932D16b1"
+  "LikeStakePositionModule#LikeStakePosition": "0x508610D3009cda82Ac1a40D2b322Ed31932D16b1",
+  "BookNFTModule#BookNFTV1Impl": "0x94F1fc8c030EE8c324bbFCE7EF6d064767122349",
+  "LikeProtocolV0Module#LikeProtocolV0Impl": "0x8CDD48d8565b4DFf35849139f20cB1286aD60625",
+  "LikeProtocolV1Module#LikeProtocolV1Impl": "0x5cF3f901e81041d71e0d92EdbF8Dcc43bEA50433",
+  "LikeProtocolV0Module#ERC1967Proxy": "0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5",
+  "LikeProtocolV0Module#LikeProtocolV0": "0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5",
+  "LikeProtocolV1Module#LikeProtocol": "0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5"
 }
