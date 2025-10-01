@@ -20,13 +20,12 @@ local-contracts:
 
 .PHONY: abigen
 abigen:
-	make -C likenft build
 	make -C likecoin3 build
 	mkdir -p abi
-	cp likenft/artifacts/contracts/LikeProtocol.sol/LikeProtocol.json abi/
-	jq '.abi' likenft/artifacts/contracts/LikeProtocol.sol/LikeProtocol.json > abi/LikeProtocol.abi.json
-	cp likenft/artifacts/contracts/BookNFT.sol/BookNFT.json abi/
-	jq '.abi' likenft/artifacts/contracts/BookNFT.sol/BookNFT.json > abi/BookNFT.abi.json
+	cp likecoin3/artifacts/contracts/LikeProtocol.sol/LikeProtocol.json abi/
+	jq '.abi' likecoin3/artifacts/contracts/LikeProtocol.sol/LikeProtocol.json > abi/LikeProtocol.abi.json
+	cp likecoin3/artifacts/contracts/BookNFT.sol/BookNFT.json abi/
+	jq '.abi' likecoin3/artifacts/contracts/BookNFT.sol/BookNFT.json > abi/BookNFT.abi.json
 	cp likecoin3/artifacts/contracts/Likecoin.sol/Likecoin.json abi/
 	jq '.abi' likecoin3/artifacts/contracts/Likecoin.sol/Likecoin.json > abi/Likecoin.abi.json
 	cp likecoin3/artifacts/contracts/LikeCollective.sol/LikeCollective.json abi/
