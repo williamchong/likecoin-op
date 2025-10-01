@@ -5,54 +5,9 @@ import {
 import { expect } from "chai";
 import { viem, ignition } from "hardhat";
 import { parseEther } from "viem";
-import LikecoinModule from "../ignition/modules/Likecoin";
-import LikeCollectiveModule from "../ignition/modules/LikeCollective";
-import LikeStakePositionModule from "../ignition/modules/LikeStakePosition";
+import { deployCollective } from "./factory";
 
 describe("LikeCollective", async function () {
-  async function deployCollective() {
-    const [deployer, rick, kin, bob] = await viem.getWalletClients();
-    const publicClient = await viem.getPublicClient();
-
-    const { likeCollective, likecoin, likeStakePosition } =
-      await ignition.deploy(LikeCollectiveModule, {
-        parameters: {
-          LikecoinModule: {
-            initOwner: deployer.account.address,
-          },
-          LikeCollectiveV0Module: {
-            initOwner: deployer.account.address,
-          },
-          LikeStakePositionV0Module: {
-            initOwner: deployer.account.address,
-          },
-        },
-        defaultSender: deployer.account.address,
-      });
-
-    // Mint some LIKE tokens
-    for (const a of [
-      rick.account.address,
-      kin.account.address,
-      bob.account.address,
-    ]) {
-      await likecoin.write.mint([a, 10000n * 10n ** 6n], {
-        account: deployer.account.address,
-      });
-    }
-
-    return {
-      likecoin,
-      likeCollective,
-      likeStakePosition,
-      deployer,
-      rick,
-      kin,
-      bob,
-      publicClient,
-    };
-  }
-
   describe("Upgradeable Storage", async function () {
     it("should have the correct STORAGE_SLOT", async function () {
       const { likeCollective, deployer } = await loadFixture(deployCollective);

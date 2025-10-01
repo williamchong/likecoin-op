@@ -20,6 +20,7 @@ describe("Likecoin", async function () {
           },
         },
         defaultSender: deployer.account.address,
+        strategy: "create2",
       },
     );
 

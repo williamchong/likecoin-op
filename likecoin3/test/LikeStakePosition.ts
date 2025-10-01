@@ -1,41 +1,9 @@
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
 import { expect } from "chai";
 import { viem, ignition } from "hardhat";
-import LikeStakePositionModule from "../ignition/modules/LikeStakePosition";
+import { deployLSP } from "./factory";
 
 describe("LikeStakePosition", async function () {
-  async function deployLSP() {
-    const [deployer, rick, kin] = await viem.getWalletClients();
-    const publicClient = await viem.getPublicClient();
-
-    const { likeStakePosition, likeStakePositionImpl } = await ignition.deploy(
-      LikeStakePositionModule,
-      {
-        parameters: {
-          LikecoinModule: {
-            initOwner: deployer.account.address,
-          },
-          LikeCollectiveV0Module: {
-            initOwner: deployer.account.address,
-          },
-          LikeStakePositionV0Module: {
-            initOwner: deployer.account.address,
-          },
-        },
-        defaultSender: deployer.account.address,
-      },
-    );
-
-    return {
-      likeStakePosition,
-      likeStakePositionImpl,
-      deployer,
-      rick,
-      kin,
-      publicClient,
-    };
-  }
-
   describe("Initialization & Ownership", async function () {
     it("should initialize with correct owner", async function () {
       const { likeStakePosition, deployer } = await loadFixture(deployLSP);
@@ -291,7 +259,8 @@ describe("LikeStakePosition", async function () {
 
   describe("position info view functions", async function () {
     async function preparePositionInfoData() {
-      const { likeStakePosition, deployer, rick, kin } = await deployLSP();
+      const { likeStakePosition, deployer, rick, kin } =
+        await loadFixture(deployLSP);
       const bookNFT1 = "0x1111111111111111111111111111111111111111";
       const bookNFT2 = "0x2222222222222222222222222222222222222222";
 

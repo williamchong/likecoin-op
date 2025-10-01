@@ -1,0 +1,15 @@
+{
+  "name": "My Book",
+  "symbol": "KOOB",
+  "metadata": {
+    "name": "Collection Name",
+    "symbol": "Collection SYMB",
+    "description": "Collection Description",
+    "image": "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
+    "banner_image": "",
+    "featured_image": "",
+    "external_link": "https://www.example.com",
+    "collaborators": []
+  },
+  "max_supply": 10
+}

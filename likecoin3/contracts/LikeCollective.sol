@@ -168,7 +168,7 @@ contract LikeCollective is
             amount,
             pool.rewardIndex
         );
-        pool.totalStaked += amount;
+        pool.totalStaked = pool.totalStaked + amount;
         pool.rewardIndexes[tokenId] = pool.rewardIndex;
         emit Staked(bookNFT, _msgSender(), amount);
     }

@@ -1,0 +1,526 @@
+// SPDX-License-Identifier: MIT
+// Compatible with OpenZeppelin Contracts ^5.4.0
+pragma solidity ^0.8.27;
+
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {ERC721EnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import {ERC721BurnableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
+import {IERC1967} from "@openzeppelin/contracts/interfaces/IERC1967.sol";
+import {IERC4906} from "@openzeppelin/contracts/interfaces/IERC4906.sol";
+
+import {BookConfig} from "../types/BookConfig.sol";
+
+error ErrUnauthorized();
+error ErrEmptyName();
+error ErrInvalidSymbol();
+error ErrInvalidMetadata();
+error ErrMemoMetadataLengthMismatch();
+error ErrMaxSupplyZero();
+error ErrSupplyDecrease();
+error ErrNftNoSupply();
+error ErrTokenIdMintFails(uint256 nextTokenId);
+
+interface ILikeProtocolInterface {
+    function getRoyaltyReceiver() external view returns (address);
+}
+/// @custom:security-contact rickmak@oursky.com
+contract BookNFT is
+    Initializable,
+    ERC721EnumerableUpgradeable,
+    ERC721BurnableUpgradeable,
+    OwnableUpgradeable,
+    AccessControlUpgradeable,
+    IERC2981,
+    IERC1967,
+    IERC4906
+{
+    struct BookNFTStorage {
+        string name;
+        string symbol;
+        string metadata;
+        uint64 max_supply;
+        uint256 _currentIndex;
+        mapping(uint256 => string) tokenURIMap;
+        uint96 royaltyFraction;
+        address protocolBeacon;
+    }
+
+    // keccak256(abi.encode(uint256(keccak256("likeprotocol.booknft.storage")) - 1)) & ~bytes32(uint256(0xff))
+    bytes32 private constant CLASS_DATA_STORAGE =
+        0x8303e9d27d04c843c8d4a08966b1e1be0214fc0b3375d79db0a8252068c41f00;
+    function _getClassStorage()
+        private
+        pure
+        returns (BookNFTStorage storage $)
+    {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            $.slot := CLASS_DATA_STORAGE
+        }
+    }
+
+    // Constants
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
+    // End Constants
+
+    // Events
+    event ContractURIUpdated();
+
+    event TransferWithMemo(
+        address indexed from,
+        address indexed to,
+        uint256 indexed tokenId,
+        string memo
+    );
+    // End Events
+
+    // Permission control
+
+    // This contract don't use the AccessControlUpgradeable adminRole feature.
+    // Owner can grant and revoke roles to any address.
+    function ownerGrantRole(bytes32 role, address account) public onlyOwner {
+        _grantRole(role, account);
+    }
+
+    function ownerRevokeRole(bytes32 role, address account) public onlyOwner {
+        _revokeRole(role, account);
+    }
+
+    // Permission modifiers
+    modifier onlyMinter() {
+        if (!hasRole(MINTER_ROLE, _msgSender())) {
+            revert ErrUnauthorized();
+        }
+        _;
+    }
+
+    modifier onlyUpdater() {
+        if (!hasRole(UPDATER_ROLE, _msgSender())) {
+            revert ErrUnauthorized();
+        }
+        _;
+    }
+
+    modifier onlyProtocol() {
+        BookNFTStorage storage $ = _getClassStorage();
+        if (_msgSender() != $.protocolBeacon) {
+            revert ErrUnauthorized();
+        }
+        _;
+    }
+    // End Permission control
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(
+        string memory name_,
+        string memory symbol_
+    ) public initializer {
+        __ERC721_init(name_, symbol_);
+        __ERC721Enumerable_init();
+        __ERC721Burnable_init();
+        __Ownable_init(_msgSender());
+        __AccessControl_init();
+        BookNFTStorage storage $ = _getClassStorage();
+        $.protocolBeacon = _msgSender();
+    }
+
+    /**
+     * initConfig
+     *
+     * In normal case, the initConfig should be called immediately after the
+     * BookNFT BeaconProxy is deployed by the LikeProtocol. The owner can
+     * update the config as long as there is no token minted.
+     *
+     * @param creator - the creator of the book nft
+     * @param minters - the minters of the book nft
+     * @param updaters - the updaters of the book nft
+     * @param config - the config of the book nft
+     */
+    function initConfig(
+        address creator,
+        address[] memory minters,
+        address[] memory updaters,
+        BookConfig memory config
+    ) public onlyOwner {
+        _validateBookConfig(config);
+
+        BookNFTStorage storage $ = _getClassStorage();
+        if ($._currentIndex > 0) {
+            revert InvalidInitialization();
+        }
+
+        $.name = config.name;
+        $.symbol = config.symbol;
+        $.max_supply = config.max_supply;
+        $.metadata = config.metadata;
+
+        $._currentIndex = 0;
+
+        transferOwnership(creator);
+        for (uint32 i = 0; i < minters.length; ++i) {
+            _grantRole(MINTER_ROLE, minters[i]);
+        }
+        for (uint32 i = 0; i < updaters.length; ++i) {
+            _grantRole(UPDATER_ROLE, updaters[i]);
+        }
+    }
+
+    // Start of inheritence resolve
+    function supportsInterface(
+        bytes4 interfaceId
+    )
+        public
+        view
+        virtual
+        override(
+            ERC721Upgradeable,
+            ERC721EnumerableUpgradeable,
+            AccessControlUpgradeable,
+            IERC165
+        )
+        returns (bool)
+    {
+        return
+            interfaceId == type(IERC2981).interfaceId ||
+            interfaceId == bytes4(0x49064906) ||
+            super.supportsInterface(interfaceId);
+    }
+
+    function _increaseBalance(
+        address account,
+        uint128 amount
+    ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
+        super._increaseBalance(account, amount);
+    }
+
+    function _update(
+        address to,
+        uint256 tokenId,
+        address auth
+    )
+        internal
+        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
+        returns (address)
+    {
+        return super._update(to, tokenId, auth);
+    }
+    // End of inheritence resolve
+
+    function _validateBookConfig(BookConfig memory config) internal pure {
+        if (bytes(config.name).length == 0) {
+            revert ErrEmptyName();
+        }
+        if (bytes(config.symbol).length == 0) {
+            revert ErrInvalidSymbol();
+        }
+        if (config.max_supply == 0) {
+            revert ErrMaxSupplyZero();
+        }
+    }
+
+    function update(BookConfig calldata config) public onlyUpdater {
+        _validateBookConfig(config);
+        BookNFTStorage storage $ = _getClassStorage();
+        if (config.max_supply < $.max_supply) {
+            revert ErrSupplyDecrease();
+        }
+        require(
+            keccak256(bytes(config.symbol)) == keccak256(bytes($.symbol)),
+            ErrInvalidSymbol()
+        );
+
+        $.name = config.name;
+        $.symbol = config.symbol;
+        $.max_supply = config.max_supply;
+        $.metadata = config.metadata;
+        emit ContractURIUpdated();
+    }
+
+    /**
+     * updateTokenMetadata
+     *
+     * update the metadata of a token
+     *
+     * @param tokenId - the token id to update
+     * @param metadata - the metadata to update
+     */
+    function updateTokenMetadata(
+        uint256 tokenId,
+        string calldata metadata
+    ) public onlyUpdater {
+        BookNFTStorage storage $ = _getClassStorage();
+        $.tokenURIMap[tokenId] = metadata;
+        emit MetadataUpdate(tokenId);
+    }
+
+    /**
+     * mint function
+     *
+     * mint a new token with metadata, caller should ensure the supply is enough.
+     *
+     * @param to - owner address to hold the new minted token
+     * @param metadataList - list of metadata to supply
+     */
+    function mint(
+        address to,
+        string[] calldata memos,
+        string[] calldata metadataList
+    ) external onlyMinter {
+        if (memos.length != metadataList.length) {
+            revert ErrMemoMetadataLengthMismatch();
+        }
+        _ensureEnoughSupply(metadataList.length);
+        for (uint32 i = 0; i < metadataList.length; ++i) {
+            _mintWithEvent(_msgSender(), to, memos[i], metadataList[i]);
+        }
+    }
+
+    /**
+     * batchMint
+     *
+     * batch mint with metadata list
+     *
+     * @param tos - owner address to hold the new minted token
+     * @param memos - list of memo to supply
+     * @param metadataList - list of metadata to supply, the length of the list should be the same as the length of the tos. Metadata will fill the corresponding position of the tos.
+     */
+    function batchMint(
+        address[] calldata tos,
+        string[] calldata memos,
+        string[] calldata metadataList
+    ) external onlyMinter {
+        _ensureEnoughSupply(metadataList.length);
+        for (uint32 i = 0; i < tos.length; ++i) {
+            _mintWithEvent(_msgSender(), tos[i], memos[i], metadataList[i]);
+        }
+    }
+
+    /**
+     * safeMintWithTokenId
+     *
+     * a fast fails function call to ensure the transaction sender
+     * is getting the desired tokenId(in stead of next Id) in the result.
+     *
+     * Expect caller to check and specify correct start token id
+     *
+     * @param fromTokenId - the start token id
+     * @param tos - owner address to hold the new minted token
+     * @param memos - list of memo to supply
+     * @param metadataList - list of metadata to supply
+     */
+    function safeMintWithTokenId(
+        uint256 fromTokenId,
+        address[] calldata tos,
+        string[] calldata memos,
+        string[] calldata metadataList
+    ) external onlyMinter {
+        if (totalSupply() != fromTokenId) {
+            revert ErrTokenIdMintFails(totalSupply());
+        }
+        _ensureEnoughSupply(metadataList.length);
+        for (uint32 i = 0; i < metadataList.length; ++i) {
+            _mintWithEvent(_msgSender(), tos[i], memos[i], metadataList[i]);
+        }
+    }
+
+    /**
+     * _ensureEnoughtSupply
+     *
+     * ensure the supply is enough
+     *
+     * @param quantity - the quantity of the tokens to mint
+     */
+    function _ensureEnoughSupply(uint256 quantity) internal view {
+        BookNFTStorage storage $ = _getClassStorage();
+        if (totalSupply() + quantity > $.max_supply) {
+            revert ErrNftNoSupply();
+        }
+    }
+
+    /**
+     * _mintWithEvent
+     *
+     * mint a new token with metadata, caller should ensure the supply is enough.
+     *
+     * @param from - the address that is transferring the token
+     * @param to - owner address to hold the new minted token
+     * @param memo - memo to supply
+     * @param metadata - metadata to supply
+     */
+    function _mintWithEvent(
+        address from,
+        address to,
+        string calldata memo,
+        string calldata metadata
+    ) internal {
+        BookNFTStorage storage $ = _getClassStorage();
+        $.tokenURIMap[$._currentIndex] = metadata;
+        _safeMint(to, $._currentIndex);
+        emit TransferWithMemo(from, to, $._currentIndex, memo);
+        ++$._currentIndex;
+    }
+
+    function transferWithMemo(
+        address from,
+        address to,
+        uint256 _tokenId,
+        string calldata memo
+    ) external {
+        safeTransferFrom(from, to, _tokenId);
+
+        emit TransferWithMemo(from, to, _tokenId, memo);
+    }
+
+    /**
+     * batchTransferWithMemo
+     *
+     * batch transfer with memo from one address to multiple addresses, it
+     * assume the parameters array length are the same.
+     * The tokens in `tokenIds` will be transferred to the addresses in the same
+     * position in `tos`
+     *
+     * @param from - the start token ids,
+     * @param tos - owner address to hold the new minted token
+     * @param tokenIds - list of metadata to supply
+     * @param memos - list of memo to supply
+     */
+    function batchTransferWithMemo(
+        address from,
+        address[] calldata tos,
+        uint256[] calldata tokenIds,
+        string[] calldata memos
+    ) external {
+        for (uint32 i = 0; i < tokenIds.length; ++i) {
+            safeTransferFrom(from, tos[i], tokenIds[i]);
+            emit TransferWithMemo(from, tos[i], tokenIds[i], memos[i]);
+        }
+    }
+
+    /**
+     * setRoyaltyFraction
+     *
+     * set the royalty fraction for the book nft.
+     * The feeDenominator is 10000.
+     * Intended to only support BookNFTs based royalty, not per token based royalty.
+     *
+     * @param royaltyFraction - the royalty fraction to set
+     */
+    function setRoyaltyFraction(uint96 royaltyFraction) external onlyProtocol {
+        BookNFTStorage storage $ = _getClassStorage();
+        $.royaltyFraction = royaltyFraction;
+    }
+
+    /**
+     * royaltyInfo
+     *
+     * getting the royalty info for a token sale.
+     * In phase 1 of likeprotocol, all royalties will be sent to the MultiSig
+     * address specified in LikeProtocol.
+     * In later phase, the royalties withdrwal logic will be implemented.
+     * The royalty is designed to be tied with the LikeProtocol contract.
+     *
+     * @param - To confronyt the token ID to get royalty info for
+     * @param salePrice - the sale price of the token
+     * @return receiver - the address that should receive the royalty payment
+     * @return royaltyAmount - the amount of royalty to be paid
+     */
+    function royaltyInfo(
+        uint256,
+        uint256 salePrice
+    ) external view override returns (address receiver, uint256 royaltyAmount) {
+        BookNFTStorage storage $ = _getClassStorage();
+        royaltyAmount = (salePrice * $.royaltyFraction) / 10000;
+        ILikeProtocolInterface likeProtocol = ILikeProtocolInterface(
+            getProtocolBeacon()
+        );
+        receiver = likeProtocol.getRoyaltyReceiver();
+    }
+
+    // Start Querying functions
+    /**
+     * getBookConfig
+     *
+     * getting the book config, owner can modify the book config field and use
+     * it in update function
+     *
+     * @return the book config
+     */
+    function getBookConfig() public view returns (BookConfig memory) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return
+            BookConfig({
+                name: $.name,
+                symbol: $.symbol,
+                metadata: $.metadata,
+                max_supply: $.max_supply
+            });
+    }
+
+    /**
+     * getCurrentIndex
+     *
+     * getting the current index of the book nft, this is the index of the next token to be minted
+     *
+     * @return the current index
+     */
+    function getCurrentIndex() public view returns (uint256) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return $._currentIndex;
+    }
+
+    function name() public view override returns (string memory) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return $.name;
+    }
+
+    function symbol() public view override returns (string memory) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return $.symbol;
+    }
+
+    function contractURI() public view returns (string memory) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    Base64.encode(abi.encodePacked($.metadata))
+                )
+            );
+    }
+
+    function maxSupply() public view returns (uint64) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return $.max_supply;
+    }
+
+    function tokenURI(
+        uint256 _tokenId
+    ) public view virtual override returns (string memory) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    Base64.encode(abi.encodePacked($.tokenURIMap[_tokenId]))
+                )
+            );
+    }
+
+    function getProtocolBeacon() public view returns (address) {
+        BookNFTStorage storage $ = _getClassStorage();
+        return $.protocolBeacon;
+    }
+    // End Querying functions
+}
