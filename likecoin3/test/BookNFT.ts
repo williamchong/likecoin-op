@@ -24,15 +24,6 @@ describe("BookNFTClass", () => {
       "./test/fixtures/BookConfig0.json",
     );
 
-    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      const unwatch = likeProtocol.watchEvent.NewBookNFT({
-        onLogs: (logs) => {
-          const id = logs[0].args.bookNFT;
-          unwatch();
-          resolve(id);
-        },
-      });
-    });
     await likeProtocol.write.newBookNFT([
       {
         creator: classOwner.account.address,
@@ -41,8 +32,8 @@ describe("BookNFTClass", () => {
         config: bookConfig,
       },
     ]);
-
-    const nftClassId = await NewClassEvent;
+    const newClassLogs = await likeProtocol.getEvents.NewBookNFT();
+    const nftClassId = newClassLogs[newClassLogs.length - 1].args.bookNFT;
     const book0NFT = await viem.getContractAt("BookNFT", nftClassId);
     expect(await book0NFT.read.owner()).to.equalAddress(
       classOwner.account.address,
@@ -574,20 +565,9 @@ describe("BookNFT permission control", () => {
       publicClient,
     } = await loadFixture(deployProtocol);
 
-    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      const unwatch = likeProtocol.watchEvent.NewBookNFT({
-        onLogs: (logs) => {
-          const id = logs[0].args.bookNFT;
-          unwatch();
-          resolve(id);
-        },
-      });
-    });
-
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
-
     await likeProtocol.write.newBookNFT([
       {
         creator: classOwner.account.address,
@@ -596,8 +576,8 @@ describe("BookNFT permission control", () => {
         config: bookConfig,
       },
     ]);
-
-    const nftClassId = await NewClassEvent;
+    const newClassLogs = await likeProtocol.getEvents.NewBookNFT();
+    const nftClassId = newClassLogs[newClassLogs.length - 1].args.bookNFT;
     const nftClassContract = await viem.getContractAt("BookNFT", nftClassId);
     expect(await nftClassContract.read.owner()).to.equalAddress(
       classOwner.account.address,
@@ -823,16 +803,6 @@ describe("BookNFT ownership transfer", () => {
       publicClient,
     } = await loadFixture(deployProtocol);
 
-    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      const unwatch = likeProtocol.watchEvent.NewBookNFT({
-        onLogs: (logs) => {
-          const id = logs[0].args.bookNFT;
-          unwatch();
-          resolve(id);
-        },
-      });
-    });
-
     const bookConfig = {
       name: "My Book",
       symbol: "KOOB",
@@ -858,8 +828,8 @@ describe("BookNFT ownership transfer", () => {
         config: bookConfig,
       },
     ]);
-
-    const nftClassId = await NewClassEvent;
+    const newClassLogs = await likeProtocol.getEvents.NewBookNFT();
+    const nftClassId = newClassLogs[newClassLogs.length - 1].args.bookNFT;
     const nftClassContract = await viem.getContractAt("BookNFT", nftClassId);
     expect(await nftClassContract.read.owner()).to.equalAddress(
       classOwner.account.address,
@@ -1140,20 +1110,9 @@ describe("BookNFT config validation", () => {
       publicClient,
     } = await loadFixture(deployProtocol);
 
-    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      const unwatch = likeProtocol.watchEvent.NewBookNFT({
-        onLogs: (logs) => {
-          const id = logs[0].args.bookNFT;
-          unwatch();
-          resolve(id);
-        },
-      });
-    });
-
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
-
     await likeProtocol.write.newBookNFT([
       {
         creator: classOwner.account.address,
@@ -1162,8 +1121,8 @@ describe("BookNFT config validation", () => {
         config: bookConfig,
       },
     ]);
-
-    const nftClassId = await NewClassEvent;
+    const newClassLogs = await likeProtocol.getEvents.NewBookNFT();
+    const nftClassId = newClassLogs[newClassLogs.length - 1].args.bookNFT;
     const nftClassContract = await viem.getContractAt("BookNFT", nftClassId);
     expect(await nftClassContract.read.owner()).to.equalAddress(
       classOwner.account.address,
@@ -1352,22 +1311,9 @@ describe("BookNFT royalty", () => {
       publicClient,
     } = await loadFixture(deployProtocol);
 
-    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      const unwatch = likeProtocol.watchEvent.NewBookNFT({
-        onLogs: (logs) => {
-          const id = logs[0].args.bookNFT;
-          if (id) {
-            unwatch();
-            resolve(id);
-          }
-        },
-      });
-    });
-
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
-
     await likeProtocol.write.setRoyaltyReceiver([deployer.account.address]);
     await likeProtocol.write.newBookNFTWithRoyalty([
       {
@@ -1378,8 +1324,8 @@ describe("BookNFT royalty", () => {
       },
       1000n,
     ]);
-
-    const nftClassId = await NewClassEvent;
+    const newClassLogs = await likeProtocol.getEvents.NewBookNFT();
+    const nftClassId = newClassLogs[newClassLogs.length - 1].args.bookNFT;
     const nftClassContract = await viem.getContractAt("BookNFT", nftClassId);
     expect(await nftClassContract.read.owner()).to.equalAddress(
       classOwner.account.address,
@@ -1457,22 +1403,9 @@ describe("BookNFT version", () => {
       publicClient,
     } = await loadFixture(deployProtocol);
 
-    const NewClassEvent = new Promise<{ id: string }>((resolve, reject) => {
-      const unwatch = likeProtocol.watchEvent.NewBookNFT({
-        onLogs: (logs) => {
-          const id = logs[0].args.bookNFT;
-          if (id) {
-            unwatch();
-            resolve(id);
-          }
-        },
-      });
-    });
-
     const bookConfig = BookConfigLoader.load(
       "./test/fixtures/BookConfig0.json",
     );
-
     await likeProtocol.write.newBookNFT([
       {
         creator: classOwner.account.address,
@@ -1481,8 +1414,8 @@ describe("BookNFT version", () => {
         config: bookConfig,
       },
     ]);
-
-    const nftClassId = await NewClassEvent;
+    const newClassLogs = await likeProtocol.getEvents.NewBookNFT();
+    const nftClassId = newClassLogs[newClassLogs.length - 1].args.bookNFT;
     const nftClassContract = await viem.getContractAt("BookNFT", nftClassId);
     expect(await nftClassContract.read.owner()).to.equalAddress(
       classOwner.account.address,
