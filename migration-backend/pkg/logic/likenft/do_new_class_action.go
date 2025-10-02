@@ -103,26 +103,43 @@ func DoNewClassAction(
 		}
 	}
 
-	metadataBytes, err := json.Marshal(
-		evm.ContractLevelMetadataFromCosmosClassAndISCN(
-			cosmosClass,
-			iscnDataResponse,
-			royaltyConfig,
-		))
+	contractLevelMetadata := evm.ContractLevelMetadataFromCosmosClassAndISCN(
+		cosmosClass,
+		iscnDataResponse,
+		royaltyConfig,
+	)
+
+	metadataBytes, err := json.Marshal(contractLevelMetadata)
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)
 	}
-	tx, txReceipt, err := n.NewBookNFTWithRoyalty(ctx, mylogger, like_protocol.MsgNewBookNFT{
-		Creator:  initialOwnerAddress,
-		Updaters: initialUpdaterAddresses,
-		Minters:  initialMinterAddresses,
-		Config: like_protocol.BookConfig{
-			Name:      cosmosClass.Name,
-			Symbol:    cosmosClass.Symbol,
-			Metadata:  string(metadataBytes),
-			MaxSupply: maxSupply,
-		},
-	}, a.DefaultRoyaltyFraction)
+
+	msgSenderStr, err := n.Signer.GetSignerAddress()
+	if err != nil {
+		return nil, doNewClassActionFailed(db, a, err)
+	}
+	msgSender := common.HexToAddress(*msgSenderStr)
+
+	salt, err := evm.ComputeNewBookNFTSalt(msgSender, [2]byte{0, 0}, contractLevelMetadata)
+	if err != nil {
+		return nil, doNewClassActionFailed(db, a, err)
+	}
+
+	tx, txReceipt, err := n.NewBookNFTWithRoyaltyAndSalt(
+		ctx,
+		mylogger,
+		salt,
+		like_protocol.MsgNewBookNFT{
+			Creator:  initialOwnerAddress,
+			Updaters: initialUpdaterAddresses,
+			Minters:  initialMinterAddresses,
+			Config: like_protocol.BookConfig{
+				Name:      cosmosClass.Name,
+				Symbol:    cosmosClass.Symbol,
+				Metadata:  string(metadataBytes),
+				MaxSupply: maxSupply,
+			},
+		}, a.DefaultRoyaltyFraction)
 
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)
