@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"github.com/likecoin/likecoin-op/op-2-base/cmd/cli/cmd/workflow"
 )
 
 var rootCmd = &cobra.Command{
@@ -21,4 +23,5 @@ func Execute(ctx context.Context) {
 }
 
 func init() {
+	rootCmd.AddCommand(workflow.WorkflowCmd)
 }
