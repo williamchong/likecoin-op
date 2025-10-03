@@ -5,6 +5,7 @@ import { viem, ignition } from "hardhat";
 import "./setup";
 import { BookConfigLoader } from "./BookConfigLoader";
 import { deployProtocol } from "./factory";
+import { defaultSalt, ROYALTY_DEFAULT } from "./factory";
 
 describe("LikeProtocol as Ownable and Pausable", () => {
   it("should have expected proxy address", async function () {
@@ -143,29 +144,34 @@ describe("LikeProtocol as ERC1967 Proxy", () => {
   it("should retain the BookNFT mapping after upgrade", async function () {
     const { likeProtocol, deployer } = await loadFixture(deployProtocol);
 
-    await likeProtocol.write.newBookNFT([
-      {
-        creator: deployer.account.address,
-        updaters: [deployer.account.address],
-        minters: [deployer.account.address],
-        config: {
-          name: "My Book",
-          symbol: "KOOB",
-          metadata: JSON.stringify({
-            name: "Collection Name",
-            symbol: "Collection SYMB",
-            description: "Collection Description",
-            image:
-              "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
-            banner_image: "",
-            featured_image: "",
-            external_link: "https://www.example.com",
-            collaborators: [],
-          }),
-          max_supply: 10n,
+    await likeProtocol.write.newBookNFT(
+      [
+        defaultSalt(deployer, { name: "My Book", symbol: "KOOB" }),
+        {
+          creator: deployer.account.address,
+          updaters: [deployer.account.address],
+          minters: [deployer.account.address],
+          config: {
+            name: "My Book",
+            symbol: "KOOB",
+            metadata: JSON.stringify({
+              name: "Collection Name",
+              symbol: "Collection SYMB",
+              description: "Collection Description",
+              image:
+                "ipfs://bafybeiezq4yqosc2u4saanove5bsa3yciufwhfduemy5z6vvf6q3c5lnbi",
+              banner_image: "",
+              featured_image: "",
+              external_link: "https://www.example.com",
+              collaborators: [],
+            }),
+            max_supply: 10n,
+          },
         },
-      },
-    ]);
+        ROYALTY_DEFAULT,
+      ],
+      { account: deployer.account },
+    );
     const logs = await likeProtocol.getEvents.NewBookNFT();
     expect(logs.length).to.equal(1);
     const bookNFTAddress = logs[0].args.bookNFT;
@@ -221,12 +227,14 @@ describe("LikeProtocol events", () => {
     expect(bookConfig.symbol).to.equal("KOOB");
 
     await likeProtocol.write.newBookNFT([
+      defaultSalt(deployer, bookConfig),
       {
         creator: deployer.account.address,
         updaters: [deployer.account.address],
         minters: [deployer.account.address],
         config: bookConfig,
       },
+      ROYALTY_DEFAULT,
     ]);
 
     const logs = await likeProtocol.getEvents.NewBookNFT();
@@ -236,45 +244,5 @@ describe("LikeProtocol events", () => {
     const book0 = await viem.getContractAt("BookNFT", bookNFTAddress);
     expect(await book0.read.symbol()).to.equal(bookConfig.symbol);
     expect(await book0.read.name()).to.equal(bookConfig.name);
-  });
-
-  it("should emit multiple NewBookNFT events calling newBookNFTs", async function () {
-    const { likeProtocol, deployer } = await loadFixture(deployProtocol);
-
-    const bookConfig = BookConfigLoader.load(
-      "./test/fixtures/BookConfig0.json",
-    );
-    const bookConfig1 = BookConfigLoader.load(
-      "./test/fixtures/BookConfig1.json",
-    );
-
-    await likeProtocol.write.newBookNFTs([
-      [
-        {
-          creator: deployer.account.address,
-          updaters: [deployer.account.address],
-          minters: [deployer.account.address],
-          config: bookConfig,
-        },
-        {
-          creator: deployer.account.address,
-          updaters: [deployer.account.address],
-          minters: [deployer.account.address],
-          config: bookConfig1,
-        },
-      ],
-    ]);
-
-    const logs = await likeProtocol.getEvents.NewBookNFT();
-    expect(logs.length).to.equal(2);
-    expect(await likeProtocol.read.isBookNFT([logs[0].args.bookNFT])).to.be
-      .true;
-    expect(await likeProtocol.read.isBookNFT([logs[1].args.bookNFT])).to.be
-      .true;
-
-    const book0 = await viem.getContractAt("BookNFT", logs[0].args.bookNFT);
-    const book1 = await viem.getContractAt("BookNFT", logs[1].args.bookNFT);
-    expect(await book0.read.symbol()).to.equal(bookConfig.symbol);
-    expect(await book1.read.symbol()).to.equal(bookConfig1.symbol);
   });
 });

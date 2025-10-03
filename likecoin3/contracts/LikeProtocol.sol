@@ -179,24 +179,6 @@ contract LikeProtocol is
     }
 
     /**
-     * newBookNFTWithSalt function
-     *
-     * Public fucntion for creating a BookNFT with a user controlled salt. If
-     * same salt is used, it will yield to same address and revert with
-     * FailedDeployment()
-     *
-     * @param salt - the salt to use for the BookNFT
-     * @param msgNewBookNFT - the message to create the BookNFT
-     */
-    function newBookNFTWithSalt(
-        bytes32 salt,
-        MsgNewBookNFT memory msgNewBookNFT
-    ) public whenNotPaused returns (address bookAddress) {
-        _guardSalt(salt);
-        bookAddress = _createBookNFT(salt, msgNewBookNFT);
-    }
-
-    /**
      * newBookNFT function
      *
      * Public fucntion for creating a BookNFT without a salt.
@@ -205,69 +187,13 @@ contract LikeProtocol is
      * @param msgNewBookNFT - the message to create the BookNFT
      */
     function newBookNFT(
-        MsgNewBookNFT memory msgNewBookNFT
-    ) public whenNotPaused returns (address bookAddress) {
-        bytes32 salt = bytes32(uint256(uint160(_msgSender())));
-        salt = bytes32(
-            uint256(
-                keccak256(
-                    abi.encode(
-                        msgNewBookNFT.config.name,
-                        msgNewBookNFT.config.symbol
-                    )
-                )
-            )
-        );
-        bookAddress = _createBookNFT(salt, msgNewBookNFT);
-    }
-
-    /**
-     * newBookNFTWithRoyalty
-     *
-     * Proxy call to create a BookNFT with a royalty fraction
-     *
-     * @param msgNewBookNFT - the message to create the BookNFT
-     * @param royaltyFraction - the royalty fraction to set
-     */
-    function newBookNFTWithRoyalty(
-        MsgNewBookNFT memory msgNewBookNFT,
-        uint96 royaltyFraction
-    ) public whenNotPaused returns (address bookAddress) {
-        bookAddress = newBookNFT(msgNewBookNFT);
-        BookNFT(bookAddress).setRoyaltyFraction(royaltyFraction);
-    }
-
-    /**
-     * newBookNFTWithRoyaltySalt
-     *
-     * Proxy call to create a BookNFT with a royalty fraction and a salt
-     *
-     * @param salt - the salt to use for the BookNFT
-     * @param msgNewBookNFT - the message to create the BookNFT
-     * @param royaltyFraction - the royalty fraction to set
-     */
-    function newBookNFTWithRoyaltyAndSalt(
         bytes32 salt,
         MsgNewBookNFT memory msgNewBookNFT,
         uint96 royaltyFraction
     ) public whenNotPaused returns (address bookAddress) {
-        bookAddress = newBookNFTWithSalt(salt, msgNewBookNFT);
+        _guardSalt(salt);
+        bookAddress = _createBookNFT(salt, msgNewBookNFT);
         BookNFT(bookAddress).setRoyaltyFraction(royaltyFraction);
-    }
-
-    /**
-     * newBookNFTs
-     *
-     * Proxy call to create multiple BookNFT at once
-     *
-     * @param msgNewBookNFTs the BookNFTs to create
-     */
-    function newBookNFTs(
-        MsgNewBookNFT[] calldata msgNewBookNFTs
-    ) public whenNotPaused {
-        for (uint32 i = 0; i < msgNewBookNFTs.length; ++i) {
-            newBookNFT(msgNewBookNFTs[i]);
-        }
     }
     // End factory methods
 

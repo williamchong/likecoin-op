@@ -1,7 +1,23 @@
 import { viem, ignition } from "hardhat";
+import { encodeAbiParameters, keccak256 } from "viem";
 import LikeProtocolV1Module from "../ignition/modules/LikeProtocolV1";
 import LikeCollectiveModule from "../ignition/modules/LikeCollective";
 import LikeStakePositionModule from "../ignition/modules/LikeStakePosition";
+
+export const ROYALTY_DEFAULT = 500n;
+
+export function defaultSalt(
+  _signer: { account: { address: string } },
+  bookConfig: { name: string; symbol: string },
+) {
+  const encoded = encodeAbiParameters(
+    [{ type: "string" }, { type: "string" }],
+    [bookConfig.name, bookConfig.symbol],
+  );
+  const hashed = keccak256(encoded);
+  const salt = _signer.account.address + "0000" + hashed.slice(2, 22);
+  return salt;
+}
 
 export async function deployProtocol() {
   const [deployer, classOwner, likerLand, randomSigner, randomSigner2] =
