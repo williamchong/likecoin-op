@@ -6,30 +6,39 @@ https://dba.stackexchange.com/questions/90482/export-postgres-table-as-json
 ## Prepare nft classes json
 
 ```
-SELECT count(*) from nft_classes;
+SELECT count(*) from nft_classes 
+WHERE nft_classes.metadata::json->>'@type' = 'Book';
 
 \o nft_classes
 
 SELECT array_to_json(array_agg(temp)) AS ok_json FROM (
 
 SELECT
-    id,
-    nft_classes.address,
-    name, metadata, 
-    metadata::json->'potentialAction'->'target'->0->'url' as "salt",
-    metadata::json->'name' as "salt2",
-    owner_address,
-    max_supply,
-    count FROM nft_classes, (
-	SELECT nft_classes.address, COUNT(*) FROM nft_classes, nfts
-	WHERE nft_classes.metadata::json->>'@type' = 'Book' AND nfts.contract_address = nft_classes.address
-	GROUP BY nft_classes.address) AS C
-WHERE C.address = nft_classes.address
+	id, 
+	nft_classes.address,
+	name,
+	metadata,
+	metadata::json->'potentialAction'->'target'->0->'url' as "salt",
+	metadata::json->'name' as "salt2",
+	C.count
+FROM nft_classes LEFT JOIN (
+	SELECT nfts.contract_address, COUNT(*) FROM nfts 
+	GROUP BY nfts.contract_address) AS C ON C.contract_address = nft_classes.address
+WHERE
+	nft_classes.metadata::json->>'@type' = 'Book'
 
 ) temp;
 
 \o
 ```
+
+For formating the output into json
+```
+sed -n 3p nft_classes | jq > nft_classes.json
+# Checking count is correct
+jq length nft_classes.json
+```
+
 
 ## Prepare nfts json
 
@@ -52,6 +61,11 @@ from nfts
 \o
 ```
 
+For formating the output into json
+```
+sed -n 3p nfts | jq > nfts.json
+```
+
 ## Prepare transaction memos json
 
 ```
@@ -71,6 +85,11 @@ FROM transaction_memos
 ) temp;
 
 \o
+```
+
+For formating the output into json
+```
+sed -n 3p transaction_memos | jq > transaction_memos.json
 ```
 
 ## Prepare minter and updater json

@@ -1,6 +1,7 @@
 package computeaddress
 
 import (
+	"encoding/hex"
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -16,6 +17,9 @@ type Input struct {
 
 type Output struct {
 	OldAddress string `json:"old_address"`
+	Salt       string `json:"salt"`
+	Name       string `json:"name"`
+	Symbol     string `json:"symbol"`
 	NewAddress string `json:"new_address"`
 }
 
@@ -65,10 +69,13 @@ func (c *computeAddress) Compute(input *Input) (*Output, error) {
 		return nil, fmt.Errorf("creationCode.MakeInitCodeHash: %v", err)
 	}
 
-	newAddress := crypto.CreateAddress2(c.signerAddress, salt, initHash)
+	newAddress := crypto.CreateAddress2(c.protocolAddress, salt, initHash)
 
 	return &Output{
 		OldAddress: input.OpAddress,
+		Salt:       "0x" + hex.EncodeToString(salt[:]),
+		Name:       input.Metadata.Name,
+		Symbol:     input.Metadata.Symbol,
 		NewAddress: newAddress.Hex(),
 	}, nil
 }
