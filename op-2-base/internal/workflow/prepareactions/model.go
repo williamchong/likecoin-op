@@ -54,19 +54,17 @@ type PrepareMintNFTActionOutput struct {
 }
 
 type Output struct {
-	NewClassActions []*PrepareNewClassActionOutput `json:"new_class_actions"`
-	MintNFTActions  []*PrepareMintNFTActionOutput  `json:"mint_nft_actions"`
+	NewClassAction *PrepareNewClassActionOutput  `json:"new_class_action"`
+	MintNFTActions []*PrepareMintNFTActionOutput `json:"mint_nft_actions"`
 }
 
 func (o *Output) Merge(others ...*Output) *Output {
-	newClassActions := o.NewClassActions
 	mintNFTActions := o.MintNFTActions
 	for _, other := range others {
-		newClassActions = append(newClassActions, other.NewClassActions...)
 		mintNFTActions = append(mintNFTActions, other.MintNFTActions...)
 	}
 	return &Output{
-		NewClassActions: newClassActions,
-		MintNFTActions:  mintNFTActions,
+		NewClassAction: o.NewClassAction,
+		MintNFTActions: mintNFTActions,
 	}
 }

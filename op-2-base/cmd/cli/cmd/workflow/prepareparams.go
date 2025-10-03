@@ -36,7 +36,6 @@ var PrepareParamsCmd = &cobra.Command{
 			panic(err)
 		}
 
-		logger = logger.With("newClassActionsCount", len(actions.NewClassActions))
 		logger = logger.With("mintNFTsCount", len(actions.MintNFTActions))
 
 		prepareNewNFTClassParam := newnftclass.NewPrepareNewNFTClassParam(
@@ -48,20 +47,17 @@ var PrepareParamsCmd = &cobra.Command{
 		prepareMintNFTsParam := mintnfts.NewPrepareMintNFTsParam()
 
 		newNFTClassParams := make([]*newnftclass.Output, 0)
-		for i, action := range actions.NewClassActions {
-			logger := logger.With("newClassActionIndex", i)
-			newNFTClassParam, err := prepareNewNFTClassParam.Prepare(
-				cmd.Context(),
-				logger,
-				&newnftclass.Input{
-					PrepareNewClassActionOutput: *action,
-				},
-			)
-			if err != nil {
-				panic(err)
-			}
-			newNFTClassParams = append(newNFTClassParams, newNFTClassParam)
+		newNFTClassParam, err := prepareNewNFTClassParam.Prepare(
+			cmd.Context(),
+			logger,
+			&newnftclass.Input{
+				PrepareNewClassActionOutput: *actions.NewClassAction,
+			},
+		)
+		if err != nil {
+			panic(err)
 		}
+		newNFTClassParams = append(newNFTClassParams, newNFTClassParam)
 		mintNFTsParams := make([]*mintnfts.Output, 0)
 		for i, action := range actions.MintNFTActions {
 			logger := logger.With("mintNFTsIndex", i)

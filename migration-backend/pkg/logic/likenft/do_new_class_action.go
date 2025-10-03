@@ -120,7 +120,13 @@ func DoNewClassAction(
 	}
 	msgSender := common.HexToAddress(*msgSenderStr)
 
-	salt, err := evm.ComputeNewBookNFTSalt(msgSender, [2]byte{0, 0}, contractLevelMetadata)
+	var saltData string = ""
+	if contractLevelMetadata.PotentialAction != nil &&
+		len(contractLevelMetadata.PotentialAction.Target) > 0 {
+		saltData = contractLevelMetadata.PotentialAction.Target[0].Url
+	}
+
+	salt, err := evm.ComputeSaltDataFromCandidates(msgSender, [2]byte{0, 0}, saltData)
 	if err != nil {
 		return nil, doNewClassActionFailed(db, a, err)
 	}

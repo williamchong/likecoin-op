@@ -57,7 +57,16 @@ func (n *newNFTClassAirdrop) Airdrop(
 	}
 	signerAddress := common.HexToAddress(*signerAddressStr)
 
-	salt, err := evm.ComputeNewBookNFTSalt(signerAddress, [2]byte{0, 0}, input.Metadata)
+	saltData := input.Salt
+	if saltData == nil || *saltData == "" {
+		saltData = input.Salt2
+	}
+
+	salt, err := evm.ComputeSaltDataFromCandidates(
+		signerAddress,
+		[2]byte{0, 0},
+		*saltData,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to compute new book nft salt: %v", err)
 	}

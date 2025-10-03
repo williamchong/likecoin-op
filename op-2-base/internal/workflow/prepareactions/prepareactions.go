@@ -74,11 +74,15 @@ func (p *prepareNewNFTClassAction) Prepare(
 		return nil, fmt.Errorf("creationCode.MakeInitCodeHash: %v", err)
 	}
 
+	saltData := input.Salt
+	if saltData == nil || *saltData == "" {
+		saltData = input.Salt2
+	}
+
 	salt, err := evm.ComputeSaltDataFromCandidates(
 		p.signerAddress,
 		[2]byte{0, 0},
-		input.Salt,
-		input.Salt2,
+		*saltData,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("evm.ComputeNewBookNFTSalt: %v", err)
@@ -152,18 +156,16 @@ func (p *prepareNewNFTClassAction) Prepare(
 	}
 
 	output := &Output{
-		NewClassActions: []*PrepareNewClassActionOutput{
-			{
-				BookNFTInput: input.BookNFTInput,
-				PreparedNewClassAction: PreparedNewClassAction{
-					CosmosClassId:          cosmosClassId,
-					InitialOwner:           initialOwner,
-					InitialMinters:         initialMinters,
-					InitialUpdaters:        initialUpdaters,
-					InitialBatchMintOwner:  initialBatchMintOwner,
-					DefaultRoyaltyFraction: defaultRoyaltyFraction.String(),
-					ShouldPremintAllNFTs:   shouldPremintAllNFTs,
-				},
+		NewClassAction: &PrepareNewClassActionOutput{
+			BookNFTInput: input.BookNFTInput,
+			PreparedNewClassAction: PreparedNewClassAction{
+				CosmosClassId:          cosmosClassId,
+				InitialOwner:           initialOwner,
+				InitialMinters:         initialMinters,
+				InitialUpdaters:        initialUpdaters,
+				InitialBatchMintOwner:  initialBatchMintOwner,
+				DefaultRoyaltyFraction: defaultRoyaltyFraction.String(),
+				ShouldPremintAllNFTs:   shouldPremintAllNFTs,
 			},
 		},
 		MintNFTActions: mintNFTActions,

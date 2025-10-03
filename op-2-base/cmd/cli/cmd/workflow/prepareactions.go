@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"slices"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -20,13 +21,14 @@ import (
 )
 
 var PrepareActionsCmd = &cobra.Command{
-	Use:   "prepare-actions <indexer-dump-path> <nfts-dump-path> <memos-dump-path>",
+	Use:   "prepare-actions <indexer-dump-path> <nfts-dump-path> <memos-dump-path> <book-nft-id>",
 	Short: "Prepare actions",
-	Args:  cobra.ExactArgs(3),
+	Args:  cobra.ExactArgs(4),
 	Run: func(cmd *cobra.Command, args []string) {
 		indexerDumpPath := args[0]
 		nftsDumpPath := args[1]
 		memosDumpPath := args[2]
+		bookNFTId := args[3]
 
 		envCfg := context.ConfigFromContext(cmd.Context())
 
@@ -63,6 +65,13 @@ var PrepareActionsCmd = &cobra.Command{
 			panic(err)
 		}
 
+		bookNFTInputs := make([]*prepareactions.BookNFTInput, 0)
+
+		err = json.Unmarshal(indexerDump, &bookNFTInputs)
+		if err != nil {
+			log.Fatalf("failed to unmarshal indexer dump: %v", err)
+		}
+
 		nftsDump, err := os.ReadFile(nftsDumpPath)
 		if err != nil {
 			log.Fatalf("failed to read nfts dump: %v", err)
@@ -70,16 +79,10 @@ var PrepareActionsCmd = &cobra.Command{
 		}
 
 		var nfts []preparenfts.Output
+
 		err = json.Unmarshal(nftsDump, &nfts)
 		if err != nil {
 			log.Fatalf("failed to unmarshal nfts dump: %v", err)
-		}
-		nftsMap := make(map[string][]preparenfts.Output)
-		for _, nft := range nfts {
-			if _, ok := nftsMap[nft.ContractAddress]; !ok {
-				nftsMap[nft.ContractAddress] = make([]preparenfts.Output, 0)
-			}
-			nftsMap[nft.ContractAddress] = append(nftsMap[nft.ContractAddress], nft)
 		}
 
 		memosDump, err := os.ReadFile(memosDumpPath)
@@ -89,19 +92,52 @@ var PrepareActionsCmd = &cobra.Command{
 		}
 
 		var memos []preparememos.Output
+
 		err = json.Unmarshal(memosDump, &memos)
 		if err != nil {
 			log.Fatalf("failed to unmarshal memos dump: %v", err)
 			panic(err)
 		}
 
-		memosByBookNFTId := make(map[string][]preparememos.Output)
-		for _, memo := range memos {
-			if _, ok := memosByBookNFTId[memo.BookNFTId]; !ok {
-				memosByBookNFTId[memo.BookNFTId] = make([]preparememos.Output, 0)
+		// End of reading files
+
+		var bookNFTInput *prepareactions.BookNFTInput = nil
+		for _, i := range bookNFTInputs {
+			if i.OpAddress == bookNFTId {
+				bookNFTInput = i
+				break
 			}
-			memosByBookNFTId[memo.BookNFTId] = append(memosByBookNFTId[memo.BookNFTId], memo)
 		}
+
+		if bookNFTInput == nil {
+			log.Fatalf("book nft input not found for book nft id: %s", bookNFTId)
+		}
+
+		nftsOfBookNFTId := make([]preparenfts.Output, 0)
+		for _, nft := range nfts {
+			if nft.ContractAddress == bookNFTInput.OpAddress {
+				nftsOfBookNFTId = append(nftsOfBookNFTId, nft)
+			}
+		}
+
+		slices.SortFunc(nftsOfBookNFTId, func(a, b preparenfts.Output) int {
+			if a.TokenId < b.TokenId {
+				return -1
+			}
+			if a.TokenId > b.TokenId {
+				return 1
+			}
+			return 0
+		})
+
+		memosOfBookNFTId := make([]preparememos.Output, 0)
+		for _, memo := range memos {
+			if memo.BookNFTId == bookNFTInput.OpAddress {
+				memosOfBookNFTId = append(memosOfBookNFTId, memo)
+			}
+		}
+
+		// End of processing data
 
 		prepareActions := prepareactions.NewPrepareNewNFTClassAction(
 			&http.Client{
@@ -113,45 +149,23 @@ var PrepareActionsCmd = &cobra.Command{
 			signerAddress,
 		)
 
-		bookNFTInputs := make([]*prepareactions.BookNFTInput, 0)
-
-		err = json.Unmarshal(indexerDump, &bookNFTInputs)
-		if err != nil {
-			log.Fatalf("failed to unmarshal indexer dump: %v", err)
-		}
-
 		logger = logger.With("count", len(bookNFTInputs))
 
-		outputs := make([]*prepareactions.Output, 0)
-		for i, bookNFTInput := range bookNFTInputs {
-			logger := logger.With("index", i)
-			nfts, ok := nftsMap[bookNFTInput.OpAddress]
-			if !ok {
-				log.Fatalf("nfts not found for contract address: %s", bookNFTInput.OpAddress)
-			}
-			memosOfBookNFTId, ok := memosByBookNFTId[bookNFTInput.OpAddress]
-			if !ok {
-				log.Fatalf("memos not found for contract address: %s", bookNFTInput.OpAddress)
-				memosOfBookNFTId = make([]preparememos.Output, 0)
-			}
-			input := &prepareactions.Input{
-				BookNFTInput: *bookNFTInput,
-				NFTsInput: prepareactions.NFTsInput{
-					NFTs: nfts,
-				},
-				MemosInput: prepareactions.MemosInput{
-					Memos: memosOfBookNFTId,
-				},
-			}
-			output, err := prepareActions.Prepare(cmd.Context(), logger, input)
-			if err != nil {
-				log.Fatalf("failed to prepare actions: %v", err)
-			}
-			outputs = append(outputs, output)
+		input := &prepareactions.Input{
+			BookNFTInput: *bookNFTInput,
+			NFTsInput: prepareactions.NFTsInput{
+				NFTs: nftsOfBookNFTId,
+			},
+			MemosInput: prepareactions.MemosInput{
+				Memos: memosOfBookNFTId,
+			},
 		}
-		prepareActionsOutput := new(prepareactions.Output).Merge(outputs...)
+		output, err := prepareActions.Prepare(cmd.Context(), logger, input)
+		if err != nil {
+			log.Fatalf("failed to prepare actions: %v", err)
+		}
 
-		json.NewEncoder(os.Stdout).Encode(prepareActionsOutput)
+		json.NewEncoder(os.Stdout).Encode(output)
 	},
 }
 

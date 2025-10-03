@@ -96,7 +96,14 @@ var AirdropCmd = &cobra.Command{
 			chunks := slices.Collect(slices.Chunk(paramsOfBookNFT, 10))
 			logger := logger.With("classId", classId, "numOfChunks", len(chunks))
 			for i, chunk := range chunks {
-				logger := logger.With("chunkIndex", i)
+				logger := logger.With(
+					"chunkIndex", i,
+				)
+				logger.Info(
+					"Minting NFTs...",
+					"fromTokenId", chunk[0].TokenId,
+					"toTokenId", chunk[len(chunk)-1].TokenId,
+				)
 				output, err := airdropMintNFTs.Airdrop(cmd.Context(), logger, chunk)
 				if err != nil {
 					panic(err)

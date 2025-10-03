@@ -42,11 +42,15 @@ func NewComputeAddress(
 }
 
 func (c *computeAddress) Compute(input *Input) (*Output, error) {
+	saltData := input.Salt
+	if saltData == nil || *saltData == "" {
+		saltData = input.Salt2
+	}
+
 	salt, err := evm.ComputeSaltDataFromCandidates(
 		c.signerAddress,
 		[2]byte{0, 0},
-		input.Salt,
-		input.Salt2,
+		*saltData,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("evm.ComputeNewBookNFTSalt: %v", err)
