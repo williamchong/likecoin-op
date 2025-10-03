@@ -82,7 +82,7 @@ func (n *newNFTClassAirdrop) Airdrop(
 		return nil, fmt.Errorf("failed to parse default royalty fraction: %s", input.DefaultRoyaltyFraction)
 	}
 
-	tx, txReceipt, err := n.baseLikeProtocol.NewBookNFTWithRoyaltyAndSalt(
+	tx, txReceipt, err := n.baseLikeProtocol.NewBookNFT(
 		ctx, logger,
 		salt,
 		like_protocol.MsgNewBookNFT{

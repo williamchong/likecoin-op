@@ -14,7 +14,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/signer"
 )
 
-func MakeNewBookNFTWithRoyaltyAndSaltRequestBody(
+func MakeNewBookNFTRequestBody(
 	contractAddress string,
 	salt [32]byte,
 	msgNewBookNFT like_protocol.MsgNewBookNFT,
@@ -22,14 +22,14 @@ func MakeNewBookNFTWithRoyaltyAndSaltRequestBody(
 ) (*signer.CreateEvmTransactionRequestRequestBody, error) {
 	return signer.MakeCreateEvmTransactionRequestRequestBody(
 		like_protocol.LikeProtocolMetaData,
-		"newBookNFTWithRoyaltyAndSalt",
+		"newBookNFT",
 		salt,
 		msgNewBookNFT,
 		royaltyFraction,
 	)(contractAddress)
 }
 
-func (l *LikeProtocol) NewBookNFTWithRoyaltyAndSalt(
+func (l *LikeProtocol) NewBookNFT(
 	ctx context.Context,
 	logger *slog.Logger,
 
@@ -37,11 +37,11 @@ func (l *LikeProtocol) NewBookNFTWithRoyaltyAndSalt(
 	msgNewBookNFT like_protocol.MsgNewBookNFT,
 	royaltyFraction *big.Int,
 ) (*types.Transaction, *types.Receipt, error) {
-	logger.Info("NewBookNFTWithRoyaltyAndSalt")
+	logger.Info("NewBookNFT")
 
-	mylogger := logger.WithGroup("NewBookNFTWithRoyaltyAndSalt")
+	mylogger := logger.WithGroup("NewBookNFT")
 
-	r, err := MakeNewBookNFTWithRoyaltyAndSaltRequestBody(
+	r, err := MakeNewBookNFTRequestBody(
 		l.ContractAddress.Hex(), salt, msgNewBookNFT, royaltyFraction,
 	)
 	if err != nil {

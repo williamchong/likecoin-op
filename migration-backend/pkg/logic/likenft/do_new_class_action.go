@@ -125,7 +125,7 @@ func DoNewClassAction(
 		return nil, doNewClassActionFailed(db, a, err)
 	}
 
-	tx, txReceipt, err := n.NewBookNFTWithRoyaltyAndSalt(
+	tx, txReceipt, err := n.NewBookNFT(
 		ctx,
 		mylogger,
 		salt,
