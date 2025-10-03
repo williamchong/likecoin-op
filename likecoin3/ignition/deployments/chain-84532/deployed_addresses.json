@@ -17,5 +17,6 @@
   "LikeProtocolV1Module#LikeProtocolV1Impl": "0x5cF3f901e81041d71e0d92EdbF8Dcc43bEA50433",
   "LikeProtocolV0Module#ERC1967Proxy": "0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5",
   "LikeProtocolV0Module#LikeProtocolV0": "0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5",
-  "LikeProtocolV1Module#LikeProtocol": "0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5"
+  "LikeProtocolV1Module#LikeProtocol": "0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5",
+  "LikeProtocolModule#LikeProtocolImpl": "0x05857EE837AB29fF79C7BB1d4c642b2C9dd10FA5"
 }

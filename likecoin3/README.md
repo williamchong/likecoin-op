@@ -38,6 +38,34 @@ npm run deploy:noverify -- --network superism1
 DOTENV_CONFIG_PATH=.env npm run deploy -- --network baseSepolia
 ```
 
+For upgrading the LikeProtocol
+Swipe if there is previous deployment: 
+
+```
+npx hardhat ignition wipe chain-84532 LikeProtocolModule#LikeProtocolImpl
+```
+```
+DOTENV_CONFIG_PATH=.env \
+    npx hardhat ignition deploy \
+    ignition/modules/LikeProtocol.ts \
+    --verify --strategy create2 \
+    --parameters ignition/parameters.json --network baseSepolia
+```
+
+Manually switch version, it's not managed by ignition
+
+
+```
+cast send 0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5 \
+    "upgradeToAndCall(address newImplementation, bytes data)" \
+    0x05857EE837AB29fF79C7BB1d4c642b2C9dd10FA5 \
+    0x \
+    --rpc-url https://base-sepolia.g.alchemy.com/v2/OM1XAvx0Dwavrz6MQn5aG \
+    --account likecoin-deployer.eth 
+```
+
+cast
+
 #### Verification
 
 ignition should verify the contract on etherscan & sourcify. In case the request fails (like rate limit), run `DOTENV_CONFIG_PATH=.env npx hardhat verify --network sepolia 0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf`, in some testnet, etherscan will fail while sourcify will success.
