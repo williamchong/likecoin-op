@@ -9,11 +9,13 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestMakeNewBookNFTWithRoyaltyRequestBody(t *testing.T) {
-	Convey("MakeNewBookNFTWithRoyaltyRequestBody", t, func() {
+func TestMakeNewBookNFTWithRoyaltyAndSaltRequestBody(t *testing.T) {
+	Convey("MakeNewBookNFTWithRoyaltyAndSaltRequestBody", t, func() {
 		msgNewBookNFT := like_protocol.MsgNewBookNFT{}
-		_, err := evm.MakeNewBookNFTWithRoyaltyRequestBody(
+		salt := [32]byte{}
+		_, err := evm.MakeNewBookNFTWithRoyaltyAndSaltRequestBody(
 			"0x0",
+			salt,
 			msgNewBookNFT,
 			big.NewInt(10),
 		)

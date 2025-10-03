@@ -1,6 +1,11 @@
 [
   {
     "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
     "name": "AccessControlBadConfirmation",
     "type": "error"
   },
@@ -161,7 +166,17 @@
   },
   {
     "inputs": [],
+    "name": "ErrMemoMetadataLengthMismatch",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "ErrNftNoSupply",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrSupplyDecrease",
     "type": "error"
   },
   {
@@ -805,53 +820,64 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "internalType": "address[]",
+        "name": "minters",
+        "type": "address[]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "updaters",
+        "type": "address[]"
+      },
+      {
         "components": [
           {
-            "internalType": "address",
-            "name": "creator",
-            "type": "address"
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
           },
           {
-            "internalType": "address[]",
-            "name": "updaters",
-            "type": "address[]"
+            "internalType": "string",
+            "name": "symbol",
+            "type": "string"
           },
           {
-            "internalType": "address[]",
-            "name": "minters",
-            "type": "address[]"
+            "internalType": "string",
+            "name": "metadata",
+            "type": "string"
           },
           {
-            "components": [
-              {
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-              },
-              {
-                "internalType": "string",
-                "name": "symbol",
-                "type": "string"
-              },
-              {
-                "internalType": "string",
-                "name": "metadata",
-                "type": "string"
-              },
-              {
-                "internalType": "uint64",
-                "name": "max_supply",
-                "type": "uint64"
-              }
-            ],
-            "internalType": "struct BookConfig",
-            "name": "config",
-            "type": "tuple"
+            "internalType": "uint64",
+            "name": "max_supply",
+            "type": "uint64"
           }
         ],
-        "internalType": "struct MsgNewBookNFT",
-        "name": "msgNewBookNFT",
+        "internalType": "struct BookConfig",
+        "name": "config",
         "type": "tuple"
+      }
+    ],
+    "name": "initConfig",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "name_",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "symbol_",
+        "type": "string"
       }
     ],
     "name": "initialize",
