@@ -5,7 +5,7 @@ import { ethers, viem } from "hardhat";
 
 import "./setup";
 import { BookConfigLoader, BookTokenConfigLoader } from "./BookConfigLoader";
-import { deployProtocol } from "./factory";
+import { defaultSalt, deployProtocol, ROYALTY_DEFAULT } from "./factory";
 
 describe("BookNFTClass", () => {
   async function initMint() {
@@ -25,12 +25,14 @@ describe("BookNFTClass", () => {
     );
 
     await likeProtocol.write.newBookNFT([
+      defaultSalt(deployer, bookConfig),
       {
         creator: classOwner.account.address,
         updaters: [classOwner.account.address, likerLand.account.address],
         minters: [classOwner.account.address, likerLand.account.address],
         config: bookConfig,
       },
+      ROYALTY_DEFAULT,
     ]);
     const newClassLogs = await likeProtocol.getEvents.NewBookNFT();
     const nftClassId = newClassLogs[newClassLogs.length - 1].args.bookNFT;
@@ -569,12 +571,14 @@ describe("BookNFT permission control", () => {
       "./test/fixtures/BookConfig0.json",
     );
     await likeProtocol.write.newBookNFT([
+      defaultSalt(deployer, bookConfig),
       {
         creator: classOwner.account.address,
         updaters: [classOwner.account.address, likerLand.account.address],
         minters: [classOwner.account.address, likerLand.account.address],
         config: bookConfig,
       },
+      ROYALTY_DEFAULT,
     ]);
     const newClassLogs = await likeProtocol.getEvents.NewBookNFT();
     const nftClassId = newClassLogs[newClassLogs.length - 1].args.bookNFT;
@@ -869,12 +873,14 @@ describe("BookNFT ownership transfer", () => {
     };
 
     await likeProtocol.write.newBookNFT([
+      defaultSalt(deployer, bookConfig),
       {
         creator: classOwner.account.address,
         updaters: [classOwner.account.address, likerLand.account.address],
         minters: [classOwner.account.address, likerLand.account.address],
         config: bookConfig,
       },
+      ROYALTY_DEFAULT,
     ]);
     const newClassLogs = await likeProtocol.getEvents.NewBookNFT();
     const nftClassId = newClassLogs[newClassLogs.length - 1].args.bookNFT;
@@ -1162,12 +1168,14 @@ describe("BookNFT config validation", () => {
       "./test/fixtures/BookConfig0.json",
     );
     await likeProtocol.write.newBookNFT([
+      defaultSalt(deployer, bookConfig),
       {
         creator: classOwner.account.address,
         updaters: [classOwner.account.address, likerLand.account.address],
         minters: [classOwner.account.address, likerLand.account.address],
         config: bookConfig,
       },
+      ROYALTY_DEFAULT,
     ]);
     const newClassLogs = await likeProtocol.getEvents.NewBookNFT();
     const nftClassId = newClassLogs[newClassLogs.length - 1].args.bookNFT;
@@ -1202,11 +1210,12 @@ describe("BookNFT config validation", () => {
   });
 
   it("should reject empty name in constructor", async function () {
-    const { likeProtocol, classOwner } =
+    const { likeProtocol, classOwner, deployer } =
       await loadFixture(initConfigValidation);
 
     await expect(
       likeProtocol.write.newBookNFT([
+        defaultSalt(deployer, { name: "", symbol: "KOOB" }),
         {
           creator: classOwner.account.address,
           updaters: [classOwner.account.address],
@@ -1221,6 +1230,7 @@ describe("BookNFT config validation", () => {
             max_supply: 10n,
           },
         },
+        ROYALTY_DEFAULT,
       ]),
     ).to.be.rejectedWith("ErrEmptyName()");
   });
@@ -1363,7 +1373,8 @@ describe("BookNFT royalty", () => {
       "./test/fixtures/BookConfig0.json",
     );
     await likeProtocol.write.setRoyaltyReceiver([deployer.account.address]);
-    await likeProtocol.write.newBookNFTWithRoyalty([
+    await likeProtocol.write.newBookNFT([
+      defaultSalt(deployer, bookConfig),
       {
         creator: classOwner.account.address,
         updaters: [classOwner.account.address, likerLand.account.address],
@@ -1455,12 +1466,14 @@ describe("BookNFT version", () => {
       "./test/fixtures/BookConfig0.json",
     );
     await likeProtocol.write.newBookNFT([
+      defaultSalt(deployer, bookConfig),
       {
         creator: classOwner.account.address,
         updaters: [classOwner.account.address, likerLand.account.address],
         minters: [classOwner.account.address, likerLand.account.address],
         config: bookConfig,
       },
+      ROYALTY_DEFAULT,
     ]);
     const newClassLogs = await likeProtocol.getEvents.NewBookNFT();
     const nftClassId = newClassLogs[newClassLogs.length - 1].args.bookNFT;

@@ -6,6 +6,17 @@ import { encodeFunctionData } from "viem";
 import "./setup";
 import { BookConfigLoader } from "./BookConfigLoader";
 import { deployProtocol } from "./factory";
+import { defaultSalt, ROYALTY_DEFAULT } from "./factory";
+
+describe("LikeProtocol test helpers", () => {
+  it("should have the correct default salt", async function () {
+    const { deployer } = await loadFixture(deployProtocol);
+    const salt = defaultSalt(deployer, { name: "My Book", symbol: "KOOB" });
+    expect(salt).to.equal(
+      "0xf39fd6e51aad88f6f4ce6ab8827279cfffb922660000a21e72ac872be7e8c07c",
+    );
+  });
+});
 
 describe("LikeProtocol as Beacon Factory", () => {
   it("should be able to create new BookNFT", async function () {
@@ -25,12 +36,14 @@ describe("LikeProtocol as Beacon Factory", () => {
     });
 
     await likeProtocol.write.newBookNFT([
+      defaultSalt(deployer, bookConfig),
       {
         creator: deployer.account.address,
         updaters: [deployer.account.address],
         minters: [deployer.account.address],
         config: bookConfig,
       },
+      0n,
     ]);
 
     const { id: classId } = await NewClassEvent;
@@ -38,14 +51,12 @@ describe("LikeProtocol as Beacon Factory", () => {
     expect(await newNFTClass.read.name()).to.equal("My Book");
     expect(await newNFTClass.read.symbol()).to.equal("KOOB");
     const beacon = await newNFTClass.read.getProtocolBeacon();
-    expect(beacon.toLowerCase()).to.equal(likeProtocol.address.toLowerCase());
+    expect(beacon).to.equalAddress(likeProtocol.address);
     expect(await newNFTClass.read.contractURI()).to.equal(
       "data:application/json;base64,eyJuYW1lIjoiQ29sbGVjdGlvbiBOYW1lIiwic3ltYm9sIjoiQ29sbGVjdGlvbiBTWU1CIiwiZGVzY3JpcHRpb24iOiJDb2xsZWN0aW9uIERlc2NyaXB0aW9uIiwiaW1hZ2UiOiJpcGZzOi8vYmFmeWJlaWV6cTR5cW9zYzJ1NHNhYW5vdmU1YnNhM3ljaXVmd2hmZHVlbXk1ejZ2dmY2cTNjNWxuYmkiLCJiYW5uZXJfaW1hZ2UiOiIiLCJmZWF0dXJlZF9pbWFnZSI6IiIsImV4dGVybmFsX2xpbmsiOiJodHRwczovL3d3dy5leGFtcGxlLmNvbSIsImNvbGxhYm9yYXRvcnMiOltdfQ==",
     );
     const royalty = await newNFTClass.read.royaltyInfo([0n, 1000n]);
-    expect(royalty[0].toLowerCase()).to.equal(
-      deployer.account.address.toLowerCase(),
-    );
+    expect(royalty[0]).to.equalAddress(deployer.account.address);
     expect(royalty[1]).to.equal(0n);
   });
 
@@ -55,7 +66,8 @@ describe("LikeProtocol as Beacon Factory", () => {
       "./test/fixtures/BookConfig0.json",
     );
 
-    await likeProtocol.write.newBookNFTWithRoyalty([
+    await likeProtocol.write.newBookNFT([
+      defaultSalt(deployer, bookConfig),
       {
         creator: deployer.account.address,
         updaters: [deployer.account.address],
@@ -127,12 +139,14 @@ describe("LikeProtocol as Beacon Factory", () => {
       });
     });
     await likeProtocol.write.newBookNFT([
+      defaultSalt(deployer, bookConfig),
       {
         creator: deployer.account.address,
         updaters: [deployer.account.address],
         minters: [deployer.account.address],
         config: bookConfig,
       },
+      ROYALTY_DEFAULT,
     ]);
     const { id: classId } = await NewClassEvent;
 
@@ -151,12 +165,14 @@ describe("LikeProtocol as Beacon Factory", () => {
     );
     await likeProtocol.write.newBookNFT(
       [
+        defaultSalt(deployer, bookConfig),
         {
           creator: deployer.account.address,
           updaters: [deployer.account.address],
           minters: [deployer.account.address],
           config: bookConfig,
         },
+        ROYALTY_DEFAULT,
       ],
       {
         account: deployer.account,
@@ -165,12 +181,14 @@ describe("LikeProtocol as Beacon Factory", () => {
     await expect(
       likeProtocol.write.newBookNFT(
         [
+          defaultSalt(deployer, bookConfig),
           {
             creator: deployer.account.address,
             updaters: [deployer.account.address],
             minters: [deployer.account.address],
             config: bookConfig,
           },
+          ROYALTY_DEFAULT,
         ],
         {
           account: deployer.account,
@@ -183,6 +201,7 @@ describe("LikeProtocol as Beacon Factory", () => {
     const { likeProtocol, deployer } = await loadFixture(deployProtocol);
     const classOperation = async () => {
       await likeProtocol.write.newBookNFT([
+        defaultSalt(deployer, { name: "My Book", symbol: "KOOB" }),
         {
           creator: deployer.account.address,
           updaters: [deployer.account.address],
@@ -204,6 +223,7 @@ describe("LikeProtocol as Beacon Factory", () => {
             max_supply: 10n,
           },
         },
+        ROYALTY_DEFAULT,
       ]);
     };
 
@@ -220,6 +240,7 @@ describe("LikeProtocol as Beacon Factory", () => {
     const newClass = async () => {
       await likeProtocol.write.newBookNFT(
         [
+          defaultSalt(randomSigner, { name: "My Book", symbol: "KOOB" }),
           {
             creator: randomSigner.account.address,
             updaters: [randomSigner.account.address],
@@ -234,6 +255,7 @@ describe("LikeProtocol as Beacon Factory", () => {
               max_supply: 10n,
             },
           },
+          ROYALTY_DEFAULT,
         ],
         { account: randomSigner.account },
       );
@@ -247,6 +269,7 @@ describe("LikeProtocol as Beacon Factory", () => {
     const newClass = async () => {
       await likeProtocol.write.newBookNFT(
         [
+          defaultSalt(randomSigner, { name: "My Book", symbol: "KOOB" }),
           {
             creator: randomSigner.account.address,
             updaters: [randomSigner.account.address],
@@ -261,6 +284,7 @@ describe("LikeProtocol as Beacon Factory", () => {
               max_supply: 0n,
             },
           },
+          ROYALTY_DEFAULT,
         ],
         { account: randomSigner.account },
       );
@@ -275,6 +299,7 @@ describe("LikeProtocol as Beacon Factory", () => {
     const classOperation = async () => {
       await likeProtocol.write.newBookNFT(
         [
+          defaultSalt(randomSigner, { name: "My Book", symbol: "KOOB" }),
           {
             creator: randomSigner.account.address,
             updaters: [randomSigner.account.address],
@@ -289,6 +314,7 @@ describe("LikeProtocol as Beacon Factory", () => {
               max_supply: 10n,
             },
           },
+          ROYALTY_DEFAULT,
         ],
         { account: randomSigner.account },
       );
@@ -310,12 +336,14 @@ describe("LikeProtocol as Beacon Factory with deterministic address", () => {
       "./test/fixtures/BookConfig0.json",
     );
     await likeProtocol.write.newBookNFT([
+      defaultSalt(deployer, bookConfig),
       {
         creator: deployer.account.address,
         updaters: [deployer.account.address],
         minters: [deployer.account.address],
         config: bookConfig,
       },
+      ROYALTY_DEFAULT,
     ]);
     const logs = await likeProtocol.getEvents.NewBookNFT();
     expect(logs.length).to.equal(1);
@@ -387,9 +415,12 @@ describe("LikeProtocol as Beacon Factory with deterministic address", () => {
       [salt, msgNewBookNFT],
     );
 
-    await likeProtocol.write.newBookNFTWithSalt([salt, msgNewBookNFT], {
-      account: deployer.account,
-    });
+    await likeProtocol.write.newBookNFT(
+      [salt, msgNewBookNFT, ROYALTY_DEFAULT],
+      {
+        account: deployer.account,
+      },
+    );
     const logs = await likeProtocol.getEvents.NewBookNFT();
     expect(logs.length).to.equal(1);
     const actualAddress = logs[0].args.bookNFT;
@@ -404,10 +435,8 @@ describe("LikeProtocol as Beacon Factory with deterministic address", () => {
       "data:application/json;base64,eyJuYW1lIjoiQ29sbGVjdGlvbiBOYW1lIiwic3ltYm9sIjoiQ29sbGVjdGlvbiBTWU1CIiwiZGVzY3JpcHRpb24iOiJDb2xsZWN0aW9uIERlc2NyaXB0aW9uIiwiaW1hZ2UiOiJpcGZzOi8vYmFmeWJlaWV6cTR5cW9zYzJ1NHNhYW5vdmU1YnNhM3ljaXVmd2hmZHVlbXk1ejZ2dmY2cTNjNWxuYmkiLCJiYW5uZXJfaW1hZ2UiOiIiLCJmZWF0dXJlZF9pbWFnZSI6IiIsImV4dGVybmFsX2xpbmsiOiJodHRwczovL3d3dy5leGFtcGxlLmNvbSIsImNvbGxhYm9yYXRvcnMiOltdfQ==",
     );
     const royalty = await book0NFT.read.royaltyInfo([0n, 1000n]);
-    expect(royalty[0].toLowerCase()).to.equal(
-      deployer.account.address.toLowerCase(),
-    );
-    expect(royalty[1]).to.equal(0n);
+    expect(royalty[0]).to.equalAddress(deployer.account.address);
+    expect(royalty[1]).to.equal(50n);
 
     expect(actualAddress).to.equalAddress(precomputedAddress);
   });
@@ -430,16 +459,19 @@ describe("LikeProtocol as Beacon Factory with deterministic address", () => {
       [salt, msgNewBookNFT],
     );
 
-    await likeProtocol.write.newBookNFTWithSalt([salt, msgNewBookNFT], {
-      account: deployer.account,
-    });
+    await likeProtocol.write.newBookNFT(
+      [salt, msgNewBookNFT, ROYALTY_DEFAULT],
+      {
+        account: deployer.account,
+      },
+    );
     const logs = await likeProtocol.getEvents.NewBookNFT();
     expect(logs.length).to.equal(1);
     const actualAddress = logs[0].args.bookNFT;
     expect(await likeProtocol.read.isBookNFT([actualAddress])).to.be.true;
 
     await expect(
-      likeProtocol.write.newBookNFTWithSalt([salt, msgNewBookNFT], {
+      likeProtocol.write.newBookNFT([salt, msgNewBookNFT, ROYALTY_DEFAULT], {
         account: deployer.account,
       }),
     ).to.be.rejectedWith("FailedDeployment()");
@@ -558,12 +590,9 @@ describe("LikeProtocol as Beacon Factory with deterministic address", () => {
       minters: [deployer.account.address],
       config: bookConfig,
     };
-    await likeProtocol.write.newBookNFTWithRoyaltyAndSalt(
-      [salt, msgNewBookNFT, 100n],
-      {
-        account: deployer.account,
-      },
-    );
+    await likeProtocol.write.newBookNFT([salt, msgNewBookNFT, 100n], {
+      account: deployer.account,
+    });
     const logs = await likeProtocol.getEvents.NewBookNFT();
     expect(logs.length).to.equal(1);
     const bookNFTAddress = logs[0].args.bookNFT;

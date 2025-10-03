@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { viem } from "hardhat";
-import { deployProtocol } from "./factory";
+import { defaultSalt, deployProtocol, ROYALTY_DEFAULT } from "./factory";
 import "./setup";
 
 import { BookConfigLoader, BookTokenConfigLoader } from "./BookConfigLoader";
@@ -36,12 +36,14 @@ describe("BookNFTToken", () => {
     );
 
     await likeProtocol.write.newBookNFT([
+      defaultSalt(deployer, bookConfig),
       {
         creator: classOwner.account.address,
         updaters: [classOwner.account.address, likerLand.account.address],
         minters: [classOwner.account.address, likerLand.account.address],
         config: bookConfig,
       },
+      ROYALTY_DEFAULT,
     ]);
 
     const nftClassId = await NewClassEvent;
@@ -242,12 +244,14 @@ describe("BookNFTToken batch actions", () => {
     );
 
     await likeProtocol.write.newBookNFT([
+      defaultSalt(deployer, bookConfig),
       {
         creator: classOwner.account.address,
         updaters: [classOwner.account.address, likerLand.account.address],
         minters: [classOwner.account.address, likerLand.account.address],
         config: bookConfig,
       },
+      ROYALTY_DEFAULT,
     ]);
 
     const nftClassId = await NewClassEvent;
@@ -479,12 +483,14 @@ describe("BookNFTToken Burnable", () => {
     );
 
     await likeProtocol.write.newBookNFT([
+      defaultSalt(deployer, bookConfig),
       {
         creator: classOwner.account.address,
         updaters: [classOwner.account.address, likerLand.account.address],
         minters: [classOwner.account.address, likerLand.account.address],
         config: bookConfig,
       },
+      ROYALTY_DEFAULT,
     ]);
 
     const nftClassId = await NewClassEvent;
