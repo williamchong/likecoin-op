@@ -335,6 +335,11 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "salt",
+        "type": "bytes32"
+      },
+      {
         "components": [
           {
             "internalType": "address",
@@ -382,6 +387,11 @@
         "internalType": "struct MsgNewBookNFT",
         "name": "msgNewBookNFT",
         "type": "tuple"
+      },
+      {
+        "internalType": "uint96",
+        "name": "royaltyFraction",
+        "type": "uint96"
       }
     ],
     "name": "newBookNFT",
@@ -392,272 +402,6 @@
         "type": "address"
       }
     ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "creator",
-            "type": "address"
-          },
-          {
-            "internalType": "address[]",
-            "name": "updaters",
-            "type": "address[]"
-          },
-          {
-            "internalType": "address[]",
-            "name": "minters",
-            "type": "address[]"
-          },
-          {
-            "components": [
-              {
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-              },
-              {
-                "internalType": "string",
-                "name": "symbol",
-                "type": "string"
-              },
-              {
-                "internalType": "string",
-                "name": "metadata",
-                "type": "string"
-              },
-              {
-                "internalType": "uint64",
-                "name": "max_supply",
-                "type": "uint64"
-              }
-            ],
-            "internalType": "struct BookConfig",
-            "name": "config",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct MsgNewBookNFT",
-        "name": "msgNewBookNFT",
-        "type": "tuple"
-      },
-      {
-        "internalType": "uint96",
-        "name": "royaltyFraction",
-        "type": "uint96"
-      }
-    ],
-    "name": "newBookNFTWithRoyalty",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "bookAddress",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "salt",
-        "type": "bytes32"
-      },
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "creator",
-            "type": "address"
-          },
-          {
-            "internalType": "address[]",
-            "name": "updaters",
-            "type": "address[]"
-          },
-          {
-            "internalType": "address[]",
-            "name": "minters",
-            "type": "address[]"
-          },
-          {
-            "components": [
-              {
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-              },
-              {
-                "internalType": "string",
-                "name": "symbol",
-                "type": "string"
-              },
-              {
-                "internalType": "string",
-                "name": "metadata",
-                "type": "string"
-              },
-              {
-                "internalType": "uint64",
-                "name": "max_supply",
-                "type": "uint64"
-              }
-            ],
-            "internalType": "struct BookConfig",
-            "name": "config",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct MsgNewBookNFT",
-        "name": "msgNewBookNFT",
-        "type": "tuple"
-      },
-      {
-        "internalType": "uint96",
-        "name": "royaltyFraction",
-        "type": "uint96"
-      }
-    ],
-    "name": "newBookNFTWithRoyaltyAndSalt",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "bookAddress",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "salt",
-        "type": "bytes32"
-      },
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "creator",
-            "type": "address"
-          },
-          {
-            "internalType": "address[]",
-            "name": "updaters",
-            "type": "address[]"
-          },
-          {
-            "internalType": "address[]",
-            "name": "minters",
-            "type": "address[]"
-          },
-          {
-            "components": [
-              {
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-              },
-              {
-                "internalType": "string",
-                "name": "symbol",
-                "type": "string"
-              },
-              {
-                "internalType": "string",
-                "name": "metadata",
-                "type": "string"
-              },
-              {
-                "internalType": "uint64",
-                "name": "max_supply",
-                "type": "uint64"
-              }
-            ],
-            "internalType": "struct BookConfig",
-            "name": "config",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct MsgNewBookNFT",
-        "name": "msgNewBookNFT",
-        "type": "tuple"
-      }
-    ],
-    "name": "newBookNFTWithSalt",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "bookAddress",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "creator",
-            "type": "address"
-          },
-          {
-            "internalType": "address[]",
-            "name": "updaters",
-            "type": "address[]"
-          },
-          {
-            "internalType": "address[]",
-            "name": "minters",
-            "type": "address[]"
-          },
-          {
-            "components": [
-              {
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-              },
-              {
-                "internalType": "string",
-                "name": "symbol",
-                "type": "string"
-              },
-              {
-                "internalType": "string",
-                "name": "metadata",
-                "type": "string"
-              },
-              {
-                "internalType": "uint64",
-                "name": "max_supply",
-                "type": "uint64"
-              }
-            ],
-            "internalType": "struct BookConfig",
-            "name": "config",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct MsgNewBookNFT[]",
-        "name": "msgNewBookNFTs",
-        "type": "tuple[]"
-      }
-    ],
-    "name": "newBookNFTs",
-    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
