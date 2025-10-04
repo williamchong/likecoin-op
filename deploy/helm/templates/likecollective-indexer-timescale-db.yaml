@@ -1,13 +1,14 @@
+{{- if .Values.likecollectiveIndexer.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: {{ .Values.likecollectiveIndexer.timescaleDb.name }}
-  name: {{ .Values.likecollectiveIndexer.timescaleDb.name }}
+    app: {{ .Values.likecollectiveIndexer.name }}-timescale-db
+  name: {{ .Values.likecollectiveIndexer.name }}-timescale-db
   namespace: {{ .Values.namespace }}
 spec:
   selector:
-    app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.timescaleDb.name }}
+    app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.name }}-timescale-db
   ports:
   - protocol: TCP
     port: {{ .Values.likecollectiveIndexer.timescaleDb.service.port }}
@@ -18,7 +19,7 @@ kind: Secret
 metadata:
   labels:
     app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.name }}
-  name: {{ .Values.likecollectiveIndexer.timescaleDb.name }}
+  name: {{ .Values.likecollectiveIndexer.name }}-timescale-db
   namespace: {{ .Values.namespace }}
 type: Opaque
 data:
@@ -30,43 +31,43 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.timescaleDb.name }}
-  name: {{ .Values.likecollectiveIndexer.timescaleDb.name }}
+    app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.name }}-timescale-db
+  name: {{ .Values.likecollectiveIndexer.name }}-timescale-db
   namespace: {{ .Values.namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.timescaleDb.name }}
+      app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.name }}-timescale-db
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.timescaleDb.name }}
+        app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.name }}-timescale-db
     spec:
       restartPolicy: Always
       volumes:
-      - name: {{ .Values.likecollectiveIndexer.timescaleDb.name }}-psql-volume
+      - name: {{ .Values.likecollectiveIndexer.name }}-timescale-db-psql-volume
         persistentVolumeClaim:
-          claimName: {{ .Values.likecollectiveIndexer.timescaleDb.name }}-psql-volume-pvc
+          claimName: {{ .Values.likecollectiveIndexer.name }}-timescale-db-psql-volume-pvc
       containers:
-      - name: {{ .Values.likecollectiveIndexer.timescaleDb.name }}
+      - name: {{ .Values.likecollectiveIndexer.name }}-timescale-db
         image: {{ .Values.likecollectiveIndexer.timescaleDb.container.image }}
         imagePullPolicy: {{ .Values.likecollectiveIndexer.timescaleDb.container.imagePullPolicy }}
         envFrom:
           - secretRef:
-              name: {{ .Values.likecollectiveIndexer.timescaleDb.name }}
+              name: {{ .Values.likecollectiveIndexer.name }}-timescale-db
         ports:
         - containerPort: {{ .Values.likecollectiveIndexer.timescaleDb.container.port }}
         resources:
           {{- toYaml .Values.likecollectiveIndexer.timescaleDb.resources | nindent 12 }}
         volumeMounts:
-        - name: {{ .Values.likecollectiveIndexer.timescaleDb.name }}-psql-volume
+        - name: {{ .Values.likecollectiveIndexer.name }}-timescale-db-psql-volume
           mountPath: /var/lib/postgresql/data
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.likecollectiveIndexer.timescaleDb.name }}-psql-volume-pvc
+  name: {{ .Values.likecollectiveIndexer.name }}-timescale-db-psql-volume-pvc
   namespace: {{ .Values.namespace }}
 spec:
   accessModes:
@@ -75,3 +76,4 @@ spec:
     requests:
       storage: {{ .Values.likecollectiveIndexer.timescaleDb.psqlVolume.storage }}
   storageClassName: {{ .Values.likecollectiveIndexer.timescaleDb.psqlVolume.storageClass }}
+{{- end }}

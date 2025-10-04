@@ -1,3 +1,4 @@
+{{- if .Values.likecollectiveIndexer.enabled }}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -24,7 +25,7 @@ metadata:
   name: {{ .Values.likecollectiveIndexer.name }}-timescale-db-migrate
   namespace: {{ .Values.namespace }}
   annotations:
-    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook: post-install,post-upgrade
 spec:
   template:
     spec:
@@ -40,3 +41,4 @@ spec:
           {{- toYaml .Values.likecollectiveIndexer.resources | nindent 12 }}
       restartPolicy: "{{ .Values.likecollectiveIndexer.migrate.restartPolicy | default "Never" }}"
   backoffLimit: {{ .Values.likecollectiveIndexer.migrate.backoffLimit | default 1 }}
+{{- end }}
