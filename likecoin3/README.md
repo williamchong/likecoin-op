@@ -39,11 +39,12 @@ DOTENV_CONFIG_PATH=.env npm run deploy -- --network baseSepolia
 ```
 
 For upgrading the LikeProtocol
-Swipe if there is previous deployment: 
+Swipe if there is previous deployment:
 
 ```
 npx hardhat ignition wipe chain-84532 LikeProtocolModule#LikeProtocolImpl
 ```
+
 ```
 DOTENV_CONFIG_PATH=.env \
     npx hardhat ignition deploy \
@@ -54,17 +55,14 @@ DOTENV_CONFIG_PATH=.env \
 
 Manually switch version, it's not managed by ignition
 
-
 ```
 cast send 0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5 \
     "upgradeToAndCall(address newImplementation, bytes data)" \
     0x05857EE837AB29fF79C7BB1d4c642b2C9dd10FA5 \
     0x \
     --rpc-url https://base-sepolia.g.alchemy.com/v2/OM1XAvx0Dwavrz6MQn5aG \
-    --account likecoin-deployer.eth 
+    --account likecoin-deployer.eth
 ```
-
-cast
 
 #### Verification
 
