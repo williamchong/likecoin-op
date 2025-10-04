@@ -4,6 +4,7 @@ APP_VERSION ?= $(GIT_SHORT_HASH)
 ENV ?= dev
 
 K8S_NAMESPACE ?= likecoin-op
+DEPLOY_NAME ?= likecoin-op
 
 VALUE_FILES := -f helm/values.yaml \
 	-f helm/$(ENV)/values.yaml \
@@ -25,7 +26,7 @@ lint:
 
 .PHONY: deploy
 deploy:
-	helm upgrade likecoin-op helm --install \
+	helm upgrade $(DEPLOY_NAME) helm --install \
 		--wait --wait-for-jobs --cleanup-on-fail \
 		-n $(K8S_NAMESPACE) \
 		$(VALUE_FILES) \

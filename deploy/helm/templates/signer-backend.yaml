@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ .Values.signerBackend.name }}
+  name: {{ .Values.signerBackend.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app.kubernetes.io/component: {{ .Values.signerBackend.name }}
+  ports:
+  - protocol: TCP
+    port: {{ .Values.signerBackend.service.port }}
+    targetPort: {{ .Values.signerBackend.container.port }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: {{ .Values.signerBackend.name }}
+  name: {{ .Values.signerBackend.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: {{ .Values.signerBackend.name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: {{ .Values.signerBackend.name }}
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: {{ .Values.signerBackend.name }}
+        image: {{ .Values.signerBackend.container.imageRepository }}:{{ .Values.appVersion }}
+        imagePullPolicy: {{ .Values.signerBackend.container.imagePullPolicy}}
+        envFrom:
+          - secretRef:
+              name: {{ .Values.signerBackend.name }}
+          - secretRef:
+              name: signer-private-key
+        ports:
+        - containerPort: {{ .Values.signerBackend.container.port }}
+        resources:
+          {{- toYaml .Values.signerBackend.resources | nindent 12 }}

@@ -5,22 +5,22 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app.kubernetes.io/component: {{ $.Values.likenftIndexer.worker.name }}-{{ $name }}
-  name: {{ $.Values.likenftIndexer.worker.name }}-{{ $name }}
+    app.kubernetes.io/component: {{ $.Values.likenftIndexer.name }}-worker-{{ $name }}
+  name: {{ $.Values.likenftIndexer.name }}-worker-{{ $name }}
   namespace: {{ $.Values.namespace }}
 spec:
   replicas: {{ $value.replicas | default 1 }}
   selector:
     matchLabels:
-      app.kubernetes.io/component: {{ $.Values.likenftIndexer.worker.name }}-{{ $name }}
+      app.kubernetes.io/component: {{ $.Values.likenftIndexer.name }}-worker-{{ $name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: {{ $.Values.likenftIndexer.worker.name }}-{{ $name }}
+        app.kubernetes.io/component: {{ $.Values.likenftIndexer.name }}-worker-{{ $name }}
     spec:
       restartPolicy: Always
       containers:
-      - name: {{ $.Values.likenftIndexer.worker.name }}-{{ $name }}
+      - name: {{ $.Values.likenftIndexer.name }}-worker-{{ $name }}
         image: {{ $.Values.likenftIndexer.container.imageRepository }}:{{ $.Values.appVersion }}
         imagePullPolicy: {{ $.Values.likenftIndexer.container.imagePullPolicy}}
         command:
