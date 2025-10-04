@@ -223,8 +223,6 @@ likecollectiveIndexer:
         resources: {}
 
   timescaleDb:
-    name: likecollective-indexer-timescale-db
-
     container:
       image: timescale/timescaledb-ha:pg16
       imagePullPolicy: IfNotPresent
