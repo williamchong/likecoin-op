@@ -5,6 +5,7 @@ evmLikeCoinChainConfig:
   name: evm-likecoin-chain
 
 likecoinMigration:
+  enabled: true
   name: likecoin-migration
 
   container:
@@ -23,6 +24,7 @@ likecoinMigration:
   resources: {}
 
 likenftMigration:
+  enabled: true
   name: likenft-migration
 
   container:
@@ -41,8 +43,9 @@ likenftMigration:
   resources: {}
 
 migrationAdmin:
+  enabled: true
   name: migration-admin
-  
+
   initContainer:
     imageRepository: nginx:alpine
     imagePullPolicy: IfNotPresent
@@ -64,96 +67,43 @@ migrationAdmin:
   resources: {}
 
 migrationBackend:
+  name: migration-backend
+  env:
+    BATCH_MINT_ITEM_PER_PAGE: "10"
+    CLASS_MIGRATION_ESTIMATED_DURATION_SECONDS: "2"
+    NFT_MIGRATION_ESTIMATED_DURATION_SECONDS: "2"
+    SHOULD_PREMINT_ALL_NFTS_WHEN_NEW_CLASS: "true"
+    PREMINT_ALL_NFTS_WHEN_NEW_CLASS_SHOULD_PREMINT_ARBITRARY_NFTIDS: "false"
+
+  container:
+    imageRepository: likecoin/like-migration-backend
+    imagePullPolicy: IfNotPresent
+    port: 8091
+
+  migrate: {}
+
+  service:
+    port: 80
   ingress:
+    prefix: /
+    adminPrefix: /admin
     tls:
       secretName: tls-migration-backend
 
-migrationBackendOp:
-  name: migration-backend-op
-  env:
-    BATCH_MINT_ITEM_PER_PAGE: "10"
-    CLASS_MIGRATION_ESTIMATED_DURATION_SECONDS: "2"
-    NFT_MIGRATION_ESTIMATED_DURATION_SECONDS: "2"
-    SHOULD_PREMINT_ALL_NFTS_WHEN_NEW_CLASS: "true"
-    PREMINT_ALL_NFTS_WHEN_NEW_CLASS_SHOULD_PREMINT_ARBITRARY_NFTIDS: "false"
-
-  container:
-    imageRepository: likecoin/like-migration-backend
-    imagePullPolicy: IfNotPresent
-    port: 8091
-
-  migrate: {}
-
-  service:
-    port: 80
-  ingress:
-    prefix: /
-    adminPrefix: /admin
-
   resources: {}
 
   worker:
-    name: migration-backend-worker-op
+    name: migration-backend-worker
 
     resources: {}
 
   scheduler:
-    name: migration-backend-scheduler-op
+    name: migration-backend-scheduler
 
     resources: {}
 
-migrationBackendBase:
-  name: migration-backend-base
-  env:
-    BATCH_MINT_ITEM_PER_PAGE: "10"
-    CLASS_MIGRATION_ESTIMATED_DURATION_SECONDS: "2"
-    NFT_MIGRATION_ESTIMATED_DURATION_SECONDS: "2"
-    SHOULD_PREMINT_ALL_NFTS_WHEN_NEW_CLASS: "true"
-    PREMINT_ALL_NFTS_WHEN_NEW_CLASS_SHOULD_PREMINT_ARBITRARY_NFTIDS: "false"
-
-  container:
-    imageRepository: likecoin/like-migration-backend
-    imagePullPolicy: IfNotPresent
-    port: 8091
-
-  migrate: {}
-
-  service:
-    port: 80
-  ingress:
-    prefix: /
-    adminPrefix: /admin
-
-  resources: {}
-
-  worker:
-    name: migration-backend-worker-base
-
-    resources: {}
-
-  scheduler:
-    name: migration-backend-scheduler-base
-
-    resources: {}
-
-signerBackendOp:
-  name: signer-backend-op
-
-  migrate:
-    backoffLimit: {}
-
-  container:
-    imageRepository: likecoin/like-signer-backend
-    imagePullPolicy: IfNotPresent
-    port: 8091
-
-  service:
-    port: 80
-
-  resources: {}
-
-signerBackendBase:
-  name: signer-backend-base
+signerBackend:
+  name: signer-backend
 
   migrate:
     backoffLimit: {}
@@ -178,8 +128,6 @@ likenftIndexer:
   migrate: {}
 
   api:
-    name: likenft-indexer-api
-
     container:
       port: 8091
 
@@ -193,8 +141,6 @@ likenftIndexer:
     resources: {}
 
   worker:
-    name: likenft-indexer-worker
-
     deployments:
       periodic:
         resources: {}
@@ -224,8 +170,6 @@ likenftIndexer:
           - index-action-check-received-evm-events
 
   scheduler:
-    name: likenft-indexer-scheduler
-
     deployments:
       all-in-one:
         cron: "*/1 * * * *"
@@ -236,6 +180,7 @@ likenftIndexer:
         resources: {}
 
 likecollectiveIndexer:
+  enabled: true
   name: likecollective-indexer
 
   container:
@@ -245,8 +190,6 @@ likecollectiveIndexer:
   migrate: {}
 
   api:
-    name: likecollective-indexer-api
-
     container:
       port: 8091
 
@@ -261,8 +204,6 @@ likecollectiveIndexer:
     resources: {}
 
   worker:
-    name: likecollective-indexer-worker
-
     deployments:
       periodic:
         resources: {}
@@ -274,8 +215,6 @@ likecollectiveIndexer:
           - process-evm-event
 
   scheduler:
-    name: likecollective-indexer-scheduler
-
     deployments:
       all-in-one:
         cron: "*/1 * * * *"

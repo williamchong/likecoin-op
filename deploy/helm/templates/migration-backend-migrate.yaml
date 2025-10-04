@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/component: {{ .Values.migrationBackend.name }}
+  name: {{ .Values.migrationBackend.name }}-migrate
+  namespace: {{ .Values.namespace }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+type: Opaque
+stringData:
+  DB_CONNECTION_STR: {{ .Values.migrationBackend.env.DB_CONNECTION_STR | quote }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/component: {{ .Values.migrationBackend.name }}
+  name: {{ .Values.migrationBackend.name }}-migrate
+  namespace: {{ .Values.namespace }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{ .Values.migrationBackend.name }}
+        image: {{ .Values.migrationBackend.container.imageRepository }}:{{ .Values.appVersion }}
+        imagePullPolicy: {{ .Values.migrationBackend.container.imagePullPolicy}}
+        command: ['sql-migrate', 'up']
+        envFrom:
+          - secretRef:
+              name: {{ .Values.migrationBackend.name }}-migrate
+        resources:
+          {{- toYaml .Values.migrationBackend.resources | nindent 12 }}
+      restartPolicy: "{{ .Values.migrationBackend.migrate.restartPolicy | default "Never" }}"
+  backoffLimit: {{ .Values.migrationBackend.migrate.backoffLimit | default 1 }}

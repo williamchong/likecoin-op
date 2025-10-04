@@ -1,3 +1,4 @@
+{{- if .Values.likecoinMigration.enabled }}
 kind: Ingress
 apiVersion: networking.k8s.io/v1
 metadata:
@@ -30,7 +31,9 @@ spec:
     - hosts:
         - {{ .Values.likecoinMigration.ingress.tls.host }}
       secretName: {{ .Values.likecoinMigration.ingress.tls.secretName }}
+{{- end }}
 ---
+{{- if .Values.likenftMigration.enabled }}
 kind: Ingress
 apiVersion: networking.k8s.io/v1
 metadata:
@@ -63,6 +66,7 @@ spec:
     - hosts:
         - {{ .Values.likenftMigration.ingress.tls.host }}
       secretName: {{ .Values.likenftMigration.ingress.tls.secretName }}
+{{- end }}
 ---
 kind: Ingress
 apiVersion: networking.k8s.io/v1
@@ -92,34 +96,13 @@ spec:
                 name: {{ .Values.migrationAdmin.name }}
                 port:
                   number: {{ .Values.migrationAdmin.service.port }}
-          - path: {{ .Values.migrationBackendOp.ingress.prefix }}
+          - path: {{ .Values.migrationBackend.ingress.adminPrefix }}
             pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ .Values.migrationBackendOp.name }}
+                name: {{ .Values.migrationBackend.name }}
                 port:
-                  number: {{ .Values.migrationBackendOp.service.port }}
-          - path: {{ .Values.migrationBackendOp.ingress.adminPrefix }}
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ .Values.migrationBackendOp.name }}
-                port:
-                  number: {{ .Values.migrationBackendOp.service.port }}
-          - path: {{ .Values.migrationBackendBase.ingress.prefix }}
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ .Values.migrationBackendBase.name }}
-                port:
-                  number: {{ .Values.migrationBackendBase.service.port }}
-          - path: {{ .Values.migrationBackendBase.ingress.adminPrefix }}
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ .Values.migrationBackendBase.name }}
-                port:
-                  number: {{ .Values.migrationBackendBase.service.port }}
+                  number: {{ .Values.migrationBackend.service.port }}
     - host: {{ .Values.migrationBackend.ingress.host }}
       # This is for permission control of /admin API of api domain used
       http:
@@ -128,9 +111,9 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ .Values.migrationBackendOp.name }}
+                name: {{ .Values.migrationBackend.name }}
                 port:
-                  number: {{ .Values.migrationBackendOp.service.port }}
+                  number: {{ .Values.migrationBackend.service.port }}
   tls:
     - hosts:
         - {{ .Values.migrationAdmin.ingress.tls.host }}
@@ -160,28 +143,13 @@ spec:
     - host: {{ .Values.migrationBackend.ingress.host }}
       http:
         paths:
-          # Default to use OP backend for user related migration.
           - path: /
             pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ .Values.migrationBackendOp.name }}
+                name: {{ .Values.migrationBackend.name }}
                 port:
-                  number: {{ .Values.migrationBackendOp.service.port }}
-          - path: {{ .Values.migrationBackendOp.ingress.prefix }}
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ .Values.migrationBackendOp.name }}
-                port:
-                  number: {{ .Values.migrationBackendOp.service.port }}
-          - path: {{ .Values.migrationBackendBase.ingress.prefix }}
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ .Values.migrationBackendBase.name }}
-                port:
-                  number: {{ .Values.migrationBackendBase.service.port }}
+                  number: {{ .Values.migrationBackend.service.port }}
   tls:
     - hosts:
         - {{ .Values.migrationBackend.ingress.tls.host }}
@@ -212,7 +180,7 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ .Values.likenftIndexer.api.name }}
+                name: {{ .Values.likenftIndexer.name }}-api
                 port:
                   number: {{ .Values.likenftIndexer.api.service.port }}
   tls:
@@ -220,6 +188,7 @@ spec:
         - {{ .Values.likenftIndexer.api.ingress.tls.host }}
       secretName: {{ .Values.likenftIndexer.api.ingress.tls.secretName }}
 ---
+{{- if .Values.likecollectiveIndexer.enabled }}
 kind: Ingress
 apiVersion: networking.k8s.io/v1
 metadata:
@@ -245,10 +214,11 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ .Values.likecollectiveIndexer.api.name }}
+                name: {{ .Values.likecollectiveIndexer.name }}-api
                 port:
                   number: {{ .Values.likecollectiveIndexer.api.service.port }}
   tls:
     - hosts:
         - {{ .Values.likecollectiveIndexer.api.ingress.tls.host }}
       secretName: {{ .Values.likecollectiveIndexer.api.ingress.tls.secretName }}
+{{- end }}

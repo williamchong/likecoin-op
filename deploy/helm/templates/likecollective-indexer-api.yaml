@@ -1,13 +1,14 @@
+{{- if .Values.likecollectiveIndexer.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: {{ .Values.likecollectiveIndexer.api.name }}
-  name: {{ .Values.likecollectiveIndexer.api.name }}
+    app: {{ .Values.likecollectiveIndexer.name }}-api
+  name: {{ .Values.likecollectiveIndexer.name }}-api
   namespace: {{ .Values.namespace }}
 spec:
   selector:
-    app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.api.name }}
+    app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.name }}-api
   ports:
   - protocol: TCP
     port: {{ .Values.likecollectiveIndexer.api.service.port }}
@@ -17,22 +18,22 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.api.name }}
-  name: {{ .Values.likecollectiveIndexer.api.name }}
+    app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.name }}-api
+  name: {{ .Values.likecollectiveIndexer.name }}-api
   namespace: {{ .Values.namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.api.name }}
+      app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.name }}-api
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.api.name }}
+        app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.name }}-api
     spec:
       restartPolicy: Always
       containers:
-      - name: {{ .Values.likecollectiveIndexer.api.name }}
+      - name: {{ .Values.likecollectiveIndexer.name }}-api
         image: {{ .Values.likecollectiveIndexer.container.imageRepository }}:{{ .Values.appVersion }}
         imagePullPolicy: {{ .Values.likecollectiveIndexer.container.imagePullPolicy }}
         envFrom:
@@ -42,3 +43,4 @@ spec:
         - containerPort: {{ .Values.likecollectiveIndexer.api.container.port }}
         resources:
           {{- toYaml .Values.likecollectiveIndexer.api.resources | nindent 12 }}
+{{- end }}
