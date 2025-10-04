@@ -24,7 +24,7 @@ metadata:
   name: {{ .Values.likecollectiveIndexer.name }}-timescale-db-migrate
   namespace: {{ .Values.namespace }}
   annotations:
-    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook: post-install,post-upgrade
 spec:
   template:
     spec:
