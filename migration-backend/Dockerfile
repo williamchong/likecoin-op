@@ -1,4 +1,4 @@
-FROM golang:1.22.10-alpine AS stage1
+FROM golang:1.24.7-alpine AS stage1
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download

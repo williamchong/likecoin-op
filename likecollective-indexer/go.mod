@@ -2,6 +2,8 @@ module likecollective-indexer
 
 go 1.23.5
 
+toolchain go1.24.7
+
 require (
 	entgo.io/ent v0.14.5
 	github.com/ethereum/go-ethereum v1.16.3

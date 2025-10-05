@@ -18,7 +18,7 @@ services:
 
   api:
     profiles: [api]
-    image: golang:1.23.5
+    image: golang:1.24.7
     depends_on:
       - redis
       - psql_bp
@@ -33,7 +33,7 @@ services:
 
   worker-periodic:
     profiles: [worker]
-    image: golang:1.23.5
+    image: golang:1.24.7
     depends_on:
       - redis
       - psql_bp
@@ -56,7 +56,7 @@ services:
 
   worker-check-book-nfts:
     profiles: [worker]
-    image: golang:1.23.5
+    image: golang:1.24.7
     depends_on:
       - redis
       - psql_bp
@@ -77,7 +77,7 @@ services:
 
   process-evm-event:
     profiles: [worker]
-    image: golang:1.23.5
+    image: golang:1.24.7
     depends_on:
       - redis
       - psql_bp
@@ -97,7 +97,7 @@ services:
 
   worker-index-action-request:
     profiles: [worker]
-    image: golang:1.23.5
+    image: golang:1.24.7
     depends_on:
       - redis
       - psql_bp
@@ -118,7 +118,7 @@ services:
 
   worker-index-action-process-evm-event:
     profiles: [worker]
-    image: golang:1.23.5
+    image: golang:1.24.7
     depends_on:
       - redis
       - psql_bp
@@ -139,7 +139,7 @@ services:
 
   scheduler-all-in-one:
     profiles: [scheduler]
-    image: golang:1.23.5
+    image: golang:1.24.7
     depends_on:
       - redis
       - psql_bp

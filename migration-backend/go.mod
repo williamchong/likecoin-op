@@ -2,6 +2,8 @@ module github.com/likecoin/like-migration-backend
 
 go 1.22.10
 
+toolchain go1.24.7
+
 require (
 	cosmossdk.io/math v1.4.0
 	cosmossdk.io/x/nft v0.1.1

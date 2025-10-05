@@ -1,4 +1,4 @@
-FROM golang:1.23.5-alpine AS builder
+FROM golang:1.24.7-alpine AS builder
 RUN apk add curl
 RUN curl https://atlasgo.sh -o atlasgo.sh
 RUN sh atlasgo.sh -y

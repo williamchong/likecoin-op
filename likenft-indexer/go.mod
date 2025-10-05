@@ -2,7 +2,7 @@ module likenft-indexer
 
 go 1.23.0
 
-toolchain go1.23.5
+toolchain go1.24.7
 
 require (
 	entgo.io/ent v0.14.4
@@ -22,11 +22,13 @@ require (
 	github.com/ogen-go/ogen v1.10.1
 	github.com/smartystreets/goconvey v1.8.1
 	github.com/spf13/cobra v1.8.1
+	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go v0.35.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.35.0
 	go.opentelemetry.io/otel v1.35.0
 	go.opentelemetry.io/otel/metric v1.35.0
 	go.opentelemetry.io/otel/trace v1.35.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -112,7 +114,6 @@ require (
 	github.com/smarty/assertions v1.15.0 // indirect
 	github.com/spf13/cast v1.7.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/supranational/blst v0.3.13 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
@@ -132,7 +133,6 @@ require (
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
 	google.golang.org/protobuf v1.36.5 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
 )

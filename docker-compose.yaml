@@ -1,6 +1,6 @@
 services:
   migration-backend:
-    image: golang:1.22.10
+    image: golang:1.24.7
     depends_on:
       - migration-backend-worker
       - db-migration-backend
@@ -21,7 +21,7 @@ services:
     command: go run ./cmd/server
 
   migration-backend-worker:
-    image: golang:1.22.10
+    image: golang:1.24.7
     depends_on:
       - signer-backend
       - db-migration-backend
@@ -35,7 +35,7 @@ services:
     command: go run ./cmd/worker worker
 
   migration-backend-scheduler:
-    image: golang:1.22.10
+    image: golang:1.24.7
     depends_on:
       - redis
     working_dir: /src
@@ -46,7 +46,7 @@ services:
     command: go run ./cmd/worker scheduler
 
   signer-backend:
-    image: golang:1.23.0
+    image: golang:1.24.7
     depends_on:
       - db-signer-backend
       - redis

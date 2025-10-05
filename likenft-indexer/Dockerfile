@@ -1,4 +1,4 @@
-FROM golang:1.23.0-alpine AS stage1
+FROM golang:1.24.7-alpine AS stage1
 RUN apk add curl
 RUN curl https://atlasgo.sh -o atlasgo.sh
 RUN sh atlasgo.sh -y
