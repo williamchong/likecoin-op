@@ -4,6 +4,7 @@ import (
 	"github.com/likecoin/likecoin-op/op-2-base/internal/workflow/preparebooknfts"
 	"github.com/likecoin/likecoin-op/op-2-base/internal/workflow/preparememos"
 	"github.com/likecoin/likecoin-op/op-2-base/internal/workflow/preparenfts"
+	"github.com/likecoin/likecoin-op/op-2-base/internal/workflow/preparerolechangeevents"
 )
 
 type BookNFTInput struct {
@@ -18,10 +19,15 @@ type MemosInput struct {
 	Memos []preparememos.Output
 }
 
+type RoleChangeEventsInput struct {
+	RoleChangeEvents []preparerolechangeevents.Output
+}
+
 type Input struct {
 	BookNFTInput
 	NFTsInput
 	MemosInput
+	RoleChangeEventsInput
 }
 
 type PreparedNewClassAction struct {

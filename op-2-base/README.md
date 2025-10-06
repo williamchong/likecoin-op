@@ -94,7 +94,55 @@ sed -n 3p transaction_memos | jq > transaction_memos.json
 
 ## Prepare minter and updater json
 
-TODO
+```
+SELECT count(*) from (
+
+select
+    address as "booknft",
+    topic0 as "event",
+    topic1 as "role_byte_array_string",
+    topic2 as "to",
+    topic3 as "by",
+    block_number,
+    transaction_index,
+    log_index
+from evm_events
+where ("topic0" = 'RoleGranted' or "topic0" = 'RoleRevoked')
+order by
+    block_number asc,
+    transaction_index asc,
+    log_index asc
+);
+
+\o evm_events_booknft_role_changed
+
+SELECT array_to_json(array_agg(temp)) AS ok_json FROM (
+
+select
+    address as "booknft",
+    topic0 as "event",
+    topic1 as "role_byte_array_string",
+    topic2 as "to",
+    topic3 as "by",
+    block_number,
+    transaction_index,
+    log_index
+from evm_events
+where ("topic0" = 'RoleGranted' or "topic0" = 'RoleRevoked')
+order by
+    block_number asc,
+    transaction_index asc,
+    log_index asc
+) temp;
+
+\o
+```
+
+For formating the output into json
+
+```
+sed -n 3p evm_events_booknft_role_changed | jq > evm_events_booknft_role_changed.json
+```
 
 ## 
 
@@ -112,9 +160,9 @@ go run ./cmd/cli workflow compute-address nft_classes.json | jq > addresses.json
 
 ```bash
 mkdir -p migration-actions
-jq -r '.[] | .old_address' addresses.json | xargs -n 1 -I {} bash -c './cli workflow prepare-actions nft_classes.json nfts.json transaction_memos.json {} | jq > migration-actions/{}.json'
+jq -r '.[] | .old_address' addresses.json | xargs -n 1 -I {} bash -c './cli workflow prepare-actions nft_classes.json nfts.json transaction_memos.json evm_events_booknft_role_changed.json {} | jq > migration-actions/{}.json'
 
-go run ./cmd/cli workflow prepare-actions nft_classes.json nfts.json transaction_memos.json 0x00DD2ec446cC9Ea9FA40dd484feBb6B0217cA4b4
+go run ./cmd/cli workflow prepare-actions nft_classes.json nfts.json transaction_memos.json evm_events_booknft_role_changed.json 0x00DD2ec446cC9Ea9FA40dd484feBb6B0217cA4b4
 ```
 
 ## Prepare airdrop param json
