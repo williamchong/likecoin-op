@@ -18,17 +18,19 @@ import (
 	"github.com/likecoin/likecoin-op/op-2-base/internal/workflow/prepareactions"
 	"github.com/likecoin/likecoin-op/op-2-base/internal/workflow/preparememos"
 	"github.com/likecoin/likecoin-op/op-2-base/internal/workflow/preparenfts"
+	"github.com/likecoin/likecoin-op/op-2-base/internal/workflow/preparerolechangeevents"
 )
 
 var PrepareActionsCmd = &cobra.Command{
-	Use:   "prepare-actions <indexer-dump-path> <nfts-dump-path> <memos-dump-path> <book-nft-id>",
+	Use:   "prepare-actions <indexer-dump-path> <nfts-dump-path> <memos-dump-path> <role-change-events-dump-path> <book-nft-id>",
 	Short: "Prepare actions",
-	Args:  cobra.ExactArgs(4),
+	Args:  cobra.ExactArgs(5),
 	Run: func(cmd *cobra.Command, args []string) {
 		indexerDumpPath := args[0]
 		nftsDumpPath := args[1]
 		memosDumpPath := args[2]
-		bookNFTId := args[3]
+		roleChangeEventsDumpPath := args[3]
+		bookNFTId := args[4]
 
 		envCfg := context.ConfigFromContext(cmd.Context())
 
@@ -99,6 +101,20 @@ var PrepareActionsCmd = &cobra.Command{
 			panic(err)
 		}
 
+		roleChangeEventsDump, err := os.ReadFile(roleChangeEventsDumpPath)
+		if err != nil {
+			log.Fatalf("failed to read role change events dump: %v", err)
+			panic(err)
+		}
+
+		var roleChangeEvents []preparerolechangeevents.Output
+
+		err = json.Unmarshal(roleChangeEventsDump, &roleChangeEvents)
+		if err != nil {
+			log.Fatalf("failed to unmarshal role change events dump: %v", err)
+			panic(err)
+		}
+
 		// End of reading files
 
 		var bookNFTInput *prepareactions.BookNFTInput = nil
@@ -137,6 +153,13 @@ var PrepareActionsCmd = &cobra.Command{
 			}
 		}
 
+		roleChangeEventsOfBookNFTId := make([]preparerolechangeevents.Output, 0)
+		for _, roleChangeEvent := range roleChangeEvents {
+			if roleChangeEvent.BookNFTId == bookNFTInput.OpAddress {
+				roleChangeEventsOfBookNFTId = append(roleChangeEventsOfBookNFTId, roleChangeEvent)
+			}
+		}
+
 		// End of processing data
 
 		prepareActions := prepareactions.NewPrepareNewNFTClassAction(
@@ -158,6 +181,9 @@ var PrepareActionsCmd = &cobra.Command{
 			},
 			MemosInput: prepareactions.MemosInput{
 				Memos: memosOfBookNFTId,
+			},
+			RoleChangeEventsInput: prepareactions.RoleChangeEventsInput{
+				RoleChangeEvents: roleChangeEventsOfBookNFTId,
 			},
 		}
 		output, err := prepareActions.Prepare(cmd.Context(), logger, input)

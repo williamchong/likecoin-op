@@ -17,6 +17,7 @@ import (
 	"github.com/likecoin/likecoin-op/op-2-base/internal/util/creationcode"
 	"github.com/likecoin/likecoin-op/op-2-base/internal/workflow/preparememos"
 	"github.com/likecoin/likecoin-op/op-2-base/internal/workflow/preparenfts"
+	"github.com/likecoin/likecoin-op/op-2-base/internal/workflow/preparerolechangeevents"
 )
 
 type PrepareNewNFTClassAction interface {
@@ -88,15 +89,20 @@ func (p *prepareNewNFTClassAction) Prepare(
 		return nil, fmt.Errorf("evm.ComputeNewBookNFTSalt: %v", err)
 	}
 
-	bookNFTAddress := crypto.CreateAddress2(p.signerAddress, salt, initCodeHash)
+	bookNFTAddress := crypto.CreateAddress2(p.protocolAddress, salt, initCodeHash)
 
 	initialOwner := input.OwnerAddress
 
-	// TODO
-	// Setting signer as initial minters and updaters
-	// For nft token migration
-	initialMinters := []string{p.signerAddress.Hex()}
-	initialUpdaters := []string{p.signerAddress.Hex()}
+	grantedMinters := preparerolechangeevents.ComputeGrantedAddresses(preparerolechangeevents.MinterRole, input.RoleChangeEvents)
+	grantedUpdaters := preparerolechangeevents.ComputeGrantedAddresses(preparerolechangeevents.UpdaterRole, input.RoleChangeEvents)
+
+	// Grant signer to minters for airdropping underlying nfts
+	if !slices.Contains(grantedMinters, p.signerAddress.Hex()) {
+		grantedMinters = append(grantedMinters, p.signerAddress.Hex())
+	}
+
+	initialMinters := grantedMinters
+	initialUpdaters := grantedUpdaters
 	initialBatchMintOwner := p.signerAddress.Hex()
 	defaultRoyaltyFraction := p.defaultRoyaltyFraction
 	shouldPremintAllNFTs := false
