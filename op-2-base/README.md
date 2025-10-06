@@ -14,16 +14,19 @@ WHERE nft_classes.metadata::json->>'@type' = 'Book';
 SELECT array_to_json(array_agg(temp)) AS ok_json FROM (
 
 SELECT
-	id, 
+	nft_classes.id,
 	nft_classes.address,
 	name,
 	metadata,
 	metadata::json->'potentialAction'->'target'->0->'url' as "salt",
 	metadata::json->'name' as "salt2",
-	C.count
+    nft_classes.max_supply,
+	C.count,
+    accounts.evm_address as owner_address
 FROM nft_classes LEFT JOIN (
 	SELECT nfts.contract_address, COUNT(*) FROM nfts 
 	GROUP BY nfts.contract_address) AS C ON C.contract_address = nft_classes.address
+LEFT JOIN accounts ON accounts.id = nft_classes.account_nft_classes
 WHERE
 	nft_classes.metadata::json->>'@type' = 'Book'
 
