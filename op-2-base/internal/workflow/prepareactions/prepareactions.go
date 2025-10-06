@@ -89,7 +89,7 @@ func (p *prepareNewNFTClassAction) Prepare(
 		return nil, fmt.Errorf("evm.ComputeNewBookNFTSalt: %v", err)
 	}
 
-	bookNFTAddress := crypto.CreateAddress2(p.signerAddress, salt, initCodeHash)
+	bookNFTAddress := crypto.CreateAddress2(p.protocolAddress, salt, initCodeHash)
 
 	initialOwner := input.OwnerAddress
 
