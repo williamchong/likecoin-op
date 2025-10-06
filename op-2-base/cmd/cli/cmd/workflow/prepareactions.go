@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -119,7 +120,7 @@ var PrepareActionsCmd = &cobra.Command{
 
 		var bookNFTInput *prepareactions.BookNFTInput = nil
 		for _, i := range bookNFTInputs {
-			if i.OpAddress == bookNFTId {
+			if strings.EqualFold(i.OpAddress, bookNFTId) {
 				bookNFTInput = i
 				break
 			}
@@ -131,7 +132,7 @@ var PrepareActionsCmd = &cobra.Command{
 
 		nftsOfBookNFTId := make([]preparenfts.Output, 0)
 		for _, nft := range nfts {
-			if nft.ContractAddress == bookNFTInput.OpAddress {
+			if strings.EqualFold(nft.ContractAddress, bookNFTInput.OpAddress) {
 				nftsOfBookNFTId = append(nftsOfBookNFTId, nft)
 			}
 		}
@@ -148,14 +149,14 @@ var PrepareActionsCmd = &cobra.Command{
 
 		memosOfBookNFTId := make([]preparememos.Output, 0)
 		for _, memo := range memos {
-			if memo.BookNFTId == bookNFTInput.OpAddress {
+			if strings.EqualFold(memo.BookNFTId, bookNFTInput.OpAddress) {
 				memosOfBookNFTId = append(memosOfBookNFTId, memo)
 			}
 		}
 
 		roleChangeEventsOfBookNFTId := make([]preparerolechangeevents.Output, 0)
 		for _, roleChangeEvent := range roleChangeEvents {
-			if roleChangeEvent.BookNFTId == bookNFTInput.OpAddress {
+			if strings.EqualFold(roleChangeEvent.BookNFTId, bookNFTInput.OpAddress) {
 				roleChangeEventsOfBookNFTId = append(roleChangeEventsOfBookNFTId, roleChangeEvent)
 			}
 		}
