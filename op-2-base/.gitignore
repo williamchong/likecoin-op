@@ -1,1 +1,10 @@
 .env
+
+nft_classes.json
+nfts.json
+transaction_memos.json
+evm_events_booknft_role_changed.json
+
+migration-actions/
+airdrop-params/
+airdrop-outputs/
