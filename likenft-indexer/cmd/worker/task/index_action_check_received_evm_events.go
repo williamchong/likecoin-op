@@ -54,6 +54,8 @@ func HandleIndexActionCheckReceivedEvents(ctx context.Context, t *asynq.Task) er
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
+	mylogger = mylogger.With("contractAddress", p.ContractAddresses)
+
 	dbService := database.New()
 
 	evmEventRepository := database.MakeEVMEventRepository(dbService)
