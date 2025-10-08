@@ -314,6 +314,7 @@ func (r *nftClassRepository) UpdateOwner(
 		}
 		return r.dbService.Client().NFTClass.Update().
 			SetOwner(newOwner).
+			SetOwnerAddress(newOwner.EvmAddress).
 			Where(nftclass.AddressEqualFold(address)).
 			Exec(ctx)
 	})
