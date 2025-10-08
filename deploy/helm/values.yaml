@@ -141,6 +141,7 @@ likenftIndexer:
     resources: {}
 
   worker:
+    enabled: true
     deployments:
       periodic:
         resources: {}
@@ -170,13 +171,18 @@ likenftIndexer:
           - index-action-check-received-evm-events
 
   scheduler:
+    enabled: true
     deployments:
-      all-in-one:
+      check-received-evm-events:
         cron: "*/1 * * * *"
+        tasks:
+          - check-received-evm-events
+        resources: {}
+      check-contracts:
+        cron: "*/15 * * * *"
         tasks:
           - check-book-nfts
           - check-like-protocol
-          - check-received-evm-events
         resources: {}
 
 likecollectiveIndexer:

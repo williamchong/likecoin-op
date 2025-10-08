@@ -1,3 +1,4 @@
+{{- if .Values.likenftIndexer.scheduler.enabled }}
 {{- with .Values.likenftIndexer.scheduler.deployments }}
 {{- range $name, $value := . }}
 {{- if ne (len .tasks) 0}}
@@ -37,6 +38,7 @@ spec:
         resources:
           {{- toYaml $value.resources | nindent 12 }}
 ---
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}
