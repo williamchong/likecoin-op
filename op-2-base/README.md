@@ -159,6 +159,53 @@ go build ./cmd/cli
 go run ./cmd/cli workflow compute-address nft_classes.json | jq > addresses.json
 ```
 
+### Find duplicated new address
+
+```bash
+jq -r 'group_by(.new_address) | map({new_address: .[0] | .new_address, addresses: .}) | map(select(.addresses | length > 1))' addresses.json > duplicated_new_addresses.json
+```
+
+Retrieving plain addresses list
+
+```bash
+jq -r '.[] | .addresses[] | .old_address' duplicated_new_addresses.json
+```
+
+### Replace salt of duplicated addresses
+
+```bash
+python ./workflow/replace_salt.py \
+    nft_classes.json \
+    duplicated_new_addresses.json | jq > nft_classes.alt.json
+```
+
+```bash
+diff nft_classes.json nft_classes.alt.json
+```
+
+### Compute addresses again
+
+```bash
+./cli workflow compute-address nft_classes.alt.json | jq > addresses.alt.json
+```
+
+```bash
+diff addresses.json addresses.alt.json
+```
+
+Inspecting against the new addresses should have no duplications.
+
+```bash
+jq -r 'group_by(.new_address) | map({new_address: .[0] | .new_address, addresses: .}) | map(select(.addresses | length > 1))' addresses.alt.json
+```
+
+In case the addresses are resolved, move the address.alt.json to address
+
+```
+mv addresses.json addresses.bak.json
+mv addresses.alt.json addresses.json
+```
+
 ## Prepare migration actions json
 
 ```bash
