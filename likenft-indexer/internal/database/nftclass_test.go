@@ -124,3 +124,57 @@ func TestNFTClass(t *testing.T) {
 	})
 
 }
+
+func TestUpdateOwner(t *testing.T) {
+	util := &nftClassUtil{}
+
+	Convey("Test UpdateOwner", t, func() {
+		dbService := newTestService(t)
+		defer dbService.Close()
+
+		accountRepository := database.MakeAccountRepository(dbService)
+		nftClassRepository := database.MakeNFTClassRepository(dbService)
+
+		accountOrigin, err := accountRepository.GetOrCreateAccount(context.Background(), &ent.Account{
+			EvmAddress: common.HexToAddress("0x1000000000000000000000000000000000000001").String(),
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		accountNew, err := accountRepository.GetOrCreateAccount(context.Background(), &ent.Account{
+			EvmAddress: common.HexToAddress("0x1000000000000000000000000000000000000002").String(),
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		nftClassAddress := common.HexToAddress("0x8Ed946DF65a6dD97fcD071c995710b9bf14361c3")
+
+		err = util.makeNFTClass(
+			nftClassRepository,
+			accountOrigin,
+			nftClassAddress.String(),
+			100,
+		)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = nftClassRepository.UpdateOwner(
+			context.Background(),
+			nftClassAddress.String(),
+			accountNew,
+		)
+		So(err, ShouldBeNil)
+
+		nftClass, err := nftClassRepository.QueryNFTClassByAddress(
+			context.Background(),
+			nftClassAddress.String(),
+		)
+		So(err, ShouldBeNil)
+		So(*nftClass.OwnerAddress, ShouldEqual, "0x1000000000000000000000000000000000000002")
+		nftClassOwner := nftClass.QueryOwner().OnlyX(context.Background())
+		So(nftClassOwner.EvmAddress, ShouldEqual, "0x1000000000000000000000000000000000000002")
+	})
+}
