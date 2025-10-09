@@ -42,6 +42,53 @@ sed -n 3p nft_classes | jq > nft_classes.json
 jq length nft_classes.json
 ```
 
+## Prepare non book nft classes json
+
+```
+SELECT nft_classes.metadata::json->>'@type', count(nft_classes.id) from nft_classes
+WHERE nft_classes.metadata::json->>'@type' is NULL or nft_classes.metadata::json->>'@type' != 'Book'
+GROUP BY nft_classes.metadata::json->>'@type';
+
+WITH nft_classes_non_book_count AS (
+	SELECT nft_classes.metadata::json->>'@type', count(nft_classes.id) from nft_classes
+	WHERE nft_classes.metadata::json->>'@type' is NULL or nft_classes.metadata::json->>'@type' != 'Book'
+	GROUP BY nft_classes.metadata::json->>'@type'
+)
+SELECT sum(count) from nft_classes_non_book_count;
+
+\o nft_classes_non_book
+
+SELECT array_to_json(array_agg(temp)) AS ok_json FROM (
+
+SELECT
+	nft_classes.id,
+	nft_classes.address,
+	name,
+	metadata,
+	metadata::json->'potentialAction'->'target'->0->'url' as "salt",
+	metadata::json->'name' as "salt2",
+    nft_classes.max_supply,
+	C.count,
+    accounts.evm_address as owner_address
+FROM nft_classes LEFT JOIN (
+	SELECT nfts.contract_address, COUNT(*) FROM nfts
+	GROUP BY nfts.contract_address) AS C ON C.contract_address = nft_classes.address
+LEFT JOIN accounts ON accounts.id = nft_classes.account_nft_classes
+WHERE
+	nft_classes.metadata::json->>'@type' is NULL or nft_classes.metadata::json->>'@type' != 'Book'
+
+) temp;
+
+\o
+```
+
+For formating the output into json
+
+```
+sed -n 3p nft_classes_non_book | jq > nft_classes_non_book.json
+# Checking count is correct
+jq length nft_classes_non_book.json
+```
 
 ## Prepare nfts json
 
@@ -159,10 +206,18 @@ go build ./cmd/cli
 go run ./cmd/cli workflow compute-address nft_classes.json | jq > addresses.json
 ```
 
+```bash
+go run ./cmd/cli workflow compute-address nft_classes_non_book.json | jq > addresses_non_book.json
+```
+
 ### Find duplicated new address
 
 ```bash
 jq -r 'group_by(.new_address) | map({new_address: .[0] | .new_address, addresses: .}) | map(select(.addresses | length > 1))' addresses.json > duplicated_new_addresses.json
+```
+
+```
+jq -r 'group_by(.new_address) | map({new_address: .[0] | .new_address, addresses: .}) | map(select(.addresses | length > 1))' addresses_non_book.json > duplicated_new_addresses_non_book.json
 ```
 
 Retrieving plain addresses list
@@ -179,8 +234,18 @@ python ./workflow/replace_salt.py \
     duplicated_new_addresses.json | jq > nft_classes.alt.json
 ```
 
+```
+python ./workflow/replace_salt.py \
+    nft_classes_non_book.json \
+    duplicated_new_addresses_non_book.json | jq > nft_classes_non_book.alt.json
+```
+
 ```bash
 diff nft_classes.json nft_classes.alt.json
+```
+
+```bash
+diff nft_classes_non_book.json nft_classes_non_book.alt.json
 ```
 
 ### Compute addresses again
@@ -190,7 +255,15 @@ diff nft_classes.json nft_classes.alt.json
 ```
 
 ```bash
+./cli workflow compute-address nft_classes_non_book.alt.json | jq > addresses_non_book.alt.json
+```
+
+```bash
 diff addresses.json addresses.alt.json
+```
+
+```bash
+diff addresses_non_book.json addresses_non_book.alt.json
 ```
 
 Inspecting against the new addresses should have no duplications.
@@ -199,18 +272,34 @@ Inspecting against the new addresses should have no duplications.
 jq -r 'group_by(.new_address) | map({new_address: .[0] | .new_address, addresses: .}) | map(select(.addresses | length > 1))' addresses.alt.json
 ```
 
+```bash
+jq -r 'group_by(.new_address) | map({new_address: .[0] | .new_address, addresses: .}) | map(select(.addresses | length > 1))' addresses_non_book.alt.json
+```
+
 In case the addresses are resolved, move the address.alt.json to address
 
-```
+```bash
 mv addresses.json addresses.bak.json
 mv addresses.alt.json addresses.json
+mv nft_classes.json nft_classes.bak.json
+mv nft_classes.alt.json nft_classes.json
+```
+
+```bash
+mv addresses_non_book.json addresses_non_book.bak.json
+mv addresses_non_book.alt.json addresses_non_book.json
+mv nft_classes_non_book.json nft_classes_non_book.bak.json
+mv nft_classes_non_book.alt.json nft_classes_non_book.json
 ```
 
 ## Prepare migration actions json
 
 ```bash
 mkdir -p migration-actions
+
 jq -r '.[] | .old_address' addresses.json | xargs -n 1 -I {} bash -c './cli workflow prepare-actions nft_classes.json nfts.json transaction_memos.json evm_events_booknft_role_changed.json {} | jq > migration-actions/{}.json'
+
+jq -r '.[] | .old_address' addresses_non_book.json | xargs -n 1 -I {} bash -c './cli workflow prepare-actions nft_classes_non_book.json nfts.json transaction_memos.json evm_events_booknft_role_changed.json {} | jq > migration-actions/{}.json'
 
 go run ./cmd/cli workflow prepare-actions nft_classes.json nfts.json transaction_memos.json evm_events_booknft_role_changed.json 0x00DD2ec446cC9Ea9FA40dd484feBb6B0217cA4b4
 ```
