@@ -2,6 +2,7 @@ package computeaddress
 
 import (
 	"encoding/hex"
+	"errors"
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -45,10 +46,16 @@ func NewComputeAddress(
 	}
 }
 
+var ErrNoSalt = errors.New("no salt")
+
 func (c *computeAddress) Compute(input *Input) (*Output, error) {
 	saltData := input.Salt
 	if saltData == nil || *saltData == "" {
 		saltData = input.Salt2
+	}
+
+	if saltData == nil {
+		return nil, ErrNoSalt
 	}
 
 	salt, err := evm.ComputeSaltDataFromCandidates(

@@ -2,6 +2,8 @@ package workflow
 
 import (
 	"encoding/json"
+	"errors"
+	"log/slog"
 	"os"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -20,6 +22,7 @@ var computeaddressCmd = &cobra.Command{
 		nftClassDumpPath := args[0]
 
 		envCfg := context.ConfigFromContext(cmd.Context())
+		logger := slog.New(slog.Default().Handler()).WithGroup("ComputeaddressCmd")
 
 		bytecodeFile, err := cmd.Flags().GetString("bytecode-file")
 		if err != nil {
@@ -53,6 +56,10 @@ var computeaddressCmd = &cobra.Command{
 		for _, input := range inputs {
 			output, err := computeAddress.Compute(&input)
 			if err != nil {
+				if errors.Is(err, computeaddress.ErrNoSalt) {
+					logger.Warn("No salt. Skipped.", "opAddress", input.OpAddress)
+					continue
+				}
 				panic(err)
 			}
 			outputs = append(outputs, *output)
