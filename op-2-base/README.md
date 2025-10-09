@@ -245,3 +245,125 @@ docker compose run --rm op-2-base-cli go run ./cmd/cli workflow airdrop airdrop-
 go run ./cmd/cli workflow migratedb airdrop-output.json > migratedb.sql
 ./cli workflow migratedb airdrop-outputs/0x2D28c4154c56488f608394f9B3d3d45932c3F1c9.json > migratedb.sql
 ```
+
+# Troubleshooting
+
+## Evm event failed
+
+Classify failed event types
+
+```sql
+select topic0, count(id) from evm_events where status = 'failed' group by topic0;
+```
+
+```
+        topic0        | count 
+----------------------+-------
+ ContractURIUpdated   |     1
+ OwnershipTransferred |     2
+```
+
+### Transfer / Transfer With Memo
+
+1. Retrieve evm event ids of all evm events (failed and processed) of the token when failed evm events
+
+```sql
+WITH evm_events_transfer_failed AS (
+    select
+        id,
+        address as "booknft",
+        topic0 as "event",
+        topic3 as "token_id"
+    from evm_events
+    where
+        (topic0 = 'TransferWithMemo' or topic0 = 'Transfer') and
+        status = 'failed'
+)
+
+select status, count(id) from evm_events where (address, topic0, topic3) in (select booknft, event, token_id from evm_events_transfer_failed) group by status;
+
+WITH evm_events_transfer_failed AS (
+    select
+        id,
+        address as "booknft",
+        topic0 as "event",
+        topic3 as "token_id"
+    from evm_events
+    where
+        (topic0 = 'TransferWithMemo' or topic0 = 'Transfer') and
+        status = 'failed'
+)
+
+select count(*) from evm_events where (address, topic0, topic3) in (select booknft, event, token_id from evm_events_transfer_failed) group by status;
+
+\o evm_events_failed
+select array_to_json(array_agg(temp)) as ok_json from (
+WITH evm_events_transfer_failed AS (
+    select
+        address as "booknft",
+        topic0 as "event",
+        topic3 as "token_id"
+    from evm_events
+    where
+        (topic0 = 'TransferWithMemo' or topic0 = 'Transfer') and
+        status = 'failed'
+)
+
+select
+    id,
+    block_number,
+    transaction_index as "tx_index",
+    log_index,
+    address as "booknft",
+    topic3 as "token_id",
+    topic1 as "from",
+    topic2 as "to",
+    status
+from evm_events
+where
+    (address, topic0, topic3) in (select booknft, event, token_id from evm_events_transfer_failed)
+order by
+    block_number asc,
+    transaction_index asc,
+    log_index asc
+) temp;
+\o
+```
+
+```sh
+sed -n 3p evm_events_failed | jq > evm_events_transfer_failed.json
+```
+
+2. Trigger process-evm-events in ascending order (block number, tx index, log index)
+
+```sh
+jq '.[] | .id' evm_events_failed.json > evm_events_transfer_rerun_ids
+```
+
+confirm the number of event matches the query.
+
+```sh
+jq 'length' evm_events_failed.json
+```
+
+3. Update events to enqueued.
+
+construct comma separated ids from `evm_events_transfer_rerun_ids`
+
+```sql
+update evm_events
+set status = 'enqueued'
+where (id) in (...)
+```
+
+Invoke with a shell script
+
+```sh
+#!/bin/bash
+
+set -e
+
+for id in $(cat evm_events_transfer_rerun_ids); do
+    kubectl -n likecoin-op exec deploy/likenft-indexer-op-api -- likenft-indexer-cli process-evm-event $id
+done
+```
