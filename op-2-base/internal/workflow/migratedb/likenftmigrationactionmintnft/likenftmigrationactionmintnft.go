@@ -9,6 +9,7 @@ import (
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 	"github.com/likecoin/like-migration-backend/pkg/util/slice"
+	"github.com/likecoin/likecoin-op/op-2-base/internal/util/sql"
 	airdropmintnfts "github.com/likecoin/likecoin-op/op-2-base/internal/workflow/airdrop/mintnfts"
 )
 
@@ -55,7 +56,7 @@ func MakeOutputs(inputs []*Input) Outputs {
 
 func (o Outputs) ToSQL() string {
 	if len(o) == 0 {
-		return ""
+		return sql.Stmt(sql.Echo("No SQL emitted for likenft_migration_action_mint_nft"))
 	}
 
 	numCol := 6
@@ -88,10 +89,10 @@ func (o Outputs) ToSQL() string {
 ) VALUES
 	%s`, strings.Join(valueTuples, ",\n\t"))
 
-		stmts = append(stmts, stmt)
+		stmts = append(stmts, sql.Stmt(sql.Echo(stmt)), sql.Stmt(stmt))
 	}
 
-	return strings.Join(stmts, ";\n") + ";"
+	return strings.Join(stmts, "\n")
 }
 
 func (o Outputs) MustMarshal(v any) string {
