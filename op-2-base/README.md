@@ -181,6 +181,8 @@ python ./workflow/replace_salt.py \
 
 ```bash
 diff nft_classes.json nft_classes.alt.json
+mv nft_classes.json nft_classes.bak.json
+mv nft_classes.alt.json nft_classes.json
 ```
 
 ### Compute addresses again
