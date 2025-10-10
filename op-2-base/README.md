@@ -241,7 +241,49 @@ docker compose run --rm op-2-base-cli go run ./cmd/cli workflow airdrop airdrop-
 
 ## Prepare migrate db sqls
 
+Check if there are empty airdrop-outputs due to exceptions / interruptions.
+
 ```bash
-go run ./cmd/cli workflow migratedb airdrop-output.json > migratedb.sql
-./cli workflow migratedb airdrop-outputs/0x2D28c4154c56488f608394f9B3d3d45932c3F1c9.json > migratedb.sql
+ls airdrop-outputs | xargs -n 1 -I {} bash -c '[ -s "airdrop-outputs/{}" ] || echo {} "empty"'
+```
+
+Prepare migration sql per airdrop-outputs
+
+```bash
+mkdir -p migrations
+# ./cli workflow migratedb airdrop-outputs/0x2D28c4154c56488f608394f9B3d3d45932c3F1c9.json > migrations/0x2D28c4154c56488f608394f9B3d3d45932c3F1c9.json.sql
+ls airdrop-outputs | xargs -n 1 -I {} bash -c './cli workflow migratedb airdrop-outputs/{} > migrations/{}.sql'
+```
+
+## Prepare db data
+
+- Dump tables from migration-backend
+
+```bash
+pg_dump $OP_DB_CONNECTION_STR \
+	--data-only \
+	--insert \
+	-n public \
+	-t likenft_asset_snapshot \
+	-t likenft_asset_snapshot_class \
+	-t likenft_asset_snapshot_nft \
+	-t likenft_asset_migration \
+	-t likenft_asset_migration_class \
+	-t likenft_asset_migration_nft \
+	-f migration-backend-op.pg_dump
+```
+
+## Perform data migrations
+
+- Insert data from op to base
+
+```bash
+psql "$BASE_DB_CONNECTION_STR" < migration-backend-op.pg_dump
+```
+
+- Execute statements
+
+```bash
+mkdir migration-results
+ls migrations | xargs -n 1 -I {} bash -c 'psql $BASE_DB_CONNECTION_STR < migrations/{} > migration-results/{}'
 ```
