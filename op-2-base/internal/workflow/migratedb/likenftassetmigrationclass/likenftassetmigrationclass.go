@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/likecoin/like-migration-backend/pkg/model"
+	"github.com/likecoin/likecoin-op/op-2-base/internal/util/sql"
 	airdropnewnftclass "github.com/likecoin/likecoin-op/op-2-base/internal/workflow/airdrop/newnftclass"
 )
 
@@ -44,7 +45,7 @@ func MakeOutputs(inputs []*Input) Outputs {
 
 func (o Outputs) ToSQL() string {
 	if len(o) == 0 {
-		return ""
+		return sql.Stmt(sql.Echo("No SQL emitted for likenft_asset_migration_class"))
 	}
 
 	stmts := make([]string, 0)
@@ -58,10 +59,10 @@ AND status = %s`,
 			o.MustMarshal(output.CosmosClassId),
 			o.MustMarshal(string(model.LikeNFTAssetMigrationClassStatusCompleted)),
 		)
-		stmts = append(stmts, stmt)
+		stmts = append(stmts, sql.Stmt(sql.Echo(stmt)), sql.Stmt(stmt))
 	}
 
-	return strings.Join(stmts, ";\n") + ";"
+	return strings.Join(stmts, "\n")
 }
 
 func (o Outputs) MustMarshal(v any) string {
