@@ -1,0 +1,6 @@
+[tool.poetry]
+name = "staking-image"
+version = "0.0.1"
+description = ""
+authors = []
+readme = "README.md"
