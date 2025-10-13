@@ -1,6 +1,16 @@
 [tool.poetry]
-name = "staking-image"
+name = "staking_image"
 version = "0.0.1"
 description = ""
 authors = []
 readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+fastapi = {extras = ["standard"], version = "^0.119.0"}
+
+[dependency-groups]
+dev = [
+    "black (>=25.9.0,<26.0.0)",
+    "isort (>=7.0.0,<8.0.0)"
+]

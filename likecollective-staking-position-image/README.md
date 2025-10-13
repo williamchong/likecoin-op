@@ -1,5 +1,13 @@
 # Staking Image
 
+## Setup local development environment
+
+```bash
+make setup-dev
 ```
-python3.13 -m venv venv
+
+## Start development server
+
+```bash
+make dev
 ```
