@@ -8,28 +8,45 @@ PYTHON_VERSION = python3.13
 
 PY_MODULES = staking_image
 
-VENV = venv
+WITH_DOCKER = true
 
-.PRECIOUS: $(VENV)
-$(VENV):
-	$(PYTHON_VERSION) -m venv $(VENV)
+ifeq ($(WITH_DOCKER), true)
+POETRY_COMMAND = docker compose run --rm dev poetry
+else
+POETRY_COMMAND = poetry
+endif
 
 .PHONY: setup-dev
-setup-dev: $(VENV)
-	source $(VENV)/bin/activate; \
-		pip install poetry; \
-		poetry install
+setup-dev:
+	pip install poetry
+	poetry install
 
 .PHONY: format
-format: $(VENV)
-	source $(VENV)/bin/activate; \
-		poetry run black $(PY_MODULES); \
-		poetry run isort $(PY_MODULES)
+format:
+	$(POETRY_COMMAND) run black $(PY_MODULES)
+	$(POETRY_COMMAND) run isort $(PY_MODULES)
 
 .PHONY: dev
-dev: $(VENV)
-	source $(VENV)/bin/activate; \
-		fastapi dev staking_image/server.py
+dev:
+ifeq ($(WITH_DOCKER), false)
+	poetry run fastapi dev staking_image/server.py
+else
+	$(MAKE) stop
+	docker compose up -d dev
+	docker compose logs -f dev
+endif
+
+.PHONY: stop
+stop:
+ifeq ($(WITH_DOCKER), true)
+	docker compose stop dev
+	docker compose rm -f dev
+endif
+
+.PHONY: poetry
+poetry: ARGS = $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+poetry:
+	$(POETRY_COMMAND) $(ARGS)
 
 .PHONY: docker-image
 docker-image:
