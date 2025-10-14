@@ -123,6 +123,16 @@ func (e *evmEventProcessor) Process(
 
 	err = processor.Process(ctx, logger, evmEvent)
 	if err != nil {
+		if errors.Is(err, UnknownEvent) {
+			reason := err.Error()
+			evmEvent, err = e.evmEventRepository.UpdateEvmEventStatus(
+				ctx,
+				evmEvent,
+				evmevent.StatusSkipped,
+				&reason,
+			)
+			return nil
+		}
 		mylogger.Error("processor.Process", "err", err)
 		return err
 	}
