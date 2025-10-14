@@ -36,6 +36,7 @@ func (NFTClass) Fields() []ent.Field {
 		field.String("owner_address").Nillable().Optional(),
 		// Minter addresses is commonly bookstore addresses
 		field.JSON("minter_addresses", []string{}).Optional(),
+		field.JSON("updater_addresses", []string{}).Optional(),
 		field.Uint64("total_supply").GoType(&big.Int{}).
 			SchemaType(typeutil.Uint64SchemaType).
 			ValueScanner(field.TextValueScanner[*big.Int]{}),
