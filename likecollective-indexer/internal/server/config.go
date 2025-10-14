@@ -15,6 +15,8 @@ type EnvConfig struct {
 
 	LikeCollectiveAddress                        string `envconfig:"LIKE_COLLECTIVE_ADDRESS"`
 	AlchemyLikeCollectiveEthLogWebhookSigningKey string `envconfig:"ALCHEMY_LIKE_COLLECTIVE_ETH_LOG_WEBHOOK_SIGNING_KEY" default:""`
+
+	AlchemyLikeStakePositionEthLogWebhookSigningKey string `envconfig:"ALCHEMY_LIKE_STAKE_POSITION_ETH_LOG_WEBHOOK_SIGNING_KEY" default:""`
 }
 
 func NewEnvConfig() (*EnvConfig, error) {
