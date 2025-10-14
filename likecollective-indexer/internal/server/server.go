@@ -9,6 +9,7 @@ import (
 
 	"likecollective-indexer/internal/database"
 	"likecollective-indexer/internal/evm/like_collective"
+	"likecollective-indexer/internal/evm/like_stake_position"
 	"likecollective-indexer/internal/evm/util/logconverter"
 	"likecollective-indexer/internal/server/middleware"
 	"likecollective-indexer/internal/util/sentry"
@@ -21,12 +22,16 @@ type Server struct {
 
 	port int
 
-	db                         database.Service
-	timescaleDbService         database.TimescaleService
-	likeCollectiveLogConverter *logconverter.LogConverter
+	db                 database.Service
+	timescaleDbService database.TimescaleService
 
 	likeCollectiveAddress                        common.Address
 	alchemyLikeCollectiveEthLogWebhookSigningKey string
+	likeCollectiveLogConverter                   *logconverter.LogConverter
+
+	likeStakePositionAddress                        common.Address
+	alchemyLikeStakePositionEthLogWebhookSigningKey string
+	likeStakePositionLogConverter                   *logconverter.LogConverter
 }
 
 func NewServer() *http.Server {
@@ -51,17 +56,27 @@ func NewServer() *http.Server {
 
 	likeCollectiveLogConverter := logconverter.NewLogConverter(likeCollectiveAbi)
 
+	likeStakePositionAbi, err := like_stake_position.LikeStakePositionMetaData.GetAbi()
+	if err != nil {
+		panic(err)
+	}
+	likeStakePositionLogConverter := logconverter.NewLogConverter(likeStakePositionAbi)
+
 	NewServer := &Server{
 		logger: logger,
 
 		port: cfg.Port,
 
-		db:                         database.New(),
-		timescaleDbService:         database.NewTimescaleService(),
-		likeCollectiveLogConverter: likeCollectiveLogConverter,
+		db:                 database.New(),
+		timescaleDbService: database.NewTimescaleService(),
 
 		likeCollectiveAddress:                        common.HexToAddress(cfg.LikeCollectiveAddress),
 		alchemyLikeCollectiveEthLogWebhookSigningKey: cfg.AlchemyLikeCollectiveEthLogWebhookSigningKey,
+		likeCollectiveLogConverter:                   likeCollectiveLogConverter,
+
+		likeStakePositionAddress:                        common.HexToAddress(cfg.LikeStakePositionAddress),
+		alchemyLikeStakePositionEthLogWebhookSigningKey: cfg.AlchemyLikeStakePositionEthLogWebhookSigningKey,
+		likeStakePositionLogConverter:                   likeStakePositionLogConverter,
 	}
 
 	applyMiddlewares := middleware.MakeApplyMiddlewares(

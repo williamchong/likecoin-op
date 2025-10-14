@@ -6,24 +6,31 @@ import (
 
 	"likecollective-indexer/internal/database"
 	"likecollective-indexer/internal/evm/util/logconverter"
-	"likecollective-indexer/internal/server/routes/alchemy/likecollective/ethlog"
+	likecollectiveethlog "likecollective-indexer/internal/server/routes/alchemy/likecollective/ethlog"
+	likestakepositionethlog "likecollective-indexer/internal/server/routes/alchemy/likestakeposition/ethlog"
 	"likecollective-indexer/internal/server/routes/alchemy/middleware"
 
 	"github.com/ethereum/go-ethereum/common"
 )
 
 type alchemyHandler struct {
-	logger                                       *slog.Logger
-	evmEventRepository                           database.EVMEventRepository
+	logger *slog.Logger
+
+	evmEventRepository database.EVMEventRepository
+
 	likeCollectiveAddress                        common.Address
 	alchemyLikeCollectiveEthLogWebhookSigningKey string
 	likeCollectiveLogConverter                   *logconverter.LogConverter
+
+	likeStakePositionAddress                        common.Address
+	alchemyLikeStakePositionEthLogWebhookSigningKey string
+	likeStakePositionLogConverter                   *logconverter.LogConverter
 }
 
 func (h *alchemyHandler) NewServer() http.Handler {
 	mux := http.NewServeMux()
 
-	likecollectiveHandler := ethlog.NewEthlogHandler(
+	likecollectiveHandler := likecollectiveethlog.NewEthlogHandler(
 		h.logger,
 		h.likeCollectiveAddress,
 		h.likeCollectiveLogConverter,
@@ -37,6 +44,22 @@ func (h *alchemyHandler) NewServer() http.Handler {
 			h.alchemyLikeCollectiveEthLogWebhookSigningKey,
 		),
 	)
+
+	likeStakePositionHandler := likestakepositionethlog.NewEthlogHandler(
+		h.logger,
+		h.likeStakePositionAddress,
+		h.likeStakePositionLogConverter,
+		h.evmEventRepository,
+	)
+
+	mux.Handle(
+		"POST /like-stake-position/ethlog",
+		middleware.NewAlchemyRequestHandlerMiddleware(
+			likeStakePositionHandler,
+			h.alchemyLikeStakePositionEthLogWebhookSigningKey,
+		),
+	)
+
 	return mux
 }
 
@@ -46,6 +69,9 @@ func NewAlchemyHandler(
 	likeCollectiveAddress common.Address,
 	alchemyLikeCollectiveEthLogWebhookSigningKey string,
 	likeCollectiveLogConverter *logconverter.LogConverter,
+	likeStakePositionAddress common.Address,
+	alchemyLikeStakePositionEthLogWebhookSigningKey string,
+	likeStakePositionLogConverter *logconverter.LogConverter,
 ) http.Handler {
 	evmEventRepository := database.MakeEVMEventRepository(dbService)
 	h := &alchemyHandler{
@@ -54,6 +80,9 @@ func NewAlchemyHandler(
 		likeCollectiveAddress,
 		alchemyLikeCollectiveEthLogWebhookSigningKey,
 		likeCollectiveLogConverter,
+		likeStakePositionAddress,
+		alchemyLikeStakePositionEthLogWebhookSigningKey,
+		likeStakePositionLogConverter,
 	}
 	return h.NewServer()
 }

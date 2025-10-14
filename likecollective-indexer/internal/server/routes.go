@@ -28,6 +28,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 				s.likeCollectiveAddress,
 				s.alchemyLikeCollectiveEthLogWebhookSigningKey,
 				s.likeCollectiveLogConverter,
+				s.likeStakePositionAddress,
+				s.alchemyLikeStakePositionEthLogWebhookSigningKey,
+				s.likeStakePositionLogConverter,
 			),
 		))
 	}

@@ -16,6 +16,7 @@ type EnvConfig struct {
 	LikeCollectiveAddress                        string `envconfig:"LIKE_COLLECTIVE_ADDRESS"`
 	AlchemyLikeCollectiveEthLogWebhookSigningKey string `envconfig:"ALCHEMY_LIKE_COLLECTIVE_ETH_LOG_WEBHOOK_SIGNING_KEY" default:""`
 
+	LikeStakePositionAddress                        string `envconfig:"LIKE_STAKE_POSITION_ADDRESS"`
 	AlchemyLikeStakePositionEthLogWebhookSigningKey string `envconfig:"ALCHEMY_LIKE_STAKE_POSITION_ETH_LOG_WEBHOOK_SIGNING_KEY" default:""`
 }
 
