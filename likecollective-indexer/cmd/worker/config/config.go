@@ -13,6 +13,10 @@ type EnvConfig struct {
 
 	SentryDsn   string `envconfig:"SENTRY_DSN" default:""`
 	SentryDebug bool   `envconfig:"SENTRY_DEBUG" default:"false"`
+
+	EthNetworkPublicRPCURL   string `envconfig:"ETH_NETWORK_PUBLIC_RPC_URL"`
+	LikeCollectiveAddress    string `envconfig:"LIKE_COLLECTIVE_ADDRESS"`
+	LikeStakePositionAddress string `envconfig:"LIKE_STAKE_POSITION_ADDRESS"`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {
