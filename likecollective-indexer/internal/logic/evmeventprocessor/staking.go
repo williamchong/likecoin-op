@@ -2,6 +2,8 @@ package evmeventprocessor
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"log/slog"
 
 	"likecollective-indexer/ent"
@@ -35,6 +37,25 @@ func MakeStakingEvmEventProcessor(
 }
 
 func (e *stakingEvmEventProcessor) Process(
+	ctx context.Context,
+	logger *slog.Logger,
+
+	evmEvent *ent.EVMEvent,
+) error {
+	if common.HexToAddress(evmEvent.Address) == e.likeCollectiveAddress {
+		return e.processLikeCollective(ctx, logger, evmEvent)
+	}
+
+	return errors.Join(
+		UnknownEvent,
+		fmt.Errorf(
+			"no candidate to process staking event: (event id: %d)",
+			evmEvent.ID,
+		),
+	)
+}
+
+func (e *stakingEvmEventProcessor) processLikeCollective(
 	ctx context.Context,
 	logger *slog.Logger,
 
