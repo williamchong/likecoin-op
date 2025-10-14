@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -11,15 +12,20 @@ import (
 	"likecollective-indexer/internal/evm/util/logconverter"
 	"likecollective-indexer/internal/server/middleware"
 	"likecollective-indexer/internal/util/sentry"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type Server struct {
+	logger *slog.Logger
+
 	port int
 
 	db                         database.Service
 	timescaleDbService         database.TimescaleService
 	likeCollectiveLogConverter *logconverter.LogConverter
 
+	likeCollectiveAddress                        common.Address
 	alchemyLikeCollectiveEthLogWebhookSigningKey string
 }
 
@@ -28,6 +34,8 @@ func NewServer() *http.Server {
 	if err != nil {
 		panic(err)
 	}
+
+	logger := slog.New(slog.Default().Handler())
 
 	log.Printf("Loaded server config: %+v", cfg)
 
@@ -44,12 +52,15 @@ func NewServer() *http.Server {
 	likeCollectiveLogConverter := logconverter.NewLogConverter(likeCollectiveAbi)
 
 	NewServer := &Server{
+		logger: logger,
+
 		port: cfg.Port,
 
 		db:                         database.New(),
 		timescaleDbService:         database.NewTimescaleService(),
 		likeCollectiveLogConverter: likeCollectiveLogConverter,
 
+		likeCollectiveAddress:                        common.HexToAddress(cfg.LikeCollectiveAddress),
 		alchemyLikeCollectiveEthLogWebhookSigningKey: cfg.AlchemyLikeCollectiveEthLogWebhookSigningKey,
 	}
 

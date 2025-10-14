@@ -2,24 +2,33 @@ package ethlog
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"likecollective-indexer/ent"
 	"likecollective-indexer/internal/database"
 	"likecollective-indexer/internal/evm/util/logconverter"
 	"likecollective-indexer/internal/server/routes/alchemy/middleware"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type ethlogHandler struct {
+	logger                     *slog.Logger
+	likeCollectiveAddress      common.Address
 	likeCollectiveLogConverter *logconverter.LogConverter
 	evmEventRepository         database.EVMEventRepository
 }
 
 func NewEthlogHandler(
+	logger *slog.Logger,
+	likeCollectiveAddress common.Address,
 	likeCollectiveLogConverter *logconverter.LogConverter,
 	evmEventRepository database.EVMEventRepository,
 ) middleware.AlchemyRequestHandler {
 	return (&ethlogHandler{
+		logger,
+		likeCollectiveAddress,
 		likeCollectiveLogConverter,
 		evmEventRepository,
 	}).handle
@@ -47,6 +56,17 @@ func (h *ethlogHandler) handle(
 	evmEvents := make([]*ent.EVMEvent, len(transactionLogs))
 	for i, txLog := range transactionLogs {
 		log := txLog.Log
+
+		if log.Address != h.likeCollectiveAddress {
+			h.logger.Info(
+				"skipping log",
+				"txHash", log.TxHash.Hex(),
+				"logIndex", log.Index,
+				"address", log.Address.Hex(),
+			)
+			continue
+		}
+
 		header := txLog.Header
 		evmEvent, err := h.likeCollectiveLogConverter.ConvertLogToEvmEvent(log, header)
 		if err != nil {

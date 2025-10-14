@@ -23,8 +23,10 @@ func (s *Server) RegisterRoutes() http.Handler {
 		mux.Handle("/alchemy/", http.StripPrefix(
 			"/alchemy",
 			alchemy.NewAlchemyHandler(
-				s.alchemyLikeCollectiveEthLogWebhookSigningKey,
+				s.logger,
 				s.db,
+				s.likeCollectiveAddress,
+				s.alchemyLikeCollectiveEthLogWebhookSigningKey,
 				s.likeCollectiveLogConverter,
 			),
 		))
