@@ -7,24 +7,37 @@ import (
 	"log/slog"
 
 	"likecollective-indexer/ent"
+	"likecollective-indexer/internal/evm"
 	stakingstateloader "likecollective-indexer/internal/logic/stakingstate/loader"
 	stakingstatepersistor "likecollective-indexer/internal/logic/stakingstate/persistor"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var UnknownEvent error = errors.New("unknown event")
 
 type eventProcessorDeps struct {
+	evmClient             evm.EVMClient
 	stakingStateLoader    stakingstateloader.StakingStateLoader
 	stakingStatePersistor stakingstatepersistor.StakingStatePersistor
+
+	likeCollectiveAddress    common.Address
+	likeStakePositionAddress common.Address
 }
 
 func makeEventProcessorDeps(
+	evmClient evm.EVMClient,
 	stakingStateLoader stakingstateloader.StakingStateLoader,
 	stakingStatePersistor stakingstatepersistor.StakingStatePersistor,
+	likeCollectiveAddress common.Address,
+	likeStakePositionAddress common.Address,
 ) *eventProcessorDeps {
 	return &eventProcessorDeps{
+		evmClient,
 		stakingStateLoader,
 		stakingStatePersistor,
+		likeCollectiveAddress,
+		likeStakePositionAddress,
 	}
 }
 

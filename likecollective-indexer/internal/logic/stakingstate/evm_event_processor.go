@@ -5,22 +5,35 @@ import (
 	"log/slog"
 
 	"likecollective-indexer/ent"
+	"likecollective-indexer/internal/evm"
 	"likecollective-indexer/internal/logic/stakingstate/loader"
 	"likecollective-indexer/internal/logic/stakingstate/persistor"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type stakingEvmEventProcessor struct {
+	evmClient             evm.EVMClient
 	stakingStateLoader    loader.StakingStateLoader
 	stakingStatePersistor persistor.StakingStatePersistor
+
+	likeCollectiveAddress    common.Address
+	likeStakePositionAddress common.Address
 }
 
 func MakeStakingEvmEventProcessor(
+	evmClient evm.EVMClient,
 	stakingStateLoader loader.StakingStateLoader,
 	stakingStatePersistor persistor.StakingStatePersistor,
+	likeCollectiveAddress common.Address,
+	likeStakePositionAddress common.Address,
 ) *stakingEvmEventProcessor {
 	return &stakingEvmEventProcessor{
+		evmClient,
 		stakingStateLoader,
 		stakingStatePersistor,
+		likeCollectiveAddress,
+		likeStakePositionAddress,
 	}
 }
 
@@ -32,7 +45,15 @@ func (e *stakingEvmEventProcessor) Process(
 	stakingEvents := make([]*ent.StakingEvent, 0)
 
 	for _, evmEvent := range evmEvents {
-		stakingEvent, err := GetStakingEventsFromEvent(evmEvent)
+		var (
+			stakingEvent []*ent.StakingEvent
+			err          error
+		)
+		if common.HexToAddress(evmEvent.Address) == e.likeCollectiveAddress {
+			stakingEvent, err = GetStakingEventsFromLikeCollectiveEvent(ctx, e.evmClient, evmEvent)
+		} else if common.HexToAddress(evmEvent.Address) == e.likeStakePositionAddress {
+			stakingEvent, err = GetStakingEventsFromLikeStakePositionEvent(ctx, e.evmClient, evmEvent)
+		}
 		if err != nil {
 			return err
 		}

@@ -2,17 +2,25 @@ package stakingstate
 
 import (
 	"likecollective-indexer/internal/evm/like_collective"
+	"likecollective-indexer/internal/evm/like_stake_position"
 	"likecollective-indexer/internal/evm/util/logconverter"
 )
 
 var (
-	logConverter *logconverter.LogConverter
+	likeCollectiveLogConverter    *logconverter.LogConverter
+	likeStakePositionLogConverter *logconverter.LogConverter
 )
 
 func init() {
-	abi, err := like_collective.LikeCollectiveMetaData.GetAbi()
+	likeCollectiveAbi, err := like_collective.LikeCollectiveMetaData.GetAbi()
 	if err != nil {
 		panic(err)
 	}
-	logConverter = logconverter.NewLogConverter(abi)
+	likeCollectiveLogConverter = logconverter.NewLogConverter(likeCollectiveAbi)
+
+	likeStakePositionAbi, err := like_stake_position.LikeStakePositionMetaData.GetAbi()
+	if err != nil {
+		panic(err)
+	}
+	likeStakePositionLogConverter = logconverter.NewLogConverter(likeStakePositionAbi)
 }
