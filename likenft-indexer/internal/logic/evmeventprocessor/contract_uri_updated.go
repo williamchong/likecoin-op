@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"likenft-indexer/ent"
-	"likenft-indexer/ent/evmeventprocessedblockheight"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/evm"
 	"likenft-indexer/internal/evm/model"
@@ -75,7 +74,7 @@ func (e *contractURIUpdatedProcessor) Process(
 
 func init() {
 	registerEventProcessor(
-		evmeventprocessedblockheight.EventContractURIUpdated.String(),
+		"ContractURIUpdated",
 		func(inj *eventProcessorDeps) eventProcessor {
 			return MakeContractURIUpdatedProcessor(
 				inj.httpClient,

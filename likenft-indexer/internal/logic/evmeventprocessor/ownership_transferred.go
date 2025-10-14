@@ -5,7 +5,6 @@ import (
 	"log/slog"
 
 	"likenft-indexer/ent"
-	"likenft-indexer/ent/evmeventprocessedblockheight"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/evm"
 	"likenft-indexer/internal/evm/book_nft"
@@ -74,7 +73,7 @@ func (e *bookNFTOwnershipTransferredProcessor) Process(
 
 func init() {
 	registerEventProcessor(
-		evmeventprocessedblockheight.EventOwnershipTransferred.String(),
+		"OwnershipTransferred",
 		func(inj *eventProcessorDeps) eventProcessor {
 			return MakeBookNFTOwnershipTransferredProcessor(
 				inj.evmClient,
