@@ -719,6 +719,16 @@ func MinterAddressesNotNil() predicate.NFTClass {
 	return predicate.NFTClass(sql.FieldNotNull(FieldMinterAddresses))
 }
 
+// UpdaterAddressesIsNil applies the IsNil predicate on the "updater_addresses" field.
+func UpdaterAddressesIsNil() predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldIsNull(FieldUpdaterAddresses))
+}
+
+// UpdaterAddressesNotNil applies the NotNil predicate on the "updater_addresses" field.
+func UpdaterAddressesNotNil() predicate.NFTClass {
+	return predicate.NFTClass(sql.FieldNotNull(FieldUpdaterAddresses))
+}
+
 // MaxSupplyEQ applies the EQ predicate on the "max_supply" field.
 func MaxSupplyEQ(v typeutil.Uint64) predicate.NFTClass {
 	vc, err := ValueScanner.MaxSupply.Value(v)

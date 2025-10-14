@@ -127,23 +127,23 @@ func init() {
 	// nftclass.SymbolValidator is a validator for the "symbol" field. It is called by the builders before save.
 	nftclass.SymbolValidator = nftclassDescSymbol.Validators[0].(func(string) error)
 	// nftclassDescTotalSupply is the schema descriptor for total_supply field.
-	nftclassDescTotalSupply := nftclassFields[5].Descriptor()
+	nftclassDescTotalSupply := nftclassFields[6].Descriptor()
 	nftclass.ValueScanner.TotalSupply = nftclassDescTotalSupply.ValueScanner.(field.TypeValueScanner[*big.Int])
 	// nftclassDescMaxSupply is the schema descriptor for max_supply field.
-	nftclassDescMaxSupply := nftclassFields[6].Descriptor()
+	nftclassDescMaxSupply := nftclassFields[7].Descriptor()
 	nftclass.ValueScanner.MaxSupply = nftclassDescMaxSupply.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
 	// nftclassDescDeployerAddress is the schema descriptor for deployer_address field.
-	nftclassDescDeployerAddress := nftclassFields[10].Descriptor()
+	nftclassDescDeployerAddress := nftclassFields[11].Descriptor()
 	// nftclass.DeployerAddressValidator is a validator for the "deployer_address" field. It is called by the builders before save.
 	nftclass.DeployerAddressValidator = nftclassDescDeployerAddress.Validators[0].(func(string) error)
 	// nftclassDescDeployedBlockNumber is the schema descriptor for deployed_block_number field.
-	nftclassDescDeployedBlockNumber := nftclassFields[11].Descriptor()
+	nftclassDescDeployedBlockNumber := nftclassFields[12].Descriptor()
 	nftclass.ValueScanner.DeployedBlockNumber = nftclassDescDeployedBlockNumber.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
 	// nftclassDescLatestEventBlockNumber is the schema descriptor for latest_event_block_number field.
-	nftclassDescLatestEventBlockNumber := nftclassFields[12].Descriptor()
+	nftclassDescLatestEventBlockNumber := nftclassFields[13].Descriptor()
 	nftclass.ValueScanner.LatestEventBlockNumber = nftclassDescLatestEventBlockNumber.ValueScanner.(field.TypeValueScanner[typeutil.Uint64])
 	// nftclassDescDisabledForIndexing is the schema descriptor for disabled_for_indexing field.
-	nftclassDescDisabledForIndexing := nftclassFields[13].Descriptor()
+	nftclassDescDisabledForIndexing := nftclassFields[14].Descriptor()
 	// nftclass.DefaultDisabledForIndexing holds the default value on creation for the disabled_for_indexing field.
 	nftclass.DefaultDisabledForIndexing = nftclassDescDisabledForIndexing.Default.(bool)
 	transactionmemoFields := schema.TransactionMemo{}.Fields()

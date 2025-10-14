@@ -147,6 +147,12 @@ func (ncc *NFTClassCreate) SetMinterAddresses(s []string) *NFTClassCreate {
 	return ncc
 }
 
+// SetUpdaterAddresses sets the "updater_addresses" field.
+func (ncc *NFTClassCreate) SetUpdaterAddresses(s []string) *NFTClassCreate {
+	ncc.mutation.SetUpdaterAddresses(s)
+	return ncc
+}
+
 // SetTotalSupply sets the "total_supply" field.
 func (ncc *NFTClassCreate) SetTotalSupply(b *big.Int) *NFTClassCreate {
 	ncc.mutation.SetTotalSupply(b)
@@ -462,6 +468,10 @@ func (ncc *NFTClassCreate) createSpec() (*NFTClass, *sqlgraph.CreateSpec, error)
 	if value, ok := ncc.mutation.MinterAddresses(); ok {
 		_spec.SetField(nftclass.FieldMinterAddresses, field.TypeJSON, value)
 		_node.MinterAddresses = value
+	}
+	if value, ok := ncc.mutation.UpdaterAddresses(); ok {
+		_spec.SetField(nftclass.FieldUpdaterAddresses, field.TypeJSON, value)
+		_node.UpdaterAddresses = value
 	}
 	if value, ok := ncc.mutation.TotalSupply(); ok {
 		vv, err := nftclass.ValueScanner.TotalSupply.Value(value)

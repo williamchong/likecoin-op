@@ -243,6 +243,24 @@ func (ncu *NFTClassUpdate) ClearMinterAddresses() *NFTClassUpdate {
 	return ncu
 }
 
+// SetUpdaterAddresses sets the "updater_addresses" field.
+func (ncu *NFTClassUpdate) SetUpdaterAddresses(s []string) *NFTClassUpdate {
+	ncu.mutation.SetUpdaterAddresses(s)
+	return ncu
+}
+
+// AppendUpdaterAddresses appends s to the "updater_addresses" field.
+func (ncu *NFTClassUpdate) AppendUpdaterAddresses(s []string) *NFTClassUpdate {
+	ncu.mutation.AppendUpdaterAddresses(s)
+	return ncu
+}
+
+// ClearUpdaterAddresses clears the value of the "updater_addresses" field.
+func (ncu *NFTClassUpdate) ClearUpdaterAddresses() *NFTClassUpdate {
+	ncu.mutation.ClearUpdaterAddresses()
+	return ncu
+}
+
 // SetTotalSupply sets the "total_supply" field.
 func (ncu *NFTClassUpdate) SetTotalSupply(b *big.Int) *NFTClassUpdate {
 	ncu.mutation.SetTotalSupply(b)
@@ -628,6 +646,17 @@ func (ncu *NFTClassUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if ncu.mutation.MinterAddressesCleared() {
 		_spec.ClearField(nftclass.FieldMinterAddresses, field.TypeJSON)
 	}
+	if value, ok := ncu.mutation.UpdaterAddresses(); ok {
+		_spec.SetField(nftclass.FieldUpdaterAddresses, field.TypeJSON, value)
+	}
+	if value, ok := ncu.mutation.AppendedUpdaterAddresses(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, nftclass.FieldUpdaterAddresses, value)
+		})
+	}
+	if ncu.mutation.UpdaterAddressesCleared() {
+		_spec.ClearField(nftclass.FieldUpdaterAddresses, field.TypeJSON)
+	}
 	if value, ok := ncu.mutation.TotalSupply(); ok {
 		vv, err := nftclass.ValueScanner.TotalSupply.Value(value)
 		if err != nil {
@@ -1007,6 +1036,24 @@ func (ncuo *NFTClassUpdateOne) AppendMinterAddresses(s []string) *NFTClassUpdate
 // ClearMinterAddresses clears the value of the "minter_addresses" field.
 func (ncuo *NFTClassUpdateOne) ClearMinterAddresses() *NFTClassUpdateOne {
 	ncuo.mutation.ClearMinterAddresses()
+	return ncuo
+}
+
+// SetUpdaterAddresses sets the "updater_addresses" field.
+func (ncuo *NFTClassUpdateOne) SetUpdaterAddresses(s []string) *NFTClassUpdateOne {
+	ncuo.mutation.SetUpdaterAddresses(s)
+	return ncuo
+}
+
+// AppendUpdaterAddresses appends s to the "updater_addresses" field.
+func (ncuo *NFTClassUpdateOne) AppendUpdaterAddresses(s []string) *NFTClassUpdateOne {
+	ncuo.mutation.AppendUpdaterAddresses(s)
+	return ncuo
+}
+
+// ClearUpdaterAddresses clears the value of the "updater_addresses" field.
+func (ncuo *NFTClassUpdateOne) ClearUpdaterAddresses() *NFTClassUpdateOne {
+	ncuo.mutation.ClearUpdaterAddresses()
 	return ncuo
 }
 
@@ -1424,6 +1471,17 @@ func (ncuo *NFTClassUpdateOne) sqlSave(ctx context.Context) (_node *NFTClass, er
 	}
 	if ncuo.mutation.MinterAddressesCleared() {
 		_spec.ClearField(nftclass.FieldMinterAddresses, field.TypeJSON)
+	}
+	if value, ok := ncuo.mutation.UpdaterAddresses(); ok {
+		_spec.SetField(nftclass.FieldUpdaterAddresses, field.TypeJSON, value)
+	}
+	if value, ok := ncuo.mutation.AppendedUpdaterAddresses(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, nftclass.FieldUpdaterAddresses, value)
+		})
+	}
+	if ncuo.mutation.UpdaterAddressesCleared() {
+		_spec.ClearField(nftclass.FieldUpdaterAddresses, field.TypeJSON)
 	}
 	if value, ok := ncuo.mutation.TotalSupply(); ok {
 		vv, err := nftclass.ValueScanner.TotalSupply.Value(value)

@@ -44,6 +44,8 @@ type NFTClass struct {
 	OwnerAddress *string `json:"owner_address,omitempty"`
 	// MinterAddresses holds the value of the "minter_addresses" field.
 	MinterAddresses []string `json:"minter_addresses,omitempty"`
+	// UpdaterAddresses holds the value of the "updater_addresses" field.
+	UpdaterAddresses []string `json:"updater_addresses,omitempty"`
 	// TotalSupply holds the value of the "total_supply" field.
 	TotalSupply *big.Int `json:"total_supply,omitempty"`
 	// MaxSupply holds the value of the "max_supply" field.
@@ -111,7 +113,7 @@ func (*NFTClass) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case nftclass.FieldMinterAddresses, nftclass.FieldMetadata:
+		case nftclass.FieldMinterAddresses, nftclass.FieldUpdaterAddresses, nftclass.FieldMetadata:
 			values[i] = new([]byte)
 		case nftclass.FieldDisabledForIndexing:
 			values[i] = new(sql.NullBool)
@@ -225,6 +227,14 @@ func (nc *NFTClass) assignValues(columns []string, values []any) error {
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &nc.MinterAddresses); err != nil {
 					return fmt.Errorf("unmarshal field minter_addresses: %w", err)
+				}
+			}
+		case nftclass.FieldUpdaterAddresses:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field updater_addresses", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &nc.UpdaterAddresses); err != nil {
+					return fmt.Errorf("unmarshal field updater_addresses: %w", err)
 				}
 			}
 		case nftclass.FieldTotalSupply:
@@ -396,6 +406,9 @@ func (nc *NFTClass) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("minter_addresses=")
 	builder.WriteString(fmt.Sprintf("%v", nc.MinterAddresses))
+	builder.WriteString(", ")
+	builder.WriteString("updater_addresses=")
+	builder.WriteString(fmt.Sprintf("%v", nc.UpdaterAddresses))
 	builder.WriteString(", ")
 	builder.WriteString("total_supply=")
 	builder.WriteString(fmt.Sprintf("%v", nc.TotalSupply))

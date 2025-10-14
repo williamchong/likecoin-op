@@ -191,6 +191,7 @@ var (
 		{Name: "symbol", Type: field.TypeString},
 		{Name: "owner_address", Type: field.TypeString, Nullable: true},
 		{Name: "minter_addresses", Type: field.TypeJSON, Nullable: true},
+		{Name: "updater_addresses", Type: field.TypeJSON, Nullable: true},
 		{Name: "total_supply", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
 		{Name: "max_supply", Type: field.TypeUint64, SchemaType: map[string]string{"postgres": "numeric"}},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
@@ -213,7 +214,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "nft_classes_accounts_nft_classes",
-				Columns:    []*schema.Column{NftClassesColumns[24]},
+				Columns:    []*schema.Column{NftClassesColumns[25]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -237,7 +238,7 @@ var (
 			{
 				Name:    "nftclass_deployer_address",
 				Unique:  false,
-				Columns: []*schema.Column{NftClassesColumns[17]},
+				Columns: []*schema.Column{NftClassesColumns[18]},
 			},
 		},
 	}
