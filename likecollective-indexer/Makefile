@@ -75,6 +75,11 @@ abigen:
 		--abi=<(cat ../abi/LikeCollective.abi.json) \
 		--pkg=like_collective \
 		--out=internal/evm/like_collective/like_collective.go
+	mkdir -p internal/evm/like_stake_position
+	go run github.com/ethereum/go-ethereum/cmd/abigen@latest \
+		--abi=<(cat ../abi/LikeStakePosition.abi.json) \
+		--pkg=like_stake_position \
+		--out=internal/evm/like_stake_position/like_stake_position.go
 
 .PHONY: start-api
 start-api:

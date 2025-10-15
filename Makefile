@@ -30,6 +30,8 @@ abigen:
 	jq '.abi' likecoin3/artifacts/contracts/Likecoin.sol/Likecoin.json > abi/Likecoin.abi.json
 	cp likecoin3/artifacts/contracts/LikeCollective.sol/LikeCollective.json abi/
 	jq '.abi' likecoin3/artifacts/contracts/LikeCollective.sol/LikeCollective.json > abi/LikeCollective.abi.json
+	cp likecoin3/artifacts/contracts/LikeStakePosition.sol/LikeStakePosition.json abi/
+	jq '.abi' likecoin3/artifacts/contracts/LikeStakePosition.sol/LikeStakePosition.json > abi/LikeStakePosition.abi.json
 	make -C likenft-indexer abigen
 	make -C migration-backend abigen
 	make -C likecollective-indexer abigen

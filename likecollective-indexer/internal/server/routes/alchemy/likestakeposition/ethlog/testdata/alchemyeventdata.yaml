@@ -1,0 +1,48 @@
+name: stake
+body: |-
+  {
+    "data": {
+      "block": {
+        "hash": "0x853a3aaf6f2264d349f2729e389bd95691ad5e2f4e464f5a5957d53d42e8224e",
+        "number": 32327452,
+        "timestamp": 1758179310,
+        "logs": [
+          {
+            "account": {
+              "address": "0x4c022E069A86f0974dc953E3F764ff2e3B6cA649"
+            },
+            "topics": [
+              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+              "0x0000000000000000000000009ec5814c3307862e9647aa0ca6758ff294f6ba26",
+              "0x00000000000000000000000050583f3fc3a2f570f3df0af234ac3268af9c3d81",
+              "0x0000000000000000000000000000000000000000000000000000000000000000"
+            ],
+            "data": null,
+            "transaction": {
+              "hash": "0x77edc332452b9178078c86ebdd774fae64812d6e8b728a3d687243599f9be82e",
+              "index": 19
+            },
+            "index": 253
+          }
+        ]
+      }
+    }
+  }
+
+transactionlogs:
+  - log:
+      address: "0x4c022E069A86f0974dc953E3F764ff2e3B6cA649"
+      topics:
+        - "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+        - "0x0000000000000000000000009ec5814c3307862e9647aa0ca6758ff294f6ba26"
+        - "0x00000000000000000000000050583f3fc3a2f570f3df0af234ac3268af9c3d81"
+        - "0x0000000000000000000000000000000000000000000000000000000000000000"
+      data: null
+      blocknumber: 32327452
+      blockhash: "0x853a3aaf6f2264d349f2729e389bd95691ad5e2f4e464f5a5957d53d42e8224e"
+      transactionhash: "0x77edc332452b9178078c86ebdd774fae64812d6e8b728a3d687243599f9be82e"
+      transactionindex: 19
+      logindex: 253
+    header:
+      number: 32327452
+      time: 1758179310

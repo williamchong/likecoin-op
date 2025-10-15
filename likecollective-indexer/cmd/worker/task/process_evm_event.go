@@ -7,11 +7,14 @@ import (
 
 	appcontext "likecollective-indexer/cmd/worker/context"
 	"likecollective-indexer/internal/database"
+	"likecollective-indexer/internal/evm"
 	"likecollective-indexer/internal/logic/evmeventprocessor"
 	stakingstateloader "likecollective-indexer/internal/logic/stakingstate/loader"
 	stakingstatepersistor "likecollective-indexer/internal/logic/stakingstate/persistor"
 	"likecollective-indexer/internal/worker/task"
 
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/hibiken/asynq"
 )
 
@@ -52,6 +55,7 @@ func NewIndexActionProcessEVMEvent(evmEventId int) (*asynq.Task, error) {
 
 func HandleProcessEVMEvent(ctx context.Context, t *asynq.Task) error {
 	logger := appcontext.LoggerFromContext(ctx)
+	envCfg := appcontext.ConfigFromContext(ctx)
 
 	mylogger := logger.WithGroup("HandleProcessEVMEvent")
 
@@ -63,6 +67,18 @@ func HandleProcessEVMEvent(ctx context.Context, t *asynq.Task) error {
 		mylogger.Error("json.Unmarshal ProcessEVMEventPayload", "err", err)
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
+
+	ethClient, err := ethclient.Dial(envCfg.EthNetworkPublicRPCURL)
+	if err != nil {
+		mylogger.Error("ethclient.Dial", "err", err)
+		return err
+	}
+
+	evmClient := evm.NewEVMClient(
+		common.HexToAddress(envCfg.LikeCollectiveAddress),
+		common.HexToAddress(envCfg.LikeStakePositionAddress),
+		ethClient,
+	)
 
 	dbService := database.New()
 
@@ -79,9 +95,12 @@ func HandleProcessEVMEvent(ctx context.Context, t *asynq.Task) error {
 	stakingStatePersistor := stakingstatepersistor.MakeStakingStatePersistor(dbService)
 
 	processor := evmeventprocessor.MakeEVMEventProcessor(
+		evmClient,
 		evmEventRepository,
 		stakingStateLoader,
 		stakingStatePersistor,
+		common.HexToAddress(envCfg.LikeCollectiveAddress),
+		common.HexToAddress(envCfg.LikeStakePositionAddress),
 	)
 
 	evmEvent, err := evmEventRepository.GetEvmEventById(ctx, p.EvmEventId)

@@ -14,22 +14,22 @@ import (
 )
 
 type ethlogHandler struct {
-	logger                     *slog.Logger
-	likeCollectiveAddress      common.Address
-	likeCollectiveLogConverter *logconverter.LogConverter
-	evmEventRepository         database.EVMEventRepository
+	logger                        *slog.Logger
+	likeStakePositionAddress      common.Address
+	likeStakePositionLogConverter *logconverter.LogConverter
+	evmEventRepository            database.EVMEventRepository
 }
 
 func NewEthlogHandler(
 	logger *slog.Logger,
-	likeCollectiveAddress common.Address,
-	likeCollectiveLogConverter *logconverter.LogConverter,
+	likeStakePositionAddress common.Address,
+	likeStakePositionLogConverter *logconverter.LogConverter,
 	evmEventRepository database.EVMEventRepository,
 ) middleware.AlchemyRequestHandler {
 	return (&ethlogHandler{
 		logger,
-		likeCollectiveAddress,
-		likeCollectiveLogConverter,
+		likeStakePositionAddress,
+		likeStakePositionLogConverter,
 		evmEventRepository,
 	}).handle
 }
@@ -57,18 +57,18 @@ func (h *ethlogHandler) handle(
 	for i, txLog := range transactionLogs {
 		log := txLog.Log
 
-		if log.Address != h.likeCollectiveAddress {
+		if log.Address != h.likeStakePositionAddress {
 			h.logger.Info(
-				"skipping log",
-				"txHash", log.TxHash.Hex(),
-				"logIndex", log.Index,
+				"Skipping log",
 				"address", log.Address.Hex(),
+				"likeStakePositionAddress", h.likeStakePositionAddress.Hex(),
+				"txHash", log.TxHash.Hex(),
 			)
 			continue
 		}
 
 		header := txLog.Header
-		evmEvent, err := h.likeCollectiveLogConverter.ConvertLogToEvmEvent(log, header)
+		evmEvent, err := h.likeStakePositionLogConverter.ConvertLogToEvmEvent(log, header)
 		if err != nil {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return

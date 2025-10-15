@@ -28,6 +28,8 @@ const (
 	StakingStateTestCaseEventTypeRewardDepositDistributed StakingStateTestCaseEventType = "rewardDepositDistributed"
 	StakingStateTestCaseEventTypeRewardClaimed            StakingStateTestCaseEventType = "rewardClaimed"
 	StakingStateTestCaseEventTypeAllRewardsClaimed        StakingStateTestCaseEventType = "allRewardsClaimed"
+	StakingStateTestCaseEventTypeStakePositionTransferred StakingStateTestCaseEventType = "stakePositionTransferred"
+	StakingStateTestCaseEventTypeStakePositionReceived    StakingStateTestCaseEventType = "stakePositionReceived"
 )
 
 type StakingStateTestCaseEventStaked struct {
@@ -146,6 +148,56 @@ func (e *StakingStateTestCaseEventAllRewardsClaimed) ToEnt() *ent.StakingEvent {
 	}
 }
 
+type StakingStateTestCaseEventStakePositionTransferred struct {
+	BookNFT             string `yaml:"bookNFT"`
+	Account             string `yaml:"account"`
+	StakedAmount        string `yaml:"stakedAmount"`
+	PendingRewardAmount string `yaml:"pendingRewardAmount"`
+}
+
+func (e *StakingStateTestCaseEventStakePositionTransferred) ToEnt() *ent.StakingEvent {
+	stakedAmount, err := uint256.FromDecimal(e.StakedAmount)
+	if err != nil {
+		panic("failed to convert staked amount to big.Int")
+	}
+	pendingRewardAmount, err := uint256.FromDecimal(e.PendingRewardAmount)
+	if err != nil {
+		panic("failed to convert pending reward amount to big.Int")
+	}
+	return &ent.StakingEvent{
+		EventType:                  stakingevent.EventTypeStakePositionTransferred,
+		AccountEvmAddress:          e.Account,
+		NftClassAddress:            e.BookNFT,
+		StakedAmountRemoved:        typeutil.Uint256(stakedAmount),
+		PendingRewardAmountRemoved: typeutil.Uint256(pendingRewardAmount),
+	}
+}
+
+type StakingStateTestCaseEventStakePositionReceived struct {
+	BookNFT             string `yaml:"bookNFT"`
+	Account             string `yaml:"account"`
+	StakedAmount        string `yaml:"stakedAmount"`
+	PendingRewardAmount string `yaml:"pendingRewardAmount"`
+}
+
+func (e *StakingStateTestCaseEventStakePositionReceived) ToEnt() *ent.StakingEvent {
+	stakedAmount, err := uint256.FromDecimal(e.StakedAmount)
+	if err != nil {
+		panic("failed to convert staked amount to big.Int")
+	}
+	pendingRewardAmount, err := uint256.FromDecimal(e.PendingRewardAmount)
+	if err != nil {
+		panic("failed to convert pending reward amount to big.Int")
+	}
+	return &ent.StakingEvent{
+		EventType:                stakingevent.EventTypeStakePositionReceived,
+		AccountEvmAddress:        e.Account,
+		NftClassAddress:          e.BookNFT,
+		StakedAmountAdded:        typeutil.Uint256(stakedAmount),
+		PendingRewardAmountAdded: typeutil.Uint256(pendingRewardAmount),
+	}
+}
+
 type StakingStateTestCaseEvent struct {
 	Type                              StakingStateTestCaseEventType                      `yaml:"type"`
 	StakedEventData                   *StakingStateTestCaseEventStaked                   `yaml:"stakedEventData"`
@@ -154,6 +206,8 @@ type StakingStateTestCaseEvent struct {
 	RewardDepositDistributedEventData *StakingStateTestCaseEventRewardDepositDistributed `yaml:"rewardDepositDistributedEventData"`
 	RewardClaimedEventData            *StakingStateTestCaseEventRewardClaimed            `yaml:"rewardClaimedEventData"`
 	AllRewardsClaimedEventData        *StakingStateTestCaseEventAllRewardsClaimed        `yaml:"allRewardsClaimedEventData"`
+	StakePositionTransferredEventData *StakingStateTestCaseEventStakePositionTransferred `yaml:"stakePositionTransferredEventData"`
+	StakePositionReceivedEventData    *StakingStateTestCaseEventStakePositionReceived    `yaml:"stakePositionReceivedEventData"`
 }
 
 func (e *StakingStateTestCaseEvent) ToStakingEvent() *ent.StakingEvent {
@@ -170,6 +224,10 @@ func (e *StakingStateTestCaseEvent) ToStakingEvent() *ent.StakingEvent {
 		return e.RewardClaimedEventData.ToEnt()
 	case StakingStateTestCaseEventTypeAllRewardsClaimed:
 		return e.AllRewardsClaimedEventData.ToEnt()
+	case StakingStateTestCaseEventTypeStakePositionTransferred:
+		return e.StakePositionTransferredEventData.ToEnt()
+	case StakingStateTestCaseEventTypeStakePositionReceived:
+		return e.StakePositionReceivedEventData.ToEnt()
 	}
 	panic("unknown event type")
 }
@@ -228,6 +286,26 @@ func FromEnt(stakingEvent *ent.StakingEvent) *StakingStateTestCaseEvent {
 				BookNFT:      stakingEvent.NftClassAddress,
 				Account:      stakingEvent.AccountEvmAddress,
 				RewardAmount: (*uint256.Int)(stakingEvent.PendingRewardAmountRemoved).String(),
+			},
+		}
+	case stakingevent.EventTypeStakePositionTransferred:
+		return &StakingStateTestCaseEvent{
+			Type: StakingStateTestCaseEventTypeStakePositionTransferred,
+			StakePositionTransferredEventData: &StakingStateTestCaseEventStakePositionTransferred{
+				BookNFT:             stakingEvent.NftClassAddress,
+				Account:             stakingEvent.AccountEvmAddress,
+				StakedAmount:        (*uint256.Int)(stakingEvent.StakedAmountRemoved).String(),
+				PendingRewardAmount: (*uint256.Int)(stakingEvent.PendingRewardAmountRemoved).String(),
+			},
+		}
+	case stakingevent.EventTypeStakePositionReceived:
+		return &StakingStateTestCaseEvent{
+			Type: StakingStateTestCaseEventTypeStakePositionReceived,
+			StakePositionReceivedEventData: &StakingStateTestCaseEventStakePositionReceived{
+				BookNFT:             stakingEvent.NftClassAddress,
+				Account:             stakingEvent.AccountEvmAddress,
+				StakedAmount:        (*uint256.Int)(stakingEvent.StakedAmountAdded).String(),
+				PendingRewardAmount: (*uint256.Int)(stakingEvent.PendingRewardAmountAdded).String(),
 			},
 		}
 	}

@@ -240,6 +240,10 @@ func MakeLoadStateFactory(stakingEvent *ent.StakingEvent) (LoadStateFactory, err
 		return MakeLoadRewardDepositDistributedStateFactory(stakingEvent), nil
 	case stakingevent.EventTypeAllRewardsClaimed:
 		return MakeLoadAllRewardsClaimedStateFactory(stakingEvent), nil
+	case stakingevent.EventTypeStakePositionTransferred:
+		return MakeLoadStakePositionTransferredStateFactory(stakingEvent), nil
+	case stakingevent.EventTypeStakePositionReceived:
+		return MakeLoadStakePositionReceivedStateFactory(stakingEvent), nil
 	default:
 		return nil, errors.New("invalid staking event type")
 	}

@@ -11,8 +11,11 @@ import (
 	"likecollective-indexer/ent"
 	"likecollective-indexer/ent/evmevent"
 	"likecollective-indexer/internal/database"
+	"likecollective-indexer/internal/evm"
 	stakingstateloader "likecollective-indexer/internal/logic/stakingstate/loader"
 	stakingstatepersistor "likecollective-indexer/internal/logic/stakingstate/persistor"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var ErrAlreadyProcessing = errors.New("evmevent already processing")
@@ -26,20 +29,30 @@ type EVMEventProcessor interface {
 }
 
 type evmEventProcessor struct {
+	evmClient             evm.EVMClient
 	evmEventRepository    database.EVMEventRepository
 	stakingStateLoader    stakingstateloader.StakingStateLoader
 	stakingStatePersistor stakingstatepersistor.StakingStatePersistor
+
+	likeCollectiveAddress    common.Address
+	likeStakePositionAddress common.Address
 }
 
 func MakeEVMEventProcessor(
+	evmClient evm.EVMClient,
 	evmEventRepository database.EVMEventRepository,
 	stakingStateLoader stakingstateloader.StakingStateLoader,
 	stakingStatePersistor stakingstatepersistor.StakingStatePersistor,
+	likeCollectiveAddress common.Address,
+	likeStakePositionAddress common.Address,
 ) EVMEventProcessor {
 	return &evmEventProcessor{
+		evmClient,
 		evmEventRepository,
 		stakingStateLoader,
 		stakingStatePersistor,
+		likeCollectiveAddress,
+		likeStakePositionAddress,
 	}
 }
 
@@ -101,12 +114,25 @@ func (e *evmEventProcessor) Process(
 		runtime.FuncForPC(reflect.ValueOf(processorCreator).Pointer()).Name())
 
 	processor := processorCreator(makeEventProcessorDeps(
+		e.evmClient,
 		e.stakingStateLoader,
 		e.stakingStatePersistor,
+		e.likeCollectiveAddress,
+		e.likeStakePositionAddress,
 	))
 
 	err = processor.Process(ctx, logger, evmEvent)
 	if err != nil {
+		if errors.Is(err, UnknownEvent) {
+			reason := err.Error()
+			evmEvent, err = e.evmEventRepository.UpdateEvmEventStatus(
+				ctx,
+				evmEvent,
+				evmevent.StatusSkipped,
+				&reason,
+			)
+			return nil
+		}
 		mylogger.Error("processor.Process", "err", err)
 		return err
 	}

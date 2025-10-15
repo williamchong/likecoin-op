@@ -15,7 +15,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-type stakingEvmEventProcessor struct {
+type transferEventProcessor struct {
 	evmClient             evm.EVMClient
 	stakingStateLoader    stakingstateloader.StakingStateLoader
 	stakingStatePersistor stakingstatepersistor.StakingStatePersistor
@@ -24,10 +24,10 @@ type stakingEvmEventProcessor struct {
 	likeStakePositionAddress common.Address
 }
 
-func MakeStakingEvmEventProcessor(
+func MakeTransferEventProcessor(
 	inj *eventProcessorDeps,
 ) eventProcessor {
-	return &stakingEvmEventProcessor{
+	return &transferEventProcessor{
 		inj.evmClient,
 		inj.stakingStateLoader,
 		inj.stakingStatePersistor,
@@ -36,31 +36,37 @@ func MakeStakingEvmEventProcessor(
 	}
 }
 
-func (e *stakingEvmEventProcessor) Process(
+func (e *transferEventProcessor) Process(
 	ctx context.Context,
 	logger *slog.Logger,
 
 	evmEvent *ent.EVMEvent,
 ) error {
-	if common.HexToAddress(evmEvent.Address) == e.likeCollectiveAddress {
-		return e.processLikeCollective(ctx, logger, evmEvent)
+	if common.HexToAddress(evmEvent.Address) == e.likeStakePositionAddress {
+		return e.processStakePosition(ctx, logger, evmEvent)
 	}
 
 	return errors.Join(
 		UnknownEvent,
-		fmt.Errorf(
-			"no candidate to process staking event: (event id: %d)",
-			evmEvent.ID,
-		),
+		fmt.Errorf("no candidate to process transfer event"),
 	)
 }
 
-func (e *stakingEvmEventProcessor) processLikeCollective(
+func (e *transferEventProcessor) processStakePosition(
 	ctx context.Context,
 	logger *slog.Logger,
 
 	evmEvent *ent.EVMEvent,
 ) error {
+	if common.HexToAddress(*evmEvent.Topic1) == common.HexToAddress("0x0") {
+		return errors.Join(
+			UnknownEvent,
+			fmt.Errorf(
+				"skip handling initial transfer event",
+			),
+		)
+	}
+
 	p := stakingstate.MakeStakingEvmEventProcessor(
 		e.evmClient,
 		e.stakingStateLoader,
@@ -74,23 +80,7 @@ func (e *stakingEvmEventProcessor) processLikeCollective(
 
 func init() {
 	registerEventProcessor(
-		"Staked",
-		MakeStakingEvmEventProcessor,
-	)
-	registerEventProcessor(
-		"Unstaked",
-		MakeStakingEvmEventProcessor,
-	)
-	registerEventProcessor(
-		"RewardClaimed",
-		MakeStakingEvmEventProcessor,
-	)
-	registerEventProcessor(
-		"RewardDeposited",
-		MakeStakingEvmEventProcessor,
-	)
-	registerEventProcessor(
-		"AllRewardClaimed",
-		MakeStakingEvmEventProcessor,
+		"Transfer",
+		MakeTransferEventProcessor,
 	)
 }

@@ -5,6 +5,52 @@ https://dba.stackexchange.com/questions/90482/export-postgres-table-as-json
 
 ## Prepare nft classes json
 
+We migration BookNFT first and non-BOOK in second batch. Only the first step SQL is different. Following step are same, so please run the subscequece command by separation of folder.
+
+### Prepare non book nft classes json
+
+This should come second in operation.
+
+```
+SELECT nft_classes.metadata::json->>'@type', count(nft_classes.id) from nft_classes
+WHERE nft_classes.metadata::json->>'@type' is NULL or nft_classes.metadata::json->>'@type' != 'Book'
+GROUP BY nft_classes.metadata::json->>'@type';
+
+WITH nft_classes_non_book_count AS (
+	SELECT nft_classes.metadata::json->>'@type', count(nft_classes.id) from nft_classes
+	WHERE nft_classes.metadata::json->>'@type' is NULL or nft_classes.metadata::json->>'@type' != 'Book'
+	GROUP BY nft_classes.metadata::json->>'@type'
+)
+SELECT sum(count) from nft_classes_non_book_count;
+
+\o nft_classes
+
+SELECT array_to_json(array_agg(temp)) AS ok_json FROM (
+
+SELECT
+	nft_classes.id,
+	nft_classes.address,
+	name,
+	metadata,
+	metadata::json->'potentialAction'->'target'->0->'url' as "salt",
+	metadata::json->'name' as "salt2",
+    nft_classes.max_supply,
+	C.count,
+    accounts.evm_address as owner_address
+FROM nft_classes LEFT JOIN (
+	SELECT nfts.contract_address, COUNT(*) FROM nfts
+	GROUP BY nfts.contract_address) AS C ON C.contract_address = nft_classes.address
+LEFT JOIN accounts ON accounts.id = nft_classes.account_nft_classes
+WHERE
+	nft_classes.metadata::json->>'@type' is NULL or nft_classes.metadata::json->>'@type' != 'Book'
+
+) temp;
+
+\o
+```
+
+### Prepare book nft classes json
+
 ```
 SELECT count(*) from nft_classes 
 WHERE nft_classes.metadata::json->>'@type' = 'Book';
@@ -41,7 +87,6 @@ sed -n 3p nft_classes | jq > nft_classes.json
 # Checking count is correct
 jq length nft_classes.json
 ```
-
 
 ## Prepare nfts json
 
@@ -153,10 +198,12 @@ sed -n 3p evm_events_booknft_role_changed | jq > evm_events_booknft_role_changed
 go build ./cmd/cli
 ```
 
+Copy the cli into `book`, `nonbook` and run following within the folder.
+
 ## Precompute addresses
 
 ```bash
-go run ./cmd/cli workflow compute-address nft_classes.json | jq > addresses.json
+./cli workflow compute-address nft_classes.json | jq > addresses.json
 ```
 
 ### Find duplicated new address
@@ -203,18 +250,23 @@ jq -r 'group_by(.new_address) | map({new_address: .[0] | .new_address, addresses
 
 In case the addresses are resolved, move the address.alt.json to address
 
-```
+```bash
 mv addresses.json addresses.bak.json
 mv addresses.alt.json addresses.json
+mv nft_classes.json nft_classes.bak.json
+mv nft_classes.alt.json nft_classes.json
 ```
 
 ## Prepare migration actions json
 
 ```bash
 mkdir -p migration-actions
+
 jq -r '.[] | .old_address' addresses.json | xargs -n 1 -I {} bash -c './cli workflow prepare-actions nft_classes.json nfts.json transaction_memos.json evm_events_booknft_role_changed.json {} | jq > migration-actions/{}.json'
 
-go run ./cmd/cli workflow prepare-actions nft_classes.json nfts.json transaction_memos.json evm_events_booknft_role_changed.json 0x00DD2ec446cC9Ea9FA40dd484feBb6B0217cA4b4
+jq -r '.[] | .old_address' addresses_non_book.json | xargs -n 1 -I {} bash -c './cli workflow prepare-actions nft_classes_non_book.json nfts.json transaction_memos.json evm_events_booknft_role_changed.json {} | jq > migration-actions/{}.json'
+
+./cli workflow prepare-actions nft_classes.json nfts.json transaction_memos.json evm_events_booknft_role_changed.json 0x00DD2ec446cC9Ea9FA40dd484feBb6B0217cA4b4
 ```
 
 ## Prepare airdrop param json

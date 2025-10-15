@@ -33,6 +33,10 @@ func MakeStakingEventApplication(stakingEvent *ent.StakingEvent) (StakingEventAp
 		return makeRewardDepositDistributedEventApplication(stakingEvent)
 	case stakingevent.EventTypeAllRewardsClaimed:
 		return makeAllRewardsClaimedEventApplication(stakingEvent)
+	case stakingevent.EventTypeStakePositionTransferred:
+		return makeStakePositionTransferredEventApplication(stakingEvent)
+	case stakingevent.EventTypeStakePositionReceived:
+		return makeStakePositionReceivedEventApplication(stakingEvent)
 	default:
 		return nil, errors.New("invalid staking event type")
 	}
@@ -374,6 +378,120 @@ func (s *allRewardsClaimedEventApplication) Apply(state *stakingState) (*staking
 	account.ClaimedRewardAmount = uint256.NewInt(0).Add(account.ClaimedRewardAmount, s.claimedRewardAmountAdded)
 	staking.PendingRewardAmount = uint256.NewInt(0).Sub(staking.PendingRewardAmount, s.pendingRewardAmountRemoved)
 	staking.ClaimedRewardAmount = uint256.NewInt(0).Add(staking.ClaimedRewardAmount, s.claimedRewardAmountAdded)
+
+	return state, []StakingEventApplication{}, nil
+}
+
+type stakePositionTransferredEventApplication struct {
+	stakingEvent *ent.StakingEvent
+
+	accountEVMAddress common.Address
+	nftClassAddress   common.Address
+
+	stakedAmountRemoved        *uint256.Int
+	pendingRewardAmountRemoved *uint256.Int
+}
+
+func makeStakePositionTransferredEventApplication(stakingEvent *ent.StakingEvent) (StakingEventApplication, error) {
+	accountEVMAddress := common.HexToAddress(stakingEvent.AccountEvmAddress)
+	nftClassAddress := common.HexToAddress(stakingEvent.NftClassAddress)
+	stakedAmountRemoved := (*uint256.Int)(stakingEvent.StakedAmountRemoved)
+	if stakedAmountRemoved == nil {
+		return nil, errors.New("failed to convert staked amount removed to uint256")
+	}
+	pendingRewardAmountRemoved := (*uint256.Int)(stakingEvent.PendingRewardAmountRemoved)
+	if pendingRewardAmountRemoved == nil {
+		return nil, errors.New("failed to convert pending reward amount removed to uint256")
+	}
+
+	return &stakePositionTransferredEventApplication{
+		stakingEvent,
+		accountEVMAddress,
+		nftClassAddress,
+		stakedAmountRemoved,
+		pendingRewardAmountRemoved,
+	}, nil
+}
+
+func (s *stakePositionTransferredEventApplication) GetStakingEvent() *ent.StakingEvent {
+	return s.stakingEvent
+}
+
+func (s *stakePositionTransferredEventApplication) Apply(state *stakingState) (*stakingState, []StakingEventApplication, error) {
+
+	account, ok := state.GetAccountByAddress(s.accountEVMAddress)
+	if !ok {
+		return nil, nil, errors.New("account not found")
+	}
+	staking, ok := state.GetStakingByAddress(s.accountEVMAddress, s.nftClassAddress)
+	if !ok {
+		return nil, nil, errors.New("staking not found")
+	}
+
+	if account.StakedAmount.Cmp(s.stakedAmountRemoved) < 0 {
+		return nil, nil, errors.New("staked amount is less than staked amount removed")
+	}
+	if account.PendingRewardAmount.Cmp(s.pendingRewardAmountRemoved) < 0 {
+		return nil, nil, errors.New("pending reward amount is less than pending reward amount removed")
+	}
+	if staking.StakedAmount.Cmp(s.stakedAmountRemoved) < 0 {
+		return nil, nil, errors.New("staking staked amount is less than staked amount removed")
+	}
+	if staking.PendingRewardAmount.Cmp(s.pendingRewardAmountRemoved) < 0 {
+		return nil, nil, errors.New("staking pending reward amount is less than pending reward amount removed")
+	}
+
+	account.StakedAmount = uint256.NewInt(0).Sub(account.StakedAmount, s.stakedAmountRemoved)
+	account.PendingRewardAmount = uint256.NewInt(0).Sub(account.PendingRewardAmount, s.pendingRewardAmountRemoved)
+	staking.StakedAmount = uint256.NewInt(0).Sub(staking.StakedAmount, s.stakedAmountRemoved)
+	staking.PendingRewardAmount = uint256.NewInt(0).Sub(staking.PendingRewardAmount, s.pendingRewardAmountRemoved)
+
+	return state, []StakingEventApplication{}, nil
+}
+
+type stakePositionReceivedEventApplication struct {
+	stakingEvent *ent.StakingEvent
+
+	accountEVMAddress common.Address
+	nftClassAddress   common.Address
+
+	stakedAmountAdded        *uint256.Int
+	pendingRewardAmountAdded *uint256.Int
+}
+
+func makeStakePositionReceivedEventApplication(stakingEvent *ent.StakingEvent) (StakingEventApplication, error) {
+	accountEVMAddress := common.HexToAddress(stakingEvent.AccountEvmAddress)
+	nftClassAddress := common.HexToAddress(stakingEvent.NftClassAddress)
+	stakedAmountAdded := (*uint256.Int)(stakingEvent.StakedAmountAdded)
+	if stakedAmountAdded == nil {
+		return nil, errors.New("failed to convert staked amount added to uint256")
+	}
+	pendingRewardAmountAdded := (*uint256.Int)(stakingEvent.PendingRewardAmountAdded)
+	if pendingRewardAmountAdded == nil {
+		return nil, errors.New("failed to convert pending reward amount added to uint256")
+	}
+
+	return &stakePositionReceivedEventApplication{
+		stakingEvent,
+		accountEVMAddress,
+		nftClassAddress,
+		stakedAmountAdded,
+		pendingRewardAmountAdded,
+	}, nil
+}
+
+func (s *stakePositionReceivedEventApplication) GetStakingEvent() *ent.StakingEvent {
+	return s.stakingEvent
+}
+
+func (s *stakePositionReceivedEventApplication) Apply(state *stakingState) (*stakingState, []StakingEventApplication, error) {
+	account := state.GetOrCreateAccount(s.accountEVMAddress)
+	staking := state.GetOrCreateStaking(s.accountEVMAddress, s.nftClassAddress)
+
+	account.StakedAmount = uint256.NewInt(0).Add(account.StakedAmount, s.stakedAmountAdded)
+	account.PendingRewardAmount = uint256.NewInt(0).Add(account.PendingRewardAmount, s.pendingRewardAmountAdded)
+	staking.StakedAmount = uint256.NewInt(0).Add(staking.StakedAmount, s.stakedAmountAdded)
+	staking.PendingRewardAmount = uint256.NewInt(0).Add(staking.PendingRewardAmount, s.pendingRewardAmountAdded)
 
 	return state, []StakingEventApplication{}, nil
 }

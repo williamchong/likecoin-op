@@ -38,6 +38,8 @@ func (StakingEvent) Fields() []ent.Field {
 				"reward_deposited",
 				"reward_deposit_distributed",
 				"all_rewards_claimed",
+				"stake_position_transferred",
+				"stake_position_received",
 			).
 			Default("staked").
 			Immutable(),
