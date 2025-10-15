@@ -324,6 +324,7 @@ pg_dump $OP_DB_CONNECTION_STR \
 	-t likenft_asset_migration \
 	-t likenft_asset_migration_class \
 	-t likenft_asset_migration_nft \
+	-t likenft_migration_action_transfer_class \
 	-f migration-backend-op.pg_dump
 ```
 

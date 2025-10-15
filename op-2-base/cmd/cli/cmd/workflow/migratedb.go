@@ -13,6 +13,7 @@ import (
 	"github.com/likecoin/likecoin-op/op-2-base/internal/workflow/migratedb/likenftassetmigrationnft"
 	"github.com/likecoin/likecoin-op/op-2-base/internal/workflow/migratedb/likenftmigrationactionmintnft"
 	"github.com/likecoin/likecoin-op/op-2-base/internal/workflow/migratedb/likenftmigrationactionnewclass"
+	"github.com/likecoin/likecoin-op/op-2-base/internal/workflow/migratedb/likenftmigrationactiontransferclass"
 )
 
 var MigratedbCmd = &cobra.Command{
@@ -39,6 +40,14 @@ var MigratedbCmd = &cobra.Command{
 			})
 		}
 		insertNewClassSqls := likenftmigrationactionnewclass.MakeOutputs(newClassInputs).ToSQL()
+
+		var transferClassInputs []*likenftmigrationactiontransferclass.Input
+		for _, transferClassOutput := range airdropOutput.NewNFTClassOutputs {
+			transferClassInputs = append(transferClassInputs, &likenftmigrationactiontransferclass.Input{
+				Output: *transferClassOutput,
+			})
+		}
+		insertTransferClassSqls := likenftmigrationactiontransferclass.MakeOutputs(transferClassInputs).ToSQL()
 
 		var mintNFTsInputs []*likenftmigrationactionmintnft.Input
 		for _, mintNFTOutput := range airdropOutput.MintNFTsOutputs {
@@ -80,6 +89,7 @@ var MigratedbCmd = &cobra.Command{
 		insertNftMigrationSqls := likenftassetmigrationnft.MakeOutputs(migrationNFTInputs).ToSQL()
 
 		fmt.Println(insertNewClassSqls)
+		fmt.Println(insertTransferClassSqls)
 		fmt.Println(insertMintNFTsSqls)
 		fmt.Println(insertAssertMigrationClassSqls)
 		fmt.Println(insertNftMigrationSqls)
