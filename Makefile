@@ -84,6 +84,7 @@ docker-images:
 	DOCKER_BUILD_ARGS=--push make -C likenft-migration docker-image
 	DOCKER_BUILD_ARGS=--push make -C likecoin-migration docker-image
 	DOCKER_BUILD_ARGS=--push make -C migration-admin docker-image
+	DOCKER_BUILD_ARGS=--push make -C likecollective-staking-position-image docker-image
 
 .PHONY: deploy
 deploy: decrypt-everything
