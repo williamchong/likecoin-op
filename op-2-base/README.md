@@ -206,6 +206,16 @@ Copy the cli into `book`, `nonbook` and run following within the folder.
 ./cli workflow compute-address nft_classes.json | jq > addresses.json
 ```
 
+If above cmd ahve error on `WARN No salt. Skipped. ComputeaddressCmd.opAddress=0x` run
+``` bash 
+python ./workflow/id_as_salt_onempty.py nft_classes.json | jq > nft_classes.nonull.json
+# Check content and replace ot original
+diff nft_classes.json nft_classes.nonull.json 
+mv nft_classes.json nft_classes.prefill.json
+mv nft_classes.nonull.json nft_classes.json
+```
+
+
 ### Find duplicated new address
 
 ```bash
@@ -224,12 +234,6 @@ jq -r '.[] | .addresses[] | .old_address' duplicated_new_addresses.json
 python ./workflow/replace_salt.py \
     nft_classes.json \
     duplicated_new_addresses.json | jq > nft_classes.alt.json
-```
-
-```bash
-diff nft_classes.json nft_classes.alt.json
-mv nft_classes.json nft_classes.bak.json
-mv nft_classes.alt.json nft_classes.json
 ```
 
 ### Compute addresses again
@@ -263,8 +267,6 @@ mv nft_classes.alt.json nft_classes.json
 mkdir -p migration-actions
 
 jq -r '.[] | .old_address' addresses.json | xargs -n 1 -I {} bash -c './cli workflow prepare-actions nft_classes.json nfts.json transaction_memos.json evm_events_booknft_role_changed.json {} | jq > migration-actions/{}.json'
-
-jq -r '.[] | .old_address' addresses_non_book.json | xargs -n 1 -I {} bash -c './cli workflow prepare-actions nft_classes_non_book.json nfts.json transaction_memos.json evm_events_booknft_role_changed.json {} | jq > migration-actions/{}.json'
 
 ./cli workflow prepare-actions nft_classes.json nfts.json transaction_memos.json evm_events_booknft_role_changed.json 0x00DD2ec446cC9Ea9FA40dd484feBb6B0217cA4b4
 ```
