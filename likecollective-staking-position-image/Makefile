@@ -19,6 +19,7 @@ endif
 .PHONY: setup-dev
 setup-dev:
 	pip install poetry
+	poetry lock
 	poetry install
 
 .PHONY: format
