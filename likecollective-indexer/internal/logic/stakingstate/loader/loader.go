@@ -248,3 +248,16 @@ func MakeLoadStateFactory(stakingEvent *ent.StakingEvent) (LoadStateFactory, err
 		return nil, errors.New("invalid staking event type")
 	}
 }
+
+type emptyStateLoader struct{}
+
+func MakeEmptyStateLoader() StakingStateLoader {
+	return &emptyStateLoader{}
+}
+
+func (l *emptyStateLoader) Load(
+	ctx context.Context,
+	loadState *LoadState,
+) ([]*model.Account, []*model.NFTClass, []*model.Staking, error) {
+	return make([]*model.Account, 0), make([]*model.NFTClass, 0), make([]*model.Staking, 0), nil
+}
