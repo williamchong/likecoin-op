@@ -12,6 +12,14 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
+type StakingEvmEventProcessor interface {
+	Process(
+		ctx context.Context,
+		logger *slog.Logger,
+		evmEvents []*ent.EVMEvent,
+	) error
+}
+
 type stakingEvmEventProcessor struct {
 	evmClient             evm.EVMClient
 	stakingStateLoader    loader.StakingStateLoader
@@ -27,7 +35,7 @@ func MakeStakingEvmEventProcessor(
 	stakingStatePersistor persistor.StakingStatePersistor,
 	likeCollectiveAddress common.Address,
 	likeStakePositionAddress common.Address,
-) *stakingEvmEventProcessor {
+) StakingEvmEventProcessor {
 	return &stakingEvmEventProcessor{
 		evmClient,
 		stakingStateLoader,
