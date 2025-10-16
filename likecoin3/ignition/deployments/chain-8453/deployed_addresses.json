@@ -7,5 +7,15 @@
   "LikeProtocolV1Module#LikeProtocolV1Impl": "0x05857EE837AB29fF79C7BB1d4c642b2C9dd10FA5",
   "LikeProtocolV0Module#ERC1967Proxy": "0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5",
   "LikeProtocolV0Module#LikeProtocolV0": "0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5",
-  "LikeProtocolV1Module#LikeProtocol": "0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5"
+  "LikeProtocolV1Module#LikeProtocol": "0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5",
+  "LikeCollectiveModule#LikeCollectiveImpl": "0x6EC61e70D53604066C3AE1A675425b23B5B522DD",
+  "LikeCollectiveV0Module#LikeCollectiveV0Impl": "0x2b6b4e3EfC3496249A9Ffb502130f9B849E72Cf3",
+  "LikeStakePositionModule#LikeStakePositionImpl": "0xB0ee5f06c3FD4Ec5dceDBD0cc3F8Ff80113dbbFe",
+  "LikeStakePositionV0Module#LikeStakePositionV0Impl": "0x59559D29031BC7f67dd6E8C6259C75c3d211422d",
+  "LikeCollectiveV0Module#ERC1967Proxy": "0x4506Ac2dD1e9A470d92a3D1656E1a99C676E1c8E",
+  "LikeStakePositionV0Module#ERC1967Proxy": "0x508610D3009cda82Ac1a40D2b322Ed31932D16b1",
+  "LikeCollectiveV0Module#LikeCollectiveV0": "0x4506Ac2dD1e9A470d92a3D1656E1a99C676E1c8E",
+  "LikeStakePositionV0Module#LikeStakePositionV0": "0x508610D3009cda82Ac1a40D2b322Ed31932D16b1",
+  "LikeCollectiveModule#LikeCollective": "0x4506Ac2dD1e9A470d92a3D1656E1a99C676E1c8E",
+  "LikeStakePositionModule#LikeStakePosition": "0x508610D3009cda82Ac1a40D2b322Ed31932D16b1"
 }
