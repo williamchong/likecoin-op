@@ -6,9 +6,12 @@ from .guilloche import generate_guilloche_png
 
 # Pick a font and size
 FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+FONT_MONO_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
 large_font = ImageFont.truetype(FONT_PATH, 56)     # xlarge
 title_font = ImageFont.truetype(FONT_PATH, 32)     # bigger
 label_font = ImageFont.truetype(FONT_PATH, 20)     # medium
+mono_large_font = ImageFont.truetype(FONT_MONO_PATH, 56)
+mono_label_font = ImageFont.truetype(FONT_MONO_PATH, 20)
 
 
 IMAGE_SIZE = (580, 1000)
@@ -88,7 +91,7 @@ def gen_image(
         draw.text((80, 420), book_nft_name, fill=(40, 100, 110, 255), font=title_font)
     draw_rotated_text(
         image,
-        f"Book NFT - {book_nft_address}",
+        f"Book - {book_nft_address}",
         xy=(535, 40),
         angle_deg=-90,
         font=label_font,
@@ -97,15 +100,15 @@ def gen_image(
     )
     draw_rotated_text(
         image,
-        f"Initial Staker - {initial_staker}",
-        xy=(0, 240),
+        f"Staker - {initial_staker}",
+        xy=(0, 300),
         angle_deg=90,
-        font=label_font,
+        font=mono_label_font,
         fill=(40, 100, 110, 255),
         pad=16,
     )
-    draw.text((80, IMAGE_SIZE[1] - 240), f"{staked_amount}", fill=(40, 100, 110, 255), font=large_font)
-    draw.text((80, IMAGE_SIZE[1] - 176), f"Staked", fill=(40, 100, 110, 255), font=label_font)
+    draw.text((80, IMAGE_SIZE[1] - 240), f"{staked_amount}", fill=(40, 100, 110, 255), font=mono_large_font)
+    draw.text((80, IMAGE_SIZE[1] - 176), f"LIKE Staked", fill=(40, 100, 110, 255), font=label_font)
     draw.text((80, IMAGE_SIZE[1] - 128), f"Reward Index: {reward_index}", fill=(40, 100, 110, 255), font=label_font)
 
     # rectangle coordinates (x0, y0, x1, y1)
@@ -114,10 +117,11 @@ def gen_image(
 
     # Guilloché overlay seeded by book_nft_address
     inner_width = bbox[2] - bbox[0]
-    inner_height = bbox[3] - bbox[1]
+    inner_height = bbox[3] - bbox[1] - 260
     guilloche_png = generate_guilloche_png(book_nft_address.lower(), inner_width, inner_height)
     guilloche_img = Image.open(BytesIO(guilloche_png)).convert("RGBA")
     image.alpha_composite(guilloche_img, dest=(bbox[0], bbox[1]))
+    draw.line([(40, IMAGE_SIZE[1] - 300), (540, IMAGE_SIZE[1] - 300)], fill=(40, 100, 110, 255), width=2)
 
     # Render and paste LikeCoin logo SVG
     svg_path = Path(__file__).resolve().parents[1] / "images" / "likecoin-logo.svg"

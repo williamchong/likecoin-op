@@ -40,10 +40,10 @@ def generate_guilloche_png(
     width: int,
     height: int,
     stroke_color: str = "#28646E",
-    stroke_width: float = 0.8,
+    stroke_width: float = 1,
     opacity: float = 0.18,
     rings: int = 3,
-    ring_spacing: int = 20,
+    ring_spacing: int = 24,
 ) -> bytes:
     cx, cy = width / 2.0, height / 2.0
 
