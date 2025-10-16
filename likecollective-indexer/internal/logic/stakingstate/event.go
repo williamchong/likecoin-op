@@ -14,6 +14,7 @@ import (
 	"likecollective-indexer/internal/evm/like_collective"
 	"likecollective-indexer/internal/evm/like_stake_position"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
 )
 
@@ -186,6 +187,24 @@ func GetStakingEventsFromLikeStakePositionEvent(
 				ErrGetStakingEventsFromEvent,
 				fmt.Errorf("failed to unpack log: %w", err),
 			)
+		}
+
+		if transferEvent.From == common.HexToAddress("0x0") {
+			// The event is mint.
+			// Given that the mint event can only be triggered by `newStakePosition`
+			// and no manual minting is allowed,
+			// so should be handled in `staked` event and
+			// no need to spawn staking event for this case
+			return []*ent.StakingEvent{}, nil
+		}
+
+		if transferEvent.To == common.HexToAddress("0x0") {
+			// The event is burn.
+			// Given that the burn event can only be triggered by `removeStakePosition`
+			// and no manual burning is allowed,
+			// so should be handled in `unstaked` event and
+			// no need to spawn staking event for this case
+			return []*ent.StakingEvent{}, nil
 		}
 
 		position, err := evmClient.GetStakePosition(
