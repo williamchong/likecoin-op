@@ -24,17 +24,14 @@ const config: HardhatUserConfig = {
     localhost: {
       url: "http://localhost:8545",
       chainId: 900,
-      accounts: [signerKey],
     },
     superism1: {
       chainId: 901,
       url: "http://localhost:9545",
-      accounts: [signerKey],
     },
     superism2: {
       chainId: 902,
       url: "http://localhost:9546",
-      accounts: [signerKey],
     },
     mainnet: {
       chainId: 1,

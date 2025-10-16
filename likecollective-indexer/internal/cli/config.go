@@ -10,6 +10,10 @@ import (
 
 type EnvConfig struct {
 	*alchemy.AlchemyConfig
+
+	LikeCollectiveAddress    string `envconfig:"LIKE_COLLECTIVE_ADDRESS"`
+	LikeStakePositionAddress string `envconfig:"LIKE_STAKE_POSITION_ADDRESS"`
+	EthNetworkPublicRPCURL   string `envconfig:"ETH_NETWORK_PUBLIC_RPC_URL"`
 }
 
 func NewEnvConfig() (*EnvConfig, error) {

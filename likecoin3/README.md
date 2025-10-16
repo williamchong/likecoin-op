@@ -81,3 +81,36 @@ If you want to upgrade the contract, you may want to swipe the implementation fu
 ```
 cat impl-future | xargs -t -L 1 npx hardhat ignition wipe chain-901
 ```
+
+## Simulation
+
+### Simulate with adhoc node
+
+The simulation will be run immediately but will be destroied after simulation completed.
+
+```bash
+npx hardhat simulate:likecollective \
+    --outputfile simulate/likecollective/simulations/case1.output.json \
+    simulate/likecollective/simulations/case1.yaml
+```
+
+### Simulate with local node
+
+A local eth node process should be setup.
+
+```bash
+docker compose up
+```
+
+The simulation involves contract deployments so may take long time to setup.
+
+```bash
+npx hardhat simulate:likecollective --network localhost \
+    --outputfile simulate/likecollective/simulations/case1.output.json \
+    simulate/likecollective/simulations/case1.yaml
+```
+
+The state will be persisted as long as the node is not shut down.
+The node is then be able to be queried for further processing.
+
+For more details, can see [likecollective-indexer](../likecollective-indexer/README.md)
