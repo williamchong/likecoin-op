@@ -40,10 +40,10 @@ def generate_guilloche_png(
     width: int,
     height: int,
     stroke_color: str = "#28646E",
-    stroke_width: float = 1,
+    stroke_width: float = 2,
     opacity: float = 0.18,
     rings: int = 3,
-    ring_spacing: int = 24,
+    ring_spacing: int = 2,
 ) -> bytes:
     cx, cy = width / 2.0, height / 2.0
 
@@ -82,4 +82,60 @@ def generate_guilloche_png(
     svg = "\n".join(g_parts)
     return cairosvg.svg2png(bytestring=svg.encode("utf-8"))
 
+
+
+def generate_sunburst_png(
+    seed: str,
+    width: int,
+    height: int,
+    stroke_color: str = "#28646E",
+    stroke_width: float = 1.2,
+    opacity: float = 0.22,
+    rays: int = 160,
+    inner_ratio: float = 0.12,
+    outer_ratio: float = 0.48,
+    wobble_freq: int = 9,
+    wobble_amp: float = 0.18,
+) -> bytes:
+    """Generate a sunburst made of radial rays seeded by the input string.
+
+    Rays length is modulated by a sinusoid and a seed-derived jitter for variety.
+    """
+    cx, cy = width / 2.0, height / 2.0
+    base = min(width, height)
+    r_inner = base * inner_ratio
+    r_outer = base * outer_ratio
+
+    h = hashlib.sha256(seed.encode("utf-8")).digest()
+
+    # derive simple per-ray jitter from the hash bytes
+    jitters = [(h[i % len(h)] / 255.0 - 0.5) * 2.0 for i in range(rays)]  # [-1,1]
+
+    parts = [
+        f"<svg width=\"{width}\" height=\"{height}\" viewBox=\"0 0 {width} {height}\" xmlns=\"http://www.w3.org/2000/svg\">",
+        f"<g fill=\"none\" stroke=\"{stroke_color}\" stroke-linecap=\"round\" opacity=\"{opacity}\">",
+    ]
+
+    for i in range(rays):
+        t = (i / rays) * math.tau
+        # Modulate ray length with sinusoid and jitter
+        mod = 0.5 + 0.5 * math.sin(wobble_freq * t + (h[0] / 255.0) * math.tau)
+        mod = (1.0 - wobble_amp) + wobble_amp * mod
+        r_end = r_inner + (r_outer - r_inner) * mod * (1.0 + 0.08 * jitters[i])
+
+        x1 = cx + r_inner * math.cos(t)
+        y1 = cy + r_inner * math.sin(t)
+        x2 = cx + r_end * math.cos(t)
+        y2 = cy + r_end * math.sin(t)
+
+        # Slight stroke tapering across rays
+        sw = max(0.6, stroke_width * (0.8 + 0.2 * jitters[i]))
+        parts.append(
+            f"<line x1=\"{x1:.2f}\" y1=\"{y1:.2f}\" x2=\"{x2:.2f}\" y2=\"{y2:.2f}\" stroke-width=\"{sw:.2f}\"/>"
+        )
+
+    parts.append("</g>")
+    parts.append("</svg>")
+    svg = "\n".join(parts)
+    return cairosvg.svg2png(bytestring=svg.encode("utf-8"))
 

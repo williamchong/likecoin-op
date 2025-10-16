@@ -2,13 +2,17 @@ from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import cairosvg
 from pathlib import Path
-from .guilloche import generate_guilloche_png
+from .guilloche import generate_guilloche_png, generate_sunburst_png
 
 # Pick a font and size
 FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 FONT_MONO_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+FONT_CJK_PATH = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
 large_font = ImageFont.truetype(FONT_PATH, 56)     # xlarge
-title_font = ImageFont.truetype(FONT_PATH, 32)     # bigger
+try:
+    title_font = ImageFont.truetype(FONT_CJK_PATH, 32)
+except Exception:
+    title_font = ImageFont.truetype(FONT_PATH, 32)
 label_font = ImageFont.truetype(FONT_PATH, 20)     # medium
 mono_large_font = ImageFont.truetype(FONT_MONO_PATH, 56)
 mono_label_font = ImageFont.truetype(FONT_MONO_PATH, 20)
@@ -116,11 +120,20 @@ def gen_image(
     draw.rounded_rectangle(bbox, radius=16, outline=(40, 100, 110, 255), width=2)
 
     # Guilloché overlay seeded by book_nft_address
-    inner_width = bbox[2] - bbox[0]
-    inner_height = bbox[3] - bbox[1] - 260
-    guilloche_png = generate_guilloche_png(book_nft_address.lower(), inner_width, inner_height)
-    guilloche_img = Image.open(BytesIO(guilloche_png)).convert("RGBA")
-    image.alpha_composite(guilloche_img, dest=(bbox[0], bbox[1]))
+    inner_width = 180
+    inner_height = 180
+    sunburst_png = generate_sunburst_png(
+        book_nft_address.lower(),
+        inner_width,
+        inner_height,
+        rays=180,
+        inner_ratio=0.06,
+        outer_ratio=0.48,
+        stroke_width=1.2,
+        opacity=0.22,
+    )
+    guilloche_img = Image.open(BytesIO(sunburst_png)).convert("RGBA")
+    image.alpha_composite(guilloche_img, dest=(IMAGE_SIZE[0] - 260, IMAGE_SIZE[1] - 260))
     draw.line([(40, IMAGE_SIZE[1] - 300), (540, IMAGE_SIZE[1] - 300)], fill=(40, 100, 110, 255), width=2)
 
     # Render and paste LikeCoin logo SVG

@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libcairo2-dev \
     libffi-dev \
     fonts-dejavu-core \
+    fonts-noto-cjk \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install poetry && poetry self add poetry-plugin-export
@@ -34,6 +35,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libcairo2-dev \
     libffi-dev \
     fonts-dejavu-core \
+    fonts-noto-cjk \
     && rm -rf /var/lib/apt/lists/* \
  && pip install -r requirements.txt
 
