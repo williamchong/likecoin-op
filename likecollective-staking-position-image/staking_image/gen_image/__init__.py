@@ -1,7 +1,7 @@
 import io
 
 from .gen_image import gen_image
-from .params import Params, parse_base64_encoded_params
+from .params import Params
 
 
 def gen_image_by_params(params: Params, format: str = "PNG") -> bytes:
@@ -16,11 +16,3 @@ def gen_image_by_params(params: Params, format: str = "PNG") -> bytes:
     img_byte_arr = io.BytesIO()
     image.save(img_byte_arr, format=format)
     return img_byte_arr.getvalue()
-
-
-def gen_image_by_encoded_string(
-    base64_encoded_string: str, format: str = "PNG"
-) -> bytes:
-    return gen_image_by_params(
-        parse_base64_encoded_params(base64_encoded_string), format
-    )
