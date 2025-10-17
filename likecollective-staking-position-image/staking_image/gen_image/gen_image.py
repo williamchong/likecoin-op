@@ -45,6 +45,47 @@ def make_linear_gradient(size, start_rgba, end_rgba, horizontal=False) -> Image.
         return grad.resize(size)
 
 
+def wrap_text(text: str, font: ImageFont.FreeTypeFont, max_width: int) -> list[str]:
+    # Greedy word-wrapping with fallback to character-splitting for long tokens
+    tmp_img = Image.new("RGBA", (1, 1))
+    d = ImageDraw.Draw(tmp_img)
+
+    words = text.split(" ")
+    if not words:
+        return []
+
+    lines: list[str] = []
+    current = ""
+    for word in words:
+        candidate = word if not current else current + " " + word
+        w = d.textlength(candidate, font=font)
+        if w <= max_width:
+            current = candidate
+        else:
+            if current:
+                lines.append(current)
+                current = word
+            else:
+                # word itself too long, split by characters
+                token = word
+                buf = ""
+                for ch in token:
+                    cw = d.textlength(buf + ch, font=font)
+                    if cw <= max_width:
+                        buf += ch
+                    else:
+                        if buf:
+                            lines.append(buf)
+                        buf = ch
+                if buf:
+                    current = buf
+                else:
+                    current = ""
+    if current:
+        lines.append(current)
+    return lines
+
+
 def draw_rotated_text(base_img, text, xy, angle_deg, font, fill, pad=12):
     # measure tight bbox
     tmp = Image.new("RGBA", (1, 1))
@@ -92,7 +133,17 @@ def gen_image(
     draw = ImageDraw.Draw(image)
 
     if book_nft_name:
-        draw.text((80, 420), book_nft_name, fill=(40, 100, 110, 255), font=title_font)
+        max_title_width = IMAGE_SIZE[0] - 80 - 80  # right margin 80
+        lines = wrap_text(book_nft_name, title_font, max_title_width)
+        # Measure line height
+        tmp = Image.new("RGBA", (1, 1))
+        td = ImageDraw.Draw(tmp)
+        _, y0, _, y1 = td.textbbox((0, 0), "Ay", font=title_font)
+        line_height = (y1 - y0) + 4
+        y = 420
+        for line in lines:
+            draw.text((80, y), line, fill=(40, 100, 110, 255), font=title_font)
+            y += line_height + 4
     draw_rotated_text(
         image,
         f"Book - {book_nft_address}",
