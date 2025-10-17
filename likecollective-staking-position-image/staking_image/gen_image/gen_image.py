@@ -2,7 +2,7 @@ from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import cairosvg
 from pathlib import Path
-from .guilloche import generate_guilloche_png, generate_sunburst_png
+from .guilloche import generate_guilloche_png, generate_sunburst_png, generate_rosette_png, generate_concentric_circles_png, generate_wavy_rings_png
 
 # Pick a font and size
 FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
@@ -120,21 +120,33 @@ def gen_image(
     draw.rounded_rectangle(bbox, radius=16, outline=(40, 100, 110, 255), width=2)
 
     # Guilloché overlay seeded by book_nft_address
-    inner_width = 180
-    inner_height = 180
+    inner_width = 1800
+    inner_height = 1800
+    # Sunburst background + multi-ring lines on top
     sunburst_png = generate_sunburst_png(
         book_nft_address.lower(),
         inner_width,
         inner_height,
-        rays=180,
-        inner_ratio=0.06,
-        outer_ratio=0.48,
-        stroke_width=1.2,
-        opacity=0.22,
+        rays=720,
+        inner_ratio=0.002,
+        outer_ratio=0.24,
+        stroke_width=0.8,
+        opacity=0.17,
     )
-    guilloche_img = Image.open(BytesIO(sunburst_png)).convert("RGBA")
-    image.alpha_composite(guilloche_img, dest=(IMAGE_SIZE[0] - 260, IMAGE_SIZE[1] - 260))
-    draw.line([(40, IMAGE_SIZE[1] - 300), (540, IMAGE_SIZE[1] - 300)], fill=(40, 100, 110, 255), width=2)
+    sunburst_img = Image.open(BytesIO(sunburst_png)).convert("RGBA")
+    image.alpha_composite(sunburst_img, dest=(-200, -320))
+
+    rings_png = generate_wavy_rings_png(
+        book_nft_address.lower(),
+        inner_width,
+        inner_height,
+        stroke_width=1.0,
+        opacity=0.17,
+        rings=40,
+        ring_spacing=30,
+    )
+    rings_img = Image.open(BytesIO(rings_png)).convert("RGBA")
+    image.alpha_composite(rings_img, dest=(-200, -320))
 
     # Render and paste LikeCoin logo SVG
     svg_path = Path(__file__).resolve().parents[1] / "images" / "likecoin-logo.svg"
