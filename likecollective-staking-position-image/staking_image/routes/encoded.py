@@ -1,3 +1,4 @@
+import decimal
 import logging
 
 from fastapi import APIRouter, Response
@@ -20,6 +21,12 @@ def get_image_from_encoded_string(
     encoded_string: str,
 ):
     params = parse_base64_encoded_params(encoded_string)
+
+    likecoin_decimals = evm_client.get_likecoin_decimals()
+    params.staked_amount = str(
+        decimal.Decimal(params.staked_amount)
+        / (decimal.Decimal(10) ** decimal.Decimal(likecoin_decimals))
+    )
 
     if params.book_nft_name is None:
         try:
