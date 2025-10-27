@@ -57,3 +57,8 @@ docker-image:
 		-t '$(DEPLOY_DEV_DOCKER_IMAGE_NAME):latest' \
 		-t '$(DEPLOY_DEV_DOCKER_IMAGE_NAME):$(TAG)' \
 		$(DOCKER_BUILD_ARGS)
+
+.PHONY: helm-lint
+helm-lint:
+	helm lint helm \
+		-f helm/values.yaml

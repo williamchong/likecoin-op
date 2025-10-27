@@ -1,0 +1,6 @@
+namespace: optimism
+name: likecollective-image
+image:
+  repository: likecoin/likecollective-staking-position-image
+  tag: latest
+domain: asset.v3.like.co
