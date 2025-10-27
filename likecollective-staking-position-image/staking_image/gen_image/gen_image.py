@@ -2,13 +2,17 @@ from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import cairosvg
 from pathlib import Path
-from .guilloche import generate_guilloche_png
+from .guilloche import generate_guilloche_png, generate_sunburst_png, generate_rosette_png, generate_concentric_circles_png, generate_wavy_rings_png
 
 # Pick a font and size
 FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 FONT_MONO_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+FONT_CJK_PATH = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
 large_font = ImageFont.truetype(FONT_PATH, 56)     # xlarge
-title_font = ImageFont.truetype(FONT_PATH, 32)     # bigger
+try:
+    title_font = ImageFont.truetype(FONT_CJK_PATH, 32)
+except Exception:
+    title_font = ImageFont.truetype(FONT_PATH, 32)
 label_font = ImageFont.truetype(FONT_PATH, 20)     # medium
 mono_large_font = ImageFont.truetype(FONT_MONO_PATH, 56)
 mono_label_font = ImageFont.truetype(FONT_MONO_PATH, 20)
@@ -39,6 +43,47 @@ def make_linear_gradient(size, start_rgba, end_rgba, horizontal=False) -> Image.
             a = int(start_rgba[3] + (end_rgba[3] - start_rgba[3]) * t)
             grad.putpixel((0, y), (r, g, b, a))
         return grad.resize(size)
+
+
+def wrap_text(text: str, font: ImageFont.FreeTypeFont, max_width: int) -> list[str]:
+    # Greedy word-wrapping with fallback to character-splitting for long tokens
+    tmp_img = Image.new("RGBA", (1, 1))
+    d = ImageDraw.Draw(tmp_img)
+
+    words = text.split(" ")
+    if not words:
+        return []
+
+    lines: list[str] = []
+    current = ""
+    for word in words:
+        candidate = word if not current else current + " " + word
+        w = d.textlength(candidate, font=font)
+        if w <= max_width:
+            current = candidate
+        else:
+            if current:
+                lines.append(current)
+                current = word
+            else:
+                # word itself too long, split by characters
+                token = word
+                buf = ""
+                for ch in token:
+                    cw = d.textlength(buf + ch, font=font)
+                    if cw <= max_width:
+                        buf += ch
+                    else:
+                        if buf:
+                            lines.append(buf)
+                        buf = ch
+                if buf:
+                    current = buf
+                else:
+                    current = ""
+    if current:
+        lines.append(current)
+    return lines
 
 
 def draw_rotated_text(base_img, text, xy, angle_deg, font, fill, pad=12):
@@ -88,7 +133,17 @@ def gen_image(
     draw = ImageDraw.Draw(image)
 
     if book_nft_name:
-        draw.text((80, 420), book_nft_name, fill=(40, 100, 110, 255), font=title_font)
+        max_title_width = IMAGE_SIZE[0] - 80 - 80  # right margin 80
+        lines = wrap_text(book_nft_name, title_font, max_title_width)
+        # Measure line height
+        tmp = Image.new("RGBA", (1, 1))
+        td = ImageDraw.Draw(tmp)
+        _, y0, _, y1 = td.textbbox((0, 0), "Ay", font=title_font)
+        line_height = (y1 - y0) + 4
+        y = 420
+        for line in lines:
+            draw.text((80, y), line, fill=(40, 100, 110, 255), font=title_font)
+            y += line_height + 4
     draw_rotated_text(
         image,
         f"Book - {book_nft_address}",
@@ -116,12 +171,33 @@ def gen_image(
     draw.rounded_rectangle(bbox, radius=16, outline=(40, 100, 110, 255), width=2)
 
     # Guilloché overlay seeded by book_nft_address
-    inner_width = bbox[2] - bbox[0]
-    inner_height = bbox[3] - bbox[1] - 260
-    guilloche_png = generate_guilloche_png(book_nft_address.lower(), inner_width, inner_height)
-    guilloche_img = Image.open(BytesIO(guilloche_png)).convert("RGBA")
-    image.alpha_composite(guilloche_img, dest=(bbox[0], bbox[1]))
-    draw.line([(40, IMAGE_SIZE[1] - 300), (540, IMAGE_SIZE[1] - 300)], fill=(40, 100, 110, 255), width=2)
+    inner_width = 1800
+    inner_height = 1800
+    # Sunburst background + multi-ring lines on top
+    sunburst_png = generate_sunburst_png(
+        book_nft_address.lower(),
+        inner_width,
+        inner_height,
+        rays=720,
+        inner_ratio=0.002,
+        outer_ratio=0.24,
+        stroke_width=0.8,
+        opacity=0.17,
+    )
+    sunburst_img = Image.open(BytesIO(sunburst_png)).convert("RGBA")
+    image.alpha_composite(sunburst_img, dest=(-200, -320))
+
+    rings_png = generate_wavy_rings_png(
+        book_nft_address.lower(),
+        inner_width,
+        inner_height,
+        stroke_width=1.0,
+        opacity=0.17,
+        rings=40,
+        ring_spacing=30,
+    )
+    rings_img = Image.open(BytesIO(rings_png)).convert("RGBA")
+    image.alpha_composite(rings_img, dest=(-200, -320))
 
     # Render and paste LikeCoin logo SVG
     svg_path = Path(__file__).resolve().parents[1] / "images" / "likecoin-logo.svg"
