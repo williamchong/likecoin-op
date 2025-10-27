@@ -1,0 +1,8 @@
+namespace: optimism
+name: likecollective-image
+image:
+  repository: likecoin/likecollective-staking-position-image
+  tag: latest
+rpc_url: https://mainnet.base.org
+likecoin_contract_address: 0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf
+domain: asset.v3.like.co

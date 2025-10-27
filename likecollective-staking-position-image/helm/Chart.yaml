@@ -1,0 +1,7 @@
+apiVersion: v2
+name: likecollective-staking-position-image
+version: 0.1.0
+description: Helm chart for likecollective-staking-position-image
+
+type: application
+appVersion: 0.1.0
