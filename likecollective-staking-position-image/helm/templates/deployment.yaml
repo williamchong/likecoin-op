@@ -18,6 +18,11 @@ spec:
       containers:
         - name: {{ .Values.name }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          env:
+            - name: RPC_URL
+              value: {{ .Values.rpc_url }}
+            - name: LIKECOIN_CONTRACT_ADDRESS
+              value: {{ .Values.likecoin_contract_address }}
           ports:
             - containerPort: 8000
           readinessProbe:
