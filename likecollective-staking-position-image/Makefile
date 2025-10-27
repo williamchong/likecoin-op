@@ -53,6 +53,7 @@ poetry:
 docker-image:
 	docker buildx build --platform linux/amd64 . \
 		--build-arg 'BUILD_TAG=$(TAG)' \
+		--push \
 		-t '$(DEPLOY_DEV_DOCKER_IMAGE_NAME):latest' \
 		-t '$(DEPLOY_DEV_DOCKER_IMAGE_NAME):$(TAG)' \
 		$(DOCKER_BUILD_ARGS)
