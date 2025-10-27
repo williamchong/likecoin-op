@@ -30,7 +30,7 @@ format:
 .PHONY: dev
 dev:
 ifeq ($(WITH_DOCKER), false)
-	poetry run fastapi dev staking_image/server.py
+	poetry run dotenv run fastapi dev staking_image/server.py
 else
 	$(MAKE) stop
 	docker compose up -d dev
