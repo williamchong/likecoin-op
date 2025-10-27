@@ -216,6 +216,8 @@ mv nft_classes.nonull.json nft_classes.json
 ```
 
 
+
+
 ### Find duplicated new address
 
 ```bash
@@ -260,6 +262,20 @@ mv addresses.alt.json addresses.json
 mv nft_classes.json nft_classes.bak.json
 mv nft_classes.alt.json nft_classes.json
 ```
+
+On migrting production WritingNFT, we encounter metadata.name is empty. Which break the migration. Patch as follow to ensure the metadata has name
+``` bash
+python3 ./workflow/insert_name_to_metadata.py nft_classes.json | jq > nft_classes.metapatch.json 
+diff nft_classes.json nft_classes.metapatch.json 
+mv nft_classes.json nft_classes.premeta.json
+mv nft_classes.metapatch.json nft_classes.json
+
+./cli workflow compute-address nft_classes.json | jq > addresses.metapatch.json
+diff addresses.metapatch.json addresses.json
+mv addresses.json addresses.premeta.json
+mv addresses.metapatch.json addresses.json
+```
+
 
 ## Prepare migration actions json
 
