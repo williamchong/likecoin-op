@@ -36,13 +36,9 @@ contract veLike is
         address newImplementation
     ) internal override onlyOwner {}
 
-    /* Start of IERC4626 — Tokenized Vaults interface (OpenZeppelin Contracts v5) */
-    /**
-     * @dev Returns the underlying asset of the vault.
-     */
-    function asset() public view override returns (address) {
-        return address(asset());
-    }
+    /* Start of IERC20 interface */
+
+    /* End of IERC20 interface */
 
     /**
      * @dev Returns the total amount of the underlying asset managed by the vault.
