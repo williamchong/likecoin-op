@@ -108,6 +108,11 @@ contract veLike is
         return currentCondition;
     }
 
+    function getClaimedReward(address account) public view returns (uint256) {
+        veLikeStorage storage $ = _getveLikeData();
+        StakerInfo memory stakerInfo = $.stakerInfos[account];
+        return stakerInfo.rewardClaimed;
+    }
     /**
      * getPendingReward function
      *
@@ -277,7 +282,7 @@ contract veLike is
         address receiver,
         uint256 assets,
         uint256 shares
-    ) internal virtual override {
+    ) internal virtual override whenNotPaused {
         veLikeStorage storage $ = _getveLikeData();
         // Copying from ERC4626 _deposit function for clarity
         SafeERC20.safeTransferFrom(
@@ -312,7 +317,7 @@ contract veLike is
         address owner,
         uint256 assets,
         uint256 shares
-    ) internal virtual override {
+    ) internal virtual override whenNotPaused {
         // Copying from ERC4626 _withdraw function for clarity
         // Same as calling super._withdraw(caller, receiver, assets, shares);
         if (caller != owner) {
@@ -331,6 +336,14 @@ contract veLike is
     // End of ERC4626 Overrides
 
     // Start of Admin functions
+
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
+    }
 
     /**
      * addReward function

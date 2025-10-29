@@ -40,6 +40,7 @@ describe("veLike ", async function () {
       publicClient,
     };
   }
+
   async function initialMint() {
     const { veLike, likecoin, deployer, rick, kin, bob, publicClient } =
       await loadFixture(deployVeLike);
@@ -57,6 +58,39 @@ describe("veLike ", async function () {
     });
     return { veLike, likecoin, deployer, rick, kin, bob, publicClient };
   }
+
+  async function initialCondition() {
+    const { veLike, likecoin, deployer, publicClient, rick, kin, bob } =
+      await loadFixture(initialMint);
+    await likecoin.write.approve([veLike.address, 10000n * 10n ** 6n], {
+      account: deployer.account.address,
+    });
+    const block = await publicClient.getBlock();
+    const startTime = block.timestamp;
+    const endTime = block.timestamp + 1000n;
+    await veLike.write.addReward([10000n * 10n ** 6n, startTime, endTime], {
+      account: deployer.account.address,
+    });
+
+    await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
+      account: bob.account.address,
+    });
+    await veLike.write.deposit([100n * 10n ** 6n, bob.account.address], {
+      account: bob.account.address,
+    });
+    return {
+      veLike,
+      likecoin,
+      deployer,
+      publicClient,
+      rick,
+      kin,
+      bob,
+      startTime,
+      endTime,
+    };
+  }
+
   describe("as ERC1967 Proxy", async function () {
     it("should have the correct owner", async function () {
       const { veLike, deployer } = await loadFixture(deployVeLike);
@@ -95,6 +129,36 @@ describe("veLike ", async function () {
       expect(await newVeLike.read.dataStorage()).to.equal(
         "0xb9e14b2a89d227541697d62a06ecbf5ccc9ad849800745b40b2826662a177600",
       );
+    });
+  });
+
+  describe("as pausable contract", async function () {
+    it("should be paused by default", async function () {
+      const { veLike } = await loadFixture(initialMint);
+      const paused = await veLike.read.paused();
+      expect(paused).to.be.false;
+    });
+
+    it("should not allow non-owner to pause", async function () {
+      const { veLike, rick } = await loadFixture(initialMint);
+      await expect(
+        veLike.write.pause({ account: rick.account.address }),
+      ).to.be.rejectedWith("OwnableUnauthorizedAccount");
+    });
+
+    it("should not able to deposit when pausehave the correct owner", async function () {
+      const { veLike, likecoin, deployer, rick } =
+        await loadFixture(initialCondition);
+      await veLike.write.pause();
+
+      await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
+        account: rick.account.address,
+      });
+      await expect(
+        veLike.write.deposit([100n * 10n ** 6n, rick.account.address], {
+          account: rick.account.address,
+        }),
+      ).to.be.rejectedWith("EnforcedPause");
     });
   });
 
