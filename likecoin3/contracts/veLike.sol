@@ -201,10 +201,19 @@ contract veLike is
         return pendingReward;
     }
 
-    function _activeCondition() internal view returns (StakingCondition memory, bool) {
+    function _activeCondition()
+        internal
+        view
+        returns (StakingCondition memory, bool)
+    {
         veLikeStorage storage $ = _getveLikeData();
-        StakingCondition memory currentCondition = $.conditions[$.currentConditionIndex];
-        if (block.number < currentCondition.startTime || block.number > currentCondition.endTime) {
+        StakingCondition memory currentCondition = $.conditions[
+            $.currentConditionIndex
+        ];
+        if (
+            block.number < currentCondition.startTime ||
+            block.number > currentCondition.endTime
+        ) {
             return (currentCondition, false);
         }
         return (currentCondition, true);
@@ -223,7 +232,10 @@ contract veLike is
         uint256 targetBlock = block.number;
         if (!_isActive) {
             // Perform last update if needed
-            if ($.lastRewardBlock > currentCondition.startTime && $.lastRewardBlock < currentCondition.endTime) {
+            if (
+                $.lastRewardBlock > currentCondition.startTime &&
+                $.lastRewardBlock < currentCondition.endTime
+            ) {
                 targetBlock = currentCondition.endTime;
             } else {
                 return;
@@ -335,8 +347,17 @@ contract veLike is
         uint256 endTime
     ) external onlyOwner {
         veLikeStorage storage $ = _getveLikeData();
-        if ($.currentConditionIndex != 0) {
+        if (startTime <= $.lastRewardBlock) {
             revert ErrConflictCondition();
+        }
+        if (endTime < startTime) {
+            revert ErrConflictCondition();
+        }
+        if (endTime < block.timestamp) {
+            revert ErrConflictCondition();
+        }
+        if ($.currentConditionIndex == 0) {
+            $.lastRewardBlock = startTime;
         }
         SafeERC20.safeTransferFrom(
             IERC20(asset()),
@@ -346,7 +367,9 @@ contract veLike is
         );
         // perform last update if needed
         _updateVault();
-        uint256 lastRewardIndex = $.conditions[$.currentConditionIndex].rewardIndex;
+        uint256 lastRewardIndex = $
+            .conditions[$.currentConditionIndex]
+            .rewardIndex;
         $.rewardPool += rewardAmount;
         $.currentConditionIndex++;
         $.conditions[$.currentConditionIndex] = StakingCondition({
