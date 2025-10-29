@@ -167,6 +167,26 @@ describe("veLike ", async function () {
       const { veLike } = await loadFixture(initialMint);
       expect(await veLike.read.totalSupply()).to.equal(0n);
     });
+
+    it("should not able to transfer between account", async function () {
+      const { veLike, likecoin, deployer, rick, kin } =
+        await loadFixture(initialMint);
+      await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
+        account: rick.account.address,
+      });
+      await veLike.write.deposit([100n * 10n ** 6n, rick.account.address], {
+        account: rick.account.address,
+      });
+
+      expect(await veLike.read.balanceOf([rick.account.address])).to.equal(
+        100n * 10n ** 6n,
+      );
+      await expect(
+        veLike.write.transfer([kin.account.address, 100n * 10n ** 6n], {
+          account: rick.account.address,
+        }),
+      ).to.be.rejectedWith("ErrNonTransferable");
+    });
   });
 
   describe("as ERC4626 vault", async function () {

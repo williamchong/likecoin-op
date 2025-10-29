@@ -59,6 +59,7 @@ contract veLike is
     // Errors
     error ErrNoRewardToClaim();
     error ErrConflictCondition();
+    error ErrNonTransferable();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -77,16 +78,6 @@ contract veLike is
     function _authorizeUpgrade(
         address newImplementation
     ) internal override onlyOwner {}
-
-    /**
-     * totalAssets function
-     *
-     * veLike to Like should be one to one mapping, so the total supply is equal to the total assets.
-     * Note: Vault share is not veLike.
-     */
-    function totalAssets() public view override returns (uint256) {
-        return totalSupply();
-    }
 
     // Start of veLike specific functions
 
@@ -264,9 +255,50 @@ contract veLike is
     }
 
     // End of veLike specific functions
+    // Start of ERC20 Overrides
+
+    /**
+     * transfer function
+     *
+     * veLIKE is non-transferable voting escrow token, so it should not be transferred.
+     * Override ERC20 transfer function to revert.
+     *
+     * @return bool - true if the transfer is successful
+     */
+    function transfer(
+        address,
+        uint256
+    ) public virtual override(ERC20Upgradeable, IERC20) returns (bool) {
+        revert ErrNonTransferable();
+    }
+
+    /**
+     * transferFrom function
+     *
+     * veLIKE is non-transferable voting escrow token, so it should not be transferred.
+     * Override ERC20 transferFrom function to revert.
+     *
+     * @return bool - true if the transfer is successful
+     */
+    function transferFrom(
+        address,
+        address,
+        uint256
+    ) public virtual override(ERC20Upgradeable, IERC20) returns (bool) {
+        revert ErrNonTransferable();
+    }
+    // End of ERC20 Overrides
 
     // Start of ERC4626 Overrides
-
+    /**
+     * totalAssets function
+     *
+     * veLike to Like should be one to one mapping, so the total supply is equal to the total assets.
+     * Note: Vault share is not veLike.
+     */
+    function totalAssets() public view override returns (uint256) {
+        return totalSupply();
+    }
     /**
      * _deposit function
      *
