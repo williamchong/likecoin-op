@@ -1,8 +1,12 @@
 import { viem, ignition } from "hardhat";
 import { encodeAbiParameters, keccak256 } from "viem";
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
+
 import LikeProtocolV1Module from "../ignition/modules/LikeProtocolV1";
 import LikeCollectiveModule from "../ignition/modules/LikeCollective";
 import LikeStakePositionModule from "../ignition/modules/LikeStakePosition";
+import veLikeModule from "../ignition/modules/veLike";
+import veLikeRewardModule from "../ignition/modules/veLikeReward";
 
 export const ROYALTY_DEFAULT = 500n;
 
@@ -126,5 +130,175 @@ export async function deployLSP() {
     rick,
     kin,
     publicClient,
+  };
+}
+
+export async function deployVeLike() {
+  const [deployer, rick, kin, bob] = await viem.getWalletClients();
+  const publicClient = await viem.getPublicClient();
+  const testClient = await viem.getTestClient();
+  const { veLike, veLikeImpl, veLikeProxy, likecoin } = await ignition.deploy(
+    veLikeModule,
+    {
+      parameters: {
+        LikecoinModule: {
+          initOwner: deployer.account.address,
+        },
+        veLikeV0Module: {
+          initOwner: deployer.account.address,
+        },
+      },
+      defaultSender: deployer.account.address,
+      strategy: "create2",
+    },
+  );
+  return {
+    veLike,
+    veLikeImpl,
+    veLikeProxy,
+    likecoin,
+    deployer,
+    rick,
+    kin,
+    bob,
+    publicClient,
+    testClient,
+  };
+}
+
+export async function deployVeLikeReward() {
+  const {
+    veLike,
+    veLikeImpl,
+    veLikeProxy,
+    likecoin,
+    deployer,
+    rick,
+    kin,
+    bob,
+    publicClient,
+    testClient,
+  } = await loadFixture(deployVeLike);
+  const { veLikeReward, veLikeRewardImpl, veLikeRewardProxy } =
+    await ignition.deploy(veLikeRewardModule, {
+      parameters: {
+        veLikeRewardModule: {
+          initOwner: deployer.account.address,
+        },
+      },
+      defaultSender: deployer.account.address,
+      strategy: "create2",
+    });
+  await veLikeReward.write.setVault([veLike.address], {
+    account: deployer.account.address,
+  });
+  await veLikeReward.write.setLikecoin([likecoin.address], {
+    account: deployer.account.address,
+  });
+  await veLike.write.setRewardContract([veLikeReward.address], {
+    account: deployer.account.address,
+  });
+  return {
+    veLikeReward,
+    veLikeRewardImpl,
+    veLikeRewardProxy,
+    veLike,
+    veLikeImpl,
+    veLikeProxy,
+    likecoin,
+    deployer,
+    rick,
+    kin,
+    bob,
+    publicClient,
+    testClient,
+  };
+}
+
+export async function initialMint() {
+  const {
+    veLikeReward,
+    veLike,
+    likecoin,
+    deployer,
+    rick,
+    kin,
+    bob,
+    publicClient,
+    testClient,
+  } = await loadFixture(deployVeLikeReward);
+  await likecoin.write.mint([deployer.account.address, 50000n * 10n ** 6n], {
+    account: deployer.account.address,
+  });
+  await likecoin.write.mint([rick.account.address, 10000n * 10n ** 6n], {
+    account: deployer.account.address,
+  });
+  await likecoin.write.mint([kin.account.address, 10000n * 10n ** 6n], {
+    account: deployer.account.address,
+  });
+  await likecoin.write.mint([bob.account.address, 10000n * 10n ** 6n], {
+    account: deployer.account.address,
+  });
+  return {
+    veLikeReward,
+    veLike,
+    likecoin,
+    deployer,
+    rick,
+    kin,
+    bob,
+    publicClient,
+    testClient,
+  };
+}
+
+export async function initialCondition() {
+  const {
+    veLikeReward,
+    veLike,
+    likecoin,
+    deployer,
+    publicClient,
+    rick,
+    kin,
+    bob,
+    testClient,
+  } = await loadFixture(initialMint);
+  await likecoin.write.approve([veLike.address, 10000n * 10n ** 6n], {
+    account: deployer.account.address,
+  });
+  const block = await publicClient.getBlock();
+  const startTime = block.timestamp + 100n;
+  const endTime = startTime + 1000n;
+  // await veLike.write.addReward([10000n * 10n ** 6n, startTime, endTime], {
+  //   account: deployer.account.address,
+  // });
+
+  await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
+    account: bob.account.address,
+  });
+  await veLike.write.deposit([100n * 10n ** 6n, bob.account.address], {
+    account: bob.account.address,
+  });
+
+  // Test case assume start of block is the startTime
+  await testClient.setNextBlockTimestamp({
+    timestamp: startTime,
+  });
+  await testClient.mine({
+    blocks: 1,
+  });
+
+  return {
+    veLike,
+    likecoin,
+    deployer,
+    publicClient,
+    rick,
+    kin,
+    bob,
+    startTime,
+    endTime,
+    testClient,
   };
 }

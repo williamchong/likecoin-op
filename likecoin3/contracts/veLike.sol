@@ -12,6 +12,12 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {Likecoin} from "./Likecoin.sol";
 
+interface IRewardContract {
+    function getPendingReward(address account) external view returns (uint256);
+    function claimReward(address account) external returns (uint256);
+    function restakeReward(address account) external returns (uint256);
+}
+
 /// @custom:security-contact rickmak@oursky.com
 contract veLike is
     ERC4626Upgradeable,
@@ -20,30 +26,9 @@ contract veLike is
     PausableUpgradeable,
     ReentrancyGuardUpgradeable
 {
-    struct StakingCondition {
-        uint256 startTime;
-        uint256 endTime;
-        uint256 rewardAmount;
-        uint256 rewardIndex;
-    }
-
-    struct StakerInfo {
-        uint256 stakedAmount;
-        uint256 rewardIndex;
-        uint256 lockedUntil;
-        uint256 rewardClaimed; // Not use for calculation, only for tracking.
-    }
-
     struct veLikeStorage {
-        uint256 rewardPool; // Tracking the likecoin hold by vault for reward distribution.
-        uint256 totalStaked;
-        uint256 lastRewardTime;
-        uint256 currentConditionIndex;
-        mapping(address account => StakerInfo stakerInfo) stakerInfos;
-        mapping(uint256 index => StakingCondition condition) conditions;
+        address rewardContract;
     }
-
-    uint256 public constant ACC_REWARD_PRECISION = 1e18; // Precision scalar for reward index
 
     // keccak256(abi.encode(uint256(keccak256("veLike.storage")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant CLASS_DATA_STORAGE =
@@ -82,28 +67,29 @@ contract veLike is
     // Start of veLike specific functions
 
     /**
+     * setRewardContract function
+     *
+     * Set the reward contract for the veLike.
+     *
+     * @param rewardContract - the reward contract to set
+     */
+    function setRewardContract(address rewardContract) public onlyOwner {
+        veLikeStorage storage $ = _getveLikeData();
+        $.rewardContract = rewardContract;
+    }
+
+    /**
      * getCurrentCondition function
      *
      * Get the current staking condition, it can be inactive. i.e. not started or already ended.
      *
      * @return currentCondition - the current staking condition
      */
-    function getCurrentCondition()
-        public
-        view
-        returns (StakingCondition memory)
-    {
-        StakingCondition memory currentCondition;
-        bool _isActive;
-        (currentCondition, _isActive) = _activeCondition();
-        return currentCondition;
+    function getCurrentRewardContract() public view returns (IRewardContract) {
+        veLikeStorage storage $ = _getveLikeData();
+        return IRewardContract($.rewardContract);
     }
 
-    function getClaimedReward(address account) public view returns (uint256) {
-        veLikeStorage storage $ = _getveLikeData();
-        StakerInfo memory stakerInfo = $.stakerInfos[account];
-        return stakerInfo.rewardClaimed;
-    }
     /**
      * getPendingReward function
      *
@@ -114,67 +100,12 @@ contract veLike is
      * @return pendingReward - the pending reward for the account
      */
     function getPendingReward(address account) public view returns (uint256) {
-        veLikeStorage storage $ = _getveLikeData();
-        StakingCondition memory currentCondition;
-        bool _isActive;
-        (currentCondition, _isActive) = _activeCondition();
-        uint256 calculatedReward = _pendingReward(account);
-        if (!_isActive) {
-            return calculatedReward;
-        }
-        uint256 veLikeAmount = balanceOf(account);
-        if (veLikeAmount == 0) {
+        IRewardContract rewardContract = getCurrentRewardContract();
+        if (rewardContract == IRewardContract(address(0))) {
             return 0;
         }
-        uint256 timePassed = block.timestamp - $.lastRewardTime;
-        uint256 newReward = timePassed *
-            _rewardPerTimeWithPrecision(currentCondition);
-        uint256 nonCalculatedReward = (newReward * veLikeAmount) /
-            ($.totalStaked * ACC_REWARD_PRECISION);
-        return calculatedReward + nonCalculatedReward;
+        return rewardContract.getPendingReward(account);
     }
-
-    /**
-     * _pendingReward function
-     *
-     * Internal function to calculate the pending reward for the account.
-     *
-     */
-    function _pendingReward(address account) internal view returns (uint256) {
-        veLikeStorage storage $ = _getveLikeData();
-        StakerInfo memory stakerInfo = $.stakerInfos[account];
-        return
-            (stakerInfo.stakedAmount *
-                ($.conditions[$.currentConditionIndex].rewardIndex -
-                    stakerInfo.rewardIndex)) / ACC_REWARD_PRECISION;
-    }
-
-    /**
-     * _claimReward function
-     *
-     * Internal function to claim the reward for the account.
-     *
-     * @param account - the account to claim the reward for
-     * @param restake - true if the reward should be restaked, false if the reward should be claimed
-     */
-    function _claimReward(address account, bool restake) internal returns (uint256) {
-        veLikeStorage storage $ = _getveLikeData();
-        StakingCondition storage condition = $.conditions[
-            $.currentConditionIndex
-        ];
-        StakerInfo storage stakerInfo = $.stakerInfos[account];
-        uint256 rewardClaimed = _pendingReward(account);
-        stakerInfo.rewardClaimed += rewardClaimed;
-        stakerInfo.rewardIndex = condition.rewardIndex;
-        $.rewardPool -= rewardClaimed;
-        if (restake) {
-            stakerInfo.stakedAmount += rewardClaimed;
-            $.totalStaked += rewardClaimed;
-            _mint(account, rewardClaimed);
-        } else {
-            SafeERC20.safeTransfer(IERC20(asset()), account, rewardClaimed);
-        }
-        return rewardClaimed;    }
 
     /**
      * claimReward function
@@ -187,14 +118,11 @@ contract veLike is
     function claimReward(
         address account
     ) public whenNotPaused nonReentrant returns (uint256) {
-        uint256 pendingReward = getPendingReward(account);
-        if (pendingReward == 0) {
+        IRewardContract rewardContract = getCurrentRewardContract();
+        if (rewardContract == IRewardContract(address(0))) {
             revert ErrNoRewardToClaim();
         }
-
-        _updateVault();
-        uint256 rewardClaimed = _claimReward(account, false);
-        return rewardClaimed;
+        return rewardContract.claimReward(account);
     }
 
     /**
@@ -208,71 +136,11 @@ contract veLike is
     function restakeReward(
         address account
     ) public nonReentrant returns (uint256) {
-        uint256 pendingReward = getPendingReward(account);
-        if (pendingReward == 0) {
+        IRewardContract rewardContract = getCurrentRewardContract();
+        if (rewardContract == IRewardContract(address(0))) {
             revert ErrNoRewardToClaim();
         }
-
-        _updateVault();
-        uint256 rewardClaimed = _claimReward(account, true);
-        return rewardClaimed;
-    }
-
-    function _activeCondition()
-        internal
-        view
-        returns (StakingCondition storage, bool)
-    {
-        veLikeStorage storage $ = _getveLikeData();
-        StakingCondition storage currentCondition = $.conditions[
-            $.currentConditionIndex
-        ];
-        if (
-            block.timestamp < currentCondition.startTime ||
-            block.timestamp > currentCondition.endTime
-        ) {
-            return (currentCondition, false);
-        }
-        return (currentCondition, true);
-    }
-    /**
-     * _updateVault function
-     *
-     * Update the vault reward index and reward debt.
-     *
-     */
-    function _updateVault() internal {
-        veLikeStorage storage $ = _getveLikeData();
-        StakingCondition storage currentCondition;
-        bool _isActive;
-        (currentCondition, _isActive) = _activeCondition();
-        uint256 targetTime = block.timestamp;
-        if (!_isActive) {
-            // Perform last update if needed
-            if (
-                $.lastRewardTime > currentCondition.startTime &&
-                $.lastRewardTime < currentCondition.endTime
-            ) {
-                targetTime = currentCondition.endTime;
-            } else {
-                return;
-            }
-        }
-        if ($.totalStaked > 0) {
-            uint256 timePassed = targetTime - $.lastRewardTime;
-            uint256 reward = timePassed *
-                _rewardPerTimeWithPrecision(currentCondition);
-            currentCondition.rewardIndex += reward / $.totalStaked;
-            $.lastRewardTime = targetTime;
-        }
-    }
-
-    function _rewardPerTimeWithPrecision(
-        StakingCondition memory condition
-    ) internal pure returns (uint256) {
-        return
-            (ACC_REWARD_PRECISION * condition.rewardAmount) /
-            (condition.endTime - condition.startTime);
+        return rewardContract.restakeReward(account);
     }
 
     // End of veLike specific functions
@@ -336,7 +204,6 @@ contract veLike is
         uint256 assets,
         uint256 shares
     ) internal virtual override whenNotPaused {
-        veLikeStorage storage $ = _getveLikeData();
         // Copying from ERC4626 _deposit function for clarity
         SafeERC20.safeTransferFrom(
             IERC20(asset()),
@@ -347,11 +214,11 @@ contract veLike is
         _mint(receiver, shares);
 
         // Vault specific logic
-        _updateVault();
+        //_updateVault();
         // Note, we must claim the reward, othereise the denominator will be wrong on next claim.
-        _claimReward(receiver, false);
-        $.totalStaked += assets;
-        $.stakerInfos[receiver].stakedAmount += assets;
+        //_claimReward(receiver, false);
+        //$.totalStaked += assets;
+        //$.stakerInfos[receiver].stakedAmount += assets;
 
         // Copying from ERC4626 _deposit function Event for clarity
         emit Deposit(caller, receiver, assets, shares);
@@ -384,7 +251,7 @@ contract veLike is
         SafeERC20.safeTransfer(IERC20(asset()), receiver, assets);
 
         // Vault specific logic
-        _updateVault();
+        //_updateVault();
 
         // Copying from ERC4626 _withdraw function Event for clarity
         emit Withdraw(caller, receiver, owner, assets, shares);
@@ -400,71 +267,5 @@ contract veLike is
     function unpause() public onlyOwner {
         _unpause();
     }
-
-    /**
-     * getLastRewardTime function
-     *
-     * Get the last reward time.
-     *
-     * @return lastRewardTime - the last reward time
-     */
-    function getLastRewardTime() public view returns (uint256) {
-        veLikeStorage storage $ = _getveLikeData();
-        return $.lastRewardTime;
-    }
-
-    function getRewardPool() public view returns (uint256) {
-        veLikeStorage storage $ = _getveLikeData();
-        return $.rewardPool;
-    }
-
-    /**
-     * addReward function
-     *
-     * Admin function for authorized address too deposit asset as reward. This
-     * staking vault rewards is linearly over time. reward calculation is update in the current block timestamp.
-     *
-     * @param rewardAmount - the amount of reward to deposit, asset ERC20(likecoin)
-     * @param endTime - the end time of the staking condition
-     */
-    function addReward(
-        uint256 rewardAmount,
-        uint256 startTime,
-        uint256 endTime
-    ) external onlyOwner {
-        veLikeStorage storage $ = _getveLikeData();
-        if (startTime <= $.lastRewardTime) {
-            revert ErrConflictCondition();
-        }
-        if (endTime < startTime) {
-            revert ErrConflictCondition();
-        }
-        if (endTime < block.timestamp) {
-            revert ErrConflictCondition();
-        }
-        if ($.currentConditionIndex == 0) {
-            $.lastRewardTime = startTime;
-        }
-        SafeERC20.safeTransferFrom(
-            IERC20(asset()),
-            _msgSender(),
-            address(this),
-            rewardAmount
-        );
-        // perform last update if needed
-        _updateVault();
-        uint256 lastRewardIndex = $
-            .conditions[$.currentConditionIndex]
-            .rewardIndex;
-        $.rewardPool += rewardAmount;
-        $.currentConditionIndex++;
-        $.conditions[$.currentConditionIndex] = StakingCondition({
-            startTime: startTime,
-            endTime: endTime,
-            rewardAmount: rewardAmount,
-            rewardIndex: lastRewardIndex
-        });
-    }
-
     // End of Admin functions
 }
