@@ -326,6 +326,22 @@ func (s *BookNFT) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		e.FieldStart("minter_addresses")
+		e.ArrStart()
+		for _, elem := range s.MinterAddresses {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("updater_addresses")
+		e.ArrStart()
+		for _, elem := range s.UpdaterAddresses {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
 		e.FieldStart("total_supply")
 		s.TotalSupply.Encode(e)
 	}
@@ -371,22 +387,24 @@ func (s *BookNFT) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfBookNFT = [15]string{
+var jsonFieldsNameOfBookNFT = [17]string{
 	0:  "id",
 	1:  "address",
 	2:  "name",
 	3:  "symbol",
 	4:  "owner_address",
-	5:  "total_supply",
-	6:  "max_supply",
-	7:  "metadata",
-	8:  "banner_image",
-	9:  "featured_image",
-	10: "deployer_address",
-	11: "deployed_block_number",
-	12: "minted_at",
-	13: "updated_at",
-	14: "owner",
+	5:  "minter_addresses",
+	6:  "updater_addresses",
+	7:  "total_supply",
+	8:  "max_supply",
+	9:  "metadata",
+	10: "banner_image",
+	11: "featured_image",
+	12: "deployer_address",
+	13: "deployed_block_number",
+	14: "minted_at",
+	15: "updated_at",
+	16: "owner",
 }
 
 // Decode decodes BookNFT from json.
@@ -394,7 +412,7 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode BookNFT to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [3]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -456,8 +474,48 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"owner_address\"")
 			}
-		case "total_supply":
+		case "minter_addresses":
 			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				s.MinterAddresses = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.MinterAddresses = append(s.MinterAddresses, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"minter_addresses\"")
+			}
+		case "updater_addresses":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				s.UpdaterAddresses = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.UpdaterAddresses = append(s.UpdaterAddresses, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"updater_addresses\"")
+			}
+		case "total_supply":
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				if err := s.TotalSupply.Decode(d); err != nil {
 					return err
@@ -467,7 +525,7 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"total_supply\"")
 			}
 		case "max_supply":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				if err := s.MaxSupply.Decode(d); err != nil {
 					return err
@@ -487,7 +545,7 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"metadata\"")
 			}
 		case "banner_image":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.BannerImage = string(v)
@@ -499,7 +557,7 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"banner_image\"")
 			}
 		case "featured_image":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.FeaturedImage = string(v)
@@ -511,7 +569,7 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"featured_image\"")
 			}
 		case "deployer_address":
-			requiredBitSet[1] |= 1 << 2
+			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
 				v, err := d.Str()
 				s.DeployerAddress = string(v)
@@ -523,7 +581,7 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"deployer_address\"")
 			}
 		case "deployed_block_number":
-			requiredBitSet[1] |= 1 << 3
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				if err := s.DeployedBlockNumber.Decode(d); err != nil {
 					return err
@@ -533,7 +591,7 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"deployed_block_number\"")
 			}
 		case "minted_at":
-			requiredBitSet[1] |= 1 << 4
+			requiredBitSet[1] |= 1 << 6
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.MintedAt = v
@@ -545,7 +603,7 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"minted_at\"")
 			}
 		case "updated_at":
-			requiredBitSet[1] |= 1 << 5
+			requiredBitSet[1] |= 1 << 7
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.UpdatedAt = v
@@ -575,9 +633,10 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
-		0b01101111,
-		0b00111111,
+	for i, mask := range [3]uint8{
+		0b11101111,
+		0b11111101,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

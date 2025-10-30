@@ -85,6 +85,8 @@ type BookNFT struct {
 	Name                string                   `json:"name"`
 	Symbol              string                   `json:"symbol"`
 	OwnerAddress        OptString                `json:"owner_address"`
+	MinterAddresses     []string                 `json:"minter_addresses"`
+	UpdaterAddresses    []string                 `json:"updater_addresses"`
 	TotalSupply         BigInt                   `json:"total_supply"`
 	MaxSupply           Uint64                   `json:"max_supply"`
 	Metadata            OptContractLevelMetadata `json:"metadata"`
@@ -120,6 +122,16 @@ func (s *BookNFT) GetSymbol() string {
 // GetOwnerAddress returns the value of OwnerAddress.
 func (s *BookNFT) GetOwnerAddress() OptString {
 	return s.OwnerAddress
+}
+
+// GetMinterAddresses returns the value of MinterAddresses.
+func (s *BookNFT) GetMinterAddresses() []string {
+	return s.MinterAddresses
+}
+
+// GetUpdaterAddresses returns the value of UpdaterAddresses.
+func (s *BookNFT) GetUpdaterAddresses() []string {
+	return s.UpdaterAddresses
 }
 
 // GetTotalSupply returns the value of TotalSupply.
@@ -195,6 +207,16 @@ func (s *BookNFT) SetSymbol(val string) {
 // SetOwnerAddress sets the value of OwnerAddress.
 func (s *BookNFT) SetOwnerAddress(val OptString) {
 	s.OwnerAddress = val
+}
+
+// SetMinterAddresses sets the value of MinterAddresses.
+func (s *BookNFT) SetMinterAddresses(val []string) {
+	s.MinterAddresses = val
+}
+
+// SetUpdaterAddresses sets the value of UpdaterAddresses.
+func (s *BookNFT) SetUpdaterAddresses(val []string) {
+	s.UpdaterAddresses = val
 }
 
 // SetTotalSupply sets the value of TotalSupply.
