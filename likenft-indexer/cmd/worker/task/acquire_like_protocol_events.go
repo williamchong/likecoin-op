@@ -75,6 +75,7 @@ func HandleAcquireLikeProtocolEventsTask(ctx context.Context, t *asynq.Task) err
 		evmEventRepository,
 		evmEventQueryClient,
 		evmClient,
+		cfg.EvmEventQueryToBlockPadding,
 		contractevmeventacquirer.ContractEvmEventsAcquirerContractTypeLikeProtocol,
 		[]string{p.ContractAddress},
 	)

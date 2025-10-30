@@ -46,6 +46,8 @@ type contractEvmEventsAcquirer struct {
 	evmEventQueryClient EvmEventQueryClient
 	evmClient           EvmClient
 
+	queryEventsToBlockPadding uint64
+
 	contractType      ContractEvmEventsAcquirerContractType
 	contractAddresses []string
 }
@@ -55,16 +57,18 @@ func NewContractEvmEventsAcquirer(
 	evmEventRepository database.EVMEventRepository,
 	evmEventQueryClient EvmEventQueryClient,
 	evmClient EvmClient,
+	queryEventsToBlockPadding uint64,
 	contractType ContractEvmEventsAcquirerContractType,
 	contractAddresses []string,
 ) ContractEvmEventsAcquirer {
 	return &contractEvmEventsAcquirer{
-		abiManager:          abiManager,
-		evmEventRepository:  evmEventRepository,
-		evmEventQueryClient: evmEventQueryClient,
-		evmClient:           evmClient,
-		contractType:        contractType,
-		contractAddresses:   contractAddresses,
+		abiManager:                abiManager,
+		evmEventRepository:        evmEventRepository,
+		evmEventQueryClient:       evmEventQueryClient,
+		evmClient:                 evmClient,
+		queryEventsToBlockPadding: queryEventsToBlockPadding,
+		contractType:              contractType,
+		contractAddresses:         contractAddresses,
 	}
 }
 
@@ -114,8 +118,12 @@ func (a *contractEvmEventsAcquirer) Acquire(
 
 	// The block limit includes `fromBlock` itself so need to -1
 	toBlock := min(fromBlock+numberOfBlocksLimit-1, blockHeight)
+	toBlockWithPadding := toBlock + a.queryEventsToBlockPadding
 
-	myLogger = myLogger.With("toBlock", toBlock)
+	myLogger = myLogger.With(
+		"toBlock", toBlock,
+		"toBlockWithPadding", toBlockWithPadding,
+	)
 
 	if fromBlock >= toBlock {
 		myLogger.Info("no new blocks. skip")
@@ -127,7 +135,12 @@ func (a *contractEvmEventsAcquirer) Acquire(
 		addresses[i] = common.HexToAddress(contractAddress)
 	}
 
-	logs, err := a.evmEventQueryClient.QueryEvents(ctx, addresses, fromBlock, toBlock)
+	logs, err := a.evmEventQueryClient.QueryEvents(
+		ctx,
+		addresses,
+		fromBlock,
+		toBlockWithPadding,
+	)
 
 	if err != nil {
 		myLogger.Error("failed to query events", "error", err)

@@ -78,6 +78,7 @@ func HandleIndexActionCheckBookNFT(ctx context.Context, t *asynq.Task) error {
 		evmEventRepository,
 		evmQueryClient,
 		evmClient,
+		envCfg.EvmEventQueryToBlockPadding,
 		contractevmeventacquirer.ContractEvmEventsAcquirerContractTypeBookNFT,
 		[]string{p.ContractAddress},
 	)
