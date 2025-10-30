@@ -44,6 +44,35 @@ describe("veLikeReward ", async function () {
     });
   });  
 
+  describe("as pausable contract", async function () {
+    it("should be paused by default", async function () {
+      const { veLikeReward } = await loadFixture(initialMint);
+      const paused = await veLikeReward.read.paused();
+      expect(paused).to.be.false;
+    });
+
+    it("should not allow non-owner to pause", async function () {
+      const { veLikeReward, rick } = await loadFixture(initialMint);
+      await expect(
+        veLikeReward.write.pause({ account: rick.account.address }),
+      ).to.be.rejectedWith("OwnableUnauthorizedAccount");
+    });
+
+    it("should not able to deposit on veLike Vault when pause the reward", async function () {
+      const { veLikeReward, veLike, likecoin, deployer, rick } =
+        await loadFixture(initialCondition);
+      await veLikeReward.write.pause();
+
+      await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
+        account: rick.account.address,
+      });
+      await expect(
+        veLike.write.deposit([100n * 10n ** 6n, rick.account.address], {
+          account: rick.account.address,
+        }),
+      ).to.be.rejectedWith("EnforcedPause");
+    });
+  });
 
   describe("reward condition setting", async function () {
     it("should return empty reward condition if no reward condition is set", async function () {

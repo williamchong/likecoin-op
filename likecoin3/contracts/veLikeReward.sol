@@ -231,7 +231,7 @@ contract veLikeReward is
 
     // Start of Vault functions
 
-    function deposit(address account, uint256 rewardAmount) public onlyVault {
+    function deposit(address account, uint256 rewardAmount) public whenNotPaused onlyVault {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
         _updateVault();
         // Note, we must claim the reward, othereise the denominator will be wrong on next claim.
@@ -240,7 +240,7 @@ contract veLikeReward is
         $.totalStaked += rewardAmount;
     }
 
-    function withdraw(address account, uint256 rewardAmount) public onlyVault {
+    function withdraw(address account, uint256 rewardAmount) public whenNotPaused onlyVault {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
         $.rewardPool -= rewardAmount;
     }
@@ -254,7 +254,7 @@ contract veLikeReward is
      * @param restake - true if the reward should be restaked, false if the reward should be claimed
      * @return reward - the reward for the account
      */
-    function claimReward(address account, bool restake) public onlyVault returns (uint256) {
+    function claimReward(address account, bool restake) public whenNotPaused onlyVault returns (uint256) {
         uint256 currentPendingReward = getPendingReward(account);
         if (currentPendingReward == 0) {
             revert ErrNoRewardToClaim();
