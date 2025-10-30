@@ -14,8 +14,9 @@ import {Likecoin} from "./Likecoin.sol";
 
 interface IRewardContract {
     function getPendingReward(address account) external view returns (uint256);
-    function claimReward(address account) external returns (uint256);
-    function restakeReward(address account) external returns (uint256);
+    function claimReward(address account, bool restake) external returns (uint256);
+    function deposit(address account, uint256 rewardAmount) external;
+    function withdraw(address account, uint256 rewardAmount) external;
 }
 
 /// @custom:security-contact rickmak@oursky.com
@@ -43,7 +44,6 @@ contract veLike is
 
     // Errors
     error ErrNoRewardToClaim();
-    error ErrConflictCondition();
     error ErrNonTransferable();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -122,7 +122,8 @@ contract veLike is
         if (rewardContract == IRewardContract(address(0))) {
             revert ErrNoRewardToClaim();
         }
-        return rewardContract.claimReward(account);
+        uint256 reward = rewardContract.claimReward(account, false);
+        return reward;
     }
 
     /**
@@ -135,12 +136,14 @@ contract veLike is
      */
     function restakeReward(
         address account
-    ) public nonReentrant returns (uint256) {
+    ) public whenNotPaused nonReentrant returns (uint256) {
         IRewardContract rewardContract = getCurrentRewardContract();
         if (rewardContract == IRewardContract(address(0))) {
             revert ErrNoRewardToClaim();
         }
-        return rewardContract.restakeReward(account);
+        uint256 reward = rewardContract.claimReward(account, true);
+        _mint(account, reward);
+        return reward;
     }
 
     // End of veLike specific functions
@@ -214,11 +217,10 @@ contract veLike is
         _mint(receiver, shares);
 
         // Vault specific logic
-        //_updateVault();
-        // Note, we must claim the reward, othereise the denominator will be wrong on next claim.
-        //_claimReward(receiver, false);
-        //$.totalStaked += assets;
-        //$.stakerInfos[receiver].stakedAmount += assets;
+        IRewardContract rewardContract = getCurrentRewardContract();
+        if (rewardContract != IRewardContract(address(0))) {
+            rewardContract.deposit(receiver, assets);
+        }
 
         // Copying from ERC4626 _deposit function Event for clarity
         emit Deposit(caller, receiver, assets, shares);
@@ -247,13 +249,15 @@ contract veLike is
             _spendAllowance(owner, caller, shares);
         }
 
-        _burn(owner, shares);
-        SafeERC20.safeTransfer(IERC20(asset()), receiver, assets);
-
         // Vault specific logic
-        //_updateVault();
+        IRewardContract rewardContract = getCurrentRewardContract();
+        if (rewardContract != IRewardContract(address(0))) {
+            rewardContract.withdraw(owner, assets);
+        }
 
         // Copying from ERC4626 _withdraw function Event for clarity
+        _burn(owner, shares);
+        SafeERC20.safeTransfer(IERC20(asset()), receiver, assets);
         emit Withdraw(caller, receiver, owner, assets, shares);
     }
     // End of ERC4626 Overrides

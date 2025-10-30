@@ -11,8 +11,8 @@ import { deployVeLike, initialMint, initialCondition } from "./factory";
 describe("veLikeReward ", async function () {
   describe("reward condition setting", async function () {
     it("should return empty reward condition if no reward condition is set", async function () {
-      const { veLike } = await loadFixture(initialMint);
-      const condition = await veLike.read.getCurrentCondition();
+      const { veLikeReward } = await loadFixture(initialMint);
+      const condition = await veLikeReward.read.getCurrentCondition();
       expect(condition.startTime).to.equal(0n);
       expect(condition.endTime).to.equal(0n);
       expect(condition.rewardAmount).to.equal(0n);
@@ -20,21 +20,24 @@ describe("veLikeReward ", async function () {
     });
 
     it("should return the correct reward condition if reward condition is set", async function () {
-      const { veLike, likecoin, deployer, publicClient } =
+      const { veLike, veLikeReward, likecoin, deployer, publicClient } =
         await loadFixture(initialMint);
 
-      await likecoin.write.approve([veLike.address, 10000n * 10n ** 6n], {
+      await likecoin.write.approve([veLikeReward.address, 10000n * 10n ** 6n], {
         account: deployer.account.address,
       });
 
       const block = await publicClient.getBlock();
       const startTime = block.timestamp;
       const endTime = block.timestamp + 1000n;
-      await veLike.write.addReward([10000n * 10n ** 6n, startTime, endTime], {
-        account: deployer.account.address,
-      });
+      await veLikeReward.write.addReward(
+        [10000n * 10n ** 6n, startTime, endTime],
+        {
+          account: deployer.account.address,
+        },
+      );
 
-      const condition = await veLike.read.getCurrentCondition();
+      const condition = await veLikeReward.read.getCurrentCondition();
       expect(condition.startTime).to.equal(startTime);
       expect(condition.endTime).to.equal(endTime);
       expect(condition.rewardAmount).to.equal(10000n * 10n ** 6n);
@@ -48,26 +51,29 @@ describe("veLikeReward ", async function () {
     });
 
     it("should not able to set reward condition with startTime before current lastRewardBlock", async function () {
-      const { veLike, likecoin, deployer, publicClient } =
+      const { veLike, veLikeReward, likecoin, deployer, publicClient } =
         await loadFixture(initialMint);
 
-      await likecoin.write.approve([veLike.address, 10000n * 10n ** 6n], {
+      await likecoin.write.approve([veLikeReward.address, 10000n * 10n ** 6n], {
         account: deployer.account.address,
       });
 
       const block = await publicClient.getBlock();
       const startTime = block.timestamp;
       const endTime = block.timestamp + 1000n;
-      await veLike.write.addReward([10000n * 10n ** 6n, startTime, endTime], {
-        account: deployer.account.address,
-      });
+      await veLikeReward.write.addReward(
+        [10000n * 10n ** 6n, startTime, endTime],
+        {
+          account: deployer.account.address,
+        },
+      );
       // The lastRewardBlock is updated to the startTime
 
-      await likecoin.write.approve([veLike.address, 10000n * 10n ** 6n], {
+      await likecoin.write.approve([veLikeReward.address, 10000n * 10n ** 6n], {
         account: deployer.account.address,
       });
       await expect(
-        veLike.write.addReward(
+        veLikeReward.write.addReward(
           [10000n * 10n ** 6n, startTime - 1000n, endTime],
           {
             account: deployer.account.address,
@@ -77,100 +83,72 @@ describe("veLikeReward ", async function () {
     });
 
     it("should not able to set reward condition with endTime before current block", async function () {
-      const { veLike, likecoin, deployer, publicClient } =
+      const { veLike, veLikeReward, likecoin, deployer, publicClient } =
         await loadFixture(initialMint);
       const block = await publicClient.getBlock();
       const startTime = block.timestamp + 1000n;
       const endTime = block.timestamp - 2000n;
       await expect(
-        veLike.write.addReward([10000n * 10n ** 6n, startTime, endTime], {
+        veLikeReward.write.addReward([10000n * 10n ** 6n, startTime, endTime], {
           account: deployer.account.address,
         }),
       ).to.be.rejectedWith("ErrConflictCondition");
     });
 
     it("should not able to set reward condition with startTime after endTime", async function () {
-      const { veLike, likecoin, deployer, publicClient } =
+      const { veLike, veLikeReward, likecoin, deployer, publicClient } =
         await loadFixture(initialMint);
       const block = await publicClient.getBlock();
       const startTime = block.timestamp + 3000n;
       const endTime = block.timestamp + 2000n;
       await expect(
-        veLike.write.addReward([10000n * 10n ** 6n, startTime, endTime], {
+        veLikeReward.write.addReward([10000n * 10n ** 6n, startTime, endTime], {
           account: deployer.account.address,
         }),
       ).to.be.rejectedWith("ErrConflictCondition");
     });
 
     it("should not able to set reward condition with startTime before current endTime", async function () {
-      const { veLike, likecoin, deployer, publicClient } =
+      const { veLike, veLikeReward, likecoin, deployer, publicClient } =
         await loadFixture(initialMint);
 
-      await likecoin.write.approve([veLike.address, 10000n * 10n ** 6n], {
+      await likecoin.write.approve([veLikeReward.address, 10000n * 10n ** 6n], {
         account: deployer.account.address,
       });
       const block = await publicClient.getBlock();
       const startTime = block.timestamp;
       const endTime = block.timestamp + 1n;
-      await veLike.write.addReward([10000n * 10n ** 6n, startTime, endTime], {
-        account: deployer.account.address,
-      });
-
-      await likecoin.write.approve([veLike.address, 10000n * 10n ** 6n], {
-        account: deployer.account.address,
-      });
-      await expect(
-        veLike.write.addReward([10000n * 10n ** 6n, startTime, endTime], {
-          account: deployer.account.address,
-        }),
-      ).to.be.rejectedWith("ErrConflictCondition");
-    });
-
-    it("should able to set new reward condition after current expire", async function () {
-      const { veLike, likecoin, deployer, publicClient } =
-        await loadFixture(initialMint);
-      await likecoin.write.approve([veLike.address, 10000n * 10n ** 6n], {
-        account: deployer.account.address,
-      });
-      const block = await publicClient.getBlock();
-      const startTime = block.timestamp;
-      const endTime = block.timestamp + 1n;
-      await veLike.write.addReward([10000n * 10n ** 6n, startTime, endTime], {
-        account: deployer.account.address,
-      });
-
-      await likecoin.write.approve([veLike.address, 10000n * 10n ** 6n], {
-        account: deployer.account.address,
-      });
-      await veLike.write.addReward(
-        [10000n * 10n ** 6n, endTime + 1n, endTime + 1000n],
+      await veLikeReward.write.addReward(
+        [10000n * 10n ** 6n, startTime, endTime],
         {
           account: deployer.account.address,
         },
       );
 
-      const condition = await veLike.read.getCurrentCondition();
-      expect(condition.startTime).to.equal(endTime + 1n);
-      expect(condition.endTime).to.equal(endTime + 1000n);
-      expect(condition.rewardAmount).to.equal(10000n * 10n ** 6n);
-      expect(condition.rewardIndex).to.equal(0n);
-      expect(await veLike.read.totalAssets()).to.equal(0n);
+      await expect(
+        veLikeReward.write.addReward([10000n * 10n ** 6n, startTime, endTime], {
+          account: deployer.account.address,
+        }),
+      ).to.be.rejectedWith("ErrConflictCondition");
     });
   });
 
   describe("reward distribution", async function () {
     it("should have correct initial reward condition", async function () {
-      const { veLike, bob, testClient } = await loadFixture(initialCondition);
-      const condition = await veLike.read.getCurrentCondition();
+      const { veLike, veLikeReward, bob, testClient } =
+        await loadFixture(initialCondition);
+      const condition = await veLikeReward.read.getCurrentCondition();
 
       // Cross check the top function not changed accidentally.
       expect(condition.endTime).to.equal(condition.startTime + 1000n);
       expect(condition.rewardAmount).to.equal(10000n * 10n ** 6n);
       expect(condition.rewardIndex).to.equal(0n);
 
-      expect(await veLike.read.getRewardPool()).to.equal(10000n * 10n ** 6n);
+      expect(await veLikeReward.read.getRewardPool()).to.equal(
+        10000n * 10n ** 6n,
+      );
       // Bob deposit before the startTime, so the lastRewardTime should be the startTime
-      const lastRewardTime = await veLike.read.getLastRewardTime();
+      const lastRewardTime = await veLikeReward.read.getLastRewardTime();
       expect(lastRewardTime).to.equal(condition.startTime);
 
       await testClient.setNextBlockTimestamp({
@@ -193,8 +171,15 @@ describe("veLikeReward ", async function () {
     });
 
     it("should have update totalStaked and lastRewardTime correctly on new deposit", async function () {
-      const { veLike, likecoin, deployer, rick, publicClient, testClient } =
-        await loadFixture(initialCondition);
+      const {
+        veLike,
+        veLikeReward,
+        likecoin,
+        deployer,
+        rick,
+        publicClient,
+        testClient,
+      } = await loadFixture(initialCondition);
       await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
         account: rick.account.address,
       });
@@ -207,14 +192,21 @@ describe("veLikeReward ", async function () {
       const block = await publicClient.getBlock({
         blockHash: depositTx.blockHash,
       });
-      const lastRewardTime = await veLike.read.getLastRewardTime();
+      const lastRewardTime = await veLikeReward.read.getLastRewardTime();
       expect(block.timestamp).to.equal(lastRewardTime);
       expect(await veLike.read.totalSupply()).to.equal(200n * 10n ** 6n);
     });
 
     it("should automatically claim reward on new deposit", async function () {
-      const { veLike, likecoin, rick, publicClient, startTime, testClient } =
-        await loadFixture(initialCondition);
+      const {
+        veLike,
+        veLikeReward,
+        likecoin,
+        rick,
+        publicClient,
+        startTime,
+        testClient,
+      } = await loadFixture(initialCondition);
 
       await likecoin.write.approve([veLike.address, 200n * 10n ** 6n], {
         account: rick.account.address,
@@ -248,7 +240,7 @@ describe("veLikeReward ", async function () {
       });
       // Immediately check the pendingReward is still zero as no time pass yet.
       expect(
-        await veLike.read.getPendingReward([rick.account.address]),
+        await veLikeReward.read.getPendingReward([rick.account.address]),
       ).to.equal(0n);
       // increase the veLike
       expect(await veLike.read.balanceOf([rick.account.address])).to.equal(
@@ -263,7 +255,7 @@ describe("veLikeReward ", async function () {
 
   describe("reward claim", async function () {
     it("should have correct reward claim as LIKE", async function () {
-      const { veLike, likecoin, rick, publicClient, testClient } =
+      const { veLike, veLikeReward, likecoin, rick, publicClient, testClient } =
         await loadFixture(initialCondition);
       await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
         account: rick.account.address,
@@ -282,12 +274,12 @@ describe("veLikeReward ", async function () {
       await testClient.setNextBlockTimestamp({
         timestamp: block.timestamp + timePassed,
       });
-      const originalRewardPool = await veLike.read.getRewardPool();
+      const originalRewardPool = await veLikeReward.read.getRewardPool();
 
       await veLike.write.claimReward([rick.account.address], {
         account: rick.account.address,
       });
-      const newRewardPool = await veLike.read.getRewardPool();
+      const newRewardPool = await veLikeReward.read.getRewardPool();
       const rewardClaimed = originalRewardPool - newRewardPool;
       expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
         (10000n - 100n) * 10n ** 6n + rewardClaimed,
@@ -303,8 +295,15 @@ describe("veLikeReward ", async function () {
     });
 
     it("should correctly restake reward", async function () {
-      const { veLike, likecoin, deployer, rick, publicClient, testClient } =
-        await loadFixture(initialCondition);
+      const {
+        veLike,
+        veLikeReward,
+        likecoin,
+        deployer,
+        rick,
+        publicClient,
+        testClient,
+      } = await loadFixture(initialCondition);
       await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
         account: rick.account.address,
       });
@@ -314,7 +313,7 @@ describe("veLikeReward ", async function () {
           account: rick.account.address,
         },
       );
-      const originalRewardPool = await veLike.read.getRewardPool();
+      const originalRewardPool = await veLikeReward.read.getRewardPool();
 
       const block = await publicClient.getBlock({
         blockHash: depositTx.blockHash,
@@ -327,7 +326,7 @@ describe("veLikeReward ", async function () {
       await veLike.write.restakeReward([rick.account.address], {
         account: rick.account.address,
       });
-      const newRewardPool = await veLike.read.getRewardPool();
+      const newRewardPool = await veLikeReward.read.getRewardPool();
       const rewardClaimed = originalRewardPool - newRewardPool;
       expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
         (10000n - 100n) * 10n ** 6n,

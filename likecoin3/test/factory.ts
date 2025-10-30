@@ -264,15 +264,15 @@ export async function initialCondition() {
     bob,
     testClient,
   } = await loadFixture(initialMint);
-  await likecoin.write.approve([veLike.address, 10000n * 10n ** 6n], {
+  await likecoin.write.approve([veLikeReward.address, 10000n * 10n ** 6n], {
     account: deployer.account.address,
   });
   const block = await publicClient.getBlock();
   const startTime = block.timestamp + 100n;
   const endTime = startTime + 1000n;
-  // await veLike.write.addReward([10000n * 10n ** 6n, startTime, endTime], {
-  //   account: deployer.account.address,
-  // });
+  await veLikeReward.write.addReward([10000n * 10n ** 6n, startTime, endTime], {
+    account: deployer.account.address,
+  });
 
   await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
     account: bob.account.address,
@@ -291,6 +291,7 @@ export async function initialCondition() {
 
   return {
     veLike,
+    veLikeReward,
     likecoin,
     deployer,
     publicClient,
