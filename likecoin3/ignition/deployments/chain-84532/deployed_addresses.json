@@ -18,5 +18,13 @@
   "LikeProtocolV0Module#ERC1967Proxy": "0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5",
   "LikeProtocolV0Module#LikeProtocolV0": "0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5",
   "LikeProtocolV1Module#LikeProtocol": "0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5",
-  "LikeProtocolModule#LikeProtocolImpl": "0x05857EE837AB29fF79C7BB1d4c642b2C9dd10FA5"
+  "LikeProtocolModule#LikeProtocolImpl": "0x05857EE837AB29fF79C7BB1d4c642b2C9dd10FA5",
+  "veLikeModule#veLikeImpl": "0xaf6677addcCAdcf82f858E3a15421Ea8a1CD023D",
+  "veLikeV0Module#veLikeV0Impl": "0xBFA43df2E3E28DdEC61d2845fA9613583D6C97F9",
+  "veLikeV0Module#ERC1967Proxy": "0xE55C2b91E688BE70e5BbcEdE3792d723b4766e2B",
+  "veLikeV0Module#veLikeV0": "0xE55C2b91E688BE70e5BbcEdE3792d723b4766e2B",
+  "veLikeModule#veLike": "0xE55C2b91E688BE70e5BbcEdE3792d723b4766e2B",
+  "veLikeRewardModule#veLikeRewardImpl": "0xbcD686D81D3540e9760DbE70bb1C1ce54B593448",
+  "veLikeRewardModule#ERC1967Proxy": "0x00723847f9508a55a1AAf54817D7B39D5fbea662",
+  "veLikeRewardModule#veLikeReward": "0x00723847f9508a55a1AAf54817D7B39D5fbea662"
 }
