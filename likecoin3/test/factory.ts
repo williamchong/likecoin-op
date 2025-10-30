@@ -149,7 +149,6 @@ export async function deployVeLike() {
         },
       },
       defaultSender: deployer.account.address,
-      strategy: "create2",
     },
   );
   return {
@@ -187,7 +186,6 @@ export async function deployVeLikeReward() {
         },
       },
       defaultSender: deployer.account.address,
-      strategy: "create2",
     });
   await veLikeReward.write.setVault([veLike.address], {
     account: deployer.account.address,
