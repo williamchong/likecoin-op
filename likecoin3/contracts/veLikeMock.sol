@@ -15,4 +15,9 @@ contract veLikeMock is veLike {
             keccak256(abi.encode(uint256(keccak256("veLike.storage")) - 1)) &
             ~bytes32(uint256(0xff));
     }
+    function veLikeRewardDataStorage() external pure returns (bytes32) {
+        return
+            keccak256(abi.encode(uint256(keccak256("veLikeReward.storage")) - 1)) &
+            ~bytes32(uint256(0xff));
+    }
 }

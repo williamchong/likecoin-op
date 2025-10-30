@@ -6,9 +6,45 @@ import { expect } from "chai";
 import { viem, ignition } from "hardhat";
 
 import "./setup";
-import { deployVeLike, initialMint, initialCondition } from "./factory";
+import { deployVeLikeReward, initialMint, initialCondition } from "./factory";
 
 describe("veLikeReward ", async function () {
+  describe("as ERC1967 Proxy", async function () {
+    it("should have the correct owner", async function () {
+      const { veLikeReward, deployer } = await loadFixture(deployVeLikeReward);
+      expect(await veLikeReward.read.owner()).to.equalAddress(
+        deployer.account.address,
+      );
+    });
+
+    it("should have the correct asset address", async function () {
+      const { veLikeReward, veLike, likecoin } = await loadFixture(initialMint);
+      const [vault, likecoinConfig, rewardPool, totalStaked, lastRewardTime] = await veLikeReward.read.getConfig();
+      expect(vault).to.equalAddress(veLike.address);
+      expect(likecoinConfig).to.equalAddress(likecoin.address);
+      expect(rewardPool).to.equal(0n);
+      expect(totalStaked).to.equal(0n);
+      expect(lastRewardTime).to.equal(0n);
+    });
+
+    it("should have the correct STORAGE_SLOT", async function () {
+      const { veLike, deployer } = await loadFixture(initialMint);
+      const veLikeMock = await viem.deployContract("veLikeMock");
+      veLike.write.upgradeTo(veLikeMock.address, {
+        account: deployer.account,
+      });
+      const newVeLike = await viem.getContractAt(
+        "veLikeMock",
+        veLikeMock.address,
+      );
+      expect(await newVeLike.read.version()).to.equal(2n);
+      expect(await newVeLike.read.veLikeRewardDataStorage()).to.equal(
+        "0xe9672d2c676bb94d428d6ce523668c779079df8febe4142a9972a2a2313d2c00",
+      );
+    });
+  });  
+
+
   describe("reward condition setting", async function () {
     it("should return empty reward condition if no reward condition is set", async function () {
       const { veLikeReward } = await loadFixture(initialMint);

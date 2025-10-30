@@ -44,7 +44,7 @@ contract veLikeReward is
 
     // keccak256(abi.encode(uint256(keccak256("veLikeReward.storage")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant CLASS_DATA_STORAGE =
-        0xb9e14b2a89d227541697d62a06ecbf5ccc9ad849800745b40b2826662a177600;
+        0xe9672d2c676bb94d428d6ce523668c779079df8febe4142a9972a2a2313d2c00;
 
     function _getveLikeRewardData()
         private
@@ -95,6 +95,10 @@ contract veLikeReward is
     function setLikecoin(address likecoin) public onlyOwner {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
         $.likecoin = likecoin;
+    }
+    function getConfig() public view returns (address, address, uint256, uint256, uint256) {
+        veLikeRewardStorage storage $ = _getveLikeRewardData();
+        return ($.vault, $.likecoin, $.rewardPool, $.totalStaked, $.lastRewardTime);
     }
 
     /**
