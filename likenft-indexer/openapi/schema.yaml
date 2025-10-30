@@ -815,6 +815,14 @@ components:
           type: string
         owner_address:
           type: string
+        minter_addresses:
+          type: array
+          items:
+            type: string
+        updater_addresses:
+          type: array
+          items:
+            type: string
         total_supply:
           $ref: "#/components/schemas/BigInt"
         max_supply:
@@ -842,6 +850,8 @@ components:
         - address
         - name
         - symbol
+        - minter_addresses
+        - updater_addresses
         - total_supply
         - max_supply
         - banner_image
