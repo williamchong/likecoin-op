@@ -19,7 +19,8 @@ describe("veLikeReward ", async function () {
 
     it("should have the correct asset address", async function () {
       const { veLikeReward, veLike, likecoin } = await loadFixture(initialMint);
-      const [vault, likecoinConfig, rewardPool, totalStaked, lastRewardTime] = await veLikeReward.read.getConfig();
+      const [vault, likecoinConfig, rewardPool, totalStaked, lastRewardTime] =
+        await veLikeReward.read.getConfig();
       expect(vault).to.equalAddress(veLike.address);
       expect(likecoinConfig).to.equalAddress(likecoin.address);
       expect(rewardPool).to.equal(0n);
@@ -42,7 +43,7 @@ describe("veLikeReward ", async function () {
         "0xe9672d2c676bb94d428d6ce523668c779079df8febe4142a9972a2a2313d2c00",
       );
     });
-  });  
+  });
 
   describe("as pausable contract", async function () {
     it("should be paused by default", async function () {

@@ -57,6 +57,7 @@ contract veLikeReward is
     }
 
     // Errors
+    error ErrWithdrawLocked();
     error ErrNoRewardToClaim();
     error ErrConflictCondition();
     error ErrUnauthorized();
@@ -95,9 +96,19 @@ contract veLikeReward is
         veLikeRewardStorage storage $ = _getveLikeRewardData();
         $.likecoin = likecoin;
     }
-    function getConfig() public view returns (address, address, uint256, uint256, uint256) {
+    function getConfig()
+        public
+        view
+        returns (address, address, uint256, uint256, uint256)
+    {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
-        return ($.vault, $.likecoin, $.rewardPool, $.totalStaked, $.lastRewardTime);
+        return (
+            $.vault,
+            $.likecoin,
+            $.rewardPool,
+            $.totalStaked,
+            $.lastRewardTime
+        );
     }
 
     /**
@@ -121,6 +132,7 @@ contract veLikeReward is
         StakerInfo memory stakerInfo = $.stakerInfos[account];
         return stakerInfo.rewardClaimed;
     }
+
     /**
      * getPendingReward function
      *
@@ -133,17 +145,18 @@ contract veLikeReward is
     function getPendingReward(address account) public view returns (uint256) {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
         uint256 calculatedReward = _pendingReward(account);
-        if (!_isActive()) {
+        uint256 stakedAmount = $.stakerInfos[account].stakedAmount;
+        if (stakedAmount == 0) {
             return calculatedReward;
         }
-        uint256 veLikeAmount = $.stakerInfos[account].stakedAmount;
-        if (veLikeAmount == 0) {
-            return 0;
+        uint256 targetTime = block.timestamp;
+        if (targetTime > $.currentStakingCondition.endTime) {
+            targetTime = $.currentStakingCondition.endTime;
         }
-        uint256 timePassed = block.timestamp - $.lastRewardTime;
+        uint256 timePassed = targetTime - $.lastRewardTime;
         uint256 newReward = timePassed *
             _rewardPerTimeWithPrecision($.currentStakingCondition);
-        uint256 nonCalculatedReward = (newReward * veLikeAmount) /
+        uint256 nonCalculatedReward = (newReward * stakedAmount) /
             ($.totalStaked * ACC_REWARD_PRECISION);
         return calculatedReward + nonCalculatedReward;
     }
@@ -163,11 +176,7 @@ contract veLikeReward is
                     stakerInfo.rewardIndex)) / ACC_REWARD_PRECISION;
     }
 
-    function _isActive()
-        internal
-        view
-        returns (bool)
-    {
+    function _isActive() internal view returns (bool) {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
         if (
             block.timestamp < $.currentStakingCondition.startTime ||
@@ -187,18 +196,15 @@ contract veLikeReward is
     function _updateVault() internal {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
         StakingCondition storage currentCondition = $.currentStakingCondition;
-        bool __isActive = _isActive();
         uint256 targetTime = block.timestamp;
-        if (!__isActive) {
-            // Perform last update if needed
-            if (
-                $.lastRewardTime > currentCondition.startTime &&
-                $.lastRewardTime < currentCondition.endTime
-            ) {
-                targetTime = currentCondition.endTime;
-            } else {
-                return;
-            }
+        if (targetTime < currentCondition.startTime) {
+            targetTime = currentCondition.startTime;
+        }
+        if (targetTime > currentCondition.endTime) {
+            targetTime = currentCondition.endTime;
+        }
+        if (targetTime == $.lastRewardTime) {
+            return;
         }
         if ($.totalStaked > 0) {
             uint256 timePassed = targetTime - $.lastRewardTime;
@@ -221,18 +227,27 @@ contract veLikeReward is
 
     // Start of Vault functions
 
-    function deposit(address account, uint256 rewardAmount) public whenNotPaused onlyVault {
+    function deposit(
+        address account,
+        uint256 stakedAmount
+    ) public whenNotPaused onlyVault {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
         _updateVault();
         // Note, we must claim the reward, othereise the denominator will be wrong on next claim.
         _claimReward(account, false);
-        $.stakerInfos[account].stakedAmount += rewardAmount;
-        $.totalStaked += rewardAmount;
+        $.stakerInfos[account].stakedAmount += stakedAmount;
+        $.totalStaked += stakedAmount;
     }
 
-    function withdraw(address account, uint256 rewardAmount) public whenNotPaused onlyVault {
+    function withdraw(address account) public whenNotPaused onlyVault {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
-        $.rewardPool -= rewardAmount;
+        if (_isActive()) {
+            revert ErrWithdrawLocked();
+        }
+        _updateVault();
+        _claimReward(account, false);
+        $.totalStaked -= $.stakerInfos[account].stakedAmount;
+        $.stakerInfos[account].stakedAmount = 0;
     }
 
     /**
@@ -244,7 +259,10 @@ contract veLikeReward is
      * @param restake - true if the reward should be restaked, false if the reward should be claimed
      * @return reward - the reward for the account
      */
-    function claimReward(address account, bool restake) public whenNotPaused onlyVault returns (uint256) {
+    function claimReward(
+        address account,
+        bool restake
+    ) public whenNotPaused onlyVault returns (uint256) {
         uint256 currentPendingReward = getPendingReward(account);
         if (currentPendingReward == 0) {
             revert ErrNoRewardToClaim();

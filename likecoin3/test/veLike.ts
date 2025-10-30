@@ -200,6 +200,78 @@ describe("veLike ", async function () {
     });
   });
 
+  describe("as a lockable vault for whole period", async function () {
+    it("should set the lock time same as the condition", async function () {
+      const { veLike, likecoin, deployer, rick, endTime } =
+        await loadFixture(initialCondition);
+      await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
+        account: rick.account.address,
+      });
+      await veLike.write.deposit([100n * 10n ** 6n, rick.account.address], {
+        account: rick.account.address,
+      });
+      expect(await veLike.read.getLockTime()).to.equal(endTime);
+    });
+
+    it("should be revert on withdraw when the condition is active", async function () {
+      const { veLike, likecoin, deployer, rick } =
+        await loadFixture(initialCondition);
+      await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
+        account: rick.account.address,
+      });
+      await veLike.write.deposit([100n * 10n ** 6n, rick.account.address], {
+        account: rick.account.address,
+      });
+      await expect(
+        veLike.write.withdraw(
+          [100n * 10n ** 6n, rick.account.address, rick.account.address],
+          {
+            account: rick.account.address,
+          },
+        ),
+      ).to.be.rejectedWith("ErrWithdrawLocked");
+    });
+
+    it("should be able to withdraw when the block timestamp is after the lock time", async function () {
+      const { veLike, veLikeReward, likecoin, bob, testClient, endTime } =
+        await loadFixture(initialCondition);
+      await testClient.setNextBlockTimestamp({
+        timestamp: endTime + 100n,
+      });
+      // Must mine for follow read command to work.
+      await testClient.mine({
+        blocks: 1,
+      });
+      expect(await likecoin.read.balanceOf([bob.account.address])).to.equal(
+        9900n * 10n ** 6n,
+      );
+      expect(await veLike.read.balanceOf([bob.account.address])).to.equal(
+        100n * 10n ** 6n,
+      );
+      const pendingReward = await veLike.read.getPendingReward([
+        bob.account.address,
+      ]);
+      expect(pendingReward).to.equal(10000n * 10n ** 6n);
+      await veLike.write.claimReward([bob.account.address], {
+        account: bob.account.address,
+      });
+      expect(await likecoin.read.balanceOf([bob.account.address])).to.equal(
+        10000n * 10n ** 6n + 10000n * 10n ** 6n - 100n * 10n ** 6n,
+      );
+      await veLike.write.withdraw(
+        [100n * 10n ** 6n, bob.account.address, bob.account.address],
+        {
+          account: bob.account.address,
+        },
+      );
+      expect(await veLike.read.balanceOf([bob.account.address])).to.equal(0n);
+      // Bob receive all the reward from the reward contract.
+      expect(await likecoin.read.balanceOf([bob.account.address])).to.equal(
+        10000n * 10n ** 6n + 10000n * 10n ** 6n,
+      );
+    });
+  });
+
   describe("reward distribution on empty account and condition", async function () {
     it("should have return zero on account never deposited", async function () {
       const { veLike, rick } = await loadFixture(initialMint);

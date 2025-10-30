@@ -14,9 +14,12 @@ import {Likecoin} from "./Likecoin.sol";
 
 interface IRewardContract {
     function getPendingReward(address account) external view returns (uint256);
-    function claimReward(address account, bool restake) external returns (uint256);
+    function claimReward(
+        address account,
+        bool restake
+    ) external returns (uint256);
     function deposit(address account, uint256 rewardAmount) external;
-    function withdraw(address account, uint256 rewardAmount) external;
+    function withdraw(address account) external;
 }
 
 /// @custom:security-contact rickmak@oursky.com
@@ -29,6 +32,7 @@ contract veLike is
 {
     struct veLikeStorage {
         address rewardContract;
+        uint256 lockTime;
     }
 
     // keccak256(abi.encode(uint256(keccak256("veLike.storage")) - 1)) & ~bytes32(uint256(0xff))
@@ -45,6 +49,7 @@ contract veLike is
     // Errors
     error ErrNoRewardToClaim();
     error ErrNonTransferable();
+    error ErrWithdrawLocked();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -76,6 +81,23 @@ contract veLike is
     function setRewardContract(address rewardContract) public onlyOwner {
         veLikeStorage storage $ = _getveLikeData();
         $.rewardContract = rewardContract;
+    }
+
+    /**
+     * setLockTime function
+     *
+     * Set the lock time for the veLike. No withdraw will be allowed before the lock time.
+     *
+     * @param lockTime - the lock time to set
+     */
+    function setLockTime(uint256 lockTime) public onlyOwner {
+        veLikeStorage storage $ = _getveLikeData();
+        $.lockTime = lockTime;
+    }
+
+    function getLockTime() public view returns (uint256) {
+        veLikeStorage storage $ = _getveLikeData();
+        return $.lockTime;
     }
 
     /**
@@ -243,6 +265,10 @@ contract veLike is
         uint256 assets,
         uint256 shares
     ) internal virtual override whenNotPaused {
+        veLikeStorage storage $ = _getveLikeData();
+        if (block.timestamp < $.lockTime) {
+            revert ErrWithdrawLocked();
+        }
         // Copying from ERC4626 _withdraw function for clarity
         // Same as calling super._withdraw(caller, receiver, assets, shares);
         if (caller != owner) {
@@ -252,7 +278,7 @@ contract veLike is
         // Vault specific logic
         IRewardContract rewardContract = getCurrentRewardContract();
         if (rewardContract != IRewardContract(address(0))) {
-            rewardContract.withdraw(owner, assets);
+            rewardContract.withdraw(owner);
         }
 
         // Copying from ERC4626 _withdraw function Event for clarity
