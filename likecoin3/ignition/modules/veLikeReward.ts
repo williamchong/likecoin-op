@@ -3,16 +3,20 @@ import veLikeModule from "./veLike";
 
 /*
 # Command to deploy the contract for testing
-npx hardhat ignition deploy ignition/modules/veLikeRewardModule.ts \
+npx hardhat ignition deploy ignition/modules/veLikeReward.ts \
   --strategy create2 \
   --parameters ignition/parameters.local.json \
   --network superism1
 
 # Rerun only this for testing
 npx hardhat ignition wipe chain-901 \
-  veLikeModule#veLikeV0Module~veLikeV0.upgradeToAndCall
+  veLikeRewardModule#veLikeReward
 npx hardhat ignition wipe chain-901 \
-  veLikeModule#veLikeImpl 
+  veLikeRewardModule#ERC1967Proxy
+npx hardhat ignition wipe chain-901 \
+  veLikeRewardModule#encodeFunctionCall(veLikeRewardModule#veLikeRewardImpl.initialize)
+npx hardhat ignition wipe chain-901 \
+  veLikeRewardModule#veLikeRewardImpl
 */
 const veLikeRewardModule = buildModule("veLikeRewardModule", (m) => {
   const initOwner = m.getParameter("initOwner");

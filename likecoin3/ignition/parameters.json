@@ -10,5 +10,11 @@
   },
   "LikeProtocolV0Module": {
     "initOwner": "0x2dd2253cd5bef4ea6d74efdfad9718a73a7d7ec7"
+  },
+  "veLikeV0Module": {
+    "initOwner": "0x2dd2253cd5bef4ea6d74efdfad9718a73a7d7ec7"
+  },
+  "veLikeRewardModule": {
+    "initOwner": "0x2dd2253cd5bef4ea6d74efdfad9718a73a7d7ec7"
   }
 }
