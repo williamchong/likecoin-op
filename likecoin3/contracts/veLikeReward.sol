@@ -35,9 +35,8 @@ contract veLikeReward is
         uint256 rewardPool; // Tracking the likecoin hold by vault for reward distribution.
         uint256 totalStaked;
         uint256 lastRewardTime;
-        uint256 currentConditionIndex;
+        StakingCondition currentStakingCondition;
         mapping(address account => StakerInfo stakerInfo) stakerInfos;
-        mapping(uint256 index => StakingCondition condition) conditions;
     }
 
     uint256 public constant ACC_REWARD_PRECISION = 1e18; // Precision scalar for reward index
@@ -113,10 +112,8 @@ contract veLikeReward is
         view
         returns (StakingCondition memory)
     {
-        StakingCondition memory currentCondition;
-        bool _isActive;
-        (currentCondition, _isActive) = _activeCondition();
-        return currentCondition;
+        veLikeRewardStorage storage $ = _getveLikeRewardData();
+        return $.currentStakingCondition;
     }
 
     function getClaimedReward(address account) public view returns (uint256) {
@@ -135,11 +132,8 @@ contract veLikeReward is
      */
     function getPendingReward(address account) public view returns (uint256) {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
-        StakingCondition memory currentCondition;
-        bool _isActive;
-        (currentCondition, _isActive) = _activeCondition();
         uint256 calculatedReward = _pendingReward(account);
-        if (!_isActive) {
+        if (!_isActive()) {
             return calculatedReward;
         }
         uint256 veLikeAmount = $.stakerInfos[account].stakedAmount;
@@ -148,7 +142,7 @@ contract veLikeReward is
         }
         uint256 timePassed = block.timestamp - $.lastRewardTime;
         uint256 newReward = timePassed *
-            _rewardPerTimeWithPrecision(currentCondition);
+            _rewardPerTimeWithPrecision($.currentStakingCondition);
         uint256 nonCalculatedReward = (newReward * veLikeAmount) /
             ($.totalStaked * ACC_REWARD_PRECISION);
         return calculatedReward + nonCalculatedReward;
@@ -165,26 +159,23 @@ contract veLikeReward is
         StakerInfo memory stakerInfo = $.stakerInfos[account];
         return
             (stakerInfo.stakedAmount *
-                ($.conditions[$.currentConditionIndex].rewardIndex -
+                ($.currentStakingCondition.rewardIndex -
                     stakerInfo.rewardIndex)) / ACC_REWARD_PRECISION;
     }
 
-    function _activeCondition()
+    function _isActive()
         internal
         view
-        returns (StakingCondition storage, bool)
+        returns (bool)
     {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
-        StakingCondition storage currentCondition = $.conditions[
-            $.currentConditionIndex
-        ];
         if (
-            block.timestamp < currentCondition.startTime ||
-            block.timestamp > currentCondition.endTime
+            block.timestamp < $.currentStakingCondition.startTime ||
+            block.timestamp > $.currentStakingCondition.endTime
         ) {
-            return (currentCondition, false);
+            return false;
         }
-        return (currentCondition, true);
+        return true;
     }
 
     /**
@@ -195,11 +186,10 @@ contract veLikeReward is
      */
     function _updateVault() internal {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
-        StakingCondition storage currentCondition;
-        bool _isActive;
-        (currentCondition, _isActive) = _activeCondition();
+        StakingCondition storage currentCondition = $.currentStakingCondition;
+        bool __isActive = _isActive();
         uint256 targetTime = block.timestamp;
-        if (!_isActive) {
+        if (!__isActive) {
             // Perform last update if needed
             if (
                 $.lastRewardTime > currentCondition.startTime &&
@@ -276,15 +266,12 @@ contract veLikeReward is
         bool restake
     ) public onlyVault returns (uint256) {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
-        StakingCondition storage condition = $.conditions[
-            $.currentConditionIndex
-        ];
         StakerInfo storage stakerInfo = $.stakerInfos[account];
 
         _updateVault();
         uint256 rewardClaimed = _pendingReward(account);
         stakerInfo.rewardClaimed += rewardClaimed;
-        stakerInfo.rewardIndex = condition.rewardIndex;
+        stakerInfo.rewardIndex = $.currentStakingCondition.rewardIndex;
         $.rewardPool -= rewardClaimed;
         if (restake) {
             stakerInfo.stakedAmount += rewardClaimed;
@@ -338,6 +325,9 @@ contract veLikeReward is
         uint256 startTime,
         uint256 endTime
     ) external onlyOwner {
+        if (_isActive()) {
+            revert ErrConflictCondition();
+        }
         veLikeRewardStorage storage $ = _getveLikeRewardData();
         if (startTime <= $.lastRewardTime) {
             revert ErrConflictCondition();
@@ -348,9 +338,7 @@ contract veLikeReward is
         if (endTime < block.timestamp) {
             revert ErrConflictCondition();
         }
-        if ($.currentConditionIndex == 0) {
-            $.lastRewardTime = startTime;
-        }
+        $.lastRewardTime = startTime;
         SafeERC20.safeTransferFrom(
             IERC20($.likecoin),
             _msgSender(),
@@ -358,17 +346,12 @@ contract veLikeReward is
             rewardAmount
         );
         // perform last update if needed
-        _updateVault();
-        uint256 lastRewardIndex = $
-            .conditions[$.currentConditionIndex]
-            .rewardIndex;
         $.rewardPool += rewardAmount;
-        $.currentConditionIndex++;
-        $.conditions[$.currentConditionIndex] = StakingCondition({
+        $.currentStakingCondition = StakingCondition({
             startTime: startTime,
             endTime: endTime,
             rewardAmount: rewardAmount,
-            rewardIndex: lastRewardIndex
+            rewardIndex: 0
         });
     }
 
