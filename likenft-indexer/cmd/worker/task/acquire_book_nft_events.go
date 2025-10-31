@@ -92,6 +92,7 @@ func HandleAcquireBookNFTEventsTask(ctx context.Context, t *asynq.Task) error {
 			evmEventRepository,
 			evmEventQueryClient,
 			evmClient,
+			cfg.EvmEventQueryToBlockPadding,
 			contractevmeventacquirer.ContractEvmEventsAcquirerContractTypeBookNFT,
 			addresses,
 		)

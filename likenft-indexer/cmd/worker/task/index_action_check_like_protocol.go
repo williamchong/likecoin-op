@@ -78,6 +78,7 @@ func HandleIndexActionCheckLikeProtocol(ctx context.Context, t *asynq.Task) erro
 		evmEventRepository,
 		evmQueryClient,
 		evmClient,
+		envCfg.EvmEventQueryToBlockPadding,
 		contractevmeventacquirer.ContractEvmEventsAcquirerContractTypeLikeProtocol,
 		[]string{p.ContractAddress},
 	)

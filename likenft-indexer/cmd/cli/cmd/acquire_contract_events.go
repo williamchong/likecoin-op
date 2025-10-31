@@ -37,6 +37,7 @@ var AcquireContractEvents = &cobra.Command{
 		logger := context.LoggerFromContext(ctx)
 		evmEventQueryClient := context.EvmQueryClientFromContext(ctx)
 		evmClient := context.EvmClientFromContext(ctx)
+		envCfg := context.ConfigFromContext(ctx)
 
 		dbService := database.New()
 
@@ -47,6 +48,7 @@ var AcquireContractEvents = &cobra.Command{
 			evmEventRepository,
 			evmEventQueryClient,
 			evmClient,
+			envCfg.EvmEventQueryToBlockPadding,
 			contractType,
 			[]string{contractAddress},
 		)

@@ -24,6 +24,7 @@ type EnvConfig struct {
 
 	EvmEventLikeProtocolInitialBlockHeight uint64 `envconfig:"EVM_EVENT_LIKE_PROTOCOL_INITIAL_BLOCK_HEIGHT" default:"1"`
 	EvmEventQueryNumberOfBlocksLimit       uint64 `envconfig:"EVM_EVENT_QUERY_NUMBER_OF_BLOCKS_LIMIT"`
+	EvmEventQueryToBlockPadding            uint64 `envconfig:"EVM_EVENT_QUERY_TO_BLOCK_PADDING" default:"10"`
 
 	TaskAcquireBookNFTMaxQueueLength int `envconfig:"TASK_ACQUIRE_BOOKNFT_MAX_QUEUE_LENGTH" default:"500"`
 
