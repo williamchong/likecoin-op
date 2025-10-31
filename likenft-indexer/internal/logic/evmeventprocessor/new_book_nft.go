@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"likenft-indexer/ent"
-	"likenft-indexer/ent/evmeventprocessedblockheight"
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/evm"
@@ -126,7 +125,7 @@ func (e *newBookNFTProcessor) Process(
 
 func init() {
 	registerEventProcessor(
-		evmeventprocessedblockheight.EventNewBookNFT.String(),
+		"NewBookNFT",
 		func(inj *eventProcessorDeps) eventProcessor {
 			return MakeNewBookNFTProcessor(
 				inj.httpClient,

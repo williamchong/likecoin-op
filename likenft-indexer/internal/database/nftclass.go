@@ -65,6 +65,8 @@ type NFTClassRepository interface {
 	) error
 	UpdateMetadata(ctx context.Context, address string, metadata *model.ContractLevelMetadata) error
 	UpdateOwner(ctx context.Context, address string, newOwner *ent.Account) error
+	UpdateMinterAddresses(ctx context.Context, address string, minterAddresses []string) error
+	UpdateUpdaterAddresses(ctx context.Context, address string, updaterAddresses []string) error
 	UpdateTotalSupply(ctx context.Context, address string, newTotalSupply *big.Int) error
 	UpdateNFTClassesLatestEventBlockNumber(
 		ctx context.Context,
@@ -315,6 +317,32 @@ func (r *nftClassRepository) UpdateOwner(
 		return r.dbService.Client().NFTClass.Update().
 			SetOwner(newOwner).
 			SetOwnerAddress(newOwner.EvmAddress).
+			Where(nftclass.AddressEqualFold(address)).
+			Exec(ctx)
+	})
+}
+
+func (r *nftClassRepository) UpdateMinterAddresses(
+	ctx context.Context,
+	address string,
+	minterAddresses []string,
+) error {
+	return WithTx(ctx, r.dbService.Client(), func(tx *ent.Tx) error {
+		return tx.NFTClass.Update().
+			SetMinterAddresses(minterAddresses).
+			Where(nftclass.AddressEqualFold(address)).
+			Exec(ctx)
+	})
+}
+
+func (r *nftClassRepository) UpdateUpdaterAddresses(
+	ctx context.Context,
+	address string,
+	updaterAddresses []string,
+) error {
+	return WithTx(ctx, r.dbService.Client(), func(tx *ent.Tx) error {
+		return tx.NFTClass.Update().
+			SetUpdaterAddresses(updaterAddresses).
 			Where(nftclass.AddressEqualFold(address)).
 			Exec(ctx)
 	})

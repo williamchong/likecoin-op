@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"likenft-indexer/ent"
-	"likenft-indexer/ent/evmeventprocessedblockheight"
 	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/evm"
@@ -166,7 +165,7 @@ func (e *transferWithMemoProcessor) Process(
 
 func init() {
 	registerEventProcessor(
-		evmeventprocessedblockheight.EventTransferWithMemo.String(),
+		"TransferWithMemo",
 		func(inj *eventProcessorDeps) eventProcessor {
 			return MakeTransferWithMemoProcessor(
 				inj.httpClient,

@@ -1,4 +1,4 @@
-h1:imgTMIBbVbJSUvvPNMZBIiM28FHuBt/pUnV66pPk0rI=
+h1:8HrAtlCsmqw1LPSO79ZqTqSCBTQBemSe3Cv7iKtffRQ=
 20250128141722.sql h1:ryXRWHhorhSGucN6U492mujs+SXglSD9AFpGmDqybvM=
 20250401092803.sql h1:JIb0qYQjuR1cWEJ2rmv14t/P1XRYgj9bU+X9oTj8+Ds=
 20250402104835.sql h1:1K1uXbyv1QsRv3Ld80bKWVxfug4O+QNwMya6b/g5/1w=
@@ -9,3 +9,4 @@ h1:imgTMIBbVbJSUvvPNMZBIiM28FHuBt/pUnV66pPk0rI=
 20250519100455_Add disabled flag on nft class.sql h1:lN2xkoG9ZnoCRnzowX+68A4RmsbDtQuRP4VXwybEqgk=
 20250718084522_Add acquire_book_nft_events columns to nft_class table.sql h1:Ur7W+Man3FvaDpBWWrT7K4/MgVHeUiqDdc1HD8AC7CU=
 20250722021109_Rename nftclass_acquire_book_nft_events_score to eta.sql h1:rp+NnzjOK17MtIwbINhozrE8QXPC/8VUv2r88mqtmPw=
+20251014134139_Add updater_addresses to nftclasses.sql h1:UxPgC9lShgKsyLLm+iJRsiZPyZlLy03HTbA3PvyFpyk=

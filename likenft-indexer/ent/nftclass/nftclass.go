@@ -39,6 +39,8 @@ const (
 	FieldOwnerAddress = "owner_address"
 	// FieldMinterAddresses holds the string denoting the minter_addresses field in the database.
 	FieldMinterAddresses = "minter_addresses"
+	// FieldUpdaterAddresses holds the string denoting the updater_addresses field in the database.
+	FieldUpdaterAddresses = "updater_addresses"
 	// FieldTotalSupply holds the string denoting the total_supply field in the database.
 	FieldTotalSupply = "total_supply"
 	// FieldMaxSupply holds the string denoting the max_supply field in the database.
@@ -99,6 +101,7 @@ var Columns = []string{
 	FieldSymbol,
 	FieldOwnerAddress,
 	FieldMinterAddresses,
+	FieldUpdaterAddresses,
 	FieldTotalSupply,
 	FieldMaxSupply,
 	FieldMetadata,

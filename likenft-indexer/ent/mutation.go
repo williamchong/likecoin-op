@@ -5039,6 +5039,8 @@ type NFTClassMutation struct {
 	owner_address                               *string
 	minter_addresses                            *[]string
 	appendminter_addresses                      []string
+	updater_addresses                           *[]string
+	appendupdater_addresses                     []string
 	total_supply                                **big.Int
 	max_supply                                  *typeutil.Uint64
 	addmax_supply                               *typeutil.Uint64
@@ -5714,6 +5716,71 @@ func (m *NFTClassMutation) ResetMinterAddresses() {
 	delete(m.clearedFields, nftclass.FieldMinterAddresses)
 }
 
+// SetUpdaterAddresses sets the "updater_addresses" field.
+func (m *NFTClassMutation) SetUpdaterAddresses(s []string) {
+	m.updater_addresses = &s
+	m.appendupdater_addresses = nil
+}
+
+// UpdaterAddresses returns the value of the "updater_addresses" field in the mutation.
+func (m *NFTClassMutation) UpdaterAddresses() (r []string, exists bool) {
+	v := m.updater_addresses
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdaterAddresses returns the old "updater_addresses" field's value of the NFTClass entity.
+// If the NFTClass object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NFTClassMutation) OldUpdaterAddresses(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdaterAddresses is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdaterAddresses requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdaterAddresses: %w", err)
+	}
+	return oldValue.UpdaterAddresses, nil
+}
+
+// AppendUpdaterAddresses adds s to the "updater_addresses" field.
+func (m *NFTClassMutation) AppendUpdaterAddresses(s []string) {
+	m.appendupdater_addresses = append(m.appendupdater_addresses, s...)
+}
+
+// AppendedUpdaterAddresses returns the list of values that were appended to the "updater_addresses" field in this mutation.
+func (m *NFTClassMutation) AppendedUpdaterAddresses() ([]string, bool) {
+	if len(m.appendupdater_addresses) == 0 {
+		return nil, false
+	}
+	return m.appendupdater_addresses, true
+}
+
+// ClearUpdaterAddresses clears the value of the "updater_addresses" field.
+func (m *NFTClassMutation) ClearUpdaterAddresses() {
+	m.updater_addresses = nil
+	m.appendupdater_addresses = nil
+	m.clearedFields[nftclass.FieldUpdaterAddresses] = struct{}{}
+}
+
+// UpdaterAddressesCleared returns if the "updater_addresses" field was cleared in this mutation.
+func (m *NFTClassMutation) UpdaterAddressesCleared() bool {
+	_, ok := m.clearedFields[nftclass.FieldUpdaterAddresses]
+	return ok
+}
+
+// ResetUpdaterAddresses resets all changes to the "updater_addresses" field.
+func (m *NFTClassMutation) ResetUpdaterAddresses() {
+	m.updater_addresses = nil
+	m.appendupdater_addresses = nil
+	delete(m.clearedFields, nftclass.FieldUpdaterAddresses)
+}
+
 // SetTotalSupply sets the "total_supply" field.
 func (m *NFTClassMutation) SetTotalSupply(b *big.Int) {
 	m.total_supply = &b
@@ -6359,7 +6426,7 @@ func (m *NFTClassMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *NFTClassMutation) Fields() []string {
-	fields := make([]string, 0, 23)
+	fields := make([]string, 0, 24)
 	if m.acquire_book_nft_events_weight != nil {
 		fields = append(fields, nftclass.FieldAcquireBookNftEventsWeight)
 	}
@@ -6392,6 +6459,9 @@ func (m *NFTClassMutation) Fields() []string {
 	}
 	if m.minter_addresses != nil {
 		fields = append(fields, nftclass.FieldMinterAddresses)
+	}
+	if m.updater_addresses != nil {
+		fields = append(fields, nftclass.FieldUpdaterAddresses)
 	}
 	if m.total_supply != nil {
 		fields = append(fields, nftclass.FieldTotalSupply)
@@ -6459,6 +6529,8 @@ func (m *NFTClassMutation) Field(name string) (ent.Value, bool) {
 		return m.OwnerAddress()
 	case nftclass.FieldMinterAddresses:
 		return m.MinterAddresses()
+	case nftclass.FieldUpdaterAddresses:
+		return m.UpdaterAddresses()
 	case nftclass.FieldTotalSupply:
 		return m.TotalSupply()
 	case nftclass.FieldMaxSupply:
@@ -6514,6 +6586,8 @@ func (m *NFTClassMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldOwnerAddress(ctx)
 	case nftclass.FieldMinterAddresses:
 		return m.OldMinterAddresses(ctx)
+	case nftclass.FieldUpdaterAddresses:
+		return m.OldUpdaterAddresses(ctx)
 	case nftclass.FieldTotalSupply:
 		return m.OldTotalSupply(ctx)
 	case nftclass.FieldMaxSupply:
@@ -6623,6 +6697,13 @@ func (m *NFTClassMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMinterAddresses(v)
+		return nil
+	case nftclass.FieldUpdaterAddresses:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdaterAddresses(v)
 		return nil
 	case nftclass.FieldTotalSupply:
 		v, ok := value.(*big.Int)
@@ -6831,6 +6912,9 @@ func (m *NFTClassMutation) ClearedFields() []string {
 	if m.FieldCleared(nftclass.FieldMinterAddresses) {
 		fields = append(fields, nftclass.FieldMinterAddresses)
 	}
+	if m.FieldCleared(nftclass.FieldUpdaterAddresses) {
+		fields = append(fields, nftclass.FieldUpdaterAddresses)
+	}
 	if m.FieldCleared(nftclass.FieldMetadata) {
 		fields = append(fields, nftclass.FieldMetadata)
 	}
@@ -6868,6 +6952,9 @@ func (m *NFTClassMutation) ClearField(name string) error {
 		return nil
 	case nftclass.FieldMinterAddresses:
 		m.ClearMinterAddresses()
+		return nil
+	case nftclass.FieldUpdaterAddresses:
+		m.ClearUpdaterAddresses()
 		return nil
 	case nftclass.FieldMetadata:
 		m.ClearMetadata()
@@ -6915,6 +7002,9 @@ func (m *NFTClassMutation) ResetField(name string) error {
 		return nil
 	case nftclass.FieldMinterAddresses:
 		m.ResetMinterAddresses()
+		return nil
+	case nftclass.FieldUpdaterAddresses:
+		m.ResetUpdaterAddresses()
 		return nil
 	case nftclass.FieldTotalSupply:
 		m.ResetTotalSupply()

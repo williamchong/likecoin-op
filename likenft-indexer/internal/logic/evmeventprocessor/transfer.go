@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"likenft-indexer/ent"
-	"likenft-indexer/ent/evmeventprocessedblockheight"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/evm"
 	"likenft-indexer/internal/evm/book_nft"
@@ -147,7 +146,7 @@ func (e *transferProcessor) Process(
 
 func init() {
 	registerEventProcessor(
-		evmeventprocessedblockheight.EventTransfer.String(),
+		"Transfer",
 		func(inj *eventProcessorDeps) eventProcessor {
 			return MakeTransferProcessor(
 				inj.httpClient,
