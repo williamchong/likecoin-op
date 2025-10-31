@@ -14,7 +14,7 @@ npx hardhat ignition wipe chain-901 \
 npx hardhat ignition wipe chain-901 \
   veLikeRewardModule#ERC1967Proxy
 npx hardhat ignition wipe chain-901 \
-  veLikeRewardModule#encodeFunctionCall(veLikeRewardModule#veLikeRewardImpl.initialize)
+  "veLikeRewardModule#encodeFunctionCall(veLikeRewardModule#veLikeRewardImpl.initialize)"
 npx hardhat ignition wipe chain-901 \
   veLikeRewardModule#veLikeRewardImpl
 */
