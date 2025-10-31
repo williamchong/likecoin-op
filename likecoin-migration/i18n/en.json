@@ -7,7 +7,7 @@
       "metamask": {
         "add-chain": "Add {chainName} Chain",
         "chain-added": "Added",
-        "description": "To view {chainName} ({chainId}), please add the network to MetaMask:"
+        "description": "Add the network to MetaMask to view Base chain"
       }
     },
     "add-tokens": {
@@ -15,8 +15,12 @@
         "add": "Add LIKE v3",
         "added": "Added",
         "chain-not-added": "Please add the {chainName} ({chainId}) to your Metamask.",
-        "description": "To view LikeCoin v3, please add the ERC-20 address to MetaMask:"
+        "description": "Add the ERC-20 address to MetaMask to view LikeCoin v3"
       }
+    },
+    "stake": {
+      "description": "Stake LikeCoin to earn 10,000,000 LIKE rewards and voting power.",
+      "stake": "Stake"
     }
   },
   "section": {
@@ -38,8 +42,7 @@
     },
     "migration-completed": {
       "messages": {
-        "p1": "Congratulations, your LikeCoin has been upgraded to v3.",
-        "p2": "Please stake LikeCoin at {link} to support your favorite books and earn profits."
+        "p1": "Congratulations, your LikeCoin has been upgraded to v3."
       },
       "title": "Migration Completed"
     },
