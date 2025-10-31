@@ -28,6 +28,8 @@ func MakeNFTClass(e *ent.NFTClass) (*api.BookNFT, error) {
 		Name:                e.Name,
 		Symbol:              e.Symbol,
 		OwnerAddress:        MakeOptString(e.OwnerAddress),
+		MinterAddresses:     e.MinterAddresses,
+		UpdaterAddresses:    e.UpdaterAddresses,
 		TotalSupply:         MakeBigInt(e.TotalSupply),
 		MaxSupply:           MakeUint64(uint64(e.MaxSupply)),
 		Metadata:            MakeOptContractLevelMetadata(opensea, metadataAdditionalProps),
