@@ -86,7 +86,7 @@ services:
     command: /bin/sh -c "npm install && npx hardhat node"
 
   db-migration-backend:
-    image: postgres
+    image: postgres:16
     volumes:
       - ./migration-backend/scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
       - db_data_migration_backend:/var/lib/postgresql/data
@@ -101,7 +101,7 @@ services:
       retries: 30
 
   db-signer-backend:
-    image: postgres
+    image: postgres:16
     volumes:
       - ./signer-backend/scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
       - db_data_signer_backend:/var/lib/postgresql/data
