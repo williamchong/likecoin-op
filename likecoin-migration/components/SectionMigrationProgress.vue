@@ -246,28 +246,6 @@
                 })
               }}
             </p>
-            <div
-              :class="['flex', 'flex-row', 'items-center', 'mt-2', 'gap-2.5']"
-            >
-              <a
-                :href="tokenBlockExplorerUrl"
-                target="_blank"
-                :class="[
-                  'text-base',
-                  'text-likecoin-votecolor-yes',
-                  'overflow-hidden',
-                  'text-ellipsis',
-                ]"
-              >
-                {{ $appConfig.evmTokenAddress }}
-              </a>
-              <button
-                type="button"
-                @click="handleTxHashCopyClick($appConfig.evmTokenAddress)"
-              >
-                <FontAwesomeIcon :class="['text-base']" icon="copy" />
-              </button>
-            </div>
           </li>
         </ul>
       </div>
