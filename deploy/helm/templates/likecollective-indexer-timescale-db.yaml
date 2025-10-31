@@ -76,4 +76,5 @@ spec:
     requests:
       storage: {{ .Values.likecollectiveIndexer.timescaleDb.psqlVolume.storage }}
   storageClassName: {{ .Values.likecollectiveIndexer.timescaleDb.psqlVolume.storageClass }}
+  reclaimPolicy: Retain
 {{- end }}
