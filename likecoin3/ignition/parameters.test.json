@@ -5,7 +5,7 @@
   "LikeCollectiveModule": {
     "initOwner": "0xC71fe89e4C0e5458a793fc6548EF6B392417A7Fb"
   },
-  "LikeStakePositionModule": {
+  "LikeStakePositionV0Module": {
     "initOwner": "0xC71fe89e4C0e5458a793fc6548EF6B392417A7Fb"
   },
   "LikeProtocolV0Module": {

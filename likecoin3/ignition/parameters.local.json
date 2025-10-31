@@ -2,10 +2,10 @@
   "LikecoinModule": {
     "initOwner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
   },
-  "LikeCollectiveModule": {
+  "LikeCollectiveV0Module": {
     "initOwner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
   },
-  "LikeStakePositionModule": {
+  "LikeStakePositionV0Module": {
     "initOwner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
   },
   "LikeProtocolV0Module": {

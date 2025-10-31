@@ -3,6 +3,14 @@ import LikeCollectiveV0Module from "./LikeCollectiveV0";
 import LikeStakePositionModule from "./LikeStakePosition";
 import LikecoinModule from "./Likecoin";
 
+/**
+ * 
+ * DOTENV_CONFIG_PATH=.env \
+   npx hardhat ignition deploy \
+    ignition/modules/LikeCollective.ts \
+    --verify --strategy create2 \
+    --parameters ignition/parameters.json --network baseSepolia
+ */
 const LikeCollectiveModule = buildModule("LikeCollectiveModule", (m) => {
   const { likeCollectiveV0 } = m.useModule(LikeCollectiveV0Module);
   const { likeStakePosition } = m.useModule(LikeStakePositionModule);
