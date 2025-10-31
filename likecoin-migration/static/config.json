@@ -6,7 +6,7 @@
   "evmLikeCoinChainConfigPath": "/evm-chain-config.json",
   "cosmosDepositAddress": "like155s3xuruk2vnynda9gq6x9e7uzvut74654mc4d",
   "evmTokenAddress": "0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf",
-  "cosmosExplorerBaseURL": "https://node.testnet.like.co/",
+  "cosmosExplorerTxBaseURL": "https://node.testnet.like.co/cosmos/tx/v1beta1/txs/",
   "evmExplorerBaseURL": "https://sepolia.basescan.org/",
   "intercomAppId": "j0ryap5a"
 }

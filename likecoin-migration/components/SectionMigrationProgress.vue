@@ -401,8 +401,8 @@ export default Vue.extend({
 
     cosmosTxUrl(): string {
       return new URL(
-        `cosmos/tx/v1beta1/txs/${this.cosmosTxHash}`,
-        this.$appConfig.cosmosExplorerBaseURL
+        `${this.cosmosTxHash}`,
+        this.$appConfig.cosmosExplorerTxBaseURL
       ).toString();
     },
 

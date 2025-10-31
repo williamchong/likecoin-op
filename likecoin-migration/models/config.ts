@@ -7,7 +7,7 @@ export const ConfigSchema = z.object({
   apiBaseURL: z.string(),
   cosmosDepositAddress: z.string(),
   evmTokenAddress: z.string(),
-  cosmosExplorerBaseURL: z.string(),
+  cosmosExplorerTxBaseURL: z.string(),
   evmExplorerBaseURL: z.string(),
   cosmosLikeCoinNetworkConfigPath: z.string(),
   evmLikeCoinChainConfigPath: z.string(),
