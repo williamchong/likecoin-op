@@ -155,7 +155,7 @@ def gen_image(
     )
     draw_rotated_text(
         image,
-        f"Staker - {initial_staker}",
+        f"Stakeholder - {initial_staker}",
         xy=(0, 300),
         angle_deg=90,
         font=mono_label_font,
