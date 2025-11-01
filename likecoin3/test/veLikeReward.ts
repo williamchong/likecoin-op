@@ -214,6 +214,70 @@ describe("veLikeReward ", async function () {
     });
   });
 
+  describe("pending reward calculation before and after the condition", async function () {
+    it("should throw error when querying pending reward before the startTime", async function () {
+      const {
+        veLike,
+        veLikeReward,
+        likecoin,
+        deployer,
+        publicClient,
+        kin,
+        testClient,
+      } = await loadFixture(initialMint);
+      await likecoin.write.approve([veLikeReward.address, 10000n * 10n ** 6n], {
+        account: deployer.account.address,
+      });
+      const block = await publicClient.getBlock();
+      const startTime = block.timestamp + 100n;
+      const endTime = startTime + 1000n;
+
+      await veLikeReward.write.addReward(
+        [deployer.account.address, 10000n * 10n ** 6n, startTime, endTime],
+        {
+          account: deployer.account.address,
+        },
+      );
+
+      // This include test as deposit before the startTime.
+      await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
+        account: kin.account.address,
+      });
+      await veLike.write.deposit([100n * 10n ** 6n, kin.account.address], {
+        account: kin.account.address,
+      });
+
+      // It should reject with `0x11 (Arithmetic operation overflowed outside of an unchecked block)`
+      // It's not ideal. TODO: fix this and return zero;
+      await expect(veLikeReward.read.getPendingReward([kin.account.address])).to
+        .be.rejected;
+
+      await testClient.setNextBlockTimestamp({
+        timestamp: startTime,
+      });
+      await testClient.mine({
+        blocks: 1,
+      });
+
+      const initialPendingReward = await veLikeReward.read.getPendingReward([
+        kin.account.address,
+      ]);
+      expect(initialPendingReward).to.equal(0n);
+
+      await testClient.setNextBlockTimestamp({
+        timestamp: endTime,
+      });
+      await testClient.mine({
+        blocks: 1,
+      });
+      const finalPendingReward = await veLikeReward.read.getPendingReward([
+        kin.account.address,
+      ]);
+      console.log("finalPendingReward", finalPendingReward);
+      expect(finalPendingReward).to.equal(10000n * 10n ** 6n);
+    });
+  });
+
   describe("reward distribution", async function () {
     it("should have correct initial reward condition", async function () {
       const { veLike, veLikeReward, bob, testClient } =
