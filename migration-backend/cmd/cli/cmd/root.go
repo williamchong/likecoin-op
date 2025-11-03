@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/likecoin/like-migration-backend/cmd/cli/cmd/ethereum"
 	"github.com/likecoin/like-migration-backend/cmd/cli/cmd/likecoin"
 	"github.com/likecoin/like-migration-backend/cmd/cli/cmd/likecoinapi"
 	"github.com/likecoin/like-migration-backend/cmd/cli/cmd/likenft"
@@ -28,6 +29,7 @@ func Execute(envCfg *config.EnvConfig) {
 }
 
 func init() {
+	rootCmd.AddCommand(ethereum.EthereumCmd)
 	rootCmd.AddCommand(likenft.LikeNFTCmd)
 	rootCmd.AddCommand(likecoin.LikeCoinCmd)
 	rootCmd.AddCommand(signer.SignerCmd)
