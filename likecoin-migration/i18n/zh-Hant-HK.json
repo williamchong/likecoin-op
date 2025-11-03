@@ -42,9 +42,11 @@
     },
     "migration-completed": {
       "messages": {
-        "p1": "恭喜，你的 LikeCoin 已經升級至 v3。"
+        "p1": "恭喜，你的 LikeCoin 已經升級至 v3。",
+        "p2": "現請把 LikeCoin 存倉，共享 10,000,000 LIKE 收益池，同時換取投票權，參與社區治理。"
       },
-      "title": "升級完成"
+      "stake": "存倉",
+      "title": "存倉並完成升級"
     },
     "migration-progress": {
       "balance-remaining-message": "尚有餘額，您要重新開始轉換嗎？",

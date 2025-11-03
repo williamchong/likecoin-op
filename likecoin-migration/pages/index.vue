@@ -245,8 +245,19 @@
             <p :class="['text-sm', 'text-likecoin-darkgrey']">
               {{ $t('section.migration-completed.messages.p1') }}
             </p>
+            <p :class="['text-sm', 'text-likecoin-darkgrey']">
+              {{ $t('section.migration-completed.messages.p2') }}
+            </p>
+            <div :class="['flex', 'justify-center']">
+              <AppButton
+                variant="primary"
+                href="https://3ook.com/account"
+                target="_blank"
+              >
+                {{ $t('section.migration-completed.stake') }}
+              </AppButton>
+            </div>
           </div>
-          <MiscellaneousActions v-if="!isFuture()" :class="['mt-5']" />
         </StepSection>
       </div>
     </div>
