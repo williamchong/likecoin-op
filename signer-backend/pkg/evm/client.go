@@ -75,3 +75,22 @@ func (c *Client) estimateGasLimit(
 	}
 	return c.ethClient.EstimateGas(ctx, msg)
 }
+
+func (c *Client) estimateGasLimitForTransfer(
+	ctx context.Context,
+	signerAddress common.Address,
+	toAddress common.Address,
+	input []byte,
+	gasPrice, gasTipCap, gasFeeCap, value *big.Int,
+) (uint64, error) {
+	msg := ethereum.CallMsg{
+		From:      signerAddress,
+		To:        &toAddress,
+		GasPrice:  gasPrice,
+		GasTipCap: gasTipCap,
+		GasFeeCap: gasFeeCap,
+		Value:     value,
+		Data:      input,
+	}
+	return c.ethClient.EstimateGas(ctx, msg)
+}

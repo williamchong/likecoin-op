@@ -104,8 +104,25 @@ func initTransaction(
 		transaction.Amount,
 	)
 	if err != nil {
-		mylogger.Error("failed to sign transaction", "error", err)
-		return nil, nil, failed(ctx, db, transaction, err)
+		if errors.Is(err, evm.ErrNoCode) && transaction.Method == "transfer" {
+			// Fallback to transfer if no contract code for to address
+			// To skip the check of contract code, we only support transfer method for now
+			mylogger.Warn("no contract code for to address", "to_address", transaction.ToAddress)
+			evmTx, err = client.SignForTransfer(
+				ctx,
+				mylogger,
+				common.HexToAddress(transaction.ToAddress),
+				callData,
+				transaction.Amount,
+			)
+			if err != nil {
+				mylogger.Error("failed to sign transfer transaction", "error", err)
+				return nil, nil, failed(ctx, db, transaction, err)
+			}
+		} else {
+			mylogger.Error("failed to sign transaction", "error", err)
+			return nil, nil, failed(ctx, db, transaction, err)
+		}
 	}
 
 	gasLimit := evmTx.Gas()

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
+	"math/big"
 	"net/http"
 	"os"
 	"time"
@@ -14,6 +16,7 @@ import (
 
 	appcontext "github.com/likecoin/like-migration-backend/cmd/worker/context"
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
+	"github.com/likecoin/like-migration-backend/pkg/ethereum"
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/cosmos"
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/cosmos/model"
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/evm"
@@ -77,6 +80,8 @@ func HandleMigrateLikeCoinTask(ctx context.Context, t *asynq.Task) error {
 		envCfg.EthSignerAPIKey,
 	)
 
+	ethereumClient := ethereum.NewClient(logger, ethClient, signer)
+
 	contractAddress := common.HexToAddress(envCfg.EthTokenAddress)
 	likeCoinClient, err := evm.NewLikeCoin(
 		logger,
@@ -106,6 +111,45 @@ func HandleMigrateLikeCoinTask(ctx context.Context, t *asynq.Task) error {
 		return err
 	}
 
+	err = airdropEth(
+		ctx,
+		mylogger,
+		ethereumClient,
+		common.HexToAddress(migration.UserEthAddress),
+		envCfg.EthAmountToAirdropOnMigrate,
+		migration.EvmTxHash,
+	)
+	if err != nil {
+		mylogger.Error("airdrop eth failed", "error", err)
+		// The error is ignored
+	}
+
 	mylogger.Info("migrate likecoin completed", "evmTxHash", *migration.EvmTxHash)
+	return nil
+}
+
+func airdropEth(
+	ctx context.Context,
+	logger *slog.Logger,
+	ethereumClient ethereum.EthereumClient,
+	toAddress common.Address,
+	ethAmount string,
+	likecoinMigrationTx *string,
+) error {
+	amountEth, ok := new(big.Float).SetString(ethAmount)
+	if !ok {
+		logger.Error("new(big.Float).SetString", "error", fmt.Errorf("invalid amount: %s", ethAmount))
+		return fmt.Errorf("invalid amount: %s", ethAmount)
+	}
+	amountWei := ethereum.ConvertToWei(amountEth)
+	if amountWei.Cmp(big.NewInt(0)) == 0 {
+		logger.Info("skipped airdrop because amount is zero")
+		return nil
+	}
+	_, _, err := likecoin.DoAirdropEth(ctx, logger, ethereumClient, toAddress, amountWei, likecoinMigrationTx)
+	if err != nil {
+		logger.Error("likecoin.DoAirdropEth", "error", err)
+		return err
+	}
 	return nil
 }
