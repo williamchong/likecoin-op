@@ -37,16 +37,16 @@
     },
     "introduction": {
       "confirm": "Next",
-      "text": "LikeCoin token has upgraded to v3 and launched on Base chain of Ethereum. Please upgrade your LikeCoin v2 token before Dec 31, 2025 avoid loss of fund.",
+      "text": "LikeCoin has been upgraded to v3 and is now live on the Base chain (Ethereum).\nPlease upgrade your LikeCoin v2 tokens before Feb 2, 2025 to avoid loss of funds.",
       "title": "Introduction"
     },
     "migration-completed": {
       "messages": {
-        "p1": "Congratulations, your LikeCoin has been upgraded to v3.",
-        "p2": "Please stake your LikeCoin to earn 10,000,000 LIKE rewards and voting power."
+        "p1": "Congratulations! Your LikeCoin has been successfully upgraded to v3.",
+        "p2": "Deposit your tokens now to join the 10,000,000 LIKE reward pool and gain voting rights in governance."
       },
-      "stake": "Stake",
-      "title": "Stake and Complete Migration"
+      "stake": "Deposit",
+      "title": "Deposit to complete your upgrade"
     },
     "migration-progress": {
       "balance-remaining-message": "There are still balance left, do you want to restart the migration?",
