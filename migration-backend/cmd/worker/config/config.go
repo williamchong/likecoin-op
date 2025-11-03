@@ -27,6 +27,7 @@ type EnvConfig struct {
 	LikecoinAPIHTTPTimeoutSeconds   int    `envconfig:"LIKECOIN_API_HTTP_TIMEOUT_SECONDS" default:"10"`
 	LikeNFTIndexerBaseURL           string `envconfig:"LIKENFT_INDEXER_BASE_URL"`
 	LikeNFTIndexerAPIKey            string `envconfig:"LIKENFT_INDEXER_API_KEY"`
+	EthAmountToAirdropOnMigrate     string `envconfig:"ETH_AMOUNT_TO_AIRDROP_ON_MIGRATE" default:"0.00005"`
 
 	InitialNewClassOwner              string   `envconfig:"INITIAL_NEW_CLASS_OWNER"`
 	InitialNewClassMinters            []string `envconfig:"INITIAL_NEW_CLASS_MINTERS"`
