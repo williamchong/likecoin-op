@@ -18,17 +18,20 @@ var ErrNoCode = errors.New("no code")
 type Client struct {
 	db            *sql.DB
 	ethClient     *ethclient.Client
+	nonceProvider NonceProvider
 	privateKeyStr string
 }
 
 func NewClient(
 	db *sql.DB,
 	ethClient *ethclient.Client,
+	nonceProvider NonceProvider,
 	privateKeyStr string,
 ) *Client {
 	return &Client{
 		db:            db,
 		ethClient:     ethClient,
+		nonceProvider: nonceProvider,
 		privateKeyStr: privateKeyStr,
 	}
 }

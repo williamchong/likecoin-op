@@ -14,6 +14,8 @@ type EnvConfig struct {
 	RoutePrefix            string `envconfig:"ROUTE_PREFIX" default:""`
 	EvmSignerPrivateKey    string `envconfig:"EVM_SIGNER_PRIVATE_KEY"`
 	EvmNetworkPublicRpcUrl string `envconfig:"ETH_NETWORK_PUBLIC_RPC_URL"`
+
+	AdditionalNoncePublicRpcUrls string `envconfig:"ADDITIONAL_NONCE_PUBLIC_RPC_URLS" default:"https://mainnet.base.org"`
 }
 
 func LoadEnvConfigFromEnv() (*EnvConfig, error) {

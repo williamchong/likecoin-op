@@ -7,7 +7,7 @@ func (l *Client) GetPendingNonce(ctx context.Context) (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
-	n, err := l.ethClient.PendingNonceAt(ctx, pubkey)
+	n, err := l.nonceProvider.PendingNonceAt(ctx, pubkey)
 	if err != nil {
 		return 0, err
 	}

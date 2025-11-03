@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -57,6 +58,18 @@ func main() {
 		panic(err)
 	}
 
+	additionalNoncePublicRpcUrls := []string{envCfg.EvmNetworkPublicRpcUrl}
+	for _, url := range strings.Split(envCfg.AdditionalNoncePublicRpcUrls, ",") {
+		if url != "" {
+			additionalNoncePublicRpcUrls = append(additionalNoncePublicRpcUrls, url)
+		}
+	}
+
+	nonceProvider := evm.NewNonceProvider(
+		logger,
+		additionalNoncePublicRpcUrls,
+	)
+
 	db, err := sql.Open("postgres", envCfg.DbConnectionStr)
 	if err != nil {
 		panic(err)
@@ -65,6 +78,7 @@ func main() {
 	evmClient := evm.NewClient(
 		db,
 		ethClient,
+		nonceProvider,
 		envCfg.EvmSignerPrivateKey,
 	)
 
