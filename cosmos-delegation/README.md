@@ -17,13 +17,22 @@ npx tsx \
     --env-file .env \
     index.ts \
     compute-delegate-cmd \
-    like1cerk8zu2ehsxsf6namnu84z9z58dlwurztla9l \
+    like15aef08e9skf5stlahddntsn87uuwuvqf4ngr6s \
     --selected-validator-address \
-        likevaloper17yqg3way0slmf4lj8vtmhlcd73006hhpljd5d0 \
-        likevaloper1pcw47y66m5clzn9cxx5lq0lrqnwzkeq86krsfj \
-        likevaloper1etpln3zmzk2qv834qy7llgw3t98rztj7e3f7cq \
-        likevaloper1dl4s8xxpmt0u6yrrlh5tnmrlgsq0t70uwzyar2 \
-        likevaloper10qz95ywphsmq8dpgk8xvfpehvnd0y5kc98x484 \
-        likevaloper1c6ch7qx2gvluc9uw85qlzx949z8ckyhud7hm6r \
+        likevaloper1knfp5qgzgr29k00nhjp2qzxlezrlalhyh77e4c \
+        likevaloper1jxpfche2386a6m0kvfpj6xq9zlrjtuqwz2rnug \
+        likevaloper1mztweu8y2lazpapfgtqmadxaqaapyasv7nhexk \
+        likevaloper1f90nyyptfajz58m9sa9dygwajwuxkv838n72k6 \
+        likevaloper1r4sv5ea8mhd7q2cp566sh5zvkwg8xf3xwgw6uw \
     2>/dev/null
 ```
+
+Add `--fees 2000000000nanolike` for tx fee;
+
+
+Ref for community validator confirmed will stay in transition period:
+oursky likevaloper1knfp5qgzgr29k00nhjp2qzxlezrlalhyh77e4c
+civic liker likevaloper1jxpfche2386a6m0kvfpj6xq9zlrjtuqwz2rnug
+liker.social likevaloper1mztweu8y2lazpapfgtqmadxaqaapyasv7nhexk
+oldcat likevaloper1f90nyyptfajz58m9sa9dygwajwuxkv838n72k6
+Yoitsu likevaloper1r4sv5ea8mhd7q2cp566sh5zvkwg8xf3xwgw6uw
