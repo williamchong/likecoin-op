@@ -18,9 +18,10 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/cosmos/api"
 	"github.com/likecoin/like-migration-backend/pkg/ethereum"
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/cosmos"
-	"github.com/likecoin/like-migration-backend/pkg/likecoin/cosmos/model"
+	cosmosmodel "github.com/likecoin/like-migration-backend/pkg/likecoin/cosmos/model"
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/evm"
 	"github.com/likecoin/like-migration-backend/pkg/logic/likecoin"
+	"github.com/likecoin/like-migration-backend/pkg/model"
 	"github.com/likecoin/like-migration-backend/pkg/signer"
 	apptask "github.com/likecoin/like-migration-backend/pkg/task"
 )
@@ -39,7 +40,10 @@ func HandleMigrateLikeCoinTask(ctx context.Context, t *asynq.Task) error {
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	mylogger = mylogger.With("CosmosAddress", p.CosmosAddress)
+	mylogger = mylogger.With(
+		"CosmosAddress", p.CosmosAddress,
+		"LikeCoinMigrationId", p.LikeCoinMigrationId,
+	)
 
 	ethClient, err := ethclient.Dial(envCfg.EthNetworkPublicRPCURL)
 	if err != nil {
@@ -59,7 +63,7 @@ func HandleMigrateLikeCoinTask(ctx context.Context, t *asynq.Task) error {
 		panic(err)
 	}
 
-	cosmosLikeCoinNetworkConfig, err := model.LoadNetworkConfig(
+	cosmosLikeCoinNetworkConfig, err := cosmosmodel.LoadNetworkConfig(
 		cosmosLikeCoinNetworkConfigData,
 	)
 
@@ -95,16 +99,32 @@ func HandleMigrateLikeCoinTask(ctx context.Context, t *asynq.Task) error {
 
 	mylogger.Info("running migrate likecoin")
 
-	migration, err := likecoin.DoMintLikeCoinByCosmosAddress(
-		ctx,
-		mylogger,
-		db,
-		ethClient,
-		cosmosAPI,
-		likeCoinClient,
-		cosmosLikeCoinClient,
-		p.CosmosAddress,
-	)
+	var migration *model.LikeCoinMigration
+	if p.CosmosAddress != "" {
+		migration, err = likecoin.DoMintLikeCoinByCosmosAddress(
+			ctx,
+			mylogger,
+			db,
+			ethClient,
+			cosmosAPI,
+			likeCoinClient,
+			cosmosLikeCoinClient,
+			p.CosmosAddress,
+		)
+	} else if p.LikeCoinMigrationId != 0 {
+		migration, err = likecoin.DoMintLikeCoinByLikeCoinMigrationId(
+			ctx,
+			mylogger,
+			db,
+			ethClient,
+			cosmosAPI,
+			likeCoinClient,
+			cosmosLikeCoinClient,
+			p.LikeCoinMigrationId,
+		)
+	} else {
+		return fmt.Errorf("cosmos address or likecoin migration id is required")
+	}
 
 	if err != nil {
 		mylogger.Error("running migrate likecoin failed", "error", err)
