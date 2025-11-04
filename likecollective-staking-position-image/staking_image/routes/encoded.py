@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel, HttpUrl
 
 from staking_image.deps import ConfigDep, EVMClientDep
-from staking_image.gen_image.params import parse_base64_encoded_params
+from staking_image.gen_image.params import parse_base64_url_encoded_params
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ def get_image_from_encoded_string(
     config: ConfigDep,
     encoded_string: str,
 ):
-    params = parse_base64_encoded_params(encoded_string)
+    params = parse_base64_url_encoded_params(encoded_string)
 
     likecoin_decimals = evm_client.get_likecoin_decimals()
     params.staked_amount = str(
