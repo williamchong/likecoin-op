@@ -253,7 +253,7 @@ contract LikeStakePosition is
     {
         Position memory position = _getStorage().positions[tokenId];
         string memory baseURI = _baseURI();
-        string memory tokenURL = Base64.encode(
+        string memory tokenURL = Base64.encodeURL(
             abi.encodePacked(
                 position.bookNFT,
                 position.stakedAmount,

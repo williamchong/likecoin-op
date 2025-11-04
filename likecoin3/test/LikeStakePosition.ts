@@ -437,7 +437,7 @@ describe("LikeStakePosition", async function () {
       const uri = await likeStakePosition.read.tokenURI([1n]);
 
       expect(uri).to.equal(
-        "https://3ook.com/lspcover/49tc2YXYaaGMAAy01RGAsctFDowAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcJl5cMUYEtw6AQx9AbUODRfcecg=",
+        "https://3ook.com/lspcover/49tc2YXYaaGMAAy01RGAsctFDowAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcJl5cMUYEtw6AQx9AbUODRfcecg",
       );
     });
   });
