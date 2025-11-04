@@ -327,13 +327,6 @@
           >
             {{ $t("migration.retry_likecoin_migration") }}
           </AppButton>
-          <AppButton
-            variant="warning"
-            :loading="deleting"
-            @click="promptRemoveMigration"
-          >
-            {{ $t("migration.delete_migration") }}
-          </AppButton>
         </div>
       </template>
     </div>
@@ -350,7 +343,6 @@ import {
   LikeCoinMigration,
   LikeCoinMigrationStatus,
 } from "~/apis/models/likecoinMigration";
-import { makeRemoveLikeCoinMigrationsAPI } from "~/apis/RemoveLikeCoinMigration";
 import { makeRetryLikeCoinMigrationAPI } from "~/apis/RetryLikeCoinMigration";
 import AppButton from "~/components/AppButton.vue";
 import HeroBanner from "~/components/HeroBanner.vue";
@@ -463,24 +455,6 @@ export default Vue.extend({
         confirm(this.$t("migration.confirm_retry_likecoin_migration") as string)
       ) {
         await this.retryLikeCoinMigration(failedMigration);
-      }
-    },
-
-    async removeMigration() {
-      this.deleting = true;
-      try {
-        await makeRemoveLikeCoinMigrationsAPI(this.migrationId)(
-          this.$apiClient
-        )();
-        this.$router.push("/likecoin");
-      } finally {
-        this.deleting = false;
-      }
-    },
-
-    async promptRemoveMigration() {
-      if (confirm(this.$t("migration.confirm_delete_migration") as string)) {
-        await this.removeMigration();
       }
     },
 
