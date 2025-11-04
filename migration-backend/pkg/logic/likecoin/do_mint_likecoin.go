@@ -76,6 +76,55 @@ func DoMintLikeCoinByCosmosAddress(
 	)
 }
 
+func DoMintLikeCoinByLikeCoinMigrationId(
+	ctx context.Context,
+	logger *slog.Logger,
+
+	db *sql.DB,
+	ethClient *ethclient.Client,
+	cosmosAPI *api.CosmosAPI,
+	evmLikeCoinClient *evm.LikeCoin,
+	cosmosLikcCoinClient *cosmos.LikeCoin,
+
+	likecoinMigrationId uint64,
+) (*model.LikeCoinMigration, error) {
+	mylogger := logger.
+		WithGroup("DoMintLikeCoinByCosmosAddress")
+
+	a, err := appdb.QueryLikeCoinMigrationById(db, likecoinMigrationId)
+
+	if err != nil {
+		logger.Error("appdb.QueryLatestLikeCoinMigration", "err", err)
+		return nil, err
+	}
+
+	if a.Status == model.LikeCoinMigrationStatusCompleted {
+		logger.Info("already completed")
+		return a, nil
+	}
+
+	if a.Status == model.LikeCoinMigrationStatusFailed {
+		logger.Info("already failed", "err", a.FailedReason)
+		return nil, errors.New(*a.FailedReason)
+	}
+
+	if a.Status != model.LikeCoinMigrationStatusVerifyingCosmosTx {
+		logger.Error("already failed", "err", ErrAlreadyInProgress)
+		return nil, ErrAlreadyInProgress
+	}
+
+	return DoMintLikeCoin(
+		ctx,
+		mylogger,
+		db,
+		ethClient,
+		cosmosAPI,
+		evmLikeCoinClient,
+		cosmosLikcCoinClient,
+		a,
+	)
+}
+
 func DoMintLikeCoin(
 	ctx context.Context,
 	logger *slog.Logger,

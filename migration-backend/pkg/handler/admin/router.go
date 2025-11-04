@@ -1,8 +1,10 @@
 package admin
 
 import (
-	"net/http"
 	"database/sql"
+	"net/http"
+
+	"github.com/hibiken/asynq"
 
 	"github.com/likecoin/like-migration-backend/pkg/handler/admin/likecoin"
 	"github.com/likecoin/like-migration-backend/pkg/handler/admin/likenft"
@@ -10,6 +12,7 @@ import (
 
 type AdminRouter struct {
 	Db          *sql.DB
+	AsynqClient *asynq.Client
 }
 
 func (h *AdminRouter) Router() *http.ServeMux {
@@ -17,10 +20,11 @@ func (h *AdminRouter) Router() *http.ServeMux {
 
 	likecoinRouter := likecoin.LikeCoinRouter{
 		Db:          h.Db,
+		AsynqClient: h.AsynqClient,
 	}
 
 	likenftRouter := likenft.LikeNFTRouter{
-		Db:          h.Db,
+		Db: h.Db,
 	}
 
 	router.Handle("/likecoin/", http.StripPrefix("/likecoin", likecoinRouter.Router()))

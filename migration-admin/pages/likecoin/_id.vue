@@ -320,11 +320,12 @@
         <!-- Action Buttons -->
         <div :class="['flex', 'justify-end', 'gap-4', 'mt-4']">
           <AppButton
+            v-if="failedMigration"
             variant="warning"
             :loading="deleting"
-            @click="promptRemoveMigration"
+            @click="promptRetryLikeCoinMigration(failedMigration)"
           >
-            {{ $t("migration.delete_migration") }}
+            {{ $t("migration.retry_likecoin_migration") }}
           </AppButton>
         </div>
       </template>
@@ -342,7 +343,7 @@ import {
   LikeCoinMigration,
   LikeCoinMigrationStatus,
 } from "~/apis/models/likecoinMigration";
-import { makeRemoveLikeCoinMigrationsAPI } from "~/apis/RemoveLikeCoinMigration";
+import { makeRetryLikeCoinMigrationAPI } from "~/apis/RetryLikeCoinMigration";
 import AppButton from "~/components/AppButton.vue";
 import HeroBanner from "~/components/HeroBanner.vue";
 import { LIKECOIN_CHAIN_DENOM, LIKECOIN_CHAIN_NAME } from "~/constant";
@@ -384,6 +385,12 @@ export default Vue.extend({
     },
     chain(): string {
       return LIKECOIN_CHAIN_NAME(this.$appConfig.isTestnet);
+    },
+    failedMigration(): LikeCoinMigration | null {
+      if (this.migration != null && this.migration.status === "failed") {
+        return this.migration;
+      }
+      return null;
     },
   },
 
@@ -431,21 +438,23 @@ export default Vue.extend({
       }
     },
 
-    async removeMigration() {
+    async retryLikeCoinMigration(failedMigration: LikeCoinMigration) {
       this.deleting = true;
       try {
-        await makeRemoveLikeCoinMigrationsAPI(this.migrationId)(
+        const resp = await makeRetryLikeCoinMigrationAPI(failedMigration.id)(
           this.$apiClient
         )();
-        this.$router.push("/likecoin");
+        this.migration = resp.migration;
       } finally {
         this.deleting = false;
       }
     },
 
-    async promptRemoveMigration() {
-      if (confirm(this.$t("migration.confirm_delete_migration") as string)) {
-        await this.removeMigration();
+    async promptRetryLikeCoinMigration(failedMigration: LikeCoinMigration) {
+      if (
+        confirm(this.$t("migration.confirm_retry_likecoin_migration") as string)
+      ) {
+        await this.retryLikeCoinMigration(failedMigration);
       }
     },
 

@@ -9,9 +9,9 @@ export const ResponseSchema = z.object({
 
 export type Response = z.infer<typeof ResponseSchema>;
 
-export const makeRemoveLikeCoinMigrationsAPI = (migrationId: number) =>
+export const makeRetryLikeCoinMigrationAPI = (migrationId: number) =>
   makeAPI({
     url: `/admin/likecoin/migration/${migrationId}`,
-    method: "DELETE",
+    method: "PUT",
     responseSchema: ResponseSchema,
   });
