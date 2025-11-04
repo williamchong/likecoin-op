@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -23,23 +24,23 @@ import (
 )
 
 var migrateCmd = &cobra.Command{
-	Use:   "migrate cosmos-address",
-	Short: "Migrate likecoin by cosmos-address",
+	Use:   "migrate likecoin-migration-id",
+	Short: "Migrate likecoin by likecoin-migration-id",
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			_ = cmd.Usage()
-			return
-		}
-
 		ctx := cmd.Context()
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
-		cosmosAddress := args[0]
+		likecoinMigrationIdStr := args[0]
+		likecoinMigrationId, err := strconv.ParseUint(likecoinMigrationIdStr, 10, 64)
+		if err != nil {
+			panic(err)
+		}
 
 		logger := slog.New(slog.Default().Handler()).
 			WithGroup("migrate").
-			With("cosmosAddress", cosmosAddress)
+			With("likecoinMigrationId", likecoinMigrationId)
 
 		envCfg := ctx.Value(config.ContextKey).(*config.EnvConfig)
 		db, err := sql.Open("postgres", envCfg.DbConnectionStr)
@@ -97,7 +98,7 @@ var migrateCmd = &cobra.Command{
 			panic(err)
 		}
 
-		migration, err := likecoin.DoMintLikeCoinByCosmosAddress(
+		migration, err := likecoin.DoMintLikeCoinByLikeCoinMigrationId(
 			ctx,
 			logger,
 			db,
@@ -105,7 +106,7 @@ var migrateCmd = &cobra.Command{
 			cosmosAPI,
 			likeCoinClient,
 			cosmosLikeCoinClient,
-			cosmosAddress,
+			likecoinMigrationId,
 		)
 
 		if err != nil {
