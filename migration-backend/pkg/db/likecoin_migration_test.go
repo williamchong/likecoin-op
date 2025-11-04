@@ -1,14 +1,13 @@
 package db_test
 
 import (
-	"database/sql"
-	"errors"
 	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
 
 	appdb "github.com/likecoin/like-migration-backend/pkg/db"
 	"github.com/likecoin/like-migration-backend/pkg/model"
 	"github.com/likecoin/like-migration-backend/pkg/testutil"
-	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestQueryLikeCoinMigrationById(t *testing.T) {
@@ -120,37 +119,6 @@ func TestQueryPaginatedLikeCoinMigration(t *testing.T) {
 			migrations, err := appdb.QueryPaginatedLikeCoinMigration(db, 10, 0, nil, "helloworld")
 			So(err, ShouldBeNil)
 			So(len(migrations), ShouldEqual, 0)
-		}
-	})
-}
-
-func TestRemoveLikeCoinMigration(t *testing.T) {
-	Convey("RemoveLikeCoinMigration", t, func() {
-		db, done := testutil.GetDB(t)
-		defer done()
-
-		address := "cosmos123"
-
-		m1, err := appdb.InsertLikeCoinMigration(db, &model.LikeCoinMigration{
-			UserCosmosAddress:    address,
-			BurningCosmosAddress: address,
-			MintingEthAddress:    "eth123",
-			Status:               model.LikeCoinMigrationStatusPendingCosmosTxHash,
-		})
-		if err != nil {
-			t.Fatalf("failed to insert likecoin migration: %v", err)
-		}
-
-		{
-
-			m, err := appdb.QueryLatestLikeCoinMigration(db, address)
-			So(err, ShouldBeNil)
-			So(m.Id, ShouldEqual, m1.Id)
-
-			err = appdb.RemoveLikeCoinMigration(db, m1.Id)
-			So(err, ShouldBeNil)
-			_, err = appdb.QueryLatestLikeCoinMigration(db, address)
-			So(errors.Is(err, sql.ErrNoRows), ShouldBeTrue)
 		}
 	})
 }

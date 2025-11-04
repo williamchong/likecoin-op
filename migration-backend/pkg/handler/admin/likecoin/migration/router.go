@@ -23,10 +23,6 @@ func (h *MigrationRouter) Router() *http.ServeMux {
 		Db: h.Db,
 	})
 
-	router.Handle("DELETE /migration/{migrationId}", &RemoveLatestLikeCoinMigrationHandler{
-		Db: h.Db,
-	})
-
 	router.Handle("PUT /migration/{migrationId}", &RetryLikeCoinMigrationHandler{
 		Db:          h.Db,
 		AsynqClient: h.AsynqClient,
