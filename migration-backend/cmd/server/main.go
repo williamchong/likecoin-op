@@ -173,7 +173,8 @@ func main() {
 	mainMux.Handle("/user/", http.StripPrefix("/user", userRouter.Router()))
 
 	adminRouter := admin.AdminRouter{
-		Db: db,
+		Db:          db,
+		AsynqClient: asynqClient,
 	}
 	mainMux.Handle("/admin/", http.StripPrefix("/admin", adminRouter.Router()))
 
