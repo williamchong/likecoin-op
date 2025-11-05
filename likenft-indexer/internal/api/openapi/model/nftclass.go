@@ -35,7 +35,6 @@ func MakeNFTClass(e *ent.NFTClass) (*api.BookNFT, error) {
 		Metadata:            MakeOptContractLevelMetadata(opensea, metadataAdditionalProps),
 		BannerImage:         e.BannerImage,
 		FeaturedImage:       e.FeaturedImage,
-		DeployerAddress:     e.DeployerAddress,
 		DeployedBlockNumber: MakeUint64(uint64(e.DeployedBlockNumber)),
 		MintedAt:            e.MintedAt,
 		UpdatedAt:           e.UpdatedAt,
