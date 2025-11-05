@@ -28,7 +28,7 @@ data:
   POSTGRES_USER: {{ .Values.likecollectiveIndexer.env.DB_TIMESCALE_USERNAME | b64enc | toYaml }}
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   labels:
     app.kubernetes.io/component: {{ .Values.likecollectiveIndexer.name }}-timescale-db
@@ -56,10 +56,20 @@ spec:
         envFrom:
           - secretRef:
               name: {{ .Values.likecollectiveIndexer.name }}-timescale-db
+        env:
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
         ports:
         - containerPort: {{ .Values.likecollectiveIndexer.timescaleDb.container.port }}
         resources:
           {{- toYaml .Values.likecollectiveIndexer.timescaleDb.resources | nindent 12 }}
+        volumeMounts:
+        - name: {{ .Values.likecollectiveIndexer.name }}-timescale-db-psql-volume
+          mountPath: /var/lib/postgresql/data
+      initContainers:
+      - name: {{ .Values.likecollectiveIndexer.name }}-timescale-db-init-container
+        image: busybox
+        command: ["/bin/chmod", "-R", "777", "/var/lib/postgresql/data"]
         volumeMounts:
         - name: {{ .Values.likecollectiveIndexer.name }}-timescale-db-psql-volume
           mountPath: /var/lib/postgresql/data
@@ -76,5 +86,4 @@ spec:
     requests:
       storage: {{ .Values.likecollectiveIndexer.timescaleDb.psqlVolume.storage }}
   storageClassName: {{ .Values.likecollectiveIndexer.timescaleDb.psqlVolume.storageClass }}
-  reclaimPolicy: Retain
 {{- end }}
