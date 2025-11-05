@@ -19,6 +19,8 @@ spec:
         - name: {{ .Values.name }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           env:
+            - name: BASE_URL
+              value: https://{{ .Values.domain }}
             - name: RPC_URL
               value: {{ .Values.rpc_url }}
             - name: LIKECOIN_CONTRACT_ADDRESS
