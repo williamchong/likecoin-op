@@ -27,5 +27,7 @@
   "veLikeRewardModule#veLikeRewardImpl": "0x5908F8bF6C595249b0443E550A4577C0a18b29c4",
   "veLikeRewardModule#ERC1967Proxy": "0x465629cedF312B77C48602D5AfF1Ecb4FEb1Bf62",
   "veLikeRewardModule#veLikeReward": "0x465629cedF312B77C48602D5AfF1Ecb4FEb1Bf62",
-  "LikeCollectiveV1Module#LikeCollectiveV1Impl": "0x6EC61e70D53604066C3AE1A675425b23B5B522DD"
+  "LikeCollectiveV1Module#LikeCollectiveV1Impl": "0x6EC61e70D53604066C3AE1A675425b23B5B522DD",
+  "LikeStakePositionV1Module#LikeStakePosition": "0x508610D3009cda82Ac1a40D2b322Ed31932D16b1",
+  "LikeStakePositionV1Module#LikeStakePositionV1Impl": "0x0A5D942E88167eD24d3d56e9031A1f32Bb5E0aeE"
 }
