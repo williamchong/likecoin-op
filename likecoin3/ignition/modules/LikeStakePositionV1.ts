@@ -18,27 +18,30 @@ npx hardhat ignition wipe chain-901 \
 
 */
 
-const LikeStakePositionV1Module = buildModule("LikeStakePositionV1Module", (m) => {
-  const { likeStakePositionV0 } = m.useModule(LikeStakePositionV0Module);
+const LikeStakePositionV1Module = buildModule(
+  "LikeStakePositionV1Module",
+  (m) => {
+    const { likeStakePositionV0 } = m.useModule(LikeStakePositionV0Module);
 
-  const likeStakePositionV1Impl = m.contract("LikeStakePosition", [], {
-    id: "LikeStakePositionV1Impl",
-  });
+    const likeStakePositionV1Impl = m.contract("LikeStakePosition", [], {
+      id: "LikeStakePositionV1Impl",
+    });
 
-  m.call(likeStakePositionV0, "upgradeToAndCall", [
-    likeStakePositionV1Impl,
-    "0x",
-  ]);
+    m.call(likeStakePositionV0, "upgradeToAndCall", [
+      likeStakePositionV1Impl,
+      "0x",
+    ]);
 
-  const likeStakePosition = m.contractAt(
-    "LikeStakePosition",
-    likeStakePositionV0,
-  );
+    const likeStakePosition = m.contractAt(
+      "LikeStakePosition",
+      likeStakePositionV0,
+    );
 
-  return {
-    likeStakePositionV1Impl,
-    likeStakePosition,
-  };
-});
+    return {
+      likeStakePositionV1Impl,
+      likeStakePosition,
+    };
+  },
+);
 
 export default LikeStakePositionV1Module;
