@@ -833,8 +833,6 @@ components:
           type: string
         featured_image:
           type: string
-        deployer_address:
-          type: string
         deployed_block_number:
           $ref: "#/components/schemas/Uint64"
         minted_at:
@@ -856,7 +854,6 @@ components:
         - max_supply
         - banner_image
         - featured_image
-        - deployer_address
         - deployed_block_number
         - minted_at
         - updated_at

@@ -364,10 +364,6 @@ func (s *BookNFT) encodeFields(e *jx.Encoder) {
 		e.Str(s.FeaturedImage)
 	}
 	{
-		e.FieldStart("deployer_address")
-		e.Str(s.DeployerAddress)
-	}
-	{
 		e.FieldStart("deployed_block_number")
 		s.DeployedBlockNumber.Encode(e)
 	}
@@ -387,7 +383,7 @@ func (s *BookNFT) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfBookNFT = [17]string{
+var jsonFieldsNameOfBookNFT = [16]string{
 	0:  "id",
 	1:  "address",
 	2:  "name",
@@ -400,11 +396,10 @@ var jsonFieldsNameOfBookNFT = [17]string{
 	9:  "metadata",
 	10: "banner_image",
 	11: "featured_image",
-	12: "deployer_address",
-	13: "deployed_block_number",
-	14: "minted_at",
-	15: "updated_at",
-	16: "owner",
+	12: "deployed_block_number",
+	13: "minted_at",
+	14: "updated_at",
+	15: "owner",
 }
 
 // Decode decodes BookNFT from json.
@@ -412,7 +407,7 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode BookNFT to nil")
 	}
-	var requiredBitSet [3]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -568,20 +563,8 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"featured_image\"")
 			}
-		case "deployer_address":
-			requiredBitSet[1] |= 1 << 4
-			if err := func() error {
-				v, err := d.Str()
-				s.DeployerAddress = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"deployer_address\"")
-			}
 		case "deployed_block_number":
-			requiredBitSet[1] |= 1 << 5
+			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
 				if err := s.DeployedBlockNumber.Decode(d); err != nil {
 					return err
@@ -591,7 +574,7 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"deployed_block_number\"")
 			}
 		case "minted_at":
-			requiredBitSet[1] |= 1 << 6
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.MintedAt = v
@@ -603,7 +586,7 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"minted_at\"")
 			}
 		case "updated_at":
-			requiredBitSet[1] |= 1 << 7
+			requiredBitSet[1] |= 1 << 6
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.UpdatedAt = v
@@ -633,10 +616,9 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [3]uint8{
+	for i, mask := range [2]uint8{
 		0b11101111,
-		0b11111101,
-		0b00000000,
+		0b01111101,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
