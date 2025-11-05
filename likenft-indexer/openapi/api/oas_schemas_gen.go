@@ -92,7 +92,6 @@ type BookNFT struct {
 	Metadata            OptContractLevelMetadata `json:"metadata"`
 	BannerImage         string                   `json:"banner_image"`
 	FeaturedImage       string                   `json:"featured_image"`
-	DeployerAddress     string                   `json:"deployer_address"`
 	DeployedBlockNumber Uint64                   `json:"deployed_block_number"`
 	MintedAt            time.Time                `json:"minted_at"`
 	UpdatedAt           time.Time                `json:"updated_at"`
@@ -157,11 +156,6 @@ func (s *BookNFT) GetBannerImage() string {
 // GetFeaturedImage returns the value of FeaturedImage.
 func (s *BookNFT) GetFeaturedImage() string {
 	return s.FeaturedImage
-}
-
-// GetDeployerAddress returns the value of DeployerAddress.
-func (s *BookNFT) GetDeployerAddress() string {
-	return s.DeployerAddress
 }
 
 // GetDeployedBlockNumber returns the value of DeployedBlockNumber.
@@ -242,11 +236,6 @@ func (s *BookNFT) SetBannerImage(val string) {
 // SetFeaturedImage sets the value of FeaturedImage.
 func (s *BookNFT) SetFeaturedImage(val string) {
 	s.FeaturedImage = val
-}
-
-// SetDeployerAddress sets the value of DeployerAddress.
-func (s *BookNFT) SetDeployerAddress(val string) {
-	s.DeployerAddress = val
 }
 
 // SetDeployedBlockNumber sets the value of DeployedBlockNumber.
