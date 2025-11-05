@@ -13,12 +13,14 @@ class Params(BaseModel):
     book_nft_name: str | None = None
 
 
-def parse_base64_encoded_params(v: Any) -> Params:
-    if not isinstance(v, str):
+def parse_base64_url_encoded_params(url_encoded_params: Any) -> Params:
+    if not isinstance(url_encoded_params, str):
         raise ValueError("Invalid base64 encoded string")
 
     try:
-        data = base64.b64decode(v)
+        data = base64.urlsafe_b64decode(
+            url_encoded_params + "=" * (len(url_encoded_params) % 4)
+        )
 
         # Address is 20 bytes
         address_bytes = data[:20].rjust(32, b"\x00")

@@ -1,10 +1,10 @@
 import decimal
 import logging
 
-from fastapi import APIRouter
-from pydantic import BaseModel, HttpUrl
+from fastapi import APIRouter, Response
 
-from staking_image.deps import ConfigDep, EVMClientDep
+from staking_image.deps import EVMClientDep
+from staking_image.gen_image import gen_image_by_params
 from staking_image.gen_image.params import parse_base64_url_encoded_params
 
 logger = logging.getLogger(__name__)
@@ -12,20 +12,12 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-class Response(BaseModel):
-    name: str | None = None
-    description: str
-    image: HttpUrl
-    stakeholder: str
-
-
 @router.get(
     "/{encoded_string}",
-    response_model=Response,
+    response_class=Response,
 )
 def get_image_from_encoded_string(
     evm_client: EVMClientDep,
-    config: ConfigDep,
     encoded_string: str,
 ):
     params = parse_base64_url_encoded_params(encoded_string)
@@ -42,14 +34,9 @@ def get_image_from_encoded_string(
         except Exception as e:
             logger.warning(f"Failed to get book NFT name: {e}")
 
+    content = gen_image_by_params(params, format="PNG")
+
     return Response(
-        name=params.book_nft_name,
-        description=f"NFT for {params.staked_amount} LIKE stake in {params.book_nft_name or params.book_nft_address}",
-        image=config.base_url.build(
-            scheme=config.base_url.scheme,
-            host=config.base_url.host,
-            port=config.base_url.port,
-            path=f"image/{encoded_string}",
-        ),
-        stakeholder=params.initial_staker,
+        content=content,
+        media_type="image/png",
     )
