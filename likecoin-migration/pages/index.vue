@@ -251,7 +251,7 @@
             <div :class="['flex', 'justify-center']">
               <AppButton
                 variant="primary"
-                href="https://3ook.com/account"
+                href="https://3ook.com/account?utm_source=likecoin&utm_medium=migration_completed_stake_button&utm_campaign=likecoin_migration"
                 target="_blank"
               >
                 {{ $t('section.migration-completed.stake') }}
