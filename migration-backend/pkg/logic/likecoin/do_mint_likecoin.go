@@ -141,9 +141,9 @@ func DoMintLikeCoin(
 		WithGroup("DoMintLikeCoin")
 	txLogger := logger.WithGroup("TxLog")
 
-	txResponse, err := cosmosAPI.QueryTransaction(*a.CosmosTxHash)
+	txResponse, err := cosmosAPI.QueryTransactionWithRetry(*a.CosmosTxHash, 1)
 	if err != nil {
-		mylogger.Error("cosmosAPI.QueryTransaction", "err", err)
+		mylogger.Error("cosmosAPI.QueryTransactionWithRetry", "err", err)
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 	memoString := txResponse.Tx.Body.Memo
