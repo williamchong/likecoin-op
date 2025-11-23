@@ -24,6 +24,7 @@ npx tsx \
         likevaloper1mztweu8y2lazpapfgtqmadxaqaapyasv7nhexk \
         likevaloper1f90nyyptfajz58m9sa9dygwajwuxkv838n72k6 \
         likevaloper1r4sv5ea8mhd7q2cp566sh5zvkwg8xf3xwgw6uw \
+        likevaloper18kzunt5rj3gzqmhda5fae2zasqqj6w4vs0gk8a \
     2>/dev/null
 ```
 
@@ -36,3 +37,4 @@ civic liker likevaloper1jxpfche2386a6m0kvfpj6xq9zlrjtuqwz2rnug
 liker.social likevaloper1mztweu8y2lazpapfgtqmadxaqaapyasv7nhexk
 oldcat likevaloper1f90nyyptfajz58m9sa9dygwajwuxkv838n72k6
 Yoitsu likevaloper1r4sv5ea8mhd7q2cp566sh5zvkwg8xf3xwgw6uw
+Yasu likevaloper18kzunt5rj3gzqmhda5fae2zasqqj6w4vs0gk8a
