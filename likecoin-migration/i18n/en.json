@@ -37,7 +37,7 @@
     },
     "introduction": {
       "confirm": "Next",
-      "text": "LikeCoin has been upgraded to v3 and is now live on the Base chain (Ethereum).\nPlease upgrade your LikeCoin v2 tokens before Feb 2, 2025 to avoid loss of funds.",
+      "text": "LikeCoin has been upgraded to v3 and is now live on the Base chain (Ethereum). Please upgrade your LikeCoin v2 tokens before Feb 2, 2026 to avoid loss of funds.\n\nIf your LikeCoin is delegated to validators, please undelegate all of them, wait for the tokens to return to your wallet after 21 days so as to upgrade all your LikeCoin to v3.",
       "title": "Introduction"
     },
     "migration-completed": {
