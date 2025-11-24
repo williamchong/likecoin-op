@@ -227,7 +227,6 @@ export default Vue.extend({
     handleConnectTargetWalletClick() {
       this.$emit('connectTargetWalletClick');
       this.$likeCoinEVMWalletConnector.connector.showConnectPortal({
-        preferredProviderId: this.preferredEvmProviderId || undefined,
         email: this.email || undefined,
       });
     },
