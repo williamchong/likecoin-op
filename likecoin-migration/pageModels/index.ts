@@ -172,6 +172,7 @@ export interface StepStateStep4Pending {
   signingStargateClient: SigningStargateClient;
   ethAddress: string;
   evmSignature: string;
+  ethSigningMessage: string;
   gasEstimation: number;
   currentBalance: ChainCoin;
   estimatedBalance: ChainCoin;
@@ -188,6 +189,7 @@ export interface StepStateStep4Polling {
   signingStargateClient: SigningStargateClient;
   ethAddress: string;
   evmSignature: string;
+  ethSigningMessage: string;
   gasEstimation: number;
   currentBalance: ChainCoin;
   estimatedBalance: ChainCoin;
@@ -204,6 +206,7 @@ export interface StepStateStep4PendingCosmosSignCancelled {
   signingStargateClient: SigningStargateClient;
   ethAddress: string;
   evmSignature: string;
+  ethSigningMessage: string;
   gasEstimation: number;
   currentBalance: ChainCoin;
   estimatedBalance: ChainCoin;
@@ -221,6 +224,7 @@ export interface StepStateStep4Failed {
   signingStargateClient: SigningStargateClient;
   ethAddress: string;
   evmSignature: string;
+  ethSigningMessage: string;
   gasEstimation: number;
   currentBalance: ChainCoin;
   estimatedBalance: ChainCoin;
@@ -237,6 +241,7 @@ export interface StepStateStepEnd {
   signingStargateClient: SigningStargateClient;
   ethAddress: string;
   evmSignature: string;
+  ethSigningMessage: string;
   gasEstimation: number;
   currentBalance: ChainCoin;
   estimatedBalance: ChainCoin;
@@ -503,6 +508,7 @@ export function pendingMigrationResolved(
     | StepStateStep4Polling,
   migration: Pending<LikeCoinMigration>
 ): StepStateStep4Pending {
+  const ethSigningMessage = 'ethSigningMessage' in prev ? prev.ethSigningMessage : '';
   return {
     step: 4,
     state: 'Pending',
@@ -513,6 +519,7 @@ export function pendingMigrationResolved(
     signingStargateClient: prev.signingStargateClient,
     ethAddress: migration.user_eth_address,
     evmSignature: migration.evm_signature,
+    ethSigningMessage,
     gasEstimation: prev.gasEstimation,
     currentBalance: prev.currentBalance,
     estimatedBalance: prev.estimatedBalance,
@@ -530,6 +537,7 @@ export function pollingMigrationResolved(
     | StepStateStep4Polling,
   migration: Polling<LikeCoinMigration>
 ): StepStateStep4Polling {
+  const ethSigningMessage = 'ethSigningMessage' in prev ? prev.ethSigningMessage : '';
   return {
     step: 4,
     state: 'Polling',
@@ -540,6 +548,7 @@ export function pollingMigrationResolved(
     signingStargateClient: prev.signingStargateClient,
     ethAddress: migration.user_eth_address,
     evmSignature: migration.evm_signature,
+    ethSigningMessage,
     gasEstimation: prev.gasEstimation,
     currentBalance: prev.currentBalance,
     estimatedBalance: prev.estimatedBalance,
@@ -557,6 +566,7 @@ export function completedMigrationResolved(
     | StepStateStep4Polling,
   migration: Completed<LikeCoinMigration>
 ): StepStateStepEnd {
+  const ethSigningMessage = 'ethSigningMessage' in prev ? prev.ethSigningMessage : '';
   return {
     step: 99999,
     cosmosAddress: prev.cosmosAddress,
@@ -566,6 +576,7 @@ export function completedMigrationResolved(
     signingStargateClient: prev.signingStargateClient,
     ethAddress: migration.user_eth_address,
     evmSignature: migration.evm_signature,
+    ethSigningMessage,
     gasEstimation: prev.gasEstimation,
     currentBalance: prev.currentBalance,
     estimatedBalance: prev.estimatedBalance,
@@ -583,6 +594,7 @@ export function failedMigrationResolved(
     | StepStateStep4Polling,
   migration: Failed<LikeCoinMigration>
 ): StepStateStep4Failed {
+  const ethSigningMessage = 'ethSigningMessage' in prev ? prev.ethSigningMessage : '';
   return {
     step: 4,
     state: 'Failed',
@@ -593,6 +605,7 @@ export function failedMigrationResolved(
     signingStargateClient: prev.signingStargateClient,
     ethAddress: migration.user_eth_address,
     evmSignature: migration.evm_signature,
+    ethSigningMessage,
     gasEstimation: prev.gasEstimation,
     currentBalance: prev.currentBalance,
     estimatedBalance: prev.estimatedBalance,
@@ -615,6 +628,7 @@ export function migrationCreated(
     signingStargateClient: prev.signingStargateClient,
     ethAddress: prev.ethAddress,
     evmSignature: migration.evm_signature,
+    ethSigningMessage: prev.ethSigningMessage,
     gasEstimation: prev.gasEstimation,
     currentBalance: prev.currentBalance,
     estimatedBalance: prev.estimatedBalance,
@@ -636,6 +650,7 @@ export function migrationCancelledByCosmosNotSigned(
     signingStargateClient: prev.signingStargateClient,
     ethAddress: prev.ethAddress,
     evmSignature: prev.migration.evm_signature,
+    ethSigningMessage: prev.ethSigningMessage,
     gasEstimation: prev.gasEstimation,
     currentBalance: prev.currentBalance,
     estimatedBalance: prev.estimatedBalance,
@@ -675,6 +690,7 @@ export function migrationRetryCosmosSign(
     signingStargateClient: prev.signingStargateClient,
     ethAddress: prev.ethAddress,
     evmSignature: prev.migration.evm_signature,
+    ethSigningMessage: prev.ethSigningMessage,
     gasEstimation: prev.gasEstimation,
     currentBalance: prev.currentBalance,
     estimatedBalance: prev.estimatedBalance,
@@ -696,6 +712,7 @@ export function migrationRefreshed(
     signingStargateClient: prev.signingStargateClient,
     ethAddress: prev.ethAddress,
     evmSignature: migration.evm_signature,
+    ethSigningMessage: prev.ethSigningMessage,
     gasEstimation: prev.gasEstimation,
     currentBalance: prev.currentBalance,
     estimatedBalance: prev.estimatedBalance,

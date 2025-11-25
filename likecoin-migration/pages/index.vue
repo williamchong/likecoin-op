@@ -277,6 +277,7 @@ import {
 } from '@likecoin/wallet-connector';
 import { isAxiosError } from 'axios';
 import { Decimal } from 'decimal.js';
+import { verifyMessage } from 'ethers';
 import Vue from 'vue';
 
 import {
@@ -791,14 +792,25 @@ export default Vue.extend({
       | StepStateStep4Failed
       | StepStateStepEnd
     > {
-      const cosmosMemoData = await this.createCosmosMemoData({
-        signature: s.evmSignature,
-        amount: s.estimatedBalance,
-        ethAddress: s.ethAddress,
-      });
-
       let tx: DeliverTxResponse;
       try {
+        // Validate that the recovered address matches the stored ETH address
+        const recoveredAddress = verifyMessage(s.ethSigningMessage, s.evmSignature);
+        const normalizedRecoveredAddress = recoveredAddress.toLowerCase();
+        const normalizedStoredAddress = s.ethAddress.toLowerCase();
+
+        if (normalizedRecoveredAddress !== normalizedStoredAddress) {
+          throw new Error(
+            'ETH address mismatch: recovered address does not match the signing address'
+          );
+        }
+
+        const cosmosMemoData = await this.createCosmosMemoData({
+          signature: s.evmSignature,
+          amount: s.estimatedBalance,
+          ethAddress: s.ethAddress,
+        });
+
         tx = await s.signingStargateClient.sendTokens(
           s.cosmosAddress,
           this.$appConfig.cosmosDepositAddress,
