@@ -351,6 +351,7 @@ import {
   isEthConnected,
   likerIdResolved,
   migrationCancelledByCosmosNotSigned,
+  migrationCancelledByInvalidEthSignature,
   migrationRetryCosmosSign,
   migrationRetryFailed,
   pendingMigrationResolved,
@@ -368,6 +369,7 @@ import {
   StepStateStep2LikerIdResolved,
   StepStateStep3AwaitSignature,
   StepStateStep4Failed,
+  StepStateStep4InvalidEthSignature,
   StepStateStep4Pending,
   StepStateStep4PendingCosmosSignCancelled,
   StepStateStep4Polling,
@@ -492,7 +494,8 @@ export default Vue.extend({
     migrationErrorMessage(): string | null {
       if (
         this.currentStep.step === 4 &&
-        this.currentStep.state === 'PendingCosmosSignCancelled'
+        (this.currentStep.state === 'PendingCosmosSignCancelled' ||
+          this.currentStep.state === 'InvalidEthSignature')
       ) {
         return this.currentStep.cancelReason;
       }
@@ -766,7 +769,10 @@ export default Vue.extend({
             this.currentStep,
             this._sendCosmosToken
           );
-        } else if (this.currentStep.state === 'Failed') {
+        } else if (
+          this.currentStep.state === 'Failed' ||
+          this.currentStep.state === 'InvalidEthSignature'
+        ) {
           this.currentStep = migrationRetryFailed(this.currentStep);
         }
       }
@@ -798,6 +804,7 @@ export default Vue.extend({
     ): Promise<
       | StepStateStep4Pending
       | StepStateStep4PendingCosmosSignCancelled
+      | StepStateStep4InvalidEthSignature
       | StepStateStep4Polling
       | StepStateStep4Failed
       | StepStateStepEnd
@@ -817,7 +824,14 @@ export default Vue.extend({
             'ETH address mismatch: recovered address does not match the signing address'
           );
         }
+      } catch (e) {
+        if (e instanceof Error) {
+          return migrationCancelledByInvalidEthSignature(s, e.message);
+        }
+        throw e;
+      }
 
+      try {
         const cosmosMemoData = await this.createCosmosMemoData({
           signature: s.evmSignature,
           amount: s.estimatedBalance,
