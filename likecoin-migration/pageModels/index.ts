@@ -196,6 +196,24 @@ export interface StepStateStep4Polling {
   migration: Polling<LikeCoinMigration>;
 }
 
+export interface StepStateStep4InvalidEthSignature {
+  step: 4;
+  state: 'InvalidEthSignature';
+  cosmosAddress: string;
+  connection: LikeCoinWalletConnectorConnectionResult;
+  avatar: string | null;
+  likerId: string | null;
+  signingStargateClient: SigningStargateClient;
+  ethAddress: string;
+  evmSignature: string;
+  ethSigningMessage: string;
+  gasEstimation: number;
+  currentBalance: ChainCoin;
+  estimatedBalance: ChainCoin;
+  migration: Pending<LikeCoinMigration>;
+  cancelReason: string;
+}
+
 export interface StepStateStep4PendingCosmosSignCancelled {
   step: 4;
   state: 'PendingCosmosSignCancelled';
@@ -262,6 +280,7 @@ export type StepState =
   | StepStateStep3AwaitSignature
   | StepStateStep4Pending
   | StepStateStep4Polling
+  | StepStateStep4InvalidEthSignature
   | StepStateStep4PendingCosmosSignCancelled
   | StepStateStep4Failed
   | StepStateStepEnd;
@@ -504,6 +523,7 @@ export function pendingMigrationResolved(
     | EitherEthConnected<StepStateStep2InsufficientEstimatedBalance>
     | StepStateStep3AwaitSignature
     | StepStateStep4Pending
+    | StepStateStep4InvalidEthSignature
     | StepStateStep4PendingCosmosSignCancelled
     | StepStateStep4Polling,
   migration: Pending<LikeCoinMigration>
@@ -640,6 +660,29 @@ export function migrationCreated(
   };
 }
 
+export function migrationCancelledByInvalidEthSignature(
+  prev: StepStateStep4Pending,
+  cancelReason: string
+): StepStateStep4InvalidEthSignature {
+  return {
+    step: 4,
+    state: 'InvalidEthSignature',
+    cosmosAddress: prev.cosmosAddress,
+    connection: prev.connection,
+    avatar: prev.avatar,
+    likerId: prev.likerId,
+    signingStargateClient: prev.signingStargateClient,
+    ethAddress: prev.ethAddress,
+    evmSignature: prev.migration.evm_signature,
+    ethSigningMessage: prev.ethSigningMessage,
+    gasEstimation: prev.gasEstimation,
+    currentBalance: prev.currentBalance,
+    estimatedBalance: prev.estimatedBalance,
+    migration: prev.migration,
+    cancelReason,
+  };
+}
+
 export function migrationCancelledByCosmosNotSigned(
   prev: StepStateStep4Pending,
   cancelReason: string
@@ -664,7 +707,7 @@ export function migrationCancelledByCosmosNotSigned(
 }
 
 export function migrationRetryFailed(
-  prev: StepStateStep4Failed
+  prev: StepStateStep4Failed | StepStateStep4InvalidEthSignature
 ): EthNotConnected<StepStateStep2GasEstimated> {
   return {
     step: 2,
