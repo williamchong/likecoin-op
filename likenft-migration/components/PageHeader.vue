@@ -5,8 +5,8 @@
       'bg-white',
       'pt-4',
       'pb-3.5',
-      'px-15',
-      'px-[60px]',
+      'px-4',
+      'sm:px-15',
       'mx-auto',
     ]"
   >
