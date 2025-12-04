@@ -508,7 +508,8 @@ export function pendingMigrationResolved(
     | StepStateStep4Polling,
   migration: Pending<LikeCoinMigration>
 ): StepStateStep4Pending {
-  const ethSigningMessage = 'ethSigningMessage' in prev ? prev.ethSigningMessage : '';
+  const ethSigningMessage =
+    'ethSigningMessage' in prev ? prev.ethSigningMessage : '';
   return {
     step: 4,
     state: 'Pending',
@@ -537,7 +538,8 @@ export function pollingMigrationResolved(
     | StepStateStep4Polling,
   migration: Polling<LikeCoinMigration>
 ): StepStateStep4Polling {
-  const ethSigningMessage = 'ethSigningMessage' in prev ? prev.ethSigningMessage : '';
+  const ethSigningMessage =
+    'ethSigningMessage' in prev ? prev.ethSigningMessage : '';
   return {
     step: 4,
     state: 'Polling',
@@ -566,7 +568,8 @@ export function completedMigrationResolved(
     | StepStateStep4Polling,
   migration: Completed<LikeCoinMigration>
 ): StepStateStepEnd {
-  const ethSigningMessage = 'ethSigningMessage' in prev ? prev.ethSigningMessage : '';
+  const ethSigningMessage =
+    'ethSigningMessage' in prev ? prev.ethSigningMessage : '';
   return {
     step: 99999,
     cosmosAddress: prev.cosmosAddress,
@@ -594,7 +597,8 @@ export function failedMigrationResolved(
     | StepStateStep4Polling,
   migration: Failed<LikeCoinMigration>
 ): StepStateStep4Failed {
-  const ethSigningMessage = 'ethSigningMessage' in prev ? prev.ethSigningMessage : '';
+  const ethSigningMessage =
+    'ethSigningMessage' in prev ? prev.ethSigningMessage : '';
   return {
     step: 4,
     state: 'Failed',

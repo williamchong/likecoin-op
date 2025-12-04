@@ -4,7 +4,9 @@
       <HeroBanner>
         <h1
           :class="[
-            'text-3xl',
+            'px-4',
+            'text-2xl',
+            'sm:text-3xl',
             'font-inter',
             'font-semibold',
             'text-likecoin-votecolor-yes',
@@ -14,8 +16,16 @@
         </h1>
       </HeroBanner>
     </div>
-    <div :class="['relative', 'max-w-[880px]', 'px-4', 'mx-auto']">
-      <div :class="['bg-white', 'p-[30px]', 'rounded-md', 'shadow-md']">
+    <div :class="['relative', 'max-w-[880px]', 'sm:px-4', 'mx-auto']">
+      <div
+        :class="[
+          'bg-white',
+          'p-[30px]',
+          'max-sm:px-4',
+          'sm:rounded-md',
+          'shadow-md',
+        ]"
+      >
         <StepSection :step="1" :current-step="currentStep.step">
           <template #default="{ isCurrent, isPast }">
             <h2
@@ -795,7 +805,10 @@ export default Vue.extend({
       let tx: DeliverTxResponse;
       try {
         // Validate that the recovered address matches the stored ETH address
-        const recoveredAddress = verifyMessage(s.ethSigningMessage, s.evmSignature);
+        const recoveredAddress = verifyMessage(
+          s.ethSigningMessage,
+          s.evmSignature
+        );
         const normalizedRecoveredAddress = recoveredAddress.toLowerCase();
         const normalizedStoredAddress = s.ethAddress.toLowerCase();
 

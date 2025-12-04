@@ -5,8 +5,10 @@
       'bg-likecoin-lightergrey',
       'p-4',
       'flex',
-      'flex-row',
-      'gap-6',
+      'flex-col',
+      'sm:flex-row',
+      'gap-4',
+      'sm:gap-6',
     ]"
   >
     <div :class="['flex-1']">
@@ -93,7 +95,14 @@
         </div>
       </div>
     </div>
-    <div :class="['border-l', 'border-l-likecoin-grey', 'self-stretch']"></div>
+    <div
+      :class="[
+        'max-sm:hidden',
+        'border-l',
+        'border-l-likecoin-grey',
+        'self-stretch',
+      ]"
+    ></div>
     <div :class="['flex-1']">
       <div v-if="ethAddress == null">
         <h3
