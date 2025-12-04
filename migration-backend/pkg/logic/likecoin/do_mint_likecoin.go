@@ -146,6 +146,16 @@ func DoMintLikeCoin(
 		mylogger.Error("cosmosAPI.QueryTransactionWithRetry", "err", err)
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
+
+	if txResponse.Code != 0 {
+		reason := txResponse.RawLog
+		if reason == "" {
+			reason = fmt.Sprintf("cosmos tx %s failed with code %d", *a.CosmosTxHash, txResponse.Code)
+		}
+		mylogger.Error("cosmosAPI.QueryTransactionWithRetry", "err", reason)
+		return nil, doMintLikeCoinFailed(db, a, errors.New(reason))
+	}
+
 	memoString := txResponse.Tx.Body.Memo
 	memo, err := ParseMemoData(memoString)
 	if err != nil {
