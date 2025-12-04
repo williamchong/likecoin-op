@@ -10,7 +10,7 @@ SELECT
     max(datetime) as last_staked_at,
     count(distinct nft_class_address) as number_of_stakers
 FROM staking_events_hyper_table
-WHERE event_type = 'staked'
+WHERE event_type IN ('staked', 'unstaked')
 GROUP BY nft_class_address, bucket;
 
 -- Use real-time aggregates
@@ -35,7 +35,7 @@ SELECT
     max(datetime) as last_staked_at,
     count(distinct nft_class_address) as number_of_stakers
 FROM staking_events_hyper_table
-WHERE event_type = 'staked'
+WHERE event_type IN ('staked', 'unstaked')
 GROUP BY nft_class_address, bucket;
 
 -- Use real-time aggregates
@@ -60,7 +60,7 @@ SELECT
     max(datetime) as last_staked_at,
     count(distinct nft_class_address) as number_of_stakers
 FROM staking_events_hyper_table
-WHERE event_type = 'staked'
+WHERE event_type IN ('staked', 'unstaked')
 GROUP BY nft_class_address, bucket;
 
 -- Use real-time aggregates
