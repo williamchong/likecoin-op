@@ -9,5 +9,8 @@ type Tx struct {
 }
 
 type TxResponse struct {
+	Code   int    `json:"code"`
+	RawLog string `json:"raw_log"`
+
 	Tx Tx `json:"tx"`
 }
