@@ -3,6 +3,7 @@ package likecoin
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -19,6 +20,7 @@ import (
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/evm"
 	"github.com/likecoin/like-migration-backend/pkg/likecoin/util"
 	"github.com/likecoin/like-migration-backend/pkg/model"
+	cosmosModel "github.com/likecoin/like-migration-backend/pkg/model/cosmos"
 	"github.com/shopspring/decimal"
 )
 
@@ -26,6 +28,89 @@ var ErrAlreadyInProgress = fmt.Errorf("err already in progress")
 var ErrEthAddressOnCosmosNotMatch = fmt.Errorf("err eth address on cosmos not match")
 var ErrMintingEthPrivateKeyNotMatchMintingEthAddress = fmt.Errorf("err minting eth private key not match minter eth address")
 var ErrAmountNotMatch = fmt.Errorf("err amount not match")
+var ErrNoMessagesInTransaction = fmt.Errorf("err no messages found in transaction")
+var ErrNoMsgSendInTransaction = fmt.Errorf("err no MsgSend found in transaction")
+var ErrNoAmountInMsgSend = fmt.Errorf("err no amount found in MsgSend")
+var ErrTransactionRecipientMismatch = fmt.Errorf("err transaction recipient does not match burning address")
+var ErrTransactionSenderMismatch = fmt.Errorf("err transaction sender does not match user address")
+var ErrTransactionAmountMismatch = fmt.Errorf("err transaction amount does not match expected amount")
+
+func verifyCosmosTransaction(
+	logger *slog.Logger,
+	txResponse *cosmosModel.TxResponse,
+	expectedFromAddress string,
+	expectedToAddress string,
+	expectedAmount string,
+	memo *MemoData,
+) (types.Coin, error) {
+	if len(txResponse.Tx.Body.Messages) == 0 {
+		logger.Error("no messages in transaction", "err", ErrNoMessagesInTransaction)
+		return types.Coin{}, ErrNoMessagesInTransaction
+	}
+
+	var msgSend *cosmosModel.MsgSend
+	for _, rawMsg := range txResponse.Tx.Body.Messages {
+		var tempMsg cosmosModel.MsgSend
+		if err := json.Unmarshal(rawMsg, &tempMsg); err != nil {
+			continue
+		}
+		if tempMsg.TypeURL == "/cosmos.bank.v1beta1.MsgSend" {
+			msgSend = &tempMsg
+			break
+		}
+	}
+
+	if msgSend == nil {
+		logger.Error("no MsgSend found", "err", ErrNoMsgSendInTransaction)
+		return types.Coin{}, ErrNoMsgSendInTransaction
+	}
+
+	if !strings.EqualFold(msgSend.To, expectedToAddress) {
+		err := fmt.Errorf("%w: got %s, expected %s", ErrTransactionRecipientMismatch, msgSend.To, expectedToAddress)
+		logger.Error("recipient mismatch", "err", err, "got", msgSend.To, "expected", expectedToAddress)
+		return types.Coin{}, err
+	}
+
+	if !strings.EqualFold(msgSend.From, expectedFromAddress) {
+		err := fmt.Errorf("%w: got %s, expected %s", ErrTransactionSenderMismatch, msgSend.From, expectedFromAddress)
+		logger.Error("sender mismatch", "err", err, "got", msgSend.From, "expected", expectedFromAddress)
+		return types.Coin{}, err
+	}
+
+	if len(msgSend.Amount) == 0 {
+		logger.Error("no amount in MsgSend", "err", ErrNoAmountInMsgSend)
+		return types.Coin{}, ErrNoAmountInMsgSend
+	}
+
+	actualTransferredCoin := msgSend.Amount[0]
+	cosmosCoinTx, err := types.ParseCoinNormalized(actualTransferredCoin.Amount + actualTransferredCoin.Denom)
+	if err != nil {
+		logger.Error("failed to parse transaction amount", "err", err)
+		return types.Coin{}, fmt.Errorf("failed to parse transaction amount: %w", err)
+	}
+
+	cosmosCoinDb, err := types.ParseCoinNormalized(expectedAmount)
+	if err != nil {
+		logger.Error("failed to parse database amount", "err", err)
+		return types.Coin{}, fmt.Errorf("failed to parse database amount: %w", err)
+	}
+
+	cosmosCoinMemo := memo.Amount
+
+	if !cosmosCoinTx.Amount.Equal(cosmosCoinDb.Amount) || cosmosCoinTx.Denom != cosmosCoinDb.Denom {
+		err := fmt.Errorf("%w: transaction %s != database %s", ErrTransactionAmountMismatch, cosmosCoinTx.String(), cosmosCoinDb.String())
+		logger.Error("amount verification failed", "err", err, "txAmount", cosmosCoinTx.String(), "dbAmount", cosmosCoinDb.String())
+		return types.Coin{}, err
+	}
+
+	if !cosmosCoinTx.Amount.Equal(cosmosCoinMemo.Amount) || cosmosCoinTx.Denom != cosmosCoinMemo.Denom {
+		err := fmt.Errorf("%w: transaction %s != memo %s", ErrTransactionAmountMismatch, cosmosCoinTx.String(), cosmosCoinMemo.String())
+		logger.Error("amount verification failed", "err", err, "txAmount", cosmosCoinTx.String(), "memoAmount", cosmosCoinMemo.String())
+		return types.Coin{}, err
+	}
+
+	return cosmosCoinTx, nil
+}
 
 func DoMintLikeCoinByCosmosAddress(
 	ctx context.Context,
@@ -163,18 +248,17 @@ func DoMintLikeCoin(
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
-	cosmosCoinDb, err := types.ParseCoinNormalized(a.Amount)
-
+	cosmosCoinDb, err := verifyCosmosTransaction(
+		mylogger,
+		txResponse,
+		a.UserCosmosAddress,
+		a.BurningCosmosAddress,
+		a.Amount,
+		memo,
+	)
 	if err != nil {
-		mylogger.Error("types.ParseCoinNormalized(a.Amount)", "err", err)
+		mylogger.Error("verifyCosmosTransaction", "err", err)
 		return nil, doMintLikeCoinFailed(db, a, err)
-	}
-
-	cosmosCoinMemo := memo.Amount
-
-	if cosmosCoinMemo.Amount != cosmosCoinDb.Amount && cosmosCoinMemo.Denom != cosmosCoinDb.Denom {
-		mylogger.Error("coin not matched", "err", ErrAmountNotMatch)
-		return nil, doMintLikeCoinFailed(db, a, ErrAmountNotMatch)
 	}
 
 	oldDecimals, err := cosmosLikcCoinClient.Decimals()
@@ -184,7 +268,8 @@ func DoMintLikeCoin(
 		return nil, doMintLikeCoinFailed(db, a, err)
 	}
 
-	evmAmountDecimal := decimal.NewFromBigInt(cosmosCoinMemo.Amount.BigInt(), -int32(oldDecimals))
+	// Use the verified amount from the actual transaction
+	evmAmountDecimal := decimal.NewFromBigInt(cosmosCoinDb.Amount.BigInt(), -int32(oldDecimals))
 
 	message := GetEthSigningMessage(evmAmountDecimal)
 
