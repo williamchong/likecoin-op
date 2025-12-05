@@ -824,12 +824,17 @@ export default Vue.extend({
           ethAddress: s.ethAddress,
         });
 
+        const gasFee: ChainCoin = {
+          denom: s.estimatedBalance.denom,
+          amount: `${s.gasEstimation * 10000}`,
+        };
+
         tx = await s.signingStargateClient.sendTokens(
           s.cosmosAddress,
           this.$appConfig.cosmosDepositAddress,
           [s.estimatedBalance],
           {
-            amount: [s.estimatedBalance],
+            amount: [gasFee],
             gas: `${s.gasEstimation}`,
           },
           cosmosMemoData.memo_data
