@@ -18,7 +18,8 @@ type NFTClassPagination struct {
 
 func (f *NFTClassPagination) HandlePagination(q *ent.NFTClassQuery) *ent.NFTClassQuery {
 	// Handle sorting
-	if f.SortBy != nil && f.SortOrder != nil {
+	usingCustomSort := f.SortBy != nil && f.SortOrder != nil
+	if usingCustomSort {
 		// Use custom sorting
 		sortField := *f.SortBy
 		var orderFunc func(*sql.Selector)
@@ -46,10 +47,16 @@ func (f *NFTClassPagination) HandlePagination(q *ent.NFTClassQuery) *ent.NFTClas
 	}
 
 	if f.Key != nil {
-		if f.Reverse != nil && *f.Reverse {
-			q = q.Where(sql.FieldLT("id", *f.Key))
+		if usingCustomSort {
+			// When using custom sort, treat Key as offset
+			q = q.Offset(*f.Key)
 		} else {
-			q = q.Where(sql.FieldGT("id", *f.Key))
+			// When using default id-based sort, treat Key as cursor
+			if f.Reverse != nil && *f.Reverse {
+				q = q.Where(sql.FieldLT("id", *f.Key))
+			} else {
+				q = q.Where(sql.FieldGT("id", *f.Key))
+			}
 		}
 	}
 
