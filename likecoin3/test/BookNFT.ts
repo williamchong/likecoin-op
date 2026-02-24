@@ -247,6 +247,53 @@ describe("BookNFTClass", () => {
     expect(await book0NFT.read.getCurrentIndex()).to.equal(1n);
   });
 
+  it("should keep current index after burning latest token", async function () {
+    const { book0NFT, classOwner } = await loadFixture(initMint);
+    await book0NFT.write.mint(
+      [
+        classOwner.account.address,
+        ["_mint1", "_mint2"],
+        [
+          JSON.stringify({
+            name: "202412191729 #0001",
+            description: "Burn latest token test",
+          }),
+          JSON.stringify({
+            name: "202412191729 #0002",
+            description: "Burn latest token test",
+          }),
+        ],
+      ],
+      {
+        account: classOwner.account,
+      },
+    );
+
+    expect(await book0NFT.read.getCurrentIndex()).to.equal(2n);
+    await book0NFT.write.burn([1n], { account: classOwner.account });
+    expect(await book0NFT.read.totalSupply()).to.equal(1n);
+    expect(await book0NFT.read.getCurrentIndex()).to.equal(2n);
+
+    await expect(
+      book0NFT.write.safeMintWithTokenId(
+        [
+          2n,
+          [classOwner.account.address],
+          ["_mint3"],
+          [
+            JSON.stringify({
+              name: "202412191729 #0003",
+              description: "Mint after burn",
+            }),
+          ],
+        ],
+        {
+          account: classOwner.account,
+        },
+      ),
+    ).to.be.not.rejected;
+  });
+
   it("should allow class owner to update class and mint NFT", async function () {
     const { book0NFT, classOwner } = await loadFixture(initMint);
     expect(await book0NFT.read.owner()).to.equalAddress(
