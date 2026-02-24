@@ -325,8 +325,9 @@ contract BookNFT is
         string[] calldata memos,
         string[] calldata metadataList
     ) external onlyMinter {
-        if (totalSupply() != fromTokenId) {
-            revert ErrTokenIdMintFails(totalSupply());
+        BookNFTStorage storage $ = _getClassStorage();
+        if ($._currentIndex != fromTokenId) {
+            revert ErrTokenIdMintFails($._currentIndex);
         }
         _ensureEnoughSupply(metadataList.length);
         for (uint32 i = 0; i < metadataList.length; ++i) {
