@@ -19,7 +19,7 @@ interface IRewardContract {
         bool restake
     ) external returns (uint256);
     function deposit(address account, uint256 rewardAmount) external;
-    function withdraw(address account) external;
+    function withdraw(address account, uint256 amount) external;
 }
 
 /// @custom:security-contact rickmak@oursky.com
@@ -278,7 +278,7 @@ contract veLike is
         // Vault specific logic
         IRewardContract rewardContract = getCurrentRewardContract();
         if (rewardContract != IRewardContract(address(0))) {
-            rewardContract.withdraw(owner);
+            rewardContract.withdraw(owner, assets);
         }
 
         // Copying from ERC4626 _withdraw function Event for clarity

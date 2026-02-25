@@ -240,15 +240,15 @@ contract veLikeReward is
         $.totalStaked += stakedAmount;
     }
 
-    function withdraw(address account) public whenNotPaused onlyVault {
+    function withdraw(
+        address account,
+        uint256 amount
+    ) public whenNotPaused onlyVault {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
-        if (_isActive()) {
-            revert ErrWithdrawLocked();
-        }
         _updateVault();
         _claimReward(account, false);
-        $.totalStaked -= $.stakerInfos[account].stakedAmount;
-        $.stakerInfos[account].stakedAmount = 0;
+        $.totalStaked -= amount;
+        $.stakerInfos[account].stakedAmount -= amount;
     }
 
     /**
