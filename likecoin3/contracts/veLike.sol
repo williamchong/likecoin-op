@@ -33,6 +33,7 @@ contract veLike is
     struct veLikeStorage {
         address rewardContract;
         uint256 lockTime;
+        mapping(address => bool) isLegacyRewardContract;
     }
 
     // keccak256(abi.encode(uint256(keccak256("veLike.storage")) - 1)) & ~bytes32(uint256(0xff))
@@ -50,6 +51,7 @@ contract veLike is
     error ErrNoRewardToClaim();
     error ErrNonTransferable();
     error ErrWithdrawLocked();
+    error ErrNotLegacyRewardContract();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -81,6 +83,48 @@ contract veLike is
     function setRewardContract(address rewardContract) public onlyOwner {
         veLikeStorage storage $ = _getveLikeData();
         $.rewardContract = rewardContract;
+    }
+
+    /**
+     * setLegacyRewardContract function
+     *
+     * Add or remove a legacy reward contract from the allowlist.
+     * Legacy reward contracts can be claimed by users after reward rotation.
+     *
+     * @param rewardContract - the legacy reward contract address
+     * @param allowed - true to allow, false to disallow
+     */
+    function setLegacyRewardContract(
+        address rewardContract,
+        bool allowed
+    ) public onlyOwner {
+        veLikeStorage storage $ = _getveLikeData();
+        $.isLegacyRewardContract[rewardContract] = allowed;
+    }
+
+    /**
+     * claimLegacyReward function
+     *
+     * Claim reward from a legacy (rotated-out) reward contract.
+     * The legacy reward contract must be allowlisted via setLegacyRewardContract.
+     *
+     * @param legacyReward - the legacy reward contract address
+     * @param account - the account to claim the reward for
+     * @return reward - the reward claimed
+     */
+    function claimLegacyReward(
+        address legacyReward,
+        address account
+    ) public whenNotPaused nonReentrant returns (uint256) {
+        veLikeStorage storage $ = _getveLikeData();
+        if (!$.isLegacyRewardContract[legacyReward]) {
+            revert ErrNotLegacyRewardContract();
+        }
+        uint256 reward = IRewardContract(legacyReward).claimReward(
+            account,
+            false
+        );
+        return reward;
     }
 
     /**
