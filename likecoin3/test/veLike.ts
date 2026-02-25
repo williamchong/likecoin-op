@@ -6,7 +6,12 @@ import { expect } from "chai";
 import { viem, ignition } from "hardhat";
 
 import "./setup";
-import { deployVeLike, initialMint, initialCondition } from "./factory";
+import {
+  deployVeLike,
+  deployVeLikeReward,
+  initialMint,
+  initialCondition,
+} from "./factory";
 
 describe("veLike ", async function () {
   describe("as ERC1967 Proxy", async function () {
@@ -454,6 +459,115 @@ describe("veLike ", async function () {
           account: rick.account.address,
         }),
       ).to.be.rejectedWith("ErrNoRewardToClaim");
+    });
+  });
+
+  describe("legacy reward claims", async function () {
+    it("should allow owner to set legacy reward contract", async function () {
+      const { veLike, veLikeReward, deployer } =
+        await loadFixture(initialCondition);
+      // setLegacyRewardContract should succeed for owner
+      await veLike.write.setLegacyRewardContract([veLikeReward.address, true], {
+        account: deployer.account.address,
+      });
+    });
+
+    it("should not allow non-owner to set legacy reward contract", async function () {
+      const { veLike, veLikeReward, rick } =
+        await loadFixture(initialCondition);
+      await expect(
+        veLike.write.setLegacyRewardContract([veLikeReward.address, true], {
+          account: rick.account.address,
+        }),
+      ).to.be.rejectedWith("OwnableUnauthorizedAccount");
+    });
+
+    it("should revert claimLegacyReward on non-allowlisted contract", async function () {
+      const { veLike, veLikeReward, bob } = await loadFixture(initialCondition);
+      await expect(
+        veLike.write.claimLegacyReward(
+          [veLikeReward.address, bob.account.address],
+          {
+            account: bob.account.address,
+          },
+        ),
+      ).to.be.rejectedWith("ErrNotLegacyRewardContract");
+    });
+
+    it("should allow user to claim legacy reward from allowlisted contract", async function () {
+      const {
+        veLike,
+        veLikeReward,
+        likecoin,
+        deployer,
+        bob,
+        testClient,
+        endTime,
+      } = await loadFixture(initialCondition);
+
+      // Advance past the reward period end
+      await testClient.setNextBlockTimestamp({ timestamp: endTime + 100n });
+      await testClient.mine({ blocks: 1 });
+
+      // Bob has 100 LIKE staked and earned all 10000 LIKE reward
+      const pendingReward = await veLike.read.getPendingReward([
+        bob.account.address,
+      ]);
+      expect(pendingReward).to.equal(10000n * 10n ** 6n);
+
+      // Now simulate rotation: allowlist the old reward contract
+      await veLike.write.setLegacyRewardContract([veLikeReward.address, true], {
+        account: deployer.account.address,
+      });
+
+      // Set reward contract to address(0) to simulate rotation
+      await veLike.write.setRewardContract(
+        ["0x0000000000000000000000000000000000000000"],
+        { account: deployer.account.address },
+      );
+
+      // Bob claims legacy reward
+      const balanceBefore = await likecoin.read.balanceOf([
+        bob.account.address,
+      ]);
+      await veLike.write.claimLegacyReward(
+        [veLikeReward.address, bob.account.address],
+        {
+          account: bob.account.address,
+        },
+      );
+      const balanceAfter = await likecoin.read.balanceOf([bob.account.address]);
+
+      // Bob should have received the full reward
+      expect(balanceAfter - balanceBefore).to.equal(10000n * 10n ** 6n);
+    });
+
+    it("should revert claimLegacyReward after removing from allowlist", async function () {
+      const { veLike, veLikeReward, deployer, bob, testClient, endTime } =
+        await loadFixture(initialCondition);
+
+      // Advance past the reward period end
+      await testClient.setNextBlockTimestamp({ timestamp: endTime + 100n });
+      await testClient.mine({ blocks: 1 });
+
+      // Allowlist, then remove
+      await veLike.write.setLegacyRewardContract([veLikeReward.address, true], {
+        account: deployer.account.address,
+      });
+      await veLike.write.setLegacyRewardContract(
+        [veLikeReward.address, false],
+        { account: deployer.account.address },
+      );
+
+      // Should revert since no longer allowlisted
+      await expect(
+        veLike.write.claimLegacyReward(
+          [veLikeReward.address, bob.account.address],
+          {
+            account: bob.account.address,
+          },
+        ),
+      ).to.be.rejectedWith("ErrNotLegacyRewardContract");
     });
   });
 });
