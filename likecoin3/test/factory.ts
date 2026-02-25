@@ -268,10 +268,7 @@ export async function initialCondition() {
   const block = await publicClient.getBlock();
   const startTime = block.timestamp + 100n;
   const endTime = startTime + 1000n;
-  // Assume set manually by admin.
-  await veLike.write.setLockTime([endTime], {
-    account: deployer.account.address,
-  });
+  // No lockTime set — users can withdraw anytime (no-lock model).
   await veLikeReward.write.addReward(
     [deployer.account.address, 10000n * 10n ** 6n, startTime, endTime],
     {
