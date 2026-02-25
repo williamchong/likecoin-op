@@ -4,6 +4,7 @@ import {
 } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
 import { expect } from "chai";
 import { viem, ignition } from "hardhat";
+import { encodeFunctionData } from "viem";
 
 import "./setup";
 import {
@@ -568,6 +569,164 @@ describe("veLike ", async function () {
           },
         ),
       ).to.be.rejectedWith("ErrNotLegacyRewardContract");
+    });
+  });
+
+  describe("reward rotation integration", async function () {
+    async function deployNewVeLikeReward(ownerAddress: `0x${string}`) {
+      const impl = await viem.deployContract("veLikeReward");
+      const initData = encodeFunctionData({
+        abi: impl.abi,
+        functionName: "initialize",
+        args: [ownerAddress],
+      });
+      const proxy = await viem.deployContract("ERC1967Proxy", [
+        impl.address,
+        initData,
+      ]);
+      return await viem.getContractAt("veLikeReward", proxy.address);
+    }
+
+    /**
+     * Flow: deploy reward1 → Bob stakes → period 1 ends →
+     * rotate to reward2 (reward1 becomes legacy) → Rick stakes →
+     * period 2 ends → Bob claims legacy, Rick claims current.
+     *
+     * Existing stakers are NOT auto-enrolled in the new reward contract;
+     * only users who deposit/withdraw after rotation get tracked.
+     */
+    it("should support full rotation: period 1 → rotate → period 2, with legacy claim", async function () {
+      const {
+        veLike,
+        likecoin,
+        deployer,
+        bob,
+        rick,
+        publicClient,
+        testClient,
+      } = await loadFixture(initialMint);
+
+      // Period 1 setup
+      const reward1 = await deployNewVeLikeReward(deployer.account.address);
+      await reward1.write.setVault([veLike.address], {
+        account: deployer.account.address,
+      });
+      await reward1.write.setLikecoin([likecoin.address], {
+        account: deployer.account.address,
+      });
+      await veLike.write.setRewardContract([reward1.address], {
+        account: deployer.account.address,
+      });
+
+      await likecoin.write.approve([reward1.address, 10000n * 10n ** 6n], {
+        account: deployer.account.address,
+      });
+      const block1 = await publicClient.getBlock();
+      const start1 = block1.timestamp + 100n;
+      const end1 = start1 + 1000n;
+      await reward1.write.addReward(
+        [deployer.account.address, 10000n * 10n ** 6n, start1, end1],
+        { account: deployer.account.address },
+      );
+
+      await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
+        account: bob.account.address,
+      });
+      await veLike.write.deposit([100n * 10n ** 6n, bob.account.address], {
+        account: bob.account.address,
+      });
+
+      await testClient.setNextBlockTimestamp({ timestamp: end1 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      const pendingP1 = await veLike.read.getPendingReward([
+        bob.account.address,
+      ]);
+      expect(pendingP1).to.equal(10000n * 10n ** 6n);
+
+      // Rotate: reward2 replaces reward1, reward1 becomes legacy
+      const reward2 = await deployNewVeLikeReward(deployer.account.address);
+      await reward2.write.setVault([veLike.address], {
+        account: deployer.account.address,
+      });
+      await reward2.write.setLikecoin([likecoin.address], {
+        account: deployer.account.address,
+      });
+      await veLike.write.setRewardContract([reward2.address], {
+        account: deployer.account.address,
+      });
+      await veLike.write.setLegacyRewardContract([reward1.address, true], {
+        account: deployer.account.address,
+      });
+
+      expect(
+        await veLike.read.getPendingReward([bob.account.address]),
+      ).to.equal(0n);
+
+      // Period 2 setup
+      await likecoin.write.approve([reward2.address, 5000n * 10n ** 6n], {
+        account: deployer.account.address,
+      });
+      const block2 = await publicClient.getBlock();
+      const start2 = block2.timestamp + 100n;
+      const end2 = start2 + 500n;
+      await reward2.write.addReward(
+        [deployer.account.address, 5000n * 10n ** 6n, start2, end2],
+        { account: deployer.account.address },
+      );
+
+      await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
+        account: rick.account.address,
+      });
+      await veLike.write.deposit([100n * 10n ** 6n, rick.account.address], {
+        account: rick.account.address,
+      });
+
+      await testClient.setNextBlockTimestamp({ timestamp: end2 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      // Only Rick is registered with reward2 (Bob's stake is only in reward1)
+      const bobP2 = await veLike.read.getPendingReward([bob.account.address]);
+      const rickP2 = await veLike.read.getPendingReward([rick.account.address]);
+      expect(bobP2).to.equal(0n);
+      expect(rickP2).to.equal(5000n * 10n ** 6n);
+
+      // Bob claims legacy reward from period 1
+      const bobBalanceBefore = await likecoin.read.balanceOf([
+        bob.account.address,
+      ]);
+      await veLike.write.claimLegacyReward(
+        [reward1.address, bob.account.address],
+        {
+          account: bob.account.address,
+        },
+      );
+      const bobBalanceAfter = await likecoin.read.balanceOf([
+        bob.account.address,
+      ]);
+      expect(bobBalanceAfter - bobBalanceBefore).to.equal(10000n * 10n ** 6n);
+
+      // Rick claims current reward from period 2
+      const rickBalanceBefore = await likecoin.read.balanceOf([
+        rick.account.address,
+      ]);
+      await veLike.write.claimReward([rick.account.address], {
+        account: rick.account.address,
+      });
+      const rickBalanceAfter = await likecoin.read.balanceOf([
+        rick.account.address,
+      ]);
+      expect(rickBalanceAfter - rickBalanceBefore).to.equal(5000n * 10n ** 6n);
+
+      // Rick has no legacy reward (wasn't in period 1)
+      await expect(
+        veLike.write.claimLegacyReward(
+          [reward1.address, rick.account.address],
+          {
+            account: rick.account.address,
+          },
+        ),
+      ).to.be.rejectedWith("ErrNoRewardToClaim");
     });
   });
 });
