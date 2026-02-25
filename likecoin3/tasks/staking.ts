@@ -128,3 +128,25 @@ task("emitOnlyRewardAdded", "Emit only RewardAdded event for a bookNFT")
     const tx = await likecollective.emitOnlyRewardAdded(booknft, amount);
     await tx.wait();
   });
+
+task(
+  "claimLegacyReward",
+  "Claim legacy reward from a rotated-out veLikeReward contract",
+)
+  .addParam("velike", "The address of the veLike contract")
+  .addParam("legacyreward", "The address of the legacy veLikeReward contract")
+  .addParam("account", "The account address to claim reward for")
+  .setAction(async ({ velike, legacyreward, account }, { ethers }) => {
+    const [operator] = await ethers.getSigners();
+    console.log("Operator:", operator.address);
+    console.log("veLike address:", velike);
+    console.log("Legacy reward address:", legacyreward);
+    console.log("Account:", account);
+
+    const veLike = await ethers.getContractAt("veLike", velike);
+    const veLikeConnected = veLike.connect(operator);
+
+    const tx = await veLikeConnected.claimLegacyReward(legacyreward, account);
+    const receipt = await tx.wait();
+    console.log("Legacy reward claimed. Tx hash:", receipt?.hash);
+  });
