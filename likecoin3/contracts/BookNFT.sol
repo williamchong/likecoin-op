@@ -344,7 +344,7 @@ contract BookNFT is
      */
     function _ensureEnoughSupply(uint256 quantity) internal view {
         BookNFTStorage storage $ = _getClassStorage();
-        if (totalSupply() + quantity > $.max_supply) {
+        if ($._currentIndex + quantity > $.max_supply) {
             revert ErrNftNoSupply();
         }
     }
