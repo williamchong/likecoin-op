@@ -280,13 +280,15 @@ contract veLike is
             address(this),
             assets
         );
-        _mint(receiver, shares);
 
-        // Vault specific logic
+        // Vault specific logic: notify reward contract before mint so that
+        // _syncStaker reads the pre-deposit balanceOf for correct retroactive rewards.
         IRewardContract rewardContract = getCurrentRewardContract();
         if (rewardContract != IRewardContract(address(0))) {
             rewardContract.deposit(receiver, assets);
         }
+
+        _mint(receiver, shares);
 
         // Copying from ERC4626 _deposit function Event for clarity
         emit Deposit(caller, receiver, assets, shares);
