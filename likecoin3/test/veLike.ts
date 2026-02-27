@@ -578,6 +578,204 @@ describe("veLike ", async function () {
     });
   });
 
+  describe("legacy reward with lock", async function () {
+    /**
+     * Simulates the real production path:
+     * - Period 1 uses veLikeReward (original) with lock enabled
+     * - Period 1 ends, lock expires
+     * - Rotate to veLikeRewardNoLock for period 2
+     * - Bob claims legacy reward from the locked veLikeReward
+     * - Auto-enrollment works for period 2
+     */
+    it("should allow claiming legacy reward from a locked veLikeReward after rotation", async function () {
+      const {
+        veLike,
+        veLikeReward: reward1,
+        likecoin,
+        deployer,
+        bob,
+        rick,
+        publicClient,
+        testClient,
+      } = await loadFixture(initialMint);
+
+      // --- Period 1 setup with veLikeReward (original) + lock ---
+      // Bob deposits 100 LIKE before reward period
+      await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
+        account: bob.account.address,
+      });
+      await veLike.write.deposit([100n * 10n ** 6n, bob.account.address], {
+        account: bob.account.address,
+      });
+
+      // Fund period 1: 10000 LIKE over 1000 seconds
+      await likecoin.write.approve([reward1.address, 10000n * 10n ** 6n], {
+        account: deployer.account.address,
+      });
+      const block1 = await publicClient.getBlock();
+      const start1 = block1.timestamp + 100n;
+      const end1 = start1 + 1000n;
+      await reward1.write.addReward(
+        [deployer.account.address, 10000n * 10n ** 6n, start1, end1],
+        { account: deployer.account.address },
+      );
+
+      // Set lock time to end of period 1 (users can't withdraw until period ends)
+      await veLike.write.setLockTime([end1], {
+        account: deployer.account.address,
+      });
+
+      // Advance to start of period 1
+      await testClient.setNextBlockTimestamp({ timestamp: start1 });
+      await testClient.mine({ blocks: 1 });
+
+      // Verify Bob cannot withdraw during locked period
+      await expect(
+        veLike.write.withdraw(
+          [100n * 10n ** 6n, bob.account.address, bob.account.address],
+          { account: bob.account.address },
+        ),
+      ).to.be.rejectedWith("ErrWithdrawLocked");
+
+      // Advance past period 1 (lock also expires since lockTime == end1)
+      await testClient.setNextBlockTimestamp({ timestamp: end1 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      // Bob earned all 10000 LIKE from period 1
+      const pendingP1 = await veLike.read.getPendingReward([
+        bob.account.address,
+      ]);
+      expect(pendingP1).to.equal(10000n * 10n ** 6n);
+
+      // --- Rotation: deploy veLikeRewardNoLock, replace reward1 ---
+      const reward2Impl = await viem.deployContract("veLikeRewardNoLock");
+      const reward2InitData = encodeFunctionData({
+        abi: reward2Impl.abi,
+        functionName: "initialize",
+        args: [deployer.account.address],
+      });
+      const reward2Proxy = await viem.deployContract("ERC1967Proxy", [
+        reward2Impl.address,
+        reward2InitData,
+      ]);
+      const reward2 = await viem.getContractAt(
+        "veLikeRewardNoLock",
+        reward2Proxy.address,
+      );
+      await reward2.write.setVault([veLike.address], {
+        account: deployer.account.address,
+      });
+      await reward2.write.setLikecoin([likecoin.address], {
+        account: deployer.account.address,
+      });
+
+      // Remove lock for period 2 (no-lock model going forward)
+      await veLike.write.setLockTime([0n], {
+        account: deployer.account.address,
+      });
+
+      // Pre-initialize totalStaked on reward2 (captures Bob's 100 LIKE)
+      await reward2.write.initTotalStaked({
+        account: deployer.account.address,
+      });
+
+      // Switch active reward to reward2, mark reward1 as legacy
+      await veLike.write.setRewardContract([reward2.address], {
+        account: deployer.account.address,
+      });
+      await veLike.write.setLegacyRewardContract([reward1.address, true], {
+        account: deployer.account.address,
+      });
+
+      // --- Period 2 setup: 5000 LIKE over 500 seconds ---
+      await likecoin.write.approve([reward2.address, 5000n * 10n ** 6n], {
+        account: deployer.account.address,
+      });
+      const block2 = await publicClient.getBlock();
+      const start2 = block2.timestamp + 100n;
+      const end2 = start2 + 500n;
+      await reward2.write.addReward(
+        [deployer.account.address, 5000n * 10n ** 6n, start2, end2],
+        { account: deployer.account.address },
+      );
+
+      // Approve Rick's deposit before advancing time
+      await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
+        account: rick.account.address,
+      });
+
+      // Advance to period 2 start
+      await testClient.setNextBlockTimestamp({ timestamp: start2 });
+      await testClient.mine({ blocks: 1 });
+
+      // Rick deposits 100 LIKE at start2 + 1
+      await testClient.setNextBlockTimestamp({ timestamp: start2 + 1n });
+      await veLike.write.deposit([100n * 10n ** 6n, rick.account.address], {
+        account: rick.account.address,
+      });
+
+      // Advance past period 2
+      await testClient.setNextBlockTimestamp({ timestamp: end2 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      // --- Verify: Bob auto-enrolled in period 2, gets retroactive rewards ---
+      // Same math as rotation integration test:
+      // 5000 LIKE over 500s = 10 LIKE/s
+      // 1s with Bob only (totalStaked=100): Bob gets 10 LIKE
+      // 499s with Bob+Rick (totalStaked=200): Bob 2495, Rick 2495
+      // Bob total: 2505, Rick total: 2495
+      const bobP2 = await veLike.read.getPendingReward([bob.account.address]);
+      const rickP2 = await veLike.read.getPendingReward([rick.account.address]);
+      expect(bobP2).to.equal(2505n * 10n ** 6n);
+      expect(rickP2).to.equal(2495n * 10n ** 6n);
+
+      // --- Bob claims legacy reward from period 1 (veLikeReward with lock) ---
+      const bobBalanceBefore = await likecoin.read.balanceOf([
+        bob.account.address,
+      ]);
+      await veLike.write.claimLegacyReward(
+        [reward1.address, bob.account.address],
+        { account: bob.account.address },
+      );
+      const bobBalanceAfter = await likecoin.read.balanceOf([
+        bob.account.address,
+      ]);
+      expect(bobBalanceAfter - bobBalanceBefore).to.equal(10000n * 10n ** 6n);
+
+      // --- Bob claims current reward from period 2 ---
+      const bobBalanceBefore2 = await likecoin.read.balanceOf([
+        bob.account.address,
+      ]);
+      await veLike.write.claimReward([bob.account.address], {
+        account: bob.account.address,
+      });
+      const bobBalanceAfter2 = await likecoin.read.balanceOf([
+        bob.account.address,
+      ]);
+      expect(bobBalanceAfter2 - bobBalanceBefore2).to.equal(2505n * 10n ** 6n);
+
+      // --- Rick claims current reward from period 2 ---
+      const rickBalanceBefore = await likecoin.read.balanceOf([
+        rick.account.address,
+      ]);
+      await veLike.write.claimReward([rick.account.address], {
+        account: rick.account.address,
+      });
+      const rickBalanceAfter = await likecoin.read.balanceOf([
+        rick.account.address,
+      ]);
+      expect(rickBalanceAfter - rickBalanceBefore).to.equal(2495n * 10n ** 6n);
+
+      // --- Rick has no legacy reward (wasn't in period 1) ---
+      await expect(
+        veLike.write.claimLegacyReward(
+          [reward1.address, rick.account.address],
+          { account: rick.account.address },
+        ),
+      ).to.be.rejectedWith("ErrNoRewardToClaim");
+    });
+  });
+
   describe("reward rotation integration", async function () {
     async function deployNewVeLikeRewardNoLock(ownerAddress: `0x${string}`) {
       const impl = await viem.deployContract("veLikeRewardNoLock");
