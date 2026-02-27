@@ -38,6 +38,7 @@ contract veLikeRewardNoLock is
         StakingCondition currentStakingCondition;
         mapping(address account => StakerInfo stakerInfo) stakerInfos;
         address drawer;
+        bool autoSyncEnabled; // Set by initTotalStaked() to enable lazy staker sync.
     }
 
     uint256 public constant ACC_REWARD_PRECISION = 1e18; // Precision scalar for reward index
@@ -58,10 +59,12 @@ contract veLikeRewardNoLock is
     }
 
     // Errors
-    error ErrWithdrawLocked();
     error ErrNoRewardToClaim();
     error ErrConflictCondition();
     error ErrUnauthorized();
+    error ErrNotActive();
+    error ErrAlreadySynced();
+    error ErrMismatchSync();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -140,14 +143,22 @@ contract veLikeRewardNoLock is
      * Get the pending reward for the account. Calculated to the query block height.
      * In subsequent claim, the reward might be more as block height is updated.
      *
+     * For un-synced stakers (pre-rotation stakers who have vault balance but
+     * stakedAmount == 0), the vault balance is used as the effective stake.
+     *
      * @param account - the account to get the pending reward for
      * @return pendingReward - the pending reward for the account
      */
     function getPendingReward(address account) public view returns (uint256) {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
         uint256 calculatedReward = _pendingReward(account);
-        uint256 stakedAmount = $.stakerInfos[account].stakedAmount;
-        if (stakedAmount == 0) {
+        uint256 stakedAmount = _effectiveStakedAmount(account);
+        if (
+            stakedAmount == 0 ||
+            $.totalStaked == 0 ||
+            $.currentStakingCondition.endTime <=
+            $.currentStakingCondition.startTime
+        ) {
             return calculatedReward;
         }
         uint256 targetTime = block.timestamp;
@@ -166,15 +177,66 @@ contract veLikeRewardNoLock is
      * _pendingReward function
      *
      * Internal function to calculate the pending reward for the account.
+     * Uses _effectiveStakedAmount to handle un-synced pre-rotation stakers.
      *
      */
     function _pendingReward(address account) internal view returns (uint256) {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
         StakerInfo memory stakerInfo = $.stakerInfos[account];
+        uint256 stakedAmount = _effectiveStakedAmount(account);
         return
-            (stakerInfo.stakedAmount *
+            (stakedAmount *
                 ($.currentStakingCondition.rewardIndex -
                     stakerInfo.rewardIndex)) / ACC_REWARD_PRECISION;
+    }
+
+    /**
+     * _effectiveStakedAmount function
+     *
+     * Returns the effective staked amount for reward calculation.
+     * For synced users, returns stakerInfo.stakedAmount.
+     * For un-synced pre-rotation stakers (stakedAmount == 0 but vault balance > 0),
+     * returns the vault balance so they earn retroactive rewards.
+     * This fallback only applies when autoSyncEnabled is true (set by initTotalStaked).
+     */
+    function _effectiveStakedAmount(
+        address account
+    ) internal view returns (uint256) {
+        veLikeRewardStorage storage $ = _getveLikeRewardData();
+        uint256 stakedAmount = $.stakerInfos[account].stakedAmount;
+        if (stakedAmount == 0 && $.autoSyncEnabled) {
+            return IERC4626($.vault).balanceOf(account);
+        }
+        return stakedAmount;
+    }
+
+    /**
+     * _syncStaker function
+     *
+     * Lazy-sync a pre-rotation staker into this reward contract.
+     * Only operates when autoSyncEnabled is true (set by initTotalStaked).
+     * If stakerInfo.stakedAmount == 0 but the user has a vault balance,
+     * sets stakedAmount to match the vault balance. The user's rewardIndex
+     * stays at 0, so they earn retroactive rewards from the period start
+     * (since addReward resets rewardIndex to 0).
+     *
+     * totalStaked is NOT adjusted because it was pre-initialized via
+     * initTotalStaked() to include all vault holders.
+     */
+    function _syncStaker(address account) internal {
+        veLikeRewardStorage storage $ = _getveLikeRewardData();
+        if (!$.autoSyncEnabled) {
+            return;
+        }
+        StakerInfo storage stakerInfo = $.stakerInfos[account];
+        if (stakerInfo.stakedAmount != 0) {
+            return;
+        }
+        uint256 vaultBalance = IERC4626($.vault).balanceOf(account);
+        if (vaultBalance == 0) {
+            return;
+        }
+        stakerInfo.stakedAmount = vaultBalance;
     }
 
     function _isActive() internal view returns (bool) {
@@ -233,8 +295,8 @@ contract veLikeRewardNoLock is
         uint256 stakedAmount
     ) public whenNotPaused onlyVault {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
+        _syncStaker(account);
         _updateVault();
-        // Note, we must claim the reward, othereise the denominator will be wrong on next claim.
         _claimReward(account, false);
         $.stakerInfos[account].stakedAmount += stakedAmount;
         $.totalStaked += stakedAmount;
@@ -245,6 +307,7 @@ contract veLikeRewardNoLock is
         uint256 amount
     ) public whenNotPaused onlyVault {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
+        _syncStaker(account);
         _updateVault();
         _claimReward(account, false);
         $.totalStaked -= amount;
@@ -264,6 +327,7 @@ contract veLikeRewardNoLock is
         address account,
         bool restake
     ) public whenNotPaused onlyVault returns (uint256) {
+        _syncStaker(account);
         uint256 currentPendingReward = getPendingReward(account);
         if (currentPendingReward == 0) {
             revert ErrNoRewardToClaim();
@@ -336,6 +400,59 @@ contract veLikeRewardNoLock is
     function getRewardPool() public view returns (uint256) {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
         return $.rewardPool;
+    }
+
+    /**
+     * initTotalStaked function
+     *
+     * Initialize totalStaked from the vault's totalSupply and enable
+     * auto-sync for pre-rotation stakers. Called once during deployment
+     * setup (after setVault) to ensure the reward accumulator uses the
+     * correct denominator that includes all existing vault holders.
+     */
+    function initTotalStaked() external onlyOwner {
+        veLikeRewardStorage storage $ = _getveLikeRewardData();
+        $.totalStaked = IERC4626($.vault).totalSupply();
+        $.autoSyncEnabled = true;
+    }
+
+    /**
+     * syncStakers function
+     *
+     * Admin function to eagerly sync pre-rotation stakers into this reward
+     * contract. Must be called during the active reward period (between
+     * startTime and endTime). For each account, sets stakedAmount to the
+     * current vault balance. The staker's rewardIndex stays at 0 so they
+     * earn retroactive rewards from the period start.
+     *
+     * totalStaked is NOT adjusted because it was pre-initialized via
+     * initTotalStaked() to include all vault holders.
+     *
+     * Reverts with ErrAlreadySynced if the account is already synced and
+     * the stakedAmount matches the vault balance. Reverts with
+     * ErrMismatchSync if the account is already synced but the
+     * stakedAmount differs from the vault balance.
+     *
+     * @param accounts - the accounts to sync
+     */
+    function syncStakers(address[] calldata accounts) external onlyOwner {
+        if (!_isActive()) {
+            revert ErrNotActive();
+        }
+        veLikeRewardStorage storage $ = _getveLikeRewardData();
+        for (uint256 i = 0; i < accounts.length; i++) {
+            address account = accounts[i];
+            uint256 vaultBalance = IERC4626($.vault).balanceOf(account);
+            StakerInfo storage stakerInfo = $.stakerInfos[account];
+            if (stakerInfo.stakedAmount != 0) {
+                if (stakerInfo.stakedAmount == vaultBalance) {
+                    revert ErrAlreadySynced();
+                } else {
+                    revert ErrMismatchSync();
+                }
+            }
+            stakerInfo.stakedAmount = vaultBalance;
+        }
     }
 
     /**
