@@ -157,7 +157,7 @@ contract veLikeRewardNoLock is
             stakedAmount == 0 ||
             $.totalStaked == 0 ||
             $.currentStakingCondition.endTime <=
-            $.currentStakingCondition.startTime
+                $.currentStakingCondition.startTime
         ) {
             return calculatedReward;
         }
