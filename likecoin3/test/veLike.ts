@@ -983,4 +983,354 @@ describe("veLike ", async function () {
       ).to.be.rejectedWith("ErrNoRewardToClaim");
     });
   });
+
+  describe("syncStakers and lazy sync", async function () {
+    async function deployNewVeLikeRewardNoLock(ownerAddress: `0x${string}`) {
+      const impl = await viem.deployContract("veLikeRewardNoLock");
+      const initData = encodeFunctionData({
+        abi: impl.abi,
+        functionName: "initialize",
+        args: [ownerAddress],
+      });
+      const proxy = await viem.deployContract("ERC1967Proxy", [
+        impl.address,
+        initData,
+      ]);
+      return await viem.getContractAt("veLikeRewardNoLock", proxy.address);
+    }
+
+    /**
+     * Shared fixture for syncStakers tests:
+     * - Bob deposits 100 LIKE via bootstrap reward contract
+     * - reward1 deployed with initTotalStaked (captures Bob's 100)
+     * - reward1 set as active, period 1 funded (10000 LIKE / 1000s)
+     * - Bob does NO operation during period 1 (never synced into reward1)
+     */
+    async function syncStakersFixture() {
+      const {
+        veLike,
+        likecoin,
+        deployer,
+        bob,
+        rick,
+        publicClient,
+        testClient,
+      } = await loadFixture(initialMintNoLock);
+
+      // Bob deposits 100 LIKE via bootstrap reward contract
+      await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
+        account: bob.account.address,
+      });
+      await veLike.write.deposit([100n * 10n ** 6n, bob.account.address], {
+        account: bob.account.address,
+      });
+
+      // Deploy reward1 with initTotalStaked
+      const reward1 = await deployNewVeLikeRewardNoLock(
+        deployer.account.address,
+      );
+      await reward1.write.setVault([veLike.address], {
+        account: deployer.account.address,
+      });
+      await reward1.write.setLikecoin([likecoin.address], {
+        account: deployer.account.address,
+      });
+      await reward1.write.initTotalStaked({
+        account: deployer.account.address,
+      });
+      await veLike.write.setRewardContract([reward1.address], {
+        account: deployer.account.address,
+      });
+
+      // Fund period 1: 10000 LIKE over 1000 seconds
+      await likecoin.write.approve([reward1.address, 10000n * 10n ** 6n], {
+        account: deployer.account.address,
+      });
+      const block1 = await publicClient.getBlock();
+      const start1 = block1.timestamp + 100n;
+      const end1 = start1 + 1000n;
+      await reward1.write.addReward(
+        [deployer.account.address, 10000n * 10n ** 6n, start1, end1],
+        { account: deployer.account.address },
+      );
+
+      return {
+        veLike,
+        likecoin,
+        deployer,
+        bob,
+        rick,
+        publicClient,
+        testClient,
+        reward1,
+        start1,
+        end1,
+      };
+    }
+
+    it("should revert with ErrNotActive before period starts", async function () {
+      const { reward1, deployer, bob } = await loadFixture(syncStakersFixture);
+
+      // Period hasn't started yet — block.timestamp < start1
+      await expect(
+        reward1.write.syncStakers([[bob.account.address]], {
+          account: deployer.account.address,
+        }),
+      ).to.be.rejectedWith("ErrNotActive");
+    });
+
+    it("should revert with ErrNotActive after period ends", async function () {
+      const { reward1, deployer, bob, testClient, end1 } =
+        await loadFixture(syncStakersFixture);
+
+      // Advance past end of period
+      await testClient.setNextBlockTimestamp({ timestamp: end1 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      await expect(
+        reward1.write.syncStakers([[bob.account.address]], {
+          account: deployer.account.address,
+        }),
+      ).to.be.rejectedWith("ErrNotActive");
+    });
+
+    it("should sync un-synced account during active period", async function () {
+      const { reward1, deployer, bob, testClient, start1 } =
+        await loadFixture(syncStakersFixture);
+
+      // Advance to active period
+      await testClient.setNextBlockTimestamp({ timestamp: start1 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      // Bob is un-synced (stakedAmount == 0 in reward1)
+      await reward1.write.syncStakers([[bob.account.address]], {
+        account: deployer.account.address,
+      });
+
+      // Verify Bob's pending reward is non-zero (he is now synced and earning)
+      const pending = await reward1.read.getPendingReward([
+        bob.account.address,
+      ]);
+      expect(pending > 0n).to.be.true;
+    });
+
+    it("should revert with ErrAlreadySynced when account is synced with matching balance", async function () {
+      const { reward1, deployer, bob, testClient, start1 } =
+        await loadFixture(syncStakersFixture);
+
+      // Advance to active period and sync Bob
+      await testClient.setNextBlockTimestamp({ timestamp: start1 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      await reward1.write.syncStakers([[bob.account.address]], {
+        account: deployer.account.address,
+      });
+
+      // Try to sync again — vault balance still matches stakedAmount
+      await expect(
+        reward1.write.syncStakers([[bob.account.address]], {
+          account: deployer.account.address,
+        }),
+      ).to.be.rejectedWith("ErrAlreadySynced");
+    });
+
+    it("should revert with ErrMismatchSync when account is synced but balance changed", async function () {
+      const { veLike, reward1, likecoin, deployer, bob, testClient, start1 } =
+        await loadFixture(syncStakersFixture);
+
+      // Advance to active period and sync Bob (stakedAmount = 100)
+      await testClient.setNextBlockTimestamp({ timestamp: start1 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      await reward1.write.syncStakers([[bob.account.address]], {
+        account: deployer.account.address,
+      });
+
+      // Switch active reward contract away from reward1 so that
+      // veLike.deposit goes to a different contract, leaving reward1's
+      // stakedAmount unchanged while vault balance grows.
+      const reward2 = await deployNewVeLikeRewardNoLock(
+        deployer.account.address,
+      );
+      await reward2.write.setVault([veLike.address], {
+        account: deployer.account.address,
+      });
+      await reward2.write.setLikecoin([likecoin.address], {
+        account: deployer.account.address,
+      });
+      await reward2.write.initTotalStaked({
+        account: deployer.account.address,
+      });
+      await veLike.write.setRewardContract([reward2.address], {
+        account: deployer.account.address,
+      });
+
+      // Bob deposits 50 more LIKE → vault balance = 150
+      // This goes through reward2.deposit(), so reward1's stakedAmount stays 100
+      await likecoin.write.approve([veLike.address, 50n * 10n ** 6n], {
+        account: bob.account.address,
+      });
+      await veLike.write.deposit([50n * 10n ** 6n, bob.account.address], {
+        account: bob.account.address,
+      });
+
+      // Try to sync on reward1 — stakedAmount (100) != vaultBalance (150)
+      await expect(
+        reward1.write.syncStakers([[bob.account.address]], {
+          account: deployer.account.address,
+        }),
+      ).to.be.rejectedWith("ErrMismatchSync");
+    });
+
+    it("should revert whole tx on first bad account in batch", async function () {
+      const { reward1, deployer, bob, rick, testClient, start1 } =
+        await loadFixture(syncStakersFixture);
+
+      // Advance to active period and sync Bob first
+      await testClient.setNextBlockTimestamp({ timestamp: start1 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      await reward1.write.syncStakers([[bob.account.address]], {
+        account: deployer.account.address,
+      });
+
+      // Batch with [bob (already synced), rick (un-synced)] — reverts on bob
+      await expect(
+        reward1.write.syncStakers(
+          [[bob.account.address, rick.account.address]],
+          { account: deployer.account.address },
+        ),
+      ).to.be.rejectedWith("ErrAlreadySynced");
+    });
+
+    it("should revert when called by non-owner", async function () {
+      const { reward1, bob, testClient, start1 } =
+        await loadFixture(syncStakersFixture);
+
+      // Advance to active period
+      await testClient.setNextBlockTimestamp({ timestamp: start1 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      await expect(
+        reward1.write.syncStakers([[bob.account.address]], {
+          account: bob.account.address,
+        }),
+      ).to.be.rejectedWith("OwnableUnauthorizedAccount");
+    });
+
+    /**
+     * Full rotation flow with syncStakers fixing the stale-balance problem:
+     *
+     * Period 0 (bootstrap): Bob deposits 100 LIKE via initial reward contract.
+     *
+     * Period 1 (veLikeRewardNoLock #1):
+     *   - Deployed with initTotalStaked() → totalStaked = 100
+     *   - Bob does NO operation on veLike during period 1
+     *   - Owner calls syncStakers([bob]) before rotation → freezes Bob at 100
+     *   - 10000 LIKE reward accrues over 1000 seconds
+     *
+     * Rotation to period 2 (veLikeRewardNoLock #2):
+     *   - Bob deposits 50 more LIKE → vault balance goes from 100 → 150
+     *   - 5000 LIKE reward accrues over 500 seconds
+     *
+     * Bob claims:
+     *   (a) legacy reward from reward1 — based on frozen 100 LIKE → 10000 LIKE
+     *   (b) current reward from reward2 — based on 150 LIKE → 5000 LIKE
+     */
+    it("should claim legacy and current rewards based on respective period balances", async function () {
+      const {
+        veLike,
+        likecoin,
+        deployer,
+        bob,
+        publicClient,
+        testClient,
+        reward1,
+        start1,
+        end1,
+      } = await loadFixture(syncStakersFixture);
+
+      // Advance to active period, then sync Bob's stake into reward1
+      await testClient.setNextBlockTimestamp({ timestamp: start1 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      // Owner syncs Bob before rotation — freezes stakedAmount at 100
+      await reward1.write.syncStakers([[bob.account.address]], {
+        account: deployer.account.address,
+      });
+
+      // Advance past period 1
+      await testClient.setNextBlockTimestamp({ timestamp: end1 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      // --- Rotate: reward2 replaces reward1, reward1 becomes legacy ---
+      const reward2 = await deployNewVeLikeRewardNoLock(
+        deployer.account.address,
+      );
+      await reward2.write.setVault([veLike.address], {
+        account: deployer.account.address,
+      });
+      await reward2.write.setLikecoin([likecoin.address], {
+        account: deployer.account.address,
+      });
+      await reward2.write.initTotalStaked({
+        account: deployer.account.address,
+      });
+      await veLike.write.setRewardContract([reward2.address], {
+        account: deployer.account.address,
+      });
+      await veLike.write.setLegacyRewardContract([reward1.address, true], {
+        account: deployer.account.address,
+      });
+
+      // --- Bob deposits 50 more LIKE → vault balance: 100 → 150 ---
+      // reward1 has stakedAmount = 100 (frozen by syncStakers), unaffected.
+      await likecoin.write.approve([veLike.address, 50n * 10n ** 6n], {
+        account: bob.account.address,
+      });
+      await veLike.write.deposit([50n * 10n ** 6n, bob.account.address], {
+        account: bob.account.address,
+      });
+
+      // Fund period 2: 5000 LIKE over 500 seconds
+      await likecoin.write.approve([reward2.address, 5000n * 10n ** 6n], {
+        account: deployer.account.address,
+      });
+      const block2 = await publicClient.getBlock();
+      const start2 = block2.timestamp + 100n;
+      const end2 = start2 + 500n;
+      await reward2.write.addReward(
+        [deployer.account.address, 5000n * 10n ** 6n, start2, end2],
+        { account: deployer.account.address },
+      );
+
+      // Advance past period 2
+      await testClient.setNextBlockTimestamp({ timestamp: end2 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      // --- Claim legacy reward from period 1 ---
+      // Bob's frozen stakedAmount = 100, totalStaked = 100 → reward = 10000 LIKE
+      const bobBefore = await likecoin.read.balanceOf([bob.account.address]);
+      await veLike.write.claimLegacyReward(
+        [reward1.address, bob.account.address],
+        { account: bob.account.address },
+      );
+      const bobAfter = await likecoin.read.balanceOf([bob.account.address]);
+      const legacyReward = bobAfter - bobBefore;
+      expect(legacyReward).to.equal(10000n * 10n ** 6n);
+
+      // --- Claim current reward from period 2 ---
+      // Bob has 150 LIKE staked (sole staker) → gets all 5000 LIKE
+      const bobBefore2 = await likecoin.read.balanceOf([bob.account.address]);
+      await veLike.write.claimReward([bob.account.address], {
+        account: bob.account.address,
+      });
+      const bobAfter2 = await likecoin.read.balanceOf([bob.account.address]);
+      const currentReward = bobAfter2 - bobBefore2;
+      // Allow 1-unit rounding tolerance from accumulator integer division
+      const expected2 = 5000n * 10n ** 6n;
+      expect(currentReward >= expected2 - 1n && currentReward <= expected2).to
+        .be.true;
+    });
+  });
 });
