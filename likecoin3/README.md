@@ -29,17 +29,50 @@ docker compose up
 
 To tail individual chain logs, run something like: `docker compose exec -it superism tail -f /tmp/anvil-chain-902-{timestamp}`
 
-### Deployment
+```
+npx hardhat ignition deploy \
+    ignition/modules/{module}.ts \
+    --strategy create2 --parameters ignition/parameters.local.json \
+    --network superism1
+```
 
-Make deployment to superism & testnet/mainnet:
+If you want to upgrade the contract, you may want to swipe the implementation future as below.
 
 ```
-npm run deploy:noverify -- --network superism1
-DOTENV_CONFIG_PATH=.env npm run deploy -- --network baseSepolia
+cat impl-future | xargs -t -L 1 npx hardhat ignition wipe chain-901
+```
+
+### Deployment
+
+Make `LikeCollective` deployment to testnet/mainnet:
+
+```
+DOTENV_CONFIG_PATH=.env \
+    npx hardhat ignition deploy \
+    ignition/modules/LikeCollective.ts \
+    --verify --strategy create2 --parameters ignition/parameters.json \
+    --network baseSepolia
+```
+
+#### LikeProtocol
+
+Ref command for deploying `LikeProtocolV1`, useful for dev to set local state.
+
+Note: the `LikeProtocol` and `BookNFT` ignition are there for dev purpose, when
+deploy to public chain, create a new `BookNFTV{num}.ts` for tracking
+`deployed_address.json`
+
+```
+DOTENV_CONFIG_PATH=.env \
+    npx hardhat ignition deploy \
+    ignition/modules/LikeProtocolV1.ts \
+    --verify --strategy create2 \
+    --parameters ignition/parameters.json --network baseSepolia
 ```
 
 For upgrading the LikeProtocol
-Swipe if there is previous deployment:
+
+Reference swipe comment for testing:
 
 ```
 npx hardhat ignition wipe chain-84532 LikeProtocolModule#LikeProtocolImpl
@@ -60,27 +93,39 @@ cast send 0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5 \
     "upgradeToAndCall(address newImplementation, bytes data)" \
     0x05857EE837AB29fF79C7BB1d4c642b2C9dd10FA5 \
     0x \
-    --rpc-url https://base-sepolia.g.alchemy.com/v2/OM1XAvx0Dwavrz6MQn5aG \
+    --rpc-url https://base-sepolia.g.alchemy.com/v2/<redacted> \
+    --account likecoin-deployer.eth
+```
+
+For upgrading the BookNFT
+
+Reference swipe comment for testing:
+
+```
+npx hardhat ignition wipe chain-84532 BookNFT#BookNFTImpl
+```
+
+Create a new `BookNFTV{num}.ts` for tracking in `deployed_address.json`
+
+```
+DOTENV_CONFIG_PATH=.env \
+    npx hardhat ignition deploy \
+    ignition/modules/BookNFTV2.ts \
+    --verify --strategy create2 \
+    --parameters ignition/parameters.json --network baseSepolia
+```
+
+```
+cast send 0xfb5cbb1973a092E6C77af02EA1E74B14870AbeC5 \
+    "upgradeTo(address newImplementation)" \
+    0x98AA03bAdD6a013bcc79CDfc00131e0d90E65AC6 \
+    --rpc-url https://base-sepolia.g.alchemy.com/v2/<redacted> \
     --account likecoin-deployer.eth
 ```
 
 #### Verification
 
 ignition should verify the contract on etherscan & sourcify. In case the request fails (like rate limit), run `DOTENV_CONFIG_PATH=.env npx hardhat verify --network sepolia 0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf`, in some testnet, etherscan will fail while sourcify will success.
-
-#### Upgrading the staking implementation
-
-For local superism deploy, normally you will run following
-
-```
-npm run deploy:local -- --network superism1
-```
-
-If you want to upgrade the contract, you may want to swipe the implementation future as below.
-
-```
-cat impl-future | xargs -t -L 1 npx hardhat ignition wipe chain-901
-```
 
 ## Simulation
 
