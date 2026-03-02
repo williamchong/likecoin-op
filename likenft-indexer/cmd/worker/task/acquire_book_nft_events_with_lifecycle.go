@@ -17,12 +17,25 @@ import (
 const TypeAcquireBookNFTEventsTaskPayloadWithLifecyclePayload = "acquire-book-nft-events-with-lifecycle"
 
 type AcquireBookNFTEventsTaskPayloadWithLifecyclePayload struct {
-	ContractAddress string
+	// Deprecated: use ContractAddresses instead. Kept for backward compatibility
+	// with in-flight tasks during rolling deploy.
+	ContractAddress   string   `json:"ContractAddress,omitempty"`
+	ContractAddresses []string `json:"ContractAddresses,omitempty"`
 }
 
-func NewTypeAcquireBookNFTEventsTaskPayloadWithLifecycle(contractAddress string) (*asynq.Task, error) {
+func (p *AcquireBookNFTEventsTaskPayloadWithLifecyclePayload) GetAddresses() []string {
+	if len(p.ContractAddresses) > 0 {
+		return p.ContractAddresses
+	}
+	if p.ContractAddress != "" {
+		return []string{p.ContractAddress}
+	}
+	return nil
+}
+
+func NewTypeAcquireBookNFTEventsTaskPayloadWithLifecycle(contractAddresses []string) (*asynq.Task, error) {
 	payload, err := json.Marshal(AcquireBookNFTEventsTaskPayloadWithLifecyclePayload{
-		ContractAddress: contractAddress,
+		ContractAddresses: contractAddresses,
 	})
 	if err != nil {
 		return nil, err
@@ -50,39 +63,72 @@ func handlerWithLifecycle(
 			return fmt.Errorf("json.Unmarshal: %v", err)
 		}
 
-		task, err := NewAcquireBookNFTEventsTask(
-			[]string{p.ContractAddress},
+		addresses := p.GetAddresses()
+		if len(addresses) == 0 {
+			return fmt.Errorf("no contract addresses in payload: %w", asynq.SkipRetry)
+		}
+
+		calculateNextScoreFn := nftclassacquirebooknftevent.MakeCalculateNextProcessingScoreFn(
+			config.TaskAcquireBookNFTNextProcessingBlockHeightWeight,
+			config.TaskAcquireBookNFTNextProcessingTimeFloor,
+			config.TaskAcquireBookNFTNextProcessingTimeCeiling,
+			config.TaskAcquireBookNFTNextProcessingTimeWeight,
 		)
+		calculateTimeoutScoreFn := nftclassacquirebooknftevent.MakeCalculateTimeoutScoreFn(
+			config.TaskAcquireBookNFTInProgressTimeoutSeconds,
+		)
+		calculateRetryScoreFn := nftclassacquirebooknftevent.MakeCalculateRetryScoreFn(
+			config.TaskAcquireBookNFTRetryInitialTimeoutSeconds,
+			config.TaskAcquireBookNFTRetryExponentialBackoffCoeff,
+			config.TaskAcquireBookNFTRetryMaxTimeoutSeconds,
+		)
+
+		// Build lifecycle objects, tracking which addresses have valid lifecycles
+		var lifecycles []nftclassacquirebooknftevent.NFTClassAcquireBookNFTEventLifecycle
+		var validAddresses []string
+		for _, addr := range addresses {
+			lifecycle, err := nftclassacquirebooknftevent.MakeNFTClassAcquireBookNFTEventLifecycleFromAddress(
+				ctx,
+				nftClassAcquireBookNFTEventsRepository,
+				addr,
+				calculateNextScoreFn,
+				calculateTimeoutScoreFn,
+				calculateRetryScoreFn,
+			)
+			if err != nil {
+				mylogger.Error("MakeNFTClassAcquireBookNFTEventLifecycleFromAddress", "addr", addr, "err", err)
+				continue
+			}
+			lifecycles = append(lifecycles, lifecycle)
+			validAddresses = append(validAddresses, addr)
+		}
+
+		if len(lifecycles) == 0 {
+			return fmt.Errorf("no valid lifecycles for batch: %w", asynq.SkipRetry)
+		}
+
+		// Create innerTask with only addresses that have valid lifecycles
+		innerTask, err := NewAcquireBookNFTEventsTask(validAddresses)
 		if err != nil {
 			return fmt.Errorf("NewAcquireBookNFTEventsTask: %v", err)
 		}
-		lifecycle, err := nftclassacquirebooknftevent.MakeNFTClassAcquireBookNFTEventLifecycleFromAddress(
-			ctx,
-			nftClassAcquireBookNFTEventsRepository,
-			p.ContractAddress,
-			nftclassacquirebooknftevent.MakeCalculateNextProcessingScoreFn(
-				config.TaskAcquireBookNFTNextProcessingBlockHeightWeight,
-				config.TaskAcquireBookNFTNextProcessingTimeFloor,
-				config.TaskAcquireBookNFTNextProcessingTimeCeiling,
-				config.TaskAcquireBookNFTNextProcessingTimeWeight,
-			),
-			nftclassacquirebooknftevent.MakeCalculateTimeoutScoreFn(
-				config.TaskAcquireBookNFTInProgressTimeoutSeconds,
-			),
-			nftclassacquirebooknftevent.MakeCalculateRetryScoreFn(
-				config.TaskAcquireBookNFTRetryInitialTimeoutSeconds,
-				config.TaskAcquireBookNFTRetryExponentialBackoffCoeff,
-				config.TaskAcquireBookNFTRetryMaxTimeoutSeconds,
-			),
-		)
-		if err != nil {
-			return fmt.Errorf("p.ToLifecycle: %v", err)
-		}
 
-		if err := lifecycle.WithEnqueued(ctx, func(nftClass *ent.NFTClass) error {
-			return handler(ctx, task)
-		}); err != nil {
-			mylogger.Error("lifecycle.WithEnqueued", "err", err)
+		// Run the inner handler once, then transition all lifecycles.
+		// The first lifecycle executes the handler; the rest reuse its result.
+		// NOTE: This relies on WithEnqueued calling the callback synchronously.
+		var handlerErr error
+		handlerExecuted := false
+
+		for _, lifecycle := range lifecycles {
+			if err := lifecycle.WithEnqueued(ctx, func(nftClass *ent.NFTClass) error {
+				if !handlerExecuted {
+					handlerExecuted = true
+					handlerErr = handler(ctx, innerTask)
+				}
+				return handlerErr
+			}); err != nil {
+				mylogger.Error("lifecycle.WithEnqueued", "err", err)
+			}
 		}
 
 		return nil
