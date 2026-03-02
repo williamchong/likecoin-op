@@ -247,6 +247,90 @@ describe("BookNFTClass", () => {
     expect(await book0NFT.read.getCurrentIndex()).to.equal(1n);
   });
 
+  it("should keep current index after burning latest token", async function () {
+    const { book0NFT, classOwner } = await loadFixture(initMint);
+    await book0NFT.write.mint(
+      [
+        classOwner.account.address,
+        ["_mint1", "_mint2"],
+        [
+          JSON.stringify({
+            name: "202412191729 #0001",
+            description: "Burn latest token test",
+          }),
+          JSON.stringify({
+            name: "202412191729 #0002",
+            description: "Burn latest token test",
+          }),
+        ],
+      ],
+      {
+        account: classOwner.account,
+      },
+    );
+
+    expect(await book0NFT.read.getCurrentIndex()).to.equal(2n);
+    await book0NFT.write.burn([1n], { account: classOwner.account });
+    expect(await book0NFT.read.totalSupply()).to.equal(1n);
+    expect(await book0NFT.read.getCurrentIndex()).to.equal(2n);
+
+    await expect(
+      book0NFT.write.safeMintWithTokenId(
+        [
+          2n,
+          [classOwner.account.address],
+          ["_mint3"],
+          [
+            JSON.stringify({
+              name: "202412191729 #0003",
+              description: "Mint after burn",
+            }),
+          ],
+        ],
+        {
+          account: classOwner.account,
+        },
+      ),
+    ).to.be.not.rejected;
+  });
+
+  it("should not free up supply slot after burning a token", async function () {
+    const { book0NFT, classOwner } = await loadFixture(initMint);
+    // max_supply is 10; mint all 10 tokens, burn 1 and try to mint 1 more
+    const metadataList = Array.from({ length: 10 }, (_, i) =>
+      JSON.stringify({
+        name: `Token #${i + 1}`,
+        description: "Supply cap test",
+      }),
+    );
+    const memos = metadataList.map((_, i) => `_memo${i + 1}`);
+    await book0NFT.write.mint(
+      [classOwner.account.address, memos, metadataList],
+      { account: classOwner.account },
+    );
+    expect(await book0NFT.read.getCurrentIndex()).to.equal(10n);
+
+    await book0NFT.write.burn([0n], { account: classOwner.account });
+    expect(await book0NFT.read.totalSupply()).to.equal(9n);
+    expect(await book0NFT.read.getCurrentIndex()).to.equal(10n);
+
+    await expect(
+      book0NFT.write.mint(
+        [
+          classOwner.account.address,
+          ["_extra"],
+          [
+            JSON.stringify({
+              name: "Extra",
+              description: "Should be rejected",
+            }),
+          ],
+        ],
+        { account: classOwner.account },
+      ),
+    ).to.be.rejectedWith("ErrNftNoSupply");
+  });
+
   it("should allow class owner to update class and mint NFT", async function () {
     const { book0NFT, classOwner } = await loadFixture(initMint);
     expect(await book0NFT.read.owner()).to.equalAddress(
