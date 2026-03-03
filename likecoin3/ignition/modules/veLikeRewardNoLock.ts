@@ -48,11 +48,6 @@ const veLikeRewardNoLockModule = buildModule(
     m.call(veLikeRewardNoLock, "setVault", [veLike]);
     m.call(veLikeRewardNoLock, "setLikecoin", [likecoin]);
 
-    // Initialize totalStaked from vault's totalSupply so the reward accumulator
-    // uses the correct denominator for pre-rotation stakers, and enable
-    // auto-sync for lazy staker enrollment.
-    m.call(veLikeRewardNoLock, "initTotalStaked", []);
-
     return {
       veLikeRewardNoLock,
       veLikeRewardNoLockProxy,
