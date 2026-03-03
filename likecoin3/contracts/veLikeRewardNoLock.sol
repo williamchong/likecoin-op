@@ -412,6 +412,7 @@ contract veLikeRewardNoLock is
      */
     function initTotalStaked() external onlyOwner {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
+        require(!$.autoSyncEnabled, "Already initialized");
         $.totalStaked = IERC4626($.vault).totalSupply();
         $.autoSyncEnabled = true;
     }
