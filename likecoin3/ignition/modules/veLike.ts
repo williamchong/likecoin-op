@@ -17,11 +17,11 @@ npx hardhat ignition wipe chain-901 \
 const veLikeModule = buildModule("veLikeModule", (m) => {
   const { veLikeV0, veLikeProxy, likecoin } = m.useModule(veLikeV0Module);
 
-  const veLikeImpl = m.contract("veLike", [], {
+  const veLikeImpl = m.contract("contracts/veLike.sol:veLike", [], {
     id: "veLikeImpl",
   });
   m.call(veLikeV0, "upgradeToAndCall", [veLikeImpl, "0x"]);
-  const veLike = m.contractAt("veLike", veLikeProxy);
+  const veLike = m.contractAt("contracts/veLike.sol:veLike", veLikeProxy);
 
   return {
     veLike,

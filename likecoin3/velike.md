@@ -24,6 +24,19 @@ export LIKE=0x1EE5DD1794C28F559f94d2cc642BaE62dC3be5cf
 
 Period 1: **Nov 3 2025 → Feb 1 2026** (timestamps `1762164000` → `1769940000`)
 
+```
+DOTENV_CONFIG_PATH=.env \
+    npx hardhat ignition deploy \
+    ignition/modules/veLike.ts \
+    --verify --strategy create2 \
+    --parameters ignition/parameters.json --network baseSepolia
+DOTENV_CONFIG_PATH=.env \
+    npx hardhat ignition deploy \
+    ignition/modules/veLikeReward.ts \
+    --verify --strategy create2 \
+    --parameters ignition/parameters.json --network baseSepolia
+```
+
 Post-deploy setup calls that were made (for reference):
 
 ```bash
@@ -50,6 +63,73 @@ cast send $VELIKE "setRewardContract(address)" 0x465629cedF312B77C48602D5AfF1Ecb
 cast send $VELIKE "setLockTime(uint256)" 1769940000 \
   --account likecoin-deployer.eth --rpc-url $RPC
 ```
+
+---
+
+## Upgrading veLike & veLikeReward (→ V2)
+
+The initial deployment (commit `80a60ec`) used `veLikeV0` and the original `veLikeReward`.
+Before rotating to `veLikeRewardNoLock`, both contracts must be upgraded in-place:
+
+| Contract         | Change                                                                                                               |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **veLike**       | Adds partial withdraw support, `setLockTime`, `setLegacyRewardContract`, `claimLegacyReward`, non-transferable token |
+| **veLikeReward** | Updates `withdraw(address)` → `withdraw(address, uint256)` to match the `IRewardContract` interface in veLike V1     |
+
+Both upgrades are handled by a single ignition module so the proxy implementations stay
+in sync.
+
+```bash
+DOTENV_CONFIG_PATH=.env \
+    npx hardhat ignition deploy \
+    ignition/modules/veLikeUpgradeV2.ts \
+    --verify --strategy create2 \
+    --parameters ignition/parameters.json --network baseSepolia
+```
+
+### Prerequisites
+
+- The current reward period has ended (or will end before any user withdraws after the
+  upgrade).
+- You have the deployer account that owns both proxies.
+
+### Step 1: Deploy the upgrade
+
+```bash
+DOTENV_CONFIG_PATH=.env \
+  npx hardhat ignition deploy \
+  ignition/modules/veLikeUpgradeV1.ts \
+  --verify --strategy create2 \
+  --parameters ignition/parameters.json \
+  --network base
+```
+
+This deploys new implementation contracts for both `veLike` and `veLikeReward`, then calls
+`upgradeToAndCall` on each proxy.
+
+### Step 2: Verify
+
+Check the new implementation addresses in
+`ignition/deployments/chain-8453/deployed_addresses.json`:
+
+- `"veLikeUpgradeV1Module#veLikeV1Impl"` — new veLike implementation
+- `"veLikeUpgradeV1Module#veLikeRewardV1Impl"` — new veLikeReward implementation
+
+Confirm on-chain:
+
+```bash
+# veLike proxy should point to the new impl
+cast storage $VELIKE 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc --rpc-url $RPC
+
+# veLikeReward proxy should point to the new impl
+export REWARD=0x465629cedF312B77C48602D5AfF1Ecb4FEb1Bf62
+cast storage $REWARD 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc --rpc-url $RPC
+```
+
+### Next steps
+
+After the upgrade, proceed to **"Rotating to a New veLikeRewardNoLock"** below to deploy
+the no-lock reward contract for the next period.
 
 ---
 

@@ -16,5 +16,9 @@
   },
   "veLikeRewardModule": {
     "initOwner": "0x2dd2253cd5bef4ea6d74efdfad9718a73a7d7ec7"
+  },
+  "veLikeUpgradeV2Module": {
+    "veLikeAddress": "0xE55C2b91E688BE70e5BbcEdE3792d723b4766e2B",
+    "veLikeRewardAddress": "0x465629cedF312B77C48602D5AfF1Ecb4FEb1Bf62"
   }
 }

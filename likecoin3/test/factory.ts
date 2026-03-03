@@ -7,6 +7,7 @@ import LikeCollectiveModule from "../ignition/modules/LikeCollective";
 import LikeStakePositionModule from "../ignition/modules/LikeStakePosition";
 import veLikeModule from "../ignition/modules/veLike";
 import veLikeRewardModule from "../ignition/modules/veLikeReward";
+import veLikeUpgradeV2Module from "../ignition/modules/veLikeUpgradeV2";
 
 export const ROYALTY_DEFAULT = 500n;
 
@@ -168,8 +169,6 @@ export async function deployVeLike() {
 export async function deployVeLikeReward() {
   const {
     veLike,
-    veLikeImpl,
-    veLikeProxy,
     likecoin,
     deployer,
     rick,
@@ -178,15 +177,14 @@ export async function deployVeLikeReward() {
     publicClient,
     testClient,
   } = await loadFixture(deployVeLike);
-  const { veLikeReward, veLikeRewardImpl, veLikeRewardProxy } =
-    await ignition.deploy(veLikeRewardModule, {
-      parameters: {
-        veLikeRewardModule: {
-          initOwner: deployer.account.address,
-        },
+  const { veLikeReward } = await ignition.deploy(veLikeRewardModule, {
+    parameters: {
+      veLikeRewardModule: {
+        initOwner: deployer.account.address,
       },
-      defaultSender: deployer.account.address,
-    });
+    },
+    defaultSender: deployer.account.address,
+  });
   await veLikeReward.write.setVault([veLike.address], {
     account: deployer.account.address,
   });
@@ -196,13 +194,18 @@ export async function deployVeLikeReward() {
   await veLike.write.setRewardContract([veLikeReward.address], {
     account: deployer.account.address,
   });
+  const v2Deploy = await ignition.deploy(veLikeUpgradeV2Module, {
+    parameters: {
+      veLikeUpgradeV2Module: {
+        veLikeAddress: veLike.address,
+        veLikeRewardAddress: veLikeReward.address,
+      },
+    },
+    defaultSender: deployer.account.address,
+  });
   return {
-    veLikeReward,
-    veLikeRewardImpl,
-    veLikeRewardProxy,
-    veLike,
-    veLikeImpl,
-    veLikeProxy,
+    veLikeReward: v2Deploy.veLikeReward,
+    veLike: v2Deploy.veLike,
     likecoin,
     deployer,
     rick,
@@ -326,8 +329,6 @@ async function deployVeLikeRewardNoLockContract(ownerAddress: `0x${string}`) {
 export async function deployVeLikeRewardNoLock() {
   const {
     veLike,
-    veLikeImpl,
-    veLikeProxy,
     likecoin,
     deployer,
     rick,
@@ -335,7 +336,7 @@ export async function deployVeLikeRewardNoLock() {
     bob,
     publicClient,
     testClient,
-  } = await loadFixture(deployVeLike);
+  } = await loadFixture(deployVeLikeReward);
   const veLikeReward = await deployVeLikeRewardNoLockContract(
     deployer.account.address,
   );
@@ -351,8 +352,6 @@ export async function deployVeLikeRewardNoLock() {
   return {
     veLikeReward,
     veLike,
-    veLikeImpl,
-    veLikeProxy,
     likecoin,
     deployer,
     rick,
