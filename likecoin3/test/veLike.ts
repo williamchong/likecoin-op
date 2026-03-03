@@ -549,6 +549,50 @@ describe("veLike ", async function () {
       expect(balanceAfter - balanceBefore).to.equal(10000n * 10n ** 6n);
     });
 
+    it("should revert claimLegacyReward on second call for same user", async function () {
+      const {
+        veLike,
+        veLikeReward,
+        likecoin,
+        deployer,
+        bob,
+        testClient,
+        endTime,
+      } = await loadFixture(initialConditionNoLock);
+
+      // Advance past the reward period end
+      await testClient.setNextBlockTimestamp({ timestamp: endTime + 100n });
+      await testClient.mine({ blocks: 1 });
+
+      // Allowlist the old reward contract and rotate away from it
+      await veLike.write.setLegacyRewardContract([veLikeReward.address, true], {
+        account: deployer.account.address,
+      });
+      await veLike.write.setRewardContract(
+        ["0x0000000000000000000000000000000000000000"],
+        { account: deployer.account.address },
+      );
+
+      // First call: Bob claims successfully
+      const balanceBefore = await likecoin.read.balanceOf([
+        bob.account.address,
+      ]);
+      await veLike.write.claimLegacyReward(
+        [veLikeReward.address, bob.account.address],
+        { account: bob.account.address },
+      );
+      const balanceAfter = await likecoin.read.balanceOf([bob.account.address]);
+      expect(balanceAfter - balanceBefore).to.equal(10000n * 10n ** 6n);
+
+      // Second call: Bob has no reward left, should revert
+      await expect(
+        veLike.write.claimLegacyReward(
+          [veLikeReward.address, bob.account.address],
+          { account: bob.account.address },
+        ),
+      ).to.be.rejectedWith("ErrNoRewardToClaim");
+    });
+
     it("should revert claimLegacyReward after removing from allowlist", async function () {
       const { veLike, veLikeReward, deployer, bob, testClient, endTime } =
         await loadFixture(initialConditionNoLock);
@@ -1331,6 +1375,176 @@ describe("veLike ", async function () {
       const expected2 = 5000n * 10n ** 6n;
       expect(currentReward >= expected2 - 1n && currentReward <= expected2).to
         .be.true;
+    });
+
+    it("should correctly sync, update vault and claim reward when deposit is the first interaction after auto-enrollment with a new depositor", async function () {
+      const {
+        veLike,
+        likecoin,
+        deployer,
+        bob,
+        rick,
+        publicClient,
+        testClient,
+        reward1,
+        end1,
+      } = await loadFixture(syncStakersFixture);
+
+      // Advance past period 1 (Bob never interacted with reward1)
+      await testClient.setNextBlockTimestamp({ timestamp: end1 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      // --- Rotate: reward2 replaces reward1, reward1 becomes legacy ---
+      const reward2 = await deployNewVeLikeRewardNoLock(
+        deployer.account.address,
+      );
+      await reward2.write.setVault([veLike.address], {
+        account: deployer.account.address,
+      });
+      await reward2.write.setLikecoin([likecoin.address], {
+        account: deployer.account.address,
+      });
+      // Auto-enroll: captures Bob's 100 LIKE vault balance into reward2.totalStaked.
+      // Rick has no vault balance yet, so his stakedAmount and rewardIndex start at 0.
+      await reward2.write.initTotalStaked({
+        account: deployer.account.address,
+      });
+      await veLike.write.setRewardContract([reward2.address], {
+        account: deployer.account.address,
+      });
+      await veLike.write.setLegacyRewardContract([reward1.address, true], {
+        account: deployer.account.address,
+      });
+
+      // --- Fund and start period 2: 5000 LIKE over 500 seconds ---
+      // Bob is the sole auto-enrolled staker (100 LIKE), rate = 10 LIKE/s
+      await likecoin.write.approve([reward2.address, 5000n * 10n ** 6n], {
+        account: deployer.account.address,
+      });
+      const block2 = await publicClient.getBlock();
+      const start2 = block2.timestamp + 100n;
+      const end2 = start2 + 500n;
+      await reward2.write.addReward(
+        [deployer.account.address, 5000n * 10n ** 6n, start2, end2],
+        { account: deployer.account.address },
+      );
+
+      // Approve both deposits before fixing timestamps so the approve txs do
+      // not consume the setNextBlockTimestamp slots.
+      await likecoin.write.approve([veLike.address, 50n * 10n ** 6n], {
+        account: bob.account.address,
+      });
+      await likecoin.write.approve([veLike.address, 100n * 10n ** 6n], {
+        account: rick.account.address,
+      });
+
+      // --- Bob's FIRST interaction with reward2 is a deposit at exactly start2+250 ---
+      // At this point Bob (sole staker, 100 LIKE) has accrued exactly 250 seconds = 2500 LIKE.
+      // Inside reward2.deposit() this triggers in sequence:
+      //   1. _syncStaker(bob)  → sets stakerInfo.stakedAmount = vaultBalance = 100 LIKE
+      //   2. _updateVault()    → accumulates rewardIndex for exactly 250 seconds elapsed
+      //   3. _claimReward(bob) → pays out 2500 LIKE accrued for the first 250 seconds
+      //   4. stakedAmount += 50 LIKE (new deposit)
+      // After: Bob stakedAmount = 150, totalStaked = 150
+      await testClient.setNextBlockTimestamp({ timestamp: start2 + 250n });
+      const bobBalanceBefore = await likecoin.read.balanceOf([
+        bob.account.address,
+      ]);
+      await veLike.write.deposit([50n * 10n ** 6n, bob.account.address], {
+        account: bob.account.address,
+      });
+      const bobBalanceAfter = await likecoin.read.balanceOf([
+        bob.account.address,
+      ]);
+
+      // _claimReward within deposit should have paid exactly 2500 LIKE.
+      // Bob sent 50 LIKE to vault and received 2500 LIKE reward in the same tx.
+      // Net balance change = reward - deposit = 2500 - 50 LIKE
+      const expected2500 = 2500n * 10n ** 6n;
+      const rewardWithinDeposit =
+        bobBalanceAfter - bobBalanceBefore + 50n * 10n ** 6n;
+      expect(
+        rewardWithinDeposit >= expected2500 - 1n &&
+          rewardWithinDeposit <= expected2500,
+      ).to.be.true;
+
+      // --- Rick's FIRST interaction with reward2 is a deposit at start2+251 ---
+      // Rick was NOT auto-enrolled: his stakedAmount = 0 and rewardIndex = 0 in reward2.
+      // Inside reward2.deposit() this triggers in sequence:
+      //   1. _syncStaker(rick)  → vault balance = 0 (no prior vault shares), nothing changes
+      //   2. _updateVault()     → accumulates 1 second of rewardIndex (totalStaked=150)
+      //   3. _claimReward(rick) → stakedAmount = 0, pending = 0, rewardIndex updated to current
+      //   4. stakedAmount += 100 LIKE (Rick's first deposit)
+      // After: Rick stakedAmount = 100, totalStaked = 250
+      await testClient.setNextBlockTimestamp({ timestamp: start2 + 251n });
+      const rickBalanceBefore = await likecoin.read.balanceOf([
+        rick.account.address,
+      ]);
+      await veLike.write.deposit([100n * 10n ** 6n, rick.account.address], {
+        account: rick.account.address,
+      });
+      const rickBalanceAfter = await likecoin.read.balanceOf([
+        rick.account.address,
+      ]);
+
+      // Rick had stakedAmount = 0 so no reward was claimed within his deposit tx.
+      // His balance decreased by exactly 100 LIKE (only the deposit, no reward received).
+      expect(rickBalanceBefore - rickBalanceAfter).to.equal(100n * 10n ** 6n);
+
+      // Advance to end of period 2
+      await testClient.setNextBlockTimestamp({ timestamp: end2 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      // Remaining rewards after both deposits:
+      //
+      // start2+250 → start2+251 (1s): totalStaked=150 (Bob only)
+      //   Bob earns: 1 × 10 LIKE/s = 10 LIKE
+      //
+      // start2+251 → end2 (249s): totalStaked=250 (Bob 150 + Rick 100)
+      //   Bob earns:  249 × 10 × 150/250 = 1494 LIKE
+      //   Rick earns: 249 × 10 × 100/250 =  996 LIKE
+      //
+      // Bob total remaining:  10 + 1494 = 1504 LIKE
+      // Rick total remaining:              996 LIKE
+      // Sum: 2500 LIKE ✓
+      const expectedBobRemaining = 1504n * 10n ** 6n;
+      const expectedRickRemaining = 996n * 10n ** 6n;
+
+      const bobPending = await veLike.read.getPendingReward([
+        bob.account.address,
+      ]);
+      const rickPending = await veLike.read.getPendingReward([
+        rick.account.address,
+      ]);
+      expect(
+        bobPending >= expectedBobRemaining - 2n &&
+          bobPending <= expectedBobRemaining,
+      ).to.be.true;
+      expect(
+        rickPending >= expectedRickRemaining - 1n &&
+          rickPending <= expectedRickRemaining,
+      ).to.be.true;
+
+      // Claim and verify final balances for both
+      const bobBefore2 = await likecoin.read.balanceOf([bob.account.address]);
+      await veLike.write.claimReward([bob.account.address], {
+        account: bob.account.address,
+      });
+      const bobAfter2 = await likecoin.read.balanceOf([bob.account.address]);
+      expect(
+        bobAfter2 - bobBefore2 >= expectedBobRemaining - 2n &&
+          bobAfter2 - bobBefore2 <= expectedBobRemaining,
+      ).to.be.true;
+
+      const rickBefore2 = await likecoin.read.balanceOf([rick.account.address]);
+      await veLike.write.claimReward([rick.account.address], {
+        account: rick.account.address,
+      });
+      const rickAfter2 = await likecoin.read.balanceOf([rick.account.address]);
+      expect(
+        rickAfter2 - rickBefore2 >= expectedRickRemaining - 1n &&
+          rickAfter2 - rickBefore2 <= expectedRickRemaining,
+      ).to.be.true;
     });
   });
 });
