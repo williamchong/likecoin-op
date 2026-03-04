@@ -1,5 +1,5 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
-import veLikeModule from "./veLike";
+import veLikeV0Module from "./veLikeV0";
 
 /*
 # Command to deploy the contract for testing
@@ -22,7 +22,7 @@ const veLikeRewardNoLockModule = buildModule(
   "veLikeRewardNoLockModule",
   (m) => {
     const initOwner = m.getParameter("initOwner");
-    const { veLike, likecoin } = m.useModule(veLikeModule);
+    const { veLikeV0, likecoin } = m.useModule(veLikeV0Module);
 
     const veLikeRewardNoLockImpl = m.contract("veLikeRewardNoLock", [], {
       id: "veLikeRewardNoLockImpl",
@@ -45,7 +45,7 @@ const veLikeRewardNoLockModule = buildModule(
     );
 
     // Configure the reward contract to point at the vault and likecoin token.
-    m.call(veLikeRewardNoLock, "setVault", [veLike]);
+    m.call(veLikeRewardNoLock, "setVault", [veLikeV0]);
     m.call(veLikeRewardNoLock, "setLikecoin", [likecoin]);
 
     return {
