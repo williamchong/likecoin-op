@@ -21,9 +21,13 @@ npx hardhat ignition wipe chain-901 \
 const veLikeRewardModule = buildModule("veLikeRewardModule", (m) => {
   const initOwner = m.getParameter("initOwner");
 
-  const veLikeRewardImpl = m.contract("veLikeReward", [], {
-    id: "veLikeRewardImpl",
-  });
+  const veLikeRewardImpl = m.contract(
+    "contracts/veLikeReward.sol:veLikeReward",
+    [],
+    {
+      id: "veLikeRewardImpl",
+    },
+  );
 
   const initData = m.encodeFunctionCall(veLikeRewardImpl, "initialize", [
     initOwner,
@@ -34,7 +38,10 @@ const veLikeRewardModule = buildModule("veLikeRewardModule", (m) => {
     initData,
   ]);
 
-  const veLikeReward = m.contractAt("veLikeReward", veLikeRewardProxy);
+  const veLikeReward = m.contractAt(
+    "contracts/veLikeReward.sol:veLikeReward",
+    veLikeRewardProxy,
+  );
 
   return {
     veLikeReward,
