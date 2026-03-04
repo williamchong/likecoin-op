@@ -66,7 +66,13 @@ cast send $VELIKE "setLockTime(uint256)" 1769940000 \
 
 ---
 
-## Upgrading veLike & veLikeReward (→ V2)
+### Prerequisites
+
+- The current reward period has ended (or will end before any user withdraws after the
+  upgrade).
+- You have the deployer account that owns both proxies.
+
+## Step 1: Upgrading veLike & veLikeReward (→ V2)
 
 The initial deployment (commit `80a60ec`) used `veLikeV0` and the original `veLikeReward`.
 Before rotating to `veLikeRewardNoLock`, both contracts must be upgraded in-place:
@@ -87,33 +93,13 @@ DOTENV_CONFIG_PATH=.env \
     --parameters ignition/parameters.json --network baseSepolia
 ```
 
-### Prerequisites
-
-- The current reward period has ended (or will end before any user withdraws after the
-  upgrade).
-- You have the deployer account that owns both proxies.
-
-### Step 1: Deploy the upgrade
-
-```bash
-DOTENV_CONFIG_PATH=.env \
-  npx hardhat ignition deploy \
-  ignition/modules/veLikeUpgradeV1.ts \
-  --verify --strategy create2 \
-  --parameters ignition/parameters.json \
-  --network base
-```
-
-This deploys new implementation contracts for both `veLike` and `veLikeReward`, then calls
-`upgradeToAndCall` on each proxy.
-
 ### Step 2: Verify
 
 Check the new implementation addresses in
 `ignition/deployments/chain-8453/deployed_addresses.json`:
 
-- `"veLikeUpgradeV1Module#veLikeV1Impl"` — new veLike implementation
-- `"veLikeUpgradeV1Module#veLikeRewardV1Impl"` — new veLikeReward implementation
+- `"veLikeUpgradeV2Module#veLikeV2Impl"` — new veLike implementation
+- `"veLikeUpgradeV2Module#veLikeRewardV2Impl"` — new veLikeReward implementation
 
 Confirm on-chain:
 
@@ -184,7 +170,7 @@ DOTENV_CONFIG_PATH=.env \
   ignition/modules/veLikeRewardNoLock.ts \
   --verify --strategy create2 \
   --parameters ignition/parameters.json \
-  --network base
+  --network baseSepolia
 ```
 
 Note the new contract address from
@@ -218,8 +204,7 @@ cast send $NEW_REWARD \
 ### Step 5: Wire the vault to the new reward contract
 
 ```bash
-export OLD_REWARD=0x465629cedF312B77C48602D5AfF1Ecb4FEb1Bf62  # period 1 for first rotation
-export MULTICALL3=0xcA11bde05977b3631167028862bE2a173976CA11
+export OLD_REWARD=0x465629cedF312B77C48602D5AfF1Ecb4FEb1Bf62
 ```
 
 Remove the lock (only needed when rotating from the original locked `veLikeReward`):
@@ -229,19 +214,17 @@ cast send $VELIKE "setLockTime(uint256)" 0 \
   --account likecoin-deployer.eth --rpc-url $RPC
 ```
 
-Atomically snapshot `totalSupply` and switch the active reward in one transaction via
-Multicall3, so no withdrawal can land in between:
+Switch the active reward and snapshot `totalSupply`, register the old contract as legacy so users can still claim accrued rewards:
 
 ```bash
-cast send $MULTICALL3 \
-  "aggregate3((address,bool,bytes)[])" \
-  "[($NEW_REWARD,false,$(cast calldata "initTotalStaked()")),($VELIKE,false,$(cast calldata "setRewardContract(address)" $NEW_REWARD))]" \
-  --account likecoin-deployer.eth --rpc-url $RPC
-```
+cast send $VELIKE "setRewardContract(address)" $OLD_REWARD \
+  --account likecoin-deployer.eth \
+  --rpc-url $RPC
 
-Register the old contract as legacy so users can still claim accrued rewards:
+cast send $NEW_REWARD "initTotalStaked()" \
+  --account likecoin-deployer.eth \
+  --rpc-url $RPC
 
-```bash
 cast send $VELIKE "setLegacyRewardContract(address,bool)" $OLD_REWARD true \
   --account likecoin-deployer.eth --rpc-url $RPC
 ```
