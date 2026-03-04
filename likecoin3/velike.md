@@ -217,7 +217,7 @@ cast send $VELIKE "setLockTime(uint256)" 0 \
 Switch the active reward and snapshot `totalSupply`, register the old contract as legacy so users can still claim accrued rewards:
 
 ```bash
-cast send $VELIKE "setRewardContract(address)" $OLD_REWARD \
+cast send $VELIKE "setRewardContract(address)" $NEW_REWARD \
   --account likecoin-deployer.eth \
   --rpc-url $RPC
 
