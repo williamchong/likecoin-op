@@ -1139,6 +1139,8 @@ components:
           nullable: true
         number_of_stakers:
           type: integer
+        staking_rank:
+          type: integer
       required:
         - evm_address
         - staked_amount

@@ -16,7 +16,8 @@ func (h *openAPIHandler) BookNftEvmAddressGet(
 		return nil, err
 	}
 
-	apiBookNFT := model.MakeBookNFT(bookNFT)
+	apiBookNFT := model.MakeBookNFT(bookNFT.NFTClass)
+	apiBookNFT.StakingRank.SetTo(bookNFT.StakingRank)
 
 	return &apiBookNFT, nil
 }

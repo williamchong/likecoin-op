@@ -212,6 +212,7 @@ type BookNFT struct {
 	StakedAmount    Uint256     `json:"staked_amount"`
 	LastStakedAt    NilDateTime `json:"last_staked_at"`
 	NumberOfStakers int         `json:"number_of_stakers"`
+	StakingRank     OptInt      `json:"staking_rank"`
 }
 
 // GetEvmAddress returns the value of EvmAddress.
@@ -234,6 +235,11 @@ func (s *BookNFT) GetNumberOfStakers() int {
 	return s.NumberOfStakers
 }
 
+// GetStakingRank returns the value of StakingRank.
+func (s *BookNFT) GetStakingRank() OptInt {
+	return s.StakingRank
+}
+
 // SetEvmAddress sets the value of EvmAddress.
 func (s *BookNFT) SetEvmAddress(val EvmAddress) {
 	s.EvmAddress = val
@@ -252,6 +258,11 @@ func (s *BookNFT) SetLastStakedAt(val NilDateTime) {
 // SetNumberOfStakers sets the value of NumberOfStakers.
 func (s *BookNFT) SetNumberOfStakers(val int) {
 	s.NumberOfStakers = val
+}
+
+// SetStakingRank sets the value of StakingRank.
+func (s *BookNFT) SetStakingRank(val OptInt) {
+	s.StakingRank = val
 }
 
 // Ref: #/components/schemas/BookNFTStakeDelta
