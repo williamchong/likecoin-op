@@ -541,13 +541,20 @@ func (s *BookNFT) encodeFields(e *jx.Encoder) {
 		e.FieldStart("number_of_stakers")
 		e.Int(s.NumberOfStakers)
 	}
+	{
+		if s.StakingRank.Set {
+			e.FieldStart("staking_rank")
+			s.StakingRank.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfBookNFT = [4]string{
+var jsonFieldsNameOfBookNFT = [5]string{
 	0: "evm_address",
 	1: "staked_amount",
 	2: "last_staked_at",
 	3: "number_of_stakers",
+	4: "staking_rank",
 }
 
 // Decode decodes BookNFT from json.
@@ -600,6 +607,16 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"number_of_stakers\"")
+			}
+		case "staking_rank":
+			if err := func() error {
+				s.StakingRank.Reset()
+				if err := s.StakingRank.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"staking_rank\"")
 			}
 		default:
 			return d.Skip()
@@ -2739,6 +2756,41 @@ func (s OptDateTime) MarshalJSON() ([]byte, error) {
 func (s *OptDateTime) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d, json.DecodeDateTime)
+}
+
+// Encode encodes int as json.
+func (o OptInt) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Int(int(o.Value))
+}
+
+// Decode decodes int from json.
+func (o *OptInt) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptInt to nil")
+	}
+	o.Set = true
+	v, err := d.Int()
+	if err != nil {
+		return err
+	}
+	o.Value = int(v)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptInt) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptInt) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
 }
 
 // Encode encodes string as json.

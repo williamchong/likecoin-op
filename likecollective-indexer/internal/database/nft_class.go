@@ -12,6 +12,11 @@ import (
 	"github.com/holiman/uint256"
 )
 
+type NFTClassWithRank struct {
+	*ent.NFTClass
+	StakingRank int
+}
+
 type NFTClassRepository interface {
 	QueryNFTClasses(
 		ctx context.Context,
@@ -26,7 +31,7 @@ type NFTClassRepository interface {
 	QueryNFTClass(
 		ctx context.Context,
 		address string,
-	) (*ent.NFTClass, error)
+	) (*NFTClassWithRank, error)
 
 	QueryNFTClassesByAddresses(
 		ctx context.Context,
@@ -59,6 +64,18 @@ type nftClassRepository struct {
 
 func MakeNFTClassRepository(dbService Service) NFTClassRepository {
 	return &nftClassRepository{dbService: dbService}
+}
+
+func (r *nftClassRepository) computeStakingRank(ctx context.Context, stakedAmount typeutil.Uint256) (int, error) {
+	amountStr := (*uint256.Int)(stakedAmount).String()
+	higherCount, err := r.dbService.Client().NFTClass.Query().Where(func(s *sql.Selector) {
+		s.Where(sql.GT(nftclass.FieldStakedAmount, 0))
+		s.Where(sql.GT(nftclass.FieldStakedAmount, amountStr))
+	}).Count(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return higherCount + 1, nil
 }
 
 func (r *nftClassRepository) QueryNFTClasses(
@@ -109,7 +126,7 @@ func (r *nftClassRepository) QueryNFTClasses(
 func (r *nftClassRepository) QueryNFTClass(
 	ctx context.Context,
 	address string,
-) (*ent.NFTClass, error) {
+) (*NFTClassWithRank, error) {
 	nftClass, err := r.dbService.Client().NFTClass.Query().Where(func(s *sql.Selector) {
 		s.Where(sql.GT(nftclass.FieldStakedAmount, 0))
 	}).Where(
@@ -119,7 +136,15 @@ func (r *nftClassRepository) QueryNFTClass(
 		return nil, err
 	}
 
-	return nftClass, nil
+	rank, err := r.computeStakingRank(ctx, nftClass.StakedAmount)
+	if err != nil {
+		return nil, err
+	}
+
+	return &NFTClassWithRank{
+		NFTClass:    nftClass,
+		StakingRank: rank,
+	}, nil
 }
 
 func (r *nftClassRepository) QueryNFTClassesByAddresses(
