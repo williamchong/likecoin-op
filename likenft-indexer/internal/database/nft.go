@@ -82,11 +82,6 @@ func (r *nftRepository) QueryNFTsByEvmAddress(
 		nft.OwnerAddressEqualFold(accountEvmAddress),
 	)
 
-	count, err = q.Count(ctx)
-	if err != nil {
-		return nil, 0, 0, err
-	}
-
 	q = pagination.HandlePagination(q)
 
 	nfts, err = q.All(ctx)
@@ -94,6 +89,7 @@ func (r *nftRepository) QueryNFTsByEvmAddress(
 		return nil, 0, 0, err
 	}
 
+	count = len(nfts)
 	nextKey = 0
 	if len(nfts) > 0 {
 		nextKey = nfts[len(nfts)-1].ID
@@ -114,11 +110,6 @@ func (r *nftRepository) QueryNFTsByBookNFTAndEvmAddress(
 			nft.OwnerAddressEqualFold(accountEvmAddress),
 		)
 
-	count, err = q.Count(ctx)
-	if err != nil {
-		return nil, 0, 0, err
-	}
-
 	q = pagination.HandlePagination(q)
 
 	nfts, err = q.All(ctx)
@@ -126,6 +117,7 @@ func (r *nftRepository) QueryNFTsByBookNFTAndEvmAddress(
 		return nil, 0, 0, err
 	}
 
+	count = len(nfts)
 	nextKey = 0
 	if len(nfts) > 0 {
 		nextKey = nfts[len(nfts)-1].ID

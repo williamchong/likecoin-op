@@ -1003,6 +1003,8 @@ components:
           type: integer
         count:
           type: integer
+          deprecated: true
+          description: Always equal to `data.length`. Kept for schema compatibility.
       required:
         - next_key
         - count

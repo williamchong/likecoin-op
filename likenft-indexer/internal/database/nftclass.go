@@ -157,11 +157,6 @@ func (r *nftClassRepository) QueryNFTClasses(
 	q = contractLevelMetadataEQ.ApplyEQ(q)
 	q = contractLevelMetadataNEQ.ApplyNEQ(q)
 
-	count, err = q.Count(ctx)
-	if err != nil {
-		return nil, 0, 0, err
-	}
-
 	q = pagination.HandlePagination(q)
 
 	nftClasses, err = q.All(ctx)
@@ -169,6 +164,7 @@ func (r *nftClassRepository) QueryNFTClasses(
 		return nil, 0, 0, err
 	}
 
+	count = len(nftClasses)
 	nextKey = 0
 	if len(nftClasses) > 0 {
 		nextKey = nftClasses[len(nftClasses)-1].ID
@@ -194,11 +190,6 @@ func (r *nftClassRepository) QueryNFTClassesByAccountTokens(
 	q = contractLevelMetadataEQ.ApplyEQ(q)
 	q = contractLevelMetadataNEQ.ApplyNEQ(q)
 
-	count, err = q.Count(ctx)
-	if err != nil {
-		return nil, 0, 0, err
-	}
-
 	q = pagination.HandlePagination(q)
 
 	nftClasses, err = q.All(ctx)
@@ -206,6 +197,7 @@ func (r *nftClassRepository) QueryNFTClassesByAccountTokens(
 		return nil, 0, 0, err
 	}
 
+	count = len(nftClasses)
 	nextKey = 0
 	if len(nftClasses) > 0 {
 		nextKey = nftClasses[len(nftClasses)-1].ID
@@ -231,17 +223,14 @@ func (r *nftClassRepository) QueryNFTClassesByAccountTokensWithNFTID(
 	q = contractLevelMetadataEQ.ApplyEQ(q)
 	q = contractLevelMetadataNEQ.ApplyNEQ(q)
 
-	count, err = q.Count(ctx)
-	if err != nil {
-		return nil, 0, 0, err
-	}
-
 	q = pagination.HandlePagination(q)
 
 	classes, err := q.All(ctx)
 	if err != nil {
 		return nil, 0, 0, err
 	}
+
+	count = len(classes)
 
 	classAddresses := make([]string, len(classes))
 	for i, c := range classes {
@@ -304,11 +293,6 @@ func (r *nftClassRepository) QueryNFTClassesByEvmAddress(
 	q = contractLevelMetadataEQ.ApplyEQ(q)
 	q = contractLevelMetadataNEQ.ApplyNEQ(q)
 
-	count, err = q.Count(ctx)
-	if err != nil {
-		return nil, 0, 0, err
-	}
-
 	q = pagination.HandlePagination(q)
 
 	nftClasses, err = q.All(ctx)
@@ -316,6 +300,7 @@ func (r *nftClassRepository) QueryNFTClassesByEvmAddress(
 		return nil, 0, 0, err
 	}
 
+	count = len(nftClasses)
 	nextKey = 0
 	if len(nftClasses) > 0 {
 		nextKey = nftClasses[len(nftClasses)-1].ID

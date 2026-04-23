@@ -92,11 +92,6 @@ func (r *accountRepository) GetTokenAccountsByBookNFT(
 			),
 		)
 
-	count, err = q.Count(ctx)
-	if err != nil {
-		return nil, 0, 0, err
-	}
-
 	q = pagination.HandlePagination(q)
 
 	accounts, err = q.All(ctx)
@@ -104,6 +99,7 @@ func (r *accountRepository) GetTokenAccountsByBookNFT(
 		return nil, 0, 0, err
 	}
 
+	count = len(accounts)
 	nextKey = 0
 	if len(accounts) > 0 {
 		nextKey = accounts[len(accounts)-1].ID

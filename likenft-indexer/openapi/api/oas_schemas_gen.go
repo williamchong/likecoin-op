@@ -1790,7 +1790,10 @@ func (o OptUint64) Or(d Uint64) Uint64 {
 // Ref: #/components/schemas/PaginationResponse
 type PaginationResponse struct {
 	NextKey int `json:"next_key"`
-	Count   int `json:"count"`
+	// Always equal to `data.length`. Kept for schema compatibility.
+	//
+	// Deprecated: schema marks this property as deprecated.
+	Count int `json:"count"`
 }
 
 // GetNextKey returns the value of NextKey.
