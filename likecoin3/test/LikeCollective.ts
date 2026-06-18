@@ -429,27 +429,40 @@ describe("LikeCollective", async function () {
     // principal, so pool.totalStaked must grow by amount + pendingRewards too. Otherwise it
     // drifts below the staked total, a later depositReward divides by an undersized total,
     // and getPendingRewardsForUser explodes. See on-chain book 0xa750...bed78d.
+    //
+    // Two stakers are required to expose the bug: with a single staker, the old
+    // `pool.totalStaked = newAmount` and the fixed `pool.totalStaked += additionalAmount`
+    // produce the same value, so a solo-staker test passes on the buggy code too.
     it("should keep totalStaked in sync when compounding rewards, so later rewards stay sane", async function () {
-      const { likeCollective, rick, likeStakePosition, likecoin, kin } =
+      const { likeCollective, rick, bob, likeStakePosition, likecoin, kin } =
         await loadFixture(deployCollective);
       const mockBookNFT = "0x1234567890123456789012345678901234567890";
-      const baseStakeAmount = 1000n * 10n ** 6n;
+      const rickStake = 1000n * 10n ** 6n;
+      const bobStake = 2000n * 10n ** 6n;
       const additionalStakeAmount = 500n * 10n ** 6n;
-      const firstReward = 1000n * 10n ** 6n;
-      const secondReward = 1000n * 10n ** 6n;
+      // 3000 splits 1:2 between rick and bob (1000 each for rick, 2000 for bob)
+      const firstReward = 3000n * 10n ** 6n;
+      // Equal to post-compound totalStaked so each staked unit earns exactly 1 LIKE
+      const secondReward = 4500n * 10n ** 6n;
 
       const nextTokenId = await likeStakePosition.read.getNextTokenId();
 
+      // Rick and bob both stake into the same pool
       await likecoin.write.approve(
-        [likeCollective.address, baseStakeAmount + additionalStakeAmount],
+        [likeCollective.address, rickStake + additionalStakeAmount],
         { account: rick.account },
       );
-      await likeCollective.write.newStakePosition(
-        [mockBookNFT, baseStakeAmount],
-        { account: rick.account },
-      );
+      await likeCollective.write.newStakePosition([mockBookNFT, rickStake], {
+        account: rick.account,
+      });
+      await likecoin.write.approve([likeCollective.address, bobStake], {
+        account: bob.account,
+      });
+      await likeCollective.write.newStakePosition([mockBookNFT, bobStake], {
+        account: bob.account,
+      });
 
-      // First reward: rick is the sole staker, so all of it is pending for his position
+      // First reward: split 1:2 so rick accumulates 1000, bob accumulates 2000
       await likecoin.write.approve([likeCollective.address, firstReward], {
         account: kin.account,
       });
@@ -458,30 +471,39 @@ describe("LikeCollective", async function () {
       });
       expect(
         await likeCollective.read.getRewardsOfPosition([nextTokenId]),
-      ).to.equal(firstReward);
+      ).to.equal(rickStake); // rick's 1/3 share = 1000
 
-      // Compound: folds firstReward into principal and adds additionalStakeAmount
+      // Compound: folds rick's 1000 pending reward into principal and adds additionalStakeAmount.
+      // rick's additionalAmount = additionalStakeAmount + pendingRewards = 500 + 1000 = 1500
+      // rick's new position    = rickStake + additionalAmount            = 1000 + 1500 = 2500
+      // Expected pool total    = rick(2500) + bob(2000)                              = 4500
+      //
+      // pool.totalStaked += 1500    = 3000 + 1500 = 4500  ✓
       await likeCollective.write.increaseStakeToPosition(
         [nextTokenId, additionalStakeAmount],
         { account: rick.account },
       );
 
-      // Invariant: pool total stake must equal the sum of all position stakes.
-      // Pre-fix this was baseStakeAmount + additionalStakeAmount (missing firstReward).
-      const expectedTotalStake =
-        baseStakeAmount + additionalStakeAmount + firstReward;
-      const userStake = await likeCollective.read.getStakeForUser([
-        rick.account.address,
-        mockBookNFT,
-      ]);
-      expect(userStake).to.equal(expectedTotalStake);
+      const rickExpectedStake = rickStake + additionalStakeAmount + rickStake; // 2500
+      const expectedPoolTotal = rickExpectedStake + bobStake; // 4500
+
+      // Rick's individual position must reflect the compounded amount
+      expect(
+        await likeCollective.read.getStakeForUser([
+          rick.account.address,
+          mockBookNFT,
+        ]),
+      ).to.equal(rickExpectedStake);
+
+      // Pool total must account for ALL stakers, not just rick's position.
+      // Pre-fix this equalled only rick's newAmount (2500), dropping bob entirely.
       expect(await likeCollective.read.getTotalStake([mockBookNFT])).to.equal(
-        expectedTotalStake,
+        expectedPoolTotal,
       );
 
       // The indexer derives staked totals by summing Staked event amounts, so the
-      // compounded firstReward must be emitted as a Staked event too. Without it the
-      // sum lags getTotalStake and the indexer drifts out of sync with the chain.
+      // compounded pending reward must be emitted as a Staked event too. Without it the
+      // event sum lags getTotalStake and the indexer drifts out of sync with the chain.
       const stakedEvents = await likeCollective.getEvents.Staked(undefined, {
         fromBlock: 0n,
       });
@@ -489,10 +511,11 @@ describe("LikeCollective", async function () {
         (sum, e) => sum + (e.args.stakedAmount ?? 0n),
         0n,
       );
-      expect(totalStakedFromEvents).to.equal(expectedTotalStake);
+      expect(totalStakedFromEvents).to.equal(expectedPoolTotal);
 
-      // Second reward divides by totalStaked. With the correct total, the sole staker's
-      // pending equals the reward exactly. Pre-fix the undersized total inflated this.
+      // Second reward (4500) divides by totalStaked (4500), so rick's proportional share
+      // is rick(2500) / total(4500) * 4500 = 2500.
+      // Pre-fix: totalStaked was 2500, giving rick(2500)/2500 * 4500 = 4500 (inflated).
       await likecoin.write.approve([likeCollective.address, secondReward], {
         account: kin.account,
       });
@@ -504,7 +527,7 @@ describe("LikeCollective", async function () {
           rick.account.address,
           mockBookNFT,
         ]),
-      ).to.equal(secondReward);
+      ).to.equal(rickExpectedStake); // 2500, not the inflated 4500
     });
 
     it("should decrease stake without rewards and update balances/stake", async function () {
