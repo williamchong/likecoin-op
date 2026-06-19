@@ -74,6 +74,13 @@ contract LikeCollective is
         address indexed account,
         RewardData[] rewardedAmount
     );
+    // Emitted when a pool and all its positions are reset to a clean slate.
+    event PoolReset(
+        address indexed bookNFT,
+        uint256 trueTotalStaked,
+        uint256 positionsReset
+    );
+    event AdminSwept(address indexed to, uint256 amount);
     // solhint-enable gas-indexed-events
 
     struct RewardData {
@@ -87,6 +94,11 @@ contract LikeCollective is
     error ErrInsufficientStake(uint256 required, uint256 available);
     error ErrNoRewardsToClaim();
     error ErrInvalidAmount();
+    error ErrTokenNotInPool(uint256 tokenId, address bookNFT);
+    error ErrIncompletePositionSet(
+        uint256 sumStaked,
+        uint256 expectedTotalStaked
+    );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -125,6 +137,57 @@ contract LikeCollective is
         address _newImplementation
     ) internal override onlyOwner {
         // TODO: Add any additional authorization logic if needed
+    }
+
+    // ---- Reward reset ----
+    //
+    // Reset the target pool and all of its NFT positions' reward indices to zero,
+    // and restore the pool's totalStaked to the true sum of its positions. The
+    // existing un-distributed reward (rewardPending) is left in the contract to be
+    // sent back to the downstream book store via adminSweep, for redistribution.
+    // Use case: recovering from a bug or a mis-calculation of the reward, on-chain
+    // or off-chain, by returning the pool to a clean, internally-consistent slate.
+    //
+    // Atomic per pool: pass EVERY live position of the pool in one call. The
+    // function recomputes totalStaked from those positions and requires it to equal
+    // expectedTotalStaked (Σ stakedAmount, supplied by the caller) — so an
+    // incomplete tokenId list reverts before any state is changed.
+    //
+    // Run while LikeCollective is paused; LikeStakePosition must stay UNPAUSED, as
+    // this calls its manager-only updatePositionRewardIndex (whenNotPaused).
+    function adminResetPool(
+        address bookNFT,
+        uint256[] calldata tokenIds,
+        uint256 expectedTotalStaked
+    ) external onlyOwner {
+        CollectiveData storage $ = _getCollectiveData();
+        PoolData storage pool = $.pools[bookNFT];
+        LikeStakePosition lsp = $.likeStakePosition;
+        uint256 sumStaked = 0;
+        for (uint256 i = 0; i < tokenIds.length; ++i) {
+            uint256 tokenId = tokenIds[i];
+            LikeStakePosition.Position memory p = lsp.getPosition(tokenId);
+            if (p.bookNFT != bookNFT)
+                revert ErrTokenNotInPool(tokenId, bookNFT);
+            sumStaked += p.stakedAmount;
+            pool.rewardIndexes[tokenId] = 0;
+            lsp.updatePositionRewardIndex(tokenId, 0);
+        }
+        if (sumStaked != expectedTotalStaked) {
+            revert ErrIncompletePositionSet(sumStaked, expectedTotalStaked);
+        }
+        pool.totalStaked = sumStaked; // derived from the reset positions, not trusted
+        pool.rewardIndex = 0;
+        pool.rewardPending = 0;
+        emit PoolReset(bookNFT, sumStaked, tokenIds.length);
+    }
+
+    // Send the un-distributed reward LIKE back to the downstream book store for
+    // redistribution. After a reset pool's positions all hold Σ stakedAmount, the
+    // surplus (the formerly-pending reward LIKE) is swept out via this function.
+    function adminSweep(address to, uint256 amount) external onlyOwner {
+        _getCollectiveData().likecoin.transfer(to, amount);
+        emit AdminSwept(to, amount);
     }
     // End Admin functions
 
