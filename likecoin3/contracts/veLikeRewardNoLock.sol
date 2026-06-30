@@ -62,7 +62,6 @@ contract veLikeRewardNoLock is
     error ErrNoRewardToClaim();
     error ErrConflictCondition();
     error ErrUnauthorized();
-    error ErrNotActive();
     error ErrAlreadySynced();
     error ErrMismatchSync();
 
@@ -421,10 +420,14 @@ contract veLikeRewardNoLock is
      * syncStakers function
      *
      * Admin function to eagerly sync pre-rotation stakers into this reward
-     * contract. Must be called during the active reward period (between
-     * startTime and endTime). For each account, sets stakedAmount to the
+     * contract. Callable any time while auto-sync is enabled (i.e. after
+     * initTotalStaked() and before finalizeSync()), regardless of whether the
+     * reward period is active. For each account, sets stakedAmount to the
      * current vault balance. The staker's rewardIndex stays at 0 so they
      * earn retroactive rewards from the period start.
+     *
+     * Large holder sets are synced across multiple syncStakers() calls, then
+     * closed out with a single finalizeSync().
      *
      * totalStaked is NOT adjusted because it was pre-initialized via
      * initTotalStaked() to include all vault holders.
@@ -437,10 +440,8 @@ contract veLikeRewardNoLock is
      * @param accounts - the accounts to sync
      */
     function syncStakers(address[] calldata accounts) external onlyOwner {
-        if (!_isActive()) {
-            revert ErrNotActive();
-        }
         veLikeRewardStorage storage $ = _getveLikeRewardData();
+        require($.autoSyncEnabled, "Not initialized or already finalized");
         for (uint256 i = 0; i < accounts.length; i++) {
             address account = accounts[i];
             uint256 vaultBalance = IERC4626($.vault).balanceOf(account);
@@ -459,10 +460,8 @@ contract veLikeRewardNoLock is
     /**
      * finalizeSync function
      *
-     * Closing step that pairs with initTotalStaked(). Materializes every listed
-     * account that is still relying on the lazy vault-balance fallback
-     * (stakedAmount == 0 but vaultBalance > 0) by writing its vault balance into
-     * stakerInfos, then disables auto-sync.
+     * Closing step that pairs with initTotalStaked(). Disables auto-sync after
+     * all pre-rotation stakers have been materialized via syncStakers().
      *
      * Once auto-sync is disabled the contract no longer trusts current vault
      * balances. This is what makes rotation safe: after this contract is rotated
@@ -470,28 +469,13 @@ contract veLikeRewardNoLock is
      * later period (and therefore has a vault balance but no stakerInfo here)
      * cannot claim rewards from this period.
      *
-     * The caller must pass the complete set of vault holders so no eligible
-     * staker is left un-materialized before auto-sync is turned off. For large
-     * holder sets, use syncStakers() for the intermediate batches (which keeps
-     * auto-sync on) and finalizeSync() for the final batch.
-     *
-     * @param accounts - the accounts to materialize before disabling auto-sync
+     * The caller is responsible for syncing the complete set of vault holders
+     * via syncStakers() before calling this, so no eligible staker is left
+     * un-materialized when the vault-balance fallback is turned off.
      */
-    function finalizeSync(address[] calldata accounts) external onlyOwner {
+    function finalizeSync() external onlyOwner {
         veLikeRewardStorage storage $ = _getveLikeRewardData();
         require($.autoSyncEnabled, "Not initialized or already finalized");
-        for (uint256 i = 0; i < accounts.length; i++) {
-            address account = accounts[i];
-            StakerInfo storage stakerInfo = $.stakerInfos[account];
-            if (stakerInfo.stakedAmount != 0) {
-                continue;
-            }
-            uint256 vaultBalance = IERC4626($.vault).balanceOf(account);
-            if (vaultBalance == 0) {
-                continue;
-            }
-            stakerInfo.stakedAmount = vaultBalance;
-        }
         $.autoSyncEnabled = false;
     }
 

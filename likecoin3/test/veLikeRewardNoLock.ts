@@ -88,18 +88,18 @@ describe("veLikeRewardNoLock", async function () {
         account: deployer.account.address,
       });
       await expect(
-        reward.write.finalizeSync([[]], { account: deployer.account.address }),
+        reward.write.finalizeSync({ account: deployer.account.address }),
       ).to.be.rejectedWith("Not initialized or already finalized");
     });
 
     it("finalizeSync() should disable auto-sync and reject a second call", async function () {
       // The fixture's reward contract already has initTotalStaked() applied.
       const { veLikeReward, deployer } = await loadFixture(initialMintNoLock);
-      await veLikeReward.write.finalizeSync([[]], {
+      await veLikeReward.write.finalizeSync({
         account: deployer.account.address,
       });
       await expect(
-        veLikeReward.write.finalizeSync([[]], {
+        veLikeReward.write.finalizeSync({
           account: deployer.account.address,
         }),
       ).to.be.rejectedWith("Not initialized or already finalized");
@@ -108,10 +108,61 @@ describe("veLikeRewardNoLock", async function () {
     it("finalizeSync() should be owner-only", async function () {
       const { veLikeReward, rick } = await loadFixture(initialMintNoLock);
       await expect(
-        veLikeReward.write.finalizeSync([[]], {
+        veLikeReward.write.finalizeSync({
           account: rick.account.address,
         }),
       ).to.be.rejectedWith("OwnableUnauthorizedAccount");
+    });
+
+    it("syncStakers() should be callable outside an active reward period", async function () {
+      const { veLike, likecoin, deployer, rick } =
+        await loadFixture(initialMintNoLock);
+
+      // rick gets a vault balance via the currently-active reward contract.
+      await likecoin.write.approve([veLike.address, 100n * DECIMALS], {
+        account: rick.account.address,
+      });
+      await veLike.write.deposit([100n * DECIMALS, rick.account.address], {
+        account: rick.account.address,
+      });
+
+      // A freshly rotated-in contract: initTotalStaked captures rick's balance
+      // but no reward period has been added yet, so it is NOT active.
+      const reward2 = await deployNewVeLikeRewardNoLock(
+        deployer.account.address,
+      );
+      await reward2.write.setVault([veLike.address], {
+        account: deployer.account.address,
+      });
+      await reward2.write.initTotalStaked({
+        account: deployer.account.address,
+      });
+
+      // syncStakers succeeds despite there being no active period, because
+      // auto-sync is enabled.
+      await reward2.write.syncStakers([[rick.account.address]], {
+        account: deployer.account.address,
+      });
+
+      // rick is now materialized: a repeat sync reverts ErrAlreadySynced.
+      await expect(
+        reward2.write.syncStakers([[rick.account.address]], {
+          account: deployer.account.address,
+        }),
+      ).to.be.rejectedWith("ErrAlreadySynced");
+    });
+
+    it("syncStakers() should be rejected once auto-sync is finalized", async function () {
+      const { veLikeReward, deployer, rick } =
+        await loadFixture(initialMintNoLock);
+      await veLikeReward.write.finalizeSync({
+        account: deployer.account.address,
+      });
+      await expect(
+        veLikeReward.write.syncStakers([[rick.account.address]], {
+          account: deployer.account.address,
+        }),
+      ).to.be.rejectedWith("Not initialized or already finalized");
     });
   });
 
@@ -120,8 +171,9 @@ describe("veLikeRewardNoLock", async function () {
   //   - Period 1: rick & kin stake (stakerInfos synced through the vault)
   //   - Period 2: a fresh veLikeRewardNoLock is rotated in with initTotalStaked
   //   - Period 2: bob (a late joiner) deposits, so his vault balance is non-zero
-  //   - At rotation, reward1 is closed out with finalizeSync(), which
-  //     materializes its stakers and disables auto-sync.
+  //   - At rotation, reward1's stakers are materialized via syncStakers() (or
+  //     already recorded via deposits) and then finalizeSync() disables
+  //     auto-sync.
   //   - bob claims the period-1 legacy reward via veLike.claimLegacyReward
   //   - Expectation: bob earns ZERO from period 1 (he never staked in it).
   //     reward1 has auto-sync enabled (initTotalStaked runs in the fixture),
@@ -216,14 +268,12 @@ describe("veLikeRewardNoLock", async function () {
       const [, , , totalStakedP2Init] = await reward2.read.getConfig();
       expect(totalStakedP2Init).to.equal(200n * DECIMALS);
 
-      // Close out reward1 before it becomes legacy: materialize its stakers
-      // (rick & kin, already recorded via their deposits) and disable
-      // auto-sync, so reward1 will no longer credit anyone from their current
-      // vault balance.
-      await reward1.write.finalizeSync(
-        [[rick.account.address, kin.account.address]],
-        { account: deployer.account.address },
-      );
+      // Close out reward1 before it becomes legacy. Its stakers (rick & kin)
+      // are already recorded via their period-1 deposits; a larger holder set
+      // would be materialized across syncStakers() batches first. finalizeSync()
+      // then disables auto-sync, so reward1 will no longer credit anyone from
+      // their current vault balance.
+      await reward1.write.finalizeSync({ account: deployer.account.address });
 
       // Switch the vault's active reward contract to reward2, and allowlist
       // reward1 so users can still claim period-1 rewards.
