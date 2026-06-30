@@ -148,8 +148,7 @@ DOTENV_CONFIG_PATH=.env npx hardhat buildSyncStakers --network base \
 
 ```bash
 cast send $OLD_REWARD \
-  "finalizeSync(address[])" \
-  "[0xAddr1,0xAddr2,...]" \
+  "finalizeSync()" \
   --account likecoin-deployer.eth --rpc-url $RPC
 ```
 
