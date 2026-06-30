@@ -386,6 +386,12 @@ export async function initialMintNoLock() {
   await likecoin.write.mint([bob.account.address, 10000n * 10n ** 6n], {
     account: deployer.account.address,
   });
+  // Enable auto-enrollment so existing veLike stakers are picked up by the
+  // reward contract without any per-user action. Mirrors the production
+  // rotation runbook where initTotalStaked() is part of reward-contract setup.
+  await veLikeReward.write.initTotalStaked({
+    account: deployer.account.address,
+  });
   return {
     veLikeReward,
     veLike,

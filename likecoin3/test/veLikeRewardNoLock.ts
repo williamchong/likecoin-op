@@ -1,0 +1,260 @@
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
+import { expect } from "chai";
+import { viem } from "hardhat";
+import { encodeFunctionData } from "viem";
+
+import "./setup";
+import { initialMintNoLock } from "./factory";
+
+const DECIMALS = 10n ** 6n;
+
+async function deployNewVeLikeRewardNoLock(ownerAddress: `0x${string}`) {
+  const impl = await viem.deployContract("veLikeRewardNoLock");
+  const initData = encodeFunctionData({
+    abi: impl.abi,
+    functionName: "initialize",
+    args: [ownerAddress],
+  });
+  const proxy = await viem.deployContract("ERC1967Proxy", [
+    impl.address,
+    initData,
+  ]);
+  return await viem.getContractAt("veLikeRewardNoLock", proxy.address);
+}
+
+describe("veLikeRewardNoLock", async function () {
+  // -----------------------------------------------------------------------
+  // Basic API calls
+  // -----------------------------------------------------------------------
+  describe("basic API", async function () {
+    it("should have the deployer as owner", async function () {
+      const { veLikeReward, deployer } = await loadFixture(initialMintNoLock);
+      expect(await veLikeReward.read.owner()).to.equalAddress(
+        deployer.account.address,
+      );
+    });
+
+    it("should expose the configured vault and likecoin", async function () {
+      const { veLikeReward, veLike, likecoin } =
+        await loadFixture(initialMintNoLock);
+      const [vault, likecoinConfig, rewardPool, totalStaked, lastRewardTime] =
+        await veLikeReward.read.getConfig();
+      expect(vault).to.equalAddress(veLike.address);
+      expect(likecoinConfig).to.equalAddress(likecoin.address);
+      expect(rewardPool).to.equal(0n);
+      expect(totalStaked).to.equal(0n);
+      expect(lastRewardTime).to.equal(0n);
+    });
+
+    it("should return an empty staking condition before any reward is added", async function () {
+      const { veLikeReward } = await loadFixture(initialMintNoLock);
+      const condition = await veLikeReward.read.getCurrentCondition();
+      expect(condition.startTime).to.equal(0n);
+      expect(condition.endTime).to.equal(0n);
+      expect(condition.rewardAmount).to.equal(0n);
+      expect(condition.rewardIndex).to.equal(0n);
+    });
+
+    it("should reject deposit() from a non-vault caller", async function () {
+      const { veLikeReward, rick } = await loadFixture(initialMintNoLock);
+      await expect(
+        veLikeReward.write.deposit([rick.account.address, 100n * DECIMALS], {
+          account: rick.account.address,
+        }),
+      ).to.be.rejectedWith("ErrUnauthorized");
+    });
+
+    it("initTotalStaked() should enable auto-sync and be callable only once", async function () {
+      const { veLike, deployer } = await loadFixture(initialMintNoLock);
+      const reward = await deployNewVeLikeRewardNoLock(deployer.account.address);
+      await reward.write.setVault([veLike.address], {
+        account: deployer.account.address,
+      });
+
+      await reward.write.initTotalStaked({ account: deployer.account.address });
+      // totalSupply is 0 in initialMintNoLock (no deposits yet).
+      const [, , , totalStaked] = await reward.read.getConfig();
+      expect(totalStaked).to.equal(0n);
+
+      await expect(
+        reward.write.initTotalStaked({ account: deployer.account.address }),
+      ).to.be.rejectedWith("Already initialized");
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Full rotation scenario:
+  //   - Period 1: rick & kin stake (stakerInfos synced through the vault)
+  //   - Period 2: a fresh veLikeRewardNoLock is rotated in with initTotalStaked
+  //   - Period 2: bob (a late joiner) deposits, so his vault balance is non-zero
+  //   - bob claims the period-1 legacy reward via veLike.claimLegacyReward
+  //   - Expectation: bob earns ZERO from period 1 (he never staked in it, and
+  //     the legacy contract has auto-sync OFF, so his period-2 stake must NOT
+  //     leak into period-1 rewards).
+  // -----------------------------------------------------------------------
+  describe("rotation with a late joiner", async function () {
+    it("bob's period-1 legacy reward is zero while rick & kin earn their share", async function () {
+      // Step 1: setup of veLike with rick, kin, bob. reward1 is the period-1
+      // reward contract already wired into the vault by the fixture.
+      const {
+        veLike,
+        veLikeReward: reward1,
+        likecoin,
+        deployer,
+        rick,
+        kin,
+        bob,
+        publicClient,
+        testClient,
+      } = await loadFixture(initialMintNoLock);
+
+      // --- Step 2: period 1 — rick & kin interact, stakerInfos get synced ---
+
+      // Fund and start period 1: 10000 LIKE over 1000 seconds.
+      await likecoin.write.approve([reward1.address, 10000n * DECIMALS], {
+        account: deployer.account.address,
+      });
+      const block1 = await publicClient.getBlock();
+      const start1 = block1.timestamp + 100n;
+      const end1 = start1 + 1000n;
+      await reward1.write.addReward(
+        [deployer.account.address, 10000n * DECIMALS, start1, end1],
+        { account: deployer.account.address },
+      );
+
+      // rick and kin each deposit 100 LIKE before the period starts. The vault
+      // forwards each deposit to reward1.deposit(), syncing their stakerInfos.
+      for (const user of [rick, kin]) {
+        await likecoin.write.approve([veLike.address, 100n * DECIMALS], {
+          account: user.account.address,
+        });
+        await veLike.write.deposit([100n * DECIMALS, user.account.address], {
+          account: user.account.address,
+        });
+      }
+
+      // stakerInfos synced: totalStaked reflects both deposits.
+      const [, , , totalStakedP1] = await reward1.read.getConfig();
+      expect(totalStakedP1).to.equal(200n * DECIMALS);
+
+      // Halfway through period 1 each holds 50% of a 10000 LIKE pool.
+      await testClient.setNextBlockTimestamp({ timestamp: start1 + 500n });
+      await testClient.mine({ blocks: 1 });
+      expect(
+        await reward1.read.getPendingReward([rick.account.address]),
+      ).to.equal(2500n * DECIMALS);
+      expect(
+        await reward1.read.getPendingReward([kin.account.address]),
+      ).to.equal(2500n * DECIMALS);
+      // bob never staked in period 1.
+      expect(
+        await reward1.read.getPendingReward([bob.account.address]),
+      ).to.equal(0n);
+
+      // Advance past period 1. Each accrues the full 5000 LIKE.
+      await testClient.setNextBlockTimestamp({ timestamp: end1 + 1n });
+      await testClient.mine({ blocks: 1 });
+      expect(
+        await reward1.read.getPendingReward([rick.account.address]),
+      ).to.equal(5000n * DECIMALS);
+      expect(
+        await reward1.read.getPendingReward([kin.account.address]),
+      ).to.equal(5000n * DECIMALS);
+
+      // --- Step 3: period 2 — rotate in a fresh contract with initTotalStaked ---
+      const reward2 = await deployNewVeLikeRewardNoLock(
+        deployer.account.address,
+      );
+      await reward2.write.setVault([veLike.address], {
+        account: deployer.account.address,
+      });
+      await reward2.write.setLikecoin([likecoin.address], {
+        account: deployer.account.address,
+      });
+
+      // initTotalStaked captures all existing vault holders (rick + kin = 200)
+      // and enables auto-sync for them in period 2.
+      await reward2.write.initTotalStaked({
+        account: deployer.account.address,
+      });
+      const [, , , totalStakedP2Init] = await reward2.read.getConfig();
+      expect(totalStakedP2Init).to.equal(200n * DECIMALS);
+
+      // Switch the vault's active reward contract to reward2, and allowlist
+      // reward1 so users can still claim period-1 rewards.
+      await veLike.write.setRewardContract([reward2.address], {
+        account: deployer.account.address,
+      });
+      await veLike.write.setLegacyRewardContract([reward1.address, true], {
+        account: deployer.account.address,
+      });
+
+      // Fund and start period 2: 5000 LIKE over 500 seconds.
+      await likecoin.write.approve([reward2.address, 5000n * DECIMALS], {
+        account: deployer.account.address,
+      });
+      const block2 = await publicClient.getBlock();
+      const start2 = block2.timestamp + 100n;
+      const end2 = start2 + 500n;
+      await reward2.write.addReward(
+        [deployer.account.address, 5000n * DECIMALS, start2, end2],
+        { account: deployer.account.address },
+      );
+
+      // --- Step 4: period 2 — bob deposits, so his vault balance is non-zero ---
+      await testClient.setNextBlockTimestamp({ timestamp: start2 });
+      await testClient.mine({ blocks: 1 });
+
+      await likecoin.write.approve([veLike.address, 100n * DECIMALS], {
+        account: bob.account.address,
+      });
+      await veLike.write.deposit([100n * DECIMALS, bob.account.address], {
+        account: bob.account.address,
+      });
+
+      // bob now holds veLIKE (his vault balance is non-zero) and is staked in
+      // reward2 only.
+      expect(await veLike.read.balanceOf([bob.account.address])).to.equal(
+        100n * DECIMALS,
+      );
+      const [, , , totalStakedP2After] = await reward2.read.getConfig();
+      expect(totalStakedP2After).to.equal(300n * DECIMALS);
+
+      // --- Step 5 & 6: bob claims the period-1 legacy reward → must be ZERO ---
+
+      // reward1 has auto-sync disabled, so bob's period-2 vault balance does
+      // NOT make him eligible for period-1 rewards. His effective period-1
+      // stake is 0, hence pending reward is 0.
+      expect(
+        await reward1.read.getPendingReward([bob.account.address]),
+      ).to.equal(0n);
+
+      // A zero legacy reward surfaces as ErrNoRewardToClaim, and bob's LIKE
+      // balance is unchanged.
+      const bobBalanceBefore = await likecoin.read.balanceOf([
+        bob.account.address,
+      ]);
+      await expect(
+        veLike.write.claimLegacyReward([reward1.address, bob.account.address], {
+          account: bob.account.address,
+        }),
+      ).to.be.rejectedWith("ErrNoRewardToClaim");
+      expect(await likecoin.read.balanceOf([bob.account.address])).to.equal(
+        bobBalanceBefore,
+      );
+
+      // Sanity contrast: rick (a genuine period-1 staker) DOES get his 5000
+      // LIKE legacy reward, proving the zero result for bob is meaningful.
+      const rickBalanceBefore = await likecoin.read.balanceOf([
+        rick.account.address,
+      ]);
+      await veLike.write.claimLegacyReward(
+        [reward1.address, rick.account.address],
+        { account: rick.account.address },
+      );
+      expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
+        rickBalanceBefore + 5000n * DECIMALS,
+      );
+    });
+  });
+});
