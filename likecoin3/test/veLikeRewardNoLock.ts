@@ -352,5 +352,202 @@ describe("veLikeRewardNoLock", async function () {
         rickBalanceBefore + 5000n * DECIMALS,
       );
     });
+
+    // -------------------------------------------------------------------
+    // Scenario:
+    //   1. veLike with rick, kin, bob, alice.
+    //   2. Period 1: rick & kin stake (stakerInfos synced).
+    //   3. Period 1 expires, then bob deposits while reward1 is still the
+    //      active reward contract — he joins too late to earn anything from
+    //      period 1 (his rewardIndex is set to the frozen final index).
+    //   4. Rotate: reward1 is closed out with finalizeSync(); reward2 is set
+    //      up with initTotalStaked() (capturing rick + kin + bob = 300).
+    //   5. Period 2: alice (a brand-new staker) deposits, earns her correct
+    //      period-2 share, and her period-1 legacy claim is zero.
+    //   6. bob's period-1 reward is zero (joined after the period ended).
+    // -------------------------------------------------------------------
+    it("late depositor (bob) and new joiner (alice) both earn zero from period 1", async function () {
+      // --- Step 1: setup with rick, kin, bob, alice ---
+      const {
+        veLike,
+        veLikeReward: reward1,
+        likecoin,
+        deployer,
+        rick,
+        kin,
+        bob,
+        publicClient,
+        testClient,
+      } = await loadFixture(initialMintNoLock);
+      // alice is not part of the fixture wallet set; fund her explicitly.
+      const alice = (await viem.getWalletClients())[4];
+      await likecoin.write.mint([alice.account.address, 10000n * DECIMALS], {
+        account: deployer.account.address,
+      });
+
+      // --- Step 2: period 1 — rick & kin stake; stakerInfos synced ---
+      await likecoin.write.approve([reward1.address, 10000n * DECIMALS], {
+        account: deployer.account.address,
+      });
+      const block1 = await publicClient.getBlock();
+      const start1 = block1.timestamp + 100n;
+      const end1 = start1 + 1000n;
+      await reward1.write.addReward(
+        [deployer.account.address, 10000n * DECIMALS, start1, end1],
+        { account: deployer.account.address },
+      );
+
+      for (const user of [rick, kin]) {
+        await likecoin.write.approve([veLike.address, 100n * DECIMALS], {
+          account: user.account.address,
+        });
+        await veLike.write.deposit([100n * DECIMALS, user.account.address], {
+          account: user.account.address,
+        });
+      }
+
+      const [, , , totalStakedP1] = await reward1.read.getConfig();
+      expect(totalStakedP1).to.equal(200n * DECIMALS);
+
+      // --- Step 3: period 1 expires, then bob deposits (too late) ---
+      await testClient.setNextBlockTimestamp({ timestamp: end1 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      // rick & kin earned their full 5000 each over the period.
+      expect(
+        await reward1.read.getPendingReward([rick.account.address]),
+      ).to.equal(5000n * DECIMALS);
+      expect(
+        await reward1.read.getPendingReward([kin.account.address]),
+      ).to.equal(5000n * DECIMALS);
+
+      // bob deposits after the period ended. reward1 is still the active
+      // reward contract, so the deposit is routed here and bob's rewardIndex
+      // is set to the frozen final index — he earns nothing from period 1.
+      await likecoin.write.approve([veLike.address, 100n * DECIMALS], {
+        account: bob.account.address,
+      });
+      await veLike.write.deposit([100n * DECIMALS, bob.account.address], {
+        account: bob.account.address,
+      });
+      expect(
+        await reward1.read.getPendingReward([bob.account.address]),
+      ).to.equal(0n);
+      const [, , , totalStakedP1AfterBob] = await reward1.read.getConfig();
+      expect(totalStakedP1AfterBob).to.equal(300n * DECIMALS);
+
+      // --- Step 4: rotate — finalizeSync(reward1), set up reward2 ---
+      // bob, rick, kin are all materialized (via deposits), so no syncStakers
+      // batch is needed before finalizing.
+      await reward1.write.finalizeSync({ account: deployer.account.address });
+
+      const reward2 = await deployNewVeLikeRewardNoLock(
+        deployer.account.address,
+      );
+      await reward2.write.setVault([veLike.address], {
+        account: deployer.account.address,
+      });
+      await reward2.write.setLikecoin([likecoin.address], {
+        account: deployer.account.address,
+      });
+      // Capture all existing vault holders (rick + kin + bob = 300).
+      await reward2.write.initTotalStaked({
+        account: deployer.account.address,
+      });
+      const [, , , totalStakedP2Init] = await reward2.read.getConfig();
+      expect(totalStakedP2Init).to.equal(300n * DECIMALS);
+
+      await veLike.write.setRewardContract([reward2.address], {
+        account: deployer.account.address,
+      });
+      await veLike.write.setLegacyRewardContract([reward1.address, true], {
+        account: deployer.account.address,
+      });
+
+      // Fund and start period 2: 5000 LIKE over 500 seconds.
+      await likecoin.write.approve([reward2.address, 5000n * DECIMALS], {
+        account: deployer.account.address,
+      });
+      const block2 = await publicClient.getBlock();
+      const start2 = block2.timestamp + 100n;
+      const end2 = start2 + 500n;
+      await reward2.write.addReward(
+        [deployer.account.address, 5000n * DECIMALS, start2, end2],
+        { account: deployer.account.address },
+      );
+
+      // --- Step 5: period 2 — alice deposits, earns her correct share ---
+      // alice deposits before the period starts, so she stakes for the whole
+      // period alongside the 3 auto-enrolled holders (4 x 100 = 400 total).
+      await likecoin.write.approve([veLike.address, 100n * DECIMALS], {
+        account: alice.account.address,
+      });
+      await veLike.write.deposit([100n * DECIMALS, alice.account.address], {
+        account: alice.account.address,
+      });
+      const [, , , totalStakedP2AfterAlice] = await reward2.read.getConfig();
+      expect(totalStakedP2AfterAlice).to.equal(400n * DECIMALS);
+
+      // Run the full period 2.
+      await testClient.setNextBlockTimestamp({ timestamp: end2 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      // 5000 LIKE over 4 equal stakers => 1250 LIKE each.
+      expect(
+        await veLike.read.getPendingReward([alice.account.address]),
+      ).to.equal(1250n * DECIMALS);
+
+      // alice's period-1 legacy claim is zero: reward1 is finalized, so her
+      // period-2 vault balance is not credited there, and she never staked in
+      // period 1.
+      expect(
+        await reward1.read.getPendingReward([alice.account.address]),
+      ).to.equal(0n);
+      await expect(
+        veLike.write.claimLegacyReward(
+          [reward1.address, alice.account.address],
+          { account: alice.account.address },
+        ),
+      ).to.be.rejectedWith("ErrNoRewardToClaim");
+
+      // alice can still claim her period-2 reward properly.
+      const aliceBalanceBefore = await likecoin.read.balanceOf([
+        alice.account.address,
+      ]);
+      await veLike.write.claimReward([alice.account.address], {
+        account: alice.account.address,
+      });
+      expect(await likecoin.read.balanceOf([alice.account.address])).to.equal(
+        aliceBalanceBefore + 1250n * DECIMALS,
+      );
+
+      // --- Step 6: bob's period-1 reward is zero ---
+      expect(
+        await reward1.read.getPendingReward([bob.account.address]),
+      ).to.equal(0n);
+      const bobBalanceBefore = await likecoin.read.balanceOf([
+        bob.account.address,
+      ]);
+      await expect(
+        veLike.write.claimLegacyReward([reward1.address, bob.account.address], {
+          account: bob.account.address,
+        }),
+      ).to.be.rejectedWith("ErrNoRewardToClaim");
+      expect(await likecoin.read.balanceOf([bob.account.address])).to.equal(
+        bobBalanceBefore,
+      );
+
+      // Sanity contrast: rick still claims his genuine 5000 period-1 reward.
+      const rickBalanceBefore = await likecoin.read.balanceOf([
+        rick.account.address,
+      ]);
+      await veLike.write.claimLegacyReward(
+        [reward1.address, rick.account.address],
+        { account: rick.account.address },
+      );
+      expect(await likecoin.read.balanceOf([rick.account.address])).to.equal(
+        rickBalanceBefore + 5000n * DECIMALS,
+      );
+    });
   });
 });
