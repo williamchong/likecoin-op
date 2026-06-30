@@ -457,6 +457,45 @@ contract veLikeRewardNoLock is
     }
 
     /**
+     * finalizeSync function
+     *
+     * Closing step that pairs with initTotalStaked(). Materializes every listed
+     * account that is still relying on the lazy vault-balance fallback
+     * (stakedAmount == 0 but vaultBalance > 0) by writing its vault balance into
+     * stakerInfos, then disables auto-sync.
+     *
+     * Once auto-sync is disabled the contract no longer trusts current vault
+     * balances. This is what makes rotation safe: after this contract is rotated
+     * out and becomes a legacy reward contract, a user who staked only in a
+     * later period (and therefore has a vault balance but no stakerInfo here)
+     * cannot claim rewards from this period.
+     *
+     * The caller must pass the complete set of vault holders so no eligible
+     * staker is left un-materialized before auto-sync is turned off. For large
+     * holder sets, use syncStakers() for the intermediate batches (which keeps
+     * auto-sync on) and finalizeSync() for the final batch.
+     *
+     * @param accounts - the accounts to materialize before disabling auto-sync
+     */
+    function finalizeSync(address[] calldata accounts) external onlyOwner {
+        veLikeRewardStorage storage $ = _getveLikeRewardData();
+        require($.autoSyncEnabled, "Not initialized or already finalized");
+        for (uint256 i = 0; i < accounts.length; i++) {
+            address account = accounts[i];
+            StakerInfo storage stakerInfo = $.stakerInfos[account];
+            if (stakerInfo.stakedAmount != 0) {
+                continue;
+            }
+            uint256 vaultBalance = IERC4626($.vault).balanceOf(account);
+            if (vaultBalance == 0) {
+                continue;
+            }
+            stakerInfo.stakedAmount = vaultBalance;
+        }
+        $.autoSyncEnabled = false;
+    }
+
+    /**
      * addReward function
      *
      * Admin function for authorized address too deposit asset as reward. This
