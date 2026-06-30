@@ -2,6 +2,7 @@ import { task } from "hardhat/config";
 import fs from "fs";
 import path from "path";
 import { parseAbiItem, getAddress, type Address } from "viem";
+import { VELIKE_DEFAULT, vaultDeployBlock } from "./velikeConstants";
 
 // veLIKE is a non-transferable ERC4626; acquisition is always a mint
 // (Transfer from the zero address) and exit is a burn (Transfer to zero).
@@ -11,11 +12,6 @@ const TRANSFER_EVENT = parseAbiItem(
 );
 
 const ZERO: Address = "0x0000000000000000000000000000000000000000";
-
-const VELIKE_DEFAULT = "0xE55C2b91E688BE70e5BbcEdE3792d723b4766e2B";
-// Block the veLike vault proxy was deployed at (veLikeV0Module#ERC1967Proxy).
-// veLIKE cannot exist before this; a fresh index starts here.
-const VAULT_DEPLOY_BLOCK = 37568967n;
 
 const DEFAULT_FILE = (chainId: number) =>
   `velike-events/${chainId}-velike-transfers.txt`;
@@ -53,7 +49,7 @@ task(
         : BigInt(args.block);
 
     const last = lastIndexedBlock(file);
-    const fromBlock = last === null ? VAULT_DEPLOY_BLOCK : last + 1n;
+    const fromBlock = last === null ? vaultDeployBlock(chainId) : last + 1n;
 
     console.log(`Vault (veLike): ${velike}`);
     console.log(`Log file:       ${file}`);

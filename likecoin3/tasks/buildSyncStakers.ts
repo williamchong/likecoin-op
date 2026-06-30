@@ -9,6 +9,11 @@ import {
   type Address,
   type Hex,
 } from "viem";
+import {
+  VELIKE_DEFAULT,
+  REWARD_DEFAULT,
+  vaultDeployBlock,
+} from "./velikeConstants";
 
 // ERC-7201 base slot of veLikeRewardStorage (see veLikeRewardNoLock.sol).
 // Field order (StakingCondition is inline = 4 slots):
@@ -18,10 +23,6 @@ const STORAGE_BASE =
   0xe9672d2c676bb94d428d6ce523668c779079df8febe4142a9972a2a2313d2c00n;
 const TOTAL_STAKED_SLOT = STORAGE_BASE + 3n;
 const STAKER_INFOS_SLOT = STORAGE_BASE + 9n;
-
-const VELIKE_DEFAULT = "0xE55C2b91E688BE70e5BbcEdE3792d723b4766e2B";
-const REWARD_DEFAULT = "0x5806B7fb388C2D3D894fE40Ba4598938b01496BA"; // veLikeRewardNoLock proxy
-const VAULT_DEPLOY_BLOCK = 37568967n; // veLikeV0Module#ERC1967Proxy
 
 const slotToHex = (slot: bigint): Hex => toHex(slot, { size: 32 });
 
@@ -118,7 +119,7 @@ task(
   .addOptionalParam("chunk", "Max addresses per syncStakers call", "100")
   .addOptionalParam(
     "out",
-    "Output JSON path (default velike-events/unsynced-{block}.json)",
+    "Output JSON path (default velike-events/{chainId}-unsynced-{block}.json)",
     "",
   )
   .setAction(async (args, hre) => {
@@ -139,7 +140,8 @@ task(
     const preScan = reconstructBalances(file, 2n ** 255n);
     const snapshotBlock =
       args.block === "" ? preScan.maxBlock : BigInt(args.block);
-    const out = args.out || `velike-events/unsynced-${snapshotBlock}.json`;
+    const out =
+      args.out || `velike-events/${chainId}-unsynced-${snapshotBlock}.json`;
 
     console.log(`Vault (veLike):   ${velike}`);
     console.log(`Reward (NoLock):  ${reward}`);
@@ -198,7 +200,7 @@ task(
     const cutoffBlock = await blockAtOrBefore(
       publicClient,
       startTime,
-      VAULT_DEPLOY_BLOCK,
+      vaultDeployBlock(chainId),
       snapshotBlock,
     );
     console.log(`Cutoff block (<= startTime): ${cutoffBlock}\n`);
