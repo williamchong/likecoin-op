@@ -38,5 +38,8 @@
   "veLikeRewardNoLockModule#veLikeRewardNoLockImpl": "0x690A2955B35B1B32343E0D0f33Ec695F970eaAa8",
   "veLikeRewardNoLockModule#ERC1967Proxy": "0x5806B7fb388C2D3D894fE40Ba4598938b01496BA",
   "veLikeRewardNoLockModule#veLikeRewardNoLock": "0x5806B7fb388C2D3D894fE40Ba4598938b01496BA",
-  "LikeCollectiveV1Module#LikeCollectiveV1Impl": "0x6A01CfF84FB3C277019230e77e250CcE5d15654B"
+  "LikeCollectiveV1Module#LikeCollectiveV1Impl": "0x6A01CfF84FB3C277019230e77e250CcE5d15654B",
+  "veLikeRewardNoLockUpgradeV2Module#veLikeRewardNoLock": "0x5806B7fb388C2D3D894fE40Ba4598938b01496BA",
+  "veLikeRewardNoLockUpgradeV2Module#veLikeRewardNoLockV2": "0x5806B7fb388C2D3D894fE40Ba4598938b01496BA",
+  "veLikeRewardNoLockUpgradeV2Module#veLikeRewardNoLockV2Impl": "0xBd752EA8f8580185Ee66a7827Ae92c8ed006f9AC"
 }
