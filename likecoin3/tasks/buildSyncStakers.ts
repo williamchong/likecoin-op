@@ -147,7 +147,10 @@ task(
     console.log(`Snapshot @ block: ${snapshotBlock}`);
     console.log(`Period:           start=${startTime} end=${endTime}`);
 
-    const rewardC = await hre.viem.getContractAt("veLikeRewardNoLock", reward);
+    const rewardC = await hre.viem.getContractAt(
+      "contracts/veLikeRewardNoLockV2.sol:veLikeRewardNoLock",
+      reward,
+    );
     const vaultC = await hre.viem.getContractAt(
       "contracts/veLikeV2.sol:veLike",
       velike,

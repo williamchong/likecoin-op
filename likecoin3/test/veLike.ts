@@ -692,7 +692,9 @@ describe("veLike ", async function () {
       expect(pendingP1).to.equal(10000n * 10n ** 6n);
 
       // --- Rotation: deploy veLikeRewardNoLock, replace reward1 ---
-      const reward2Impl = await viem.deployContract("veLikeRewardNoLock");
+      const reward2Impl = await viem.deployContract(
+        "contracts/veLikeRewardNoLockV2.sol:veLikeRewardNoLock",
+      );
       const reward2InitData = encodeFunctionData({
         abi: reward2Impl.abi,
         functionName: "initialize",
@@ -703,7 +705,7 @@ describe("veLike ", async function () {
         reward2InitData,
       ]);
       const reward2 = await viem.getContractAt(
-        "veLikeRewardNoLock",
+        "contracts/veLikeRewardNoLockV2.sol:veLikeRewardNoLock",
         reward2Proxy.address,
       );
       await reward2.write.setVault([veLike.address], {
@@ -822,7 +824,9 @@ describe("veLike ", async function () {
 
   describe("reward rotation integration", async function () {
     async function deployNewVeLikeRewardNoLock(ownerAddress: `0x${string}`) {
-      const impl = await viem.deployContract("veLikeRewardNoLock");
+      const impl = await viem.deployContract(
+        "contracts/veLikeRewardNoLockV2.sol:veLikeRewardNoLock",
+      );
       const initData = encodeFunctionData({
         abi: impl.abi,
         functionName: "initialize",
@@ -832,7 +836,10 @@ describe("veLike ", async function () {
         impl.address,
         initData,
       ]);
-      return await viem.getContractAt("veLikeRewardNoLock", proxy.address);
+      return await viem.getContractAt(
+        "contracts/veLikeRewardNoLockV2.sol:veLikeRewardNoLock",
+        proxy.address,
+      );
     }
 
     /**
@@ -1030,7 +1037,9 @@ describe("veLike ", async function () {
 
   describe("syncStakers and lazy sync", async function () {
     async function deployNewVeLikeRewardNoLock(ownerAddress: `0x${string}`) {
-      const impl = await viem.deployContract("veLikeRewardNoLock");
+      const impl = await viem.deployContract(
+        "contracts/veLikeRewardNoLockV2.sol:veLikeRewardNoLock",
+      );
       const initData = encodeFunctionData({
         abi: impl.abi,
         functionName: "initialize",
@@ -1040,7 +1049,10 @@ describe("veLike ", async function () {
         impl.address,
         initData,
       ]);
-      return await viem.getContractAt("veLikeRewardNoLock", proxy.address);
+      return await viem.getContractAt(
+        "contracts/veLikeRewardNoLockV2.sol:veLikeRewardNoLock",
+        proxy.address,
+      );
     }
 
     /**
@@ -1112,18 +1124,24 @@ describe("veLike ", async function () {
       };
     }
 
-    it("should revert with ErrNotActive before period starts", async function () {
+    it("should sync before period starts (auto-sync enabled)", async function () {
       const { reward1, deployer, bob } = await loadFixture(syncStakersFixture);
 
-      // Period hasn't started yet — block.timestamp < start1
+      // Period hasn't started yet — block.timestamp < start1. syncStakers is
+      // allowed because auto-sync is enabled, regardless of active period.
+      await reward1.write.syncStakers([[bob.account.address]], {
+        account: deployer.account.address,
+      });
+
+      // Bob is now materialized: a repeat sync reverts ErrAlreadySynced.
       await expect(
         reward1.write.syncStakers([[bob.account.address]], {
           account: deployer.account.address,
         }),
-      ).to.be.rejectedWith("ErrNotActive");
+      ).to.be.rejectedWith("ErrAlreadySynced");
     });
 
-    it("should revert with ErrNotActive after period ends", async function () {
+    it("should sync after period ends (auto-sync enabled)", async function () {
       const { reward1, deployer, bob, testClient, end1 } =
         await loadFixture(syncStakersFixture);
 
@@ -1131,11 +1149,17 @@ describe("veLike ", async function () {
       await testClient.setNextBlockTimestamp({ timestamp: end1 + 1n });
       await testClient.mine({ blocks: 1 });
 
-      await expect(
-        reward1.write.syncStakers([[bob.account.address]], {
-          account: deployer.account.address,
-        }),
-      ).to.be.rejectedWith("ErrNotActive");
+      // Still allowed: auto-sync has not been finalized.
+      await reward1.write.syncStakers([[bob.account.address]], {
+        account: deployer.account.address,
+      });
+
+      // Synced with rewardIndex 0, so Bob earns his full retroactive share.
+      // Bob is the only staker (totalStaked == 100), so he earns the entire
+      // 10000 LIKE period reward.
+      expect(
+        await reward1.read.getPendingReward([bob.account.address]),
+      ).to.equal(10000n * 10n ** 6n);
     });
 
     it("should sync un-synced account during active period", async function () {

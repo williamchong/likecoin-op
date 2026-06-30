@@ -9,7 +9,9 @@ import { initialMintNoLock } from "./factory";
 const DECIMALS = 10n ** 6n;
 
 async function deployNewVeLikeRewardNoLock(ownerAddress: `0x${string}`) {
-  const impl = await viem.deployContract("veLikeRewardNoLock");
+  const impl = await viem.deployContract(
+    "contracts/veLikeRewardNoLockV2.sol:veLikeRewardNoLock",
+  );
   const initData = encodeFunctionData({
     abi: impl.abi,
     functionName: "initialize",
@@ -19,7 +21,10 @@ async function deployNewVeLikeRewardNoLock(ownerAddress: `0x${string}`) {
     impl.address,
     initData,
   ]);
-  return await viem.getContractAt("veLikeRewardNoLock", proxy.address);
+  return await viem.getContractAt(
+    "contracts/veLikeRewardNoLockV2.sol:veLikeRewardNoLock",
+    proxy.address,
+  );
 }
 
 describe("veLikeRewardNoLock", async function () {
@@ -66,7 +71,9 @@ describe("veLikeRewardNoLock", async function () {
 
     it("initTotalStaked() should enable auto-sync and be callable only once", async function () {
       const { veLike, deployer } = await loadFixture(initialMintNoLock);
-      const reward = await deployNewVeLikeRewardNoLock(deployer.account.address);
+      const reward = await deployNewVeLikeRewardNoLock(
+        deployer.account.address,
+      );
       await reward.write.setVault([veLike.address], {
         account: deployer.account.address,
       });
@@ -83,7 +90,9 @@ describe("veLikeRewardNoLock", async function () {
 
     it("finalizeSync() should revert before initTotalStaked()", async function () {
       const { veLike, deployer } = await loadFixture(initialMintNoLock);
-      const reward = await deployNewVeLikeRewardNoLock(deployer.account.address);
+      const reward = await deployNewVeLikeRewardNoLock(
+        deployer.account.address,
+      );
       await reward.write.setVault([veLike.address], {
         account: deployer.account.address,
       });

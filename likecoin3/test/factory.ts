@@ -313,7 +313,9 @@ export async function initialCondition() {
 // --- NoLock fixtures (deploy veLikeRewardNoLock instead of veLikeReward) ---
 
 async function deployVeLikeRewardNoLockContract(ownerAddress: `0x${string}`) {
-  const impl = await viem.deployContract("veLikeRewardNoLock");
+  const impl = await viem.deployContract(
+    "contracts/veLikeRewardNoLock.sol:veLikeRewardNoLock",
+  );
   const initData = encodeFunctionData({
     abi: impl.abi,
     functionName: "initialize",
@@ -323,7 +325,33 @@ async function deployVeLikeRewardNoLockContract(ownerAddress: `0x${string}`) {
     impl.address,
     initData,
   ]);
-  return await viem.getContractAt("veLikeRewardNoLock", proxy.address);
+  return await viem.getContractAt(
+    "contracts/veLikeRewardNoLock.sol:veLikeRewardNoLock",
+    proxy.address,
+  );
+}
+
+// Upgrade an already-deployed veLikeRewardNoLock proxy to the V2 implementation
+// (adds finalizeSync() and auto-sync-gated syncStakers()). Mirrors
+// ignition/modules/veLikeRewardNoLockUpgradeV2.ts.
+async function upgradeVeLikeRewardNoLockToV2(
+  proxyAddress: `0x${string}`,
+  ownerAddress: `0x${string}`,
+) {
+  const implV2 = await viem.deployContract(
+    "contracts/veLikeRewardNoLockV2.sol:veLikeRewardNoLock",
+  );
+  const proxy = await viem.getContractAt(
+    "contracts/veLikeRewardNoLock.sol:veLikeRewardNoLock",
+    proxyAddress,
+  );
+  await proxy.write.upgradeToAndCall([implV2.address, "0x"], {
+    account: ownerAddress,
+  });
+  return await viem.getContractAt(
+    "contracts/veLikeRewardNoLockV2.sol:veLikeRewardNoLock",
+    proxyAddress,
+  );
 }
 
 export async function deployVeLikeRewardNoLock() {
@@ -349,8 +377,12 @@ export async function deployVeLikeRewardNoLock() {
   await veLike.write.setRewardContract([veLikeReward.address], {
     account: deployer.account.address,
   });
+  const veLikeRewardV2 = await upgradeVeLikeRewardNoLockToV2(
+    veLikeReward.address,
+    deployer.account.address,
+  );
   return {
-    veLikeReward,
+    veLikeReward: veLikeRewardV2,
     veLike,
     likecoin,
     deployer,

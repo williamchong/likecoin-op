@@ -24,9 +24,13 @@ const veLikeRewardNoLockModule = buildModule(
     const initOwner = m.getParameter("initOwner");
     const { veLikeV0, likecoin } = m.useModule(veLikeV0Module);
 
-    const veLikeRewardNoLockImpl = m.contract("veLikeRewardNoLock", [], {
-      id: "veLikeRewardNoLockImpl",
-    });
+    const veLikeRewardNoLockImpl = m.contract(
+      "contracts/veLikeRewardNoLock.sol:veLikeRewardNoLock",
+      [],
+      {
+        id: "veLikeRewardNoLockImpl",
+      },
+    );
 
     const initData = m.encodeFunctionCall(
       veLikeRewardNoLockImpl,
@@ -40,7 +44,7 @@ const veLikeRewardNoLockModule = buildModule(
     ]);
 
     const veLikeRewardNoLock = m.contractAt(
-      "veLikeRewardNoLock",
+      "contracts/veLikeRewardNoLock.sol:veLikeRewardNoLock",
       veLikeRewardNoLockProxy,
     );
 
