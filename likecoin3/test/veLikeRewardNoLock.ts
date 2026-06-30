@@ -549,5 +549,202 @@ describe("veLikeRewardNoLock", async function () {
         rickBalanceBefore + 5000n * DECIMALS,
       );
     });
+
+    // -------------------------------------------------------------------
+    // Scenario (existing staker tops up after each period ends):
+    //   1. veLike with rick, kin, bob.
+    //   2. Period 1: rick & kin stake (stakerInfos synced).
+    //   3. Period 1 expires, then kin tops up while reward1 is still active.
+    //      The deposit auto-claims kin's earned period-1 reward, and the newly
+    //      added stake earns nothing more.
+    //   4. Rotate: finalizeSync(reward1); reward2 with initTotalStaked().
+    //   5. Period 2: bob (brand-new) deposits, earns his correct share, and
+    //      his period-1 legacy claim is zero.
+    //   6. kin's period-1 reward is correct (the 5000 he auto-claimed).
+    //   7. Period 2 expires; reward2 is still active. kin tops up — the
+    //      deposit auto-claims his correct period-2 reward, and the new stake
+    //      earns nothing more.
+    // -------------------------------------------------------------------
+    it("existing staker (kin) topping up after a period ends earns nothing extra", async function () {
+      const {
+        veLike,
+        veLikeReward: reward1,
+        likecoin,
+        deployer,
+        rick,
+        kin,
+        bob,
+        publicClient,
+        testClient,
+      } = await loadFixture(initialMintNoLock);
+
+      // --- Step 2: period 1 — rick & kin stake ---
+      await likecoin.write.approve([reward1.address, 10000n * DECIMALS], {
+        account: deployer.account.address,
+      });
+      const block1 = await publicClient.getBlock();
+      const start1 = block1.timestamp + 100n;
+      const end1 = start1 + 1000n;
+      await reward1.write.addReward(
+        [deployer.account.address, 10000n * DECIMALS, start1, end1],
+        { account: deployer.account.address },
+      );
+
+      for (const user of [rick, kin]) {
+        await likecoin.write.approve([veLike.address, 100n * DECIMALS], {
+          account: user.account.address,
+        });
+        await veLike.write.deposit([100n * DECIMALS, user.account.address], {
+          account: user.account.address,
+        });
+      }
+      expect((await reward1.read.getConfig())[3]).to.equal(200n * DECIMALS);
+
+      // --- Step 3: period 1 expires, then kin tops up ---
+      await testClient.setNextBlockTimestamp({ timestamp: end1 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      // Both earned their full 5000 over the period.
+      expect(
+        await reward1.read.getPendingReward([rick.account.address]),
+      ).to.equal(5000n * DECIMALS);
+      expect(
+        await reward1.read.getPendingReward([kin.account.address]),
+      ).to.equal(5000n * DECIMALS);
+
+      // kin tops up 100 more. The deposit auto-claims his 5000 period-1 reward;
+      // the new stake is pinned to the frozen final index, so it earns nothing.
+      const kinBalanceBeforeTopup = await likecoin.read.balanceOf([
+        kin.account.address,
+      ]);
+      await likecoin.write.approve([veLike.address, 100n * DECIMALS], {
+        account: kin.account.address,
+      });
+      await veLike.write.deposit([100n * DECIMALS, kin.account.address], {
+        account: kin.account.address,
+      });
+
+      // kin received his 5000 reward minus the 100 he just staked.
+      expect(await likecoin.read.balanceOf([kin.account.address])).to.equal(
+        kinBalanceBeforeTopup - 100n * DECIMALS + 5000n * DECIMALS,
+      );
+      // No further period-1 reward accrues to the new stake.
+      expect(
+        await reward1.read.getPendingReward([kin.account.address]),
+      ).to.equal(0n);
+      expect((await reward1.read.getConfig())[3]).to.equal(300n * DECIMALS);
+
+      // --- Step 4: rotate — finalizeSync(reward1), set up reward2 ---
+      await reward1.write.finalizeSync({ account: deployer.account.address });
+
+      const reward2 = await deployNewVeLikeRewardNoLock(
+        deployer.account.address,
+      );
+      await reward2.write.setVault([veLike.address], {
+        account: deployer.account.address,
+      });
+      await reward2.write.setLikecoin([likecoin.address], {
+        account: deployer.account.address,
+      });
+      // Captures rick (100) + kin (200) = 300.
+      await reward2.write.initTotalStaked({
+        account: deployer.account.address,
+      });
+      expect((await reward2.read.getConfig())[3]).to.equal(300n * DECIMALS);
+
+      await veLike.write.setRewardContract([reward2.address], {
+        account: deployer.account.address,
+      });
+      await veLike.write.setLegacyRewardContract([reward1.address, true], {
+        account: deployer.account.address,
+      });
+
+      // Fund and start period 2: 5000 LIKE over 500 seconds.
+      await likecoin.write.approve([reward2.address, 5000n * DECIMALS], {
+        account: deployer.account.address,
+      });
+      const block2 = await publicClient.getBlock();
+      const start2 = block2.timestamp + 100n;
+      const end2 = start2 + 500n;
+      await reward2.write.addReward(
+        [deployer.account.address, 5000n * DECIMALS, start2, end2],
+        { account: deployer.account.address },
+      );
+
+      // --- Step 5: period 2 — bob (brand-new) deposits ---
+      // Stakes: rick 100, kin 200 (auto-enrolled), bob 100 => 400 total.
+      await likecoin.write.approve([veLike.address, 100n * DECIMALS], {
+        account: bob.account.address,
+      });
+      await veLike.write.deposit([100n * DECIMALS, bob.account.address], {
+        account: bob.account.address,
+      });
+      expect((await reward2.read.getConfig())[3]).to.equal(400n * DECIMALS);
+
+      await testClient.setNextBlockTimestamp({ timestamp: end2 + 1n });
+      await testClient.mine({ blocks: 1 });
+
+      // bob's share: 100/400 of 5000 = 1250.
+      expect(
+        await veLike.read.getPendingReward([bob.account.address]),
+      ).to.equal(1250n * DECIMALS);
+
+      // bob's period-1 legacy claim is zero (never staked in period 1).
+      expect(
+        await reward1.read.getPendingReward([bob.account.address]),
+      ).to.equal(0n);
+      await expect(
+        veLike.write.claimLegacyReward([reward1.address, bob.account.address], {
+          account: bob.account.address,
+        }),
+      ).to.be.rejectedWith("ErrNoRewardToClaim");
+
+      // bob claims his correct period-2 reward.
+      const bobBalanceBefore = await likecoin.read.balanceOf([
+        bob.account.address,
+      ]);
+      await veLike.write.claimReward([bob.account.address], {
+        account: bob.account.address,
+      });
+      expect(await likecoin.read.balanceOf([bob.account.address])).to.equal(
+        bobBalanceBefore + 1250n * DECIMALS,
+      );
+
+      // --- Step 6: kin's period-1 reward is correct (5000, auto-claimed) ---
+      expect(
+        await reward1.read.getClaimedReward([kin.account.address]),
+      ).to.equal(5000n * DECIMALS);
+      expect(
+        await reward1.read.getPendingReward([kin.account.address]),
+      ).to.equal(0n);
+
+      // --- Step 7: period 2 ended, reward2 still active, kin tops up ---
+      // kin's pending period-2 reward is his 200/400 share = 2500.
+      expect(
+        await reward2.read.getPendingReward([kin.account.address]),
+      ).to.equal(2500n * DECIMALS);
+
+      const kinBalanceBeforeP2Topup = await likecoin.read.balanceOf([
+        kin.account.address,
+      ]);
+      await likecoin.write.approve([veLike.address, 100n * DECIMALS], {
+        account: kin.account.address,
+      });
+      await veLike.write.deposit([100n * DECIMALS, kin.account.address], {
+        account: kin.account.address,
+      });
+
+      // The deposit auto-claims kin's 2500 period-2 reward; the new 100 stake
+      // earns nothing more (period already ended).
+      expect(await likecoin.read.balanceOf([kin.account.address])).to.equal(
+        kinBalanceBeforeP2Topup - 100n * DECIMALS + 2500n * DECIMALS,
+      );
+      expect(
+        await reward2.read.getClaimedReward([kin.account.address]),
+      ).to.equal(2500n * DECIMALS);
+      expect(
+        await reward2.read.getPendingReward([kin.account.address]),
+      ).to.equal(0n);
+    });
   });
 });

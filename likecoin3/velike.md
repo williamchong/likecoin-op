@@ -121,9 +121,9 @@ the no-lock reward contract for the next period.
 
 ## Rotating to a New veLikeRewardNoLock (2nd period onwards)
 
-Use this when the current reward period has ended and you want to start a new one with a
-fresh contract. The `veLikeRewardNoLock` contract supports auto-enrollment of existing
-stakers without requiring them to re-deposit.
+Use this when the current reward period has ended and you want to start a new
+one with a fresh contract. The `veLikeRewardNoLockV2` contract supports
+auto-enrollment of existing stakers without requiring them to re-deposit.
 
 ### Before you start
 
@@ -131,20 +131,30 @@ stakers without requiring them to re-deposit.
 - Decide the new period parameters: `startTime`, `endTime`, `rewardAmount`, `drawer`.
 - The `drawer` account must hold enough LIKE and pre-approve the new reward contract.
 
-### Step 1: (Optional but recommended) Sync stakers on the old contract
+### Step 1: Sync stakers on the old contract to finalzied it
 
-Call `syncStakers` on the **current** (old) reward contract to freeze staker balances before
-anyone withdraws between periods. Must be called while the old period is still active.
+Call `syncStaker` follow by `finalizeSync` on the **current** (old) reward
+contract to freeze staker balances before anyone withdraws between periods. Must
+be called once before rotate out.
+
+address should be obtain via:
+
+```bash
+DOTENV_CONFIG_PATH=.env npx hardhat indexVeLikeTransfers --network base
+
+DOTENV_CONFIG_PATH=.env npx hardhat buildSyncStakers --network base \
+  --starttime 1773014400 --endtime 1780959600
+```
 
 ```bash
 cast send $OLD_REWARD \
-  "syncStakers(address[])" \
+  "finalizeSync(address[])" \
   "[0xAddr1,0xAddr2,...]" \
   --account likecoin-deployer.eth --rpc-url $RPC
 ```
 
 Skip this if all stakers have already interacted with the old contract (they are already
-synced) or if the period has already ended.
+synced), unlikely.
 
 ### Step 2: Add parameters for the new ignition module
 
@@ -157,8 +167,10 @@ Add to `ignition/parameters.json`:
 ```
 
 For a 3rd/4th reward, duplicate `ignition/modules/veLikeRewardNoLock.ts` as
-`veLikeRewardNoLockV2.ts` (change the module ID string to `"veLikeRewardNoLockV2Module"`)
-and add a matching `"veLikeRewardNoLockV2Module"` entry in `parameters.json`.
+`veLikeRewardNoLockV2P2.ts` (change the module ID string to `"veLikeRewardNoLockV2P2Module"`)
+and add a matching `"veLikeRewardNoLockV2P2Module"` entry in `parameters.json`.
+
+The naming should be `P{N}` if no contract upgrade.
 
 ### Step 3: Deploy the new reward contract
 
@@ -239,25 +251,6 @@ the active period (`startTime` ≤ now ≤ `endTime`):
 cast send $NEW_REWARD \
   "syncStakers(address[])" \
   "[0xAddr1,0xAddr2,...]" \
-  --account likecoin-deployer.eth --rpc-url $RPC
-```
-
----
-
-## Adding Another Period to the Same Contract (no rotation)
-
-If you want to reuse an existing `veLikeRewardNoLock` contract for the next period (no new
-deployment needed), just repeat the funding step after the current period ends:
-
-```bash
-# Drawer approves
-cast send $LIKE "approve(address,uint256)" $REWARD_CONTRACT $REWARD_AMOUNT \
-  --account <drawer-account> --rpc-url $RPC
-
-# Add the next period (startTime must be > lastRewardTime of the contract)
-cast send $REWARD_CONTRACT \
-  "addReward(address,uint256,uint256,uint256)" \
-  $DRAWER $REWARD_AMOUNT $START_TIME $END_TIME \
   --account likecoin-deployer.eth --rpc-url $RPC
 ```
 
