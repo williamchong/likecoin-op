@@ -15,9 +15,5 @@
     }
   ],
   "excludedLateJoiners": [],
-  "syncStakersChunks": [
-    [
-      "0x997953F3Be6e3c60BCC0177216E6636739FC4B79"
-    ]
-  ]
+  "syncStakersChunks": [["0x997953F3Be6e3c60BCC0177216E6636739FC4B79"]]
 }
