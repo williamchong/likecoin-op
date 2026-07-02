@@ -27,5 +27,8 @@
   },
   "veLikeRewardNoLockUpgradeV2Module": {
     "veLikeRewardNoLockAddress": "0x5806B7fb388C2D3D894fE40Ba4598938b01496BA"
+  },
+  "veLikeRewardNoLockV2P2Module": {
+    "initOwner": "0x2dd2253cd5bef4ea6d74efdfad9718a73a7d7ec7"
   }
 }

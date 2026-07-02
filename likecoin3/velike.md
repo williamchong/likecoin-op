@@ -168,6 +168,7 @@ Add to `ignition/parameters.json`:
 For a 3rd/4th reward, duplicate `ignition/modules/veLikeRewardNoLock.ts` as
 `veLikeRewardNoLockV2P2.ts` (change the module ID string to `"veLikeRewardNoLockV2P2Module"`)
 and add a matching `"veLikeRewardNoLockV2P2Module"` entry in `parameters.json`.
+For contract, it should duplicate the existing `veLikeRewardNoLockV2.sol`, add a comment on with `pool X` should enough to trigger different CREATE2 address.
 
 The naming should be `P{N}` if no contract upgrade.
 
