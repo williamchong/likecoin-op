@@ -134,6 +134,7 @@ func (e *transferProcessor) Process(
 		tokenId,
 		transferEvent.To.Hex(),
 		owner,
+		evmEvent.Timestamp,
 	)
 
 	if err != nil {

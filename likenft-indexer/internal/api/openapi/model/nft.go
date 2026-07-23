@@ -29,7 +29,7 @@ func MakeNFT(e *ent.NFT) api.NFT {
 		YoutubeURL:      MakeOptString(e.YoutubeURL),
 		OwnerAddress:    e.OwnerAddress,
 		MintedAt:        e.MintedAt,
-		UpdatedAt:       e.MintedAt,
+		UpdatedAt:       e.UpdatedAt,
 	}
 }
 

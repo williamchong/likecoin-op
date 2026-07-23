@@ -153,6 +153,7 @@ func (e *transferWithMemoProcessor) Process(
 		tokenId,
 		transferWithMemoEvent.To.Hex(),
 		owner,
+		evmEvent.Timestamp,
 	)
 
 	if err != nil {

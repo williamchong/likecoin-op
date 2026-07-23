@@ -2,7 +2,6 @@ package model
 
 import (
 	"likenft-indexer/ent"
-	"likenft-indexer/ent/schema/typeutil"
 	"likenft-indexer/internal/database"
 	"likenft-indexer/internal/evm/model"
 	"likenft-indexer/openapi/api"
@@ -11,10 +10,11 @@ import (
 )
 
 func MakeNFTClass(e *ent.NFTClass) (*api.BookNFT, error) {
-	return MakeNFTClassWithTokenID(e, nil)
+	return MakeNFTClassWithToken(&database.NFTClassWithNFTID{NFTClass: e})
 }
 
-func MakeNFTClassWithTokenID(e *ent.NFTClass, tokenID *typeutil.Uint64) (*api.BookNFT, error) {
+func MakeNFTClassWithToken(t *database.NFTClassWithNFTID) (*api.BookNFT, error) {
+	e := t.NFTClass
 	var (
 		opensea                 *model.ContractLevelMetadataOpenSea
 		metadataAdditionalProps = make(map[string]jx.Raw)
@@ -44,7 +44,8 @@ func MakeNFTClassWithTokenID(e *ent.NFTClass, tokenID *typeutil.Uint64) (*api.Bo
 		MintedAt:            e.MintedAt,
 		UpdatedAt:           e.UpdatedAt,
 		Owner:               MakeOptAccount(e.Edges.Owner),
-		TokenID:             MakeOptUint64(tokenID),
+		TokenID:             MakeOptUint64(t.NFTID),
+		TokenUpdatedAt:      MakeOptDateTime(t.TokenUpdatedAt),
 	}, nil
 }
 
