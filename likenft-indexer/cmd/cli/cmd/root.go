@@ -38,6 +38,7 @@ func Execute(
 
 func init() {
 	rootCmd.AddCommand(AcquireContractEvents)
+	rootCmd.AddCommand(BackfillNFTUpdatedAtCmd)
 	rootCmd.AddCommand(ProcessAllEVMEventCmd)
 	rootCmd.AddCommand(ProcessEVMEventCmd)
 	rootCmd.AddCommand(RecalculateEvmEventsCmd)

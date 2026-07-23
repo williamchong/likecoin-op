@@ -97,6 +97,9 @@ type BookNFT struct {
 	UpdatedAt           time.Time                `json:"updated_at"`
 	Owner               OptAccount               `json:"owner"`
 	TokenID             OptUint64                `json:"token_id"`
+	// Latest acquisition time among the requested account's owned tokens of this class; only populated
+	// by /account/{address}/token-booknfts.
+	TokenUpdatedAt OptDateTime `json:"token_updated_at"`
 }
 
 // GetID returns the value of ID.
@@ -184,6 +187,11 @@ func (s *BookNFT) GetTokenID() OptUint64 {
 	return s.TokenID
 }
 
+// GetTokenUpdatedAt returns the value of TokenUpdatedAt.
+func (s *BookNFT) GetTokenUpdatedAt() OptDateTime {
+	return s.TokenUpdatedAt
+}
+
 // SetID sets the value of ID.
 func (s *BookNFT) SetID(val int) {
 	s.ID = val
@@ -267,6 +275,11 @@ func (s *BookNFT) SetOwner(val OptAccount) {
 // SetTokenID sets the value of TokenID.
 func (s *BookNFT) SetTokenID(val OptUint64) {
 	s.TokenID = val
+}
+
+// SetTokenUpdatedAt sets the value of TokenUpdatedAt.
+func (s *BookNFT) SetTokenUpdatedAt(val OptDateTime) {
+	s.TokenUpdatedAt = val
 }
 
 type BookNFTsByAccountOK struct {
@@ -1505,6 +1518,52 @@ func (o OptContractLevelMetadataNEQ) Get() (v ContractLevelMetadataNEQ, ok bool)
 
 // Or returns value if set, or given parameter if does not.
 func (o OptContractLevelMetadataNEQ) Or(d ContractLevelMetadataNEQ) ContractLevelMetadataNEQ {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDateTime returns new OptDateTime with value set to v.
+func NewOptDateTime(v time.Time) OptDateTime {
+	return OptDateTime{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDateTime is optional time.Time.
+type OptDateTime struct {
+	Value time.Time
+	Set   bool
+}
+
+// IsSet returns true if OptDateTime was set.
+func (o OptDateTime) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDateTime) Reset() {
+	var v time.Time
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDateTime) SetTo(v time.Time) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDateTime) Get() (v time.Time, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDateTime) Or(d time.Time) time.Time {
 	if v, ok := o.Get(); ok {
 		return v
 	}

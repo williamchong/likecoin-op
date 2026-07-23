@@ -19,6 +19,9 @@ import (
 type NFTClassWithNFTID struct {
 	NFTClass *ent.NFTClass
 	NFTID    *typeutil.Uint64
+	// Latest updated_at among the account's owned tokens of this class,
+	// i.e. when the account most recently acquired a copy.
+	TokenUpdatedAt *time.Time
 }
 
 type NFTClassRepository interface {
@@ -250,18 +253,27 @@ func (r *nftClassRepository) QueryNFTClassesByAccountTokensWithNFTID(
 	}
 
 	nftIDMap := make(map[string]*typeutil.Uint64)
+	tokenUpdatedAtMap := make(map[string]time.Time)
 	for _, n := range nfts {
 		if _, exists := nftIDMap[n.ContractAddress]; !exists {
 			nftID := typeutil.Uint64(n.TokenID)
 			nftIDMap[n.ContractAddress] = &nftID
 		}
+		if n.UpdatedAt.After(tokenUpdatedAtMap[n.ContractAddress]) {
+			tokenUpdatedAtMap[n.ContractAddress] = n.UpdatedAt
+		}
 	}
 
 	result := make([]*NFTClassWithNFTID, len(classes))
 	for i, c := range classes {
+		var tokenUpdatedAt *time.Time
+		if t, exists := tokenUpdatedAtMap[c.Address]; exists {
+			tokenUpdatedAt = &t
+		}
 		result[i] = &NFTClassWithNFTID{
-			NFTClass: c,
-			NFTID:    nftIDMap[c.Address],
+			NFTClass:       c,
+			NFTID:          nftIDMap[c.Address],
+			TokenUpdatedAt: tokenUpdatedAt,
 		}
 	}
 

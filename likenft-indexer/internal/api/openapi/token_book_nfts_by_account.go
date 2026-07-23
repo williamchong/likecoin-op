@@ -38,7 +38,7 @@ func (h *OpenAPIHandler) TokenBookNFTsByAccount(ctx context.Context, params api.
 	apiBookNFTs := make([]api.BookNFT, len(nftClassWithTokenIDs))
 
 	for i, nftClassWithTokenID := range nftClassWithTokenIDs {
-		apiNFTClass, err := model.MakeNFTClassWithTokenID(nftClassWithTokenID.NFTClass, nftClassWithTokenID.NFTID)
+		apiNFTClass, err := model.MakeNFTClassWithToken(nftClassWithTokenID)
 		if err != nil {
 			return nil, err
 		}

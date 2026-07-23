@@ -5,6 +5,7 @@ package api
 import (
 	"math/bits"
 	"strconv"
+	"time"
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
@@ -387,9 +388,15 @@ func (s *BookNFT) encodeFields(e *jx.Encoder) {
 			s.TokenID.Encode(e)
 		}
 	}
+	{
+		if s.TokenUpdatedAt.Set {
+			e.FieldStart("token_updated_at")
+			s.TokenUpdatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
 }
 
-var jsonFieldsNameOfBookNFT = [17]string{
+var jsonFieldsNameOfBookNFT = [18]string{
 	0:  "id",
 	1:  "address",
 	2:  "name",
@@ -407,6 +414,7 @@ var jsonFieldsNameOfBookNFT = [17]string{
 	14: "updated_at",
 	15: "owner",
 	16: "token_id",
+	17: "token_updated_at",
 }
 
 // Decode decodes BookNFT from json.
@@ -623,6 +631,16 @@ func (s *BookNFT) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"token_id\"")
+			}
+		case "token_updated_at":
+			if err := func() error {
+				s.TokenUpdatedAt.Reset()
+				if err := s.TokenUpdatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"token_updated_at\"")
 			}
 		default:
 			return d.Skip()
@@ -3353,6 +3371,41 @@ func (s OptContractLevelMetadata) MarshalJSON() ([]byte, error) {
 func (s *OptContractLevelMetadata) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
+}
+
+// Encode encodes time.Time as json.
+func (o OptDateTime) Encode(e *jx.Encoder, format func(*jx.Encoder, time.Time)) {
+	if !o.Set {
+		return
+	}
+	format(e, o.Value)
+}
+
+// Decode decodes time.Time from json.
+func (o *OptDateTime) Decode(d *jx.Decoder, format func(*jx.Decoder) (time.Time, error)) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptDateTime to nil")
+	}
+	o.Set = true
+	v, err := format(d)
+	if err != nil {
+		return err
+	}
+	o.Value = v
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptDateTime) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e, json.EncodeDateTime)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptDateTime) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d, json.DecodeDateTime)
 }
 
 // Encode encodes Erc721MetadataAttributeDisplayType as json.

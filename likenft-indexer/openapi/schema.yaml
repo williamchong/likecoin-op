@@ -893,6 +893,12 @@ components:
           $ref: "#/components/schemas/Account"
         token_id:
           $ref: "#/components/schemas/Uint64"
+        token_updated_at:
+          type: string
+          format: date-time
+          description: >-
+            Latest acquisition time among the requested account's owned tokens
+            of this class; only populated by /account/{address}/token-booknfts.
       required:
         - id
         - address
