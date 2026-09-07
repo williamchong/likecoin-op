@@ -289,6 +289,13 @@ likecollectiveIndexer:
             memory: "10Mi"
         tasks:
           - retry-failed-evm-events
+      check-evm-event-gaps:
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "10Mi"
+        tasks:
+          - check-evm-event-gaps
 
   scheduler:
     deployments:
@@ -307,6 +314,18 @@ likecollectiveIndexer:
         cron: "*/15 * * * *"
         tasks:
           - retry-failed-evm-events
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "10Mi"
+      # The only check that can see a webhook delivery that never arrived: it
+      # reads logs straight from the chain and compares. The window defaults to
+      # 500 blocks, which Base produces in about 17 minutes, so the cron has to
+      # stay well inside that or a gap could fall between two passes.
+      check-evm-event-gaps:
+        cron: "*/5 * * * *"
+        tasks:
+          - check-evm-event-gaps
         resources:
           requests:
             cpu: "10m"

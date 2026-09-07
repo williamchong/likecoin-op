@@ -142,3 +142,46 @@ Query as below: (all event)
     ```
 
 2. Compare the result of `{likecoin3_simulation_output.json}` and the console output and see if there are inconsistency.
+
+## Keeping the indexed state true to the chain
+
+`accounts`, `nft_classes` and `stakings` hold running totals accumulated from
+events, not values derived from the chain. A missing or wrong event therefore
+does not delay a number, it offsets it, and every later event builds on the
+wrong base. Two things guard that.
+
+### Noticing
+
+- **`check-evm-event-gaps`** (scheduler, `*/5`) reads the logs the contracts
+  actually emitted in a recent window and compares them with `evm_events`. The
+  webhook is the only ingest path, so this is the only check that can see a
+  delivery that never arrived -- `check-received-evm-events` drains rows the
+  webhook already wrote and cannot miss what was never written. A non-empty
+  result is returned as an error so the sentry middleware raises it. The window
+  is `EVM_EVENT_GAP_QUERY_NUMBER_OF_BLOCKS_LIMIT` blocks (500 by default,
+  matching what providers accept for one `eth_getLogs`); keep the cron well
+  inside the time the chain takes to produce that many blocks.
+- **`retry-failed-evm-events`** (scheduler, `*/15`) re-drives events that
+  exhausted their asynq retries and were parked at `failed`. Without it a
+  single failed event stayed failed forever.
+
+`check-evm-event-gaps` has two blind spots of its own. It only looks at a
+window behind the head, so if the scheduler itself is down for longer than that
+window, the interval it skipped is never examined by any later pass -- it keeps
+no cursor. And it only reports logs the chain has that the database does not;
+a row the webhook delivered from a block later reorged out stays put and is not
+flagged. The block padding makes the second unlikely rather than impossible.
+
+Expect the first run in a new environment to be loud: the two Alchemy webhooks
+are registered out of band, so if either is missing, paused, or filtered on a
+stale address, every log from that contract is correctly reported missing. Run
+it somewhere quiet before pointing it at sentry.
+
+Replaying missing logs back into `evm_events` would let the pipeline rebuild
+what the gap cost, and `check-evm-event-gaps` already identifies exactly which
+logs to replay. It is
+not implemented yet because it is not safe yet: `RewardDeposited` fans out into
+a per-staker split derived from the stake distribution held **at the time it is
+applied**, so a log replayed late would distribute against today's distribution
+rather than the one at its own block. That event has to read its amounts from
+the chain at its own block first.
