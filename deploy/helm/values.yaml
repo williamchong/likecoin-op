@@ -282,6 +282,13 @@ likecollectiveIndexer:
             memory: "10Mi"
         tasks:
           - process-evm-event
+      retry-failed-evm-events:
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "10Mi"
+        tasks:
+          - retry-failed-evm-events
 
   scheduler:
     deployments:
@@ -289,6 +296,17 @@ likecollectiveIndexer:
         cron: "*/1 * * * *"
         tasks:
           - check-received-evm-events
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "10Mi"
+      # Backstop for events that exhausted their asynq retries. Deliberately
+      # slower than all-in-one: an event that can never succeed is re-driven
+      # every cycle, so a tight cron would flood the process-evm-event queue.
+      retry-failed-evm-events:
+        cron: "*/15 * * * *"
+        tasks:
+          - retry-failed-evm-events
         resources:
           requests:
             cpu: "10m"

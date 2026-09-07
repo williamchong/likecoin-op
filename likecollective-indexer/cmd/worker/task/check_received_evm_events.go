@@ -19,6 +19,14 @@ import (
 
 const TypeCheckReceivedEVMEventsPayload = "check-received-evm-events"
 
+// processEVMEventMaxRetry lets asynq retry a process-evm-event task that failed
+// transiently -- an RPC blip, a lock wait. Without it a single failure parked
+// the event at `failed`, where nothing picked it up again: the running totals
+// are accumulated, so a skipped event does not delay a number, it offsets it
+// permanently. retry-failed-evm-events is the slower backstop for whatever
+// survives these attempts.
+const processEVMEventMaxRetry = 5
+
 type CheckReceivedEVMEventsPayload struct {
 }
 
@@ -65,7 +73,7 @@ func HandleCheckReceivedEVMEvents(ctx context.Context, t *asynq.Task) error {
 	receivedEventIds := make([]int, 0, len(receivedEventIdsInProcessingOrder))
 
 	for _, evmEvent := range receivedEvents {
-		err := handleCheckReceivedEVMEvents_enqueueProcessEVMEvent(
+		err := enqueueProcessEVMEvent(
 			mylogger,
 			asynqClient,
 			evmEvent,
@@ -87,7 +95,7 @@ func HandleCheckReceivedEVMEvents(ctx context.Context, t *asynq.Task) error {
 	return nil
 }
 
-func handleCheckReceivedEVMEvents_enqueueProcessEVMEvent(
+func enqueueProcessEVMEvent(
 	logger *slog.Logger,
 	asynqClient *asynq.Client,
 
@@ -101,7 +109,7 @@ func handleCheckReceivedEVMEvents_enqueueProcessEVMEvent(
 		mylogger.Error("Cannot create task", "err", err)
 		return err
 	}
-	taskInfo, err := asynqClient.Enqueue(t, asynq.MaxRetry(0))
+	taskInfo, err := asynqClient.Enqueue(t, asynq.MaxRetry(processEVMEventMaxRetry))
 	if err != nil {
 		mylogger.Error("Cannot enqueue task", "err", err)
 		return err
