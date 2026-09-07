@@ -299,10 +299,18 @@ func (s *evmEventRepository) UpdateEvmEventStatus(
 ) (*ent.EVMEvent, error) {
 	updatedRecordChan := make(chan *ent.EVMEvent, 1)
 	err := WithTx(ctx, s.dbService.Client(), func(tx *ent.Tx) error {
-		updatedEvmEvent, err := tx.EVMEvent.UpdateOne(evmEvent).
-			SetStatus(newStatus).
-			SetNillableFailedReason(failedReason).
-			Save(ctx)
+		updateBuilder := tx.EVMEvent.UpdateOne(evmEvent).
+			SetStatus(newStatus)
+
+		// SetNillableFailedReason no-ops on nil instead of nulling the column,
+		// so a record leaving `failed` would keep the stale reason.
+		if failedReason == nil {
+			updateBuilder = updateBuilder.ClearFailedReason()
+		} else {
+			updateBuilder = updateBuilder.SetFailedReason(*failedReason)
+		}
+
+		updatedEvmEvent, err := updateBuilder.Save(ctx)
 
 		if err != nil {
 			return err
