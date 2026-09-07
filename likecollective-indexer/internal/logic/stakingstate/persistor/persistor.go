@@ -51,13 +51,24 @@ func (p *latestStakingStatePersistor) Persist(
 	stakings []*model.Staking,
 ) error {
 	err := database.WithTx(ctx, p.dbService.Client(), func(tx *ent.Tx) error {
-		_, err := p.stakingEventRepository.InsertStakingEventsIfNeeded(
+		allAlreadyStored, err := p.stakingEventRepository.InsertStakingEventsIfNeeded(
 			ctx,
 			tx,
 			stakingEvents,
 		)
 		if err != nil {
 			return fmt.Errorf("failed to insert staking events if needed: %w", err)
+		}
+
+		// An earlier attempt already applied these totals and failed only
+		// afterward: evmEventProcessor.Process writes the evm_event status in
+		// a separate statement once this transaction commits, and a retry
+		// lands here when that later write is what failed. accounts,
+		// nftClasses and stakings are loaded-state-plus-delta, and the loaded
+		// state already holds the delta, so writing them again would apply
+		// the event twice.
+		if allAlreadyStored {
+			return nil
 		}
 
 		for _, account := range accounts {

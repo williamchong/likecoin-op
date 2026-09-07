@@ -22,11 +22,14 @@ type StakingEventRepository interface {
 		pagination StakingEventPagination,
 	) (stakingEvents []*ent.StakingEvent, count int, nextKey int, err error)
 
+	// InsertStakingEventsIfNeeded stores the staking events that are not yet
+	// in the table. allAlreadyStored reports that a non-empty input needed
+	// nothing stored, i.e. this is a replay.
 	InsertStakingEventsIfNeeded(
 		ctx context.Context,
 		tx *ent.Tx,
 		allStakingEvents []*ent.StakingEvent,
-	) ([]*ent.StakingEvent, error)
+	) (allAlreadyStored bool, err error)
 }
 
 type stakingEventRepository struct {
@@ -81,13 +84,13 @@ func (s *stakingEventRepository) InsertStakingEventsIfNeeded(
 	ctx context.Context,
 	tx *ent.Tx,
 	allStakingEvents []*ent.StakingEvent,
-) ([]*ent.StakingEvent, error) {
+) (bool, error) {
 
 	grouppedStakingEvents := slices_util.GroupBy(allStakingEvents, func(e *ent.StakingEvent) typeutil.Uint64 {
 		return e.BlockNumber
 	})
 
-	dbStakingEvents := make([]*ent.StakingEvent, 0)
+	anyInserted := false
 
 	for _, stakingEventsThisGroup := range grouppedStakingEvents {
 		var txPredicates = make([]predicate.StakingEvent, len(stakingEventsThisGroup))
@@ -103,7 +106,7 @@ func (s *stakingEventRepository) InsertStakingEventsIfNeeded(
 			Where(stakingevent.Or(txPredicates...)).All(ctx)
 
 		if err != nil {
-			return nil, err
+			return false, err
 		}
 
 		var eventsToBeInserted []*ent.StakingEventCreate
@@ -133,23 +136,24 @@ func (s *stakingEventRepository) InsertStakingEventsIfNeeded(
 			}
 		}
 
+		// Nothing new for this block. The count check below is skipped on
+		// purpose -- a replayed RewardDeposited can fan out to a different set
+		// of stakers than the one stored, and that difference is not an
+		// insert failure.
+		if len(eventsToBeInserted) == 0 {
+			continue
+		}
+
+		if len(dbStakingEventsThisGroup)+len(eventsToBeInserted) != len(stakingEventsThisGroup) {
+			return false, errors.New("err len not match")
+		}
+
 		err = tx.StakingEvent.CreateBulk(eventsToBeInserted...).Exec(ctx)
 		if err != nil {
-			return nil, err
+			return false, err
 		}
-
-		dbStakingEventsThisGroup, err = s.BaseQuery(tx.StakingEvent.Query()).
-			Where(stakingevent.Or(txPredicates...)).All(ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		if len(dbStakingEventsThisGroup) != len(stakingEventsThisGroup) {
-			return nil, errors.New("err len not match")
-		}
-
-		dbStakingEvents = append(dbStakingEvents, dbStakingEventsThisGroup...)
+		anyInserted = true
 	}
 
-	return dbStakingEvents, nil
+	return len(allStakingEvents) > 0 && !anyInserted, nil
 }

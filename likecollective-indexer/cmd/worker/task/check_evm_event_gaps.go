@@ -64,6 +64,11 @@ func HandleCheckEVMEventGaps(ctx context.Context, t *asynq.Task) error {
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
+	blockLimit := envCfg.EvmEventGapQueryNumberOfBlocksLimit
+	if blockLimit == 0 {
+		return fmt.Errorf("EVM_EVENT_GAP_QUERY_NUMBER_OF_BLOCKS_LIMIT must be greater than zero: %w", asynq.SkipRetry)
+	}
+
 	ethClient, err := ethclient.Dial(envCfg.EthNetworkPublicRPCURL)
 	if err != nil {
 		mylogger.Error("ethclient.Dial", "err", err)
@@ -98,9 +103,12 @@ func HandleCheckEVMEventGaps(ctx context.Context, t *asynq.Task) error {
 	}
 
 	toBlock := headBlock - envCfg.EvmEventGapQueryToBlockPadding
+
+	// eth_getLogs treats both ends as inclusive, so a limit of N blocks is
+	// [toBlock-N+1, toBlock], not [toBlock-N, toBlock].
 	fromBlock := uint64(0)
-	if toBlock > envCfg.EvmEventGapQueryNumberOfBlocksLimit {
-		fromBlock = toBlock - envCfg.EvmEventGapQueryNumberOfBlocksLimit
+	if toBlock >= blockLimit {
+		fromBlock = toBlock - blockLimit + 1
 	}
 
 	dbService := database.New()
