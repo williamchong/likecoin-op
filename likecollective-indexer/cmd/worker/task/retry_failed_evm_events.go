@@ -94,7 +94,11 @@ func HandleRetryFailedEVMEvents(ctx context.Context, t *asynq.Task) error {
 	}
 
 	// Deltas are applied in block order, so re-drive in the same order the
-	// normal path uses.
+	// normal path uses. This only orders the failed batch among itself: later
+	// events have already been applied against today's state, so a re-drive
+	// can misallocate a state-sensitive delta the same way a late-replayed
+	// missing log would (see evmeventgap.Detect for why). Still closer to the
+	// truth than never applying the event.
 	slices.SortFunc(failedEvents, model.EvmEventsProcessingComparator)
 
 	mylogger.Warn(fmt.Sprintf("%d failed events found, re-driving", len(failedEvents)))
