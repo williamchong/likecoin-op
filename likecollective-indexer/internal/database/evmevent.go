@@ -21,6 +21,14 @@ type EVMEventRepository interface {
 	GetEvmEvents(ctx context.Context, filter *EvmEventsFilter) ([]*ent.EVMEvent, int, error)
 
 	GetEVMEventsByStatus(ctx context.Context, status evmevent.Status) ([]*ent.EVMEvent, error)
+
+	// GetEVMEventsByStatusWithLimit returns at most limit events of a status,
+	// oldest first.
+	GetEVMEventsByStatusWithLimit(
+		ctx context.Context,
+		status evmevent.Status,
+		limit int,
+	) ([]*ent.EVMEvent, error)
 	GetEVMEventsByContractAddressAndStatus(
 		ctx context.Context,
 		contractAddress string,
@@ -99,6 +107,18 @@ func (s *evmEventRepository) GetEvmEvents(ctx context.Context, filter *EvmEvents
 func (s *evmEventRepository) GetEVMEventsByStatus(ctx context.Context, status evmevent.Status) ([]*ent.EVMEvent, error) {
 	return s.BaseQuery(s.dbService.Client().EVMEvent.Query()).
 		Where(evmevent.StatusEQ(status)).All(ctx)
+}
+
+func (s *evmEventRepository) GetEVMEventsByStatusWithLimit(
+	ctx context.Context,
+	status evmevent.Status,
+	limit int,
+) ([]*ent.EVMEvent, error) {
+	return s.BaseQuery(s.dbService.Client().EVMEvent.Query()).
+		Where(evmevent.StatusEQ(status)).
+		Order(ent.Asc(evmevent.FieldBlockNumber), ent.Asc(evmevent.FieldLogIndex)).
+		Limit(limit).
+		All(ctx)
 }
 
 func (s *evmEventRepository) GetEVMEventsByContractAddressAndStatus(
