@@ -187,3 +187,177 @@ steps:
           bookNFT: 0x1000000000000000000000000000000000000001
           account: 0x2000000000000000000000000000000000000002
           rewardAmount: 1
+
+---
+
+# Stakes above MaxInt64. The pro-rata split used to reach the amounts through
+# big.Int.Int64(), which wraps silently past 9223372036854775807, so this case
+# would have distributed nonsense. uint64 columns reach 1.8e19, so these are
+# storable values, not hypothetical ones.
+name: reward-deposited-stake-above-max-int64
+
+parameters:
+  snapshottedAccounts:
+    - address: 0x2000000000000000000000000000000000000001
+      stakedAmount: "10000000000000000000"
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+    - address: 0x2000000000000000000000000000000000000002
+      stakedAmount: "8000000000000000000"
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+  snapshottedNftClasses:
+    - address: 0x1000000000000000000000000000000000000001
+      stakedAmount: "18000000000000000000"
+  snapshottedStakings:
+    - accountAddress: 0x2000000000000000000000000000000000000001
+      bookNFTAddress: 0x1000000000000000000000000000000000000001
+      stakedAmount: "10000000000000000000"
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+    - accountAddress: 0x2000000000000000000000000000000000000002
+      bookNFTAddress: 0x1000000000000000000000000000000000000001
+      stakedAmount: "8000000000000000000"
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+
+steps:
+  - events:
+    - type: rewardDeposited
+      rewardDepositedEventData:
+        bookNFT: 0x1000000000000000000000000000000000000001
+        account: 0x9999999999999999999999999999999999999999
+        rewardAmount: 100
+    stakingstate:
+      accounts:
+        0x2000000000000000000000000000000000000001:
+          address: 0x2000000000000000000000000000000000000001
+          stakedAmount: "10000000000000000000"
+          pendingRewardAmount: 55
+          claimedRewardAmount: 0
+        0x2000000000000000000000000000000000000002:
+          address: 0x2000000000000000000000000000000000000002
+          stakedAmount: "8000000000000000000"
+          pendingRewardAmount: 44
+          claimedRewardAmount: 0
+      nftClasses:
+        0x1000000000000000000000000000000000000001:
+          address: 0x1000000000000000000000000000000000000001
+          stakedAmount: "18000000000000000000"
+      stakings:
+        0x2000000000000000000000000000000000000001:
+          0x1000000000000000000000000000000000000001:
+            accountAddress: 0x2000000000000000000000000000000000000001
+            bookNFTAddress: 0x1000000000000000000000000000000000000001
+            stakedAmount: "10000000000000000000"
+            pendingRewardAmount: 55
+            claimedRewardAmount: 0
+        0x2000000000000000000000000000000000000002:
+          0x1000000000000000000000000000000000000001:
+            accountAddress: 0x2000000000000000000000000000000000000002
+            bookNFTAddress: 0x1000000000000000000000000000000000000001
+            stakedAmount: "8000000000000000000"
+            pendingRewardAmount: 44
+            claimedRewardAmount: 0
+    processedStakingEvents:
+      - type: rewardDeposited
+        rewardDepositedEventData:
+          bookNFT: 0x1000000000000000000000000000000000000001
+          account: 0x9999999999999999999999999999999999999999
+          rewardAmount: 100
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x1000000000000000000000000000000000000001
+          account: 0x2000000000000000000000000000000000000001
+          rewardAmount: 55
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x1000000000000000000000000000000000000001
+          account: 0x2000000000000000000000000000000000000002
+          rewardAmount: 44
+---
+
+# staked * reward is 2^300, past uint256, while each share it divides down to
+# is 2^59. The split used to refuse the product, failing the deposit on every
+# retry; only a share that itself overflows may be refused.
+name: reward-deposited-product-above-uint256
+
+parameters:
+  snapshottedAccounts:
+    - address: 0x2000000000000000000000000000000000000001
+      stakedAmount: "1766847064778384329583297500742918515827483896875618958121606201292619776"
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+    - address: 0x2000000000000000000000000000000000000002
+      stakedAmount: "1766847064778384329583297500742918515827483896875618958121606201292619776"
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+  snapshottedNftClasses:
+    - address: 0x1000000000000000000000000000000000000001
+      stakedAmount: "3533694129556768659166595001485837031654967793751237916243212402585239552"
+  snapshottedStakings:
+    - accountAddress: 0x2000000000000000000000000000000000000001
+      bookNFTAddress: 0x1000000000000000000000000000000000000001
+      stakedAmount: "1766847064778384329583297500742918515827483896875618958121606201292619776"
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+    - accountAddress: 0x2000000000000000000000000000000000000002
+      bookNFTAddress: 0x1000000000000000000000000000000000000001
+      stakedAmount: "1766847064778384329583297500742918515827483896875618958121606201292619776"
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+
+steps:
+  - events:
+    - type: rewardDeposited
+      rewardDepositedEventData:
+        bookNFT: 0x1000000000000000000000000000000000000001
+        account: 0x9999999999999999999999999999999999999999
+        rewardAmount: "1152921504606846976"
+    stakingstate:
+      accounts:
+        0x2000000000000000000000000000000000000001:
+          address: 0x2000000000000000000000000000000000000001
+          stakedAmount: "1766847064778384329583297500742918515827483896875618958121606201292619776"
+          pendingRewardAmount: "576460752303423488"
+          claimedRewardAmount: 0
+        0x2000000000000000000000000000000000000002:
+          address: 0x2000000000000000000000000000000000000002
+          stakedAmount: "1766847064778384329583297500742918515827483896875618958121606201292619776"
+          pendingRewardAmount: "576460752303423488"
+          claimedRewardAmount: 0
+      nftClasses:
+        0x1000000000000000000000000000000000000001:
+          address: 0x1000000000000000000000000000000000000001
+          stakedAmount: "3533694129556768659166595001485837031654967793751237916243212402585239552"
+      stakings:
+        0x2000000000000000000000000000000000000001:
+          0x1000000000000000000000000000000000000001:
+            accountAddress: 0x2000000000000000000000000000000000000001
+            bookNFTAddress: 0x1000000000000000000000000000000000000001
+            stakedAmount: "1766847064778384329583297500742918515827483896875618958121606201292619776"
+            pendingRewardAmount: "576460752303423488"
+            claimedRewardAmount: 0
+        0x2000000000000000000000000000000000000002:
+          0x1000000000000000000000000000000000000001:
+            accountAddress: 0x2000000000000000000000000000000000000002
+            bookNFTAddress: 0x1000000000000000000000000000000000000001
+            stakedAmount: "1766847064778384329583297500742918515827483896875618958121606201292619776"
+            pendingRewardAmount: "576460752303423488"
+            claimedRewardAmount: 0
+    processedStakingEvents:
+      - type: rewardDeposited
+        rewardDepositedEventData:
+          bookNFT: 0x1000000000000000000000000000000000000001
+          account: 0x9999999999999999999999999999999999999999
+          rewardAmount: "1152921504606846976"
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x1000000000000000000000000000000000000001
+          account: 0x2000000000000000000000000000000000000001
+          rewardAmount: "576460752303423488"
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x1000000000000000000000000000000000000001
+          account: 0x2000000000000000000000000000000000000002
+          rewardAmount: "576460752303423488"
