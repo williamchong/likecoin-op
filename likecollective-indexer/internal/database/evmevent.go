@@ -22,6 +22,14 @@ type EVMEventRepository interface {
 
 	GetEVMEventsByStatus(ctx context.Context, status evmevent.Status) ([]*ent.EVMEvent, error)
 
+	// GetEVMEventsInBlockRange returns every event stored for blocks in
+	// [fromBlock, toBlock], whatever its status.
+	GetEVMEventsInBlockRange(
+		ctx context.Context,
+		fromBlock uint64,
+		toBlock uint64,
+	) ([]*ent.EVMEvent, error)
+
 	// GetEVMEventsByStatusWithLimit returns at most limit events of a status,
 	// oldest first.
 	GetEVMEventsByStatusWithLimit(
@@ -107,6 +115,26 @@ func (s *evmEventRepository) GetEvmEvents(ctx context.Context, filter *EvmEvents
 func (s *evmEventRepository) GetEVMEventsByStatus(ctx context.Context, status evmevent.Status) ([]*ent.EVMEvent, error) {
 	return s.BaseQuery(s.dbService.Client().EVMEvent.Query()).
 		Where(evmevent.StatusEQ(status)).All(ctx)
+}
+
+func (s *evmEventRepository) GetEVMEventsInBlockRange(
+	ctx context.Context,
+	fromBlock uint64,
+	toBlock uint64,
+) ([]*ent.EVMEvent, error) {
+	// Only the identity columns: the caller builds a lookup set, and the rows
+	// carry two JSONB parameter blobs it has no use for.
+	return s.dbService.Client().EVMEvent.Query().
+		Where(
+			evmevent.BlockNumberGTE(typeutil.Uint64(fromBlock)),
+			evmevent.BlockNumberLTE(typeutil.Uint64(toBlock)),
+		).
+		Select(
+			evmevent.FieldTransactionHash,
+			evmevent.FieldTransactionIndex,
+			evmevent.FieldLogIndex,
+		).
+		All(ctx)
 }
 
 func (s *evmEventRepository) GetEVMEventsByStatusWithLimit(

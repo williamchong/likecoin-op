@@ -7,10 +7,20 @@ import (
 	"likecollective-indexer/internal/evm/like_stake_position"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 type EVMClient interface {
+	// FilterLogs reads logs straight from the chain, bypassing the webhook.
+	FilterLogs(
+		ctx context.Context,
+		fromBlock *big.Int,
+		toBlock *big.Int,
+	) ([]types.Log, error)
+
+	LatestBlockNumber(ctx context.Context) (*big.Int, error)
+
 	GetRewardsOfPosition(
 		ctx context.Context,
 		blockNumber *big.Int,
