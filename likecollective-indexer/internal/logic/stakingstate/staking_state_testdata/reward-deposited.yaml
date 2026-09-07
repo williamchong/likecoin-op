@@ -187,3 +187,91 @@ steps:
           bookNFT: 0x1000000000000000000000000000000000000001
           account: 0x2000000000000000000000000000000000000002
           rewardAmount: 1
+
+---
+
+# Stakes above MaxInt64. The pro-rata split used to reach the amounts through
+# big.Int.Int64(), which wraps silently past 9223372036854775807, so this case
+# would have distributed nonsense. uint64 columns reach 1.8e19, so these are
+# storable values, not hypothetical ones.
+name: reward-deposited-stake-above-max-int64
+
+parameters:
+  snapshottedAccounts:
+    - address: 0x2000000000000000000000000000000000000001
+      stakedAmount: "10000000000000000000"
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+    - address: 0x2000000000000000000000000000000000000002
+      stakedAmount: "8000000000000000000"
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+  snapshottedNftClasses:
+    - address: 0x1000000000000000000000000000000000000001
+      stakedAmount: "18000000000000000000"
+  snapshottedStakings:
+    - accountAddress: 0x2000000000000000000000000000000000000001
+      bookNFTAddress: 0x1000000000000000000000000000000000000001
+      stakedAmount: "10000000000000000000"
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+    - accountAddress: 0x2000000000000000000000000000000000000002
+      bookNFTAddress: 0x1000000000000000000000000000000000000001
+      stakedAmount: "8000000000000000000"
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+
+steps:
+  - events:
+    - type: rewardDeposited
+      rewardDepositedEventData:
+        bookNFT: 0x1000000000000000000000000000000000000001
+        account: 0x9999999999999999999999999999999999999999
+        rewardAmount: 100
+    stakingstate:
+      accounts:
+        0x2000000000000000000000000000000000000001:
+          address: 0x2000000000000000000000000000000000000001
+          stakedAmount: "10000000000000000000"
+          pendingRewardAmount: 55
+          claimedRewardAmount: 0
+        0x2000000000000000000000000000000000000002:
+          address: 0x2000000000000000000000000000000000000002
+          stakedAmount: "8000000000000000000"
+          pendingRewardAmount: 44
+          claimedRewardAmount: 0
+      nftClasses:
+        0x1000000000000000000000000000000000000001:
+          address: 0x1000000000000000000000000000000000000001
+          stakedAmount: "18000000000000000000"
+      stakings:
+        0x2000000000000000000000000000000000000001:
+          0x1000000000000000000000000000000000000001:
+            accountAddress: 0x2000000000000000000000000000000000000001
+            bookNFTAddress: 0x1000000000000000000000000000000000000001
+            stakedAmount: "10000000000000000000"
+            pendingRewardAmount: 55
+            claimedRewardAmount: 0
+        0x2000000000000000000000000000000000000002:
+          0x1000000000000000000000000000000000000001:
+            accountAddress: 0x2000000000000000000000000000000000000002
+            bookNFTAddress: 0x1000000000000000000000000000000000000001
+            stakedAmount: "8000000000000000000"
+            pendingRewardAmount: 44
+            claimedRewardAmount: 0
+    processedStakingEvents:
+      - type: rewardDeposited
+        rewardDepositedEventData:
+          bookNFT: 0x1000000000000000000000000000000000000001
+          account: 0x9999999999999999999999999999999999999999
+          rewardAmount: 100
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x1000000000000000000000000000000000000001
+          account: 0x2000000000000000000000000000000000000001
+          rewardAmount: 55
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x1000000000000000000000000000000000000001
+          account: 0x2000000000000000000000000000000000000002
+          rewardAmount: 44

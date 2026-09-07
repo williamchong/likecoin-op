@@ -3,7 +3,6 @@ package stakingstate
 import (
 	"errors"
 	"fmt"
-	"math/big"
 
 	"likecollective-indexer/ent"
 	"likecollective-indexer/ent/stakingevent"
@@ -11,7 +10,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
-	"github.com/shopspring/decimal"
 )
 
 type StakingEventApplication interface {
@@ -300,28 +298,26 @@ func (s *rewardDepositedEventApplication) Apply(
 	}
 
 	for _, staking := range nonZeroStakings {
-		var poolShares *big.Rat
-		if (*uint256.Int)(nftClass.StakedAmount).IsZero() {
-			poolShares = big.NewRat(0, 1)
-		} else {
-			poolShares = big.NewRat(staking.StakedAmount.ToBig().Int64(), nftClass.StakedAmount.ToBig().Int64())
-		}
-		pendingRewardAmountRat := big.NewRat(0, 1).
-			Mul(poolShares,
-				big.NewRat(
-					rewardAmount.ToBig().Int64(),
-					big.NewInt(1).Int64(),
-				))
-		pendingRewardAmount, err := uint256.FromDecimal(
-			decimal.NewFromBigRat(pendingRewardAmountRat, 18).
-				Floor().
-				String(),
-		)
-		if err != nil {
-			return nil, nil, errors.Join(
-				ErrRewardDepositedEventApplication,
-				fmt.Errorf("failed to convert pending reward amount to uint256: %w", err),
-			)
+		// floor(staked * reward / totalStaked), in exact integer arithmetic.
+		//
+		// This used to go through big.Rat and a decimal rounded to 18 places
+		// before flooring, reached via ToBig().Int64() -- which silently wraps
+		// above MaxInt64, and these are uint64 columns. Integer division is
+		// also what the contract itself does, so there is no reason to leave
+		// the rounding to a decimal round trip.
+		pendingRewardAmount := uint256.NewInt(0)
+		if !nftClass.StakedAmount.IsZero() {
+			product, overflow := new(uint256.Int).MulOverflow(staking.StakedAmount, rewardAmount)
+			if overflow {
+				return nil, nil, errors.Join(
+					ErrRewardDepositedEventApplication,
+					fmt.Errorf(
+						"staked amount %s times reward %s overflows uint256",
+						staking.StakedAmount, rewardAmount,
+					),
+				)
+			}
+			pendingRewardAmount = new(uint256.Int).Div(product, nftClass.StakedAmount)
 		}
 		distributedApplication, err := makeRewardDepositDistributedEventApplication(
 			MakeRewardDepositDistributedEvent(
