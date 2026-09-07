@@ -17,6 +17,17 @@ type StakingStatePersistor interface {
 		nftClasses []*model.NFTClass,
 		stakings []*model.Staking,
 	) error
+
+	// AlreadyApplied reports whether the log's delta has been persisted. The
+	// staking events are committed in the same transaction as the totals, so
+	// one stored means the totals were written too, even if whatever the
+	// caller does after Persist returned did not complete.
+	AlreadyApplied(
+		ctx context.Context,
+		transactionHash string,
+		transactionIndex uint,
+		logIndex uint,
+	) (bool, error)
 }
 
 type latestStakingStatePersistor struct {
@@ -43,6 +54,15 @@ func MakeStakingStatePersistor(
 	}
 }
 
+func (p *latestStakingStatePersistor) AlreadyApplied(
+	ctx context.Context,
+	transactionHash string,
+	transactionIndex uint,
+	logIndex uint,
+) (bool, error) {
+	return p.stakingEventRepository.HasStakingEventsForLog(ctx, transactionHash, transactionIndex, logIndex)
+}
+
 func (p *latestStakingStatePersistor) Persist(
 	ctx context.Context,
 	stakingEvents []*ent.StakingEvent,
@@ -60,13 +80,11 @@ func (p *latestStakingStatePersistor) Persist(
 			return fmt.Errorf("failed to insert staking events if needed: %w", err)
 		}
 
-		// An earlier attempt already applied these totals and failed only
-		// afterward: evmEventProcessor.Process writes the evm_event status in
-		// a separate statement once this transaction commits, and a retry
-		// lands here when that later write is what failed. accounts,
-		// nftClasses and stakings are loaded-state-plus-delta, and the loaded
-		// state already holds the delta, so writing them again would apply
-		// the event twice.
+		// A replay: an earlier attempt committed this transaction and failed
+		// afterward. Callers are expected to ask AlreadyApplied first; this is
+		// the atomic backstop. accounts, nftClasses and stakings are
+		// loaded-state-plus-delta, and the loaded state already holds the
+		// delta, so writing them again would apply the event twice.
 		if allAlreadyStored {
 			return nil
 		}

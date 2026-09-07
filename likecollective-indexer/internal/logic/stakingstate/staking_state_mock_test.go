@@ -89,6 +89,15 @@ func MakeStakingStateTestMockPersistor() *stakingStateTestMockPersistor {
 	}
 }
 
+func (p *stakingStateTestMockPersistor) AlreadyApplied(
+	ctx context.Context,
+	transactionHash string,
+	transactionIndex uint,
+	logIndex uint,
+) (bool, error) {
+	return false, nil
+}
+
 func (p *stakingStateTestMockPersistor) Persist(
 	ctx context.Context,
 	stakingEvents []*ent.StakingEvent,

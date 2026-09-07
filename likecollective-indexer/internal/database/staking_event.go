@@ -30,6 +30,31 @@ type StakingEventRepository interface {
 		tx *ent.Tx,
 		allStakingEvents []*ent.StakingEvent,
 	) (allAlreadyStored bool, err error)
+
+	// HasStakingEventsForLog reports whether any staking event derived from
+	// the given log has been stored. They are written in the same transaction
+	// as the totals, so a stored one means the log's delta has been applied.
+	HasStakingEventsForLog(
+		ctx context.Context,
+		transactionHash string,
+		transactionIndex uint,
+		logIndex uint,
+	) (bool, error)
+}
+
+// stakingEventLogPredicate matches every staking event derived from one log.
+// Derived events, such as the per-staker split of a RewardDeposited, share
+// the log's key.
+func stakingEventLogPredicate(
+	transactionHash string,
+	transactionIndex uint,
+	logIndex uint,
+) predicate.StakingEvent {
+	return stakingevent.And(
+		stakingevent.TransactionHashEqualFold(transactionHash),
+		stakingevent.TransactionIndexEQ(transactionIndex),
+		stakingevent.LogIndexEQ(logIndex),
+	)
 }
 
 type stakingEventRepository struct {
@@ -80,6 +105,17 @@ func (r *stakingEventRepository) QueryStakingEvents(
 	return stakingEvents, count, nextKey, nil
 }
 
+func (s *stakingEventRepository) HasStakingEventsForLog(
+	ctx context.Context,
+	transactionHash string,
+	transactionIndex uint,
+	logIndex uint,
+) (bool, error) {
+	return s.dbService.Client().StakingEvent.Query().
+		Where(stakingEventLogPredicate(transactionHash, transactionIndex, logIndex)).
+		Exist(ctx)
+}
+
 func (s *stakingEventRepository) InsertStakingEventsIfNeeded(
 	ctx context.Context,
 	tx *ent.Tx,
@@ -95,11 +131,7 @@ func (s *stakingEventRepository) InsertStakingEventsIfNeeded(
 	for _, stakingEventsThisGroup := range grouppedStakingEvents {
 		var txPredicates = make([]predicate.StakingEvent, len(stakingEventsThisGroup))
 		for i, e := range stakingEventsThisGroup {
-			txPredicates[i] = stakingevent.And(
-				stakingevent.TransactionHashEqualFold(e.TransactionHash),
-				stakingevent.TransactionIndexEQ(e.TransactionIndex),
-				stakingevent.LogIndexEQ(e.LogIndex),
-			)
+			txPredicates[i] = stakingEventLogPredicate(e.TransactionHash, e.TransactionIndex, e.LogIndex)
 		}
 
 		dbStakingEventsThisGroup, err := s.BaseQuery(tx.StakingEvent.Query()).
