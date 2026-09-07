@@ -145,10 +145,29 @@ Query as below: (all event)
 
 ## Keeping the indexed state true to the chain
 
-`accounts`, `nft_classes` and `stakings` hold running totals accumulated from
-events, not values derived from the chain. A missing or wrong event therefore
-does not delay a number, it offsets it, and every later event builds on the
-wrong base. Two things guard that.
+`accounts`, `nft_classes` and `stakings` are re-read from `LikeCollective`
+whenever an event touches them, rather than moved by that event's delta. An
+event is the trigger to re-read an amount, not the source of it.
+
+That is what makes the numbers recoverable. The reads are deliberately not
+pinned to the event's block: nothing orders the pipeline -- events are enqueued
+oldest-first but asynq retries land late, and `retry-failed-evm-events`
+re-drives old events on purpose -- so a pinned read would let an older event
+commit an older truth over a newer one and leave it there. Reading latest,
+every writer converges on the same answer whatever order they run in, and no
+archive node is needed. `staking_events` is still accumulated from deltas -- it
+is history, and history has to be.
+
+The totals used to be accumulated too, which is why they drifted: a missing or
+wrong event did not delay a number, it offset it, and every later event built
+on the wrong base. `RewardDeposited` was worse than that, re-deriving the
+per-staker split with one integer floor per account where the contract takes
+one per position against a reward index -- so the two disagreed by dust on
+every single deposit, by construction rather than by accident.
+
+`claimed_reward_amount` is the exception. It is lifetime cumulative and the
+contract keeps no such counter, so it stays accumulated and stays
+unrecoverable.
 
 ### Noticing
 
@@ -190,14 +209,21 @@ port-forward.
 ### What none of this repairs
 
 - **`claimed_reward_amount`** is lifetime-cumulative and the contract keeps no
-  such counter, so a snapshot cannot rebuild it. Only replaying `RewardClaimed`
-  from logs can.
+  such counter, so neither the per-event re-read nor a snapshot can rebuild it.
+  Only replaying `RewardClaimed` from logs can.
 - **`staking_events`** is history, not current state, so `resync` leaves it
   alone. Anything reading it -- including the TimescaleDB
   `book_nft_delta_time_bucket_*` aggregates behind
   `GET /collective/api/book-nfts/{7d|30d|1y}/delta` -- still reflects the gap.
 - **`nft_classes.last_staked_at`** is not part of a snapshot; rows a resync
   creates get the ent schema default.
+
+One drift case the re-read cannot heal by itself: the delta applications
+refuse to subtract more than a row holds, so a row that has already drifted
+*low* fails before the re-read is reached, and the event retries into
+`retry-failed-evm-events` instead. That is loud rather than silent -- the
+events pile up at `failed` and sentry says so -- but it takes a `cli resync` to
+clear.
 
 `check-evm-event-gaps` has two blind spots of its own. It only looks at a
 window behind the head, so if the scheduler itself is down for longer than that

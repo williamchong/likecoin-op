@@ -27,6 +27,8 @@ type stakingEvmEventProcessor struct {
 
 	likeCollectiveAddress    common.Address
 	likeStakePositionAddress common.Address
+
+	reconcileFromChain bool
 }
 
 func MakeStakingEvmEventProcessor(
@@ -42,6 +44,31 @@ func MakeStakingEvmEventProcessor(
 		stakingStatePersistor,
 		likeCollectiveAddress,
 		likeStakePositionAddress,
+		true,
+	}
+}
+
+// MakeSimulationStakingEvmEventProcessor builds a processor that does not
+// re-read the totals from the chain.
+//
+// Simulation exists to check the delta arithmetic against a known expected
+// state. Reconciling would overwrite the numbers under test with the chain's
+// own, and simulate would then be comparing the chain with itself -- which
+// would pass whatever the arithmetic did.
+func MakeSimulationStakingEvmEventProcessor(
+	evmClient evm.EVMClient,
+	stakingStateLoader loader.StakingStateLoader,
+	stakingStatePersistor persistor.StakingStatePersistor,
+	likeCollectiveAddress common.Address,
+	likeStakePositionAddress common.Address,
+) StakingEvmEventProcessor {
+	return &stakingEvmEventProcessor{
+		evmClient,
+		stakingStateLoader,
+		stakingStatePersistor,
+		likeCollectiveAddress,
+		likeStakePositionAddress,
+		false,
 	}
 }
 
@@ -73,12 +100,22 @@ func (e *stakingEvmEventProcessor) Process(
 		return err
 	}
 
-	stakingState, processedStakingEvents, err := stakingState.Process(stakingEvents)
+	processedState, processedStakingEvents, err := stakingState.Process(stakingEvents)
 	if err != nil {
 		return err
 	}
 
-	err = stakingState.Persist(ctx, processedStakingEvents, e.stakingStatePersistor)
+	// The applications above have produced staking_events -- the history --
+	// and moved the totals by their deltas. Now replace those totals with what
+	// the contract itself reports, so a delta that was wrong, or an event that
+	// never arrived, does not leave a permanent offset behind.
+	if e.reconcileFromChain {
+		if err := reconcileFromChain(ctx, logger, e.evmClient, processedState); err != nil {
+			return err
+		}
+	}
+
+	err = processedState.Persist(ctx, processedStakingEvents, e.stakingStatePersistor)
 	if err != nil {
 		return err
 	}

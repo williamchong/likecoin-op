@@ -207,13 +207,10 @@ func (r *stakingRepository) CreateOrUpdateStaking(
 		).
 		Only(ctx)
 
-	var poolShares *big.Rat
-	if (*uint256.Int)(nftClass.StakedAmount).IsZero() {
-		poolShares = big.NewRat(0, 1)
-	} else {
-		poolShares = big.NewRat((*uint256.Int)(stakedAmount).ToBig().Int64(), (*uint256.Int)(nftClass.StakedAmount).ToBig().Int64())
-	}
-	poolSharesPercentage := decimal.NewFromBigRat(poolShares, 2)
+	poolSharesPercentage := poolSharePercentage(
+		(*uint256.Int)(stakedAmount),
+		(*uint256.Int)(nftClass.StakedAmount),
+	)
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -253,13 +250,10 @@ func (r *stakingRepository) RecomputePoolSharesByNFTClassAddress(
 	}
 
 	for _, staking := range stakings {
-		var poolShares *big.Rat
-		if (*uint256.Int)(nftClass.StakedAmount).IsZero() {
-			poolShares = big.NewRat(0, 1)
-		} else {
-			poolShares = big.NewRat((*uint256.Int)(staking.StakedAmount).ToBig().Int64(), (*uint256.Int)(nftClass.StakedAmount).ToBig().Int64())
-		}
-		poolSharePercentage := decimal.NewFromBigRat(poolShares, 2)
+		poolSharePercentage := poolSharePercentage(
+			(*uint256.Int)(staking.StakedAmount),
+			(*uint256.Int)(nftClass.StakedAmount),
+		)
 		if _, err = tx.Staking.UpdateOne(staking).SetPoolShare(poolSharePercentage.String()).Save(ctx); err != nil {
 			return err
 		}
@@ -272,4 +266,20 @@ func (r *stakingRepository) QueryAllStakings(ctx context.Context) ([]*ent.Stakin
 		WithAccount().
 		WithNftClass().
 		All(ctx)
+}
+
+// poolSharePercentage is staked/total as a percentage.
+//
+// The operands are taken as big.Int rather than through Int64(), which wraps
+// silently above MaxInt64 -- these are uint64 columns holding amounts that
+// reach well past it, so the share was being computed from a negative
+// numerator.
+func poolSharePercentage(staked *uint256.Int, total *uint256.Int) decimal.Decimal {
+	if total.IsZero() {
+		return decimal.NewFromBigRat(big.NewRat(0, 1), 2)
+	}
+	return decimal.NewFromBigRat(
+		new(big.Rat).SetFrac(staked.ToBig(), total.ToBig()),
+		2,
+	)
 }
