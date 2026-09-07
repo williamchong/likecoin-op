@@ -92,6 +92,29 @@ func (e *evmEventProcessor) Process(
 		}
 	}()
 
+	// A failed event may already have been applied: the `processed` status
+	// below is written after Persist committed, and if that write is what
+	// failed, re-applying the delta against state that already holds it fails
+	// validation before Persist's own replay guard runs. Ask first.
+	if evmEvent.Status == evmevent.StatusFailed {
+		var applied bool
+		applied, err = e.stakingStatePersistor.AlreadyApplied(
+			ctx,
+			evmEvent.TransactionHash,
+			evmEvent.TransactionIndex,
+			evmEvent.LogIndex,
+		)
+		if err != nil {
+			mylogger.Error("e.stakingStatePersistor.AlreadyApplied", "err", err)
+			return err
+		}
+		if applied {
+			mylogger.Info("staking events already persisted by an earlier attempt, marking processed")
+			_, err = e.evmEventRepository.UpdateEvmEventStatus(ctx, evmEvent, evmevent.StatusProcessed, nil)
+			return err
+		}
+	}
+
 	evmEvent, err = e.evmEventRepository.UpdateEvmEventStatus(ctx, evmEvent, evmevent.StatusProcessing, nil)
 
 	if err != nil {

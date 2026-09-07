@@ -25,6 +25,16 @@ func MakeSimulationPersistor(echo echo) persistor.StakingStatePersistor {
 	}
 }
 
+// AlreadyApplied is always false: a simulation persists nothing.
+func (p *simulationPersistor) AlreadyApplied(
+	ctx context.Context,
+	transactionHash string,
+	transactionIndex uint,
+	logIndex uint,
+) (bool, error) {
+	return false, nil
+}
+
 func (p *simulationPersistor) Persist(
 	ctx context.Context,
 	stakingEvents []*ent.StakingEvent,

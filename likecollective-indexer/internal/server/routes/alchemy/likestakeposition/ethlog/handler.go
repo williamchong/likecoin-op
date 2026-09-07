@@ -54,6 +54,7 @@ func (h *ethlogHandler) handle(
 	transactionLogs := evmEvent.Data.Block.ToTransactionLogs()
 
 	evmEvents := make([]*ent.EVMEvent, 0, len(transactionLogs))
+	var conversionErr error
 	for _, txLog := range transactionLogs {
 		log := txLog.Log
 
@@ -67,20 +68,34 @@ func (h *ethlogHandler) handle(
 			continue
 		}
 
+		// Skip the one log, keep the rest of the block. Only logs the ABI does
+		// not declare are skipped (see LogConverter.Knows), which is the same
+		// test evmeventgap.Detect uses, so the two agree on what is stored.
+		if !h.likeStakePositionLogConverter.Knows(log) {
+			h.logger.Warn(
+				"skipping log the abi does not declare",
+				"txHash", log.TxHash.Hex(),
+				"logIndex", log.Index,
+				"topics", len(log.Topics),
+			)
+			continue
+		}
+
 		header := txLog.Header
 		evmEvent, err := h.likeStakePositionLogConverter.ConvertLogToEvmEvent(log, header)
 		if err != nil {
-			// Skip the one log, keep the rest of the block. Failing the whole
-			// delivery would cost every event in it once Alchemy gives up
-			// retrying, and the totals are accumulated, so those never come
-			// back. An unconvertible log is one the ABI does not declare --
-			// a proxy event, or one a later upgrade added.
-			h.logger.Warn(
-				"skipping log that could not be converted",
+			// A declared event that will not convert is malformed, or sits
+			// under the wrong block header. Keep going so the rest of the
+			// delivery is stored, then fail the delivery so the error is
+			// visible and alchemy retries. Once it gives up, the gap check
+			// keeps reporting this log, since Knows says it should be stored.
+			h.logger.Error(
+				"could not convert log",
 				"txHash", log.TxHash.Hex(),
 				"logIndex", log.Index,
 				"err", err,
 			)
+			conversionErr = err
 			continue
 		}
 		evmEvents = append(evmEvents, evmEvent)
@@ -88,6 +103,11 @@ func (h *ethlogHandler) handle(
 
 	_, err = h.evmEventRepository.InsertEvmEventsIfNeeded(r.Context(), evmEvents)
 	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	if conversionErr != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
