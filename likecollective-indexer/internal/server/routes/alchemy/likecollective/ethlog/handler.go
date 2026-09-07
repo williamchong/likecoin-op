@@ -53,8 +53,8 @@ func (h *ethlogHandler) handle(
 
 	transactionLogs := evmEvent.Data.Block.ToTransactionLogs()
 
-	evmEvents := make([]*ent.EVMEvent, len(transactionLogs))
-	for i, txLog := range transactionLogs {
+	evmEvents := make([]*ent.EVMEvent, 0, len(transactionLogs))
+	for _, txLog := range transactionLogs {
 		log := txLog.Log
 
 		if log.Address != h.likeCollectiveAddress {
@@ -70,10 +70,20 @@ func (h *ethlogHandler) handle(
 		header := txLog.Header
 		evmEvent, err := h.likeCollectiveLogConverter.ConvertLogToEvmEvent(log, header)
 		if err != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
+			// Skip the one log, keep the rest of the block. Failing the whole
+			// delivery would cost every event in it once Alchemy gives up
+			// retrying, and the totals are accumulated, so those never come
+			// back. An unconvertible log is one the ABI does not declare --
+			// a proxy event, or one a later upgrade added.
+			h.logger.Warn(
+				"skipping log that could not be converted",
+				"txHash", log.TxHash.Hex(),
+				"logIndex", log.Index,
+				"err", err,
+			)
+			continue
 		}
-		evmEvents[i] = evmEvent
+		evmEvents = append(evmEvents, evmEvent)
 	}
 
 	_, err = h.evmEventRepository.InsertEvmEventsIfNeeded(r.Context(), evmEvents)

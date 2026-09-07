@@ -19,6 +19,7 @@ import (
 
 var (
 	ErrLogNotBelongsToBlock = errors.New("log not belongs to block")
+	ErrLogHasNoTopic        = errors.New("log has no topic")
 )
 
 type LogConverter struct {
@@ -37,6 +38,12 @@ func (c *LogConverter) ConvertLogToEvmEvent(
 ) (*ent.EVMEvent, error) {
 	if log.BlockNumber != header.Number.Uint64() {
 		return nil, ErrLogNotBelongsToBlock
+	}
+
+	// A LOG0 carries no topics. Nothing the indexed contracts emit looks like
+	// that, but the node decides what arrives here, not the contract.
+	if len(log.Topics) == 0 {
+		return nil, ErrLogHasNoTopic
 	}
 
 	event, err := c.abi.EventByID(log.Topics[0])
@@ -172,4 +179,19 @@ func (c *LogConverter) UnpackLogIntoMap(log types.Log, out map[string]any) error
 		return err
 	}
 	return contract.UnpackLogIntoMap(out, event.Name, log)
+}
+
+// Knows reports whether the bound ABI declares the event this log carries.
+//
+// Proxies emit events the implementation ABI has never heard of -- ERC-1967
+// AdminChanged and BeaconUpgraded, and anything a later upgrade adds. Those are
+// not convertible and are never stored, so anything comparing stored events
+// against the chain has to leave them out or it would report them missing
+// forever.
+func (c *LogConverter) Knows(log types.Log) bool {
+	if len(log.Topics) == 0 {
+		return false
+	}
+	_, err := c.abi.EventByID(log.Topics[0])
+	return err == nil
 }
