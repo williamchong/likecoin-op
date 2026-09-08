@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"math/big"
+	"sync"
 	"testing"
 
 	"likecollective-indexer/internal/evm"
@@ -20,19 +21,37 @@ var (
 	testBookNFT = common.HexToAddress("0x1000000000000000000000000000000000000001")
 )
 
-// stubEVMClient embeds the interface so only the three reads the reconciler
-// makes need implementing; anything else panics, which is the point.
+// stubEVMClient embeds the interface so only the head lookup and the three
+// reads the reconciler makes need implementing; anything else panics, which is
+// the point. Every read records the block it was asked for, and err fails the
+// reads only -- the head lookup always succeeds, so a test setting it is
+// exercising a read failure rather than a failure to resolve the head.
 type stubEVMClient struct {
 	evm.EVMClient
+	head    *big.Int
 	staked  map[common.Address]*big.Int
 	pending map[common.Address]*big.Int
 	total   map[common.Address]*big.Int
 	err     error
+
+	mu         sync.Mutex
+	readBlocks []*big.Int
+}
+
+func (s *stubEVMClient) LatestBlockNumber(ctx context.Context) (*big.Int, error) {
+	return s.head, nil
+}
+
+func (s *stubEVMClient) recordRead(blockNumber *big.Int) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.readBlocks = append(s.readBlocks, blockNumber)
 }
 
 func (s *stubEVMClient) GetStakeForUser(
 	ctx context.Context, blockNumber *big.Int, user common.Address, bookNFT common.Address,
 ) (*big.Int, error) {
+	s.recordRead(blockNumber)
 	if s.err != nil {
 		return nil, s.err
 	}
@@ -42,6 +61,7 @@ func (s *stubEVMClient) GetStakeForUser(
 func (s *stubEVMClient) GetPendingRewardsForUser(
 	ctx context.Context, blockNumber *big.Int, user common.Address, bookNFT common.Address,
 ) (*big.Int, error) {
+	s.recordRead(blockNumber)
 	if s.err != nil {
 		return nil, s.err
 	}
@@ -51,6 +71,7 @@ func (s *stubEVMClient) GetPendingRewardsForUser(
 func (s *stubEVMClient) GetTotalStake(
 	ctx context.Context, blockNumber *big.Int, bookNFT common.Address,
 ) (*big.Int, error) {
+	s.recordRead(blockNumber)
 	if s.err != nil {
 		return nil, s.err
 	}
@@ -79,8 +100,13 @@ func stateWith(accountStaked, accountPending, stakingStaked, stakingPending uint
 	}
 }
 
+// testEventBlock is the block the event under test was emitted in; the stub
+// chain's head sits on it unless a test moves one of them.
+const testEventBlock = 1000
+
 func chainSaying(staked, pending, total uint64) *stubEVMClient {
 	return &stubEVMClient{
+		head:    big.NewInt(testEventBlock),
 		staked:  map[common.Address]*big.Int{testAccount: big.NewInt(int64(staked))},
 		pending: map[common.Address]*big.Int{testAccount: big.NewInt(int64(pending))},
 		total:   map[common.Address]*big.Int{testBookNFT: big.NewInt(int64(total))},
@@ -93,7 +119,9 @@ func testLogger() *slog.Logger {
 
 func reconcile(t *testing.T, state *stakingState, client *stubEVMClient) {
 	t.Helper()
-	if err := reconcileFromChain(context.Background(), testLogger(), client, state); err != nil {
+	if err := reconcileFromChain(
+		context.Background(), testLogger(), client, state, big.NewInt(testEventBlock),
+	); err != nil {
 		t.Fatalf("reconcileFromChain: %v", err)
 	}
 }
@@ -177,12 +205,13 @@ func TestReconcileSkipsRowsHoldingNothing(t *testing.T) {
 	// current stakers.
 	state := stateWith(0, 0, 0, 0)
 	client := chainSaying(0, 0, 0)
-	client.err = errors.New("this read should never happen")
 
-	if err := reconcileFromChain(context.Background(), testLogger(), client, state); err == nil {
-		// GetTotalStake still runs for the nft class, so the stub error must
-		// come from there and not from a per-staking read.
-		t.Fatal("expected the nft class read to surface the stub error")
+	reconcile(t, state, client)
+
+	// GetTotalStake still runs for the nft class; the two per-staking reads
+	// must not.
+	if got := len(client.readBlocks); got != 1 {
+		t.Fatalf("chain was read %d times, want 1 (the nft class total only)", got)
 	}
 	if !state.stakings[0].StakedAmount.IsZero() {
 		t.Fatal("an empty staking should have been left alone")
@@ -223,9 +252,57 @@ func TestReconcileFailsRatherThanPersistPartialState(t *testing.T) {
 	client := chainSaying(1, 1, 1)
 	client.err = errors.New("rpc is down")
 
-	err := reconcileFromChain(context.Background(), testLogger(), client, state)
+	err := reconcileFromChain(
+		context.Background(), testLogger(), client, state, big.NewInt(testEventBlock),
+	)
 
 	if err == nil {
 		t.Fatal("expected a read failure to be returned")
+	}
+	if len(client.readBlocks) == 0 {
+		t.Fatal("the failure should have come from a read, not from resolving the head")
+	}
+}
+
+func TestReconcilePinsEveryReadToOneHead(t *testing.T) {
+	// A pool-wide pass is many reads. Each taking whatever block the node had
+	// at that moment would mix rows from before and after a block that landed
+	// mid-pass into a set of totals no block ever held.
+	state := stateWith(100, 0, 100, 0)
+	client := chainSaying(1, 1, 1)
+	client.head = big.NewInt(testEventBlock + 5)
+
+	reconcile(t, state, client)
+
+	if len(client.readBlocks) == 0 {
+		t.Fatal("expected the chain to be read")
+	}
+	for _, blockNumber := range client.readBlocks {
+		if blockNumber == nil || blockNumber.Cmp(client.head) != 0 {
+			t.Fatalf("a read was pinned to %s, want the head %s", blockNumber, client.head)
+		}
+	}
+}
+
+func TestReconcileRefusesAHeadBehindTheEvent(t *testing.T) {
+	// A node that has not caught up to the event's own block would return a
+	// truth older than the event, and nothing would re-drive the event to
+	// correct it. Failing here hands the event back to asynq to retry.
+	state := stateWith(100, 0, 100, 0)
+	client := chainSaying(1, 1, 1)
+	client.head = big.NewInt(testEventBlock - 1)
+
+	err := reconcileFromChain(
+		context.Background(), testLogger(), client, state, big.NewInt(testEventBlock),
+	)
+
+	if !errors.Is(err, ErrChainBehindEvent) {
+		t.Fatalf("err = %v, want %v", err, ErrChainBehindEvent)
+	}
+	if len(client.readBlocks) != 0 {
+		t.Fatal("nothing should have been read from a lagging head")
+	}
+	if state.stakings[0].StakedAmount.Uint64() != 100 {
+		t.Fatalf("staking staked = %s, want 100 untouched", state.stakings[0].StakedAmount)
 	}
 }

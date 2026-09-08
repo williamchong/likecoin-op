@@ -153,10 +153,14 @@ That is what makes the numbers recoverable. The reads are deliberately not
 pinned to the event's block: nothing orders the pipeline -- events are enqueued
 oldest-first but asynq retries land late, and `retry-failed-evm-events`
 re-drives old events on purpose -- so a pinned read would let an older event
-commit an older truth over a newer one and leave it there. Reading latest,
+commit an older truth over a newer one and leave it there. Reading the head,
 every writer converges on the same answer whatever order they run in, and no
-archive node is needed. `staking_events` is still accumulated from deltas -- it
-is history, and history has to be.
+archive node is needed. The head is resolved once per event and every read in
+that pass is pinned to it, so a pool-wide re-read cannot mix rows from either
+side of a block that lands mid-pass; and an event whose block the node has not
+reached yet fails and is retried rather than read against an older head.
+`staking_events` is still accumulated from deltas -- it is history, and history
+has to be.
 
 The totals used to be accumulated too, which is why they drifted: a missing or
 wrong event did not delay a number, it offset it, and every later event built
