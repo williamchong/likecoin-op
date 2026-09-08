@@ -3,6 +3,7 @@ package stakingstate
 import (
 	"context"
 	"log/slog"
+	"math/big"
 
 	"likecollective-indexer/ent"
 	"likecollective-indexer/internal/evm"
@@ -110,7 +111,9 @@ func (e *stakingEvmEventProcessor) Process(
 	// the contract itself reports, so a delta that was wrong, or an event that
 	// never arrived, does not leave a permanent offset behind.
 	if e.reconcileFromChain {
-		if err := reconcileFromChain(ctx, logger, e.evmClient, processedState); err != nil {
+		if err := reconcileFromChain(
+			ctx, logger, e.evmClient, processedState, newestBlockNumber(evmEvents),
+		); err != nil {
 			return err
 		}
 	}
@@ -121,4 +124,16 @@ func (e *stakingEvmEventProcessor) Process(
 	}
 
 	return nil
+}
+
+// newestBlockNumber is the block of the newest event in the batch: the reads
+// that replace its totals must come from a head at least that new.
+func newestBlockNumber(evmEvents []*ent.EVMEvent) *big.Int {
+	var newest uint64
+	for _, evmEvent := range evmEvents {
+		if uint64(evmEvent.BlockNumber) > newest {
+			newest = uint64(evmEvent.BlockNumber)
+		}
+	}
+	return big.NewInt(0).SetUint64(newest)
 }

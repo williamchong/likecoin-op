@@ -302,9 +302,12 @@ func (s *rewardDepositedEventApplication) Apply(
 		//
 		// This used to go through big.Rat and a decimal rounded to 18 places
 		// before flooring, reached via ToBig().Int64() -- which silently wraps
-		// above MaxInt64, and these are uint64 columns. Integer division is
-		// also what the contract itself does, so there is no reason to leave
-		// the rounding to a decimal round trip.
+		// above MaxInt64, and these are uint64 columns. The integer form
+		// keeps the same one-floor-per-account approximation without the
+		// decimal round trip. It is an approximation: the contract floors a
+		// reward-index increment once, then floors again per position, and
+		// the two disagree by dust on every deposit. That is why the totals
+		// are re-read from the chain afterwards rather than trusted from here.
 		pendingRewardAmount := uint256.NewInt(0)
 		if !nftClass.StakedAmount.IsZero() {
 			product, overflow := new(uint256.Int).MulOverflow(staking.StakedAmount, rewardAmount)

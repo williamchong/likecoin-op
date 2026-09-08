@@ -2,6 +2,7 @@ package stakingstate
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"math/big"
@@ -17,6 +18,10 @@ import (
 // RewardDeposited loads every staker the pool has ever had, and each read is a
 // contract call that itself loops over that user's positions.
 const reconcileConcurrency = 8
+
+// ErrChainBehindEvent is returned when the node's head is older than the block
+// of the event being applied, so a read from it would predate the event.
+var ErrChainBehindEvent = errors.New("chain head is behind the event")
 
 // reconcileFromChain replaces the amounts in state with what LikeCollective
 // reports.
@@ -37,11 +42,21 @@ const reconcileConcurrency = 8
 // the event pipeline -- check-received-evm-events enqueues in whatever order
 // the query returned, asynq retries land late, and retry-failed-evm-events
 // re-drives old events on purpose -- so a pinned read would let an older event
-// commit an older truth on top of a newer one and leave it there. Reading
-// latest, every writer converges on the same answer whatever order they run
-// in, which is the property that makes the totals recoverable. It also means
-// no archive state is required, where a pinned read would need it for every
+// commit an older truth on top of a newer one and leave it there. Reading the
+// head, every writer converges on the same answer whatever order they run in,
+// which is the property that makes the totals recoverable. It also means no
+// archive state is required, where a pinned read would need it for every
 // event once retries push one past a non-archive node's window.
+//
+// The head is resolved once and every read in the pass is pinned to it. A
+// RewardDeposited fans out into a read per staker, and with each read taking
+// whatever block the node had at that moment, a block landing mid-pass would
+// leave some rows from before it and some from after -- a set of totals that
+// no block ever held, and that nothing corrects if no later event touches the
+// rows read early. The head is also required to be at least as new as the
+// event being applied: a node that has not caught up to the event's own block
+// would otherwise persist a truth older than the event, with nothing left to
+// re-drive it.
 //
 // claimed_reward_amount is left alone. It is lifetime cumulative and the
 // contract keeps no such counter, so there is nothing to read it from.
@@ -50,8 +65,20 @@ func reconcileFromChain(
 	logger *slog.Logger,
 	evmClient evm.EVMClient,
 	state *stakingState,
+	eventBlockNumber *big.Int,
 ) error {
 	mylogger := logger.WithGroup("reconcileFromChain")
+
+	head, err := evmClient.LatestBlockNumber(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get latest block number: %w", err)
+	}
+	if head.Cmp(eventBlockNumber) < 0 {
+		return fmt.Errorf(
+			"%w: head %s is behind event block %s",
+			ErrChainBehindEvent, head, eventBlockNumber,
+		)
+	}
 
 	// A row holding nothing on either side contributes nothing to any total,
 	// and a pool keeps its fully unstaked rows forever, so re-reading them
@@ -72,7 +99,7 @@ func reconcileFromChain(
 		ctx context.Context,
 		staking *model.Staking,
 	) (*stakingAmounts, error) {
-		return readStakingAmounts(ctx, evmClient, staking)
+		return readStakingAmounts(ctx, evmClient, head, staking)
 	})
 	if err != nil {
 		return err
@@ -110,7 +137,7 @@ func reconcileFromChain(
 	}
 
 	for _, nftClass := range state.nftClasses {
-		totalStake, err := evmClient.GetTotalStake(ctx, nil, nftClass.EVMAddress)
+		totalStake, err := evmClient.GetTotalStake(ctx, head, nftClass.EVMAddress)
 		if err != nil {
 			return fmt.Errorf("failed to get total stake of %s: %w", nftClass.EVMAddress, err)
 		}
@@ -133,10 +160,11 @@ type stakingAmounts struct {
 func readStakingAmounts(
 	ctx context.Context,
 	evmClient evm.EVMClient,
+	blockNumber *big.Int,
 	staking *model.Staking,
 ) (*stakingAmounts, error) {
 	stakedAmount, err := evmClient.GetStakeForUser(
-		ctx, nil, staking.AccountEVMAddress, staking.BookNFTEvmAddress,
+		ctx, blockNumber, staking.AccountEVMAddress, staking.BookNFTEvmAddress,
 	)
 	if err != nil {
 		return nil, fmt.Errorf(
@@ -145,7 +173,7 @@ func readStakingAmounts(
 		)
 	}
 	pendingRewardAmount, err := evmClient.GetPendingRewardsForUser(
-		ctx, nil, staking.AccountEVMAddress, staking.BookNFTEvmAddress,
+		ctx, blockNumber, staking.AccountEVMAddress, staking.BookNFTEvmAddress,
 	)
 	if err != nil {
 		return nil, fmt.Errorf(
