@@ -84,10 +84,13 @@ func reconcileFromChain(
 	// and a pool keeps its fully unstaked rows forever, so re-reading them
 	// would make a deposit's cost grow with the pool's whole history rather
 	// than with its current stakers. Drift banked on such a row is left for
-	// `cli resync`, which reads every row rather than the loaded ones.
+	// `cli resync`, which reads every row rather than the loaded ones. A row an
+	// event named is read regardless: the event is the evidence it may hold
+	// something now, and on chain-backed state its delta was not applied.
 	targets := make([]*model.Staking, 0, len(state.stakings))
 	for _, staking := range state.stakings {
-		if staking.StakedAmount.IsZero() && staking.PendingRewardAmount.IsZero() {
+		if staking.StakedAmount.IsZero() && staking.PendingRewardAmount.IsZero() &&
+			!state.isTouched(staking) {
 			continue
 		}
 		targets = append(targets, staking)
@@ -109,7 +112,15 @@ func reconcileFromChain(
 		staking := amount.staking
 
 		if !amount.staked.Eq(staking.StakedAmount) || !amount.pending.Eq(staking.PendingRewardAmount) {
-			mylogger.Warn("corrected a staking against the chain",
+			// On chain-backed state a row an event named still holds its
+			// loaded amount, so it differs from the chain by that event's own
+			// delta as a matter of course; only an untouched row moving is
+			// drift worth a warning.
+			level := slog.LevelWarn
+			if state.chainBacked && state.isTouched(staking) {
+				level = slog.LevelDebug
+			}
+			mylogger.Log(ctx, level, "corrected a staking against the chain",
 				"account", staking.AccountEVMAddress,
 				"book_nft", staking.BookNFTEvmAddress,
 				"staked_was", staking.StakedAmount,

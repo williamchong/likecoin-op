@@ -160,7 +160,10 @@ that pass is pinned to it, so a pool-wide re-read cannot mix rows from either
 side of a block that lands mid-pass; and an event whose block the node has not
 reached yet fails and is retried rather than read against an older head.
 `staking_events` is still accumulated from deltas -- it is history, and history
-has to be.
+has to be. The deltas are neither applied to nor checked against the loaded
+totals: those may already have been re-read at a head past the event, so an
+unstake larger than the loaded amount is expected, and refusing it would fail
+the event on every retry.
 
 The totals used to be accumulated too, which is why they drifted: a missing or
 wrong event did not delay a number, it offset it, and every later event built
@@ -222,12 +225,15 @@ port-forward.
 - **`nft_classes.last_staked_at`** is not part of a snapshot; rows a resync
   creates get the ent schema default.
 
-One drift case the re-read cannot heal by itself: the delta applications
-refuse to subtract more than a row holds, so a row that has already drifted
-*low* fails before the re-read is reached, and the event retries into
-`retry-failed-evm-events` instead. That is loud rather than silent -- the
-events pile up at `failed` and sentry says so -- but it takes a `cli resync` to
-clear.
+Two drift cases the re-read cannot heal by itself. A row that is missing
+outright -- its `Staked` delivery was lost, so nothing ever created it -- fails
+an unstake or claim with "not found" before the re-read is reached, and the
+event retries into `retry-failed-evm-events` until a `cli resync` creates the
+row. That is loud rather than silent: the events pile up at `failed` and sentry
+says so. And an account total already lower than a correction takes out of one
+of its stakings is clamped to zero rather than wrapped, which is logged as an
+error and discards what the account holds in pools the event did not load; it
+also takes a `cli resync`, which rebuilds the account from every pool.
 
 `check-evm-event-gaps` has two blind spots of its own. It only looks at a
 window behind the head, so if the scheduler itself is down for longer than that

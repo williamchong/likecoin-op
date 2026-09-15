@@ -9,6 +9,9 @@ import (
 	"sync"
 	"testing"
 
+	"likecollective-indexer/ent"
+	"likecollective-indexer/ent/schema/typeutil"
+	"likecollective-indexer/ent/stakingevent"
 	"likecollective-indexer/internal/evm"
 	"likecollective-indexer/internal/logic/stakingstate/model"
 
@@ -304,5 +307,83 @@ func TestReconcileRefusesAHeadBehindTheEvent(t *testing.T) {
 	}
 	if state.stakings[0].StakedAmount.Uint64() != 100 {
 		t.Fatalf("staking staked = %s, want 100 untouched", state.stakings[0].StakedAmount)
+	}
+}
+
+func unstakedEvent(amount uint64) *ent.StakingEvent {
+	return &ent.StakingEvent{
+		EventType:           stakingevent.EventTypeUnstaked,
+		AccountEvmAddress:   testAccount.Hex(),
+		NftClassAddress:     testBookNFT.Hex(),
+		StakedAmountRemoved: typeutil.Uint256(uint256.NewInt(amount)),
+	}
+}
+
+func stakedEvent(amount uint64) *ent.StakingEvent {
+	return &ent.StakingEvent{
+		EventType:         stakingevent.EventTypeStaked,
+		AccountEvmAddress: testAccount.Hex(),
+		NftClassAddress:   testBookNFT.Hex(),
+		StakedAmountAdded: typeutil.Uint256(uint256.NewInt(amount)),
+	}
+}
+
+func TestChainBackedStateAppliesARemovalTheLoadedAmountAlreadyReflects(t *testing.T) {
+	// Two unstakes of a 100 position are queued. The first was re-read at a
+	// head past both, so the staking loads as 0; the account holds 30 in
+	// another pool. Refusing the second removal against that 0 would fail it
+	// on every retry, and resync would write the same 0 back.
+	state := stateWith(30, 0, 0, 0)
+	state.chainBacked = true
+
+	processed, events, err := state.Process([]*ent.StakingEvent{unstakedEvent(50)})
+	if err != nil {
+		t.Fatalf("Process: %v", err)
+	}
+	if len(events) != 1 {
+		t.Fatalf("history rows = %d, want 1", len(events))
+	}
+
+	reconcile(t, processed, chainSaying(0, 0, 0))
+
+	if !processed.stakings[0].StakedAmount.IsZero() {
+		t.Fatalf("staking staked = %s, want 0", processed.stakings[0].StakedAmount)
+	}
+	if processed.accounts[0].StakedAmount.Uint64() != 30 {
+		t.Fatalf("account staked = %s, want the 30 held elsewhere kept", processed.accounts[0].StakedAmount)
+	}
+}
+
+func TestChainBackedStateReReadsAnEmptyRowAnEventNamed(t *testing.T) {
+	// A stake into a row holding nothing leaves it holding nothing as loaded,
+	// since the delta is not applied; the row must still be read, or the stake
+	// is never seen.
+	state := stateWith(30, 0, 0, 0)
+	state.chainBacked = true
+
+	processed, _, err := state.Process([]*ent.StakingEvent{stakedEvent(100)})
+	if err != nil {
+		t.Fatalf("Process: %v", err)
+	}
+
+	reconcile(t, processed, chainSaying(100, 0, 100))
+
+	if processed.stakings[0].StakedAmount.Uint64() != 100 {
+		t.Fatalf("staking staked = %s, want 100", processed.stakings[0].StakedAmount)
+	}
+	if processed.accounts[0].StakedAmount.Uint64() != 130 {
+		t.Fatalf("account staked = %s, want 130", processed.accounts[0].StakedAmount)
+	}
+}
+
+func TestDeltaStateStillRefusesARemovalLargerThanTheAmount(t *testing.T) {
+	// Simulation checks the delta arithmetic itself, so an underflow there is
+	// the bug it exists to catch.
+	state := stateWith(30, 0, 0, 0)
+
+	_, _, err := state.Process([]*ent.StakingEvent{unstakedEvent(50)})
+
+	if !errors.Is(err, ErrUnstakedEventApplication) {
+		t.Fatalf("err = %v, want %v", err, ErrUnstakedEventApplication)
 	}
 }

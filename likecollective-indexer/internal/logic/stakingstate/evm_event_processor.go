@@ -96,7 +96,9 @@ func (e *stakingEvmEventProcessor) Process(
 		stakingEvents = append(stakingEvents, stakingEvent...)
 	}
 
-	stakingState, err := LoadStakingState(ctx, e.stakingStateLoader, stakingEvents)
+	stakingState, err := loadStakingState(
+		ctx, e.stakingStateLoader, stakingEvents, e.reconcileFromChain,
+	)
 	if err != nil {
 		return err
 	}
@@ -106,10 +108,13 @@ func (e *stakingEvmEventProcessor) Process(
 		return err
 	}
 
-	// The applications above have produced staking_events -- the history --
-	// and moved the totals by their deltas. Now replace those totals with what
-	// the contract itself reports, so a delta that was wrong, or an event that
-	// never arrived, does not leave a permanent offset behind.
+	// The applications above have produced staking_events -- the history. On
+	// chain-backed state they left the staked and pending totals as loaded,
+	// neither moving them by the deltas nor checking the deltas against them:
+	// the loaded totals may already be from a head past these events. Now
+	// replace those totals with what the contract itself reports, so a delta
+	// that was wrong, or an event that never arrived, does not leave a
+	// permanent offset behind.
 	if e.reconcileFromChain {
 		if err := reconcileFromChain(
 			ctx, logger, e.evmClient, processedState, newestBlockNumber(evmEvents),
