@@ -59,3 +59,24 @@ func TestMapWithLimitReturnsCancellationInsteadOfAPartialSlice(t *testing.T) {
 		t.Fatalf("results = %v, want nil on cancellation", results)
 	}
 }
+
+func TestMapWithLimitStartsNoMoreWorkersThanItems(t *testing.T) {
+	// limit comes from a cli flag. Starting that many goroutines regardless of
+	// the items would exhaust memory before any work began.
+	results, err := MapWithLimit(context.Background(), 1<<40, []int{1, 2}, func(ctx context.Context, item int) (int, error) {
+		return item, nil
+	})
+	if err != nil {
+		t.Fatalf("MapWithLimit: %v", err)
+	}
+	if len(results) != 2 || results[0] != 1 || results[1] != 2 {
+		t.Fatalf("results = %v, want [1 2]", results)
+	}
+
+	empty, err := MapWithLimit(context.Background(), 1<<40, []int{}, func(ctx context.Context, item int) (int, error) {
+		return item, nil
+	})
+	if err != nil || len(empty) != 0 {
+		t.Fatalf("empty = %v, %v; want no results and no error", empty, err)
+	}
+}

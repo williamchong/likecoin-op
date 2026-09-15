@@ -34,7 +34,9 @@ func MapWithLimit[T any, R any](
 
 	indexes := make(chan int)
 
-	for range limit {
+	// A worker per item at most: goroutines beyond the items would only sit
+	// parked on the channel, and limit can be as large as a cli flag allows.
+	for range min(limit, len(items)) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
