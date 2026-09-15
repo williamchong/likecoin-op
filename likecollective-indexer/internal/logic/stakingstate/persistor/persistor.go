@@ -92,7 +92,7 @@ func (p *latestStakingStatePersistor) Persist(
 	nftClasses []*model.NFTClass,
 	stakings []*model.Staking,
 ) error {
-	err := database.WithTx(ctx, p.dbService.Client(), func(tx *ent.Tx) error {
+	err := database.WithStakingStateTx(ctx, p.dbService, func(tx *ent.Tx) error {
 		allAlreadyStored, err := p.stakingEventRepository.InsertStakingEventsIfNeeded(
 			ctx,
 			tx,
