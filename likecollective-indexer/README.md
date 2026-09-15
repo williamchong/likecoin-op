@@ -165,6 +165,13 @@ totals: those may already have been re-read at a head past the event, so an
 unstake larger than the loaded amount is expected, and refusing it would fail
 the event on every retry.
 
+Every writer -- each event pass and `resync --apply` -- holds one Postgres
+advisory lock across its load, chain read and persist, so worker concurrency and
+replicas cannot interleave a stale load with a newer commit. The head each
+commit was read at is recorded in `staking_state_heads`, and a commit from an
+older head -- a load-balanced RPC node lagging the one the previous writer
+asked -- is refused and retried rather than rolling rows back.
+
 The totals used to be accumulated too, which is why they drifted: a missing or
 wrong event did not delay a number, it offset it, and every later event built
 on the wrong base. `RewardDeposited` was worse than that, re-deriving the
@@ -206,9 +213,14 @@ pairs with the rows already stored so a burned position is zeroed rather than
 left at its last value, and refuses to write when the contract's two
 independent accessors disagree with each other.
 
+With `--apply` it takes the same lock as the workers from before it picks the
+snapshot block until the write commits, so event processing pauses for the whole
+build. The snapshot block is raised to the head the state was last committed at
+when `--confirmations` would put it behind, and an explicit `--block` behind
+that head is refused.
+
 It is deliberately **manual**. Running it on a schedule would have it rewriting
-financial columns unattended, and it takes no lock against the live worker, so
-an event applied between its read and its commit is overwritten. Run it when
+financial columns unattended. Run it when
 `check-evm-event-gaps` says something was lost, and prefer running it in
 cluster -- the mainnet write takes ~80s there against ~35 minutes over a
 port-forward.
