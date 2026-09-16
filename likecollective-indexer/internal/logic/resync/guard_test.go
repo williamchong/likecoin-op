@@ -21,6 +21,7 @@ type stubEVMEventRepository struct {
 	latestApplied *uint64
 	pending       *ent.EVMEvent
 	failed        []*ent.EVMEvent
+	processing    []*ent.EVMEvent
 }
 
 func (r *stubEVMEventRepository) GetLatestAppliedStakingEvmEventBlockNumber(context.Context) (uint64, bool, error) {
@@ -34,11 +35,17 @@ func (r *stubEVMEventRepository) GetEarliestPendingStakingEvmEvent(context.Conte
 	return r.pending, r.pending != nil, nil
 }
 
-func (r *stubEVMEventRepository) QueryStakingEvmEvents(_ context.Context, status evmevent.Status) ([]*ent.EVMEvent, error) {
-	if status != evmevent.StatusFailed {
-		return nil, nil
+func (r *stubEVMEventRepository) QueryStakingEvmEvents(_ context.Context, statuses ...evmevent.Status) ([]*ent.EVMEvent, error) {
+	var events []*ent.EVMEvent
+	for _, status := range statuses {
+		switch status {
+		case evmevent.StatusFailed:
+			events = append(events, r.failed...)
+		case evmevent.StatusProcessing:
+			events = append(events, r.processing...)
+		}
 	}
-	return r.failed, nil
+	return events, nil
 }
 
 // stubPersistor reports the logs, by transaction hash, whose staking events
@@ -66,6 +73,7 @@ func TestCheckSnapshotBlock(t *testing.T) {
 	latest := uint64(100)
 	failedAt90 := evmEvent(3, 90, evmevent.StatusFailed)
 	failedAt120 := evmEvent(4, 120, evmevent.StatusFailed)
+	processingAt95 := evmEvent(5, 95, evmevent.StatusProcessing)
 
 	cases := []struct {
 		name    string
@@ -156,6 +164,32 @@ func TestCheckSnapshotBlock(t *testing.T) {
 			block:   110,
 			wantErr: "older than block 120",
 		},
+		{
+			name: "after a processing event not yet persisted",
+			repo: &stubEVMEventRepository{
+				latestApplied: &latest,
+				processing:    []*ent.EVMEvent{processingAt95},
+			},
+			block:   100,
+			wantErr: "evm event 5, which is processing",
+		},
+		{
+			name: "after a processing event already persisted",
+			repo: &stubEVMEventRepository{
+				processing: []*ent.EVMEvent{processingAt95},
+			},
+			applied: map[string]bool{processingAt95.TransactionHash: true},
+			block:   100,
+		},
+		{
+			name: "older than a processing event already persisted",
+			repo: &stubEVMEventRepository{
+				processing: []*ent.EVMEvent{processingAt95},
+			},
+			applied: map[string]bool{processingAt95.TransactionHash: true},
+			block:   94,
+			wantErr: "older than block 95",
+		},
 	}
 
 	for _, tc := range cases {
@@ -174,12 +208,16 @@ func TestCheckSnapshotBlock(t *testing.T) {
 	}
 }
 
-func TestCheckSnapshotBlockAtBlockZero(t *testing.T) {
-	repo := &stubEVMEventRepository{
-		pending: evmEvent(1, 0, evmevent.StatusReceived),
-	}
-	err := CheckSnapshotBlock(context.Background(), repo, &stubPersistor{}, 0)
-	if err == nil || strings.Contains(err.Error(), "--block") {
-		t.Fatalf("error = %v, want a refusal without a --block suggestion", err)
+// --block 0 is the head-less-confirmations sentinel, so an event at block 0
+// or 1 must not suggest it.
+func TestCheckSnapshotBlockNearBlockZero(t *testing.T) {
+	for _, pendingBlock := range []uint64{0, 1} {
+		repo := &stubEVMEventRepository{
+			pending: evmEvent(1, pendingBlock, evmevent.StatusReceived),
+		}
+		err := CheckSnapshotBlock(context.Background(), repo, &stubPersistor{}, pendingBlock)
+		if err == nil || strings.Contains(err.Error(), "--block") {
+			t.Fatalf("pending at %d: error = %v, want a refusal without a --block suggestion", pendingBlock, err)
+		}
 	}
 }

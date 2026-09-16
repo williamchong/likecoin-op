@@ -45,12 +45,11 @@ type EVMEventRepository interface {
 
 	QueryStakingEvmEvents(
 		ctx context.Context,
-		status evmevent.Status,
+		statuses ...evmevent.Status,
 	) ([]*ent.EVMEvent, error)
 
 	// GetLatestAppliedStakingEvmEventBlockNumber returns the highest block of
-	// a staking event that is processed or processing, and false when there
-	// is none.
+	// a processed staking event, and false when there is none.
 	GetLatestAppliedStakingEvmEventBlockNumber(
 		ctx context.Context,
 	) (uint64, bool, error)
@@ -188,11 +187,11 @@ func (s *evmEventRepository) GetEVMEventsByContractAddressAndStatus(
 
 func (s *evmEventRepository) QueryStakingEvmEvents(
 	ctx context.Context,
-	status evmevent.Status,
+	statuses ...evmevent.Status,
 ) ([]*ent.EVMEvent, error) {
 	return s.BaseQuery(
 		s.dbService.Client().EVMEvent.Query(),
-	).Where(evmevent.NameIn(stakingEventNames...)).Where(evmevent.StatusEQ(status)).All(ctx)
+	).Where(evmevent.NameIn(stakingEventNames...)).Where(evmevent.StatusIn(statuses...)).All(ctx)
 }
 
 func (s *evmEventRepository) GetLatestAppliedStakingEvmEventBlockNumber(
@@ -201,7 +200,7 @@ func (s *evmEventRepository) GetLatestAppliedStakingEvmEventBlockNumber(
 	e, err := s.dbService.Client().EVMEvent.Query().
 		Where(
 			evmevent.NameIn(stakingEventNames...),
-			evmevent.StatusIn(evmevent.StatusProcessing, evmevent.StatusProcessed),
+			evmevent.StatusEQ(evmevent.StatusProcessed),
 		).
 		Order(evmevent.ByBlockNumber(sql.OrderDesc())).
 		Select(evmevent.FieldBlockNumber).

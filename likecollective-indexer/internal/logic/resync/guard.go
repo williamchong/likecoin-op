@@ -19,10 +19,12 @@ import (
 //     time on top of a snapshot that already includes it. That is one
 //     received or enqueued, or failed without its staking events persisted:
 //     a failed event is retried, and the retry only stops at the persisted
-//     staking events, which resync does not write.
+//     staking events, which resync does not write. A processing event is
+//     marked before its delta is persisted, so one without its staking events
+//     persisted may be a worker still about to apply it.
 //
-// A failed event whose staking events were persisted counts as applied; its
-// retry only marks it processed.
+// A failed or processing event whose staking events were persisted counts as
+// applied; a retry only marks it processed.
 func CheckSnapshotBlock(
 	ctx context.Context,
 	evmEventRepository database.EVMEventRepository,
@@ -39,11 +41,11 @@ func CheckSnapshotBlock(
 		return fmt.Errorf("failed to get earliest pending staking event: %w", err)
 	}
 
-	failedEvents, err := evmEventRepository.QueryStakingEvmEvents(ctx, evmevent.StatusFailed)
+	unsettledEvents, err := evmEventRepository.QueryStakingEvmEvents(ctx, evmevent.StatusFailed, evmevent.StatusProcessing)
 	if err != nil {
-		return fmt.Errorf("failed to query failed staking events: %w", err)
+		return fmt.Errorf("failed to query failed and processing staking events: %w", err)
 	}
-	for _, e := range failedEvents {
+	for _, e := range unsettledEvents {
 		applied, err := stakingStatePersistor.AlreadyApplied(ctx, e.TransactionHash, e.TransactionIndex, e.LogIndex)
 		if err != nil {
 			return fmt.Errorf("failed to check whether evm event %d was applied: %w", e.ID, err)
@@ -72,7 +74,9 @@ func CheckSnapshotBlock(
 		return nil
 	}
 	rerun := "let the workers process it and rerun"
-	if unappliedBlock > 0 {
+	// --block 0 means head less --confirmations, so block 0 itself cannot be
+	// suggested.
+	if unappliedBlock > 1 {
 		rerun += fmt.Sprintf(", or rerun with --block %d or earlier", unappliedBlock-1)
 	}
 	return fmt.Errorf(
