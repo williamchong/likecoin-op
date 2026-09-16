@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"likecollective-indexer/ent"
 	"likecollective-indexer/ent/evmevent"
 	"likecollective-indexer/internal/database"
 	"likecollective-indexer/internal/logic/stakingstate/persistor"
@@ -35,21 +34,9 @@ func CheckSnapshotBlock(
 		return fmt.Errorf("failed to get latest applied staking event block: %w", err)
 	}
 
-	var earliestUnapplied *ent.EVMEvent
-	markUnapplied := func(e *ent.EVMEvent) {
-		if earliestUnapplied == nil || uint64(e.BlockNumber) < uint64(earliestUnapplied.BlockNumber) {
-			earliestUnapplied = e
-		}
-	}
-
-	for _, status := range []evmevent.Status{evmevent.StatusReceived, evmevent.StatusEnqueued} {
-		events, err := evmEventRepository.QueryStakingEvmEvents(ctx, status)
-		if err != nil {
-			return fmt.Errorf("failed to query %s staking events: %w", status, err)
-		}
-		for _, e := range events {
-			markUnapplied(e)
-		}
+	earliestUnapplied, unappliedFound, err := evmEventRepository.GetEarliestPendingStakingEvmEvent(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get earliest pending staking event: %w", err)
 	}
 
 	failedEvents, err := evmEventRepository.QueryStakingEvmEvents(ctx, evmevent.StatusFailed)
@@ -61,12 +48,13 @@ func CheckSnapshotBlock(
 		if err != nil {
 			return fmt.Errorf("failed to check whether evm event %d was applied: %w", e.ID, err)
 		}
-		if !applied {
-			markUnapplied(e)
-			continue
-		}
-		if !appliedFound || uint64(e.BlockNumber) > latestApplied {
-			latestApplied, appliedFound = uint64(e.BlockNumber), true
+		block := uint64(e.BlockNumber)
+		if applied {
+			if !appliedFound || block > latestApplied {
+				latestApplied, appliedFound = block, true
+			}
+		} else if !unappliedFound || block < uint64(earliestUnapplied.BlockNumber) {
+			earliestUnapplied, unappliedFound = e, true
 		}
 	}
 
@@ -76,11 +64,19 @@ func CheckSnapshotBlock(
 			blockNumber, latestApplied, latestApplied,
 		)
 	}
-	if earliestUnapplied != nil && blockNumber >= uint64(earliestUnapplied.BlockNumber) {
-		return fmt.Errorf(
-			"snapshot block %d includes block %d of evm event %d, which is %s and not yet applied, so a worker would apply it again; let the workers process it and rerun, or rerun with --block %d or earlier",
-			blockNumber, uint64(earliestUnapplied.BlockNumber), earliestUnapplied.ID, earliestUnapplied.Status, uint64(earliestUnapplied.BlockNumber)-1,
-		)
+	if !unappliedFound {
+		return nil
 	}
-	return nil
+	unappliedBlock := uint64(earliestUnapplied.BlockNumber)
+	if blockNumber < unappliedBlock {
+		return nil
+	}
+	rerun := "let the workers process it and rerun"
+	if unappliedBlock > 0 {
+		rerun += fmt.Sprintf(", or rerun with --block %d or earlier", unappliedBlock-1)
+	}
+	return fmt.Errorf(
+		"snapshot block %d includes block %d of evm event %d, which is %s and not yet applied, so a worker would apply it again; %s",
+		blockNumber, unappliedBlock, earliestUnapplied.ID, earliestUnapplied.Status, rerun,
+	)
 }

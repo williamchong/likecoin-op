@@ -55,6 +55,12 @@ type EVMEventRepository interface {
 		ctx context.Context,
 	) (uint64, bool, error)
 
+	// GetEarliestPendingStakingEvmEvent returns the received or enqueued
+	// staking event with the lowest block, and false when there is none.
+	GetEarliestPendingStakingEvmEvent(
+		ctx context.Context,
+	) (*ent.EVMEvent, bool, error)
+
 	InsertEvmEventsIfNeeded(
 		ctx context.Context,
 
@@ -207,6 +213,26 @@ func (s *evmEventRepository) GetLatestAppliedStakingEvmEventBlockNumber(
 		return 0, false, err
 	}
 	return uint64(e.BlockNumber), true, nil
+}
+
+func (s *evmEventRepository) GetEarliestPendingStakingEvmEvent(
+	ctx context.Context,
+) (*ent.EVMEvent, bool, error) {
+	e, err := s.dbService.Client().EVMEvent.Query().
+		Where(
+			evmevent.NameIn(stakingEventNames...),
+			evmevent.StatusIn(evmevent.StatusReceived, evmevent.StatusEnqueued),
+		).
+		Order(evmevent.ByBlockNumber(sql.OrderAsc())).
+		Select(evmevent.FieldID, evmevent.FieldBlockNumber, evmevent.FieldStatus).
+		First(ctx)
+	if ent.IsNotFound(err) {
+		return nil, false, nil
+	}
+	if err != nil {
+		return nil, false, err
+	}
+	return e, true, nil
 }
 
 func (s *evmEventRepository) InsertEvmEventsIfNeeded(
