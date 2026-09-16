@@ -302,9 +302,12 @@ func (s *rewardDepositedEventApplication) Apply(
 		//
 		// This used to go through big.Rat and a decimal rounded to 18 places
 		// before flooring, reached via ToBig().Int64() -- which silently wraps
-		// above MaxInt64, and these are uint64 columns. Integer division is
-		// also what the contract itself does, so there is no reason to leave
-		// the rounding to a decimal round trip.
+		// above MaxInt64, and these are uint64 columns.
+		//
+		// This is still a per-deposit approximation: the contract floors
+		// amount * 1e18 / totalStaked into an accumulated reward index and
+		// applies the index delta per position, so the two can differ by
+		// rounding dust per deposit.
 		//
 		// The product is taken at 512 bits: only the share has to fit in
 		// uint256, and refusing a product that does not would fail the event
