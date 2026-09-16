@@ -278,8 +278,8 @@ steps:
 ---
 
 # staked * reward is 2^300, past uint256, while each share it divides down to
-# is 2^59. The split used to refuse the product, failing the deposit on every
-# retry; only a share that itself overflows may be refused.
+# is 2^59. This guards against a naive 256-bit multiply: only a share that
+# itself overflows may be refused.
 name: reward-deposited-product-above-uint256
 
 parameters:
@@ -361,3 +361,89 @@ steps:
           bookNFT: 0x1000000000000000000000000000000000000001
           account: 0x2000000000000000000000000000000000000002
           rewardAmount: "576460752303423488"
+---
+
+# 1 * reward / total is 0.9999999999999999995. The split used to round that to
+# 18 decimal places before flooring, which carried it up to 1 and credited a
+# wei the stake never earned; exact integer division floors it to 0.
+name: reward-deposited-share-just-below-one
+
+parameters:
+  snapshottedAccounts:
+    - address: 0x2000000000000000000000000000000000000001
+      stakedAmount: 1
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+    - address: 0x2000000000000000000000000000000000000002
+      stakedAmount: "1999999999999999999"
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+  snapshottedNftClasses:
+    - address: 0x1000000000000000000000000000000000000001
+      stakedAmount: "2000000000000000000"
+  snapshottedStakings:
+    - accountAddress: 0x2000000000000000000000000000000000000001
+      bookNFTAddress: 0x1000000000000000000000000000000000000001
+      stakedAmount: 1
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+    - accountAddress: 0x2000000000000000000000000000000000000002
+      bookNFTAddress: 0x1000000000000000000000000000000000000001
+      stakedAmount: "1999999999999999999"
+      pendingRewardAmount: 0
+      claimedRewardAmount: 0
+
+steps:
+  - events:
+    - type: rewardDeposited
+      rewardDepositedEventData:
+        bookNFT: 0x1000000000000000000000000000000000000001
+        account: 0x9999999999999999999999999999999999999999
+        rewardAmount: "1999999999999999999"
+    stakingstate:
+      accounts:
+        0x2000000000000000000000000000000000000001:
+          address: 0x2000000000000000000000000000000000000001
+          stakedAmount: 1
+          pendingRewardAmount: 0
+          claimedRewardAmount: 0
+        0x2000000000000000000000000000000000000002:
+          address: 0x2000000000000000000000000000000000000002
+          stakedAmount: "1999999999999999999"
+          pendingRewardAmount: "1999999999999999998"
+          claimedRewardAmount: 0
+      nftClasses:
+        0x1000000000000000000000000000000000000001:
+          address: 0x1000000000000000000000000000000000000001
+          stakedAmount: "2000000000000000000"
+      stakings:
+        0x2000000000000000000000000000000000000001:
+          0x1000000000000000000000000000000000000001:
+            accountAddress: 0x2000000000000000000000000000000000000001
+            bookNFTAddress: 0x1000000000000000000000000000000000000001
+            stakedAmount: 1
+            pendingRewardAmount: 0
+            claimedRewardAmount: 0
+        0x2000000000000000000000000000000000000002:
+          0x1000000000000000000000000000000000000001:
+            accountAddress: 0x2000000000000000000000000000000000000002
+            bookNFTAddress: 0x1000000000000000000000000000000000000001
+            stakedAmount: "1999999999999999999"
+            pendingRewardAmount: "1999999999999999998"
+            claimedRewardAmount: 0
+    processedStakingEvents:
+      - type: rewardDeposited
+        rewardDepositedEventData:
+          bookNFT: 0x1000000000000000000000000000000000000001
+          account: 0x9999999999999999999999999999999999999999
+          rewardAmount: "1999999999999999999"
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x1000000000000000000000000000000000000001
+          account: 0x2000000000000000000000000000000000000001
+          rewardAmount: 0
+      - type: rewardDepositDistributed
+        rewardDepositDistributedEventData:
+          bookNFT: 0x1000000000000000000000000000000000000001
+          account: 0x2000000000000000000000000000000000000002
+          rewardAmount: "1999999999999999998"
