@@ -182,7 +182,13 @@ independent accessors disagree with each other.
 
 It is deliberately **manual**. Running it on a schedule would have it rewriting
 financial columns unattended, and it takes no lock against the live worker, so
-an event applied between its read and its commit is overwritten. Run it when
+an event applied between its read and its commit is overwritten. Stop the
+workers before `--apply`. It refuses a snapshot block older than a staking
+event already applied, because its default of head less `--confirmations`
+would otherwise roll back events that are never replayed, and one at or after
+a staking event still to be applied (received, enqueued, or failed before
+persisting), which a worker would apply on top of the snapshot again. Let the
+workers drain those first. Run it when
 `check-evm-event-gaps` says something was lost, and prefer running it in
 cluster -- the mainnet write takes ~80s there against ~35 minutes over a
 port-forward.
