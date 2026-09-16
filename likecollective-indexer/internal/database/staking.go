@@ -239,7 +239,7 @@ func PoolSharePercentage(stakedAmount *uint256.Int, totalStakedAmount *uint256.I
 	if totalStakedAmount.IsZero() {
 		poolShares = big.NewRat(0, 1)
 	} else {
-		poolShares = big.NewRat(stakedAmount.ToBig().Int64(), totalStakedAmount.ToBig().Int64())
+		poolShares = new(big.Rat).SetFrac(stakedAmount.ToBig(), totalStakedAmount.ToBig())
 	}
 	return decimal.NewFromBigRat(poolShares, 2).String()
 }
