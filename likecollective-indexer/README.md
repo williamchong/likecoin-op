@@ -182,7 +182,17 @@ independent accessors disagree with each other.
 
 It is deliberately **manual**. Running it on a schedule would have it rewriting
 financial columns unattended, and it takes no lock against the live worker, so
-an event applied between its read and its commit is overwritten. Run it when
+an event applied between its read and its commit is overwritten. Stop the
+workers before `--apply`. It refuses a snapshot block older than a staking
+event already applied, because its default of head less `--confirmations`
+would otherwise roll back events that are never replayed, and one at or after
+a staking event still to be applied (received, enqueued, or failed or
+processing before persisting), which a worker would apply on top of the
+snapshot again. Let the workers drain those first. A `processing` row left by a
+crashed worker is never retried, so it keeps refusing until it is reset. Nor
+can it see a webhook delivery that arrives late for a block the snapshot
+already covers, during the write or after it; `--confirmations` is the only
+margin against that, and running `resync` again at a later block repairs it. Run it when
 `check-evm-event-gaps` says something was lost, and prefer running it in
 cluster -- the mainnet write takes ~80s there against ~35 minutes over a
 port-forward.

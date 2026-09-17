@@ -31,7 +31,13 @@ overwrites them.
 
 Reports the diff and exits without writing unless --apply is given. Does not
 touch staking_events or evm_events, so it repairs the current state only, not
-the history that produced it.`,
+the history that produced it.
+
+--apply takes no lock against the workers, so stop them first. The workers
+apply events as deltas, so it refuses a snapshot block older than a staking
+event already applied, which would be rolled back for good, and one at or
+after a staking event still to be applied (received, enqueued, or failed
+before persisting), which a worker would apply a second time.`,
 	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		envCfg := clicontext.ConfigFromContext(cmd.Context())
@@ -144,7 +150,21 @@ the history that produced it.`,
 			return
 		}
 
-		err = persistor.MakeStakingStatePersistor(dbService).Persist(
+		stakingStatePersistor := persistor.MakeStakingStatePersistor(dbService)
+
+		// Checked after the build, not before, so an event a still-running
+		// worker applied during the build is caught too.
+		err = resync.CheckSnapshotBlock(
+			ctx,
+			database.MakeEVMEventRepository(dbService),
+			stakingStatePersistor,
+			blockNumber.Uint64(),
+		)
+		if err != nil {
+			panic(err)
+		}
+
+		err = stakingStatePersistor.Persist(
 			ctx,
 			nil,
 			snapshot.Accounts,

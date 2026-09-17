@@ -45,8 +45,20 @@ type EVMEventRepository interface {
 
 	QueryStakingEvmEvents(
 		ctx context.Context,
-		status evmevent.Status,
+		statuses ...evmevent.Status,
 	) ([]*ent.EVMEvent, error)
+
+	// GetLatestAppliedStakingEvmEventBlockNumber returns the highest block of
+	// a processed staking event, and false when there is none.
+	GetLatestAppliedStakingEvmEventBlockNumber(
+		ctx context.Context,
+	) (uint64, bool, error)
+
+	// GetEarliestPendingStakingEvmEvent returns the received or enqueued
+	// staking event with the lowest block, and false when there is none.
+	GetEarliestPendingStakingEvmEvent(
+		ctx context.Context,
+	) (*ent.EVMEvent, bool, error)
 
 	InsertEvmEventsIfNeeded(
 		ctx context.Context,
@@ -68,6 +80,18 @@ type EVMEventRepository interface {
 		evmEventIds []int,
 		newStatus evmevent.Status,
 	) error
+}
+
+// stakingEventNames are the events applied to the staking state: the
+// LikeCollective staking events and the LikeStakePosition Transfer, which
+// moves a position between accounts.
+var stakingEventNames = []string{
+	"Transfer",
+	"Staked",
+	"Unstaked",
+	"RewardClaimed",
+	"RewardDeposited",
+	"AllRewardClaimed",
 }
 
 type evmEventRepository struct {
@@ -163,18 +187,51 @@ func (s *evmEventRepository) GetEVMEventsByContractAddressAndStatus(
 
 func (s *evmEventRepository) QueryStakingEvmEvents(
 	ctx context.Context,
-	status evmevent.Status,
+	statuses ...evmevent.Status,
 ) ([]*ent.EVMEvent, error) {
 	return s.BaseQuery(
 		s.dbService.Client().EVMEvent.Query(),
-	).Where(evmevent.NameIn(
-		"Staked",
-		"Unstaked",
-		"RewardAdded",
-		"RewardClaimed",
-		"RewardDeposited",
-		"AllRewardsClaimed",
-	)).Where(evmevent.StatusEQ(status)).All(ctx)
+	).Where(evmevent.NameIn(stakingEventNames...)).Where(evmevent.StatusIn(statuses...)).All(ctx)
+}
+
+func (s *evmEventRepository) GetLatestAppliedStakingEvmEventBlockNumber(
+	ctx context.Context,
+) (uint64, bool, error) {
+	e, err := s.dbService.Client().EVMEvent.Query().
+		Where(
+			evmevent.NameIn(stakingEventNames...),
+			evmevent.StatusEQ(evmevent.StatusProcessed),
+		).
+		Order(evmevent.ByBlockNumber(sql.OrderDesc())).
+		Select(evmevent.FieldBlockNumber).
+		First(ctx)
+	if ent.IsNotFound(err) {
+		return 0, false, nil
+	}
+	if err != nil {
+		return 0, false, err
+	}
+	return uint64(e.BlockNumber), true, nil
+}
+
+func (s *evmEventRepository) GetEarliestPendingStakingEvmEvent(
+	ctx context.Context,
+) (*ent.EVMEvent, bool, error) {
+	e, err := s.dbService.Client().EVMEvent.Query().
+		Where(
+			evmevent.NameIn(stakingEventNames...),
+			evmevent.StatusIn(evmevent.StatusReceived, evmevent.StatusEnqueued),
+		).
+		Order(evmevent.ByBlockNumber(sql.OrderAsc())).
+		Select(evmevent.FieldID, evmevent.FieldBlockNumber, evmevent.FieldStatus).
+		First(ctx)
+	if ent.IsNotFound(err) {
+		return nil, false, nil
+	}
+	if err != nil {
+		return nil, false, err
+	}
+	return e, true, nil
 }
 
 func (s *evmEventRepository) InsertEvmEventsIfNeeded(
